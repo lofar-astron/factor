@@ -32,7 +32,7 @@ logging.StreamHandler.emit = add_coloring_to_emit_ansi(logging.StreamHandler.emi
 # set the logging format and default level (info)
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
-def setLevel(level):
+def set_level(level):
     """
     Change verbosity
     """
