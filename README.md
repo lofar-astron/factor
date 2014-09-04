@@ -1,4 +1,4 @@
-factor
+Factor
 ======
 
-Facet calibration for LOFAR
+Facet Calibration for LOFAR
