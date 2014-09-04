@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
+# this modeule sets some propreties of the logging system
+
 import logging
 
 def add_coloring_to_emit_ansi(fn):
