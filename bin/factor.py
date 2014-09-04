@@ -56,7 +56,6 @@ if __name__=='__main__':
         sys.exit(1)
 
     parset = factor.parset.parset_read( parset_file )
-    
 
     for step in steps:
         operation = parset.getString( '.'.join( [ "LoSoTo.Steps", step, "Operation" ] ) )
