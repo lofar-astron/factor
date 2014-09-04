@@ -13,5 +13,6 @@ _author = "Francesco de Gasperin (fdg@hs.uni-hamburg.de)"
 
 import sys, os, time
 import logging
-import ..factor._version
-import ..factor._logging
+import factor
+
+
