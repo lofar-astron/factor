@@ -2,9 +2,12 @@
 Operation: tessellation
 Implements the tassellation of the whole field given a set of calibrators.
 """
-import operations
+
+from factor.lib.operations import *
+import logging
 
 class tessellation(operation):
 
-    def __init__(parset):
+    def __init__(self, parset):
+        operation(parset)
         logging.info('Operation tessellation started!')
