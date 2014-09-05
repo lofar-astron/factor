@@ -25,25 +25,27 @@
 
 _author = "Francesco de Gasperin (fdg@hs.uni-hamburg.de)"
 
-import sys, os, time
+import sys, os
 import logging
 import factor
 
 if __name__=='__main__':
 
+    # command-line options
     import optparse
     opt = optparse.OptionParser(usage='%prog [-v|-q] parset [default: facotr.parset] \n'
-            +_author, version='%prog '+_version.__version__)
+            +_author, version='%prog %s'.format(factor._version.__version__))
     opt.add_option('-q', help='Quiet', action='store_true', default=False)
     opt.add_option('-v', help='Verbose', action='store_true', default=False)
     (options, args) = opt.parse_args()
 
+    # logging
     if options.q:
         _logging.set_level('warning')
     if options.v:
         _logging.set_level('debug')
 
-    # Check options
+    # prepare parset
     if len(args) not in [0, 1]:
         opt.print_help()
         sys.exit()
@@ -56,11 +58,30 @@ if __name__=='__main__':
         sys.exit(1)
 
     parset = factor.parset.parset_read( parset_file )
+    
+    # prepare directions
+    import factor.directions
+    directions = factor.directions.directions_read( parset['directions_file'] )
 
-    import factor.operations as op
-
-    with op_timer(), op_operation(param) as o:
+    # run operations
+    with op_timer(), op_init('tessellation', parset) as o:
         returncode = o.run()
+    with op_timer(), op_init('init_subtract', parset) as o:
+        returncode = o.run()
+
+    # loop on directions    
+    for d in directions:
+        with op_timer(), op_init('facet_setup', parset, d) as o:
+            returncode = o.run()
         
+    with op_timer(), op_init('final_image', parset) as o:
+        returncode = o.run()        
+
     logging.info("Factor has finished :)")
+
+
+    logging.info("Factor has finished :)")
+
+
+
 
