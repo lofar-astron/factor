@@ -57,21 +57,10 @@ if __name__=='__main__':
 
     parset = factor.parset.parset_read( parset_file )
 
-    for step in steps:
-        operation = parset.getString( '.'.join( [ "LoSoTo.Steps", step, "Operation" ] ) )
-        if not operation in operations:
-            logging.error('Unkown operation: '+operation)
-            continue
-        logging.info("--> Starting \'" + step + "\' step (operation: " + operation + ").")
-        start = time.clock()
-        returncode = operations[ operation ].run( step, parset, H )
-        if returncode != 0:
-           logging.error("Step \'" + step + "\' incomplete. Try to continue anyway.")
-        else:
-           logging.info("Step \'" + step + "\' completed successfully.")
-        elapsed = (time.clock() - start)
-        logging.debug("Time for this step: "+str(elapsed)+" s.")
+    import factor.operations as op
 
-    del H
-    logging.info("Done.")
+    with op_timer(), op_operation(param) as o:
+        returncode = o.run()
+        
+    logging.info("Factor has finished :)")
 
