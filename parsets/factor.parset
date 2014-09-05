@@ -1,1 +1,24 @@
 # This is an example parset for Factor
+
+[global]
+
+# MS directory, will be scanned for all .MS files
+ms = 
+
+# parmdb name (default='instrument')
+parmdb_name = 
+
+# File containing calibrator directions
+directions_file = ../parsets/directions.txt
+
+# Initial skymodel, one per ms (how do we handle this?)
+init_skymodel = 
+
+# what is this?
+ncpw = 
+
+# Number of usable cpus (default=all available cpus)
+ncpu = 
+
+#?
+other = 
