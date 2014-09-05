@@ -10,4 +10,7 @@ class facet_setup(operation_facet):
 
     def __init__(self, parset, direction):
         operation_facet(parset, direction)
-        logging.info('Operation initial facet setup started!')
+        self.name = 'Facet setup'
+
+    def run(self):
+        pass

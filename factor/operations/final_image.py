@@ -10,4 +10,7 @@ class final_image(operation):
 
     def __init__(self, parset):
         operation(parset)
-        logging.info('Operation final_image started!')
+        self.name = 'Final imaging'
+
+    def run(self):
+        pass

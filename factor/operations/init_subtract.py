@@ -10,4 +10,7 @@ class init_subtract(operation):
 
     def __init__(self, parset):
         operation(parset)
-        logging.info('Operation init_subtract started!')
+        self.name = 'Initial subtraction'
+
+    def run(self):
+        pass

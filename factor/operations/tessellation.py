@@ -10,4 +10,7 @@ class tessellation(operation):
 
     def __init__(self, parset):
         operation(parset)
-        logging.info('Operation tessellation started!')
+        self.name = 'Tessellation'
+
+    def run(self):
+        pass
