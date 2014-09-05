@@ -18,7 +18,7 @@ class operation():
         logging.info('<-- Operation %s started.' % self.name)
         
     def run(self):
-        pass
+        raise(NotImplementedError)
 
     def finalize(self):
         logging.info('--> Operation %s terminated.' % self.name)
