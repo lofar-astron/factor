@@ -3,7 +3,7 @@ Operation: tessellation
 Implements the tassellation of the whole field given a set of calibrators.
 """
 
-from factor.lib.operations import *
+from factor.lib.operation import *
 import logging
 
 class tessellation(operation):
