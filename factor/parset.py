@@ -1,6 +1,7 @@
 # This module handle the reading of the parset
 
 import logging
+import sys, os
 import ConfigParser
 
 def parset_read(parset_file):

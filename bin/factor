@@ -23,7 +23,7 @@
 #
 # The code is based on an original idea of Reinout van Weeren
 
-_author = "Francesco de Gasperin (fdg@hs.uni-hamburg.de)"
+_contact = "Francesco de Gasperin (fdg@hs.uni-hamburg.de)"
 
 import sys, os
 import logging
@@ -34,7 +34,7 @@ if __name__=='__main__':
     # command-line options
     import optparse
     opt = optparse.OptionParser(usage='%prog [-v|-q] parset [default: facotr.parset] \n'
-            +_author, version='%%prog %s' % (factor._version.__version__))
+            +_contact, version='%%prog %s' % (factor._version.__version__))
     opt.add_option('-q', help='Quiet', action='store_true', default=False)
     opt.add_option('-v', help='Verbose', action='store_true', default=False)
     (options, args) = opt.parse_args()
