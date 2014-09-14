@@ -1,6 +1,6 @@
 """
 Operation: init_subtract
-Implements the tassellation of the whole field given a set of calibrators.
+Implements the initial creation  initial sky model and empty MS by imaging at high resolution  and low resolution and subtracting these from the datasets
 """
 
 from factor.lib.operation import *
