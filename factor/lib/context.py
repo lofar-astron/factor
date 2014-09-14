@@ -14,7 +14,8 @@ class op_timer():
     def __exit__(self, type, value, tb):
 
         if type is not None:
-            return
+            return 1
+
         elapsed = (time.clock() - self.start)
         logging.debug('Time for operation: %i sec' % (elapsed))
 

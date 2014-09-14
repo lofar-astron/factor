@@ -11,6 +11,8 @@ class operation():
     Every module must have a class called in the same way of the module which
     inherits from this class.
     """
+
+    # a common scheduler, although operations are run sequentially
     self.s = factor.scheduler.scheduler()
 
     def __init__(self, parset):

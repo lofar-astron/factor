@@ -7,15 +7,15 @@ class scheduler():
     The scheduler run all actions sent to it in parallel
     """
     def __init__(self, max_threads = 1):
-        self.q = Queue()
-
-    def put(self, command):
-        self.q.put(command)
+        self.Pool = Pool(max_threads)
 
     def run_action_parallel(self, action_list):
         """
         List of actions to run in parallel
         """
+        for action in action_list:
+            self.Pool(target=action.run())
+
 
     def run_action(self, command):
         """
