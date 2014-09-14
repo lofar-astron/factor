@@ -3,7 +3,7 @@
 [global]
 
 # MS directory, will be scanned for all .MS files
-ms = 
+ms_dir = 
 
 # parmdb name (default='instrument')
 parmdb_name = 

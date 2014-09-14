@@ -1,7 +1,9 @@
 """
 General operation library, contains the master class for operations
+Operations have the parallelized part of the code.
 """
 import logging
+import factor.scheduler
 
 class operation():
     """
@@ -9,6 +11,7 @@ class operation():
     Every module must have a class called in the same way of the module which
     inherits from this class.
     """
+    self.s = factor.scheduler.scheduler()
 
     def __init__(self, parset):
         self.name = None

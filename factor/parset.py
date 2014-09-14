@@ -1,7 +1,7 @@
 # This module handle the reading of the parset
 
+import sys, os, glob
 import logging
-import sys, os
 import ConfigParser
 
 def parset_read(parset_file):
@@ -12,7 +12,12 @@ def parset_read(parset_file):
 
     logging.info("Reading parset file: %s" % (parset_file))
 
-    config = ConfigParser.RawConfigParser()
-    config.read(parset_file)
+    parset = ConfigParser.RawConfigParser()
+    parset.read(parset_file)
 
-    return config._sections['global']
+    parset_dict = parset._sections['global']
+
+    # get all the MS in the directory
+    parset_dict['mss'] = glob.glob(parset_ditc['ms_dir']+'/*MS')
+
+    return parset_dict

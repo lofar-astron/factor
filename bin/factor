@@ -62,9 +62,8 @@ if __name__=='__main__':
 
     # run operations
     from factor.lib.context import *
-    with op_timer():
-        with op_init('tessellation', parset) as o:
-            returncode = o.run()
+    with op_timer(), op_init('tessellation', parset) as o:
+        returncode = o.run()
     with op_timer(), op_init('init_subtract', parset) as o:
         returncode = o.run()
 
