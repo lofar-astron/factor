@@ -10,7 +10,7 @@ def add_coloring_to_emit_ansi(fn):
     """
     # add methods we need to the class
     def new(*args):
-        levelno = args[1].levelno
+        levelno = args[0].levelno
         if(levelno>=50):
             color = '\x1b[31m' # red
         elif(levelno>=40):
@@ -23,14 +23,9 @@ def add_coloring_to_emit_ansi(fn):
             color = '\x1b[35m' # pink
         else:
             color = '\x1b[0m' # normal
-        args[1].msg = color + args[1].msg +  '\x1b[0m'  # normal
+        args[0].msg = color + args[0].msg +  '\x1b[0m'  # normal
         return fn(*args)
     return new
-
-# set the logging colors
-logging.StreamHandler.emit = add_coloring_to_emit_ansi(logging.StreamHandler.emit)
-# set the logging format and default level (info)
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
 def set_level(level):
     """
@@ -42,4 +37,19 @@ def set_level(level):
         logging.root.setLevel(logging.INFO)
     elif level == 'debug':
         logging.root.setLevel(logging.DEBUG)
+
+# logging to file (B/W)
+fh = logging.FileHandler('factor.log')
+fh.setLevel(logging.DEBUG)
+logging.root.addHandler(fh)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+
+# logging to console (color)
+ch = logging.StreamHandler()
+formatter = logging.Formatter('%(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+ch.emit =  add_coloring_to_emit_ansi(ch.emit)
+logging.root.addHandler(ch)
+
 
