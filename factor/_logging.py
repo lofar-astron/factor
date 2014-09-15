@@ -52,4 +52,3 @@ ch.setFormatter(formatter)
 ch.emit =  add_coloring_to_emit_ansi(ch.emit)
 logging.root.addHandler(ch)
 
-
