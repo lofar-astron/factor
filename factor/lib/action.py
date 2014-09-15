@@ -5,7 +5,7 @@ Commands contained in an action are run in sequential mode.
 
 import logging
 
-class action():
+class action( object ):
     """
     Generic action class
     """

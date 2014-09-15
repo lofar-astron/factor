@@ -14,9 +14,6 @@ parmdb_name = instrument
 # File containing calibrator directions
 directions_file = ../parsets/directions.txt
 
-# Initial skymodel, one per ms (how do we handle this?)
-init_skymodel = 
-
 # what is this?!
 #ncpw = 
 

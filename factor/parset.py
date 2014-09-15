@@ -31,7 +31,8 @@ def parset_read(parset_file):
     logging.info("Working on %i MSs" % (len(parset_dict['mss'])))
 
     # some check on types
-    parset_dict['ncpu'] = parset.getint('global', 'ncpu')
+    if 'ncpu' in parset_dict: parset_dict['ncpu'] = parset.getint('global', 'ncpu')
     logging.debug("Using %i processors for multi-thread." % (parset_dict['ncpu']))
+
 
     return parset_dict

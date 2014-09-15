@@ -5,7 +5,7 @@ Operations have the parallelized part of the code.
 import logging
 from factor.lib.scheduler import scheduler
 
-class operation():
+class operation( object ):
     """
     General class for operations. All operations should be in a separate module.
     Every module must have a class called in the same way of the module which

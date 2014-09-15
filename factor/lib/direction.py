@@ -2,7 +2,7 @@
 Definition of direction-related classes
 """
 
-class direction:
+class direction( object ):
     """
     general direciton class
     """
