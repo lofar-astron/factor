@@ -62,17 +62,17 @@ if __name__=='__main__':
 
     # run operations
     from factor.lib.context import *
-    with op_timer(), op_init('tessellation', parset) as o:
+    with op_init('tessellation', parset) as o, op_timer(o):
         returncode = o.run()
-    with op_timer(), op_init('init_subtract', parset) as o:
+    with op_init('init_subtract', parset) as o,  op_timer(o):
         returncode = o.run()
 
     # loop on directions    
     for d in directions:
-        with op_timer(), op_init('facet_setup', parset, d) as o:
+        with op_init('facet_setup', parset, d) as o, op_timer(o):
             returncode = o.run()
         
-    with op_timer(), op_init('final_image', parset) as o:
+    with op_init('final_image', parset) as o, op_timer(o):
         returncode = o.run()        
 
     logging.info("Factor has finished :)")

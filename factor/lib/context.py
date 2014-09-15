@@ -8,23 +8,26 @@ class op_timer():
     context manager used to time the operations
     """
 
+    def __init__(self, operation):
+        self.name = operation.name
+
     def __enter__(self):
-        self.start = time.clock()
+        self.start = time.time()
 
     def __exit__(self, type, value, tb):
 
         if type is not None:
-            return 1
+            raise type, value, tb
 
-        elapsed = (time.clock() - self.start)
-        logging.debug('Time for operation: %i sec' % (elapsed))
+        elapsed = (time.time() - self.start)
+        logging.debug('Time for operation "%s": %i sec' % (self.name, elapsed))
 
 class op_init():
     """
     context manager used to initialize an operations
     """
 
-    def __init__(self,name, parset, direction = None):
+    def __init__(self, name, parset, direction = None):
 
         self.name = name
         self.parset = parset
@@ -35,8 +38,8 @@ class op_init():
         import factor.operations as op
         # find the module and create the object from the name
         op_class = getattr(getattr(op, self.name), self.name)
-        if self.direction != None: self.op_obj = op_class(self.parset, self.direction)
-        else: self.op_obj = op_class(self.parset)
+        if self.direction != None: self.op_obj = op_class(self.parset, self.name, self.direction)
+        else: self.op_obj = op_class(self.parset, self.name)
         self.op_obj.setup()
         return  self.op_obj
 
@@ -45,5 +48,5 @@ class op_init():
         # catch any exceptions from this operation
         if type is not None:
             logging.error('Problems running operation: %s' % (self.name))
-            raise(value)
+            raise type, value, tb
         self.op_obj.finalize()

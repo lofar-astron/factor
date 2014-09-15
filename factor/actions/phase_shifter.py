@@ -1,9 +1,19 @@
-import action
+from factor.lib.action import action
+import subprocess
 
-commands = [ 'NDPPP parset', 'cp file1 file2']
+commands = [ 'sleep 1', 'sleep 1']
 
 class phase_shifter(action):
     """
     Implment the phase shifter action
     """
-   pass
+
+    def __init__(self, ms, direction):
+        action(name = 'Phase shifter')
+
+    def run(self):
+        print 'command'
+        for command in commands:
+            #p = subprocess.Popen(command, stderr=outputfile, stdout=outputfile, shell=True)
+            p = subprocess.Popen(command, shell=True)
+            p.wait()

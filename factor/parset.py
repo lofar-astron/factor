@@ -10,14 +10,28 @@ def parset_read(parset_file):
         logging.critical("Missing parset file (%s), I don't know what to do :'(" % (parset_file))
         sys.exit(1)
 
-    logging.info("Reading parset file: %s" % (parset_file))
+    logging.info("Reading parset file: %s." % (parset_file))
 
     parset = ConfigParser.RawConfigParser()
     parset.read(parset_file)
 
     parset_dict = parset._sections['global']
 
+    # set-up the working dir (first thing to do, other path may be relative to this)
+    try:
+        os.chdir(parset_dict['dir_working'])
+        if not os.path.isdir(parset_dict['dir_working']+'/log'): os.mkdir(parset_dict['dir_working']+'/log')
+        if not os.path.isdir(parset_dict['dir_working']+'/img'): os.mkdir(parset_dict['dir_working']+'/img')
+    except:
+        logging.error("Cannot use the working dir %s." % (parset_dict['dir_working']))
+        sys.exit(1)
+
     # get all the MS in the directory
-    parset_dict['mss'] = glob.glob(parset_ditc['ms_dir']+'/*MS')
+    parset_dict['mss'] = glob.glob(parset_dict['dir_ms']+'/*[MS|ms]')
+    logging.info("Working on %i MSs" % (len(parset_dict['mss'])))
+
+    # some check on types
+    parset_dict['ncpu'] = parset.getint('global', 'ncpu')
+    logging.debug("Using %i processors for multi-thread." % (parset_dict['ncpu']))
 
     return parset_dict

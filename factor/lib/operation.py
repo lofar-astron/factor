@@ -3,7 +3,7 @@ General operation library, contains the master class for operations
 Operations have the parallelized part of the code.
 """
 import logging
-import factor.scheduler
+from factor.lib.scheduler import scheduler
 
 class operation():
     """
@@ -12,12 +12,12 @@ class operation():
     inherits from this class.
     """
 
-    # a common scheduler, although operations are run sequentially
-    self.s = factor.scheduler.scheduler()
-
-    def __init__(self, parset):
-        self.name = None
+    def __init__(self, parset, name = None, direction = None):
         self.parset = parset
+        self.name = name
+        self.direction = direction
+
+        self.s = scheduler(max_threads = parset['ncpu'])
     
     def setup(self):
         logging.info('<-- Operation %s started.' % self.name)
@@ -27,14 +27,3 @@ class operation():
 
     def finalize(self):
         logging.info('--> Operation %s terminated.' % self.name)
-
-class operation_facet(operation):
-    """
-    Extend the operation class for facet-specific operations
-    """
-
-    def __init__(self, parset, direction):
-        operation(parset)
-        self.direction = direction
-
-

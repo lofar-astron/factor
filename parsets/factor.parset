@@ -2,11 +2,14 @@
 
 [global]
 
-# MS directory, will be scanned for all .MS files
-ms_dir = 
+# Working dir (complete path) - other path are relative to this
+dir_working = /home/fdg/phd/code/factor/wdir
 
-# parmdb name (default='instrument')
-parmdb_name = 
+# MS directory, will be scanned for all .MS files
+dir_ms = mss
+
+# parmdb name
+parmdb_name = instrument
 
 # File containing calibrator directions
 directions_file = ../parsets/directions.txt
@@ -14,11 +17,12 @@ directions_file = ../parsets/directions.txt
 # Initial skymodel, one per ms (how do we handle this?)
 init_skymodel = 
 
-# what is this?
-ncpw = 
+# what is this?!
+#ncpw = 
 
 # Number of usable cpus (default=all available cpus)
-ncpu = 
+ncpu = 2
 
-#?
-other = 
+# MS-specific parameters
+[ms1.ms]
+init_skymodel = ms1strangename.sky

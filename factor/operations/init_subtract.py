@@ -8,9 +8,5 @@ import logging
 
 class init_subtract(operation):
 
-    def __init__(self, parset):
-        operation(parset)
-        self.name = 'Initial subtraction'
-
     def run(self):
         pass

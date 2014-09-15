@@ -8,9 +8,5 @@ import logging
 
 class tessellation(operation):
 
-    def __init__(self, parset):
-        operation(parset)
-        self.name = 'Tessellation'
-
     def run(self):
         pass

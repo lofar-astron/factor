@@ -4,14 +4,13 @@ Commands contained in an action are run in sequential mode.
 """
 
 import logging
-import scheduler
 
 class action():
     """
     Generic action class
     """
-    def __init__(self):
-        self.scheduler = scheduler.scheduler()
+    def __init__(self, name = None):
+        self.name = name
 
     def run(self):
         raise NotImplementedError

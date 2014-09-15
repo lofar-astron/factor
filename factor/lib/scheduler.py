@@ -1,3 +1,4 @@
+import logging
 from Queue import Queue
 from multiprocessing import Pool
 
@@ -14,10 +15,17 @@ class scheduler():
         List of actions to run in parallel
         """
         for action in action_list:
-            self.Pool(target=action.run())
+            self.Pool.apply_async(action.run())
 
 
     def run_action(self, command):
         """
         run a single action
         """
+        pass
+
+    def get_result(self):
+        """
+        run a single action
+        """
+        pass
