@@ -7,6 +7,10 @@ class scheduler( object ):
     The scheduler run all actions sent to it in parallel
     """
     def __init__(self, max_threads = 1, name=''):
+        """
+        max_threads: limit the number of parallel process to this number
+        name: name of the operation requesting a scheduler
+        """
         self.max_threads = max_threads
         self.name = name
 

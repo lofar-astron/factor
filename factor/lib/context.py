@@ -1,7 +1,8 @@
 """
 Definition of context managers (with statements) used for operations
 """
-import logging, time
+import time
+import logging
 
 class op_timer():
     """
@@ -20,7 +21,8 @@ class op_timer():
             raise type, value, tb
 
         elapsed = (time.time() - self.start)
-        logging.debug('Time for operation "%s": %i sec' % (self.name, elapsed))
+        log = logging.getLogger(self.name)
+        log.debug('Time for operation: %i sec' % (elapsed))
 
 class op_init():
     """

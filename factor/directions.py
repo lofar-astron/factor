@@ -1,16 +1,16 @@
 # This module handle the reading of directions
 
-import logging
+import logging 
 import os
 
-logging = logging.getLogger('parset')
+log = logging.getLogger('parset')
 
 def directions_read(directions_file):
 
     if not os.path.isfile(directions_file):
-        logging.critical("Missing directions file (%s)." % (directions_file))
+        log.critical("Missing directions file (%s)." % (directions_file))
         sys.exit(1)
 
-    logging.info("Reading directions file: %s" % (directions_file))
+    log.info("Reading directions file: %s" % (directions_file))
 
     return ['dir', 'dir']

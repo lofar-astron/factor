@@ -4,15 +4,15 @@ import sys, os, glob
 import logging
 import ConfigParser
 
-logging = logging.getLogger('parset')
+log = logging.getLogger('parset')
 
 def parset_read(parset_file):
 
     if not os.path.isfile(parset_file):
-        logging.critical("Missing parset file (%s), I don't know what to do :'(" % (parset_file))
+        log.critical("Missing parset file (%s), I don't know what to do :'(" % (parset_file))
         sys.exit(1)
 
-    logging.info("Reading parset file: %s." % (parset_file))
+    log.info("Reading parset file: %s." % (parset_file))
 
     parset = ConfigParser.RawConfigParser()
     parset.read(parset_file)
@@ -25,16 +25,15 @@ def parset_read(parset_file):
         if not os.path.isdir(parset_dict['dir_working']+'/log'): os.mkdir(parset_dict['dir_working']+'/log')
         if not os.path.isdir(parset_dict['dir_working']+'/img'): os.mkdir(parset_dict['dir_working']+'/img')
     except:
-        logging.error("Cannot use the working dir %s." % (parset_dict['dir_working']))
+        log.critical("Cannot use the working dir %s." % (parset_dict['dir_working']))
         sys.exit(1)
 
     # get all the MS in the directory
     parset_dict['mss'] = glob.glob(parset_dict['dir_ms']+'/*[MS|ms]')
-    logging.info("Working on %i MSs" % (len(parset_dict['mss'])))
+    log.info("Working on %i MSs" % (len(parset_dict['mss'])))
 
     # some check on types
     if 'ncpu' in parset_dict: parset_dict['ncpu'] = parset.getint('global', 'ncpu')
-    logging.debug("Using %i processors for multi-thread." % (parset_dict['ncpu']))
-
+    log.debug("Using %i processors for multi-thread." % (parset_dict['ncpu']))
 
     return parset_dict

@@ -20,10 +20,12 @@ class operation( object ):
         self.s = scheduler(max_threads = parset['ncpu'], name = name)
     
     def setup(self):
-        logging.info('<-- Operation %s started.' % self.name)
+        log = logging.getLogger(self.name)
+        log.info('<-- Operation %s started.' % self.name)
         
     def run(self):
         raise(NotImplementedError)
 
     def finalize(self):
-        logging.info('--> Operation %s terminated.' % self.name)
+        log = logging.getLogger(self.name)
+        log.info('--> Operation %s terminated.' % self.name)
