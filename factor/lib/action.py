@@ -27,4 +27,3 @@ class action( object ):
              open("log/%s-%s.err.log" % (self.name, cmd.partition(' ')[0]),"wb") as err:
             p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
             p.wait()
-

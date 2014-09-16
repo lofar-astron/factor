@@ -14,10 +14,10 @@ class example_operation(operation):
 
         # this is a typical multi-thread block
         self.log.info('Starting example procedure...')
-        actions = [ a.action_name(ms, direction, arg1, arg2) for ms in mss ] # create multiple action objects
+        actions = [ a.action_name(self.name, ms, direction, arg1, arg2) for ms in mss ] # create multiple action objects
         self.s.run_action_parallel( actions ) # call the scheduler (it's in self.s)
 
         # this is a single call
         self.log.info('Starting example procedure...')
-        self.s.run_action_parallel( a.action_name(ms, arg1, arg2) )
+        self.s.run_action_parallel( a.action_name(self.name, ms, arg1, arg2) )
 
