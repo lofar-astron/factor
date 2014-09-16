@@ -147,4 +147,4 @@ class tessellation(operation):
         for i,p in enumerate(points):
             plt.text(p[0],p[1],str(i+1))
         
-        plt.savefig('log/tess.png')
+        #plt.savefig('log/tess.png')
