@@ -32,23 +32,26 @@ def set_level(level):
     Change verbosity
     """
     if level == 'warning':
-        logging.root.setLevel(logging.WARNING)
+        ch.setLevel(logging.WARNING)
     elif level == 'info':
-        logging.root.setLevel(logging.INFO)
+        ch.setLevel(logging.INFO)
     elif level == 'debug':
-        logging.root.setLevel(logging.DEBUG)
+        ch.setLevel(logging.DEBUG)
 
 # logging to file (B/W)
 fh = logging.FileHandler('factor.log')
-fh.setLevel(logging.DEBUG)
-logging.root.addHandler(fh)
+fh.setLevel(logging.DEBUG) # file always log everything
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 fh.setFormatter(formatter)
+logging.root.addHandler(fh)
 
 # logging to console (color)
 ch = logging.StreamHandler()
-formatter = logging.Formatter('%(levelname)s - %(message)s')
+ch.setLevel(logging.INFO) # default log level
+formatter = logging.Formatter('%(levelname)s - %(name)s - %(message)s')
 ch.setFormatter(formatter)
 ch.emit =  add_coloring_to_emit_ansi(ch.emit)
 logging.root.addHandler(ch)
 
+# logging everything, the handler will set the level
+logging.root.setLevel(logging.DEBUG)

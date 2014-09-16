@@ -4,6 +4,8 @@ import sys, os, glob
 import logging
 import ConfigParser
 
+logging = logging.getLogger('parset')
+
 def parset_read(parset_file):
 
     if not os.path.isfile(parset_file):

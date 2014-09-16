@@ -1,4 +1,3 @@
-import logging
 from Queue import Queue
 from threading import Thread
 
@@ -7,8 +6,9 @@ class scheduler( object ):
     Schedule jobs
     The scheduler run all actions sent to it in parallel
     """
-    def __init__(self, max_threads = 1):
+    def __init__(self, max_threads = 1, name=''):
         self.max_threads = max_threads
+        self.name = name
 
         def worker(queue):
             for cmd in iter(queue.get, None):
@@ -24,7 +24,10 @@ class scheduler( object ):
         """
         List of actions to run in parallel
         """
+        import logging
+        logging = logging.getLogger(self.name)
         logging.debug("Run %i action(s) on %i cpu(s)." % (len(action_list), self.max_threads))
+
         for action in action_list:
             self.q.put_nowait(action)
         for _ in self.threads: self.q.put(None) # signal no more commands

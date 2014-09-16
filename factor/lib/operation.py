@@ -17,7 +17,7 @@ class operation( object ):
         self.name = name
         self.direction = direction
 
-        self.s = scheduler(max_threads = parset['ncpu'])
+        self.s = scheduler(max_threads = parset['ncpu'], name = name)
     
     def setup(self):
         logging.info('<-- Operation %s started.' % self.name)

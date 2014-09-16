@@ -3,6 +3,8 @@
 import logging
 import os
 
+logging = logging.getLogger('parset')
+
 def directions_read(directions_file):
 
     if not os.path.isfile(directions_file):
