@@ -1,7 +1,7 @@
 from factor.lib.action import action
 import subprocess
 
-commands = [ 'sleep 0.1', 'sleep 0.1']
+commands = [ 'echo aaa', 'sleep 0.1', 'glfgsdfsd']
 
 class phase_shifter(action):
     """
@@ -9,10 +9,8 @@ class phase_shifter(action):
     """
 
     def __init__(self, ms, direction):
-        super(phase_shifter, self).__init__(name = 'Phase shifter')
+        super(phase_shifter, self).__init__(name = 'phase_shifter')
 
     def run(self):
         for command in commands:
-            #p = subprocess.Popen(command, stderr=outputfile, stdout=outputfile, shell=True)
-            p = subprocess.Popen(command, shell=True)
-            p.wait()
+            self.exec_cmd(command)

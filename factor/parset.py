@@ -36,4 +36,12 @@ def parset_read(parset_file):
     if 'ncpu' in parset_dict: parset_dict['ncpu'] = parset.getint('global', 'ncpu')
     log.debug("Using %i processors for multi-thread." % (parset_dict['ncpu']))
 
+    # load MS-specific parameters
+    parset_dict['ms_specific'] = {}
+    for ms in parset_dict['mss']:
+        ms = os.path.basename(ms)
+        if not ms in parset._sections.keys(): continue
+        paset_dict_ms = parset._sections[ ms ]
+        parset_dict['ms_specific'][ms] = paset_dict_ms
+
     return parset_dict

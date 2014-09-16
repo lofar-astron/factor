@@ -6,6 +6,7 @@
 dir_working = /home/fdg/phd/code/factor/wdir
 
 # MS directory, will be scanned for all .MS files
+# each file must have a .skymodel associated, unless specified below
 dir_ms = mss
 
 # parmdb name
@@ -23,3 +24,10 @@ ncpu = 2
 # MS-specific parameters
 [ms1.ms]
 init_skymodel = ms1strangename.sky
+param1 = 123
+param2 = 123
+
+[ms2.ms]
+init_skymodel = ms2strangename.sky
+param1 = 123
+param2 = 123
