@@ -1,7 +1,8 @@
 # This module handle the reading of directions
 
-import logging 
 import os
+import logging 
+from factor.lib.direction import direction as d
 
 log = logging.getLogger('parset')
 
@@ -13,4 +14,4 @@ def directions_read(directions_file):
 
     log.info("Reading directions file: %s" % (directions_file))
 
-    return ['dir', 'dir']
+    return [d('aaa'), d('bbb')]

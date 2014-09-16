@@ -4,13 +4,18 @@ Definition of context managers (with statements) used for operations
 import time
 import logging
 
-class op_timer():
+class timer():
     """
     context manager used to time the operations
     """
 
-    def __init__(self, operation):
-        self.name = operation.name
+    def __init__(self, log=''):
+        """
+        log: is a logging istance to print the correct log format
+        if nothing is passed, root is used
+        """
+        if log == '': self.log = logging
+        else: self.log = log
 
     def __enter__(self):
         self.start = time.time()
@@ -21,8 +26,7 @@ class op_timer():
             raise type, value, tb
 
         elapsed = (time.time() - self.start)
-        log = logging.getLogger(self.name)
-        log.debug('Time for operation: %i sec' % (elapsed))
+        self.log.debug('Time for operation: %i sec' % (elapsed))
 
 class op_init():
     """
@@ -30,6 +34,11 @@ class op_init():
     """
 
     def __init__(self, name, parset, direction = None):
+        """
+        name: name of the operation
+        parset: parset dict
+        direction: optional direction object
+        """
 
         self.name = name
         self.parset = parset

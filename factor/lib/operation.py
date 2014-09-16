@@ -18,14 +18,20 @@ class operation( object ):
         self.direction = direction
 
         self.s = scheduler(max_threads = parset['ncpu'], name = name)
+        self.log = logging.getLogger(self.name)
+
     
     def setup(self):
-        log = logging.getLogger(self.name)
-        log.info('<-- Operation %s started.' % self.name)
+        if self.direction == None:
+            self.log.info('<-- Operation %s started.' % self.name)
+        else:
+            self.log.info('<-- Operation %s started (direction: %s).' % (self.name, self.direction.name))
         
     def run(self):
         raise(NotImplementedError)
 
     def finalize(self):
-        log = logging.getLogger(self.name)
-        log.info('--> Operation %s terminated.' % self.name)
+        if self.direction == None:
+            self.log.info('--> Operation %s terminated.' % self.name)
+        else:
+            self.log.info('--> Operation %s terminated (direction: %s).' % (self.name, self.direction.name))

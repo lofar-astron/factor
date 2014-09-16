@@ -1,5 +1,7 @@
+import logging
 from Queue import Queue
 from threading import Thread
+from factor.lib.context import timer
 
 class scheduler( object ):
     """
@@ -13,6 +15,7 @@ class scheduler( object ):
         """
         self.max_threads = max_threads
         self.name = name
+        self.log = logging.getLogger(name)
 
         def worker(queue):
             for cmd in iter(queue.get, None):
@@ -28,14 +31,13 @@ class scheduler( object ):
         """
         List of actions to run in parallel
         """
-        import logging
-        logging = logging.getLogger(self.name)
-        logging.debug("Run %i action(s) on %i cpu(s)." % (len(action_list), self.max_threads))
-
-        for action in action_list:
-            self.q.put_nowait(action)
-        for _ in self.threads: self.q.put(None) # signal no more commands
-        for t in self.threads: t.join() # wait for completion
+        self.log.debug("Run %i action(s) on %i cpu(s)." % (len(action_list), self.max_threads))
+        
+        with timer(action_list[0].log): # start timer
+            for action in action_list:
+                self.q.put_nowait(action)
+            for _ in self.threads: self.q.put(None) # signal no more commands
+            for t in self.threads: t.join() # wait for completion
 
     def get_result(self):
         """

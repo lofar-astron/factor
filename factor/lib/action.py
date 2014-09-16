@@ -10,8 +10,10 @@ class action( object ):
     """
     Generic action class
     """
-    def __init__(self, name = None):
+    def __init__(self, op_name = None, name = None):
+        self.op_name = op_name
         self.name = name
+        self.log = logging.getLogger('%s::%s' % (self.op_name, self.name))
 
     def run(self):
         raise NotImplementedError
