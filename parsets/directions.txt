@@ -1,0 +1,8 @@
+# Example direction file
+
+# In [] the optional parameters with the relative default value
+# Name, RA (deg), DEC (deg), [regionfile, d=''], [multiscale (bool, d=False)], [solint_amp (s, d=60)], [solint_ph (s, d=600)], [HDR (bool, d=False)]
+
+calibrator_1, 111.11, 11.11, , , , ,
+calibrator_2, 222.22, 33.33, reg/cal2.reg, True, 600, 5, True
+calibrator_3, 333.33, 33.33, , True, 600, 5,
