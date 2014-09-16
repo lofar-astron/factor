@@ -10,14 +10,39 @@ class init_subtract(operation):
 
     def run(self):
 
+        import init_subtract from factor.operation.hardcoded_param as p
+
         mss = self.parset['mss']
 
         # this is a typical multi-thread block
-        self.log.info('Starting example procedure...')
-        actions = [ a.action_name(ms, direction, arg1, arg2) for ms in mss ] # create multiple action objects
-        self.s.run_action_parallel( actions ) # call the scheduler (it's in self.s)
+        self.log.info('High-res imaging...')
+        actions = [ a.imager_mask(ms, niter=p['niterh'], imsize=p['imsizeh'], cell=p['cellh'], uvrange=p['uvrangeh']) for ms in mss ]
+        self.s.run_action_parallel( actions )
 
-        # this is a single call
-        self.log.info('Starting example procedure...')
-        self.s.run_action_parallel( a.action_name(ms, arg1, arg2) )
+        self.log.info('Make high-res skymodel...')
+        actions = [ a.make_skymodel(ms, ) for ms in mss ]
+        self.s.run_action_parallel( actions )
 
+        self.log.info('Subtract high-res skymodel...')
+        actions = [ a.subtract(ms, ) for ms in mss ]
+        self.s.run_action_parallel( actions )
+
+        self.log.info('Average...')
+        actions = [ a.avg(ms, ) for ms in mss ]
+        self.s.run_action_parallel( actions )
+
+        self.log.info('Low-res imaging...')
+        actions = [ a.imager_mask(ms, niter=p['niterl'], imsize=p['imsizel'], cell=p['celll'], uvrange=p['uvrangel']) for ms in mss ]
+        self.s.run_action_parallel( actions )
+
+        self.log.info('Make low-res skymodel...')
+        actions = [ a.make_skymodel(ms, ) for ms in mss ]
+        self.s.run_action_parallel( actions )
+
+        self.log.info('Subtract low-res skymodel...')
+        actions = [ a.subtract(ms, ) for ms in mss ]
+        self.s.run_action_parallel( actions )
+
+        self.log.info('Merge skymodels...')
+        actions = [ a.merge_skymodel(ms, ) for ms in mss ]
+        self.s.run_action_parallel( actions )
