@@ -1,4 +1,6 @@
-# some functions called by multiple actions
+"""
+Some functions called by multiple actions
+"""
 
 def makeimagename(ms, prefix, direction = None):
     """

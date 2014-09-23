@@ -13,7 +13,7 @@ class imager(action):
     """
 
     def __init__(self, op_name, ms, prefix='', niter=None, imsize=None, cell=None, uvrange=None, mask=None, clean=True):
-        super(phase_shifter, self).__init__(op_name, name = 'imager')
+        super(imager, self).__init__(op_name, name = 'imager')
         self.ms = ms
         self.prefix = prefix
         self.niter = niter
