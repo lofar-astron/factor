@@ -28,7 +28,7 @@ class PyTest(Command):
 setup(
     name='factor',
     version=factor._version.__version__,
-    url='http://github.com/revoltek/facotr/',
+    url='http://github.com/revoltek/factor/',
     author='Francesco de Gasperin',
     author_email='fdg@hs.uni-hamburg.de',
     description=description,
@@ -44,7 +44,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         ],
     install_requires=['numpy'],
-    scripts = ['bin/factor.py'],
-    packages=['facotor','factor.operations'],
+    scripts = ['bin/factor'],
+    packages=['factor','factor.operations','factor.actions','factor.lib'],
     cmdclass = {'test': PyTest},
     )
