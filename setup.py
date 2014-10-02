@@ -43,7 +43,7 @@ setup(
         'Topic :: Scientific/Engineering :: Astronomy',
         'Topic :: Software Development :: Libraries :: Python Modules',
         ],
-    install_requires=['numpy'],
+    install_requires=['numpy', 'jinja2'],
     scripts = ['bin/factor'],
     packages=['factor','factor.operations','factor.actions','factor.lib'],
     cmdclass = {'test': PyTest},
