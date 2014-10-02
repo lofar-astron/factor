@@ -49,3 +49,20 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+
+# OS-specific
+.DS_Store
+.directory
+
+# Editors
+.*.s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*~
+*.kate-swp
+
+# IDE
+.idea/*
+*.iml
+
