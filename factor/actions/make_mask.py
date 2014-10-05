@@ -10,10 +10,8 @@ class make_mask(action):
     Implment the make_mask action
     """
 
-    def __init__(self, op_name, image, threshpix = None, threshisl = None, rms_box = (55,12), adaptive_rms_box = False, rms_box_bright = None, atrous_do = False, clean=True):
+    def __init__(self, op_name, p, clean=True):
         super(make_mask, self).__init__(op_name, name = 'make_mask')
-        self.ms = ms
-        self.image = image
 
     def run(self):
         # TODO: implement the template

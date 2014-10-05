@@ -10,40 +10,39 @@ class init_subtract(operation):
 
     def run(self):
 
-        import init_subtract from factor.operation.hardcoded_param as p
+        from factor.operations.hardcoded_param import init_subtract as p
 
         mss = self.parset['mss']
 
         # this is a typical multi-thread block
         self.log.info('High-res imaging...')
-        actions = [ a.imager_mask(self.name, ms, prefix='HR', niter=p['niterh'], imsize=p['imsizeh'], \
-                                    cell=p['cellh'], uvrange=p['uvrangeh']) for ms in mss ]
+        actions = [ a.imager_mask.imager_mask(self.name, ms, p['imagerh']) for ms in mss ]
         self.s.run_action_parallel( actions )
 
         self.log.info('Make high-res skymodel...')
-        actions = [ a.make_skymodel(self.name, ms, ) for ms in mss ]
+        actions = [ a.make_skymodel.make_skymodel(self.name, ms) for ms in mss ]
         self.s.run_action_parallel( actions )
 
         self.log.info('Subtract high-res skymodel...')
-        actions = [ a.subtract(self.name, ms, ) for ms in mss ]
+        actions = [ a.subtract.subtract(self.name, ms) for ms in mss ]
         self.s.run_action_parallel( actions )
 
         self.log.info('Average...')
-        actions = [ a.avg(self.name, ms, ) for ms in mss ]
+        actions = [ a.avg.avg(self.name, ms) for ms in mss ]
         self.s.run_action_parallel( actions )
 
         self.log.info('Low-res imaging...')
-        actions = [ a.imager_mask(self.name, ms, niter=p['niterl'], imsize=p['imsizel'], cell=p['celll'], uvrange=p['uvrangel']) for ms in mss ]
+        actions = [ a.imager_mask.imager_mask(self.name, ms, p['imagerl']) for ms in mss ]
         self.s.run_action_parallel( actions )
 
         self.log.info('Make low-res skymodel...')
-        actions = [ a.make_skymodel(self.name, ms, ) for ms in mss ]
+        actions = [ a.make_skymodel.make_skymodel(self.name, ms) for ms in mss ]
         self.s.run_action_parallel( actions )
 
         self.log.info('Subtract low-res skymodel...')
-        actions = [ a.subtract(self.name, ms, ) for ms in mss ]
+        actions = [ a.subtract.subtract(self.name, ms) for ms in mss ]
         self.s.run_action_parallel( actions )
 
         self.log.info('Merge skymodels...')
-        actions = [ a.merge_skymodel(self.name, ms, ) for ms in mss ]
+        actions = [ a.merge_skymodel.merge_skymodel(self.name, ms) for ms in mss ]
         self.s.run_action_parallel( actions )

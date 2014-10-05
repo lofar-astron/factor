@@ -3,17 +3,19 @@
 # refer to a specific operation. Actions should have all
 # the parameters passed, not hardcoded
 
-init_subtract = {'niterh': 40000,
-                 'niterl' : 10000,
-                 'imsizeh': 6144,
-                 'imsizel': 4800,
-                 'cellh': '7.5arcsec',
-                 'celll': '25arcsec',
-                 'uvrangeh': "0.08~7.0klambda",
-                 'uvrangel': "0.08~2.0klambda",
-                 'threshislh': 2.5,
-                 'threshisll': 5,
-                 'threshpixh': 4,
-                 'threshpixl': 5,
-                 'nterms': 1}
-
+init_subtract = {
+'imagerh' : {'niter': 40000,
+        'imsize': 6144,
+        'cell': '7.5arcsec',
+        'uvrange': "0.08~7.0klambda",
+        'threshpix': 4,
+        'threshisl': 2.5,
+        'nterms' : 1},
+'imagerl' : {'niter' : 10000,
+        'imsize': 4800,
+        'cell': '25arcsec',
+        'uvrange': "0.08~2.0klambda",
+        'threshisl': 5,
+        'threshpix': 5,
+        'nterms': 1}
+}
