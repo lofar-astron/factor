@@ -7,9 +7,17 @@ import os
 from factor.lib.action import action
 from factor.lib.action_lib import makeimagename
 
+from jinja2 import Environment, FileSystemLoader
+import os
+
+
+DIR = os.path.dirname(os.path.abspath(__file__))
+env = Environment(loader=FileSystemLoader(os.path.join(DIR, 'templates')))
+
+
 class imager(action):
     """
-    Implment the imager action
+    Implement the imager action
     """
 
     def __init__(self, op_name, ms, p, clean=True):
@@ -17,15 +25,19 @@ class imager(action):
         self.ms = ms
         self.p = p
         self.clean = clean
-        self.image = makeimagename(ms, prefix)
-
+    
+    def _get_command(self):
+        template_imager = env.get_template('imager.tpl')
+        cmd = 'casapy --nologger --log2term -c %s' % template_imager.render(self.d)
+    
     def run(self):
         # TODO: implement the template
         template_imager = make_template(ms = self.ms, image = self.image, p = self.p)
         cmd = 'casapy --nologger --log2term -c %s' % template_imager
         exec_cmd(cmd)
 
-        if clean: os.system('rm -rf %s.mask %s.flux %s.psf' % (image, image, image))
+        if clean: 
+            os.system('rm -rf %s.mask %s.flux %s.psf' % (image, image, image))
 
     def get_results(self):
         """
