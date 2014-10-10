@@ -16,15 +16,15 @@ class init_subtract(operation):
 
         # this is a typical multi-thread block
         self.log.info('High-res imaging...')
-        actions = [ a.imager_mask.imager_mask(self.name, ms, p['imagerh']) for ms in mss ]
+        actions = [ a.imager_mask.imager_mask(self.name, ms, p['imagerh'], 'init_hires') for ms in mss ]
         self.s.run_action_parallel( actions )
 
         self.log.info('Make high-res skymodel...')
-        actions = [ a.make_skymodel.make_skymodel(self.name, ms) for ms in mss ]
+        actions = [ a.make_skymodel.make_skymodel(self.name, ms, p['xxx'], 'init_hires') for ms in mss ]
         self.s.run_action_parallel( actions )
 
         self.log.info('Subtract high-res skymodel...')
-        actions = [ a.subtract.subtract(self.name, ms) for ms in mss ]
+        actions = [ a.subtract.subtract(self.name, ms, p['xxx'], 'init_hires') for ms in mss ]
         self.s.run_action_parallel( actions )
 
         self.log.info('Average...')
@@ -32,15 +32,15 @@ class init_subtract(operation):
         self.s.run_action_parallel( actions )
 
         self.log.info('Low-res imaging...')
-        actions = [ a.imager_mask.imager_mask(self.name, ms, p['imagerl']) for ms in mss ]
+        actions = [ a.imager_mask.imager_mask(self.name, ms, p['imagerl'], 'init_lowres') for ms in mss ]
         self.s.run_action_parallel( actions )
 
         self.log.info('Make low-res skymodel...')
-        actions = [ a.make_skymodel.make_skymodel(self.name, ms) for ms in mss ]
+        actions = [ a.make_skymodel.make_skymodel(self.name, ms, p['xxx'], 'init_lowres') for ms in mss ]
         self.s.run_action_parallel( actions )
 
         self.log.info('Subtract low-res skymodel...')
-        actions = [ a.subtract.subtract(self.name, ms) for ms in mss ]
+        actions = [ a.subtract.subtract(self.name, ms, p['xxx'], 'init_lowres') for ms in mss ]
         self.s.run_action_parallel( actions )
 
         self.log.info('Merge skymodels...')

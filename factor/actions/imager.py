@@ -1,11 +1,20 @@
 """
 Action: imager
 Make an image
+Used parameters:
+* niter
+* imsize
+* cell
+* uvrange
+* nterms
+Return:
+* image filename (in a vector to deal with nterm>1)
+* model filename (in a vector to deal with nterm>1)
 """
 
 import os
 from factor.lib.action import action
-from factor.lib.action_lib import makeimagename
+from factor.lib.action_lib import makeimagebasename
 
 from jinja2 import Environment, FileSystemLoader
 import os
@@ -20,10 +29,11 @@ class imager(action):
     Implement the imager action
     """
 
-    def __init__(self, op_name, ms, p, clean=True):
+    def __init__(self, op_name, ms, p, prefix = None, direction = None, clean=True):
         super(imager, self).__init__(op_name, name = 'imager')
         self.ms = ms
         self.p = p
+        self.imagebasename = makeimagebasename(self.ms, prefix, direction)
         self.clean = clean
     
     def _get_command(self):
@@ -34,10 +44,10 @@ class imager(action):
         # TODO: implement the template
         template_imager = make_template(ms = self.ms, image = self.image, p = self.p)
         cmd = 'casapy --nologger --log2term -c %s' % template_imager
-        exec_cmd(cmd)
+        self.exec_cmd(cmd)
 
         if clean: 
-            os.system('rm -rf %s.mask %s.flux %s.psf' % (image, image, image))
+            os.system('rm -rf %s.mask %s.flux %s.psf' % (self.imagebasename, self.imagebasename, self.imagebasename))
 
     def get_results(self):
         """

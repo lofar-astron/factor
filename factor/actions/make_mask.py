@@ -1,23 +1,27 @@
 """
 Action: make_mask
 Make a mask using PyBDSM from a given image
+Used parameters:
+* threshpix
+* threshisl
+Return:
+* mask name
 """
 
 from factor.lib.action import action
+from factor.lib.action_lib import makeimagebasename
 
 class make_mask(action):
     """
     Implment the make_mask action
     """
 
-    def __init__(self, op_name, p, clean=True):
+    def __init__(self, op_name, p, prefix = None, direction = None, clean=True):
         super(make_mask, self).__init__(op_name, name = 'make_mask')
+        self.imagebasename = makeimagebasename(self.ms, prefix, direction)
 
     def run(self):
-        # TODO: implement the template
-        template_imager = make_template(ms = self.ms, imagename = self.imagename, \
-                                niter = self.niter, imsize = self.imsize, cell = self.cell, uvrange = self.uvrange, mask = self.mask)
-        cmd = 'casapy --nologger --log2term -c %s' % template_imager
+        # run pybdsm....
 
 
     def get_results(self):

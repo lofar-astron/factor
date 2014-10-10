@@ -1,12 +1,17 @@
 """
 Some functions called by multiple actions
 """
+import logging
 
-def makeimagename(ms, prefix, direction = None):
+def makeimagebasename(ms, prefix = None, direction = None):
     """
-    define a standard name patter for imaging
+    define a standard name pattern for imaging
     """
     import re
+    if prefix == None: 
+        logging.error('Prefix ofr imagebasename not selected, using xxx.')
+        prefix = 'xxx'
+        
     if direction != None:
         return 'img/%s-%s_%s' % (prefix, re.sub(r'.MS|.ms','',ms), direction.name)
     else:
