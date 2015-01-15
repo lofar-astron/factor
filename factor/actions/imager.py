@@ -36,15 +36,14 @@ class imager(action):
         self.imagebasename = makeimagebasename(self.ms, prefix, direction)
         self.clean = clean
     
-    def _get_command(self):
-        template_imager = env.get_template('imager.tpl')
-        cmd = 'casapy --nologger --log2term -c %s' % template_imager.render(self.d)
-    
-    def run(self):
+    def get_command(self):
         # TODO: implement the template
-        template_imager = make_template(ms = self.ms, image = self.image, p = self.p)
-        cmd = 'casapy --nologger --log2term -c %s' % template_imager
-        self.exec_cmd(cmd)
+        template_imager = env.get_template('imager.tpl')
+        self.cmd = 'casapy --nologger --log2term -c %s' % template_imager.render(self.p)
+   
+    def run(self):
+        self.get_command()
+        self.exec_cmd(self.cmd)
 
         if clean: 
             os.system('rm -rf %s.mask %s.flux %s.psf' % (self.imagebasename, self.imagebasename, self.imagebasename))

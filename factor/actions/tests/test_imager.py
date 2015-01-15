@@ -14,7 +14,7 @@ class TestImager(unittest.TestCase):
         self.im = imager("op1", "test_ms")
     
     def test_command(self):
-        print(self.im._get_command())
+        print(self.im.get_command())
     
 if __name__ == '__main__':
     unittest.main()
