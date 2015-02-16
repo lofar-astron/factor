@@ -1,29 +1,102 @@
 """
-General action library, contains the master class for actions
-Commands contained in an action are run in sequential mode.
+General action library
+
+Contains the master class for actions. Actions handle the setup and running of
+the pipeline.
 """
 
 import logging
 import subprocess
+import os
 
-class action( object ):
+class Action(object):
     """
     Generic action class
+
+    All actions should be in a separate module. Every module must have a
+    class called in the same way of the module which inherits from this class.
     """
-    def __init__(self, op_name = None, name = None):
-        self.op_name = op_name
+    def __init__(self, op_parset, name):
+        """
+        Create Action object
+
+        Parameters
+        ----------
+        op_parset : str
+            Parset of calling operation
+        name : str
+            Name of the action
+        """
+        self.op_name = op_parset['op_name']
         self.name = name
+        self.op_parset = op_parset.copy()
+        self.pipeline_parset_file = None
+        self.pipeline_config_file = None
+
+        self.image_dir = 'images/{0}/'.format(self.op_name)
+        if not os.path.exists(self.image_dir):
+            os.makedirs(self.image_dir)
+
+        self.vis_dir = 'visdata/'
+
+        self.datamap_dir = 'datamaps/{0}/{1}/'.format(self.op_name, self.name)
+        if not os.path.exists(self.datamap_dir):
+            os.makedirs(self.datamap_dir)
+
+        self.model_dir = 'models/{0}/'.format(self.op_name)
+        if not os.path.exists(self.model_dir):
+            os.makedirs(self.model_dir)
+
+        self.parset_dir = 'parsets/{0}/{1}/'.format(self.op_name, self.name)
+        if not os.path.exists(self.parset_dir):
+            os.makedirs(self.parset_dir)
+
+        self.pipeline_run_dir = 'pipeline/{0}/{1}/'.format(self.op_name, self.name)
+        if not os.path.exists(self.pipeline_run_dir):
+            os.makedirs(self.pipeline_run_dir)
+
         self.log = logging.getLogger('%s::%s' % (self.op_name, self.name))
+        self.pipeline_executable = '{0}/bin/genericpipeline.py'.format(
+            self.op_parset['lofarroot'])
+
+        self.run()
+
+
+    def make_datamaps(self):
+        """
+        Makes the output datamap
+        """
+        raise NotImplementedError
+
+
+    def make_pipeline_control_parset(self):
+        """
+        Makes the pipeline control parset
+        """
+        raise NotImplementedError
+
+
+    def make_pipeline_config_parset(self):
+        """
+        Makes the pipeline configuration parset
+        """
+        raise NotImplementedError
+
 
     def run(self):
-        raise NotImplementedError
+        """
+        Runs the generic pipeline with parset
+        """
+        cmd = 'python {0} {1} -d -c {2}'.format(self.pipeline_executable,
+            self.pipeline_parset_file, self.pipeline_config_file)
+        p = subprocess.Popen(cmd, shell=True)
+        p.wait()
+
 
     def get_results(self):
-        raise NotImplementedError
+        """
+        Return results data map
+        """
+        return self.outupt_datamap
 
-    def exec_cmd(self, cmd):
-        # TODO: find a better name for logs, so they don't clash
-        with open("log/%s-%s.out.log" % (self.name, cmd.partition(' ')[0]),"wb") as out, \
-             open("log/%s-%s.err.log" % (self.name, cmd.partition(' ')[0]),"wb") as err:
-            p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
-            p.wait()
+

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-# this modeule sets some propreties of the logging system
+# this module sets some propreties of the logging system
 
 import logging
 
@@ -38,12 +38,13 @@ def set_level(level):
     elif level == 'debug':
         ch.setLevel(logging.DEBUG)
 
-# logging to file (B/W)
-fh = logging.FileHandler('factor.log')
-fh.setLevel(logging.DEBUG) # file always log everything
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-fh.setFormatter(formatter)
-logging.root.addHandler(fh)
+def set_log_file(log_file):
+    # logging to file (B/W)
+    fh = logging.FileHandler(log_file)
+    fh.setLevel(logging.DEBUG) # file always log everything
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    logging.root.addHandler(fh)
 
 # logging to console (color)
 ch = logging.StreamHandler()

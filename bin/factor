@@ -20,21 +20,28 @@
 # Jose Sabater Montes
 # Wendy Williams
 # Martin Hardcastle
+# David Rafferty
+# Stefan Fröhlich
+# Tim Shimwell
 #
 # The code is based on an original idea of Reinout van Weeren
 
-_contact = "Francesco de Gasperin (fdg@hs.uni-hamburg.de)"
-
-import sys, os
+import sys
+import os
 import logging
+import pickle
 import factor
+from factor.lib.context import *
+import factor.directions
+import factor.parset
+from factor.lib.scheduler import Scheduler
+from factor.operations.init_subtract import init_subtract
+
 
 if __name__=='__main__':
-
-    # command-line options
     import optparse
-    opt = optparse.OptionParser(usage='%prog [-v|-q] parset [default: facotr.parset] \n'
-            +_contact, version='%%prog %s' % (factor._version.__version__))
+    opt = optparse.OptionParser(usage='%prog [-v|-q] parset [default: factor.parset] \n',
+            version='%%prog %s' % (factor._version.__version__))
     opt.add_option('-q', help='Quiet', action='store_true', default=False)
     opt.add_option('-v', help='Verbose', action='store_true', default=False)
     (options, args) = opt.parse_args()
@@ -43,37 +50,138 @@ if __name__=='__main__':
         opt.print_help()
         sys.exit()
 
-    # logging
+    # Prepare logging
     if options.q:
         factor._logging.set_level('warning')
     if options.v:
         factor._logging.set_level('debug')
 
-    # prepare parset
-    try: parset_file = args[0]
-    except: parset_file = 'factor.parset'
+    # Prepare parset
+    try:
+        parset_file = args[0]
+    except:
+        parset_file = 'factor.parset'
+    parset = factor.parset.parset_read(parset_file)
 
-    import factor.parset
-    parset = factor.parset.parset_read( parset_file )
-    
-    # prepare directions
-    import factor.directions
-    directions = factor.directions.directions_read( parset['directions_file'] )
+    # Prepare vis data
+    bands = []
+    from factor.lib.band import Band
+    for ms in parset['mss']:
+        band = Band(ms)
+        band.dirindparmdb = parset['parmdb_name']
+        band.skymodel_dirindep = None
+        msbase = os.path.basename(ms)
+        if msbase in parset['ms_specific']:
+            if 'init_skymodel' in parset['ms_specific'][msbase]:
+                band.skymodel_dirindep = parset['ms_specific'][msbase]['init_skymodel']
+        bands.append(band)
 
-    # run operations
-    from factor.lib.context import *
-    with op_init('tessellation', parset) as o, timer(o.log):
-        o.run()
-    with op_init('init_subtract', parset) as o,  timer(o.log):
-        o.run()
+    # Check directions
+    if 'directions_file' in parset:
+        directions = factor.directions.directions_read(parset['directions_file'])
+    elif os.path.exists(parset['dir_working']+'/factor_directions.txt'):
+        directions = factor.directions.directions_read(parset['dir_working']+
+            '/factor_directions.txt')
+    else:
+        if 'directions_flux_min_jy' not in parset or \
+            'directions_size_max_arcmin' not in parset:
+                logging.critical('If no directions file is specified, you must '
+                    'give values for both directions_flux_min_Jy and '
+                    'directions_size_max_arcmin')
+                sys.exit(1)
+        else:
+            directions = None
 
-    # loop on directions    
-    for d in directions:
-        with op_init('facet_setup', parset, d) as o, timer(o.log):
-            o.run()
-        
-#    with op_init('final_image', parset) as o, timer(o.log):
-#        o.run()        
+    # Run initial sky model generation and create empty datasets. First check that
+    # this operation is needed (only needed if band lacks an initial skymodel).
+    bands_init_subtract = []
+    for band in bands:
+        if band.skymodel_dirindep is None:
+            bands_init_subtract.append(band)
+    if len(bands_init_subtract) > 0:
+        op = init_subtract(parset, bands_init_subtract)
+        op.run()
+    else:
+        logging.info("Sky models found for all MS files. Skipping init_subtract "
+            "operation.")
+
+    # Prepare scheduler for facet processing
+    scheduler = Scheduler(parset['ndir_parallel'], 'process_facets')
+
+    # Prepare directions
+    if directions is None:
+        # Make directions from dir-indep sky models using flux and size parameters
+        logging.info("No directions file given. Selecting directions internally...")
+        parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(bands,
+            parset['directions_flux_min_jy'], parset['directions_size_max_arcmin'],
+            interactive=parset['interactive'])
+        directions = factor.directions.directions_read( parset['directions_file'] )
+    dir_reg = [d for d in directions if d.reg != '']
+    for i, direction in enumerate(dir_reg):
+        direction.vertices, direction.width = factor.directions.region_read(direction.reg)
+    dir_no_reg = [d for d in directions if d.reg == '']
+    polys, widths = factor.directions.thiessen(dir_no_reg)
+    for i, direction in enumerate(dir_no_reg):
+        direction.vertices = polys[i]
+        direction.width = widths[i]
+
+    # Select subset of directions to process
+    if 'ndir' in parset:
+        if parset['ndir'] > 0 and parset['ndir'] <= len(directions):
+            directions = directions[:parset['ndir']]
+
+    # Group directions into groups that are processed in parallel
+    direction_groups = factor.directions.group_directions(directions)
+
+    # Iterate over direction groups
+    for direction_group in direction_groups:
+
+        # Add calibrator(s) to empty datasets. These operations
+        # must be done in one at a time
+        ops = [facet_add_cal(parset, bands, d) for d in direction_group]
+        for op in ops:
+            op.run()
+
+        # Setup up facet(s) for selfcal
+        ops = [facet_setup(parset, bands, d) for d in direction_group]
+        scheduler.run(ops)
+
+        # Do selfcal on calibrator only
+        ops = [facet_selfcal(parset, bands, d) for d in direction_group]
+        scheduler.run(ops)
+
+        # Add all sources in the facet(s) to empty datasets. These operations
+        # must be done in one at a time
+        ops = [facet_add_all(parset, bands, d) for d in dirs_to_image]
+        for op in ops:
+            op.run()
+
+        # Make image of all sources in facet(s) and get final model(s)
+        ops = [facet_image(parset, bands, d) for d in direction_group]
+        scheduler.run(ops)
+
+        # Subtract final model(s) from empty datasets. These operations
+        # must be done in one at a time
+        ops = [facet_sub_all(parset, bands, d) for d in direction_group]
+        for op in ops:
+            op.run()
+
+    # Make final facet images (from final empty datasets) if desired
+    dirs_to_image = [d for d in directions if d.make_final_image]
+    ops = [facet_add_all(parset, bands, d) for d in dirs_to_image]
+    for op in ops:
+        op.run()
+    ops = [facet_image(parset, bands, d) for d in dirs_to_image]
+    scheduler.run(ops)
+
+    # Save final band and direction objects to disk
+    pickle.dump(bands, open(parset['dir_working']+"/bands.sav", "wb" ))
+    pickle.dump(directions, open(parset['dir_working']+"/directions.sav", "wb" ))
+
+    # Mosaic the final facet images together (trim each facet image to Thiessen
+    # region first? What about sources on edge of region? Can we just sum them?)
+    if parset['make_mosaic']:
+        make_mosaic(directions)
 
     logging.info("Factor has finished :)")
 

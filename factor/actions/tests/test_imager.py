@@ -6,15 +6,13 @@ import os
 
 # Append the path of the module to the syspath
 sys.path.append(os.path.join('..','..','..'))
-from factor.actions.imager import imager
+from factor.actions.images import make_image
 
 class TestImager(unittest.TestCase):
-    
+
     def setUp(self):
-        self.im = imager("op1", "test_ms")
-    
-    def test_command(self):
-        print(self.im.get_command())
-    
+        self.im = make_image({"op_name":"op1"}, "test_ms")
+
+
 if __name__ == '__main__':
     unittest.main()

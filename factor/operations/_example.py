@@ -3,21 +3,21 @@ Operation: example
 An example operation, to be used as a template
 """
 
-from factor.lib.operation import operation
-import factor.actions as a
+from factor.lib.operation import Operation
+from factor.lib.datamap import make_datamap
+from factor.actions.images import make_image
 
-class example_operation(operation):
+class example_operation(Operation):
 
     def run(self):
 
-        mss = self.parset['mss']
+        from factor.operations.hardcoded_param import example_parms as p
 
-        # this is a typical multi-thread block
-        self.log.info('Starting example procedure...')
-        actions = [ a.action_name(self.name, ms, direction, arg1, arg2) for ms in mss ] # create multiple action objects
-        self.s.run_action_parallel( actions ) # call the scheduler (it's in self.s)
+        # Make data map from input bands
+        bands = self.bands
+        subtracted_datamap = make_datamap(bands)
 
-        # this is a single call
+        # this is a typical pipeline call
         self.log.info('Starting example procedure...')
-        self.s.run_action_parallel( a.action_name(self.name, ms, arg1, arg2) )
+        image_datamap = make_image(subtracted_datamap, p['image'])
 

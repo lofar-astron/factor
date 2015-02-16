@@ -13,5 +13,6 @@ def changelog():
     Factor Changelog.
     -----------------------------------------------
     4/9/2014 - Initial version
+    16/2/2015 - Initial support for LOFAR generic pipeline
     """
     pass

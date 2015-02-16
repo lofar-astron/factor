@@ -1,33 +1,52 @@
 # This is an example parset for Factor
 
 [global]
+# LOFAR installation root directories. If not given, they will be determined
+# from the environment
+lofarroot = /lofar/build/gnu_opt/installed
+lofarpythonpath = /lofar/build/gnu_opt/installed/lib/python2.7/dist-packages
 
-# Working dir (complete path) - other path are relative to this
-dir_working = /home/fdg/phd/code/factor/wdir
+# Full path to working dir - other paths are relative to this
+dir_working = /data/wdir
 
-# MS directory, will be scanned for all .MS files
-# each file must have a .skymodel associated, unless specified below
-dir_ms = mss
+# Full path to directory containing selfcaled bands, will be scanned for all .MS / .ms files
+dir_ms = /data/bands
 
-# parmdb name
-parmdb_name = instrument
+# Parmdb name for dir-indep. selfcal solutions (stored inside the input
+# band measurement sets)
+parmdb_name = instrument_ap_smoothed
 
-# File containing calibrator directions
-directions_file = ../parsets/directions.txt
+# Full path to file containing calibrator directions. If not given, directions
+# are selected internally using the flux and size cuts below
+directions_file = /data/directions.txt
+directions_flux_min_Jy = 0.1
+directions_size_max_arcmin = 3.0
 
-# what is this?!
-#ncpw = 
+# Path to local storage (on each node); used only for casapy imaging ATM
+dir_node = /tmp
 
-# Number of usable cpus (default=all available cpus)
-ncpu = 2
+# Maximum number of directions (default = all)
+ndir = 10
+
+# Maximum number of directions to process in parallel (default = 1)
+ndir_parallel = 3
+
+# Maximum number of CPUs per node
+ncpu = 6
+
+# Interactive?
+interactive = False
+
+# Make final mosaic?
+make_mosaic = False
 
 # MS-specific parameters
 [ms1.ms]
-init_skymodel = ms1strangename.sky
+init_skymodel = /data/ms1strangename.sky
 param1 = 123
 param2 = 123
 
 [ms2.ms]
-init_skymodel = ms2strangename.sky
+init_skymodel = /data/ms2strangename.sky
 param1 = 123
 param2 = 123
