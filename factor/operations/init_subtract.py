@@ -12,7 +12,7 @@ from factor.actions.calibrations import Subtract
 class InitSubtract(Operation):
     """
     Operation to create empty datasets
-    """"
+    """
     def __init__(self, parset, bands, direction=None, reset=False):
         super(InitSubtract, self).__init__(parset, bands, direction=direction,
             reset=reset, name='InitSubtract')
