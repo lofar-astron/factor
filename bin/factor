@@ -31,11 +31,10 @@ import os
 import logging
 import pickle
 import factor
-from factor.lib.context import *
 import factor.directions
 import factor.parset
 from factor.lib.scheduler import Scheduler
-from factor.operations.init_subtract import init_subtract
+from factor.operations.init_subtract import InitSubtract
 
 
 if __name__=='__main__':
@@ -84,10 +83,11 @@ if __name__=='__main__':
             '/factor_directions.txt')
     else:
         if 'directions_flux_min_jy' not in parset or \
-            'directions_size_max_arcmin' not in parset:
+            'directions_size_max_arcmin' not in parset or \
+            'directions_separation_max_arcmin' not in parset:
                 logging.critical('If no directions file is specified, you must '
-                    'give values for both directions_flux_min_Jy and '
-                    'directions_size_max_arcmin')
+                    'give values for directions_flux_min_Jy, '
+                    'directions_size_max_arcmin, and directions_separation_max_arcmin')
                 sys.exit(1)
         else:
             directions = None
@@ -99,7 +99,7 @@ if __name__=='__main__':
         if band.skymodel_dirindep is None:
             bands_init_subtract.append(band)
     if len(bands_init_subtract) > 0:
-        op = init_subtract(parset, bands_init_subtract)
+        op = InitSubtract(parset, bands_init_subtract)
         op.run()
     else:
         logging.info("Sky models found for all MS files. Skipping init_subtract "
@@ -114,7 +114,7 @@ if __name__=='__main__':
         logging.info("No directions file given. Selecting directions internally...")
         parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(bands,
             parset['directions_flux_min_jy'], parset['directions_size_max_arcmin'],
-            interactive=parset['interactive'])
+            parset['directions_separation_max_arcmin'], interactive=parset['interactive'])
         directions = factor.directions.directions_read( parset['directions_file'] )
     dir_reg = [d for d in directions if d.reg != '']
     for i, direction in enumerate(dir_reg):
@@ -137,31 +137,31 @@ if __name__=='__main__':
     for direction_group in direction_groups:
 
         # Add calibrator(s) to empty datasets. These operations
-        # must be done in one at a time
+        # must be done one at a time
         ops = [facet_add_cal(parset, bands, d) for d in direction_group]
         for op in ops:
             op.run()
 
         # Setup up facet(s) for selfcal
         ops = [facet_setup(parset, bands, d) for d in direction_group]
-        scheduler.run(ops)
+        scheduler.run_parallel(ops)
 
         # Do selfcal on calibrator only
         ops = [facet_selfcal(parset, bands, d) for d in direction_group]
-        scheduler.run(ops)
+        scheduler.run_parallel(ops)
 
         # Add all sources in the facet(s) to empty datasets. These operations
-        # must be done in one at a time
+        # must be done one at a time
         ops = [facet_add_all(parset, bands, d) for d in dirs_to_image]
         for op in ops:
             op.run()
 
         # Make image of all sources in facet(s) and get final model(s)
         ops = [facet_image(parset, bands, d) for d in direction_group]
-        scheduler.run(ops)
+        scheduler.run_parallel(ops)
 
         # Subtract final model(s) from empty datasets. These operations
-        # must be done in one at a time
+        # must be done one at a time
         ops = [facet_sub_all(parset, bands, d) for d in direction_group]
         for op in ops:
             op.run()
@@ -172,7 +172,7 @@ if __name__=='__main__':
     for op in ops:
         op.run()
     ops = [facet_image(parset, bands, d) for d in dirs_to_image]
-    scheduler.run(ops)
+    scheduler.run_parallel(ops)
 
     # Save final band and direction objects to disk
     pickle.dump(bands, open(parset['dir_working']+"/bands.sav", "wb" ))

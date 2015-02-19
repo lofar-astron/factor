@@ -47,7 +47,7 @@ def directions_read(directions_file):
 
 
 def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
-    interactive=False):
+    directions_separation_max_arcmin, interactive=False):
     """
     Selects appropriate directions and makes the directions file
     """
@@ -74,6 +74,26 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
         sys.exit(1)
     log.info('Found {0} directions with fluxes above {1} Jy and sizes below {2} '
         'arcmin'.format(len(s.getPatchNames()), flux_min_Jy, size_max_arcmin))
+
+    # Look for nearby pairs
+    log.info('Merging directions within {0} arcmin of each other...'.format(
+        directions_separation_max_arcmin))
+    allDone = False
+    while not allDone:
+        pRA, pDec = s.getPatchPositions(asArray=True)
+        for ra, dec in zip(pRA.tolist()[:], pDec.tolist()[:]):
+            dist = s.getDistance(ra, dec, byPatch=True, units='arcmin')
+            nearby = np.where(dist < directions_separation_max_arcmin)
+            if len(nearby[0]) > 1:
+                patches = s.getPatchNames()[nearby]
+                s.merge(patches.tolist())
+                s.setPatchPositions(method='mid')
+                allDone = False
+                break
+            else:
+                allDone = True
+
+    # Write the file
     s.write(fileName=directions_file, format='factor', sortBy='I', clobber=True)
     if interactive:
         s.more(sortBy='I')
@@ -88,18 +108,95 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     return directions_file
 
 
-def group_directions(directions, one_at_a_time=True):
+def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':5,
+    '2':0, '4':8, '8':20, '16':100}, allow_reordering=True):
     """
     Sorts directions into groups that can be selfcaled simultaneously
 
+    Directions are grouped by flux and then optionally reodered to maximize
+    the miniumum separation between sources in a group
+
+    Parameters
+    ----------
+    directions : list of Direction objects
+        List of input directions to group
+    one_at_a_time : bool, optional
+        If True, run one direction at a time
+    n_per_grouping : dict, optional
+        Dict specifying the number of sources at each grouping level
+    allow_reordering : bool, optional
+        If True, allow sources in neighboring groups to be reordered to increase
+        the minimum separation between sources within a group
     """
-    direction_groups = []
+    from random import shuffle
 
     if one_at_a_time:
         for d in directions:
             direction_groups.append([d])
     else:
-        pass
+        def find_min_separation(group):
+            """
+            Finds the minimum separation between sources in a group
+            """
+            sep = []
+            for direction1 in group:
+                for direction2 in group:
+                    if direction1 != direction2:
+                        sep.append(calculateSeparation(direction1.ra, direction1.dec,
+                            direction2.ra, direction2.dec))
+            return min(sep)
+
+        # Divide based on flux (assuming order is decreasing flux)
+        grouping_levels = [int(g) for g in n_per_grouping.iterkeys()]
+        grouping_levels.sort()
+        for i, g in enumerate(grouping_levels):
+            if i == 0:
+                start = 0
+            else:
+                start = end
+            end = start + n_per_grouping[str(g)]
+            if end > len(directions):
+                end = len(directions)
+            if end > start:
+                for j in range(start, end, g):
+                    gstart = j
+                    gend = j + g
+                    if gend > end:
+                        gend = end
+                    if j == 0:
+                        direction_groups = [directions[gstart: gend]]
+
+                    else:
+                        direction_groups += [directions[gstart: gend]]
+
+        # Reorganize groups in each grouping level based on distance. This
+        # is done by swapping the directions of neighboring groups randomly
+        # and picking the group with the largest minimum separation
+        if allow_reordering:
+            direction_groups_orig = direction_groups[:]
+            if len(direction_groups_orig) > 1:
+                for i in range(len(direction_groups_orig), 2):
+                    group1 = direction_groups_orig[i]
+                    if i < len(direction_groups)-1:
+                        k = 1 + 1
+                    else:
+                        k = i - 1
+                    group2 = direction_groups_orig[k]
+
+                    min_sep_global = 0.0
+                    for j in range(10):
+                        group_merged = shuffle(group1[:] + group2[:])
+                        group1_test = group_merged[range(len(group1))]
+                        group2_test = group_merged[range(len(group1), len(group2))]
+                        min_sep1 = find_min_separation(group1_test)
+                        min_sep2 = find_min_separation(group2_test)
+                        min_sep = min(min_sep1, min_sep2)
+                        if min_sep > min_sep_global:
+                            min_sep_global = min_sep
+                            group1_best = group1_test
+                            group2_best = group2_test
+                    direction_groups[i] = group1_best
+                    direction_groups[k] = group2_best
 
     return direction_groups
 
@@ -150,7 +247,7 @@ def thiessen(directions_list, bounds_scale=2):
 
 
 def plot_thiessen(directions_list, bounds_scale=2):
-    """quick plot of thiessen polygons for a given set of point"""
+    """quick plot of thiessen polygons for a given set of points"""
     from matplotlib import pyplot as plt
 
     points, midRA, midDec = getxy(directions_list)

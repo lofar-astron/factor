@@ -24,6 +24,9 @@ def write_mapfile(data_list, op_name, action_name=None, prefix=None, direction=N
 
 
 def read_mapfile(mapfile):
+    """
+    Returns a list of files in the input map file
+    """
     indata = DataMap.load(mapfile)
     files = []
     for item in indata:
@@ -34,7 +37,7 @@ def read_mapfile(mapfile):
 
 def make_mapfile_basename(action_name=None, prefix=None, direction=None, index=None):
     """
-    define a standard name pattern for datamap files
+    Returns a standard name pattern for datamap files
     """
     import re
     import os

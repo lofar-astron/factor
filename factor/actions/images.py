@@ -1,9 +1,14 @@
 """
-Module that holds all image-related objects and functions
+Module that holds all image-related actions
 
-Actions defined in this module:
-
-- make_image: makes an image using clean masks
+Classes
+-------
+Casapy : Action
+    Makes an image with CASA
+MakeImage : Action
+    Make an image using a clean mask
+ExpandMask : Action
+    Expand a clean mask to match a larger image
 
 """
 
@@ -15,16 +20,14 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 env = Environment(loader=FileSystemLoader(os.path.join(DIR, 'templates')))
 
 
-class make_image(Action):
+class Casapy(Action):
     """
-    Makes restored and model images using clean masks
-
-    Returns data map of images and models
+    Action to make an image using a clean mask with CASA clean()
     """
     def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
-        localdir=None, clean=True, index=None):
+        localdir=None, clean=True, index=None, image_twice=True, name='Casapy'):
         """
-        Create make_image action and run pipeline
+        Create action and run pipeline
 
         Parameters
         ----------
@@ -44,11 +47,16 @@ class make_image(Action):
             Remove unneeded files?
         index : int, optional
             Index of action
+        image_twice : bool, optional
+            If True, image two times, making a clean mask in between. If
+            False, image only once; in this case, no clean mask is made.
+
         """
         from factor.lib.action_lib import make_parset_basename, make_pipeline_dirname
 
-        super(make_image, self).__init__(op_parset, 'make_image')
+        super(Casapy, self).__init__(op_parset, name=name)
 
+        # Store input parameters
         self.input_datamap = input_datamap
         self.p = p.copy()
         if prefix is None:
@@ -58,13 +66,14 @@ class make_image(Action):
         self.localdir = localdir
         self.clean = clean
         self.index = index
+        self.image_twice = image_twice
 
         # Set up parset and script names
         self.parsetbasename = self.parset_dir + make_parset_basename(prefix,
             direction, index)
         self.pipeline_parset_file = self.parsetbasename + 'pipe.parset'
         self.pipeline_config_file = self.parsetbasename + 'pipe.cfg'
-        self.maskscriptname = self.parsetbasename + 'makecleanmask.py'
+        self.mask_script_file = self.parsetbasename + 'make_clean_mask.py'
         self.pipeline_run_dir += make_pipeline_dirname(prefix, direction, index)
         if not os.path.exists(self.pipeline_run_dir):
             os.makedirs(self.pipeline_run_dir)
@@ -178,15 +187,18 @@ class make_image(Action):
         """
         Writes the pipeline control parset and any script files
         """
-        self.p['maskscriptname'] = os.path.abspath(self.maskscriptname)
-        template = env.get_template('imager.pipeline.parset.tpl')
+        self.p['maskscriptname'] = os.path.abspath(self.mask_script_file)
+        if self.image_twice:
+            template = env.get_template('make_image.pipeline.parset.tpl')
+        else:
+            template = env.get_template('make_image_single.pipeline.parset.tpl')
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
 
-        template_mask = env.get_template('makecleanmask.tpl')
+        template_mask = env.get_template('make_clean_mask.tpl')
         tmp = template_mask.render(self.p)
-        with open(self.maskscriptname, 'w') as f:
+        with open(self.mask_script_file, 'w') as f:
             f.write(tmp)
 
 
@@ -202,9 +214,15 @@ class make_image(Action):
 
     def get_results(self):
         """
-        Return map files for final images, models, and clean masks
+        Makes and returns map files for final images, models, and clean masks
 
-        If nterms > 1, only the tt0 image and model are returned
+        Returns
+        -------
+        images_mapfile, models_mapfile, masks_mapfile : Data map filenames
+            If nterms > 1, only the tt0 image and model are returned. If
+            self.image_twice if False then None is returned for the
+            masks_mapfile.
+
         """
         from factor.lib.datamap_lib import write_mapfile
 
@@ -225,15 +243,24 @@ class make_image(Action):
             prefix=self.prefix, direction=self.direction, index=self.index)
         models_mapfile = write_mapfile(models, self.op_name, action_name=self.name,
             prefix=self.prefix, direction=self.direction, index=self.index)
-        masks_mapfile = write_mapfile(masks, self.op_name, action_name=self.name,
-            prefix=self.prefix, direction=self.direction, index=self.index)
+        if self.image_twice:
+            masks_mapfile = write_mapfile(masks, self.op_name, action_name=self.name,
+                prefix=self.prefix, direction=self.direction, index=self.index)
+        else:
+            masks_mapfile = None
 
         return images_mapfile, models_mapfile, masks_mapfile
 
 
     def make_image_basename(self, prefix=None):
         """
-        define a standard name pattern for imaging files
+        Define a standard name pattern for imaging files
+
+        Parameters
+        ----------
+        prefix : str, optional
+            String to prepend to the image basename. If None, 'image' is used
+
         """
         from factor.lib.datamap_lib import read_mapfile
         import re
@@ -262,11 +289,22 @@ class make_image(Action):
 
 
     def getOptimumSize(self, size):
-        '''
-        Gets the nearest optimal image size
+        """
+        Gets the nearest optimum image size
 
         Taken from the casa source code (cleanhelper.py)
-        '''
+
+        Parameters
+        ----------
+        size : int
+            Target image size in pixels
+
+        Returns
+        -------
+        optimum_size : int
+            Optimum image size nearest to target size
+
+        """
         import numpy
 
         def prime_factors(n, douniq=True):
@@ -295,7 +333,7 @@ class make_image(Action):
             if (factors==[]): factors=[n]
             return  numpy.unique(factors).tolist() if douniq else factors
 
-        n=size
+        n = int(size)
         if (n%2 != 0):
             n+=1
         fac=prime_factors(n, False)
@@ -311,3 +349,13 @@ class make_image(Action):
                 return k
         return newlarge
 
+
+class MakeImage(Casapy):
+    """
+    Action to make an image using a clean mask
+    """
+    def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
+        localdir=None, clean=True, index=None, image_twice=True):
+        super(MakeImage, self).__init__(op_parset, input_datamap, p, prefix=prefix,
+            direction=direction, localdir=localdir, clean=clean, index=index,
+            image_twice=image_twice, name='MakeImage')

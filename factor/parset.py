@@ -47,7 +47,8 @@ def parset_read(parset_file):
         parset_dict['ndir'] = -1
     if 'ndir_parallel' in parset_dict:
         parset_dict['ndir_parallel'] = parset.getint('global', 'ndir_parallel')
-        log.debug("Processing up to %s directions at once." % (parset_dict['ndir_parallel']))
+        log.debug("Processing up to {0} directions at once.".format(
+            parset_dict['ndir_parallel']))
     else:
         parset_dict['ndir_parallel'] = 1
     if 'ncpu' in parset_dict:
@@ -63,9 +64,14 @@ def parset_read(parset_file):
     if 'dir_node' not in parset_dict:
         parset_dict['dir_node'] = None
     if 'directions_flux_min_jy' in parset_dict:
-        parset_dict['directions_flux_min_jy'] = parset.getfloat('global', 'directions_flux_min_jy')
+        parset_dict['directions_flux_min_jy'] = parset.getfloat('global',
+            'directions_flux_min_jy')
     if 'directions_size_max_arcmin' in parset_dict:
-        parset_dict['directions_size_max_arcmin'] = parset.getfloat('global', 'directions_size_max_arcmin')
+        parset_dict['directions_size_max_arcmin'] = parset.getfloat('global',
+            'directions_size_max_arcmin')
+    if 'directions_separation_max_arcmin' in parset_dict:
+        parset_dict['directions_separation_max_arcmin'] = parset.getfloat('global',
+            'directions_separation_max_arcmin')
 
     # load MS-specific parameters
     parset_dict['ms_specific'] = {}

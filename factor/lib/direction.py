@@ -10,7 +10,7 @@ class Direction(object):
     def __init__(self, name, ra, dec, reg, multiscale, solint_a, solint_p,
         make_final_image, cal_radius):
         """
-        Create Direction object.
+        Create Direction object
 
         Parameters
         ----------

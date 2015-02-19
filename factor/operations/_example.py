@@ -1,13 +1,20 @@
 """
-Operation: example
+Operation: ExampleOperation
+
 An example operation, to be used as a template
 """
-
+import os
 from factor.lib.operation import Operation
 from factor.lib.datamap import make_datamap
 from factor.actions.images import make_image
 
-class example_operation(Operation):
+class ExampleOperation(Operation):
+
+    def __init__(self, parset, bands, direction=None, reset=False):
+        super(ExampleOperation, self).__init__(parset, bands, direction=direction,
+            reset=reset, name='ExampleOperation')
+        self.setup()
+
 
     def run(self):
 

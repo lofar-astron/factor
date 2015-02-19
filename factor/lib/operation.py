@@ -5,6 +5,7 @@ Contains the master class for operations
 """
 import os
 import logging
+from factor.lib.context import Timer
 
 
 class Operation(object):
@@ -56,11 +57,21 @@ class Operation(object):
         return mapfile
 
 
+    def run_steps(self):
+        """
+        Define the operation's steps
+        """
+        raise(NotImplementedError)
+
+
     def run(self):
         """
         Run the operation
         """
-        raise(NotImplementedError)
+        with Timer(self.log):
+            self.setup()
+            self.run_steps()
+            self.finalize()
 
 
     def finalize(self):

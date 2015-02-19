@@ -17,10 +17,13 @@ dir_ms = /data/bands
 parmdb_name = instrument_ap_smoothed
 
 # Full path to file containing calibrator directions. If not given, directions
-# are selected internally using the flux and size cuts below
+# are selected internally using the flux and size cuts below (min flux, max
+# size of a source, and max separation between sources below which they are grouped
+# into one direction)
 directions_file = /data/directions.txt
 directions_flux_min_Jy = 0.1
 directions_size_max_arcmin = 3.0
+directions_separation_max_arcmin = 6.0
 
 # Path to local storage (on each node); used only for casapy imaging ATM
 dir_node = /tmp
