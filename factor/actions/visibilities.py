@@ -15,6 +15,7 @@ Concat : Action
 """
 
 from factor.lib.action import Action
+from factor.lib.action_lib import make_basename
 from jinja2 import Environment, FileSystemLoader
 import os
 
