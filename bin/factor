@@ -33,7 +33,7 @@ import pickle
 import factor
 import factor.directions
 import factor.parset
-from factor.lib.scheduler import Scheduler
+from factor.lib.op_scheduler import Scheduler
 from factor.operations.init_subtract import InitSubtract
 
 
@@ -92,8 +92,8 @@ if __name__=='__main__':
         else:
             directions = None
 
-    # Prepare scheduler
-    scheduler = Scheduler(parset['ndir_parallel'], 'process_facets')
+    # Prepare operation scheduler
+    op_scheduler = Scheduler(parset['ndir_parallel'], 'process_facets')
 
     # Run initial sky model generation and create empty datasets. First check that
     # this operation is needed (only needed if band lacks an initial skymodel).
@@ -103,8 +103,7 @@ if __name__=='__main__':
             bands_init_subtract.append(band)
     if len(bands_init_subtract) > 0:
         op = InitSubtract(parset, bands_init_subtract)
-#         op.run()
-        scheduler.run_parallel(op)
+        op_scheduler.run(op)
     else:
         logging.info("Sky models found for all MS files. Skipping init_subtract "
             "operation.")
@@ -140,40 +139,36 @@ if __name__=='__main__':
         # Add calibrator(s) to empty datasets. These operations
         # must be done one at a time
         ops = [facet_add_cal(parset, bands, d) for d in direction_group]
-        for op in ops:
-            op.run()
+        op_scheduler.run(ops, parallel=False)
 
         # Setup up facet(s) for selfcal
         ops = [facet_setup(parset, bands, d) for d in direction_group]
-        scheduler.run_parallel(ops)
+        op_scheduler.run(ops)
 
         # Do selfcal on calibrator only
         ops = [facet_selfcal(parset, bands, d) for d in direction_group]
-        scheduler.run_parallel(ops)
+        op_scheduler.run(ops)
 
         # Add all sources in the facet(s) to empty datasets. These operations
         # must be done one at a time
         ops = [facet_add_all(parset, bands, d) for d in dirs_to_image]
-        for op in ops:
-            op.run()
+        op_scheduler.run(ops, parallel=False)
 
         # Make image of all sources in facet(s) and get final model(s)
         ops = [facet_image(parset, bands, d) for d in direction_group]
-        scheduler.run_parallel(ops)
+        op_scheduler.run(ops)
 
         # Subtract final model(s) from empty datasets. These operations
         # must be done one at a time
         ops = [facet_sub_all(parset, bands, d) for d in direction_group]
-        for op in ops:
-            op.run()
+        op_scheduler.run(ops, parallel=False)
 
     # Make final facet images (from final empty datasets) if desired
     dirs_to_image = [d for d in directions if d.make_final_image]
     ops = [facet_add_all(parset, bands, d) for d in dirs_to_image]
-    for op in ops:
-        op.run()
+    op_scheduler.run(ops, parallel=False)
     ops = [facet_image(parset, bands, d) for d in dirs_to_image]
-    scheduler.run_parallel(ops)
+    op_scheduler.run(ops)
 
     # Save final band and direction objects to disk
     pickle.dump(bands, open(parset['dir_working']+"/bands.sav", "wb" ))
