@@ -63,8 +63,6 @@ class Action(object):
         self.pipeline_executable = '{0}/bin/genericpipeline.py'.format(
             self.op_parset['lofarroot'])
 
-        self.run()
-
 
     def make_datamaps(self):
         """
