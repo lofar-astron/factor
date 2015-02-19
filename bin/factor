@@ -92,8 +92,10 @@ if __name__=='__main__':
         else:
             directions = None
 
-    # Prepare operation scheduler
-    op_scheduler = Scheduler(parset['ndir_parallel'], 'process_facets')
+    # Prepare operation schedulers: one for running operations in parallel, and
+    # one for running them in series
+    op_scheduler = Scheduler(parset['ndir_parallel'], 'parallel')
+    serial_op_scheduler = Scheduler(1, 'serial')
 
     # Run initial sky model generation and create empty datasets. First check that
     # this operation is needed (only needed if band lacks an initial skymodel).
@@ -137,9 +139,9 @@ if __name__=='__main__':
     for direction_group in direction_groups:
 
         # Add calibrator(s) to empty datasets. These operations
-        # must be done one at a time
+        # must be done in series
         ops = [facet_add_cal(parset, bands, d) for d in direction_group]
-        op_scheduler.run(ops, parallel=False)
+        serial_op_scheduler.run(ops)
 
         # Setup up facet(s) for selfcal
         ops = [facet_setup(parset, bands, d) for d in direction_group]
@@ -152,7 +154,7 @@ if __name__=='__main__':
         # Add all sources in the facet(s) to empty datasets. These operations
         # must be done one at a time
         ops = [facet_add_all(parset, bands, d) for d in dirs_to_image]
-        op_scheduler.run(ops, parallel=False)
+        serial_op_scheduler.run(ops)
 
         # Make image of all sources in facet(s) and get final model(s)
         ops = [facet_image(parset, bands, d) for d in direction_group]
@@ -161,12 +163,12 @@ if __name__=='__main__':
         # Subtract final model(s) from empty datasets. These operations
         # must be done one at a time
         ops = [facet_sub_all(parset, bands, d) for d in direction_group]
-        op_scheduler.run(ops, parallel=False)
+        serial_op_scheduler.run(ops)
 
     # Make final facet images (from final empty datasets) if desired
     dirs_to_image = [d for d in directions if d.make_final_image]
     ops = [facet_add_all(parset, bands, d) for d in dirs_to_image]
-    op_scheduler.run(ops, parallel=False)
+    serial_op_scheduler.run(ops)
     ops = [facet_image(parset, bands, d) for d in dirs_to_image]
     op_scheduler.run(ops)
 

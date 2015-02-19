@@ -32,7 +32,7 @@ dir_node = /tmp
 ndir = 10
 
 # Maximum number of directions to process in parallel (default = 1)
-ndir_parallel = 3
+ndir_parallel = 4
 
 # Maximum number of CPUs per node
 ncpu = 6
