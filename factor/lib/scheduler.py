@@ -43,20 +43,30 @@ class Scheduler(object):
             t.start()
 
 
-    def run_parallel(self, op_list):
+    def run(self, op_list, parallel=True):
         """
         Runs a list of operations in parallel
         """
+        if parallel:
+            self.startup()
         self.startup()
         if type(op_list) != list:
             op_list = [op_list]
         with Timer(self.log):
             for op in op_list:
+                if not parallel:
+                    self.startup()
                 self.q.put_nowait(op)
-            for _ in self.threads:
-                self.q.put(None) # signal no more commands
-            for t in self.threads:
-                t.join() # wait for completion
+                if not parallel:
+                    for _ in self.threads:
+                        self.q.put(None)
+                    for t in self.threads:
+                        t.join()
+            if parallel:
+                for _ in self.threads:
+                    self.q.put(None)
+                for t in self.threads:
+                    t.join()
 
 
     def get_result(self):
