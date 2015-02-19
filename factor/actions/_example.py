@@ -5,7 +5,7 @@ An example action, to be used as a template
 
 from factor.lib.action import Action
 
-class example_action(Action):
+class ExampleAction(Action):
     """
     An example action
     """
@@ -21,7 +21,7 @@ class example_action(Action):
         input_datamap : data map
             Input data map of file(s) to process
         """
-        super(example_action, self).__init__(op_parset, name = 'example_action')
+        super(ExampleAction, self).__init__(op_parset, name='ExampleAction')
         self.input_datamap = input_datamap
 
         # Make data maps
