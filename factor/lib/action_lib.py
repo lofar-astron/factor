@@ -6,7 +6,7 @@ import logging
 
 def make_parset_basename(prefix, direction=None, index=None):
     """
-    define a standard name pattern for pipeline parset files
+    Returns a standard name pattern for pipeline parset files
     """
     import re
     import os
@@ -28,7 +28,7 @@ def make_parset_basename(prefix, direction=None, index=None):
 
 def make_pipeline_dirname(prefix, direction=None, index=None):
     """
-    define a standard name pattern for pipeline runtime dir
+    Returns a standard name pattern for pipeline runtime dir
     """
     import re
     import os
@@ -46,3 +46,10 @@ def make_pipeline_dirname(prefix, direction=None, index=None):
         indtxt = ''
 
     return '{0}{1}{2}'.format(prefix, dirtxt, indtxt)
+
+
+def make_log_basename(prefix, direction=None, index=None):
+    """
+    Returns a standard name pattern for log files
+    """
+    return make_parset_basename(prefix, direction, index)

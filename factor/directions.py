@@ -130,6 +130,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':5,
     """
     from random import shuffle
 
+    direction_groups = []
     if one_at_a_time:
         for d in directions:
             direction_groups.append([d])

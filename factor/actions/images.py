@@ -13,6 +13,8 @@ ExpandMask : Action
 """
 
 from factor.lib.action import Action
+from factor.lib.action_lib import make_parset_basename, make_pipeline_dirname,
+    make_log_basename
 from jinja2 import Environment, FileSystemLoader
 import os
 
@@ -52,8 +54,6 @@ class Casapy(Action):
             False, image only once; in this case, no clean mask is made.
 
         """
-        from factor.lib.action_lib import make_parset_basename, make_pipeline_dirname
-
         super(Casapy, self).__init__(op_parset, name=name)
 
         # Store input parameters
@@ -77,6 +77,8 @@ class Casapy(Action):
         self.pipeline_run_dir += make_pipeline_dirname(prefix, direction, index)
         if not os.path.exists(self.pipeline_run_dir):
             os.makedirs(self.pipeline_run_dir)
+        self.logbasename = self.log_dir + make_log_basename(prefix, direction,
+            index)
 
         # Set up image names for output data map
         self.imagebasenames1 = []

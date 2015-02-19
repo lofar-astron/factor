@@ -56,6 +56,10 @@ class Action(object):
             os.makedirs(self.pipeline_run_dir)
 
         self.log = logging.getLogger('%s::%s' % (self.op_name, self.name))
+        self.log_dir = 'logs/{0}/{1}/'.format(self.op_name, self.name)
+        if not os.path.exists(self.log_dir):
+            os.makedirs(self.log_dir)
+
         self.pipeline_executable = '{0}/bin/genericpipeline.py'.format(
             self.op_parset['lofarroot'])
 
@@ -89,8 +93,10 @@ class Action(object):
         """
         cmd = 'python {0} {1} -d -c {2}'.format(self.pipeline_executable,
             self.pipeline_parset_file, self.pipeline_config_file)
-        p = subprocess.Popen(cmd, shell=True)
-        p.wait()
+        with open("{0}.out.log".format(self.logbasename), "wb") as out, \
+            open("{0}.err.log".format(self.logbasename), "wb") as err:
+            p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
+            p.wait()
 
 
     def get_results(self):
