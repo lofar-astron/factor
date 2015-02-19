@@ -13,8 +13,7 @@ ExpandMask : Action
 """
 
 from factor.lib.action import Action
-from factor.lib.action_lib import make_parset_basename, make_pipeline_dirname, \
-    make_log_basename
+from factor.lib.action_lib import make_basename
 from jinja2 import Environment, FileSystemLoader
 import os
 
@@ -69,15 +68,15 @@ class Casapy(Action):
         self.image_twice = image_twice
 
         # Set up parset and script names
-        self.parsetbasename = self.parset_dir + make_parset_basename(prefix,
+        self.parsetbasename = self.parset_dir + make_basename(prefix,
             direction, index)
         self.pipeline_parset_file = self.parsetbasename + 'pipe.parset'
         self.pipeline_config_file = self.parsetbasename + 'pipe.cfg'
         self.mask_script_file = self.parsetbasename + 'make_clean_mask.py'
-        self.pipeline_run_dir += make_pipeline_dirname(prefix, direction, index)
+        self.pipeline_run_dir += make_basename(prefix, direction, index)
         if not os.path.exists(self.pipeline_run_dir):
             os.makedirs(self.pipeline_run_dir)
-        self.logbasename = self.log_dir + make_log_basename(prefix, direction,
+        self.logbasename = self.log_dir + make_basename(prefix, direction,
             index)
 
         # Set up image names for output data map
