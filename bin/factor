@@ -33,7 +33,7 @@ import pickle
 import factor
 import factor.directions
 import factor.parset
-from factor.lib.op_scheduler import Scheduler
+from factor.lib.scheduler import Scheduler
 from factor.operations.init_subtract import InitSubtract
 
 
