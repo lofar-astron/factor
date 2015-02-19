@@ -47,8 +47,6 @@ class Scheduler(object):
         """
         Runs a list of operations in parallel
         """
-        self.log.debug("Run %i operations(s) on %i cpu(s)." % (len(action_list), self.max_threads))
-
         self.startup()
         with Timer(self.log):
             for op in op_list:
