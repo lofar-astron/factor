@@ -100,7 +100,8 @@ if __name__=='__main__':
             bands_init_subtract.append(band)
     if len(bands_init_subtract) > 0:
         op = InitSubtract(parset, bands_init_subtract)
-        op.run()
+#         op.run()
+        scheduler.run_parallel(op)
     else:
         logging.info("Sky models found for all MS files. Skipping init_subtract "
             "operation.")
