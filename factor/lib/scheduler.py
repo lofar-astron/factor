@@ -48,6 +48,8 @@ class Scheduler(object):
         Runs a list of operations in parallel
         """
         self.startup()
+        if type(op_list) != list:
+            op_list = [op_list]
         with Timer(self.log):
             for op in op_list:
                 self.q.put_nowait(op)
