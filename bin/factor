@@ -92,6 +92,9 @@ if __name__=='__main__':
         else:
             directions = None
 
+    # Prepare scheduler
+    scheduler = Scheduler(parset['ndir_parallel'], 'process_facets')
+
     # Run initial sky model generation and create empty datasets. First check that
     # this operation is needed (only needed if band lacks an initial skymodel).
     bands_init_subtract = []
@@ -105,9 +108,6 @@ if __name__=='__main__':
     else:
         logging.info("Sky models found for all MS files. Skipping init_subtract "
             "operation.")
-
-    # Prepare scheduler for facet processing
-    scheduler = Scheduler(parset['ndir_parallel'], 'process_facets')
 
     # Prepare directions
     if directions is None:
