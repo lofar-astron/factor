@@ -60,7 +60,6 @@ class MakeSkymodelFromModelImage(Action):
             prefix = 'make_skymodel'
         self.prefix = prefix
         self.direction = direction
-        self.localdir = localdir
         self.clean = clean
         self.index = index
 
@@ -101,7 +100,6 @@ class MakeFacetSkymodel(Action):
             prefix = 'make_facet_skymodel'
         self.prefix = prefix
         self.direction = direction
-        self.localdir = localdir
         self.clean = clean
         self.index = index
 
@@ -142,7 +140,6 @@ class MergeSkymodels(Action):
             prefix = 'merge_skymodels'
         self.prefix = prefix
         self.direction = direction
-        self.localdir = localdir
         self.clean = clean
         self.index = index
 
@@ -183,6 +180,5 @@ class FFT(Action):
             prefix = 'fft'
         self.prefix = prefix
         self.direction = direction
-        self.localdir = localdir
         self.clean = clean
         self.index = index

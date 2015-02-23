@@ -50,9 +50,9 @@ class InitSubtract(Operation):
         # Make initial data maps for the empty datasets and their dir-indep
         # instrument parmdbs
         subtracted_all_mapfile = self.make_datamap([band.file for band in bands],
-            'initial_subtracted')
+            'subtracted_all')
         dir_indep_parmdbs_mapfile = self.make_datamap([band.dirindparmdb for band
-            in bands], 'initial_subtracted')
+            in bands], 'dir_indep_parmdbs')
 
         self.log.info('High-res imaging...')
         action = MakeImage(self.parset, subtracted_all_mapfile, p['imagerh'],
