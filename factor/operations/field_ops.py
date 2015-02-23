@@ -1,5 +1,5 @@
 """
-Module that holds all field (non-facet) operations
+Module that holds all field (non-facet-specific) operations
 
 Classes
 -------

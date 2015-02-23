@@ -1,5 +1,6 @@
 from lofar import bdsm
 import numpy
+import sys
 
 image_name = sys.argv[1]
 mask_name  = image_name.split('.image')[0] + '.cleanmask'
