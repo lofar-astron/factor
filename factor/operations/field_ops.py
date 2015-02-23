@@ -61,38 +61,38 @@ class InitSubtract(Operation):
             action.get_results()
 
         self.log.info('Making high-res sky model...')
-        action = MakeSkymodelFromModelImage(self.name, [high_res_models_mapfile,
+        action = MakeSkymodelFromModelImage(self.parset, [high_res_models_mapfile,
             high_res_masks_mapfile], p['modelh'], prefix='init_highres')
         high_res_skymodels_mapfile = action.get_results()
 
         self.log.info('Subtracting high-res sky model...')
-        action = Subtract(self.name, [subtracted_all_mapfile,
+        action = Subtract(self.parset, [subtracted_all_mapfile,
             high_res_skymodels_mapfile, dir_indep_parmdbs_mapfile], p['calibh'],
             prefix='init_highres')
 
         self.log.info('Averaging...')
-        action = Average(self.name, subtracted_all_mapfile, p['avgl'],
+        action = Average(self.parset, subtracted_all_mapfile, p['avgl'],
             prefix='init_highres')
         avg_files_mapfile = action.get_results()
 
         self.log.info('Low-res imaging...')
-        action = MakeImage(self.name, avg_files_mapfile, p['imagerl'],
+        action = MakeImage(self.parset, avg_files_mapfile, p['imagerl'],
             prefix='init_lowres', localdir=localdir)
         low_res_images_mapfile, low_res_models_mapfile, low_res_masks_mapfile = \
             action.get_results()
 
         self.log.info('Making low-res sky model...')
-        action = MakeSkymodelFromModelImage(self.name, [low_res_models_mapfile,
+        action = MakeSkymodelFromModelImage(self.parset, [low_res_models_mapfile,
             low_res_masks_mapfile], p['modell'], prefix='init_lowres')
         low_res_skymodel_mapfile = action.get_results()
 
         self.log.info('Subtracting low-res sky model...')
-        action = Subtract(self.name, [subtracted_all_mapfile,
+        action = Subtract(self.parset, [subtracted_all_mapfile,
             low_res_skymodels_mapfile, dir_indep_parmdbs_mapfile], p['calibh'],
             prefix='init_highres')
 
         self.log.info('Merging low- and high-res sky models...')
-        action = MergeSkymodels(self.name, [low_res_skymodels_mapfile,
+        action = MergeSkymodels(self.parset, [low_res_skymodels_mapfile,
             high_res_skymodels_mapfile], p['merge'], prefix='init')
         merged_skymodels_mapfile = action.get_results()
         for band, skymodel in zip(bands, read_mapfile(merged_skymodel_mapfile)):
