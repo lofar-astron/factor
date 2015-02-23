@@ -39,9 +39,6 @@ def make_mapfile_basename(action_name=None, prefix=None, direction=None, index=N
     """
     Returns a standard name pattern for datamap files
     """
-    import re
-    import os
-
     if direction is not None:
         try:
             dirtxt = '_{0}'.format(direction.name)

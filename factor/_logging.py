@@ -1,7 +1,6 @@
-#!/usr/bin/env python
-# encoding: utf-8
-# this module sets some propreties of the logging system
-
+"""
+Module that sets up Factor logging
+"""
 import logging
 
 def add_coloring_to_emit_ansi(fn):

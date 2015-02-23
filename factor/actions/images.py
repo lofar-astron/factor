@@ -135,7 +135,6 @@ class Casapy(Action):
         # Make second imaging data maps
         #     - input is list of MS files (same as imager 1 inputs)
         #     - output is list of image names
-        self.p['input_datamap_image2'] = self.input_datamap
         self.p['output_datamap_image2'] = write_mapfile(self.imagebasenames2,
             self.op_name, self.name, prefix=self.prefix+'-imager2_output',
             direction=self.direction)

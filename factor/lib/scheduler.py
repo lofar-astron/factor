@@ -1,3 +1,6 @@
+"""
+Module defining the operation scheduler class
+"""
 import logging
 from Queue import Queue
 from threading import Thread
@@ -6,13 +9,19 @@ from factor.lib.context import Timer
 
 class Scheduler(object):
     """
-    Schedule jobs
     The scheduler runs all jobs sent to it in parallel
     """
     def __init__(self, max_threads=1, name=''):
         """
-        max_threads: limit the number of parallel process to this number
-        name: name of the scheduler
+        Create Scheduler object
+
+        Parameters
+        ----------
+        max_threads : int, optional
+            Limit the number of parallel process to this number
+        name : str, optional
+            Name of the scheduler
+
         """
         self.max_threads = max_threads
         self.name = name
@@ -46,6 +55,12 @@ class Scheduler(object):
     def run(self, op_list):
         """
         Runs a list of operations in parallel
+
+        Parameters
+        ----------
+        op_list : list of Operation objects
+            List of operations to run
+
         """
         self.startup()
         if type(op_list) != list:
@@ -57,9 +72,3 @@ class Scheduler(object):
                 self.q.put(None) # signal no more commands
             for t in self.threads:
                 t.join() # wait for completion
-
-
-    def get_result(self):
-        """
-        """
-        pass

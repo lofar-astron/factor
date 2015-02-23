@@ -16,6 +16,22 @@ class Operation(object):
     class called in the same way of the module which inherits from this class.
     """
     def __init__(self, parset, bands, direction=None, reset=False, name=None):
+        """
+        Create Operation object
+
+        Parameters
+        ----------
+        parset : str
+            Parset of operation
+        bands : list of Band objects
+            Bands for this operation
+        direction : Direction object, optional
+            Direction for this operation
+        reset : bool, optional
+            If True, reset the state of this operation
+        name : str, optional
+            Name of the action
+        """
         self.parset = parset.copy()
         self.bands = bands
         self.name = name
@@ -40,14 +56,22 @@ class Operation(object):
         Set up the operation
         """
         if self.direction is None:
-            self.log.info('<-- Operation %s started.' % self.name)
+            self.log.info('<-- Operation %s started' % self.name)
         else:
-            self.log.info('<-- Operation %s started (direction: %s).' % (self.name, self.direction.name))
+            self.log.info('<-- Operation %s started (direction: %s)' % (self.name, self.direction.name))
 
 
     def make_datamap(self, data_list, prefix=None):
         """
         Returns the mapfile for the input data list
+
+        Parameters
+        ----------
+        data_list : list
+            Files for data map
+        prefix : str, optional
+            Prefix for ouput data map
+
         """
         from factor.lib.datamap_lib import write_mapfile
 
@@ -78,14 +102,19 @@ class Operation(object):
         """
         Finalize the operation
         """
+        # Set the operation completion state. How to determine if all steps
+        # completed successfully? Check pipeline state for each step?
         self.set_state(0)
         if self.direction is None:
-            self.log.info('--> Operation %s terminated.' % self.name)
+            self.log.info('--> Operation %s finished' % self.name)
         else:
-            self.log.info('--> Operation %s terminated (direction: %s).' % (self.name, self.direction.name))
+            self.log.info('--> Operation %s finished (direction: %s)' % (self.name, self.direction.name))
 
 
     def set_state(self, returncode):
+        """
+        Set success or failure state
+        """
         success_file = self.statebasename + '.done'
         failure_file = self.statebasename + '.failed'
         if returncode == 0:
@@ -104,6 +133,9 @@ class Operation(object):
 
 
     def unset_state(self):
+        """
+        Unset any previous state
+        """
         success_file = self.statebasename + '.done'
         failure_file = self.statebasename + '.failed'
         if os.path.exists(failure_file):

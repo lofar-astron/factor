@@ -1,8 +1,6 @@
-# this file contains some hardcoded parameters
-# that can be easily edited by hand. The dict names
-# refer to a specific operation. Actions should have all
-# the parameters passed, not hardcoded
-
+"""
+Module that holds all hard-coded parameters
+"""
 
 init_subtract = {
 'imagerh' : {'niter': 40000,

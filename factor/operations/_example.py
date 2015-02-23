@@ -1,12 +1,10 @@
 """
-Operation: ExampleOperation
-
 An example operation, to be used as a template
 """
 import os
 from factor.lib.operation import Operation
 from factor.lib.datamap import make_datamap
-from factor.actions.images import make_image
+from factor.actions.images import MakeImage
 
 class ExampleOperation(Operation):
 
@@ -26,5 +24,6 @@ class ExampleOperation(Operation):
 
         # this is a typical pipeline call
         self.log.info('Starting example procedure...')
-        image_datamap = make_image(subtracted_datamap, p['image'])
+        action = MakeImage(self.name, subtracted_datamap, p['image'])
+        image_mapfile = action.get_results()
 

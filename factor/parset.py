@@ -1,3 +1,6 @@
+"""
+Module that holds all parset-related functions
+"""
 import sys
 import os
 import glob
@@ -7,13 +10,27 @@ from factor._logging import set_log_file
 
 log = logging.getLogger('parset')
 
-def parset_read(parset_file):
 
+def parset_read(parset_file):
+    """
+    Read a Factor-formatted parset file and return dict of parameters
+
+    Parameters
+    ----------
+    parset_file : str
+        Filename of Factor-formated parset file
+
+    Returns
+    -------
+    parset_dict : dict
+        Dict of parset parameters
+
+    """
     if not os.path.isfile(parset_file):
         log.critical("Missing parset file (%s), I don't know what to do :'(" % (parset_file))
         sys.exit(1)
 
-    log.info("Reading parset file: %s." % (parset_file))
+    log.info("Reading parset file: %s" % (parset_file))
 
     parset = ConfigParser.RawConfigParser()
     parset.read(parset_file)
@@ -30,35 +47,35 @@ def parset_read(parset_file):
             if not os.path.isdir(parset_dict['dir_working']+subdir):
                 os.mkdir(parset_dict['dir_working']+subdir)
     except:
-        log.critical("Cannot use the working dir %s." % (parset_dict['dir_working']))
+        log.critical("Cannot use the working dir %s" % (parset_dict['dir_working']))
         sys.exit(1)
     set_log_file(parset_dict['dir_working']+'/factor.log')
-    log.info("Working directory is {0}.".format(parset_dict['dir_working']))
+    log.info("Working directory is {0}".format(parset_dict['dir_working']))
 
     # get all the MS in the directory
     parset_dict['mss'] = glob.glob(parset_dict['dir_ms']+'/*[MS|ms]')
-    log.info("Working on %i MS(s)" % (len(parset_dict['mss'])))
+    log.info("Working on %i bands" % (len(parset_dict['mss'])))
 
     # some check on types
     if 'ndir' in parset_dict:
         parset_dict['ndir'] = parset.getint('global', 'ndir')
-        log.debug("Processing up to %s directions." % (parset_dict['ndir']))
+        log.debug("Processing up to %s directions in total" % (parset_dict['ndir']))
     else:
         parset_dict['ndir'] = -1
     if 'ndir_parallel' in parset_dict:
         parset_dict['ndir_parallel'] = parset.getint('global', 'ndir_parallel')
-        log.debug("Processing up to {0} directions at once.".format(
+        log.debug("Processing up to {0} directions in parallel".format(
             parset_dict['ndir_parallel']))
     else:
         parset_dict['ndir_parallel'] = 1
     if 'ncpu' in parset_dict:
         parset_dict['ncpu'] = parset.getint('global', 'ncpu')
-        log.debug("Using up to %s CPUs per node." % (parset_dict['ncpu']))
+        log.debug("Using up to %s CPUs per node" % (parset_dict['ncpu']))
     else:
         parset_dict['ncpu'] = 1
     if 'interactive' in parset_dict:
         parset_dict['interactive'] = parset.getboolean('global', 'interactive')
-        log.debug("Using interactive mode.")
+        log.debug("Using interactive mode")
     else:
         parset_dict['interactive'] = False
     if 'dir_node' not in parset_dict:

@@ -60,7 +60,7 @@ class BBS(Action):
         self.input_datamap = input_datamap
         self.p = p.copy()
         if prefix is None:
-            prefix = 'make_skymodel'
+            prefix = 'run_bbs'
         self.prefix = prefix
         self.direction = direction
         self.localdir = localdir
@@ -101,7 +101,7 @@ class DPPP(Action):
         self.input_datamap = input_datamap
         self.p = p.copy()
         if prefix is None:
-            prefix = 'make_skymodel'
+            prefix = 'run_dppp'
         self.prefix = prefix
         self.direction = direction
         self.localdir = localdir
@@ -117,6 +117,13 @@ class Add(BBS):
         localdir=None, clean=True, index=None):
         super(Add, self).__init__(op_parset, input_datamap, p, prefix=prefix,
             direction=direction, clean=clean, index=index, name='Add')
+
+        # Deal with empty sky models: (Note: if a facet sky model has no sources, we need
+        # simply to copy the visibilities). Set the skip flag in the data map, then
+        # deal with them as follows:
+#         for band in bands:
+#              if band.calmodel_dirindep is None:
+#                 copy_column(band.file, p['add']['incol'], p['add']['outcol'])
 
 
 class Apply(BBS):

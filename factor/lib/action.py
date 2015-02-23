@@ -12,9 +12,6 @@ import os
 class Action(object):
     """
     Generic action class
-
-    All actions should be in a separate module. Every module must have a
-    class called in the same way of the module which inherits from this class.
     """
     def __init__(self, op_parset, name):
         """

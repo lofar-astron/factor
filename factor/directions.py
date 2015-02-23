@@ -1,5 +1,6 @@
-# This module handles reading and initialization of directions
-
+"""
+Module that holds all direction-related functions
+"""
 import os
 import numpy as np
 import logging
@@ -10,8 +11,22 @@ from scipy.spatial import Delaunay
 
 log = logging.getLogger('directions')
 
-def directions_read(directions_file):
 
+def directions_read(directions_file):
+    """
+    Read a Factor-formatted directions file and return list of Direction objects
+
+    Parameters
+    ----------
+    directions_file : str
+        Filename of Factor-formated directions file
+
+    Returns
+    -------
+    data : list of Direction objects
+        List of Direction objects
+
+    """
     if not os.path.isfile(directions_file):
         log.critical("Directions file (%s) not found." % (directions_file))
         sys.exit(1)
@@ -49,7 +64,27 @@ def directions_read(directions_file):
 def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     directions_separation_max_arcmin, interactive=False):
     """
-    Selects appropriate directions and makes the directions file
+    Selects appropriate calibrators from sky models and makes the directions file
+
+    Parameters
+    ----------
+    bands : list of Band objects
+        Input Bands with dir-indep skymodels
+    flux_min_Jy : float
+        Minimum flux for a calibrator in Jy
+    size_max_arcmin : float
+        Maximum size for a calibrator in arcmin
+    directions_separation_max_arcmin : float
+        Maximum separation in arcmin between two calibrators for gouping into a
+        single direction
+    interactive : bool, optional
+        If True, plot the directions and ask for approval
+
+    Returns
+    -------
+    directions_file : str
+        Filename of resulting Factor-formatted directions file
+
     """
     import lsmtool
 
@@ -96,7 +131,8 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     # Write the file
     s.write(fileName=directions_file, format='factor', sortBy='I', clobber=True)
     if interactive:
-        s.more(sortBy='I')
+        print("Plotting directions...")
+        s.plot(labelBy='patch')
         prompt = "Continue processing (y/n)? "
         answ = raw_input(prompt)
         while answ.lower() not in  ['y', 'n', 'yes', 'no']:
@@ -127,6 +163,12 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':5,
     allow_reordering : bool, optional
         If True, allow sources in neighboring groups to be reordered to increase
         the minimum separation between sources within a group
+
+    Returns
+    -------
+    direction_groups : list of lists
+        List of direction groups
+
     """
     from random import shuffle
 
@@ -205,6 +247,21 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':5,
 def thiessen(directions_list, bounds_scale=2):
     """
     Return list of thiessen polygons and their widths in degrees
+
+    Parameters
+    ----------
+    directions_list : list of Direction objects
+        List of input directions
+    bounds_scale : int, optional
+        Scale to use for bounding box
+
+    Returns
+    -------
+    thiessen_polys_deg : list
+        List of polygon RA and Dec vertices in degrees
+    width_deg : list
+        List of polygon bounding box width in degrees
+
     """
 
     points, midRA, midDec = getxy(directions_list)
@@ -248,7 +305,17 @@ def thiessen(directions_list, bounds_scale=2):
 
 
 def plot_thiessen(directions_list, bounds_scale=2):
-    """quick plot of thiessen polygons for a given set of points"""
+    """
+    Plot thiessen polygons for a given set of points
+
+    Parameters
+    ----------
+    directions_list : list of Direction objects
+        List of input directions
+    bounds_scale : int, optional
+        Scale to use for bounding box
+
+    """
     from matplotlib import pyplot as plt
 
     points, midRA, midDec = getxy(directions_list)

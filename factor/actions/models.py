@@ -139,7 +139,7 @@ class MergeSkymodels(Action):
         self.input_datamap = input_datamap
         self.p = p.copy()
         if prefix is None:
-            prefix = 'make_image'
+            prefix = 'merge_skymodels'
         self.prefix = prefix
         self.direction = direction
         self.localdir = localdir
@@ -180,7 +180,7 @@ class FFT(Action):
         self.input_datamap = input_datamap
         self.p = p.copy()
         if prefix is None:
-            prefix = 'make_image'
+            prefix = 'fft'
         self.prefix = prefix
         self.direction = direction
         self.localdir = localdir

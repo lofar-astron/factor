@@ -1,7 +1,8 @@
-# Example direction file. Directions should be sorted in order of reduction
-# (e.g., bright to faint).
-
-# In [] are optional parameters with their default values
+# This is an example directions file for Factor.
+#
+# Directions should be sorted in order of reduction (e.g., bright to faint).
+#
+# Columns are defined as follows (in [] are optional parameters with their default values):
 # Name (str), RA (float), DEC (float), [regionfile (str, default='')], [multiscale (bool, default=True)], [solint_amp (int, default=600)], [solint_ph (int, default=5)], [make_final_image (bool, default=True)], [cal_radius (float arcmin, default=3.0)]
 
 calibrator_1, 111.11, 22.22, , , , , ,

@@ -54,7 +54,7 @@ class LoSoTo(Action):
         self.input_datamap = input_datamap
         self.p = p.copy()
         if prefix is None:
-            prefix = 'make_skymodel'
+            prefix = 'run_losoto'
         self.prefix = prefix
         self.direction = direction
         self.localdir = localdir

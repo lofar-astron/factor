@@ -6,22 +6,28 @@ import logging
 
 class Timer():
     """
-    context manager used to time the operations
+    Context manager used to time operations
     """
+    def __init__(self, log=None):
+        """
+        Create Direction object
 
-    def __init__(self, log=''):
+        Parameters
+        ----------
+        log : logging instance
+            The logging instance to use. If None, root is used
         """
-        log: is a logging istance to print the correct log format
-        if nothing is passed, root is used
-        """
-        if log == '': self.log = logging
-        else: self.log = log
+        if log is None:
+            self.log = logging
+        else:
+            self.log = log
+
 
     def __enter__(self):
         self.start = time.time()
 
-    def __exit__(self, type, value, tb):
 
+    def __exit__(self, type, value, tb):
         if type is not None:
             raise type, value, tb
 

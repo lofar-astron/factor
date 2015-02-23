@@ -1,13 +1,27 @@
-# This module handle the Chunk class
-
+"""
+Definition of the time chunk class
+"""
 import logging
 import os
 
 log = logging.getLogger('parset')
 
 class Chunk(object):
-    """The Chunk object contains parameters needed for each time chunk (MS)."""
+    """
+    The Chunk object contains parameters needed for each time chunk (MS)
+    """
     def __init__(self, MSfile, index):
+        """
+        Create Chunk object
+
+        Parameters
+        ----------
+        MSfile : str
+            Filename of MS
+        index : int
+            Index of chunk
+
+        """
         self.parent_file = MSfile
         self.index = index
         self.file = '{0}-chunk_{1}.ms'.format(os.path.splitext(MSfile)[0], index)

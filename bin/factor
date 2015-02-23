@@ -34,7 +34,8 @@ import factor
 import factor.directions
 import factor.parset
 from factor.lib.scheduler import Scheduler
-from factor.operations.init_subtract import InitSubtract
+from factor.operations.field_ops import *
+from factor.operations.facet_ops import *
 
 
 if __name__=='__main__':
@@ -98,10 +99,11 @@ if __name__=='__main__':
     serial_op_scheduler = Scheduler(1, 'serial')
 
     # Run initial sky model generation and create empty datasets. First check that
-    # this operation is needed (only needed if band lacks an initial skymodel).
+    # this operation is needed (only needed if band lacks an initial skymodel or
+    # the SUBTRACTED_DATA_ALL column).
     bands_init_subtract = []
     for band in bands:
-        if band.skymodel_dirindep is None:
+        if band.skymodel_dirindep is None or not band.has_sub_data:
             bands_init_subtract.append(band)
     if len(bands_init_subtract) > 0:
         op = InitSubtract(parset, bands_init_subtract)
@@ -140,36 +142,36 @@ if __name__=='__main__':
 
         # Add calibrator(s) to empty datasets. These operations
         # must be done in series
-        ops = [facet_add_cal(parset, bands, d) for d in direction_group]
+        ops = [FacetAddCal(parset, bands, d) for d in direction_group]
         serial_op_scheduler.run(ops)
 
         # Setup up facet(s) for selfcal
-        ops = [facet_setup(parset, bands, d) for d in direction_group]
+        ops = [FacetSetup(parset, bands, d) for d in direction_group]
         op_scheduler.run(ops)
 
         # Do selfcal on calibrator only
-        ops = [facet_selfcal(parset, bands, d) for d in direction_group]
+        ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
         op_scheduler.run(ops)
 
         # Add all sources in the facet(s) to empty datasets. These operations
-        # must be done one at a time
-        ops = [facet_add_all(parset, bands, d) for d in dirs_to_image]
+        # must be done in series
+        ops = [FacetAddAll(parset, bands, d) for d in dirs_to_image]
         serial_op_scheduler.run(ops)
 
         # Make image of all sources in facet(s) and get final model(s)
-        ops = [facet_image(parset, bands, d) for d in direction_group]
+        ops = [FacetImage(parset, bands, d) for d in direction_group]
         op_scheduler.run(ops)
 
         # Subtract final model(s) from empty datasets. These operations
-        # must be done one at a time
-        ops = [facet_sub_all(parset, bands, d) for d in direction_group]
+        # must be done in series
+        ops = [FacetSubAll(parset, bands, d) for d in direction_group]
         serial_op_scheduler.run(ops)
 
     # Make final facet images (from final empty datasets) if desired
     dirs_to_image = [d for d in directions if d.make_final_image]
-    ops = [facet_add_all(parset, bands, d) for d in dirs_to_image]
+    ops = [FacetAddAllFinal(parset, bands, d) for d in dirs_to_image]
     serial_op_scheduler.run(ops)
-    ops = [facet_image(parset, bands, d) for d in dirs_to_image]
+    ops = [FacetImageFinal(parset, bands, d) for d in dirs_to_image]
     op_scheduler.run(ops)
 
     # Save final band and direction objects to disk
@@ -179,7 +181,8 @@ if __name__=='__main__':
     # Mosaic the final facet images together (trim each facet image to Thiessen
     # region first? What about sources on edge of region? Can we just sum them?)
     if parset['make_mosaic']:
-        make_mosaic(directions)
+        op = MakeMosaic(parset, directions)
+        op_scheduler.run(op)
 
     logging.info("Factor has finished :)")
 

@@ -36,8 +36,8 @@ mask.control.opts.arguments=[{{ maskscriptname }}, inputms]
 
 casapy2.control.kind=recipe
 casapy2.control.type=casapy
-casapy2.control.opts.mapfile_in={{ input_datamap_image2 }}
-casapy2.control.opts.inputkey=clean.vis
+casapy2.control.opts.mapfile_in=[{{ input_datamap_image1 }}, {{ output_datamap_mask }}]
+casapy2.control.opts.inputkey=[clean.vis, clean.mask]
 casapy2.control.opts.outputkey=clean.imagename
 casapy2.control.opts.arguments=[--nologger,--log2term,-c]
 casapy2.parsetarg.clean.gridmode='widefield'

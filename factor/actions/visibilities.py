@@ -5,11 +5,11 @@ Classes
 -------
 DPPP : Action
     Runs DPPP
-Avg : Action
+Average : Action
     Averages visibilities
 PhaseShift : Action
     Phase shifts visibilities
-Concat : Action
+Concatenate : Action
     Concatenates visibilities
 
 """
@@ -56,7 +56,7 @@ class DPPP(Action):
         self.input_datamap = input_datamap
         self.p = p.copy()
         if prefix is None:
-            prefix = 'make_skymodel'
+            prefix = 'run_dppp'
         self.prefix = prefix
         self.direction = direction
         self.localdir = localdir
@@ -64,14 +64,14 @@ class DPPP(Action):
         self.index = index
 
 
-class Avg(DPPP):
+class Average(DPPP):
     """
     Action to average visibilities
     """
     def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
         localdir=None, clean=True, index=None):
-        super(Avg, self).__init__(op_parset, input_datamap, p, prefix=prefix,
-            direction=direction, clean=clean, index=index, name='Avg')
+        super(Average, self).__init__(op_parset, input_datamap, p, prefix=prefix,
+            direction=direction, clean=clean, index=index, name='Average')
 
 
 class PhaseShift(DPPP):
@@ -84,7 +84,7 @@ class PhaseShift(DPPP):
             direction=direction, clean=clean, index=index, name='PhaseShift')
 
 
-class Concat(DPPP):
+class Concatenate(DPPP):
     """
     Action to concatenate visibilities
     """
