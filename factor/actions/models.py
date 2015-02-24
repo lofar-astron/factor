@@ -88,7 +88,7 @@ class MakeSkymodelFromModelImage(Action):
         output_files = []
         for bn in imagebasenames:
             input_files.append(bn+'.model')
-            output_files.append(mb+'.skymodel')
+            output_files.append(bn+'.skymodel')
 
         self.p['input_datamap'] = write_mapfile(input_files,
             self.op_name, self.name, prefix=self.prefix+'_input',
