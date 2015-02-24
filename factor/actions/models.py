@@ -15,7 +15,7 @@ FFT : Action
 """
 
 from factor.lib.action import Action
-from factor.lib.action_lib import make_basename
+from factor.lib.action_lib import make_image_basename
 from jinja2 import Environment, FileSystemLoader
 import os
 
@@ -51,17 +51,69 @@ class MakeSkymodelFromModelImage(Action):
 
         """
         super(MakeSkymodelFromModelImage, self).__init__(op_parset,
-            'MakeSkymodelFromModelImage')
+            'MakeSkymodelFromModelImage', prefix=prefix, direction=direction,
+            index=index)
 
         # Store input parameters
         self.input_datamap = input_datamap
         self.p = p.copy()
-        if prefix is None:
-            prefix = 'make_skymodel'
-        self.prefix = prefix
-        self.direction = direction
+        if self.prefix is None:
+            self.prefix = 'make_skymodel'
         self.clean = clean
-        self.index = index
+        self.working_dir = 'models/{0}/'.format(self.op_name)
+        if not os.path.exists(self.working_dir):
+            os.makedirs(self.working_dir)
+
+        # Set up names for output data map
+        self.modelbasenames = []
+        modelbasenames = make_image_basename(self.input_datamap,
+            direction=self.direction, prefix=self.prefix)
+        for bn in modelbasenames:
+            self.modelbasenames.append(self.working_dir+bn)
+
+        # Run the pipeline
+        self.run()
+
+
+    def make_datamaps(self):
+        """
+        Makes the required data maps
+        """
+        from factor.lib.datamap_lib import write_mapfile, read_mapfile
+
+        # Input is list of image basenames
+        # Output is sky model files
+        imagebasenames = read_mapfile(self.input_datamap)
+        input_files = []
+        output_files = []
+        for bn in imagebasenames:
+            input_files.append(bn+'.model')
+            output_files.append(mb+'.skymodel')
+
+        self.p['input_datamap'] = write_mapfile(input_files,
+            self.op_name, self.name, prefix=self.prefix+'_input',
+            direction=self.direction)
+
+        self.p['output_datamap'] = write_mapfile(output_files,
+            self.op_name, self.name, prefix=self.prefix+'_output',
+            direction=self.direction)
+
+
+    def make_pipeline_control_parset(self):
+        """
+        Writes the pipeline control parset and any script files
+        """
+        template = env.get_template('make_skymodel_from_model_image.pipeline.parset.tpl')
+        tmp = template.render(self.p)
+        with open(self.pipeline_parset_file, 'w') as f:
+            f.write(tmp)
+
+
+    def get_results(self):
+        """
+        Return skymodel names
+        """
+        return self.p['output_datamap']
 
 
 class MakeFacetSkymodel(Action):
