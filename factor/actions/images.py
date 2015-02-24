@@ -81,9 +81,13 @@ class Casapy(Action):
         self.localdir = localdir
         self.clean = clean
         self.image_twice = image_twice
-        self.image_dir = 'images/{0}/'.format(self.op_name)
+        if self.direction is None:
+            self.image_dir = 'images/{0}/'.format(self.op_name)
+        else:
+            self.image_dir = 'images/{0}/{1}/'.format(self.op_name, self.direction)
         if not os.path.exists(self.image_dir):
             os.makedirs(self.image_dir)
+        self.working_dir = self.image_dir
 
         # Set up mask script name
         self.mask_script_file = self.parsetbasename + 'make_clean_mask.py'
