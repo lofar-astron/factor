@@ -57,12 +57,11 @@ class InitSubtract(Operation):
         self.log.info('High-res imaging...')
         action = MakeImage(self.parset, subtracted_all_mapfile, p['imagerh'],
             prefix='init_highres', localdir=localdir)
-        high_res_images_mapfile, high_res_models_mapfile, high_res_masks_mapfile = \
-            action.get_results()
+        high_res_image_basenames_mapfile = action.get_results()
 
         self.log.info('Making high-res sky model...')
-        action = MakeSkymodelFromModelImage(self.parset, [high_res_models_mapfile,
-            high_res_masks_mapfile], p['modelh'], prefix='init_highres')
+        action = MakeSkymodelFromModelImage(self.parset, high_res_image_basenames_mapfile,
+            p['modelh'], prefix='init_highres')
         high_res_skymodels_mapfile = action.get_results()
 
         self.log.info('Subtracting high-res sky model...')
