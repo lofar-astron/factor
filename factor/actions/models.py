@@ -71,9 +71,6 @@ class MakeSkymodelFromModelImage(Action):
         for bn in modelbasenames:
             self.modelbasenames.append(self.working_dir+bn)
 
-        # Run the pipeline
-        self.run()
-
 
     def make_datamaps(self):
         """

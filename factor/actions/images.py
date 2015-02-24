@@ -103,9 +103,6 @@ class Casapy(Action):
         # Define imaging parameters
         self.set_imaging_parameters()
 
-        # Run the pipeline
-        self.run()
-
 
     def make_datamaps(self):
         """

@@ -120,11 +120,13 @@ class Action(object):
             p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
             p.wait()
 
+        return self.get_results()
+
 
     def get_results(self):
         """
         Return results data map
         """
-        return self.outupt_datamap
+        return self.output_datamap
 
 
