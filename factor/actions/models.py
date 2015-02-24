@@ -109,6 +109,16 @@ class MakeSkymodelFromModelImage(Action):
             f.write(tmp)
 
 
+    def make_pipeline_config_parset(self):
+        """
+        Writes the pipeline configuration parset
+        """
+        template = env.get_template('pipeline.cfg.tpl')
+        tmp = template.render(self.op_parset)
+        with open(self.pipeline_config_file, 'w') as f:
+            f.write(tmp)
+
+
     def get_results(self):
         """
         Return skymodel names
