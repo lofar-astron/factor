@@ -54,7 +54,7 @@ class InitSubtract(Operation):
             self.name, prefix='subtracted_all', working_dir=self.parset['dir_working'])
         dir_indep_parmdbs_mapfile = write_mapfile([band.dirindparmdb for band
             in bands], self.name, prefix='dir_indep_parmdbs',
-            working_dir=self.parset['dir_working']))
+            working_dir=self.parset['dir_working'])
 
         self.log.info('High-res imaging...')
         action = MakeImage(self.parset, subtracted_all_mapfile, p['imagerh'],
