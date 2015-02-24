@@ -17,8 +17,8 @@ class InitSubtract(Operation):
     """
     Operation to create empty datasets
     """
-    def __init__(self, parset, bands, direction=None, reset=False):
-        super(InitSubtract, self).__init__(parset, bands, direction=direction,
+    def __init__(self, parset, bands, reset=False):
+        super(InitSubtract, self).__init__(parset, bands, direction=None,
             reset=reset, name='InitSubtract')
 
 
@@ -30,6 +30,7 @@ class InitSubtract(Operation):
         from factor.actions.models import MakeSkymodelFromModelImage, MergeSkymodels
         from factor.actions.calibrations import Subtract
         from factor.actions.visibilities import Average
+        from factor.lib.datamap_lib import write_mapfile, read_mapfile
         from factor.operations.hardcoded_param import init_subtract_test_quick as p
 
         bands = self.bands
@@ -50,10 +51,11 @@ class InitSubtract(Operation):
         # Make initial data maps for the empty datasets and their dir-indep
         # instrument parmdbs
         subtracted_all_mapfile = write_mapfile([band.file for band in bands],
-            self.name, prefix='subtracted_all', direction=self.direction,
-            working_dir=self.parset['dir_working'])
-        dir_indep_parmdbs_mapfile = self.make_datamap([band.dirindparmdb for band
-            in bands], 'dir_indep_parmdbs')
+            self.name, prefix='subtracted_all', working_dir=self.parset['dir_working'])
+        dir_indep_parmdbs_mapfile = write_mapfile([band.dirindparmdb for band
+            in bands], self.name, prefix='dir_indep_parmdbs',
+            working_dir=self.parset['dir_working']))
+
         self.log.info('High-res imaging...')
         action = MakeImage(self.parset, subtracted_all_mapfile, p['imagerh'],
             prefix='highres_image', localdir=localdir)

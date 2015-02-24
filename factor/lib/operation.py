@@ -61,26 +61,6 @@ class Operation(object):
             self.log.info('<-- Operation %s started (direction: %s)' % (self.name, self.direction.name))
 
 
-    def make_datamap(self, data_list, prefix=None):
-        """
-        Returns the mapfile for the input data list
-
-        Parameters
-        ----------
-        data_list : list
-            Files for data map
-        prefix : str, optional
-            Prefix for ouput data map
-
-        """
-        from factor.lib.datamap_lib import write_mapfile
-
-        mapfile = write_mapfile(data_list, self.name, prefix=prefix,
-            direction=self.direction)
-
-        return mapfile
-
-
     def run_steps(self):
         """
         Define the operation's steps
