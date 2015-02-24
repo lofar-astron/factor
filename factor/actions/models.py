@@ -64,6 +64,9 @@ class MakeSkymodelFromModelImage(Action):
         if not os.path.exists(self.working_dir):
             os.makedirs(self.working_dir)
 
+        # Define script name
+        self.script_file = self.parsetbasename + 'make_skymodel_from_model_image.py'
+
         # Set up names for output data map
         self.modelbasenames = []
         modelbasenames = make_image_basename(self.input_datamap,
@@ -100,9 +103,15 @@ class MakeSkymodelFromModelImage(Action):
         """
         Writes the pipeline control parset and any script files
         """
+        self.p['scriptname'] = os.path.abspath(self.script_file)
         template = env.get_template('make_skymodel_from_model_image.pipeline.parset.tpl')
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
+            f.write(tmp)
+
+        template = env.get_template('make_skymodel_from_model_image.tpl')
+        tmp = template.render(self.p)
+        with open(self.script_file, 'w') as f:
             f.write(tmp)
 
 
