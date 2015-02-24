@@ -133,7 +133,6 @@ class Casapy(Action):
                 imnames.append(bn+'.image.tt0')
             else:
                 imnames.append(bn+'.image')
-        for bn in self.imagebasenames2:
             masknames.append(bn+'.cleanmask')
         self.p['input_datamap_mask'] = write_mapfile(imnames, self.op_name,
             self.name, prefix=self.prefix+'-masker_input', direction=self.direction)

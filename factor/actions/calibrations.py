@@ -67,6 +67,48 @@ class BBS(Action):
         self.clean = clean
         self.index = index
 
+        self.ms = ms
+        self.statebasename += makestatebasename(self.ms, prefix, direction, index)
+        self.logbasename += makestatebasename(self.ms, prefix, direction, index)
+        self.parsetbasename += makestatebasename(self.ms, prefix, direction, index)
+        self.parsetname = self.parsetbasename + '.parset'
+        self.clean = clean
+        self.p = p.copy()
+        if '/' in parmdb:
+            # path is not local to input ms, so copy it to ms
+            destfile = '/'.join([self.ms, os.path.basename(parmdb)])
+            if os.path.exists(destfile):
+                os.system('rm -rf {0}'.format(destfile))
+            shutil.copytree(parmdb, destfile)
+            self.parmdb = os.path.basename(parmdb)
+        else:
+            self.parmdb = parmdb
+        self.templatename = '{0}_{1}.parset.tpl'.format(prefix, self.name)
+        if skymodel is None:
+            self.skymodel = self.modelbasename + 'empty.skymodel'
+            os.system('touch {0}'.format(self.skymodel))
+        else:
+            self.skymodel = skymodel
+
+    def get_command(self):
+        template_bbs = env.get_template(self.templatename)
+        tmp = template_bbs.render(self.p)
+        with open(self.parsetname, 'wb') as f:
+            f.write(tmp)
+
+        if 'flags' in self.p:
+            flags = self.p['flags']
+        else:
+            flags = ''
+        if self.parmdb is not None:
+            # Use of --parmdb-name means parmdb path must be local to MS
+            self.cmd = 'calibrate-stand-alone {0} --parmdb-name {1} {2} {3} {4}'.format(
+                flags, self.parmdb, self.ms, self.parsetname, self.skymodel)
+        else:
+            self.cmd = 'calibrate-stand-alone {0} {1} {2} {3}'.format(
+                flags, self.ms, self.parsetname, self.skymodel)
+
+
 
 class DPPP(Action):
     """
