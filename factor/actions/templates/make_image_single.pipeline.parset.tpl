@@ -2,7 +2,7 @@ pipeline.steps=[casapy1]
 
 casapy1.control.kind=recipe
 casapy1.control.type=casapy
-casapy1.control.opts.mapfile_in={{ input_datamap_image1 }}
+casapy1.control.opts.mapfile_in={{ vis_datamap_image1 }}
 casapy1.control.opts.inputkey=clean.vis
 casapy1.control.opts.outputkey=clean.imagename
 casapy1.control.opts.arguments=[--nologger,--log2term,--nogui,-c]

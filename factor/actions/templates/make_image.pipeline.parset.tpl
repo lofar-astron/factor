@@ -2,7 +2,7 @@ pipeline.steps=[casapy1, mask, casapy2]
 
 casapy1.control.kind=recipe
 casapy1.control.type=casapy
-casapy1.control.opts.mapfile_in={{ input_datamap_image1 }}
+casapy1.control.opts.mapfile_in={{ vis_datamap_image1 }}
 casapy1.control.opts.mapfile_out={{ output_datamap_image1 }}
 casapy1.control.opts.inputkey=clean.vis
 casapy1.control.opts.outputkey=clean.imagename
@@ -38,7 +38,7 @@ mask.control.opts.arguments=[{{ maskscriptname }}, inputms]
 
 casapy2.control.kind=recipe
 casapy2.control.type=casapy
-casapy2.control.opts.mapfiles_in=[{{ input_datamap_image1 }}, {{ output_datamap_mask }}]
+casapy2.control.opts.mapfiles_in=[{{ vis_datamap_image1 }}, {{ output_datamap_mask }}]
 casapy2.control.opts.mapfile_out={{ output_datamap_image2 }}
 casapy2.control.opts.inputkeys=[clean.vis, clean.mask]
 casapy2.control.opts.outputkey=clean.imagename
