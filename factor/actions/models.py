@@ -86,9 +86,8 @@ class MakeSkymodelFromModelImage(Action):
         imagebasenames = read_mapfile(self.input_datamap)
         input_files = []
         output_files = []
-        for bn in imagebasenames:
-            input_files.append(bn+'.model')
-            output_files.append(bn+'.skymodel')
+        input_files = [bn+'.model' for bn in imagebasenames]
+        output_files = [bn+'.skymodel' for bn in self.modelbasenames]
 
         self.p['input_datamap'] = write_mapfile(input_files,
             self.op_name, self.name, prefix=self.prefix+'_input',
@@ -104,6 +103,7 @@ class MakeSkymodelFromModelImage(Action):
         Writes the pipeline control parset and any script files
         """
         self.p['scriptname'] = os.path.abspath(self.script_file)
+        self.p['outputdir'] = os.path.abspath(self.working_dir)
         template = env.get_template('make_skymodel_from_model_image.pipeline.parset.tpl')
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
