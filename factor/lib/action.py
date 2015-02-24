@@ -8,12 +8,15 @@ the pipeline.
 import logging
 import subprocess
 import os
+from factor.lib.action_lib import make_basename
+
 
 class Action(object):
     """
     Generic action class
     """
-    def __init__(self, op_parset, name):
+    def __init__(self, op_parset, name, prefix=None, direction=None,
+        index=None):
         """
         Create Action object
 
@@ -27,28 +30,22 @@ class Action(object):
         self.op_name = op_parset['op_name']
         self.name = name
         self.op_parset = op_parset.copy()
-        self.pipeline_parset_file = None
-        self.pipeline_config_file = None
+        self.prefix = prefix
+        self.direction = direction
+        self.index = index
 
-        self.image_dir = 'images/{0}/'.format(self.op_name)
-        if not os.path.exists(self.image_dir):
-            os.makedirs(self.image_dir)
-
+        # Set up directories needed by every action
         self.vis_dir = 'visdata/'
 
         self.datamap_dir = 'datamaps/{0}/{1}/'.format(self.op_name, self.name)
         if not os.path.exists(self.datamap_dir):
             os.makedirs(self.datamap_dir)
 
-        self.model_dir = 'models/{0}/'.format(self.op_name)
-        if not os.path.exists(self.model_dir):
-            os.makedirs(self.model_dir)
-
         self.parset_dir = 'parsets/{0}/{1}/'.format(self.op_name, self.name)
         if not os.path.exists(self.parset_dir):
             os.makedirs(self.parset_dir)
 
-        self.pipeline_run_dir = 'pipeline/{0}/{1}/'.format(self.op_name, self.name)
+        self.pipeline_run_dir = 'pipeline/{0}/'.format(self.op_name)
         if not os.path.exists(self.pipeline_run_dir):
             os.makedirs(self.pipeline_run_dir)
 
@@ -60,32 +57,59 @@ class Action(object):
         self.pipeline_executable = '{0}/bin/genericpipeline.py'.format(
             self.op_parset['lofarroot'])
 
+        # Set up parset and script names needed by every action
+        self.parsetbasename = self.parset_dir + make_basename(prefix,
+            direction, index)
+        self.pipeline_parset_file = self.parsetbasename + 'pipe.parset'
+        self.pipeline_config_file = self.parsetbasename + 'pipe.cfg'
+        self.pipeline_run_dir += make_basename(prefix, direction, index)
+        if not os.path.exists(self.pipeline_run_dir):
+            os.makedirs(self.pipeline_run_dir)
+        self.logbasename = self.log_dir + make_basename(prefix, direction,
+            index)
+
 
     def make_datamaps(self):
         """
-        Makes the output datamap
+        Makes the output datamaps (specific to given action)
         """
         raise NotImplementedError
 
 
     def make_pipeline_control_parset(self):
         """
-        Makes the pipeline control parset
+        Makes the pipeline control parset (specific to given action)
         """
         raise NotImplementedError
+
+
+    def set_pipeline_parameters(self):
+        """
+        Sets various pipeline parameters specific to this action
+        """
+        self.op_parset['runtime_dir'] = os.path.join(os.path.abspath('.'), self.pipeline_run_dir)
+        self.op_parset['working_dir'] = os.path.join(os.path.abspath('.'), self.working_dir)
 
 
     def make_pipeline_config_parset(self):
         """
-        Makes the pipeline configuration parset
+        Writes the pipeline configuration parset
         """
-        raise NotImplementedError
+        template = env.get_template('pipeline.cfg.tpl')
+        tmp = template.render(self.op_parset)
+        with open(self.pipeline_config_file, 'w') as f:
+            f.write(tmp)
 
 
     def run(self):
         """
         Runs the generic pipeline with parset
         """
+        self.make_datamaps()
+        self.set_pipeline_parameters()
+        self.make_pipeline_control_parset()
+        self.make_pipeline_config_parset()
+
         cmd = 'python {0} {1} -d -c {2}'.format(self.pipeline_executable,
             self.pipeline_parset_file, self.pipeline_config_file)
         with open("{0}.out.log".format(self.logbasename), "wb") as out, \
