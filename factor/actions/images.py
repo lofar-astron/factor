@@ -91,11 +91,11 @@ class Casapy(Action):
         # Set up names for output data map
         self.imagebasenames1 = []
         self.imagebasenames2 = []
-        imagebasenames1 = make_image_basename(self.input_datamap,
+        imagebasenames1 = make_image_basename(self.vis_datamap,
             direction=self.direction, prefix=self.prefix+'1')
         for bn in imagebasenames1:
             self.imagebasenames1.append(self.image_dir+bn)
-        imagebasenames2 = make_image_basename(self.input_datamap,
+        imagebasenames2 = make_image_basename(self.vis_datamap,
             direction=self.direction, prefix=self.prefix+'2')
         for bn in imagebasenames1:
             self.imagebasenames2.append(self.image_dir+bn)
@@ -283,8 +283,8 @@ class MakeImage(Casapy):
     """
     Action to make an image using a clean mask
     """
-    def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
-        localdir=None, clean=True, index=None, image_twice=True):
-        super(MakeImage, self).__init__(op_parset, input_datamap, p, prefix=prefix,
+    def __init__(self, op_parset, vis_datamap, p, mask_datamap=None, prefix=None,
+        direction=None, localdir=None, clean=True, index=None, image_twice=True):
+        super(MakeImage, self).__init__(op_parset, vis_datamap, p, prefix=prefix,
             direction=direction, localdir=localdir, clean=clean, index=index,
             image_twice=image_twice, name='MakeImage')
