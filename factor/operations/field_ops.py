@@ -67,9 +67,9 @@ class InitSubtract(Operation):
         highres_skymodels_mapfile = action.run()
 
         self.log.info('Subtracting high-res sky model...')
-        action = Subtract(self.parset, [subtracted_all_mapfile,
-            high_res_skymodels_mapfile, dir_indep_parmdbs_mapfile], p['calibh'],
-            prefix='highres_subtract')
+        action = Subtract(self.parset, subtracted_all_mapfile, p['calibh'],
+            model_datamap=highres_skymodels_mapfile,
+            parmdb_datamap=dir_indep_parmdbs_mapfile, prefix='highres_subtract')
 
         self.log.info('Averaging...')
         action = Average(self.parset, subtracted_all_mapfile, p['avgl'],
