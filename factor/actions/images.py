@@ -89,22 +89,18 @@ class Casapy(Action):
             os.makedirs(self.image_dir)
         self.working_dir = self.image_dir
 
-        # Set up mask script name
+        # Define mask script name
         self.mask_script_file = self.parsetbasename + 'make_clean_mask.py'
 
-        # Set up names for output data map
-        self.imagebasenames1 = []
-        self.imagebasenames2 = []
+        # Define names for output images
         imagebasenames1 = make_image_basename(self.vis_datamap,
             direction=self.direction, prefix=self.prefix+'1')
-        for bn in imagebasenames1:
-            self.imagebasenames1.append(self.image_dir+bn)
+        self.imagebasenames1 = [self.image_dir+bn for bn in imagebasenames1]
         imagebasenames2 = make_image_basename(self.vis_datamap,
             direction=self.direction, prefix=self.prefix+'2')
-        for bn in imagebasenames1:
-            self.imagebasenames2.append(self.image_dir+bn)
+        self.imagebasenames2 = [self.image_dir+bn for bn in imagebasenames2]
 
-        # Determine imaging parameters
+        # Define imaging parameters
         self.set_imaging_parameters()
 
         # Run the pipeline
@@ -117,7 +113,7 @@ class Casapy(Action):
         """
         from factor.lib.datamap_lib import write_mapfile
 
-        # Make first imaging data maps:
+        # Make first imaging run data maps:
         #     - input is list of MS files
         #     - output is list of image names
         self.p['vis_datamap_image1'] = self.vis_datamap
@@ -127,7 +123,7 @@ class Casapy(Action):
             self.op_name, self.name, prefix=self.prefix+'-imager1_output',
             direction=self.direction)
 
-        # Make masking data maps:
+        # Make masking run data maps:
         #     - input is list of images
         #     - output is none
         imnames = []
@@ -144,7 +140,7 @@ class Casapy(Action):
         self.p['output_datamap_mask'] = write_mapfile(masknames, self.op_name,
             self.name, prefix=self.prefix+'-masker_output', direction=self.direction)
 
-        # Make second imaging data maps
+        # Make second imaging run data maps
         #     - input is list of MS files (same as imager 1 inputs)
         #     - output is list of image basenames
         self.p['output_datamap_image2'] = write_mapfile(self.imagebasenames2,
