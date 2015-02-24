@@ -89,11 +89,11 @@ class MakeSkymodelFromModelImage(Action):
 
         self.p['input_datamap'] = write_mapfile(input_files,
             self.op_name, self.name, prefix=self.prefix+'_input',
-            direction=self.direction)
+            direction=self.direction, working_dir=self.op_parset['dir_working'])
 
         self.p['output_datamap'] = write_mapfile(output_files,
             self.op_name, self.name, prefix=self.prefix+'_output',
-            direction=self.direction)
+            direction=self.direction, working_dir=self.op_parset['dir_working'])
 
 
     def make_pipeline_control_parset(self):

@@ -132,9 +132,11 @@ class Casapy(Action):
                 imnames.append(bn+'.image')
             masknames.append(bn+'.cleanmask')
         self.p['input_datamap_mask'] = write_mapfile(imnames, self.op_name,
-            self.name, prefix=self.prefix+'-masker_input', direction=self.direction)
+            self.name, prefix=self.prefix+'-masker_input', direction=self.direction,
+            working_dir=self.op_parset['dir_working'])
         self.p['output_datamap_mask'] = write_mapfile(masknames, self.op_name,
-            self.name, prefix=self.prefix+'-masker_output', direction=self.direction)
+            self.name, prefix=self.prefix+'-masker_output', direction=self.direction,
+            working_dir=self.op_parset['dir_working'])
 
         # Make second imaging run data maps
         #     - input is list of MS files (same as imager 1 inputs)

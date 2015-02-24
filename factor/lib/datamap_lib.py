@@ -5,15 +5,15 @@ import os
 from lofarpipe.support.data_map import DataMap, DataProduct
 
 
-def write_mapfile(data_list, op_name, action_name=None, prefix=None, direction=None, index=None):
+def write_mapfile(data_list, op_name, action_name=None, prefix=None,
+    direction=None, index=None, working_dir='.'):
     """
     Returns a datamap for the input data list
     """
-    # Make sure paths are absolute
     data_list = [os.path.abspath(f) for f in data_list]
-
-    mapfile = 'datamaps/{0}/{1}.datamap'.format(op_name, make_mapfile_basename(action_name,
-        prefix, direction, index))
+    basename = make_mapfile_basename(action_name, prefix, direction, index)
+    mapfile = os.path.join(working_dir, 'datamaps', op_name, basename,
+        '{0}.datamap'.format(index))
 
     datamap = DataMap([])
     for data in data_list:
