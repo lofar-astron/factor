@@ -33,7 +33,6 @@ import pickle
 import factor
 import factor.directions
 import factor.parset
-from factor.lib.scheduler import Scheduler
 from factor.operations.field_ops import *
 from factor.operations.facet_ops import *
 
@@ -93,11 +92,6 @@ if __name__=='__main__':
         else:
             directions = None
 
-    # Prepare operation schedulers: one for running operations in parallel, and
-    # one for running them in series
-    op_scheduler = Scheduler(parset['ndir_parallel'], 'parallel')
-    serial_op_scheduler = Scheduler(1, 'serial')
-
     # Run initial sky model generation and create empty datasets. First check that
     # this operation is needed (only needed if band lacks an initial skymodel or
     # the SUBTRACTED_DATA_ALL column).
@@ -107,7 +101,7 @@ if __name__=='__main__':
             bands_init_subtract.append(band)
     if len(bands_init_subtract) > 0:
         op = InitSubtract(parset, bands_init_subtract)
-        op_scheduler.run(op)
+        op.run()
     else:
         logging.info("Sky models found for all MS files. Skipping init_subtract "
             "operation.")
@@ -143,36 +137,40 @@ if __name__=='__main__':
         # Add calibrator(s) to empty datasets. These operations
         # must be done in series
         ops = [FacetAddCal(parset, bands, d) for d in direction_group]
-        serial_op_scheduler.run(ops)
+        for op in ops:
+            op.run()
 
         # Setup up facet(s) for selfcal
-        ops = [FacetSetup(parset, bands, d) for d in direction_group]
-        op_scheduler.run(ops)
+        op = FacetSetup(parset, bands, direction_group)
+        op.run()
 
         # Do selfcal on calibrator only
-        ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
-        op_scheduler.run(ops)
+        op = FacetSelfcal(parset, bands, direction_group)
+        op.run()
 
         # Add all sources in the facet(s) to empty datasets. These operations
         # must be done in series
         ops = [FacetAddAll(parset, bands, d) for d in dirs_to_image]
-        serial_op_scheduler.run(ops)
+        for op in ops:
+            op.run()
 
         # Make image of all sources in facet(s) and get final model(s)
-        ops = [FacetImage(parset, bands, d) for d in direction_group]
-        op_scheduler.run(ops)
+        op = FacetImage(parset, bands, direction_group)
+        op.run()
 
         # Subtract final model(s) from empty datasets. These operations
         # must be done in series
         ops = [FacetSubAll(parset, bands, d) for d in direction_group]
-        serial_op_scheduler.run(ops)
+        for op in ops:
+            op.run()
 
     # Make final facet images (from final empty datasets) if desired
     dirs_to_image = [d for d in directions if d.make_final_image]
     ops = [FacetAddAllFinal(parset, bands, d) for d in dirs_to_image]
-    serial_op_scheduler.run(ops)
-    ops = [FacetImageFinal(parset, bands, d) for d in dirs_to_image]
-    op_scheduler.run(ops)
+    for op in ops:
+        op.run()
+    op = FacetImageFinal(parset, bands, dirs_to_image)
+    op.run()
 
     # Save final band and direction objects to disk
     pickle.dump(bands, open(parset['dir_working']+"/bands.sav", "wb" ))
@@ -182,7 +180,7 @@ if __name__=='__main__':
     # region first? What about sources on edge of region? Can we just sum them?)
     if parset['make_mosaic']:
         op = MakeMosaic(parset, directions)
-        op_scheduler.run(op)
+        op.run()
 
     logging.info("Factor has finished :)")
 
