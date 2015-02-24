@@ -26,6 +26,12 @@ class Action(object):
             Parset of calling operation
         name : str
             Name of the action
+        prefix : str, optional
+            Prefix to use for names
+        direction : Direction object, optional
+            Direction for this action
+        index : int, optional
+            Index of action
         """
         self.op_name = op_parset['op_name']
         self.name = name
@@ -85,7 +91,7 @@ class Action(object):
 
     def set_pipeline_parameters(self):
         """
-        Sets various pipeline parameters specific to this action
+        Sets various pipeline parameters
         """
         self.op_parset['runtime_dir'] = os.path.join(os.path.abspath('.'), self.pipeline_run_dir)
         self.op_parset['working_dir'] = os.path.join(os.path.abspath('.'), self.working_dir)
@@ -93,17 +99,14 @@ class Action(object):
 
     def make_pipeline_config_parset(self):
         """
-        Writes the pipeline configuration parset
+        Writes the pipeline configuration parset (specific to given action)
         """
-        template = env.get_template('pipeline.cfg.tpl')
-        tmp = template.render(self.op_parset)
-        with open(self.pipeline_config_file, 'w') as f:
-            f.write(tmp)
+        raise NotImplementedError
 
 
     def run(self):
         """
-        Runs the generic pipeline with parset
+        Runs the pipeline
         """
         self.make_datamaps()
         self.set_pipeline_parameters()
