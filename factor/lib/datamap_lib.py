@@ -12,8 +12,8 @@ def write_mapfile(data_list, op_name, action_name=None, prefix=None,
     """
     data_list = [os.path.abspath(f) for f in data_list]
     basename = make_mapfile_basename(action_name, prefix, direction, index)
-    mapfile = os.path.join(working_dir, 'datamaps', op_name, basename,
-        '{0}.datamap'.format(index))
+    mapfile = os.path.join(working_dir, 'datamaps', op_name,
+        '{0}.datamap'.format(basename))
 
     datamap = DataMap([])
     for data in data_list:
