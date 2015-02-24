@@ -13,7 +13,7 @@ ExpandMask : Action
 """
 
 from factor.lib.action import Action
-from factor.lib.action_lib import make_basename
+from factor.lib.action_lib import make_basename, make_image_basename
 from jinja2 import Environment, FileSystemLoader
 import os
 
@@ -23,10 +23,24 @@ env = Environment(loader=FileSystemLoader(os.path.join(DIR, 'templates')))
 
 class Casapy(Action):
     """
-    Action to make an image using a clean mask with CASA clean()
+    Action to make an image with casapy clean()
+
+    Input data maps
+    ---------------
+    vis_map : Datamap
+        Map of MS files
+    mask_map : Datamap, optional
+        Map of masks
+
+    Output data maps
+    ----------------
+    image_map : Datamap
+        Map of image basenames
+
     """
-    def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
-        localdir=None, clean=True, index=None, image_twice=True, name='Casapy'):
+    def __init__(self, op_parset, vis_datamap, p, mask_datamap=None, prefix=None,
+        direction=None, localdir=None, clean=True, index=None, image_twice=True,
+        name='Casapy'):
         """
         Create action and run pipeline
 
@@ -34,10 +48,12 @@ class Casapy(Action):
         ----------
         op_parset : dict
             Parset dict of the calling operation
-        input_datamap : data map
+        vis_datamap : Datamap
             Input data map of MS file(s) to image
         p : parset dict
             Input parset dict defining imaging and pipeline parameters
+        maks_datamap : Datamap, optional
+            Input data map of mask images
         prefix : str, optional
             Prefix to use for image names
         direction : Direction object, optional
@@ -53,50 +69,39 @@ class Casapy(Action):
             False, image only once; in this case, no clean mask is made.
 
         """
-        super(Casapy, self).__init__(op_parset, name=name)
+        super(Casapy, self).__init__(op_parset, name, prefix=prefix,
+            direction=direction, index=index)
 
         # Store input parameters
-        self.input_datamap = input_datamap
+        self.vis_datamap = vis_datamap
+        self.mask_datamap = mask_datamap
         self.p = p.copy()
-        if prefix is None:
-            prefix = 'make_image'
-        self.prefix = prefix
-        self.direction = direction
+        if self.prefix is None:
+            self.prefix = 'make_image'
         self.localdir = localdir
         self.clean = clean
-        self.index = index
         self.image_twice = image_twice
+        self.image_dir = 'images/{0}/'.format(self.op_name)
+        if not os.path.exists(self.image_dir):
+            os.makedirs(self.image_dir)
 
-        # Set up parset and script names
-        self.parsetbasename = self.parset_dir + make_basename(prefix,
-            direction, index)
-        self.pipeline_parset_file = self.parsetbasename + 'pipe.parset'
-        self.pipeline_config_file = self.parsetbasename + 'pipe.cfg'
+        # Set up mask script name
         self.mask_script_file = self.parsetbasename + 'make_clean_mask.py'
-        self.pipeline_run_dir += make_basename(prefix, direction, index)
-        if not os.path.exists(self.pipeline_run_dir):
-            os.makedirs(self.pipeline_run_dir)
-        self.logbasename = self.log_dir + make_basename(prefix, direction,
-            index)
 
-        # Set up image names for output data map
+        # Set up names for output data map
         self.imagebasenames1 = []
         self.imagebasenames2 = []
-        imagebasenames1 = self.make_image_basename(prefix+'1')
+        imagebasenames1 = make_image_basename(self.input_datamap,
+            direction=self.direction, prefix=self.prefix+'1')
         for bn in imagebasenames1:
             self.imagebasenames1.append(self.image_dir+bn)
-        imagebasenames2 = self.make_image_basename(prefix+'2')
+        imagebasenames2 = make_image_basename(self.input_datamap,
+            direction=self.direction, prefix=self.prefix+'2')
         for bn in imagebasenames1:
             self.imagebasenames2.append(self.image_dir+bn)
 
-        # Make data maps
-        self.make_datamaps()
-
-        # Make pipeline parsets
+        # Determine imaging parameters
         self.set_imaging_parameters()
-        self.set_pipeline_parameters()
-        self.make_pipeline_control_parset()
-        self.make_pipeline_config_parset()
 
         # Run the pipeline
         self.run()
@@ -111,13 +116,15 @@ class Casapy(Action):
         # Make first imaging data maps:
         #     - input is list of MS files
         #     - output is list of image names
-        self.p['input_datamap_image1'] = self.input_datamap
+        self.p['vis_datamap_image1'] = self.vis_datamap
+        if self.mask_datamap is not None:
+            self.p['mask_datamap_image1'] = self.mask_datamap
         self.p['output_datamap_image1'] = write_mapfile(self.imagebasenames1,
             self.op_name, self.name, prefix=self.prefix+'-imager1_output',
             direction=self.direction)
 
         # Make masking data maps:
-        #     - input is list of model images
+        #     - input is list of images
         #     - output is none
         imnames = []
         masknames = []
@@ -126,6 +133,7 @@ class Casapy(Action):
                 imnames.append(bn+'.image.tt0')
             else:
                 imnames.append(bn+'.image')
+        for bn in self.imagebasenames2:
             masknames.append(bn+'.cleanmask')
         self.p['input_datamap_mask'] = write_mapfile(imnames, self.op_name,
             self.name, prefix=self.prefix+'-masker_input', direction=self.direction)
@@ -134,7 +142,7 @@ class Casapy(Action):
 
         # Make second imaging data maps
         #     - input is list of MS files (same as imager 1 inputs)
-        #     - output is list of image names
+        #     - output is list of image basenames
         self.p['output_datamap_image2'] = write_mapfile(self.imagebasenames2,
             self.op_name, self.name, prefix=self.prefix+'-imager2_output',
             direction=self.direction)
@@ -174,22 +182,16 @@ class Casapy(Action):
             self.p['nfacets'] = 1
 
 
-    def set_pipeline_parameters(self):
-        """
-        Sets various pipeline parameters specific to this action
-        """
-        self.op_parset['runtime_dir'] = os.path.join(os.path.abspath('.'), self.pipeline_run_dir)
-        self.op_parset['working_dir'] = os.path.join(os.path.abspath('.'), self.image_dir)
-        self.op_parset['ncpu'] = 1
-
-
     def make_pipeline_control_parset(self):
         """
         Writes the pipeline control parset and any script files
         """
         self.p['maskscriptname'] = os.path.abspath(self.mask_script_file)
         if self.image_twice:
-            template = env.get_template('make_image.pipeline.parset.tpl')
+            if self.mask_datamap is not None:
+                template = env.get_template('make_image_masked.pipeline.parset.tpl')
+            else:
+                template = env.get_template('make_image.pipeline.parset.tpl')
         else:
             template = env.get_template('make_image_single.pipeline.parset.tpl')
         tmp = template.render(self.p)
@@ -202,90 +204,17 @@ class Casapy(Action):
             f.write(tmp)
 
 
-    def make_pipeline_config_parset(self):
-        """
-        Writes the pipeline configuration parset
-        """
-        template = env.get_template('pipeline.cfg.tpl')
-        tmp = template.render(self.op_parset)
-        with open(self.pipeline_config_file, 'w') as f:
-            f.write(tmp)
-
-
     def get_results(self):
         """
-        Makes and returns map files for final images, models, and clean masks
+        Makes and returns map files for image basenames
 
         Returns
         -------
-        images_mapfile, models_mapfile, masks_mapfile : Data map filenames
-            If nterms > 1, only the tt0 image and model are returned. If
-            self.image_twice if False then None is returned for the
-            masks_mapfile.
+        images_mapfile : Data map filename
+            Filename to map file with imagebasenames
 
         """
-        from factor.lib.datamap_lib import write_mapfile
-
-        images = []
-        models = []
-        masks = []
-        nterms = self.p['nterms']
-        imagebasenames = self.imagebasenames2
-        for ib in imagebasenames:
-            if nterms > 1:
-                images.append(ib+'.image.tt0')
-                models.append(ib+'.model.tt0')
-            else:
-                images.append(ib+'.image')
-                models.append(ib+'.model')
-            masks.append(ib+'.cleanmask')
-        images_mapfile = write_mapfile(images, self.op_name, action_name=self.name,
-            prefix=self.prefix, direction=self.direction, index=self.index)
-        models_mapfile = write_mapfile(models, self.op_name, action_name=self.name,
-            prefix=self.prefix, direction=self.direction, index=self.index)
-        if self.image_twice:
-            masks_mapfile = write_mapfile(masks, self.op_name, action_name=self.name,
-                prefix=self.prefix, direction=self.direction, index=self.index)
-        else:
-            masks_mapfile = None
-
-        return images_mapfile, models_mapfile, masks_mapfile
-
-
-    def make_image_basename(self, prefix=None):
-        """
-        Define a standard name pattern for imaging files
-
-        Parameters
-        ----------
-        prefix : str, optional
-            String to prepend to the image basename. If None, 'image' is used
-
-        """
-        from factor.lib.datamap_lib import read_mapfile
-        import re
-        import os
-
-        if prefix is None:
-            prefix = 'image'
-            logging.warn('Prefix of imagebasename not selected, using "{0}".'.format(prefix))
-
-        msfiles = read_mapfile(self.input_datamap)
-        image_basenames = []
-
-        for msfile in msfiles:
-            msbase = os.path.basename(msfile)
-
-            if self.direction is not None:
-                try:
-                    dirtxt = direction.name
-                except:
-                    dirtxt = direction
-                image_basenames.append('%s-%s_%s' % (prefix, re.sub(r'.MS|.ms', '', msbase), dirtxt))
-            else:
-                image_basenames.append('%s-%s' % (prefix, re.sub(r'.MS|.ms', '', msbase)))
-
-        return image_basenames
+        return self.p['output_datamap_image2']
 
 
     def getOptimumSize(self, size):
