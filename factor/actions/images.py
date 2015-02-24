@@ -226,6 +226,16 @@ class Casapy(Action):
         return self.p['output_datamap_image2']
 
 
+    def clean(self):
+        """
+        Remove unneeded files:
+
+        E.g., images/InitSubtract/init_highres/init_highrespipe directory?
+
+        """
+        pass
+
+
     def getOptimumSize(self, size):
         """
         Gets the nearest optimum image size
