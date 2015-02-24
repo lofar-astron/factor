@@ -82,7 +82,7 @@ class BBS(Action):
 
         # Define parset name
         self.parset_file = self.parsetbasename + '.parset'
-        self.templatename = '{0}_{1}.parset.tpl'.format(prefix, self.name)
+        self.templatename = '{0}.parset.tpl'.format(prefix, self.name)
 
 
     def make_datamaps(self):
