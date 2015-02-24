@@ -31,8 +31,9 @@ class BBS(Action):
     """
     Action to run BBS
     """
-    def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
-        clean=True, index=None, name='BBS'):
+    def __init__(self, op_parset, vis_datamap, p, model_datamap=None,
+        parmdb_datamap=None, prefix=None, direction=None, clean=True,
+        index=None, name='BBS'):
         """
         Create action and run pipeline
 
@@ -40,55 +41,97 @@ class BBS(Action):
         ----------
         op_parset : dict
             Parset dict of the calling operation
-        input_datamap : data map
-            Input data map for CASA model image
+        vis_datamap : data map
+            Input data map for MS files
         p : dict
             Input parset dict defining model and pipeline parameters
+        model_datamap : data map
+            Input data map for sky model files
+        parmdb_datamap : data map
+            Input data map for parmdb files
         prefix : str, optional
-            Prefix to use for model names
+            Prefix to use for run
         direction : Direction object, optional
-            Direction for this model
+            Direction for this action
         clean : bool, optional
             Remove unneeded files?
         index : int, optional
             Index of action
 
         """
-        super(BBS, self).__init__(op_parset, name=name)
+        super(BBS, self).__init__(op_parset, name, prefix=prefix,
+            direction=direction, index=index)
 
         # Store input parameters
-        self.input_datamap = input_datamap
+        self.vis_datamap = vis_datamap
+        self.model_datamap = model_datamap
+        self.parmdb_datamap = parmdb_datamap
         self.p = p.copy()
-        if prefix is None:
-            prefix = 'run_bbs'
-        self.prefix = prefix
-        self.direction = direction
-        self.localdir = localdir
+        if self.prefix is None:
+            self.prefix = 'run_bbs'
         self.clean = clean
-        self.index = index
+        factor_working_dir = op_parset['dir_working']
+        if self.direction is None:
+            self.working_dir = '{0}/visdata/{1}/'.format(factor_working_dir,
+                self.op_name)
+        else:
+            self.working_dir = '{0}/visdata/{1}/{2}/'.format(factor_working_dir,
+                self.op_name, self.direction)
+        if not os.path.exists(self.working_dir):
+            os.makedirs(self.working_dir)
 
-        self.ms = ms
-        self.statebasename += makestatebasename(self.ms, prefix, direction, index)
-        self.logbasename += makestatebasename(self.ms, prefix, direction, index)
-        self.parsetbasename += makestatebasename(self.ms, prefix, direction, index)
-        self.parsetname = self.parsetbasename + '.parset'
-        self.clean = clean
-        self.p = p.copy()
-        if '/' in parmdb:
-            # path is not local to input ms, so copy it to ms
-            destfile = '/'.join([self.ms, os.path.basename(parmdb)])
-            if os.path.exists(destfile):
-                os.system('rm -rf {0}'.format(destfile))
-            shutil.copytree(parmdb, destfile)
-            self.parmdb = os.path.basename(parmdb)
-        else:
-            self.parmdb = parmdb
+        # Define parset name
+        self.parset_file = self.parsetbasename + '.parset'
         self.templatename = '{0}_{1}.parset.tpl'.format(prefix, self.name)
-        if skymodel is None:
-            self.skymodel = self.modelbasename + 'empty.skymodel'
-            os.system('touch {0}'.format(self.skymodel))
-        else:
-            self.skymodel = skymodel
+
+
+    def make_datamaps(self):
+        """
+        Makes the required data maps
+        """
+        self.p['vis_datamap'] = self.vis_datamap
+        self.p['skymodel_datamap'] = self.model_datamap
+        self.p['parmdb_datamap'] = self.parmdb_datamap
+
+
+    def make_pipeline_control_parset(self):
+        """
+        Writes the pipeline control parset and any script files
+        """
+        self.p['parset'] = os.path.abspath(self.parset_file)
+        self.p['outputdir'] = os.path.abspath(self.working_dir)
+        self.p['lofarroot'] = self.op_parset['lofarroot']
+        self.p['parset'] = self.parset_file
+        if 'flags' not in self.p:
+            self.p['flags'] = ''
+
+        template = env.get_template('bbs.pipeline.parset.tpl')
+        tmp = template.render(self.p)
+        with open(self.pipeline_parset_file, 'w') as f:
+            f.write(tmp)
+
+        template = env.get_template(self.templatename)
+        tmp = template.render(self.p)
+        with open(self.parset_file, 'w') as f:
+            f.write(tmp)
+
+
+    def make_pipeline_config_parset(self):
+        """
+        Writes the pipeline configuration parset
+        """
+        template = env.get_template('pipeline.cfg.tpl')
+        tmp = template.render(self.op_parset)
+        with open(self.pipeline_config_file, 'w') as f:
+            f.write(tmp)
+
+
+    def get_results(self):
+        """
+        Return results
+        """
+        return None
+
 
     def get_command(self):
         template_bbs = env.get_template(self.templatename)
@@ -182,17 +225,23 @@ class Solve(BBS):
     """
     Action to solve for solutions
     """
-    def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
-        localdir=None, clean=True, index=None):
-        super(Solve, self).__init__(op_parset, input_datamap, p, prefix=prefix,
-            direction=direction, clean=clean, index=index, name='Solve')
+    def __init__(self, op_parset, vis_datamap, p, model_datamap=None,
+        parmdb_datamap=None, prefix=None, direction=None, clean=True,
+        index=None):
+        super(Solve, self).__init__(op_parset, vis_datamap, p,
+            model_datamap=model_datamap, parmdb_datamap=parmdb_datamap,
+            prefix=prefix, direction=direction, clean=clean, index=index,
+            name='Solve')
 
 
 class Subtract(BBS):
     """
     Action to subtract sources
     """
-    def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
-        localdir=None, clean=True, index=None):
-        super(Subtract, self).__init__(op_parset, input_datamap, p, prefix=prefix,
-            direction=direction, clean=clean, index=index, name='Subtract')
+    def __init__(self, op_parset, vis_datamap, p, model_datamap=None,
+        parmdb_datamap=None, prefix=None, direction=None, clean=True,
+        index=None):
+        super(Subtract, self).__init__(op_parset, vis_datamap, p,
+            model_datamap=model_datamap, parmdb_datamap=parmdb_datamap,
+            prefix=prefix, direction=direction, clean=clean, index=index,
+            name='Subtract')
