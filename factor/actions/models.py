@@ -60,7 +60,13 @@ class MakeSkymodelFromModelImage(Action):
         if self.prefix is None:
             self.prefix = 'make_skymodel'
         self.clean = clean
-        self.working_dir = 'models/{0}/'.format(self.op_name)
+        factor_working_dir = op_parset['dir_working']
+        if self.direction is None:
+            self.working_dir = '{0}/models/{1}/'.format(factor_working_dir,
+                self.op_name)
+        else:
+            self.working_dir = '{0}/models/{1}/{2}/'.format(factor_working_dir,
+                self.op_name, self.direction)
         if not os.path.exists(self.working_dir):
             os.makedirs(self.working_dir)
 
@@ -68,11 +74,9 @@ class MakeSkymodelFromModelImage(Action):
         self.script_file = self.parsetbasename + 'make_skymodel_from_model_image.py'
 
         # Set up names for output data map
-        self.modelbasenames = []
         modelbasenames = make_image_basename(self.input_datamap,
             direction=self.direction, prefix=self.prefix)
-        for bn in modelbasenames:
-            self.modelbasenames.append(self.working_dir+bn)
+        self.modelbasenames = [self.working_dir+bn for bn in modelbasenames]
 
 
     def make_datamaps(self):

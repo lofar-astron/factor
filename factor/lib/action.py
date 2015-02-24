@@ -39,24 +39,37 @@ class Action(object):
         self.prefix = prefix
         self.direction = direction
         self.index = index
+        factor_working_dir = op_parset['dir_working']
 
         # Set up directories needed by every action
-        self.vis_dir = 'visdata/'
+        self.vis_dir = '{0}/visdata/'.format(factor_working_dir)
 
-        self.datamap_dir = 'datamaps/{0}/{1}/'.format(self.op_name, self.name)
+        self.datamap_dir = '{0}/datamaps/{1}/{2}/'.format(factor_working_dir,
+            self.op_name, self.name)
+        if self.direction is not None:
+            self.datamap_dir += '{0}/'.format(self.direction.name)
         if not os.path.exists(self.datamap_dir):
             os.makedirs(self.datamap_dir)
 
-        self.parset_dir = 'parsets/{0}/{1}/'.format(self.op_name, self.name)
+        self.parset_dir = '{0}/parsets/{1}/{2}/'.format(factor_working_dir,
+            self.op_name, self.name)
+        if self.direction is not None:
+            self.parset_dir += '{0}/'.format(self.direction.name)
         if not os.path.exists(self.parset_dir):
             os.makedirs(self.parset_dir)
 
-        self.pipeline_run_dir = 'pipeline/{0}/'.format(self.op_name)
+        self.pipeline_run_dir = '{0}/pipeline/{1}/'.format(factor_working_dir,
+            self.op_name)
+        if self.direction is not None:
+            self.pipeline_run_dir += '{0}/'.format(self.direction.name)
         if not os.path.exists(self.pipeline_run_dir):
             os.makedirs(self.pipeline_run_dir)
 
         self.log = logging.getLogger('%s::%s' % (self.op_name, self.name))
-        self.log_dir = 'logs/{0}/{1}/'.format(self.op_name, self.name)
+        self.log_dir = '{0}/logs/{1}/{2}/'.format(factor_working_dir,
+            self.op_name, self.name)
+        if self.direction is not None:
+            self.log_dir += '{0}/'.format(self.direction.name)
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
 
@@ -93,8 +106,8 @@ class Action(object):
         """
         Sets various pipeline parameters
         """
-        self.op_parset['runtime_dir'] = os.path.join(os.path.abspath('.'), self.pipeline_run_dir)
-        self.op_parset['working_dir'] = os.path.join(os.path.abspath('.'), self.working_dir)
+        self.op_parset['runtime_dir'] = self.pipeline_run_dir
+        self.op_parset['working_dir'] = self.working_dir
 
 
     def make_pipeline_config_parset(self):

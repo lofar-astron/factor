@@ -81,10 +81,13 @@ class Casapy(Action):
         self.localdir = localdir
         self.clean = clean
         self.image_twice = image_twice
+        factor_working_dir = op_parset['dir_working']
         if self.direction is None:
-            self.image_dir = 'images/{0}/'.format(self.op_name)
+            self.image_dir = '{0}/images/{1}/'.format(factor_working_dir,
+                self.op_name)
         else:
-            self.image_dir = 'images/{0}/{1}/'.format(self.op_name, self.direction)
+            self.image_dir = '{0}/images/{1}/{2}/'.format(factor_working_dir,
+                self.op_name, self.direction)
         if not os.path.exists(self.image_dir):
             os.makedirs(self.image_dir)
         self.working_dir = self.image_dir

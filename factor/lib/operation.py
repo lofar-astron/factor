@@ -40,13 +40,16 @@ class Operation(object):
         self.reset = reset
         self.exit_on_error = True
         self.log = logging.getLogger(self.name)
+        factor_working_dir = parset['dir_working']
 
         if self.direction is not None:
-            self.statebasename = 'state/{0}-{1}'.format(self.name, self.direction.name)
+            self.statebasename = '{0}/state/{1}-{2}'.format(factor_working_dir,
+                self.name, self.direction.name)
         else:
-            self.statebasename = 'state/{0}'.format(self.name)
+            self.statebasename = '{0}/state/{1}'.format(factor_working_dir,
+                self.name)
 
-        self.mapbasename = 'datamaps/{0}/'.format(self.name)
+        self.mapbasename = '{0}/datamaps/{1}/'.format(factor_working_dir, self.name)
         if not os.path.exists(self.mapbasename):
             os.makedirs(self.mapbasename)
 
