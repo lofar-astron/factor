@@ -37,7 +37,6 @@ class InitSubtract(Operation):
 
         if 'dir_node' in self.parset:
             localdir = self.parset['dir_node']
-            self.log.info('Using {0} for imaging...'.format(localdir))
         else:
             localdir = None
 
