@@ -76,11 +76,24 @@ class DPPP(Action):
         """
         from factor.lib.datamap_lib import write_mapfile, read_mapfile
 
-        self.p['input_datamap'] = self.input_datamap
+        if self.name != 'Concatenate':
+            self.p['input_datamap'] = self.input_datamap
 
-        msnames = read_mapfile(self.input_datamap)
-        output_files = [self.working_dir + os.path.splitext(os.path.basename(ms))[0]
-            + '_{0}.ms'.format(self.name.lower()) for ms in msnames]
+            msnames = read_mapfile(self.input_datamap)
+            output_files = [self.working_dir + os.path.splitext(os.path.basename(ms))[0]
+                + '_{0}.ms'.format(self.name.lower()) for ms in msnames]
+        else:
+            # Handle concatenation separately, as we need a data map with a
+            # single "file"
+            msnames = read_mapfile(self.input_datamap)
+            concat_file_list = ['[' + ','.join([msname for msname in msnames]) + ']']
+            self.p['input_datamap'] = write_mapfile(concat_file_list,
+                self.op_name, self.name, prefix=self.prefix+'_input',
+                direction=self.direction, working_dir=self.op_parset['dir_working'])
+
+            ms = msnames[0]
+            output_files = [self.working_dir + os.path.splitext(os.path.basename(ms))[0]
+                + '_{0}.ms'.format(self.name.lower())]
 
         self.p['output_datamap'] = write_mapfile(output_files,
             self.op_name, self.name, prefix=self.prefix+'_output',
@@ -142,8 +155,8 @@ class Concatenate(DPPP):
     """
     Action to concatenate visibilities
     """
-    def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
+    def __init__(self, op_parset, input_datamap, p, direction, prefix=None,
         clean=True, index=None):
-        super(Concat, self).__init__(op_parset, input_datamap, p, prefix=prefix,
-            direction=direction, clean=clean, index=index, name='Concat')
+        super(Concatenate, self).__init__(op_parset, input_datamap, p, prefix=prefix,
+            direction=direction, clean=clean, index=index, name='Concatenate')
 

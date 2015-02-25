@@ -75,7 +75,7 @@ class MakeSkymodelFromModelImage(Action):
 
         # Set up names for output data map
         modelbasenames = make_image_basename(self.input_datamap,
-            direction=self.direction, prefix=self.prefix)
+            direction=self.direction)
         self.modelbasenames = [self.working_dir+bn for bn in modelbasenames]
 
 
