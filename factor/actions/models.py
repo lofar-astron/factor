@@ -305,7 +305,7 @@ class MergeSkymodels(Action):
         output_files = [os.path.splitext(bn)[0] + '_merged.skymodel' for bn in
             model1basenames]
 
-        self.p['outskymodel_datamap'] = write_mapfile(output_files,
+        self.p['output_datamap'] = write_mapfile(output_files,
             self.op_name, self.name, prefix=self.prefix+'_output',
             direction=self.direction, working_dir=self.op_parset['dir_working'])
 
@@ -340,7 +340,7 @@ class MergeSkymodels(Action):
         """
         Return skymodel names
         """
-        return self.p['outskymodel_datamap']
+        return self.p['output_datamap']
 
 
 class FFT(Action):
