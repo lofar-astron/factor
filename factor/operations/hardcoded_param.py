@@ -122,14 +122,18 @@ init_subtract_test_quick = {
            'radius': 0}
 }
 
-facet_setup = {
+facet_add_cal = {
+'model' : {},
 'add' : {'incol': 'SUBTRACTED_DATA_ALL',
          'outcol': 'FACET_DATA',
          'flags': '--replace-sourcedb'},
+'shift' : {'columnname': 'FACET_DATA'} # outcol is DATA
+}
+
+facet_setup = {
 'apply' : {'incol': 'FACET_DATA',
            'outcol': 'CORRECTED_DATA'},
-'shift1' : {'columnname': 'FACET_DATA'}, # outcol is DATA
-'shift2' : {'columnname': 'CORRECTED_DATA'}, # outcol is DATA
+'shift' : {'columnname': 'CORRECTED_DATA'}, # outcol is DATA
 'avg1' : {'columnname': 'DATA', # outcol is DATA
          'freqstep': 20,
          'timestep': 1},

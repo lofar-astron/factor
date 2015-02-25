@@ -67,7 +67,7 @@ class FacetAddCal(Operation):
         # visibilities
         self.log.info('Selecting sources for this direction...')
         action = MakeFacetSkymodel(self.name, dir_indep_skymodels_mapfile,
-            p['imagerh'], d, prefix='cal', cal_only=True)
+            p['model'], d, prefix='cal', cal_only=True)
         dir_indep_cal_skymodels_mapfile = action.run()
 
 
@@ -78,7 +78,7 @@ class FacetAddCal(Operation):
 
         # Phase shift to facet center
         self.log.info('Phase shifting DATA...')
-        action = PhaseShift(self.name, subtracted_all_mapfile, p['shift1'],
+        action = PhaseShift(self.name, subtracted_all_mapfile, p['shift'],
             prefix='facet', direction=d, index=1)
         shifted_data_mapfile = action.get_results()
 
