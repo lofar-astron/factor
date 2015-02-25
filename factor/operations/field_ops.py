@@ -73,7 +73,6 @@ class InitSubtract(Operation):
         action.run()
 
         self.log.info('Averaging...')
-        self.visbasename + self.ms))[0] + '_avg.ms'
         action = Average(self.parset, subtracted_all_mapfile, p['avgl'],
             prefix='highres_average')
         avg_files_mapfile = action.get_results()
