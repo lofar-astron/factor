@@ -237,7 +237,7 @@ class MergeSkymodels(Action):
         self.p['skymodel2_datamap'] = self.skymodel2_datamap
 
         model1basenames = read_mapfile(self.skymodel1_datamap)
-        output_files = [os.path.splitext(bn) + '_merged.skymodel' for bn in
+        output_files = [os.path.splitext(bn)[0] + '_merged.skymodel' for bn in
             model1basenames]
 
         self.p['output_datamap'] = write_mapfile(output_files,
