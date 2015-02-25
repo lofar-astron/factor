@@ -43,8 +43,8 @@ class InitSubtract(Operation):
 
         # Check operation state
         if os.path.exists(self.statebasename+'.done'):
-            merged_skymodels_mapfile = '' # fill in!!
-            for band, skymodel in zip(bands, read_mapfile(merged_skymodel_mapfile)):
+            merged_skymodels_mapfile = ' datamaps/InitSubtract/MergeSkymodels/merge_output.datamap'
+            for band, skymodel in zip(bands, read_mapfile(merged_skymodels_mapfile)):
                 band.skymodel_dirindep = skymodel
             return
 
@@ -95,7 +95,7 @@ class InitSubtract(Operation):
 
         self.log.info('Merging low- and high-res sky models...')
         action = MergeSkymodels(self.parset, lowres_skymodels_mapfile,
-            highres_skymodels_mapfile, p['merge'], prefix='init_merge')
+            highres_skymodels_mapfile, p['merge'], prefix='merge')
         merged_skymodels_mapfile = action.run()
         for band, skymodel in zip(bands, read_mapfile(merged_skymodels_mapfile)):
             band.skymodel_dirindep = skymodel
