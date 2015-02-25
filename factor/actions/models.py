@@ -138,8 +138,8 @@ class MakeFacetSkymodel(Action):
     """
     Action to make a sky model for a facet
     """
-    def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
-        clean=True, index=None):
+    def __init__(self, op_parset, input_datamap, p, direction, prefix=None,
+        clean=True, index=None, cal_only=True):
         """
         Create action and run pipeline
 
@@ -148,30 +148,92 @@ class MakeFacetSkymodel(Action):
         op_parset : dict
             Parset dict of the calling operation
         input_datamap : data map
-            Input data map for CASA model image
+            Input data map for full sky models
         p : dict
             Input parset dict defining model and pipeline parameters
+        direction : Direction object
+            Direction for this model
         prefix : str, optional
             Prefix to use for model names
-        direction : Direction object, optional
-            Direction for this model
         clean : bool, optional
             Remove unneeded files?
         index : int, optional
             Index of action
+        cal_only : bool, optional
+            If True, return sky model for calibrator only. If False, return
+            sky model for entire facet
 
         """
-        super(MakeFacetSkymodel, self).__init__(op_parset, 'MakeFacetSkymodel')
+        super(MakeFacetSkymodel, self).__init__(op_parset, 'MakeFacetSkymodel',
+            prefix=prefix, direction=direction, index=index)
 
         # Store input parameters
         self.input_datamap = input_datamap
         self.p = p.copy()
-        if prefix is None:
-            prefix = 'make_facet_skymodel'
-        self.prefix = prefix
-        self.direction = direction
+        if self.prefix is None:
+            self.prefix = 'make_facet_skymodel'
         self.clean = clean
-        self.index = index
+        self.cal_only = cal_only
+        factor_working_dir = op_parset['dir_working']
+        self.working_dir = '{0}/models/{1}/{2}/'.format(factor_working_dir,
+            self.op_name, self.direction)
+        if not os.path.exists(self.working_dir):
+            os.makedirs(self.working_dir)
+
+        # Define script name
+        self.script_file = self.parsetbasename + 'make_facet_skymodels.py'
+
+
+    def make_datamaps(self):
+        """
+        Makes the required data maps
+        """
+        from factor.lib.datamap_lib import write_mapfile, read_mapfile
+
+        self.p['input_datamap'] = self.input_datamap
+
+        modelbasenames = read_mapfile(self.input_datamap)
+        output_files = [os.path.splitext(bn)[0] + '_facet.skymodel' for bn in
+            modelbasenames]
+
+        self.p['output_datamap'] = write_mapfile(output_files,
+            self.op_name, self.name, prefix=self.prefix+'_output',
+            direction=self.direction, working_dir=self.op_parset['dir_working'])
+
+
+    def make_pipeline_control_parset(self):
+        """
+        Writes the pipeline control parset and any script files
+        """
+        self.p['scriptname'] = os.path.abspath(self.script_file)
+        self.p['cal_only'] = self.cal_only
+        self.p['vertices'] = self.direction.vertices
+        template = env.get_template('make_facet_skymodel.pipeline.parset.tpl')
+        tmp = template.render(self.p)
+        with open(self.pipeline_parset_file, 'w') as f:
+            f.write(tmp)
+
+        template = env.get_template('make_facet_skymodel.tpl')
+        tmp = template.render(self.p)
+        with open(self.script_file, 'w') as f:
+            f.write(tmp)
+
+
+    def make_pipeline_config_parset(self):
+        """
+        Writes the pipeline configuration parset
+        """
+        template = env.get_template('pipeline.cfg.tpl')
+        tmp = template.render(self.op_parset)
+        with open(self.pipeline_config_file, 'w') as f:
+            f.write(tmp)
+
+
+    def get_results(self):
+        """
+        Return skymodel names
+        """
+        return self.p['output_datamap']
 
 
 class MergeSkymodels(Action):

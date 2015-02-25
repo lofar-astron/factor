@@ -42,28 +42,34 @@ class FacetAddCal(Operation):
         from factor.actions.models import MakeFacetSkymodel
         from factor.actions.calibrations import Add
         from factor.operations.hardcoded_param import facet_add_cal as p
-
-        if os.path.exists(self.statebasename+'.done'):
-            return
+        from factor.lib.datamap_lib import write_mapfile, read_mapfile
 
         d = self.direction
         bands = self.bands
 
+        if os.path.exists(self.statebasename+'.done'):
+            shifted_data_mapfile = ''
+            files = read_mapfile(shifted_data_mapfile)
+            for band, f in zip(bands, files):
+                band.shifted_data_file = f
+
         # Make initial data maps for the empty datasets, their dir-indep
         # instrument parmdbs, and their dir-indep sky models
-        subtracted_all_mapfile = self.make_datamap([band.file for band in bands],
-            'initial_subtracted')
-        dir_indep_parmdbs_mapfile = self.make_datamap([band.dirindparmdb for band
-            in bands], 'dirindep_parmdbs')
-        dir_indep_skymodels_mapfile = self.make_datamap([band.skymodel_dirindep
-            for band in bands], 'dirindep_skymodels')
+        subtracted_all_mapfile = write_mapfile([band.file for band in bands],
+            self.name, prefix='subtracted_all', working_dir=self.parset['dir_working'])
+        dir_indep_parmdbs_mapfile = write_mapfile([os.path.join(band.file,
+            band.dirindparmdb) for band in bands], self.name,
+            prefix='dir_indep_parmdbs', working_dir=self.parset['dir_working'])
+        dir_indep_skymodels_mapfile = write_mapfile([band.skymodel_dirindep
+            for band in bands], 'dir_indep_skymodels')
 
         # Add calibrators from the dir-indep sky model for this direction to the
         # visibilities
         self.log.info('Selecting sources for this direction...')
-        action = MakeFacetSkymodel(self.name, dir_indep_skymodels_mapfile, d,
-            prefix='cal', cal_only=True)
-        dir_indep_cal_skymodels_mapfile = action.get_results()
+        action = MakeFacetSkymodel(self.name, dir_indep_skymodels_mapfile,
+            p['imagerh'], d, prefix='cal', cal_only=True)
+        dir_indep_cal_skymodels_mapfile = action.run()
+
 
         self.log.info('Adding sources for this direction...')
         action = Add(self.name, [subtracted_all_mapfile,
