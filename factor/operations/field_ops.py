@@ -58,39 +58,39 @@ class InitSubtract(Operation):
 
         self.log.info('High-res imaging...')
         action = MakeImage(self.parset, subtracted_all_mapfile, p['imagerh'],
-            prefix='highres_image', localdir=localdir)
+            prefix='highres', localdir=localdir)
         highres_image_basenames_mapfile = action.run()
 
         self.log.info('Making high-res sky model...')
         action = MakeSkymodelFromModelImage(self.parset, highres_image_basenames_mapfile,
-            p['modelh'], prefix='highres_model')
+            p['modelh'], prefix='highres')
         highres_skymodels_mapfile = action.run()
 
         self.log.info('Subtracting high-res sky model...')
         action = Subtract(self.parset, subtracted_all_mapfile, p['calibh'],
             model_datamap=highres_skymodels_mapfile,
-            parmdb_datamap=dir_indep_parmdbs_mapfile, prefix='highres_subtract')
+            parmdb_datamap=dir_indep_parmdbs_mapfile, prefix='highres')
         action.run()
 
         self.log.info('Averaging...')
         action = Average(self.parset, subtracted_all_mapfile, p['avgl'],
-            prefix='highres_average')
+            prefix='highres')
         avg_files_mapfile = action.run()
 
         self.log.info('Low-res imaging...')
         action = MakeImage(self.parset, avg_files_mapfile, p['imagerl'],
-            prefix='lowres_image', localdir=localdir)
+            prefix='lowres', localdir=localdir)
         lowres_image_basenames_mapfile = action.run()
 
         self.log.info('Making low-res sky model...')
         action = MakeSkymodelFromModelImage(self.parset, lowres_image_basenames_mapfile,
-            p['modell'], prefix='lowres_model')
+            p['modell'], prefix='lowres')
         lowres_skymodels_mapfile = action.run()
 
         self.log.info('Subtracting low-res sky model...')
         action = Subtract(self.parset, subtracted_all_mapfile, p['calibl'],
             model_datamap=lowres_skymodels_mapfile,
-            parmdb_datamap=dir_indep_parmdbs_mapfile, prefix='lowres_subtract')
+            parmdb_datamap=dir_indep_parmdbs_mapfile, prefix='lowres')
         action.run()
 
         self.log.info('Merging low- and high-res sky models...')

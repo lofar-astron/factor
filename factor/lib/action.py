@@ -58,8 +58,8 @@ class Action(object):
         if not os.path.exists(self.parset_dir):
             os.makedirs(self.parset_dir)
 
-        self.pipeline_run_dir = '{0}/pipeline/{1}/'.format(factor_working_dir,
-            self.op_name)
+        self.pipeline_run_dir = '{0}/pipeline/{1}/{2}/'.format(factor_working_dir,
+            self.op_name, self.name)
         if self.direction is not None:
             self.pipeline_run_dir += '{0}/'.format(self.direction.name)
         if not os.path.exists(self.pipeline_run_dir):
