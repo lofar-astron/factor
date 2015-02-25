@@ -97,7 +97,7 @@ class InitSubtract(Operation):
         action = MergeSkymodels(self.parset, lowres_skymodels_mapfile,
             highres_skymodels_mapfile, p['merge'], prefix='init_merge')
         merged_skymodels_mapfile = action.run()
-        for band, skymodel in zip(bands, read_mapfile(merged_skymodel_mapfile)):
+        for band, skymodel in zip(bands, read_mapfile(merged_skymodels_mapfile)):
             band.skymodel_dirindep = skymodel
 
 
