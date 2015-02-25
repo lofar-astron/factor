@@ -78,7 +78,7 @@ class DPPP(Action):
 
         msnames = read_mapfile(self.input_datamap)
         output_files = [self.working_dir + os.path.splitext(os.path.basename(ms))[0]
-            + '_avg.ms' for bn in for ms in msnames]
+            + '_avg.ms' for ms in msnames]
 
         self.p['output_datamap'] = write_mapfile(output_files,
             self.op_name, self.name, prefix=self.prefix+'_output',
