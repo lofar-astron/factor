@@ -54,7 +54,7 @@ class DPPP(Action):
             direction=direction, index=index)
 
         # Store input parameters
-        self.input_datamap = vis_datamap
+        self.input_datamap = input_datamap
         self.p = p.copy()
         if self.prefix is None:
             self.prefix = 'run_dppp'
