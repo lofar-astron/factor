@@ -74,11 +74,13 @@ class DPPP(Action):
         """
         Makes the required data maps
         """
+        from factor.lib.datamap_lib import write_mapfile, read_mapfile
+
         self.p['input_datamap'] = self.input_datamap
 
         msnames = read_mapfile(self.input_datamap)
         output_files = [self.working_dir + os.path.splitext(os.path.basename(ms))[0]
-            + '_avg.ms' for ms in msnames]
+            + '_{0}.ms'.format(self.name.lower()) for ms in msnames]
 
         self.p['output_datamap'] = write_mapfile(output_files,
             self.op_name, self.name, prefix=self.prefix+'_output',
