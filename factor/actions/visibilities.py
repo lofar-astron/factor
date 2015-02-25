@@ -132,8 +132,10 @@ class PhaseShift(DPPP):
     """
     def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
         clean=True, index=None):
-        super(PhaseShift, self).__init__(op_parset, input_datamap, p, prefix=prefix,
-            direction=direction, clean=clean, index=index, name='PhaseShift')
+        super(PhaseShift, self).__init__(op_parset, input_datamap, p, direction,
+            prefix=prefix, clean=clean, index=index, name='PhaseShift')
+        self.p['ra'] = direction.ra
+        self.p['dec'] = direction.dec
 
 
 class Concatenate(DPPP):
