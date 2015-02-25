@@ -340,7 +340,7 @@ class MergeSkymodels(Action):
         """
         Return skymodel names
         """
-        return self.p['output_datamap']
+        return self.p['outskymodel_datamap']
 
 
 class FFT(Action):
