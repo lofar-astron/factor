@@ -113,7 +113,7 @@ class DPPP(Action):
         """
         Return results
         """
-        return
+        return self.p['output_datamap']
 
 
     def get_command(self):
