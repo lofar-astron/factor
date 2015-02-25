@@ -67,21 +67,22 @@ class FacetAddCal(Operation):
         # Add calibrators from the dir-indep sky model for this direction to the
         # visibilities
         self.log.info('Selecting sources for this direction...')
-        action = MakeFacetSkymodel(self.name, dir_indep_skymodels_mapfile,
+        action = MakeFacetSkymodel(self.parset, dir_indep_skymodels_mapfile,
             p['model'], d, prefix='cal', cal_only=True)
         dir_indep_cal_skymodels_mapfile = action.run()
 
-
         self.log.info('Adding sources for this direction...')
-        action = Add(self.name, [subtracted_all_mapfile,
-            dir_indep_cal_skymodels_mapfile, dir_indep_parmdbs_mapfile], p['add'],
-            prefix='facet_dirindep', direction=d)
+        action = Add(self.parset, subtracted_all_mapfile, p['add'],
+            model_datamap=dir_indep_cal_skymodels_mapfile,
+            parmdb_datamap=dir_indep_parmdbs_mapfile, prefix='facet_dirindep',
+            direction=d)
+        action.run()
 
         # Phase shift to facet center
         self.log.info('Phase shifting DATA...')
-        action = PhaseShift(self.name, subtracted_all_mapfile, p['shift'],
-            prefix='facet', direction=d, index=1)
-        shifted_data_mapfile = action.get_results()
+        action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift'],
+            prefix='facet', direction=d)
+        shifted_data_mapfile = action.run()
 
         # Save files to band objects
         files = read_mapfile(shifted_data_mapfile)

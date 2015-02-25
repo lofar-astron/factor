@@ -178,10 +178,13 @@ class Add(BBS):
     """
     Action to add sources
     """
-    def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
-        localdir=None, clean=True, index=None):
-        super(Add, self).__init__(op_parset, input_datamap, p, prefix=prefix,
-            direction=direction, clean=clean, index=index, name='Add')
+    def __init__(self, op_parset, vis_datamap, p, model_datamap=None,
+        parmdb_datamap=None, prefix=None, direction=None, clean=True,
+        index=None):
+        super(Add, self).__init__(op_parset, vis_datamap, p,
+            model_datamap=model_datamap, parmdb_datamap=parmdb_datamap,
+            prefix=prefix, direction=direction, clean=clean, index=index,
+            name='Add')
 
         # Deal with empty sky models: (Note: if a facet sky model has no sources, we need
         # simply to copy the visibilities). Set the skip flag in the data map, then
@@ -195,10 +198,13 @@ class Apply(BBS):
     """
     Action to apply solutions
     """
-    def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
-        localdir=None, clean=True, index=None):
-        super(Apply, self).__init__(op_parset, input_datamap, p, prefix=prefix,
-            direction=direction, clean=clean, index=index, name='Apply')
+    def __init__(self, op_parset, vis_datamap, p, model_datamap=None,
+        parmdb_datamap=None, prefix=None, direction=None, clean=True,
+        index=None):
+        super(Apply, self).__init__(op_parset, vis_datamap, p,
+            model_datamap=model_datamap, parmdb_datamap=parmdb_datamap,
+            prefix=prefix, direction=direction, clean=clean, index=index,
+            name='Apply')
 
 
 class Solve(BBS):
