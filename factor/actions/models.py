@@ -210,6 +210,7 @@ class MakeFacetSkymodel(Action):
         self.p['scriptname'] = os.path.abspath(self.script_file)
         self.p['cal_only'] = self.cal_only
         self.p['vertices'] = self.direction.vertices
+
         template = env.get_template('make_facet_skymodel.pipeline.parset.tpl')
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
@@ -304,7 +305,7 @@ class MergeSkymodels(Action):
         output_files = [os.path.splitext(bn)[0] + '_merged.skymodel' for bn in
             model1basenames]
 
-        self.p['output_datamap'] = write_mapfile(output_files,
+        self.p['outskymodel_datamap'] = write_mapfile(output_files,
             self.op_name, self.name, prefix=self.prefix+'_output',
             direction=self.direction, working_dir=self.op_parset['dir_working'])
 
