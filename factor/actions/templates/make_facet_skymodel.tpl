@@ -5,9 +5,11 @@ from numpy import array, zeros
 import sys
 
 fullskymodel = sys.argv[1]
-outmodel = sys.argv[2]
+outputdir = sys.argv[2]
 cal_only = bool(sys.argv[3])
 vertices = {{ vertices }}
+outskymodel = os.path.basename(os.path.splitext(fullskymodel)[0]) + '_facet.skymodel'
+outmodel = os.path.join(outputdir, outskymodel)
 
 s = lsmtool.load(fullskymodel)
 

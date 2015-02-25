@@ -176,12 +176,17 @@ class MakeFacetSkymodel(Action):
         self.cal_only = cal_only
         factor_working_dir = op_parset['dir_working']
         self.working_dir = '{0}/models/{1}/{2}/'.format(factor_working_dir,
-            self.op_name, self.direction)
+            self.op_name, self.direction.name)
         if not os.path.exists(self.working_dir):
             os.makedirs(self.working_dir)
 
         # Define script name
         self.script_file = self.parsetbasename + 'make_facet_skymodels.py'
+
+        # Set up names for output data map
+        modelbasenames = make_image_basename(self.input_datamap,
+            direction=self.direction, prefix=self.prefix)
+        self.modelbasenames = [self.working_dir+bn for bn in modelbasenames]
 
 
     def make_datamaps(self):
@@ -192,10 +197,7 @@ class MakeFacetSkymodel(Action):
 
         self.p['input_datamap'] = self.input_datamap
 
-        modelbasenames = read_mapfile(self.input_datamap)
-        output_files = [os.path.splitext(bn)[0] + '_facet.skymodel' for bn in
-            modelbasenames]
-
+        output_files = [bn + '_facet.skymodel' for bn in self.modelbasenames]
         self.p['output_datamap'] = write_mapfile(output_files,
             self.op_name, self.name, prefix=self.prefix+'_output',
             direction=self.direction, working_dir=self.op_parset['dir_working'])
