@@ -88,8 +88,6 @@ class MakeSkymodelFromModelImage(Action):
         # Input is list of image basenames
         # Output is sky model files
         imagebasenames = read_mapfile(self.input_datamap)
-        input_files = []
-        output_files = []
         input_files = [bn+'.model' for bn in imagebasenames]
         output_files = [bn+'.skymodel' for bn in self.modelbasenames]
 

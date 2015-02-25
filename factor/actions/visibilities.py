@@ -27,7 +27,7 @@ class DPPP(Action):
     """
     Action to run DPPP
     """
-    def __init__(self, op_parset, input_datamap, output_datamap, p, prefix=None,
+    def __init__(self, op_parset, input_datamap, p, prefix=None,
         direction=None, clean=True, index=None, name='DPPP'):
         """
         Create action and run pipeline
@@ -38,8 +38,6 @@ class DPPP(Action):
             Parset dict of the calling operation
         input_datamap : data map
             Input data map for action
-        output_datamap : data map
-            Output data map for action
         p : dict
             Input parset dict defining model and pipeline parameters
         prefix : str, optional
@@ -77,7 +75,14 @@ class DPPP(Action):
         Makes the required data maps
         """
         self.p['input_datamap'] = self.input_datamap
-        self.p['output_datamap'] = self.output_datamap
+
+        msnames = read_mapfile(self.input_datamap)
+        output_files = [self.working_dir + os.path.splitext(os.path.basename(ms))[0]
+            + '_avg.ms' for bn in for ms in msnames]
+
+        self.p['output_datamap'] = write_mapfile(output_files,
+            self.op_name, self.name, prefix=self.prefix+'_output',
+            direction=self.direction, working_dir=self.op_parset['dir_working'])
 
 
     def make_pipeline_control_parset(self):
