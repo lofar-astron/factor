@@ -75,28 +75,28 @@ class InitSubtract(Operation):
         self.log.info('Averaging...')
         action = Average(self.parset, subtracted_all_mapfile, p['avgl'],
             prefix='highres_average')
-        avg_files_mapfile = action.get_results()
+        avg_files_mapfile = action.run()
 
         self.log.info('Low-res imaging...')
         action = MakeImage(self.parset, avg_files_mapfile, p['imagerl'],
             prefix='lowres_image', localdir=localdir)
-        low_res_images_mapfile, low_res_models_mapfile, low_res_masks_mapfile = \
-            action.get_results()
+        lowres_image_basenames_mapfile = action.run()
 
         self.log.info('Making low-res sky model...')
-        action = MakeSkymodelFromModelImage(self.parset, [low_res_models_mapfile,
-            low_res_masks_mapfile], p['modell'], prefix='lowres_model')
-        low_res_skymodel_mapfile = action.get_results()
+        action = MakeSkymodelFromModelImage(self.parset, lowres_image_basenames_mapfile,
+            p['modell'], prefix='lowres_model')
+        lowres_skymodels_mapfile = action.run()
 
         self.log.info('Subtracting low-res sky model...')
-        action = Subtract(self.parset, [subtracted_all_mapfile,
-            low_res_skymodels_mapfile, dir_indep_parmdbs_mapfile], p['calibh'],
-            prefix='highres_subtract')
+        action = Subtract(self.parset, subtracted_all_mapfile, p['calibl'],
+            model_datamap=lowres_skymodels_mapfile,
+            parmdb_datamap=dir_indep_parmdbs_mapfile, prefix='lowres_subtract')
+        action.run()
 
         self.log.info('Merging low- and high-res sky models...')
         action = MergeSkymodels(self.parset, [low_res_skymodels_mapfile,
             high_res_skymodels_mapfile], p['merge'], prefix='init_merge')
-        merged_skymodels_mapfile = action.get_results()
+        merged_skymodels_mapfile = action.run()
         for band, skymodel in zip(bands, read_mapfile(merged_skymodel_mapfile)):
             band.skymodel_dirindep = skymodel
 
