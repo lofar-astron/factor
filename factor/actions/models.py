@@ -233,8 +233,8 @@ class MergeSkymodels(Action):
         """
         from factor.lib.datamap_lib import write_mapfile, read_mapfile
 
-        self.p['skymodel1_datamap'] = skymodel1_datamap
-        self.p['skymodel2_datamap'] = skymodel2_datamap
+        self.p['skymodel1_datamap'] = self.skymodel1_datamap
+        self.p['skymodel2_datamap'] = self.skymodel2_datamap
 
         model1basenames = read_mapfile(self.skymodel1_datamap)
         output_files = [os.path.splitext(bn) + '_merged.skymodel' for bn in
