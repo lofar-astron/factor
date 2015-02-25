@@ -43,7 +43,8 @@ class InitSubtract(Operation):
 
         # Check operation state
         if os.path.exists(self.statebasename+'.done'):
-            merged_skymodels_mapfile = ' datamaps/InitSubtract/MergeSkymodels/merge_output.datamap'
+            merged_skymodels_mapfile = os.path.join(self.parset['dir_working'],
+                'datamaps/InitSubtract/MergeSkymodels/merge_output.datamap')
             for band, skymodel in zip(bands, read_mapfile(merged_skymodels_mapfile)):
                 band.skymodel_dirindep = skymodel
             return
