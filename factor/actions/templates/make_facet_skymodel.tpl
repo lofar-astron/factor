@@ -3,6 +3,8 @@ from lsmtool.operations_lib import radec2xy
 import matplotlib.path as mplPath
 from numpy import array, zeros
 import sys
+import os
+
 
 fullskymodel = sys.argv[1]
 outputdir = sys.argv[2]
