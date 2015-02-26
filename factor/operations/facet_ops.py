@@ -191,8 +191,10 @@ class FacetSelfcal(Operation):
         """
         from factor.actions.visibilities import Average, Concatenate
         from factor.actions.calibrations import Apply
+        from factor.actions.images import MakeImage
+        from factor.actions.models import MakeSkymodelFromModelImage
         from factor.lib.operation_lib import copy_column
-        from factor.operations.hardcoded_param import facet_setup as p
+        from factor.operations.hardcoded_param import facet_selfcal as p
         from factor.lib.datamap_lib import write_mapfile, read_mapfile
 
         # Check state for each direction
