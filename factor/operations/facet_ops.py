@@ -76,9 +76,8 @@ class FacetAddCal(Operation):
 
         self.log.info('Adding sources for this direction...')
         action = Add(self.parset, subtracted_all_mapfile, p['add'],
-            model_datamap=dir_indep_cal_skymodels_mapfile,
-            parmdb_datamap=dir_indep_parmdbs_mapfile, prefix='facet_dirindep',
-            direction=d)
+            dir_indep_cal_skymodels_mapfile, dir_indep_parmdbs_mapfile,
+            prefix='facet_dirindep', direction=d)
         action.run()
 
         # Phase shift to facet center

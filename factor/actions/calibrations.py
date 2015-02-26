@@ -76,7 +76,7 @@ class BBS(Action):
                 self.op_name)
         else:
             self.working_dir = '{0}/visdata/{1}/{2}/'.format(factor_working_dir,
-                self.op_name, self.direction)
+                self.op_name, self.direction.name)
         if not os.path.exists(self.working_dir):
             os.makedirs(self.working_dir)
 
@@ -178,8 +178,8 @@ class Add(BBS):
     """
     Action to add sources
     """
-    def __init__(self, op_parset, vis_datamap, p, model_datamap=None,
-        parmdb_datamap=None, prefix=None, direction=None, clean=True,
+    def __init__(self, op_parset, vis_datamap, p, model_datamap,
+        parmdb_datamap, prefix=None, direction=None, clean=True,
         index=None):
         super(Add, self).__init__(op_parset, vis_datamap, p,
             model_datamap=model_datamap, parmdb_datamap=parmdb_datamap,
@@ -187,29 +187,23 @@ class Add(BBS):
             name='Add')
 
         # Deal with empty sky models: (Note: if a facet sky model has no sources, we need
-        # simply to copy the visibilities). Set the skip flag in the data map, then
-        # deal with them as follows:
-        from factor.lib.datamap_lib import write_mapfile, read_mapfile
+        # simply to copy the visibilities).
+        from factor.lib.datamap_lib import read_mapfile, set_mapfile_flags
         from factor.lib.operation_lib import copy_column
 
         model_files = read_mapfile(self.model_datamap)
         vis_files = read_mapfile(self.vis_datamap)
-        empty_model = False
+        skip = []
         for model_file, vis_file in zip(model_files[:], vis_files[:]):
             if not os.path.exists(model_file):
                 copy_column(vis_file, self.p['incol'], self.p['outcol'])
-                vis_files.remove(vis_file)
-                model_files.remove(model_file)
-                empty_model = True
-        if len(vis_files) == 0:
+                skip.append(True)
+        if len(skip) == len(vis_files):
             return
-        elif empty_model:
-            self.model_datamap = write_mapfile(model_files, self.op_name,
-            self.name, prefix=self.prefix+'-add_input', direction=self.direction,
-            working_dir=self.op_parset['dir_working'])
-            self.vis_datamap = write_mapfile(vis_files, self.op_name,
-            self.name, prefix=self.prefix+'-add_input', direction=self.direction,
-            working_dir=self.op_parset['dir_working'])
+        elif len(skip) > 0:
+            set_mapfile_flags(vis_datamap, skip):
+            set_mapfile_flags(model_datamap, skip):
+            set_mapfile_flags(parmdb_datamap, skip):
 
 
 class Apply(BBS):

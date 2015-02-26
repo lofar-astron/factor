@@ -6,7 +6,7 @@ from lofarpipe.support.data_map import DataMap, DataProduct
 
 
 def write_mapfile(data_list, op_name, action_name=None, prefix=None,
-    direction=None, index=None, working_dir='.'):
+    direction=None, index=None, working_dir='.', flag_list=None):
     """
     Returns a datamap for the input data list
     """
@@ -16,8 +16,10 @@ def write_mapfile(data_list, op_name, action_name=None, prefix=None,
         '{0}.datamap'.format(basename))
 
     datamap = DataMap([])
-    for data in data_list:
-        datamap.data.append(DataProduct('localhost', data, False))
+    if flag_list is None:
+        flag_list = [False] * len(data_list)
+    for data, flag in zip(data_list, flag_list):
+        datamap.data.append(DataProduct('localhost', data, flag))
         datamap.save(mapfile)
 
     return mapfile
@@ -33,6 +35,24 @@ def read_mapfile(mapfile):
         files.append(item.file)
 
     return files
+
+
+def set_mapfile_flags(mapfile, flag_list):
+    """
+    Sets flages in a datamap
+    """
+    datamap = DataMap.load(mapfile)
+    if len(datamap) != len(flag_list):
+        print('Length of flag list does not match length of mapfile')
+        return
+
+    for item, flag in zip(datamap.data, flag_list):
+        item.skip = flag
+
+    datamap.save(mapfile)
+
+    return
+
 
 
 def make_mapfile_basename(action_name=None, prefix=None, direction=None, index=None):
