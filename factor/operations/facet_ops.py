@@ -117,13 +117,16 @@ class FacetSetup(Operation):
         bands = self.bands
 
         # Check state for each direction
-        if os.path.exists(self.statebasename+'.done'):
-            for d in d_list:
+        all_done = False
+        for i, d in enumerate(d_list):
+            if os.path.exists(self.statebasename[i]+'.done'):
                 concat_data_mapfile = os.path.join(self.parset['dir_working'],
                     'datamaps/FacetSetup/Concatenate/facet_bands_output_{0}.datamap'.
                     format(d.name))
                 file = read_mapfile(concat_data_mapfile)[0]
                 d.concat_file = file
+                all_done = True
+        if all_done:
             return
 
         # Make initial data maps for the phase-shifted datasets and their dir-indep
