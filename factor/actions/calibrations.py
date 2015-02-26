@@ -204,10 +204,10 @@ class Add(BBS):
         if len(vis_files) == 0:
             return
         elif empty_model:
-            model_datamap = write_mapfile(model_files, self.op_name,
+            self.model_datamap = write_mapfile(model_files, self.op_name,
             self.name, prefix=self.prefix+'-add_input', direction=self.direction,
             working_dir=self.op_parset['dir_working'])
-            vis_datamap = write_mapfile(vis_files, self.op_name,
+            self.vis_datamap = write_mapfile(vis_files, self.op_name,
             self.name, prefix=self.prefix+'-add_input', direction=self.direction,
             working_dir=self.op_parset['dir_working'])
 

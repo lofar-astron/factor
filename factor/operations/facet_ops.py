@@ -48,10 +48,13 @@ class FacetAddCal(Operation):
         bands = self.bands
 
         if os.path.exists(self.statebasename+'.done'):
-            shifted_data_mapfile = ''
+            shifted_data_mapfile = os.path.join(self.parset['dir_working'],
+                'datamaps/FacetAddCal/PhaseShift/facet_output_{0}.datamap'.
+                format(d.name))
             files = read_mapfile(shifted_data_mapfile)
             for band, f in zip(bands, files):
                 band.shifted_data_file = f
+            return
 
         # Make initial data maps for the empty datasets, their dir-indep
         # instrument parmdbs, and their dir-indep sky models
