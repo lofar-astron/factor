@@ -116,7 +116,7 @@ class FacetSetup(Operation):
 #             return
 
         d_list = self.direction
-        if type(d) is not list:
+        if type(d_list) is not list:
             d_list = [d_list]
         bands = self.bands
 
