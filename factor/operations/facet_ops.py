@@ -233,27 +233,228 @@ class FacetSelfcal(Operation):
 
         actions = [MakeImage(self.parset, m, p['imager0'], prefix='facet_selfcal0',
             direction=d, localdir=localdir) for d, m in zip(d_list, facet_data_mapfiles)]
-        image0_basenames_mapfile = self.s.run(actions)
+        image0_basenames_mapfiles = self.s.run(actions)
 
         self.log.info('Making sky model (facet model #0)...')
         actions = [MakeSkymodelFromModelImage(self.parset, m, p['model0'],
             prefix='facet_selfcal0', direction=d) for d, m in zip(d_list,
-            image0_basenames_mapfile)]
-        skymodels0_mapfile = self.s.run(actions)
+            image0_basenames_mapfiles)]
+        skymodels0_mapfiles = self.s.run(actions)
 
         # Chunk phase-shifted concatenated MS of all bands in time. Chunks should
         # be the length of the desired amplitude solution interval (otherwise they
         # must be concatenated together later before amp. calibration)
-#         self.log.info('Dividing dataset into chunks...')
-#         chunks = self.make_chunks(d.concat_file, cellsizetime_a,
-#             'facet_chunk')
-#
-#         self.log.info('Solving for phase solutions and applying them (#1)...')
-#         p['solve_phaseonly1']['timestep'] = cellsizetime_p
-#         actions = [ a.solve.solve(self.name, chunk.file, model0, chunk.parmdb,
-#             p['solve_phaseonly1'], prefix='facet_phaseonly', direction=d, index=0)
-#             for chunk in chunks ]
-#         self.s.run_action_parallel( actions )
+        self.log.info('Dividing dataset into chunks...')
+        chunks_list = []
+        for d in d_list:
+            chunks_list.append(self.make_chunks(d.concat_file, d.solint_a,
+                'facet_chunk'))
+        chunk_data_mapfiles = []
+        chunk_parmdb_mapfiles = []
+        chunk_model_mapfiles = []
+        for i, chunks in enumerate(chunks_list):
+            chunk_data_mapfiles.append(write_mapfile([chunk.file for chunk in chunks],
+                self.name, prefix='chunk', working_dir=self.parset['dir_working'])
+            chunk_parmdb_mapfiles.append(write_mapfile([chunk.parmdb for chunk in chunks],
+                self.name, prefix='chunk', working_dir=self.parset['dir_working'])
+            chunk_model_mapfiles.append(write_mapfile(read_mapfile(skymodels0_mapfiles[i]),
+                self.name, prefix='chunk', working_dir=self.parset['dir_working'])
+
+        self.log.info('Solving for phase solutions and applying them (#1)...')
+        p['solve_phaseonly1']['timestep'] = cellsizetime_p
+        actions = [Solve(self.parset, dm, p['solve_phaseonly1'], model_datamap=mm,
+            parmdb_datamap=pm, prefix='facet_phaseonly', direction=d, index=0)
+            for d, dm, mm, pm in zip(d_list, chunk_data_mapfiles,
+            chunk_model_mapfiles, chunk_parmdb_mapfiles)]
+        self.s.run(actions)
+
+
+
+    def make_chunks(self, dataset, blockl, prefix=None, clobber=False):
+        """
+        Split ms into time chunks of length chunksize time slots
+        """
+        from factor.lib.chunk import Chunk
+        import numpy as np
+        import pyrap.tables as pt
+
+        if blockl < 1:
+            blockl = 1
+
+        # Get time per sample and number of samples
+        t = pt.table(dataset, readonly=True, ack=False)
+        for t2 in t.iter(["ANTENNA1","ANTENNA2"]):
+            if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
+                timepersample = t2[1]['TIME']-t2[0]['TIME'] # sec
+                nsamples = t2.nrows()
+        t.close()
+
+        nchunks = int(np.ceil((np.float(nsamples) / np.float(blockl))))
+        tlen = timepersample * np.float(blockl) / 3600. # length of block in hours
+        tobs = timepersample * nsamples / 3600.0 # length of obs in hours
+
+        # Set up the chunks
+        chunk_list = []
+        for c in range(nchunks):
+            chunk_obj = Chunk(dataset, c)
+            chunk_obj.t0 = tlen * float(chunk_obj.index) # hours
+            chunk_obj.t1 = np.float(chunk_obj.t0) + tlen # hours
+            if c == nchunks-1 and chunk_obj.t1 < tobs:
+                chunk_obj.t1 = tobs + 0.1 # make sure last chunk gets all that remains
+            chunk_obj.start_delay = 0.0
+            chunk_list.append(chunk_obj)
+            self.split_ms(dataset, chunk_obj.file, chunk_obj.t0, chunk_obj.t1,
+                clobber=clobber)
+
+        return chunk_list
+
+
+    def split_ms(self, msin, msout, start_out, end_out, clobber=True):
+        """Splits an MS between start and end times in hours relative to first time"""
+        import pyrap.tables as pt
+        import os
+
+        if os.path.exists(msout):
+            if clobber:
+                os.system('rm -rf {0}'.format(msout))
+            else:
+                return
+
+        t = pt.table(msin, ack=False)
+
+        starttime = t[0]['TIME']
+        t1 = t.query('TIME > ' + str(starttime+start_out*3600) + ' && '
+          'TIME < ' + str(starttime+end_out*3600), sortlist='TIME,ANTENNA1,ANTENNA2')
+
+        t1.copy(msout, True)
+        t1.close()
+        t.close()
+
+
+    def merge_chunks(self, chunk_files, clobber=True):
+        """Merges chunks"""
+        import pyrap.tables as pt
+        import os
+
+        msout = None
+        for m in chunk_files:
+            if '-chunk_0' in m:
+                msout = 'allchunks'.join(m.split('chunk_0'))
+                break
+        if msout is None:
+            msout = chunk_files[0]
+        if os.path.exists(msout):
+            if clobber:
+                os.system('rm -rf {0}'.format(msout))
+            else:
+                return
+
+        t = pt.table(chunk_files, ack=False)
+        t.sort('TIME').copy(msout, deep = True)
+        t.close()
+        return msout
+
+
+    def merge_chunk_parmdbs(self, inparmdbs, concat_file, prefix='merged',
+        clobber=True):
+        """Merges parmdbs"""
+        import lofar.parmdb
+        import pyrap.tables as pt
+        import os
+
+        outparmdb = '{0}/{1}_instrument'.format(concat_file, prefix)
+        if os.path.exists(outparmdb):
+            if clobber:
+                os.system('rm -rf {0}'.format(outparmdb))
+            else:
+                return
+        os.system('cp -r {0} {1}'.format(inparmdbs[0], outparmdb))
+        pdb_concat = lofar.parmdb.parmdb(outparmdb)
+
+        for parmname in pdb_concat.getNames():
+            pdb_concat.deleteValues(parmname)
+
+        for inparmdb in inparmdbs:
+            pdb = lofar.parmdb.parmdb(inparmdb)
+            for parmname in pdb.getNames():
+                v = pdb.getValuesGrid(parmname)
+                pdb_concat.addValues(v)
+        pdb_concat.flush()
+
+        return outparmdb
+
+
+    def merge_parmdbs(self, parmdb_p, pre_apply_parmdb, parmdb_a, parmdb_out,
+        ms, clobber=True):
+        """Merges amp+phase parmdbs"""
+        import lofar.parmdb
+        import pyrap.tables as pt
+        import numpy as np
+
+        if os.path.exists(parmdb_out):
+            if clobber:
+                os.system('rm -rf {0}'.format(parmdb_out))
+            else:
+                return
+        pdb_out = lofar.parmdb.parmdb(parmdb_out, create=True)
+
+        pol_list = ['0:0', '1:1']
+        gain = 'Gain'
+        anttab = pt.table(ms + '::ANTENNA', ack=False)
+        antenna_list = anttab.getcol('NAME')
+        anttab.close()
+
+        # Copy over the CommonScalar phases and TEC
+        pdb_p   = lofar.parmdb.parmdb(parmdb_p)
+        for parmname in pdb_p.getNames():
+            parms = pdb_p.getValuesGrid(parmname)
+            pdb_out.addValues(parms)
+
+        # Get amplitude solutions
+        pdb_pre = lofar.parmdb.parmdb(pre_apply_parmdb)
+        pdb_a = lofar.parmdb.parmdb(parmdb_a)
+        parms_pre = pdb_pre.getValuesGrid("*")
+        parms_a = pdb_a.getValuesGrid("*")
+
+        # Get array sizes and initialize values using first antenna (all
+        # antennas should be the same)
+        parmname = 'Gain:0:0:Real:' + antenna_list[0]
+        N_times, N_freqs = parms_a[parmname]['values'].shape
+        times = parms_a[parmname]['times'].copy()
+        timewidths = parms_a[parmname]['timewidths'].copy()
+        freqs = parms_a[parmname]['freqs'].copy()
+        freqwidths = parms_a[parmname]['freqwidths'].copy()
+        parms = {}
+        v = {}
+        v['times'] = times
+        v['timewidths'] = timewidths
+        v['freqs'] = freqs
+        v['freqwidths'] = freqwidths
+
+        # Multiply gains
+        for pol in pol_list:
+            for antenna in antenna_list:
+                real1 = np.copy(parms_pre[gain+':'+pol+':Real:'+antenna]['values'])
+                real2 = np.copy(parms_a[gain+':' +pol+':Real:'+antenna]['values'])
+                imag1 = np.copy(parms_pre[gain+':'+pol+':Imag:'+antenna]['values'])
+                imag2 = np.copy(parms_a[gain+':'+pol+':Imag:'+antenna]['values'])
+
+                G1 = real1 + 1j * imag1
+                G2 = real2 + 1j * imag2
+                Gnew = G1 * G2
+                v['values'] = np.zeros((N_times, N_freqs), dtype=np.double)
+
+                parmname = gain + ':' + pol + ':Imag:' + antenna
+                v['values'] = np.copy(np.imag(Gnew))
+                parms[parmname] = v.copy()
+
+                parmname = gain + ':' + pol + ':Real:' + antenna
+                v['values'] = np.copy(np.real(Gnew))
+                parms[parmname] = v.copy()
+
+        pdb_out.addValues(parms)
+        pdb_out.flush()
+
 
 
 
