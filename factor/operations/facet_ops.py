@@ -136,7 +136,7 @@ class FacetSetup(Operation):
         # average to 1 channel per band. Do this twice, once for DATA and once
         # for CORRECTED_DATA
         self.log.info('Averaging DATA...')
-        actions = [Average(self.parset, m, p['avg1'], prefix='facet',
+        actions = [Average(self.parset, m, p['avg'], prefix='facet',
             direction=d, index=1) for d, m in zip(d_list, shifted_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
 
