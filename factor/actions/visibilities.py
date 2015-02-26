@@ -59,7 +59,7 @@ class DPPP(Action):
         if self.prefix is None:
             self.prefix = 'run_dppp'
         self.clean = clean
-        self.working_dir = self.vis_dir + '{1}/{2}/'.format(self.op_name, self.name)
+        self.working_dir = self.vis_dir + '{0}/{1}/'.format(self.op_name, self.name)
         if self.direction is not None:
             self.working_dir += '{0}/'.format(self.direction.name)
         if not os.path.exists(self.working_dir):
