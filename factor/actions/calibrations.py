@@ -190,7 +190,7 @@ class Add(BBS):
         # simply to copy the visibilities). Set the skip flag in the data map, then
         # deal with them as follows:
         from factor.lib.datamap_lib import write_mapfile, read_mapfile
-        from factor.operation_lib import copy_column
+        from factor.lib.operation_lib import copy_column
 
         model_files = read_mapfile(self.model_datamap)
         vis_files = read_mapfile(self.vis_datamap)
