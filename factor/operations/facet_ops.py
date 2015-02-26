@@ -84,7 +84,7 @@ class FacetAddCal(Operation):
             prefix='facet', direction=d)
         shifted_data_mapfile = action.run()
 
-        # Save files to band objects
+        # Save files to the band objects
         files = read_mapfile(shifted_data_mapfile)
         for band, f in zip(bands, files):
             band.shifted_data_file = f
