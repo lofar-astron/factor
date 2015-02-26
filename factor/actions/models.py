@@ -135,18 +135,6 @@ class MakeSkymodelFromModelImage(Action):
         set the skip flag to True.
 
         """
-        from factor.lib.datamap_lib import read_mapfile, set_mapfile_flags
-
-        model_files = read_mapfile(self.p['output_datamap'])
-        skip = []
-        for model_file in model_files:
-            if not os.path.exists(model_file):
-                skip.append(True)
-            else:
-                skip.append(False)
-        self.log.info('{0}'.format(skip))
-        set_mapfile_flags(self.p['output_datamap'], skip)
-
         return self.p['output_datamap']
 
 
@@ -255,6 +243,18 @@ class MakeFacetSkymodel(Action):
         """
         Return skymodel names
         """
+        from factor.lib.datamap_lib import read_mapfile, set_mapfile_flags
+
+        model_files = read_mapfile(self.p['output_datamap'])
+        skip_flags = []
+        for model_file in model_files:
+            if not os.path.exists(model_file):
+                skip_flags.append(True)
+            else:
+                skip_flags.append(False)
+        self.log.info('{0}'.format(skip_flags))
+        set_mapfile_flags(self.p['output_datamap'], skip_flags)
+
         return self.p['output_datamap']
 
 
