@@ -11,4 +11,4 @@ s2 = lsmtool.load(inmodel2)
 s1.concatenate(s2, matchBy='{{ matchby }}', radius={{ radius }}, keep='{{ keep }}',
     inheritPatches=True)
 s1.group('every')
-s1.write(outfile=outmodel, clobber=True)
+s1.write(fileName=outmodel, clobber=True)
