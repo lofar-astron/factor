@@ -123,20 +123,20 @@ class FacetSetup(Operation):
 
         # Make initial data maps for the phase-shifted datasets and their dir-indep
         # instrument parmdbs
-        shifted_data_mapfile = []
-        dir_indep_parmdbs_mapfile = []
+        shifted_data_mapfiles = []
+        dir_indep_parmdbs_mapfiles = []
         for d in d_list:
-            shifted_data_mapfile.append(write_mapfile([band.shifted_data_file for band
+            shifted_data_mapfiles.append(write_mapfile([band.shifted_data_file for band
                 in bands], self.name, prefix='shifted', working_dir=self.parset['dir_working']))
-            dir_indep_parmdbs_mapfile.append(write_mapfile([os.path.join(band.file,
+            dir_indep_parmdbs_mapfiles.append(write_mapfile([os.path.join(band.file,
                 band.dirindparmdb) for band in bands], self.name,
                 prefix='dir_indep_parmdbs', working_dir=self.parset['dir_working']))
 
         # average to 1 channel per band. Do this twice, once for DATA and once
         # for CORRECTED_DATA
         self.log.info('Averaging DATA...')
-        actions = [Average(self.parset, shifted_data_mapfile, p['avg1'], prefix='facet',
-            direction=d, index=1) for d in d_list]
+        actions = [Average(self.parset, m, p['avg1'], prefix='facet',
+            direction=d, index=1) for d, m in zip(d_list, shifted_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
 
         # apply direction-independent calibration
