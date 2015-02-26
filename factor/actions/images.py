@@ -87,7 +87,7 @@ class Casapy(Action):
                 self.op_name)
         else:
             self.image_dir = '{0}/images/{1}/{2}/'.format(factor_working_dir,
-                self.op_name, self.direction)
+                self.op_name, self.direction.name)
         if not os.path.exists(self.image_dir):
             os.makedirs(self.image_dir)
         self.working_dir = self.image_dir

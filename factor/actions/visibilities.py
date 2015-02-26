@@ -65,7 +65,7 @@ class DPPP(Action):
                 self.op_name)
         else:
             self.working_dir = '{0}/visdata/{1}/{2}/'.format(factor_working_dir,
-                self.op_name, self.direction)
+                self.op_name, self.direction.name)
         if not os.path.exists(self.working_dir):
             os.makedirs(self.working_dir)
 

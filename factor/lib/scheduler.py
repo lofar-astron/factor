@@ -52,9 +52,9 @@ class Scheduler(object):
             t.start()
 
 
-    def run(self, op_list):
+    def run(self, action_list):
         """
-        Runs a list of operations in parallel
+        Runs a list of actions in parallel
 
         Parameters
         ----------
@@ -63,12 +63,18 @@ class Scheduler(object):
 
         """
         self.startup()
-        if type(op_list) != list:
-            op_list = [op_list]
+        if type(action_list) != list:
+            action_list = [action_list]
         with Timer(self.log):
-            for op in op_list:
-                self.q.put_nowait(op)
+            for act in action_list:
+                self.q.put_nowait(act)
             for _ in self.threads:
                 self.q.put(None) # signal no more commands
             for t in self.threads:
                 t.join() # wait for completion
+
+        results = []
+        for action in action_list:
+            results.append(action.get_results())
+
+        return results

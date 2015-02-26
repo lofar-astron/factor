@@ -109,28 +109,34 @@ class FacetSetup(Operation):
         from factor.lib.operation_lib import copy_column
         from factor.operations.hardcoded_param import facet_setup as p
 
-        if os.path.exists(self.statebasename+'.done'):
-            self.direction.concat_file = 'visdata/allbands_concat_{0}.ms'.format(
-                self.direction.name)
-            return
+        # Check state for each direction
+#         if os.path.exists(self.statebasename+'.done'):
+#             self.direction.concat_file = 'visdata/allbands_concat_{0}.ms'.format(
+#                 self.direction.name)
+#             return
 
-        d = self.direction
+        d_list = self.direction
+        if type(d) is not list:
+            d_list = [d_list]
         bands = self.bands
 
         # Make initial data maps for the phase-shifted datasets and their dir-indep
         # instrument parmdbs
-        shifted_data_mapfile = self.make_datamap([band.shifted_data_file for band
-            in bands], self.name, prefix='shifted', working_dir=self.parset['dir_working'])
-        dir_indep_parmdbs_mapfile = write_mapfile([os.path.join(band.file,
-            band.dirindparmdb) for band in bands], self.name,
-            prefix='dir_indep_parmdbs', working_dir=self.parset['dir_working'])
+        shifted_data_mapfile = []
+        dir_indep_parmdbs_mapfile = []
+        for d in d_list:
+            shifted_data_mapfile.append(self.make_datamap([band.shifted_data_file for band
+                in bands], self.name, prefix='shifted', working_dir=self.parset['dir_working']))
+            dir_indep_parmdbs_mapfile.append(write_mapfile([os.path.join(band.file,
+                band.dirindparmdb) for band in bands], self.name,
+                prefix='dir_indep_parmdbs', working_dir=self.parset['dir_working']))
 
         # average to 1 channel per band. Do this twice, once for DATA and once
         # for CORRECTED_DATA
         self.log.info('Averaging DATA...')
-        action = Average(self.parset, shifted_data_mapfile, p['avg1'], prefix='facet',
-            direction=d, index=1)
-        avg_data_mapfile = action.run()
+        actions = [Average(self.parset, shifted_data_mapfile, p['avg1'], prefix='facet',
+            direction=d, index=1) for d in d_list]
+        avg_data_mapfiles = self.s.run(actions)
 
         # apply direction-independent calibration
         self.log.info('Applying direction-independent calibration...')

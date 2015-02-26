@@ -44,8 +44,14 @@ class Operation(object):
 
         factor_working_dir = parset['dir_working']
         if self.direction is not None:
-            self.statebasename = '{0}/state/{1}-{2}'.format(factor_working_dir,
-                self.name, self.direction.name)
+            if type(self.direction) is list:
+                self.statebasename = []
+                for d in self.direction:
+                    self.statebasename.append('{0}/state/{1}-{2}'.format(factor_working_dir,
+                        self.name, d.name)            )
+            else:
+                self.statebasename = '{0}/state/{1}-{2}'.format(factor_working_dir,
+                    self.name, self.direction.name)
         else:
             self.statebasename = '{0}/state/{1}'.format(factor_working_dir,
                 self.name)
@@ -98,21 +104,39 @@ class Operation(object):
         """
         Set success or failure state
         """
-        success_file = self.statebasename + '.done'
-        failure_file = self.statebasename + '.failed'
-        if returncode == 0:
-            state_file = success_file
-            if os.path.exists(failure_file):
-                os.remove(failure_file)
+        if type(self.statebasename) is list:
+            for s in self.statebasename:
+                success_file = s + '.done'
+                failure_file = s + '.failed'
+            if returncode == 0:
+                state_file = success_file
+                if os.path.exists(failure_file):
+                    os.remove(failure_file)
+            else:
+                state_file = failure_file
+                if os.path.exists(success_file):
+                    os.remove(success_file)
+            with open(state_file, 'w') as f:
+                f.write(' ')
+            if returncode != 0 and self.exit_on_error:
+                import sys
+                sys.exit(1)
         else:
-            state_file = failure_file
-            if os.path.exists(success_file):
-                os.remove(success_file)
-        with open(state_file, 'w') as f:
-            f.write(' ')
-        if returncode != 0 and self.exit_on_error:
-            import sys
-            sys.exit(1)
+            success_file = self.statebasename + '.done'
+            failure_file = self.statebasename + '.failed'
+            if returncode == 0:
+                state_file = success_file
+                if os.path.exists(failure_file):
+                    os.remove(failure_file)
+            else:
+                state_file = failure_file
+                if os.path.exists(success_file):
+                    os.remove(success_file)
+            with open(state_file, 'w') as f:
+                f.write(' ')
+            if returncode != 0 and self.exit_on_error:
+                import sys
+                sys.exit(1)
 
 
     def unset_state(self):
