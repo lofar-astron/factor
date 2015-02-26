@@ -201,9 +201,9 @@ class Add(BBS):
         if len(skip) == len(vis_files):
             return
         elif len(skip) > 0:
-            set_mapfile_flags(vis_datamap, skip):
-            set_mapfile_flags(model_datamap, skip):
-            set_mapfile_flags(parmdb_datamap, skip):
+            set_mapfile_flags(vis_datamap, skip)
+            set_mapfile_flags(model_datamap, skip)
+            set_mapfile_flags(parmdb_datamap, skip)
 
 
 class Apply(BBS):
