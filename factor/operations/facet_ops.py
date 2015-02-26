@@ -227,12 +227,14 @@ class FacetSelfcal(Operation):
             d.imsize = imsize
 
         self.log.info('Imaging (facet image #0)...')
+        self.log.debug('Averaging in preparation for imaging...')
         actions = [Average(self.parset, m, p['avg0'], prefix='facet',
             direction=d, index=0) for d, m in zip(d_list, facet_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
 
+        self.log.debug('Imaging...')
         actions = [MakeImage(self.parset, m, p['imager0'], prefix='facet_selfcal0',
-            direction=d, localdir=localdir) for d, m in zip(d_list, facet_data_mapfiles)]
+            direction=d, localdir=localdir) for d, m in zip(d_list, avg_data_mapfiles)]
         image0_basenames_mapfiles = self.s.run(actions)
 
         self.log.info('Making sky model (facet model #0)...')
@@ -262,12 +264,76 @@ class FacetSelfcal(Operation):
                 self.name, prefix='chunk', working_dir=self.parset['dir_working']))
 
         self.log.info('Solving for phase solutions and applying them (#1)...')
-        p['solve_phaseonly1']['timestep'] = cellsizetime_p
-        actions = [Solve(self.parset, dm, p['solve_phaseonly1'], model_datamap=mm,
+        p_list = []
+        for d in d_list:
+            p_d = p['solve_phaseonly1'].copy()
+            p_d['timestep'] = d.solint_p
+            p_list.append(p_d)
+        actions = [Solve(self.parset, dm, pd, model_datamap=mm,
             parmdb_datamap=pm, prefix='facet_phaseonly', direction=d, index=0)
-            for d, dm, mm, pm in zip(d_list, chunk_data_mapfiles,
+            for d, dm, pd, mm, pm in zip(d_list, chunk_data_mapfiles, p_list,
             chunk_model_mapfiles, chunk_parmdb_mapfiles)]
         self.s.run(actions)
+
+        self.log.info('Imaging (facet image #1)...')
+        self.log.debug('Merging chunks...')
+        merged_data_mapfiles = []
+        for chunks in chunks_list:
+            merged_data_mapfiles.append(write_mapfile([self.merge_chunks(
+                [chunk.file for chunk in chunks])], self.name, prefix='chunk',
+                working_dir=self.parset['dir_working']))
+
+        self.log.debug('Averaging in preparation for imaging...')
+        actions = [Average(self.parset, m, p['avg1'], prefix='facet',
+            direction=d, index=1) for d, m in zip(d_list, merged_data_mapfiles)]
+        avg_data_mapfiles = self.s.run(actions)
+
+        self.log.debug('Imaging...')
+        actions = [MakeImage(self.parset, m, p['imager1'], prefix='facet_selfcal1',
+            direction=d, localdir=localdir) for d, m in zip(d_list, avg_data_mapfiles)]
+        image1_basenames_mapfiles = self.s.run(actions)
+
+        self.log.info('Making sky model (facet model #1)...')
+        actions = [MakeSkymodelFromModelImage(self.parset, m, p['model1'],
+            prefix='facet_selfcal1', direction=d) for d, m in zip(d_list,
+            image1_basenames_mapfiles)]
+        skymodels1_mapfiles = self.s.run(actions)
+
+        self.log.info('Solving for phase solutions and applying them (#2)...')
+        p_list = []
+        for d in d_list:
+            p_d = p['solve_phaseonly2'].copy()
+            p_d['timestep'] = d.solint_p
+            p_list.append(p_d)
+        actions = [Solve(self.parset, dm, pd, model_datamap=mm,
+            parmdb_datamap=pm, prefix='facet_phaseonly', direction=d, index=1)
+            for d, dm, pd, mm, pm in zip(d_list, chunk_data_mapfiles, p_list,
+            chunk_model_mapfiles, chunk_parmdb_mapfiles)]
+        self.s.run(actions)
+
+        self.log.info('Imaging (facet image #2)...')
+        self.log.debug('Merging chunks...')
+        merged_data_mapfiles = []
+        for chunks in chunks_list:
+            merged_data_mapfiles.append(write_mapfile([self.merge_chunks(
+                [chunk.file for chunk in chunks])], self.name, prefix='chunk',
+                working_dir=self.parset['dir_working']))
+
+        self.log.debug('Averaging in preparation for imaging...')
+        actions = [Average(self.parset, m, p['avg2'], prefix='facet',
+            direction=d, index=2) for d, m in zip(d_list, merged_data_mapfiles)]
+        avg_data_mapfiles = self.s.run(actions)
+
+        self.log.debug('Imaging...')
+        actions = [MakeImage(self.parset, m, p['imager2'], prefix='facet_selfcal2',
+            direction=d, localdir=localdir) for d, m in zip(d_list, avg_data_mapfiles)]
+        image2_basenames_mapfiles = self.s.run(actions)
+
+        self.log.info('Making sky model (facet model #2)...')
+        actions = [MakeSkymodelFromModelImage(self.parset, m, p['model2'],
+            prefix='facet_selfcal2', direction=d) for d, m in zip(d_list,
+            image2_basenames_mapfiles)]
+        skymodels2_mapfiles = self.s.run(actions)
 
 
 
