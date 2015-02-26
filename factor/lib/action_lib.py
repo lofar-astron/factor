@@ -49,8 +49,9 @@ def make_image_basename(input_datamap, direction=None, prefix=None):
     import os
 
     if prefix is None:
-        prefix = 'image'
-        logging.warn('Prefix of imagebasename not selected, using "{0}".'.format(prefix))
+        prefix = ''
+    else:
+        prefix += '-'
 
     msfiles = read_mapfile(input_datamap)
     image_basenames = []
@@ -63,8 +64,8 @@ def make_image_basename(input_datamap, direction=None, prefix=None):
                 dirtxt = direction.name
             except:
                 dirtxt = direction
-            image_basenames.append('%s-%s_%s' % (prefix, re.sub(r'.MS|.ms', '', msbase), dirtxt))
+            image_basenames.append('%s%s_%s' % (prefix, re.sub(r'.MS|.ms', '', msbase), dirtxt))
         else:
-            image_basenames.append('%s-%s' % (prefix, re.sub(r'.MS|.ms', '', msbase)))
+            image_basenames.append('%s%s' % (prefix, re.sub(r'.MS|.ms', '', msbase)))
 
     return image_basenames
