@@ -27,8 +27,8 @@ class Chunk(object):
         self.file = '{0}-chunk_{1}.ms'.format(os.path.splitext(MSfile)[0], index)
         self.msname = self.file.split('/')[-1]
         self.name = 'chunk_{0}'.format(index)
-        self.parmdb = 'instrument'
-        self.parmdb_phaseamp1a = 'instrument_phase1'
-        self.parmdb_phaseamp2a = 'instrument_phase2'
-        self.parmdb_phaseamp1b = 'instrument_amp1'
-        self.parmdb_phaseamp2b = 'instrument_amp2'
+        self.parmdb = '{0}/instrument'.format(self.file)
+        self.parmdb_phaseamp1a = self.parmdb + '_phase1'
+        self.parmdb_phaseamp2a = self.parmdb + '_phase2'
+        self.parmdb_phaseamp1b = self.parmdb + '_amp1'
+        self.parmdb_phaseamp2b = self.parmdb + '_amp2'
