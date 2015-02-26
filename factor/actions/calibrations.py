@@ -70,13 +70,9 @@ class BBS(Action):
         if self.prefix is None:
             self.prefix = 'run_bbs'
         self.clean = clean
-        factor_working_dir = op_parset['dir_working']
-        if self.direction is None:
-            self.working_dir = '{0}/visdata/{1}/'.format(factor_working_dir,
-                self.op_name)
-        else:
-            self.working_dir = '{0}/visdata/{1}/{2}/'.format(factor_working_dir,
-                self.op_name, self.direction.name)
+        self.working_dir = self.vis_dir + '{1}/{2}/'.format(self.op_name, self.name)
+        if self.direction is not None:
+            self.working_dir += '{0}/'.format(self.direction.name)
         if not os.path.exists(self.working_dir):
             os.makedirs(self.working_dir)
 
