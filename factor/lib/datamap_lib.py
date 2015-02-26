@@ -37,6 +37,18 @@ def read_mapfile(mapfile):
     return files
 
 
+def read_mapfile_flags(mapfile):
+    """
+    Returns a list of skip flags in the input map file
+    """
+    indata = DataMap.load(mapfile)
+    flags = []
+    for item in indata:
+        flags.append(item.skip)
+
+    return flags
+
+
 def set_mapfile_flags(mapfile, flag_list):
     """
     Sets flages in a datamap

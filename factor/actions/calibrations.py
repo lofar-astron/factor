@@ -188,22 +188,16 @@ class Add(BBS):
 
         # Deal with empty sky models: (Note: if a facet sky model has no sources, we need
         # simply to copy the visibilities).
-        from factor.lib.datamap_lib import read_mapfile, set_mapfile_flags
+        from factor.lib.datamap_lib import read_mapfile, read_mapfile_flags, set_mapfile_flags
         from factor.lib.operation_lib import copy_column
 
         model_files = read_mapfile(self.model_datamap)
+        model_flags = read_mapfile_flags(self.model_datamap)
         vis_files = read_mapfile(self.vis_datamap)
-        skip = []
-        for model_file, vis_file in zip(model_files[:], vis_files[:]):
-            if not os.path.exists(model_file):
+        for model_file, model_flag, vis_file in zip(model_files, model_flags, vis_files):
+            if model_flag:
+                self.log.info('Skipping add for {0}'.format(vis_file))
                 copy_column(vis_file, self.p['incol'], self.p['outcol'])
-                skip.append(True)
-        if len(skip) == len(vis_files):
-            return
-        elif len(skip) > 0:
-            set_mapfile_flags(vis_datamap, skip)
-            set_mapfile_flags(model_datamap, skip)
-            set_mapfile_flags(parmdb_datamap, skip)
 
 
 class Apply(BBS):
