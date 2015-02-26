@@ -142,9 +142,10 @@ class MakeSkymodelFromModelImage(Action):
         for model_file in model_files:
             if not os.path.exists(model_file):
                 skip.append(True)
-        print(skip)
-        if len(skip) > 0:
-            set_mapfile_flags(self.p['output_datamap'], skip)
+            else:
+                skip.append(False)
+        self.log.info('{0}'.format(skip))
+        set_mapfile_flags(self.p['output_datamap'], skip)
 
         return self.p['output_datamap']
 

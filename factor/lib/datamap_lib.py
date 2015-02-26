@@ -51,9 +51,6 @@ def set_mapfile_flags(mapfile, flag_list):
 
     datamap.save(mapfile)
 
-    return
-
-
 
 def make_mapfile_basename(action_name=None, prefix=None, direction=None, index=None):
     """
