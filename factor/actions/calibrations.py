@@ -89,8 +89,11 @@ class BBS(Action):
         """
         Makes the required data maps
         """
+        from factor.lib.datamap_lib import write_mapfile
+
         self.p['vis_datamap'] = self.vis_datamap
-        self.p['skymodel_datamap'] = self.model_datamap
+        if self.model_datamap is not None:
+            self.p['skymodel_datamap'] = self.model_datamap
         self.p['parmdb_datamap'] = self.parmdb_datamap
 
 
@@ -105,7 +108,10 @@ class BBS(Action):
         if 'flags' not in self.p:
             self.p['flags'] = ''
 
-        template = env.get_template('bbs.pipeline.parset.tpl')
+        if self.model_datamap is not None:
+            template = env.get_template('bbs.pipeline.parset.tpl')
+        else:
+            template = env.get_template('bbs_nomodel.pipeline.parset.tpl')
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
@@ -207,7 +213,7 @@ class Apply(BBS):
     def __init__(self, op_parset, vis_datamap, p, parmdb_datamap, prefix=None,
         direction=None, clean=True, index=None):
         super(Apply, self).__init__(op_parset, vis_datamap, p,
-            model_datamap=None, parmdb_datamap=parmdb_datamap,
+            parmdb_datamap=parmdb_datamap,
             prefix=prefix, direction=direction, clean=clean, index=index,
             name='Apply')
 
