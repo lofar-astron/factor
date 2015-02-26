@@ -106,6 +106,7 @@ class FacetSetup(Operation):
         Run the steps for this operation
         """
         from factor.actions.visibilities import Average, Concatenate
+        from factor.actions.calibrations import Apply
         from factor.lib.operation_lib import copy_column
         from factor.operations.hardcoded_param import facet_setup as p
         from factor.lib.datamap_lib import write_mapfile, read_mapfile
@@ -141,28 +142,30 @@ class FacetSetup(Operation):
 
         # apply direction-independent calibration
         self.log.info('Applying direction-independent calibration...')
-        action = Apply(self.parset, shifted_data_mapfile, p['apply'],
-            parmdb_datamap=dir_indep_parmdbs_mapfile,
-            prefix='facet_dirindep', direction=d)
-        action.run()
+        actions = [Apply(self.parset, dm, p['apply'],
+            pm, prefix='facet_dirindep', direction=d) for d, dm, pm in zip(d_list,
+            shifted_data_mapfile, dir_indep_parmdbs_mapfile)]
+        self.s.run(actions)
 
         # concatenate all phase-shifted, averaged bands together. Do this twice,
         # once each of the two averaged file sets
         self.log.info('Concatenating bands...')
-        action = Concatenate(self.name, avg_data_mapfile, p['concat1'],
-            prefix='facet_bands', direction=d)
-        concat_data_mapfile = action.get_results()
-        action = Concatenate(self.name, avg_corrdata_mapfile, p['concat2'],
-            prefix='facet_bands', direction=d)
-        concat_corrdata_mapfile = action.get_results()
+        actions = [Concatenate(self.name, m, p['concat1'],
+            prefix='facet_bands', direction=d) for d, m in zip(d_list,
+            avg_data_mapfile)]
+        concat_data_mapfiles = self.s.run(actions)
+        actions = [Concatenate(self.name, m, p['concat2'],
+            prefix='facet_bands', direction=d) for d, m in zip(d_list,
+            avg_data_mapfile)]
+        concat_corrdata_mapfiles = self.s.run(actions)
 
         # Copy over CORRECTED_DATA column from second concat file, so that
         # first concatenated file has both DATA and dir-indep CORRECTED_DATA
-        concat_data_file = read_mapfile(concat_data_mapfile)
-        concat_corrdata_file = read_mapfile(concat_corrdata_mapfile)
-        d.concat_file = 'visdata/allbands_concat_{0}.ms'.format(d.name)
-        os.system('cp -r {0} {1}'.format(concat_data_file, d.concat_file))
-        copy_column(d.concat_file, p['copy']['incol'], p['copy']['outcol'],
-            ms_from=concat_corrdata_file)
+        for dm, cdm, d in zip(concat_data_mapfiles, concat_corrdata_mapfile, d_list):
+            concat_data_file = read_mapfile(dm)
+            concat_corrdata_file = read_mapfile(cdm)
+            d.concat_file = concat_data_file
+            copy_column(d.concat_file, p['copy']['incol'], p['copy']['outcol'],
+                ms_from=concat_corrdata_file)
 
 
