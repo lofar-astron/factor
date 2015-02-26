@@ -247,6 +247,7 @@ class FacetSelfcal(Operation):
         self.log.info('Dividing dataset into chunks...')
         chunks_list = []
         for d in d_list:
+            self.log.info(d.concat_file)
             chunks_list.append(self.make_chunks(d.concat_file, d.solint_a,
                 'facet_chunk'))
         chunk_data_mapfiles = []
