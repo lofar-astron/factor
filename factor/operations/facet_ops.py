@@ -254,11 +254,11 @@ class FacetSelfcal(Operation):
         chunk_model_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             chunk_data_mapfiles.append(write_mapfile([chunk.file for chunk in chunks],
-                self.name, prefix='chunk', working_dir=self.parset['dir_working'])
+                self.name, prefix='chunk', working_dir=self.parset['dir_working']))
             chunk_parmdb_mapfiles.append(write_mapfile([chunk.parmdb for chunk in chunks],
-                self.name, prefix='chunk', working_dir=self.parset['dir_working'])
+                self.name, prefix='chunk', working_dir=self.parset['dir_working']))
             chunk_model_mapfiles.append(write_mapfile(read_mapfile(skymodels0_mapfiles[i]),
-                self.name, prefix='chunk', working_dir=self.parset['dir_working'])
+                self.name, prefix='chunk', working_dir=self.parset['dir_working']))
 
         self.log.info('Solving for phase solutions and applying them (#1)...')
         p['solve_phaseonly1']['timestep'] = cellsizetime_p
