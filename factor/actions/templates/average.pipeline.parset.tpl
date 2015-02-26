@@ -13,4 +13,3 @@ dpppex.parsetarg.steps=[avg]
 dpppex.parsetarg.avg.type=squash
 dpppex.parsetarg.avg.freqstep={{ freqstep }}
 dpppex.parsetarg.avg.timestep={{ timestep }}
-
