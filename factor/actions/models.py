@@ -193,7 +193,7 @@ class MakeFacetSkymodel(Action):
         """
         Makes the required data maps
         """
-        from factor.lib.datamap_lib import write_mapfile, read_mapfile
+        from factor.lib.datamap_lib import write_mapfile
 
         self.p['input_datamap'] = self.input_datamap
 

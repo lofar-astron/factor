@@ -189,9 +189,27 @@ class Add(BBS):
         # Deal with empty sky models: (Note: if a facet sky model has no sources, we need
         # simply to copy the visibilities). Set the skip flag in the data map, then
         # deal with them as follows:
-#         for band in bands:
-#              if band.calmodel_dirindep is None:
-#                 copy_column(band.file, p['add']['incol'], p['add']['outcol'])
+        from factor.lib.datamap_lib import write_mapfile, read_mapfile
+        from factor.operation_lib import copy_column
+
+        model_files = read_mapfile(self.model_datamap)
+        vis_files = read_mapfile(self.vis_datamap)
+        empty_model = False
+        for model_file, vis_file in zip(model_files[:], vis_files[:]):
+            if not os.path.exists(model_file):
+                copy_column(vis_file, self.p['add']['incol'], self.p['add']['outcol'])
+                vis_files.remove(vis_file)
+                model_files.remove(model_file)
+                empty_model = True
+        if len(vis_files) == 0:
+            return
+        elif empty_model:
+            model_datamap = write_mapfile(model_files, self.op_name,
+            self.name, prefix=self.prefix+'-add_input', direction=self.direction,
+            working_dir=self.op_parset['dir_working'])
+            vis_datamap = write_mapfile(vis_files, self.op_name,
+            self.name, prefix=self.prefix+'-add_input', direction=self.direction,
+            working_dir=self.op_parset['dir_working'])
 
 
 class Apply(BBS):
