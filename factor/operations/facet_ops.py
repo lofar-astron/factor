@@ -111,16 +111,20 @@ class FacetSetup(Operation):
         from factor.operations.hardcoded_param import facet_setup as p
         from factor.lib.datamap_lib import write_mapfile, read_mapfile
 
-        # Check state for each direction
-#         if os.path.exists(self.statebasename+'.done'):
-#             self.direction.concat_file = 'visdata/allbands_concat_{0}.ms'.format(
-#                 self.direction.name)
-#             return
-
         d_list = self.direction
         if type(d_list) is not list:
             d_list = [d_list]
         bands = self.bands
+
+        # Check state for each direction
+        if os.path.exists(self.statebasename+'.done'):
+            for d in d_list:
+                concat_data_mapfile = os.path.join(self.parset['dir_working'],
+                    'datamaps/FacetSetup/Concatenate/facet_bands_output_{0}.datamap'.
+                    format(d.name))
+                file = read_mapfile(concat_data_mapfile)[0]
+                d.concat_file = file
+            return
 
         # Make initial data maps for the phase-shifted datasets and their dir-indep
         # instrument parmdbs
@@ -205,8 +209,7 @@ class FacetSelfcal(Operation):
         bands = self.bands
 
         # Make initial data maps for the averaged, phase-shifted datasets
-        shifted_data_mapfiles = []
-        dir_indep_parmdbs_mapfiles = []
+        facet_data_mapfiles = []
         for d in d_list:
             facet_data_mapfiles.append(write_mapfile([d.concat_file], self.name, prefix='shifted', working_dir=self.parset['dir_working']))
 
