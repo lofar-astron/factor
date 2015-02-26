@@ -8,6 +8,5 @@ dpppex.control.opts.executable={{ lofarroot }}/bin/NDPPP
 dpppex.control.opts.mapfile_out={{ output_datamap }}
 dpppex.control.opts.outputkey=msout
 
-dpppex.parsetarg.msin=temp
 dpppex.parsetarg.msin.datacolumn={{ columnname }}
 dpppex.parsetarg.steps=[]
