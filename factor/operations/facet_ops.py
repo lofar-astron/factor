@@ -289,6 +289,7 @@ class FacetSelfcal(Operation):
             if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
                 timepersample = t2[1]['TIME']-t2[0]['TIME'] # sec
                 nsamples = t2.nrows()
+                break
         t.close()
 
         nchunks = int(np.ceil((np.float(nsamples) / np.float(blockl))))
