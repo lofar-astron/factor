@@ -247,7 +247,6 @@ class FacetSelfcal(Operation):
         self.log.info('Dividing dataset into chunks...')
         chunks_list = []
         for d in d_list:
-            self.log.info(d.concat_file)
             chunks_list.append(self.make_chunks(d.concat_file, d.solint_a,
                 'facet_chunk'))
         chunk_data_mapfiles = []
@@ -284,7 +283,8 @@ class FacetSelfcal(Operation):
             blockl = 1
 
         # Get time per sample and number of samples
-        t = pt.table(dataset, readonly=True, ack=False)
+        self.log.info(dataset)
+        t = pt.table(dataset, readonly=True, ack=True)
         for t2 in t.iter(["ANTENNA1","ANTENNA2"]):
             if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
                 timepersample = t2[1]['TIME']-t2[0]['TIME'] # sec
