@@ -197,7 +197,7 @@ class Add(BBS):
         empty_model = False
         for model_file, vis_file in zip(model_files[:], vis_files[:]):
             if not os.path.exists(model_file):
-                copy_column(vis_file, self.p['add']['incol'], self.p['add']['outcol'])
+                copy_column(vis_file, self.p['incol'], self.p['outcol'])
                 vis_files.remove(vis_file)
                 model_files.remove(model_file)
                 empty_model = True
