@@ -6,11 +6,13 @@ from lofarpipe.support.data_map import DataMap, DataProduct
 
 
 def write_mapfile(data_list, op_name, action_name=None, prefix=None,
-    direction=None, index=None, working_dir='.', flag_list=None):
+    direction=None, index=None, working_dir='.', flag_list=None,
+    use_abs_path=True):
     """
     Returns a datamap for the input data list
     """
-    data_list = [os.path.abspath(f) for f in data_list]
+    if use_abs_path:
+        data_list = [os.path.abspath(f) for f in data_list]
     basename = make_mapfile_basename(action_name, prefix, direction, index)
     mapfile = os.path.join(working_dir, 'datamaps', op_name,
         '{0}.datamap'.format(basename))

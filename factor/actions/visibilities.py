@@ -84,12 +84,13 @@ class DPPP(Action):
                 + '_{0}.ms'.format(self.name.lower()) for ms in msnames]
         else:
             # Handle concatenation separately, as we need a data map with a
-            # single "file"
+            # single "file" (and hence must disable use_abs_path below).
             msnames = read_mapfile(self.input_datamap)
             concat_file_list = ['[' + ','.join([msname for msname in msnames]) + ']']
             self.p['input_datamap'] = write_mapfile(concat_file_list,
                 self.op_name, self.name, prefix=self.prefix+'_input',
-                direction=self.direction, working_dir=self.op_parset['dir_working'])
+                direction=self.direction, working_dir=self.op_parset['dir_working'],
+                use_abs_path=False)
 
             ms = msnames[0]
             output_files = [self.working_dir + os.path.splitext(os.path.basename(ms))[0]
