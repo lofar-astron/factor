@@ -144,7 +144,7 @@ class FacetSetup(Operation):
         self.log.info('Applying direction-independent calibration...')
         actions = [Apply(self.parset, dm, p['apply'],
             pm, prefix='facet_dirindep', direction=d) for d, dm, pm in zip(d_list,
-            shifted_data_mapfile, dir_indep_parmdbs_mapfile)]
+            avg_data_mapfiles, dir_indep_parmdbs_mapfiles)]
         self.s.run(actions)
 
         # concatenate all phase-shifted, averaged bands together. Do this twice,
@@ -152,16 +152,16 @@ class FacetSetup(Operation):
         self.log.info('Concatenating bands...')
         actions = [Concatenate(self.name, m, p['concat1'],
             prefix='facet_bands', direction=d) for d, m in zip(d_list,
-            avg_data_mapfile)]
+            avg_data_mapfiles)]
         concat_data_mapfiles = self.s.run(actions)
         actions = [Concatenate(self.name, m, p['concat2'],
             prefix='facet_bands', direction=d) for d, m in zip(d_list,
-            avg_data_mapfile)]
+            avg_data_mapfiles)]
         concat_corrdata_mapfiles = self.s.run(actions)
 
         # Copy over CORRECTED_DATA column from second concat file, so that
         # first concatenated file has both DATA and dir-indep CORRECTED_DATA
-        for dm, cdm, d in zip(concat_data_mapfiles, concat_corrdata_mapfile, d_list):
+        for dm, cdm, d in zip(concat_data_mapfiles, concat_corrdata_mapfiles, d_list):
             concat_data_file = read_mapfile(dm)
             concat_corrdata_file = read_mapfile(cdm)
             d.concat_file = concat_data_file
