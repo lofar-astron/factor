@@ -158,7 +158,10 @@ class Casapy(Action):
         self.p['timer'] = ''
         self.p['nfacets'] = 1
         self.p['wplanes'] = 1
-        self.p['imsize'] = self.getOptimumSize(int(self.p['imsize']))
+        self.imsize = self.p['imsize']
+        if self.direction is not None:
+            self.imsize = self.direction.imsize
+        self.p['imsize'] = self.getOptimumSize(int(self.imsize))
         if self.p['imsize'] > 512:
             self.p['wplanes'] = 64
         if self.p['imsize'] > 799:

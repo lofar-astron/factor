@@ -151,23 +151,99 @@ class FacetSetup(Operation):
         # once each of the two averaged file sets
         self.log.info('Concatenating bands...')
         actions = [Concatenate(self.parset, m, p['concat1'],
-            prefix='facet_bands', direction=d) for d, m in zip(d_list,
+            prefix='facet_bands', direction=d, index=0) for d, m in zip(d_list,
             avg_data_mapfiles)]
         concat_data_mapfiles = self.s.run(actions)
         actions = [Concatenate(self.parset, m, p['concat2'],
-            prefix='facet_bands', direction=d) for d, m in zip(d_list,
+            prefix='facet_bands', direction=d, index=1) for d, m in zip(d_list,
             avg_data_mapfiles)]
         concat_corrdata_mapfiles = self.s.run(actions)
 
         # Copy over CORRECTED_DATA column from second concat file, so that
         # first concatenated file has both DATA and dir-indep CORRECTED_DATA
         for dm, cdm, d in zip(concat_data_mapfiles, concat_corrdata_mapfiles, d_list):
-            concat_data_file = read_mapfile(dm)
-            concat_corrdata_file = read_mapfile(cdm)
-            self.log.info(concat_data_file)
-            self.log.info(concat_corrdata_file)
+            self.log.info('{0}'.format(dm))
+            concat_data_file = read_mapfile(dm)[0]
+            concat_corrdata_file = read_mapfile(cdm)[0]
+            self.log.info('{0}'.format(concat_data_file))
+            self.log.info('{0}'.format(concat_corrdata_file))
             d.concat_file = concat_data_file
             copy_column(d.concat_file, p['copy']['incol'], p['copy']['outcol'],
                 ms_from=concat_corrdata_file)
+
+
+def FacetSelfcal(Operation):
+    """
+    Selfcal one or more directions
+    """
+    def __init__(self, parset, bands, direction=None, reset=False):
+        super(FacetSelfcal, self).__init__(parset, bands, direction=direction,
+            reset=reset, name='FacetSelfcal')
+
+
+    def run_steps(self):
+        """
+        Run the steps for this operation
+        """
+        from factor.actions.visibilities import Average, Concatenate
+        from factor.actions.calibrations import Apply
+        from factor.lib.operation_lib import copy_column
+        from factor.operations.hardcoded_param import facet_setup as p
+        from factor.lib.datamap_lib import write_mapfile, read_mapfile
+
+        # Check state for each direction
+#         if os.path.exists(self.statebasename+'.done'):
+#             self.direction.concat_file = 'visdata/allbands_concat_{0}.ms'.format(
+#                 self.direction.name)
+#             return
+
+        if 'dir_node' in self.parset:
+            localdir = self.parset['dir_node']
+        else:
+            localdir = None
+
+        d_list = self.direction
+        if type(d_list) is not list:
+            d_list = [d_list]
+        bands = self.bands
+
+        # Make initial data maps for the averaged, phase-shifted datasets
+        shifted_data_mapfiles = []
+        dir_indep_parmdbs_mapfiles = []
+        for d in d_list:
+            facet_data_mapfiles.append(write_mapfile([d.concat_file], self.name, prefix='shifted', working_dir=self.parset['dir_working']))
+
+        # Set image sizes
+        for d in d_list:
+            cell = float(p['imager0']['cell'].split('arcsec')[0]) # arcsec per pixel
+            imsize = d.cal_radius_deg * 1.5 * 3600.0 / cell # pixels
+            if imsize < 512:
+                imsize = 512
+            d.imsize = imsize
+
+        self.log.info('Imaging (facet image #0)...')
+        actions = [Average(self.parset, m, p['avg0'], prefix='facet',
+            direction=d, index=0) for d, m in zip(d_list, facet_data_mapfiles)]
+        avg_data_mapfiles = self.s.run(actions)
+
+        actions = [MakeImage(self.parset, m, p['imager0'], prefix='facet_selfcal0',
+            direction=d, localdir=localdir) for d, m in zip(d_list, facet_data_mapfiles)]
+        image0_basenames_mapfile = self.s.run(actions)
+
+        self.log.info('Making sky model (facet model #0)...')
+        actions = [MakeSkymodelFromModelImage(self.parset, m, p['model0'],
+            prefix='facet_selfcal0', direction=d) for d, m in zip(d_list,
+            image0_basenames_mapfile)]
+        skymodels0_mapfile = self.s.run(actions)
+
+
+
+
+
+
+
+
+
+
 
 
