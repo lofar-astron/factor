@@ -210,6 +210,9 @@ class MakeFacetSkymodel(Action):
         self.p['scriptname'] = os.path.abspath(self.script_file)
         self.p['cal_only'] = self.cal_only
         self.p['vertices'] = self.direction.vertices
+        self.p['ra'] = self.direction.ra
+        self.p['dec'] = self.direction.dec
+        self.p['cal_radius'] = self.direction.cal_radius_deg
 
         template = env.get_template('make_facet_skymodel.pipeline.parset.tpl')
         tmp = template.render(self.p)

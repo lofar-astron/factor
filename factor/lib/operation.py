@@ -6,7 +6,7 @@ Contains the master class for operations
 import os
 import logging
 from factor.lib.context import Timer
-
+from factor.lib.scheduler import Scheduler
 
 class Operation(object):
     """
@@ -40,15 +40,15 @@ class Operation(object):
         self.reset = reset
         self.exit_on_error = True
         self.log = logging.getLogger(self.name)
-        factor_working_dir = parset['dir_working']
+        self.s = Scheduler(parset['ncpu'], name=name)
 
+        factor_working_dir = parset['dir_working']
         if self.direction is not None:
             self.statebasename = '{0}/state/{1}-{2}'.format(factor_working_dir,
                 self.name, self.direction.name)
         else:
             self.statebasename = '{0}/state/{1}'.format(factor_working_dir,
                 self.name)
-
         self.mapbasename = '{0}/datamaps/{1}/'.format(factor_working_dir, self.name)
         if not os.path.exists(self.mapbasename):
             os.makedirs(self.mapbasename)

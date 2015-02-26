@@ -10,13 +10,16 @@ fullskymodel = sys.argv[1]
 outmodel = sys.argv[2]
 cal_only = bool(sys.argv[3])
 vertices = {{ vertices }}
+facet_ra = {{ ra }}
+facet_dec = {{ dec }}
+cal_radius_deg = {{ cal_radius }}
 
 s = lsmtool.load(fullskymodel)
 
 if cal_only:
     # Get calibrator model
-    dist = s.getDistance(self.facet_ra, self.facet_dec)
-    s.select(dist < self.cal_radius_deg)
+    dist = s.getDistance(facet_ra, facet_dec)
+    s.select(dist < cal_radius_deg)
 else:
     # Get all facet sources
     x, y, midRA, midDec = s._getXY()
