@@ -108,6 +108,7 @@ class FacetSetup(Operation):
         from factor.actions.visibilities import Average, Concatenate
         from factor.lib.operation_lib import copy_column
         from factor.operations.hardcoded_param import facet_setup as p
+        from factor.lib.datamap_lib import write_mapfile, read_mapfile
 
         # Check state for each direction
 #         if os.path.exists(self.statebasename+'.done'):
@@ -125,7 +126,7 @@ class FacetSetup(Operation):
         shifted_data_mapfile = []
         dir_indep_parmdbs_mapfile = []
         for d in d_list:
-            shifted_data_mapfile.append(self.make_datamap([band.shifted_data_file for band
+            shifted_data_mapfile.append(write_mapfile([band.shifted_data_file for band
                 in bands], self.name, prefix='shifted', working_dir=self.parset['dir_working']))
             dir_indep_parmdbs_mapfile.append(write_mapfile([os.path.join(band.file,
                 band.dirindparmdb) for band in bands], self.name,
