@@ -164,6 +164,8 @@ class FacetSetup(Operation):
         for dm, cdm, d in zip(concat_data_mapfiles, concat_corrdata_mapfiles, d_list):
             concat_data_file = read_mapfile(dm)
             concat_corrdata_file = read_mapfile(cdm)
+            self.log.info(concat_data_file)
+            self.log.info(concat_corrdata_file)
             d.concat_file = concat_data_file
             copy_column(d.concat_file, p['copy']['incol'], p['copy']['outcol'],
                 ms_from=concat_corrdata_file)
