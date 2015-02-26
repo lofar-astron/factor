@@ -129,8 +129,23 @@ class MakeSkymodelFromModelImage(Action):
 
     def get_results(self):
         """
-        Return skymodel names
+        Return skymodel names.
+
+        If a skymodel was not made because there were no sources in the facet,
+        set the skip flag to True.
+
         """
+        from factor.lib.datamap_lib import read_mapfile, set_mapfile_flags
+
+        model_files = read_mapfile(self.p['output_datamap'])
+        skip = []
+        for model_file in model_files:
+            if not os.path.exists(model_file):
+                skip.append(True)
+        print(skip)
+        if len(skip) > 0:
+            set_mapfile_flags(self.p['output_datamap'], skip)
+
         return self.p['output_datamap']
 
 
