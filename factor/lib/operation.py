@@ -67,7 +67,11 @@ class Operation(object):
         if self.direction is None:
             self.log.info('<-- Operation %s started' % self.name)
         else:
-            self.log.info('<-- Operation %s started (direction: %s)' % (self.name, self.direction.name))
+            if type(self.direction) is list:
+                dirstr = ', '.join([d.name if d in self.direction])
+            else:
+                dirstr = self.direction.name
+            self.log.info('<-- Operation %s started (direction(s): %s)' % (self.name, dirstr))
 
 
     def run_steps(self):
@@ -97,7 +101,11 @@ class Operation(object):
         if self.direction is None:
             self.log.info('--> Operation %s finished' % self.name)
         else:
-            self.log.info('--> Operation %s finished (direction: %s)' % (self.name, self.direction.name))
+            if type(self.direction) is list:
+                dirstr = ', '.join([d.name if d in self.direction])
+            else:
+                dirstr = self.direction.name
+            self.log.info('--> Operation %s finished (direction(s): %s)' % (self.name, dirstr))
 
 
     def set_state(self, returncode):
