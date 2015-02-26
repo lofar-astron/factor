@@ -150,11 +150,11 @@ class FacetSetup(Operation):
         # concatenate all phase-shifted, averaged bands together. Do this twice,
         # once each of the two averaged file sets
         self.log.info('Concatenating bands...')
-        actions = [Concatenate(self.name, m, p['concat1'],
+        actions = [Concatenate(self.parset, m, p['concat1'],
             prefix='facet_bands', direction=d) for d, m in zip(d_list,
             avg_data_mapfiles)]
         concat_data_mapfiles = self.s.run(actions)
-        actions = [Concatenate(self.name, m, p['concat2'],
+        actions = [Concatenate(self.parset, m, p['concat2'],
             prefix='facet_bands', direction=d) for d, m in zip(d_list,
             avg_data_mapfiles)]
         concat_corrdata_mapfiles = self.s.run(actions)
