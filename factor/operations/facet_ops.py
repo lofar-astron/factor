@@ -162,17 +162,14 @@ class FacetSetup(Operation):
         # Copy over CORRECTED_DATA column from second concat file, so that
         # first concatenated file has both DATA and dir-indep CORRECTED_DATA
         for dm, cdm, d in zip(concat_data_mapfiles, concat_corrdata_mapfiles, d_list):
-            self.log.info('{0}'.format(dm))
             concat_data_file = read_mapfile(dm)[0]
             concat_corrdata_file = read_mapfile(cdm)[0]
-            self.log.info('{0}'.format(concat_data_file))
-            self.log.info('{0}'.format(concat_corrdata_file))
             d.concat_file = concat_data_file
             copy_column(d.concat_file, p['copy']['incol'], p['copy']['outcol'],
                 ms_from=concat_corrdata_file)
 
 
-def FacetSelfcal(Operation):
+class FacetSelfcal(Operation):
     """
     Selfcal one or more directions
     """
@@ -236,6 +233,19 @@ def FacetSelfcal(Operation):
             image0_basenames_mapfile)]
         skymodels0_mapfile = self.s.run(actions)
 
+        # Chunk phase-shifted concatenated MS of all bands in time. Chunks should
+        # be the length of the desired amplitude solution interval (otherwise they
+        # must be concatenated together later before amp. calibration)
+#         self.log.info('Dividing dataset into chunks...')
+#         chunks = self.make_chunks(d.concat_file, cellsizetime_a,
+#             'facet_chunk')
+#
+#         self.log.info('Solving for phase solutions and applying them (#1)...')
+#         p['solve_phaseonly1']['timestep'] = cellsizetime_p
+#         actions = [ a.solve.solve(self.name, chunk.file, model0, chunk.parmdb,
+#             p['solve_phaseonly1'], prefix='facet_phaseonly', direction=d, index=0)
+#             for chunk in chunks ]
+#         self.s.run_action_parallel( actions )
 
 
 
