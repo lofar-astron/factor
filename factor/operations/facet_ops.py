@@ -646,14 +646,17 @@ class FacetSelfcal(Operation):
         import os
 
         msout = None
+        if prefix is not None:
+            pstr = prefix + '_'
+        else:
+            pstr = ''
         for m in chunk_files:
             if '-chunk_0' in m:
-                msout = 'allchunks'.join(m.split('chunk_0'))
+                rstr = prstr + 'allchunks'
+                msout = rstr.join(m.split('chunk_0'))
                 break
         if msout is None:
             msout = chunk_files[0]
-        if prefix is not None:
-            msout = prefix + '_' + msout
 
         if os.path.exists(msout):
             if clobber:
