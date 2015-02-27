@@ -652,7 +652,7 @@ class FacetSelfcal(Operation):
             pstr = ''
         for m in chunk_files:
             if '-chunk_0' in m:
-                rstr = prstr + 'allchunks'
+                rstr = pstr + 'allchunks'
                 msout = rstr.join(m.split('chunk_0'))
                 break
         if msout is None:
