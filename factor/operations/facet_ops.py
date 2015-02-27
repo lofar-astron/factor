@@ -671,7 +671,7 @@ class FacetSelfcal(Operation):
 
 
     def merge_chunk_parmdbs(self, inparmdbs, concat_file, prefix='merged',
-        clobber=True):
+        clobber=False):
         """Merges parmdbs"""
         import lofar.parmdb
         import pyrap.tables as pt
