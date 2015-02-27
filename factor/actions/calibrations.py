@@ -247,7 +247,7 @@ class Solve(BBS):
         parmdb_files = [os.path.join(v, 'instrument') for v in vis_files]
         parmdb_datamap = write_mapfile(parmdb_files, self.name,
             prefix=self.prefix+'_output_parmdbs',
-            working_dir=self.parset['dir_working'])
+            working_dir=self.op_parset['dir_working'])
 
         return parmdb_datamap
 
