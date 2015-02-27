@@ -241,7 +241,13 @@ class Solve(BBS):
         """
         Return results
         """
-        return self.parmdb_datamap
+        vis_files = read_mapfile(self.vis_datamap)
+        parmdb_files = [os.path.join(v, 'instrument') for v in vis_files]
+        parmdb_datamap = write_mapfile(parmdb_files, self.name,
+            prefix=self.prefix+'_output_parmdbs',
+            working_dir=self.parset['dir_working']))
+
+        return parmdb_datamap
 
 
 class Subtract(BBS):
