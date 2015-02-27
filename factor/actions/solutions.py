@@ -73,7 +73,7 @@ class Losoto(Action):
         parmdb_names = read_mapfile(self.parmdb_datamap)
         ms_names = read_mapfile(self.vis_datamap)
         for pn, mn in zip(parmdb_names, ms_names):
-            is os.path.exists('{0}/instrument'.format(mn)):
+            if os.path.exists('{0}/instrument'.format(mn)):
                 os.system('rm -rf {0}/instrument'.format(mn))
             os.system('cp -r {0} {1}/instrument'.format(pn, mn))
 
