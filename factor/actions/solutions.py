@@ -129,7 +129,7 @@ class Losoto(Action):
         parmdb_names = read_mapfile(self.parmdb_datamap)
         ms_names = read_mapfile(self.vis_datamap)
         for pn, mn in zip(parmdb_names, ms_names):
-            is os.path.exists(pn):
+            if os.path.exists(pn):
                 os.system('rm -rf {0}'.format(pn))
             os.system('cp -r {0}/{1}_instrument {2}'.format(mn, self.p['solset'], pn))
 
