@@ -6,7 +6,7 @@ import.control.opts.executable=/usr/bin/python
 import.control.opts.mapfile_in={{ input_datamap }}
 import.control.opts.inputkey=inputms
 import.control.opts.mapfile_out={{ h5parm_datamap }}
-import.control.opts.inputkey=h5parm
+import.control.opts.outputkey=h5parm
 import.control.opts.arguments=[{{ lofarroot }}/bin/H5parm_importer.py, h5parm, inputms]
 
 losoto.control.kind=recipe
