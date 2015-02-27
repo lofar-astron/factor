@@ -673,10 +673,6 @@ class FacetSelfcal(Operation):
     def merge_chunk_parmdbs(self, inparmdbs, concat_file, prefix='merged',
         clobber=False):
         """Merges parmdbs"""
-        import lofar.parmdb
-        import pyrap.tables as pt
-        import os
-
         root_dir = inparmdbs[0].split('chunks')[0]
         outparmdb = '{0}/{1}_instrument'.format(root_dir, prefix)
         if os.path.exists(outparmdb):
@@ -684,6 +680,10 @@ class FacetSelfcal(Operation):
                 os.system('rm -rf {0}'.format(outparmdb))
             else:
                 return outparmdb
+
+        import lofar.parmdb
+        import pyrap.tables as pt
+        import os
 
         os.system('cp -r {0} {1}'.format(inparmdbs[0], outparmdb))
         pdb_concat = lofar.parmdb.parmdb(outparmdb)
