@@ -3,7 +3,7 @@ Module that holds all solution-related actions
 
 Classes
 -------
-LoSoTo : Action
+Losoto : Action
     Runs LoSoTo
 Smooth : Action
     Smooths and normalizes solutions
@@ -137,7 +137,7 @@ class Losoto(Action):
 
 
 
-class Smooth(LoSoTo):
+class Smooth(Losoto):
     """
     Action to smooth and normalize solutions
     """
@@ -148,7 +148,7 @@ class Smooth(LoSoTo):
             name='Smooth')
 
 
-class ResetPhases(LoSoTo):
+class ResetPhases(Losoto):
     """
     Action to reset phases to zero
     """
