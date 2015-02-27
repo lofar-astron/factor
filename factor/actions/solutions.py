@@ -71,7 +71,7 @@ class Losoto(Action):
         self.templatename = '{0}_{1}.parset.tpl'.format(prefix, self.name.lower())
 
         # Copy parmdbs to instrument directory inside MS files
-        from factor.lib.datamap_lib import write_mapfile, read_mapfile
+        from factor.lib.datamap_lib import read_mapfile
         parmdb_names = read_mapfile(self.parmdb_datamap)
         ms_names = read_mapfile(self.vis_datamap)
         for pn, mn in zip(parmdb_names, ms_names):
@@ -127,6 +127,8 @@ class Losoto(Action):
         """
         Return results
         """
+        from factor.lib.datamap_lib import read_mapfile
+
         # Copy parmdbs from instrument directory inside MS files to final files
         parmdb_names = read_mapfile(self.parmdb_datamap)
         ms_names = read_mapfile(self.vis_datamap)
