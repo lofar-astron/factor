@@ -674,6 +674,8 @@ class FacetSelfcal(Operation):
         clobber=False):
         """Merges parmdbs"""
         import os
+        import lofar.parmdb
+        import pyrap.tables as pt
 
         root_dir = inparmdbs[0].split('chunks')[0]
         outparmdb = '{0}/{1}_instrument'.format(root_dir, prefix)
@@ -682,9 +684,6 @@ class FacetSelfcal(Operation):
                 os.system('rm -rf {0}'.format(outparmdb))
             else:
                 return outparmdb
-
-        import lofar.parmdb
-        import pyrap.tables as pt
 
         os.system('cp -r {0} {1}'.format(inparmdbs[0], outparmdb))
         pdb_concat = lofar.parmdb.parmdb(outparmdb)
