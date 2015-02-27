@@ -683,7 +683,8 @@ class FacetSelfcal(Operation):
             if clobber:
                 os.system('rm -rf {0}'.format(outparmdb))
             else:
-                return
+                return outparmdb
+
         os.system('cp -r {0} {1}'.format(inparmdbs[0], outparmdb))
         pdb_concat = lofar.parmdb.parmdb(outparmdb)
 
