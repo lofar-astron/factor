@@ -1,12 +1,11 @@
-pipeline.steps=[import]
-#, losoto, export]
+pipeline.steps=[import, losoto, export]
 
 import.control.kind=recipe
 import.control.type=executable_args
 import.control.opts.mapfiles_in=[{{ input_datamap }}, {{ h5parm_datamap }}]
 import.control.opts.executable={{ lofarroot }}/bin/H5parm_importer.py
 import.control.opts.inputkeys=[inputms, h5parm]
-import.control.opts.arguments=[h5parm, inputms, --instrument=instrument]
+import.control.opts.arguments=[h5parm, inputms]
 
 losoto.control.kind=recipe
 losoto.control.type=executable_args
