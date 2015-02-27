@@ -102,7 +102,7 @@ class Losoto(Action):
         self.p['lofarroot'] = self.op_parset['lofarroot']
         self.p['parset'] = self.parset_file
 
-        template = env.get_template('{0}.pipeline.parset.tpl'.format(self.name.lower()))
+        template = env.get_template('losoto.pipeline.parset.tpl')
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
