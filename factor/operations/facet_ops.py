@@ -247,7 +247,7 @@ class FacetSelfcal(Operation):
         chunks_list = []
         for d in d_list:
             chunks_list.append(self.make_chunks(d.concat_file, d.solint_a,
-                'facet_chunk'))
+                'facet_chunk', direction=d))
         chunk_data_mapfiles = []
         chunk_parmdb_mapfiles = []
         chunk_model_mapfiles = []
@@ -564,7 +564,7 @@ class FacetSelfcal(Operation):
         self.s.run(actions)
 
 
-    def make_chunks(self, dataset, blockl, prefix=None, clobber=False):
+    def make_chunks(self, dataset, blockl, prefix=None, direction=None, clobber=True):
         """
         Split ms into time chunks of length chunksize time slots
         """
@@ -591,7 +591,7 @@ class FacetSelfcal(Operation):
         # Set up the chunks
         chunk_list = []
         for c in range(nchunks):
-            chunk_obj = Chunk(dataset, c)
+            chunk_obj = Chunk(self.parset, dataset, c, prefix=prefix, direction=direction)
             chunk_obj.t0 = tlen * float(chunk_obj.index) # hours
             chunk_obj.t1 = np.float(chunk_obj.t0) + tlen # hours
             if c == nchunks-1 and chunk_obj.t1 < tobs:
