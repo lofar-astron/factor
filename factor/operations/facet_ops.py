@@ -282,7 +282,7 @@ class FacetSelfcal(Operation):
         merged_data_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             merged_data_mapfiles.append(write_mapfile([self.merge_chunks(
-                [chunk.file for chunk in chunks])], self.name, prefix='merged_vis',
+                [chunk.file for chunk in chunks], prefix='image1')], self.name, prefix='merged_vis',
                 working_dir=self.parset['dir_working'], direction=d_list[i]))
 
         self.log.debug('Averaging in preparation for imaging...')
@@ -328,7 +328,7 @@ class FacetSelfcal(Operation):
         merged_data_mapfiles = []
         for chunks in chunks_list:
             merged_data_mapfiles.append(write_mapfile([self.merge_chunks(
-                [chunk.file for chunk in chunks])], self.name, prefix='merged_vis',
+                [chunk.file for chunk in chunks], prefix='image2')], self.name, prefix='merged_vis',
                 working_dir=self.parset['dir_working']))
 
         self.log.debug('Averaging in preparation for imaging...')
@@ -389,7 +389,7 @@ class FacetSelfcal(Operation):
         merged_data_mapfiles = []
         for chunks in chunks_list:
             merged_data_mapfiles.append(write_mapfile([self.merge_chunks(
-                [chunk.file for chunk in chunks])], self.name, prefix='merged_vis',
+                [chunk.file for chunk in chunks], prefix='image3')], self.name, prefix='merged_vis',
                 working_dir=self.parset['dir_working'], direction=d_list[i]))
 
         self.log.info('Merging instrument parmdbs...')
@@ -495,7 +495,7 @@ class FacetSelfcal(Operation):
         merged_data_mapfiles = []
         for chunks in chunks_list:
             merged_data_mapfiles.append(write_mapfile([self.merge_chunks(
-                [chunk.file for chunk in chunks])], self.name, prefix='merged_vis',
+                [chunk.file for chunk in chunks], prefix='image4')], self.name, prefix='merged_vis',
                 working_dir=self.parset['dir_working'], direction=d_list[i]))
 
         self.log.info('Merging instrument parmdbs...')
@@ -640,7 +640,7 @@ class FacetSelfcal(Operation):
         t.close()
 
 
-    def merge_chunks(self, chunk_files, clobber=True):
+    def merge_chunks(self, chunk_files, prefix=None, clobber=False):
         """Merges chunks"""
         import pyrap.tables as pt
         import os
@@ -652,6 +652,9 @@ class FacetSelfcal(Operation):
                 break
         if msout is None:
             msout = chunk_files[0]
+        if prefix is not None:
+            msout = prefix + '_' + msout
+
         if os.path.exists(msout):
             if clobber:
                 os.system('rm -rf {0}'.format(msout))
