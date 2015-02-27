@@ -14,8 +14,10 @@ def write_mapfile(data_list, op_name, action_name=None, prefix=None,
     if use_abs_path:
         data_list = [os.path.abspath(f) for f in data_list]
     basename = make_mapfile_basename(action_name, prefix, direction, index)
-    mapfile = os.path.join(working_dir, 'datamaps', op_name,
-        '{0}.datamap'.format(basename))
+    mapfile_dir = os.path.join(working_dir, 'datamaps', op_name)
+    if not os.path.exists(mapfile_dir):
+        os.makedirs(mapfile_dir)
+    mapfile = os.path.join(mapfile_dir, '{0}.datamap'.format(basename))
 
     datamap = DataMap([])
     if flag_list is None:
