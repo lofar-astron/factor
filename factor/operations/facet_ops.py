@@ -5,7 +5,7 @@ Classes
 -------
 FacetAddCal : Operation
     Adds calibrator source to data
-FacetSetupCal : Operation
+FacetSetup : Operation
     Sets up the data for selfcal
 FacetSelfcal : Operation
     Runs selfcal cycle

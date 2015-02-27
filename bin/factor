@@ -141,7 +141,7 @@ if __name__=='__main__':
             op.run()
 
         # Setup up facet(s) for selfcal of calibrator
-        op = FacetSetupCal(parset, bands, direction_group)
+        op = FacetSetup(parset, bands, direction_group)
         op.run()
 
         # Do selfcal on calibrator only
