@@ -245,6 +245,8 @@ class Solve(BBS):
                 self.parmdb_datamap = None
             else:
                 self.output_parmdb_datamap = None
+        else:
+            self.output_parmdb_datamap = None
 
 
     def get_results(self):
