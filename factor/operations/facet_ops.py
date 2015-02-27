@@ -258,8 +258,8 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             chunk_data_mapfiles.append(write_mapfile([chunk.file for chunk in chunks],
                 self.name, prefix='chunks_vis', working_dir=self.parset['dir_working']))
-            chunk_parmdb_mapfiles.append(write_mapfile([chunk.parmdb for chunk in chunks],
-                self.name, prefix='chunks_parmdb', working_dir=self.parset['dir_working']))
+#             chunk_parmdb_mapfiles.append(write_mapfile([chunk.parmdb for chunk in chunks],
+#                 self.name, prefix='chunks_parmdb', working_dir=self.parset['dir_working']))
             skymodel0 = read_mapfile(skymodels0_mapfiles[i])
             chunk_model_mapfiles.append(write_mapfile(skymodel0*len(chunks),
                 self.name, prefix='chunks_skymodel', working_dir=self.parset['dir_working']))
@@ -271,10 +271,10 @@ class FacetSelfcal(Operation):
             p_d['timestep'] = d.solint_p
             p_list.append(p_d)
         actions = [Solve(self.parset, dm, pd, model_datamap=mm,
-            parmdb_datamap=pm, prefix='facet_phaseonly', direction=d, index=0)
-            for d, dm, pd, mm, pm in zip(d_list, chunk_data_mapfiles, p_list,
-            chunk_model_mapfiles, chunk_parmdb_mapfiles)]
-        self.s.run(actions)
+            prefix='facet_phaseonly', direction=d, index=0)
+            for d, dm, pd, mm in zip(d_list, chunk_data_mapfiles, p_list,
+            chunk_model_mapfiles)]
+        chunk_parmdb_mapfiles = self.s.run(actions)
 
         self.log.info('Imaging (facet image #1)...')
         self.log.debug('Merging chunks...')
@@ -307,10 +307,10 @@ class FacetSelfcal(Operation):
             p_d['timestep'] = d.solint_p
             p_list.append(p_d)
         actions = [Solve(self.parset, dm, pd, model_datamap=mm,
-            parmdb_datamap=pm, prefix='facet_phaseonly', direction=d, index=1)
-            for d, dm, pd, mm, pm in zip(d_list, chunk_data_mapfiles, p_list,
-            chunk_model_mapfiles, chunk_parmdb_mapfiles)]
-        self.s.run(actions)
+            prefix='facet_phaseonly', direction=d, index=1)
+            for d, dm, pd, mm in zip(d_list, chunk_data_mapfiles, p_list,
+            chunk_model_mapfiles)]
+        chunk_parmdb_mapfiles = self.s.run(actions)
 
         self.log.info('Imaging (facet image #2)...')
         self.log.debug('Merging chunks...')

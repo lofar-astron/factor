@@ -90,7 +90,8 @@ class BBS(Action):
         self.p['vis_datamap'] = self.vis_datamap
         if self.model_datamap is not None:
             self.p['skymodel_datamap'] = self.model_datamap
-        self.p['parmdb_datamap'] = self.parmdb_datamap
+        if self.parmdb_datamap is not None:
+            self.p['parmdb_datamap'] = self.parmdb_datamap
 
 
     def make_pipeline_control_parset(self):
@@ -105,7 +106,10 @@ class BBS(Action):
             self.p['flags'] = ''
 
         if self.model_datamap is not None:
-            template = env.get_template('bbs.pipeline.parset.tpl')
+            if self.parmdb_datamap is not None:
+                template = env.get_template('bbs.pipeline.parset.tpl')
+            else:
+                template = env.get_template('bbs_noparmdb.pipeline.parset.tpl')
         else:
             template = env.get_template('bbs_nomodel.pipeline.parset.tpl')
         tmp = template.render(self.p)
@@ -217,6 +221,12 @@ class Apply(BBS):
 class Solve(BBS):
     """
     Action to solve for solutions
+
+    Returns
+    -------
+    parmdb_datamap : DataMap
+        Output solutions parmdb data map
+
     """
     def __init__(self, op_parset, vis_datamap, p, model_datamap=None,
         parmdb_datamap=None, prefix=None, direction=None, clean=True,
@@ -225,6 +235,13 @@ class Solve(BBS):
             model_datamap=model_datamap, parmdb_datamap=parmdb_datamap,
             prefix=prefix, direction=direction, clean=clean, index=index,
             name='Solve')
+
+
+    def get_results(self):
+        """
+        Return results
+        """
+        return self.parmdb_datamap
 
 
 class Subtract(BBS):
