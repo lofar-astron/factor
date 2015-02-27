@@ -387,10 +387,11 @@ class FacetSelfcal(Operation):
 
         self.log.info('Merging instrument parmdbs...')
         merged_parmdb_phaseamp_amp1_mapfiles = []
-        for chunks in chunks_list:
+        for i, chunks in enumerate(chunks_list):
+            concat_file = read_mapfile(merged_data_mapfiles[i])
             merged_parmdb_phaseamp_amp1_mapfiles.append(write_mapfile(
                 [self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp1 for chunk
-                in chunks])], self.name, prefix='merged_amps1',
+                in chunks], concat_file)], self.name, prefix='merged_amps1',
                 working_dir=self.parset['dir_working']))
 
         self.log.debug('Smoothing amplitude solutions...')
@@ -491,17 +492,20 @@ class FacetSelfcal(Operation):
 
         self.log.info('Merging instrument parmdbs...')
         merged_parmdb_phaseamp_amp2_mapfiles = []
-        for chunks in chunks_list:
+        for i, chunks in enumerate(chunks_list):
+            concat_file = read_mapfile(merged_data_mapfiles[i])
             merged_parmdb_phaseamp_amp2_mapfiles.append(write_mapfile(
                 [self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp2 for chunk
-                in chunks])], self.name, prefix='merged_amps2',
+                in chunks], concat_file)], self.name, prefix='merged_amps2',
                 working_dir=self.parset['dir_working']))
         merged_parmdb_phaseamp_phase2_mapfiles = []
-        for chunks in chunks_list:
+        for i, chunks in enumerate(chunks_list):
+            concat_file = read_mapfile(merged_data_mapfiles[i])
             merged_parmdb_phaseamp_phase2_mapfiles.append(write_mapfile(
                 [self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_phase2 for chunk
-                in chunks])], self.name, prefix='merged_phases2',
+                in chunks], concat_file)], self.name, prefix='merged_phases2',
                 working_dir=self.parset['dir_working']))
+
 
         self.log.debug('Smoothing amplitude solutions...')
         actions = [Smooth(self.parset, dm, p['smooth_amp2'], pm,
