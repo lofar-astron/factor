@@ -241,6 +241,8 @@ class Solve(BBS):
         """
         Return results
         """
+        from factor.lib.datamap_lib import write_mapfile, read_mapfile
+
         vis_files = read_mapfile(self.vis_datamap)
         parmdb_files = [os.path.join(v, 'instrument') for v in vis_files]
         parmdb_datamap = write_mapfile(parmdb_files, self.name,
