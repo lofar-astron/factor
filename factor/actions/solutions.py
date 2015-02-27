@@ -54,7 +54,8 @@ class Losoto(Action):
             direction=direction, index=index)
 
         # Store input parameters
-        self.input_datamap = input_datamap
+        self.vis_datamap = vis_datamap
+        self.parmdb_datamap = parmdb_datamap
         self.p = p.copy()
         if prefix is None:
             prefix = 'run_losoto'
