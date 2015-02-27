@@ -253,12 +253,15 @@ class FacetSelfcal(Operation):
         chunk_model_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             chunk_data_mapfiles.append(write_mapfile([chunk.file for chunk in chunks],
-                self.name, prefix='chunks_vis', working_dir=self.parset['dir_working']))
+                self.name, prefix='chunks_vis', working_dir=self.parset['dir_working'],
+                direction=d_list[i]))
             skymodel0 = read_mapfile(skymodels0_mapfiles[i])
             chunk_model_mapfiles.append(write_mapfile(skymodel0*len(chunks),
-                self.name, prefix='chunks_skymodel', working_dir=self.parset['dir_working']))
+                self.name, prefix='chunks_skymodel', working_dir=self.parset['dir_working'],
+                direction=d_list[i]))
             chunk_parmdb_mapfiles.append(write_mapfile([chunk.parmdb_phaseonly1 for chunk in chunks],
-                self.name, prefix='chunk', working_dir=self.parset['dir_working']))
+                self.name, prefix='chunk', working_dir=self.parset['dir_working'],
+                direction=d_list[i]))
 
         self.log.info('Solving for phase solutions and applying them (#1)...')
         p_list = []
@@ -275,10 +278,10 @@ class FacetSelfcal(Operation):
         self.log.info('Imaging (facet image #1)...')
         self.log.debug('Merging chunks...')
         merged_data_mapfiles = []
-        for chunks in chunks_list:
+        for i, chunks in enumerate(chunks_list):
             merged_data_mapfiles.append(write_mapfile([self.merge_chunks(
                 [chunk.file for chunk in chunks])], self.name, prefix='merged_vis',
-                working_dir=self.parset['dir_working']))
+                working_dir=self.parset['dir_working'], direction=d_list[i]))
 
         self.log.debug('Averaging in preparation for imaging...')
         actions = [Average(self.parset, m, p['avg1'], prefix='facet',
@@ -307,9 +310,11 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             skymodel1 = read_mapfile(skymodels1_mapfiles[i])
             chunk_model_mapfiles.append(write_mapfile(skymodel1*len(chunks),
-                self.name, prefix='chunks_skymodel', working_dir=self.parset['dir_working']))
+                self.name, prefix='chunks_skymodel', working_dir=
+                self.parset['dir_working'], direction=d_list[i]))
             chunk_parmdb_mapfiles.append(write_mapfile([chunk.parmdb_phaseonly2 for chunk in chunks],
-                self.name, prefix='chunk_parmdb', working_dir=self.parset['dir_working']))
+                self.name, prefix='chunk_parmdb', working_dir=
+                self.parset['dir_working'], direction=d_list[i]))
         actions = [Solve(self.parset, dm, pd, model_datamap=mm,
             parmdb_datamap=pm, prefix='facet_phaseonly', direction=d, index=1)
             for d, dm, pd, mm, pm in zip(d_list, chunk_data_mapfiles, p_list,
@@ -356,11 +361,11 @@ class FacetSelfcal(Operation):
             chunk_parmdb_phaseamp_phase1_mapfiles.append(write_mapfile(
                 [chunk.parmdb_phaseamp_phase1 for chunk in chunks],
                 self.name, prefix='chunk_parmdb', working_dir=
-                self.parset['dir_working']))
+                self.parset['dir_working'], direction=d_list[i]))
             chunk_parmdb_phaseamp_amp1_mapfiles.append(write_mapfile(
                 [chunk.parmdb_phaseamp_amp1 for chunk in chunks],
                 self.name, prefix='chunk_parmdb', working_dir=
-                self.parset['dir_working']))
+                self.parset['dir_working'], direction=d_list[i]))
         actions = [Solve(self.parset, dm, pd, model_datamap=mm,
             parmdb_datamap=pm, prefix='facet_phaseonly', direction=d, index=2)
             for d, dm, pd, mm, pm in zip(d_list, chunk_data_mapfiles, p_list,
@@ -383,7 +388,7 @@ class FacetSelfcal(Operation):
         for chunks in chunks_list:
             merged_data_mapfiles.append(write_mapfile([self.merge_chunks(
                 [chunk.file for chunk in chunks])], self.name, prefix='merged_vis',
-                working_dir=self.parset['dir_working']))
+                working_dir=self.parset['dir_working'], direction=d_list[i]))
 
         self.log.info('Merging instrument parmdbs...')
         merged_parmdb_phaseamp_amp1_mapfiles = []
@@ -438,7 +443,7 @@ class FacetSelfcal(Operation):
             chunk_parmdb_phaseamp_amp1_mapfiles.append(write_mapfile(
                 [merged_parmdb_phaseamp_amp1_mapfiles]*len(chunks),
                 self.name, prefix='chunk_parmdb_amp1', working_dir=
-                self.parset['dir_working']))
+                self.parset['dir_working'], direction=d_list[i]))
         actions = [Apply(self.parset, dm, p['apply_amp2'],
             pm, prefix='facet_amp', direction=d, index=2) for d, dm, pm in
             zip(d_list, chunk_data_mapfiles,
@@ -457,15 +462,16 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             skymodel23= read_mapfile(skymodels3_mapfiles[i])
             chunk_model_mapfiles.append(write_mapfile(skymodel3*len(chunks),
-                self.name, prefix='chunks_skymodel', working_dir=self.parset['dir_working']))
+                self.name, prefix='chunks_skymodel', working_dir=
+                self.parset['dir_working'], direction=d_list[i]))
             chunk_parmdb_phaseamp_phase2_mapfiles.append(write_mapfile(
                 [chunk.parmdb_phaseamp_phase2 for chunk in chunks],
                 self.name, prefix='chunk_parmdb', working_dir=
-                self.parset['dir_working']))
+                self.parset['dir_working'], direction=d_list[i]))
             chunk_parmdb_phaseamp_amp2_mapfiles.append(write_mapfile(
                 [chunk.parmdb_phaseamp_amp2 for chunk in chunks],
                 self.name, prefix='chunk_parmdb', working_dir=
-                self.parset['dir_working']))
+                self.parset['dir_working'], direction=d_list[i]))
         actions = [Solve(self.parset, dm, pd, model_datamap=mm,
             parmdb_datamap=pm, prefix='facet_phaseonly', direction=d, index=3)
             for d, dm, pd, mm, pm in zip(d_list, chunk_data_mapfiles, p_list,
@@ -488,7 +494,7 @@ class FacetSelfcal(Operation):
         for chunks in chunks_list:
             merged_data_mapfiles.append(write_mapfile([self.merge_chunks(
                 [chunk.file for chunk in chunks])], self.name, prefix='merged_vis',
-                working_dir=self.parset['dir_working']))
+                working_dir=self.parset['dir_working'], direction=d_list[i]))
 
         self.log.info('Merging instrument parmdbs...')
         merged_parmdb_phaseamp_amp2_mapfiles = []
@@ -497,14 +503,14 @@ class FacetSelfcal(Operation):
             merged_parmdb_phaseamp_amp2_mapfiles.append(write_mapfile(
                 [self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp2 for chunk
                 in chunks], concat_file)], self.name, prefix='merged_amps2',
-                working_dir=self.parset['dir_working']))
+                working_dir=self.parset['dir_working'], direction=d_list[i]))
         merged_parmdb_phaseamp_phase2_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             concat_file = read_mapfile(merged_data_mapfiles[i])
             merged_parmdb_phaseamp_phase2_mapfiles.append(write_mapfile(
                 [self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_phase2 for chunk
                 in chunks], concat_file)], self.name, prefix='merged_phases2',
-                working_dir=self.parset['dir_working']))
+                working_dir=self.parset['dir_working'], direction=d_list[i]))
 
 
         self.log.debug('Smoothing amplitude solutions...')
@@ -558,7 +564,7 @@ class FacetSelfcal(Operation):
             merged_parmdb_final_mapfiles.append(write_mapfile(
                 [self.merge_parmdbs(phases2_final, smoothed_amps1_final, smoothed_amps2_final,
                 concat_file)], self.name, prefix='merged_amps_final',
-                working_dir=self.parset['dir_working']))
+                working_dir=self.parset['dir_working'], direction=d))
 
         self.log.debug('Smoothing amplitude solutions...')
         actions = [Smooth(self.parset, dm, p['smooth_amp3'], pm,
@@ -568,7 +574,8 @@ class FacetSelfcal(Operation):
         self.s.run(actions)
 
 
-    def make_chunks(self, dataset, blockl, prefix=None, direction=None, clobber=True):
+    def make_chunks(self, dataset, blockl, prefix=None, direction=None,
+        clobber=False):
         """
         Split ms into time chunks of length chunksize time slots
         """
@@ -595,7 +602,8 @@ class FacetSelfcal(Operation):
         # Set up the chunks
         chunk_list = []
         for c in range(nchunks):
-            chunk_obj = Chunk(self.parset, dataset, c, prefix=prefix, direction=direction)
+            chunk_obj = Chunk(self.parset, dataset, c, prefix=prefix,
+                direction=direction)
             chunk_obj.t0 = tlen * float(chunk_obj.index) # hours
             chunk_obj.t1 = np.float(chunk_obj.t0) + tlen # hours
             if c == nchunks-1 and chunk_obj.t1 < tobs:
