@@ -13,7 +13,7 @@ dir_working = /data/wdir
 dir_ms = /data/bands
 
 # Parmdb name for dir-indep. selfcal solutions (stored inside the input
-# band measurement sets)
+# band measurement sets, so path should be relative to those)
 parmdb_name = instrument_ap_smoothed
 
 # Full path to file containing calibrator directions. If not given, directions
@@ -25,17 +25,17 @@ directions_flux_min_Jy = 0.1
 directions_size_max_arcmin = 3.0
 directions_separation_max_arcmin = 6.0
 
-# Path to local storage (on each node); used only for casapy imaging ATM
-dir_node = /tmp
-
 # Maximum number of directions (default = all)
 ndir = 10
 
 # Maximum number of directions to process in parallel (default = 1)
 ndir_parallel = 4
 
-# Maximum number of CPUs per node
+# Maximum number of CPUs per node to use
 ncpu = 6
+
+# Full path to cluster description file
+clusterdesc_file = /lofar/build/gnu_opt/installed/share/my.clusterdesc
 
 # Interactive?
 interactive = False

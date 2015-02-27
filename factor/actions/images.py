@@ -39,8 +39,7 @@ class Casapy(Action):
 
     """
     def __init__(self, op_parset, vis_datamap, p, mask_datamap=None, prefix=None,
-        direction=None, localdir=None, clean=True, index=None, image_twice=True,
-        name='Casapy'):
+        direction=None, clean=True, index=None, image_twice=True, name='Casapy'):
         """
         Create action and run pipeline
 
@@ -58,8 +57,6 @@ class Casapy(Action):
             Prefix to use for image names
         direction : Direction object, optional
             Direction for this image
-        localdir : str, optional
-            Path to local node directory to use during imaging
         clean : bool, optional
             Remove unneeded files?
         index : int, optional
@@ -78,15 +75,14 @@ class Casapy(Action):
         self.p = p.copy()
         if self.prefix is None:
             self.prefix = 'make_image'
-        self.localdir = localdir
         self.clean = clean
         self.image_twice = image_twice
         self.image_dir += '{0}/{1}/'.format(self.op_name, self.name)
-        self.working_dir = self.image_dir
         if self.direction is not None:
-            self.working_dir += '{0}/'.format(self.direction.name)
-        if not os.path.exists(self.working_dir):
-            os.makedirs(self.working_dir)
+            self.image_dir += '{0}/'.format(self.direction.name)
+        if not os.path.exists(self.image_dir):
+            os.makedirs(self.image_dir)
+        self.working_dir = self.image_dir
 
         # Define mask script name
         self.mask_script_file = self.parsetbasename + 'make_clean_mask.py'
@@ -304,7 +300,7 @@ class MakeImage(Casapy):
     Action to make an image using a clean mask
     """
     def __init__(self, op_parset, vis_datamap, p, mask_datamap=None, prefix=None,
-        direction=None, localdir=None, clean=True, index=None, image_twice=True):
+        direction=None, clean=True, index=None, image_twice=True):
         super(MakeImage, self).__init__(op_parset, vis_datamap, p, prefix=prefix,
-            direction=direction, localdir=localdir, clean=clean, index=index,
+            direction=direction, clean=clean, index=index,
             image_twice=image_twice, name='MakeImage')

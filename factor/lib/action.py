@@ -45,6 +45,7 @@ class Action(object):
         self.vis_dir = '{0}/visdata/'.format(factor_working_dir)
         self.image_dir = '{0}/images/'.format(factor_working_dir)
         self.model_dir = '{0}/models/'.format(factor_working_dir)
+        self.parmdb_dir = '{0}/parmdbs/'.format(factor_working_dir)
 
         self.datamap_dir = '{0}/datamaps/{1}/{2}/'.format(factor_working_dir,
             self.op_name, self.name)

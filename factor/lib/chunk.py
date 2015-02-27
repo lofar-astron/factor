@@ -10,16 +10,22 @@ class Chunk(object):
     """
     The Chunk object contains parameters needed for each time chunk (MS)
     """
-    def __init__(self, MSfile, index):
+    def __init__(self, op_parset, MSfile, index, prefix=None, direction=None):
         """
         Create Chunk object
 
         Parameters
         ----------
+        op_parset : str
+            Parset of calling operation
         MSfile : str
             Filename of MS
         index : int
             Index of chunk
+        prefix : str, optional
+            Prefix to use for names
+        direction : Direction object, optional
+            Direction for this chunk
 
         """
         self.parent_file = MSfile
@@ -27,8 +33,20 @@ class Chunk(object):
         self.file = '{0}-chunk_{1}.ms'.format(os.path.splitext(MSfile)[0], index)
         self.msname = self.file.split('/')[-1]
         self.name = 'chunk_{0}'.format(index)
-        self.parmdb = '{0}/instrument'.format(self.file)
-        self.parmdb_phaseamp1a = self.parmdb + '_phase1'
-        self.parmdb_phaseamp2a = self.parmdb + '_phase2'
-        self.parmdb_phaseamp1b = self.parmdb + '_amp1'
-        self.parmdb_phaseamp2b = self.parmdb + '_amp2'
+
+        factor_working_dir = op_parset['dir_working']
+        op_name = op_parset['op_name']
+        self.parmdb_dir = '{0}/parmdbs/{1}/'.format(factor_working_dir,
+            op_name)
+        if self.direction is not None:
+            self.parmdb_dir += '{0}/'.format(self.direction.name)
+        self.parmdb_dir += 'chunks/'
+        if not os.path.exists(self.parmdb_dir):
+            os.makedirs(self.parmdb_dir)
+
+        self.parmdb_phaseonly1 = self.parmdb_dir + 'chunk{0}_instrument_phase1'.format(self.index)
+        self.parmdb_phaseonly2 = self.parmdb_dir + 'chunk{0}_instrument_phase2'.format(self.index)
+        self.parmdb_phaseamp_phase1 = self.parmdb_dir + 'chunk{0}_instrument_phaseamp_phase1'.format(self.index)
+        self.parmdb_phaseamp_phase2 = self.parmdb_dir + 'chunk{0}_instrument_phaseamp_phase2'.format(self.index)
+        self.parmdb_phaseamp_amp1 = self.parmdb_dir + 'chunk{0}_instrument_phaseamp_amp1'.format(self.index)
+        self.parmdb_phaseamp_amp2 = self.parmdb_dir + 'chunk{0}_instrument_phaseamp_amp1'.format(self.index)

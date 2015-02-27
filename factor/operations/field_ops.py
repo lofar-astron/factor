@@ -35,11 +35,6 @@ class InitSubtract(Operation):
 
         bands = self.bands
 
-        if 'dir_node' in self.parset:
-            localdir = self.parset['dir_node']
-        else:
-            localdir = None
-
         # Check operation state
         if os.path.exists(self.statebasename+'.done'):
             merged_skymodels_mapfile = os.path.join(self.parset['dir_working'],
@@ -58,7 +53,7 @@ class InitSubtract(Operation):
 
         self.log.info('High-res imaging...')
         action = MakeImage(self.parset, subtracted_all_mapfile, p['imagerh'],
-            prefix='highres', localdir=localdir)
+            prefix='highres')
         highres_image_basenames_mapfile = action.run()
 
         self.log.info('Making high-res sky model...')
@@ -79,7 +74,7 @@ class InitSubtract(Operation):
 
         self.log.info('Low-res imaging...')
         action = MakeImage(self.parset, avg_files_mapfile, p['imagerl'],
-            prefix='lowres', localdir=localdir)
+            prefix='lowres')
         lowres_image_basenames_mapfile = action.run()
 
         self.log.info('Making low-res sky model...')

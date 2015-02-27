@@ -21,12 +21,12 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 env = Environment(loader=FileSystemLoader(os.path.join(DIR, 'templates')))
 
 
-class LoSoTo(Action):
+class Losoto(Action):
     """
     Action to run LoSoTo
     """
-    def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
-        clean=True, index=None, name='LoSoTo'):
+    def __init__(self, op_parset, vis_datamap, p, parmdb_datamap, prefix=None,
+        direction=None, clean=True, index=None, name='Losoto'):
         """
         Create action and run pipeline
 
@@ -34,10 +34,12 @@ class LoSoTo(Action):
         ----------
         op_parset : dict
             Parset dict of the calling operation
-        input_datamap : data map
-            Input data map for CASA model image
+        vis_datamap : data map
+            Input data map for vis files
         p : dict
             Input parset dict defining model and pipeline parameters
+        parmdb_datamap : data map
+            Input data map for parmdb files
         prefix : str, optional
             Prefix to use for model names
         direction : Direction object, optional
@@ -48,28 +50,102 @@ class LoSoTo(Action):
             Index of action
 
         """
-        super(LoSoTo, self).__init__(op_parset, name=name)
+        super(Losoto, self).__init__(op_parset, name=name, prefix=prefix,
+            direction=direction, index=index)
 
         # Store input parameters
         self.input_datamap = input_datamap
         self.p = p.copy()
         if prefix is None:
             prefix = 'run_losoto'
-        self.prefix = prefix
-        self.direction = direction
-        self.localdir = localdir
         self.clean = clean
-        self.index = index
+        self.working_dir = self.parmdb_dir + '{0}/{1}/'.format(self.op_name, self.name)
+        if self.direction is not None:
+            self.working_dir += '{0}/'.format(self.direction.name)
+        if not os.path.exists(self.working_dir):
+            os.makedirs(self.working_dir)
+
+        # Define parset name
+        self.parset_file = self.parsetbasename + '.parset'
+        self.templatename = '{0}_{1}.parset.tpl'.format(prefix, self.name.lower())
+
+        # Copy parmdbs to instrument directory inside MS files
+        parmdb_names = read_mapfile(self.parmdb_datamap)
+        ms_names = read_mapfile(self.vis_datamap)
+        for pn, mn in zip(parmdb_names, ms_names):
+            is os.path.exists('{0}/instrument'.format(mn)):
+                os.system('rm -rf {0}/instrument'.format(mn))
+            os.system('cp -r {0} {1}/instrument'.format(pn, mn))
+
+
+    def make_datamaps(self):
+        """
+        Makes the required data maps
+        """
+        from factor.lib.datamap_lib import write_mapfile, read_mapfile
+
+        self.p['input_datamap'] = self.vis_datamap
+
+        parmdb_names = read_mapfile(self.parmdb_datamap)
+        h5parm_files = [parmdb_name + '.h5parm' for parmdb_name in parmdb_names]
+        self.p['h5parm_datamap'] = write_mapfile(h5parm_files,
+            self.op_name, self.name, prefix=self.prefix+'_h5parm',
+            direction=self.direction, working_dir=self.op_parset['dir_working'])
+
+
+    def make_pipeline_control_parset(self):
+        """
+        Writes the pipeline control parset and any script files
+        """
+        self.p['lofarroot'] = self.op_parset['lofarroot']
+        self.p['parset'] = self.parset_file
+
+        template = env.get_template('{0}.pipeline.parset.tpl'.format(self.name.lower()))
+        tmp = template.render(self.p)
+        with open(self.pipeline_parset_file, 'w') as f:
+            f.write(tmp)
+
+        template = env.get_template(self.templatename)
+        tmp = template.render(self.p)
+        with open(self.parset_file, 'w') as f:
+            f.write(tmp)
+
+
+    def make_pipeline_config_parset(self):
+        """
+        Writes the pipeline configuration parset
+        """
+        template = env.get_template('pipeline.cfg.tpl')
+        tmp = template.render(self.op_parset)
+        with open(self.pipeline_config_file, 'w') as f:
+            f.write(tmp)
+
+
+    def get_results(self):
+        """
+        Return results
+        """
+        # Copy parmdbs from instrument directory inside MS files to final files
+        parmdb_names = read_mapfile(self.parmdb_datamap)
+        ms_names = read_mapfile(self.vis_datamap)
+        for pn, mn in zip(parmdb_names, ms_names):
+            is os.path.exists(pn):
+                os.system('rm -rf {0}'.format(pn))
+            os.system('cp -r {0}/{1}_instrument {2}'.format(mn, self.p['solset'], pn))
+
+        return self.parmdb_datamap
+
 
 
 class Smooth(LoSoTo):
     """
     Action to smooth and normalize solutions
     """
-    def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
+    def __init__(self, op_parset, vis_datamap, p, parmdb_datamap, prefix=None, direction=None,
         clean=True, index=None):
-        super(Smooth, self).__init__(op_parset, input_datamap, p, prefix=prefix,
-            direction=direction, clean=clean, index=index, name='Smooth')
+        super(Smooth, self).__init__(op_parset, vis_datamap, p, parmdb_datamap,
+            prefix=prefix, direction=direction, clean=clean, index=index,
+            name='Smooth')
 
 
 class ResetPhases(LoSoTo):
@@ -78,5 +154,6 @@ class ResetPhases(LoSoTo):
     """
     def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
         clean=True, index=None):
-        super(ResetPhases, self).__init__(op_parset, input_datamap, p, prefix=prefix,
-            direction=direction, clean=clean, index=index, name='ResetPhases')
+        super(ResetPhases, self).__init__(op_parset, vis_datamap, p, parmdb_datamap,
+            prefix=prefix, direction=direction, clean=clean, index=index,
+            name='ResetPhases')

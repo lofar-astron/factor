@@ -98,8 +98,7 @@ class BBS(Action):
         """
         Writes the pipeline control parset and any script files
         """
-        self.p['parset'] = os.path.abspath(self.parset_file)
-        self.p['outputdir'] = os.path.abspath(self.working_dir)
+        self.p['outputdir'] = self.working_dir
         self.p['lofarroot'] = self.op_parset['lofarroot']
         self.p['parset'] = self.parset_file
         if 'flags' not in self.p:
@@ -236,6 +235,17 @@ class Solve(BBS):
             prefix=prefix, direction=direction, clean=clean, index=index,
             name='Solve')
 
+        # Check whether parmdb exists. If not, use "instrument" and copy
+        # them at the end
+        if self.parmdb_datamap is not None:
+            from factor.lib.datamap_lib import write_mapfile, read_mapfile
+            parmdb_files = read_mapfile(self.parmdb_datamap)
+            if not os.path.exists(parmdb_files[0]):
+                self.output_parmdb_datamap = self.parmdb_datamap
+                self.parmdb_datamap = None
+            else:
+                self.output_parmdb_datamap = None
+
 
     def get_results(self):
         """
@@ -245,9 +255,16 @@ class Solve(BBS):
 
         vis_files = read_mapfile(self.vis_datamap)
         parmdb_files = [os.path.join(v, 'instrument') for v in vis_files]
-        parmdb_datamap = write_mapfile(parmdb_files, self.name,
-            prefix=self.prefix+'_output_parmdbs',
-            working_dir=self.op_parset['dir_working'])
+
+        if self.output_parmdb_datamap is not None:
+            output_parmdb_files = read_mapfile(self.output_parmdb_datamap)
+            for inp, outp in zip(parmdb_files, output_parmdb_files):
+                os.system('cp -r {0} {1}'.format(inp, outp))
+            parmdb_datamap = self.output_parmdb_datamap
+        else:
+            parmdb_datamap = write_mapfile(parmdb_files, self.name,
+                prefix=self.prefix+'_output_parmdbs',
+                working_dir=self.op_parset['dir_working'])
 
         return parmdb_datamap
 

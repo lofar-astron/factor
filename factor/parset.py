@@ -78,8 +78,6 @@ def parset_read(parset_file):
         log.debug("Using interactive mode")
     else:
         parset_dict['interactive'] = False
-    if 'dir_node' not in parset_dict:
-        parset_dict['dir_node'] = None
     if 'directions_flux_min_jy' in parset_dict:
         parset_dict['directions_flux_min_jy'] = parset.getfloat('global',
             'directions_flux_min_jy')
