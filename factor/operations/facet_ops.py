@@ -216,7 +216,8 @@ class FacetSelfcal(Operation):
         # Make initial data maps for the averaged, phase-shifted datasets
         facet_data_mapfiles = []
         for d in d_list:
-            facet_data_mapfiles.append(write_mapfile([d.concat_file], self.name, prefix='shifted', working_dir=self.parset['dir_working']))
+            facet_data_mapfiles.append(write_mapfile([d.concat_file], self.name,
+            prefix='shifted_vis', working_dir=self.parset['dir_working']))
 
         # Set image sizes
         for d in d_list:
@@ -256,12 +257,12 @@ class FacetSelfcal(Operation):
         chunk_model_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             chunk_data_mapfiles.append(write_mapfile([chunk.file for chunk in chunks],
-                self.name, prefix='chunk', working_dir=self.parset['dir_working']))
+                self.name, prefix='chunks_vis', working_dir=self.parset['dir_working']))
             chunk_parmdb_mapfiles.append(write_mapfile([chunk.parmdb for chunk in chunks],
-                self.name, prefix='chunk', working_dir=self.parset['dir_working']))
+                self.name, prefix='chunks_parmdb', working_dir=self.parset['dir_working']))
             skymodel0 = read_mapfile(skymodels0_mapfiles[i])
             chunk_model_mapfiles.append(write_mapfile(skymodel0*len(chunks),
-                self.name, prefix='chunk', working_dir=self.parset['dir_working']))
+                self.name, prefix='chunks_skymodel', working_dir=self.parset['dir_working']))
 
         self.log.info('Solving for phase solutions and applying them (#1)...')
         p_list = []
@@ -280,7 +281,7 @@ class FacetSelfcal(Operation):
         merged_data_mapfiles = []
         for chunks in chunks_list:
             merged_data_mapfiles.append(write_mapfile([self.merge_chunks(
-                [chunk.file for chunk in chunks])], self.name, prefix='chunk',
+                [chunk.file for chunk in chunks])], self.name, prefix='merged_vis',
                 working_dir=self.parset['dir_working']))
 
         self.log.debug('Averaging in preparation for imaging...')
@@ -316,7 +317,7 @@ class FacetSelfcal(Operation):
         merged_data_mapfiles = []
         for chunks in chunks_list:
             merged_data_mapfiles.append(write_mapfile([self.merge_chunks(
-                [chunk.file for chunk in chunks])], self.name, prefix='chunk',
+                [chunk.file for chunk in chunks])], self.name, prefix='merged_vis',
                 working_dir=self.parset['dir_working']))
 
         self.log.debug('Averaging in preparation for imaging...')
