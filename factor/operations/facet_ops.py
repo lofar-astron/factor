@@ -190,7 +190,7 @@ class FacetSelfcal(Operation):
         Run the steps for this operation
         """
         from factor.actions.visibilities import Average, Concatenate
-        from factor.actions.calibrations import Apply
+        from factor.actions.calibrations import Apply, Solve
         from factor.actions.images import MakeImage
         from factor.actions.models import MakeSkymodelFromModelImage
         from factor.lib.operation_lib import copy_column
@@ -349,8 +349,7 @@ class FacetSelfcal(Operation):
             blockl = 1
 
         # Get time per sample and number of samples
-        self.log.info(dataset)
-        t = pt.table(dataset, readonly=True, ack=True)
+        t = pt.table(dataset, readonly=True, ack=False)
         for t2 in t.iter(["ANTENNA1","ANTENNA2"]):
             if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
                 timepersample = t2[1]['TIME']-t2[0]['TIME'] # sec
