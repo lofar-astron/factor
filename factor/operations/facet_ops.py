@@ -662,7 +662,7 @@ class FacetSelfcal(Operation):
             if clobber:
                 os.system('rm -rf {0}'.format(msout))
             else:
-                return
+                return msout
 
         t = pt.table(chunk_files, ack=False)
         t.sort('TIME').copy(msout, deep = True)
