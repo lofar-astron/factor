@@ -30,6 +30,7 @@ class Chunk(object):
         """
         self.parent_file = MSfile
         self.index = index
+        self.direction = direction
         self.file = '{0}-chunk_{1}.ms'.format(os.path.splitext(MSfile)[0], index)
         self.msname = self.file.split('/')[-1]
         self.name = 'chunk_{0}'.format(index)
@@ -38,8 +39,8 @@ class Chunk(object):
         op_name = op_parset['op_name']
         self.parmdb_dir = '{0}/parmdbs/{1}/'.format(factor_working_dir,
             op_name)
-        if self.direction is not None:
-            self.parmdb_dir += '{0}/'.format(self.direction.name)
+        if direction is not None:
+            self.parmdb_dir += '{0}/'.format(direction.name)
         self.parmdb_dir += 'chunks/'
         if not os.path.exists(self.parmdb_dir):
             os.makedirs(self.parmdb_dir)
