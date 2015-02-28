@@ -5,7 +5,7 @@ import.control.type=executable_args
 import.control.opts.mapfiles_in=[{{ input_datamap }}, {{ h5parm_datamap }}]
 import.control.opts.executable={{ lofarroot }}/bin/H5parm_importer.py
 import.control.opts.inputkeys=[inputms, h5parm]
-import.control.opts.arguments=[h5parm, inputms, -i instrument]
+import.control.opts.arguments=[h5parm, inputms, -i, instrument]
 
 losoto.control.kind=recipe
 losoto.control.type=executable_args
@@ -19,5 +19,5 @@ export.control.type=executable_args
 export.control.opts.executable={{ lofarroot }}/bin/H5parm_exporter.py
 export.control.opts.mapfiles_in=[{{ input_datamap }}, {{ h5parm_datamap }}]
 export.control.opts.inputkeys=[inputms, h5parm]
-export.control.opts.arguments=[h5parm, inputms, -i instrument, -c]
+export.control.opts.arguments=[h5parm, inputms, -i, instrument, -c]
 
