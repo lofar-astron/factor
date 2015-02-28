@@ -247,7 +247,6 @@ class MakeFacetSkymodel(Action):
                 skip_flags.append(True)
             else:
                 skip_flags.append(False)
-        self.log.info('{0}'.format(skip_flags))
         set_mapfile_flags(self.p['output_datamap'], skip_flags)
 
         return self.p['output_datamap']

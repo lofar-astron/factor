@@ -67,7 +67,11 @@ if __name__=='__main__':
     from factor.lib.band import Band
     for ms in parset['mss']:
         band = Band(ms)
-        band.dirindparmdb = parset['parmdb_name']
+        band.dirindparmdb = os.path.join(band.file, parset['parmdb_name'])
+        if not os.path.exists(band.dirindparmdb):
+            logging.critical('Direction-independent instument parmdb not found '
+                'for band {0}'.format(band.file))
+            sys.exit(1)
         band.skymodel_dirindep = None
         msbase = os.path.basename(ms)
         if msbase in parset['ms_specific']:
@@ -103,7 +107,7 @@ if __name__=='__main__':
         op = InitSubtract(parset, bands_init_subtract)
         op.run()
     else:
-        logging.info("Sky models found for all MS files. Skipping init_subtract "
+        logging.info("Sky models found for all MS files. Skipping initial subtraction "
             "operation.")
 
     # Prepare directions
