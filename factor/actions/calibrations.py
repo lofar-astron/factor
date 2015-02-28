@@ -239,9 +239,11 @@ class Solve(BBS):
         # them at the end
         if self.parmdb_datamap is not None:
             from factor.lib.datamap_lib import write_mapfile, read_mapfile
+            import copy
+
             parmdb_files = read_mapfile(self.parmdb_datamap)
             if not os.path.exists(parmdb_files[0]):
-                self.output_parmdb_datamap = self.parmdb_datamap
+                self.output_parmdb_datamap = copy.deepcopy(self.parmdb_datamap)
                 self.parmdb_datamap = None
             else:
                 self.output_parmdb_datamap = None
@@ -256,15 +258,17 @@ class Solve(BBS):
         from factor.lib.datamap_lib import write_mapfile, read_mapfile
 
         vis_files = read_mapfile(self.vis_datamap)
-        parmdb_files = [os.path.join(v, 'instrument') for v in vis_files]
+        default_parmdb_files = [os.path.join(v, 'instrument') for v in vis_files]
 
         if self.output_parmdb_datamap is not None:
             output_parmdb_files = read_mapfile(self.output_parmdb_datamap)
-            for inp, outp in zip(parmdb_files, output_parmdb_files):
+            for inp, outp in zip(default_parmdb_files, output_parmdb_files):
                 os.system('cp -r {0} {1}'.format(inp, outp))
             parmdb_datamap = self.output_parmdb_datamap
+        elif self.parmdb_datamap is not None:
+            parmdb_datamap = self.parmdb_datamap
         else:
-            parmdb_datamap = write_mapfile(parmdb_files, self.name,
+            parmdb_datamap = write_mapfile(default_parmdb_files, self.name,
                 prefix=self.prefix+'_output_parmdbs',
                 working_dir=self.op_parset['dir_working'])
 
