@@ -79,7 +79,8 @@ if __name__=='__main__':
                 band.skymodel_dirindep = parset['ms_specific'][msbase]['init_skymodel']
         bands.append(band)
 
-    # Check directions
+    # Check directions. First check for user-supplied file, then for Factor-generated
+    # file from a previous run, then for parameters needed to generate it internally
     if 'directions_file' in parset:
         directions = factor.directions.directions_read(parset['directions_file'])
     elif os.path.exists(parset['dir_working']+'/factor_directions.txt'):
