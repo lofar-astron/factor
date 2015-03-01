@@ -61,13 +61,14 @@ class FacetAddCal(Operation):
         # Make initial data maps for the empty datasets, their dir-indep
         # instrument parmdbs, and their dir-indep sky models
         subtracted_all_mapfile = write_mapfile([band.file for band in bands],
-            self.name, prefix='subtracted_all', working_dir=self.parset['dir_working'])
+        	self.name, prefix='subtracted_all',
+        	working_dir=self.parset['dir_working'])
         dir_indep_parmdbs_mapfile = write_mapfile([band.dirindparmdb for band
-            in bands], self.name, prefix='dir_indep_parmdbs',
-            working_dir=self.parset['dir_working'])
+        	in bands], self.name, prefix='dir_indep_parmdbs',
+        	working_dir=self.parset['dir_working'])
         dir_indep_skymodels_mapfile = write_mapfile([band.skymodel_dirindep
-            for band in bands], self.name, prefix='dir_indep_skymodels',
-            working_dir=self.parset['dir_working'])
+        	for band in bands], self.name, prefix='dir_indep_skymodels',
+        	working_dir=self.parset['dir_working'])
 
         # Add calibrators from the dir-indep sky model for this direction to the
         # visibilities
@@ -136,11 +137,12 @@ class FacetSetup(Operation):
         shifted_data_mapfiles = []
         dir_indep_parmdbs_mapfiles = []
         for d in d_list:
-            shifted_data_mapfiles.append(write_mapfile([band.shifted_data_file for band
-                in bands], self.name, prefix='shifted', working_dir=self.parset['dir_working']))
-            dir_indep_parmdbs_mapfiles.append(write_mapfile([os.path.join(band.file,
-                band.dirindparmdb) for band in bands], self.name,
-                prefix='dir_indep_parmdbs', working_dir=self.parset['dir_working']))
+            shifted_data_mapfiles.append(write_mapfile([band.shifted_data_file
+                for band in bands], self.name, prefix='shifted',
+                working_dir=self.parset['dir_working']))
+            dir_indep_parmdbs_mapfiles.append(write_mapfile([band.dirindparmdb
+                for band in bands], self.name, prefix='dir_indep_parmdbs',
+                working_dir=self.parset['dir_working']))
 
         # average to 1 channel per band. Do this twice, once for DATA and once
         # for CORRECTED_DATA
@@ -804,9 +806,9 @@ class FacetAddAll(Operation):
         # instrument parmdbs, and their dir-indep sky models
         subtracted_all_mapfile = write_mapfile([band.file for band in bands],
             self.name, prefix='subtracted_all', working_dir=self.parset['dir_working'])
-        dir_indep_parmdbs_mapfile = write_mapfile([os.path.join(band.file,
-            band.dirindparmdb) for band in bands], self.name,
-            prefix='dir_indep_parmdbs', working_dir=self.parset['dir_working'])
+        dir_indep_parmdbs_mapfile = write_mapfile([band.dirindparmdb for
+        	band in bands], self.name, prefix='dir_indep_parmdbs',
+        	working_dir=self.parset['dir_working'])
         dir_indep_skymodels_mapfile = write_mapfile([band.skymodel_dirindep
             for band in bands], self.name, prefix='dir_indep_parmdbs',
             working_dir=self.parset['dir_working'])
@@ -878,11 +880,13 @@ class FacetImage(Operation):
         shifted_data_mapfiles = []
         dir_indep_parmdbs_mapfiles = []
         for d in d_list:
-            shifted_data_mapfiles.append(write_mapfile([band.shifted_data_file for band
-                in bands], self.name, prefix='shifted', working_dir=self.parset['dir_working']))
-            dir_indep_parmdbs_mapfiles.append(write_mapfile([os.path.join(band.file,
-                band.dirindparmdb) for band in bands], self.name,
-                prefix='dir_indep_parmdbs', working_dir=self.parset['dir_working']))
+            shifted_data_mapfiles.append(write_mapfile([band.
+            	shifted_data_file for band in bands], self.name,
+            	prefix='shifted', working_dir=self.parset['dir_working']))
+            dir_indep_parmdbs_mapfiles.append(write_mapfile([band.
+            	dirindparmdb for band in bands], self.name,
+            	prefix='dir_indep_parmdbs',
+            	working_dir=self.parset['dir_working']))
 
         # average to 1 channel per band. Do this twice, once for DATA and once
         # for CORRECTED_DATA

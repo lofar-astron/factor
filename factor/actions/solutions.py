@@ -155,7 +155,7 @@ class ResetPhases(Losoto):
     """
     Action to reset phases to zero
     """
-    def __init__(self, op_parset, input_datamap, p, parmdb_datamap, prefix=None,
+    def __init__(self, op_parset, vis_datamap, p, parmdb_datamap, prefix=None,
         direction=None, clean=True, index=None):
         super(ResetPhases, self).__init__(op_parset, vis_datamap, p, parmdb_datamap,
             prefix=prefix, direction=direction, clean=clean, index=index,

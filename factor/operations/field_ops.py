@@ -46,10 +46,11 @@ class InitSubtract(Operation):
         # Make initial data maps for the empty datasets and their dir-indep
         # instrument parmdbs
         subtracted_all_mapfile = write_mapfile([band.file for band in bands],
-            self.name, prefix='subtracted_all', working_dir=self.parset['dir_working'])
+        	self.name, prefix='subtracted_all',
+        	working_dir=self.parset['dir_working'])
         dir_indep_parmdbs_mapfile = write_mapfile([band.dirindparmdb for band
-            in bands], self.name, prefix='dir_indep_parmdbs',
-            working_dir=self.parset['dir_working'])
+        	in bands], self.name, prefix='dir_indep_parmdbs',
+        	working_dir=self.parset['dir_working'])
 
         self.log.info('High-res imaging...')
         action = MakeImage(self.parset, subtracted_all_mapfile, p['imagerh'],
@@ -57,8 +58,8 @@ class InitSubtract(Operation):
         highres_image_basenames_mapfile = action.run()
 
         self.log.info('Making high-res sky model...')
-        action = MakeSkymodelFromModelImage(self.parset, highres_image_basenames_mapfile,
-            p['modelh'], prefix='highres')
+        action = MakeSkymodelFromModelImage(self.parset,
+        	highres_image_basenames_mapfile, p['modelh'], prefix='highres')
         highres_skymodels_mapfile = action.run()
 
         self.log.info('Subtracting high-res sky model...')
