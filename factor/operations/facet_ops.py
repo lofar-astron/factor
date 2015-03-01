@@ -464,7 +464,7 @@ class FacetSelfcal(Operation):
         chunk_parmdb_phaseamp_amp2_mapfiles = []
         chunk_model_mapfiles = []
         for i, chunks in enumerate(chunks_list):
-            skymodel23 = read_mapfile(skymodels3_mapfiles[i])
+            skymodel3 = read_mapfile(skymodels3_mapfiles[i])
             chunk_model_mapfiles.append(write_mapfile(skymodel3*len(chunks),
                 self.name, prefix='chunks_skymodel3', working_dir=
                 self.parset['dir_working'], direction=d_list[i]))
