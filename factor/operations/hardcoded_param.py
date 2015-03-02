@@ -123,7 +123,7 @@ init_subtract_test_quick = {
 }
 
 facet_add_cal = {
-'model' : {},
+'select' : {},
 'add' : {'incol': 'SUBTRACTED_DATA_ALL',
          'outcol': 'FACET_DATA',
          'flags': '--replace-sourcedb'},
@@ -131,11 +131,14 @@ facet_add_cal = {
 }
 
 facet_setup = {
-'avg' : {'columnname': 'DATA', # outcol is DATA
-          'freqstep': 20,
-          'timestep': 1},
 'apply' : {'incol': 'DATA',
            'outcol': 'CORRECTED_DATA'},
+'avg1' : {'columnname': 'DATA', # outcol is DATA
+          'freqstep': 20,
+          'timestep': 1},
+'avg2' : {'columnname': 'CORRECTED_DATA', # outcol is DATA
+          'freqstep': 20,
+          'timestep': 1},
 'concat1' : {'columnname': 'DATA'}, # outcol is DATA
 'concat2' : {'columnname': 'CORRECTED_DATA'}, # outcol is DATA
 'copy' : {'incol': 'DATA',
@@ -264,27 +267,33 @@ facet_selfcal = {
                 'smoothing_window': 1},
 }
 
+facet_add_all = {
+'select' : {},
+'add' : {'incol': 'SUBTRACTED_DATA_ALL',
+         'outcol': 'FACET_DATA',
+         'flags': '--replace-sourcedb'},
+'shift' : {'columnname': 'FACET_DATA'} # outcol is DATA
+}
+
+
 facet_image= {
-'add_dirindep' : {'incol': 'SUBTRACTED_DATA_ALL',
-                  'outcol': 'FACET_DATA',
-                  'flags': '--replace-sourcedb'},
-'apply_dirdep' : {'incol': 'FACET_DATA',
-                  'outcol': 'CORRECTED_DATA'},
-'shift' : {'columnname': 'CORRECTED_DATA'}, # outcol is DATA
 'avg' : {'columnname': 'DATA', # outcol is DATA
          'freqstep': 5,
          'timestep': 3},
+'apply_dirdep' : {'incol': 'DATA',
+                  'outcol': 'CORRECTED_DATA'},
+'concat2' : {'columnname': 'CORRECTED_DATA'}, # outcol is DATA
 'imager_template' : {'niter': 1,
                      'imsize': 1024,
-                     'mscale': True,
+                     'mscale': False,
                      'cell': '1.5arcsec',
                      'uvrange': '>80lambda',
                      'threshpix': 10.0,
                      'threshisl': 6.0,
-                     'atrous_do': True,
+                     'atrous_do': False,
                      'rmsbox': '(70, 20)',
                      'threshold': '0mJy',
-                     'nterms' : 2},
+                     'nterms' : 1},
 'expand_mask' : {'image': ''},
 'imager' : {'niter': 10000,
             'imsize': 1024,
@@ -298,6 +307,7 @@ facet_image= {
             'threshold': '0mJy',
             'nterms' : 2},
 'model' : {'nterms': 2}
+'select' : {},
 }
 
 facet_finalize = {

@@ -320,7 +320,7 @@ def plot_thiessen(directions_list, bounds_scale=2):
 
     points, midRA, midDec = getxy(directions_list)
     points = points.T
-    polys = thiessen(directions_list, bounds_scale)
+    polys, _ = thiessen(directions_list, bounds_scale)
     plt.scatter(points[:, 0], points[:, 1])
     for poly in polys:
         poly = np.vstack([poly, poly[0]])

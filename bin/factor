@@ -163,7 +163,7 @@ if __name__=='__main__':
         op = FacetSetupFull(parset, bands, direction_group)
         op.run()
 
-        # Make image of all sources in facet(s) and get final model(s)
+        # Make image of all sources in the facet(s) and get final model(s)
         op = FacetImage(parset, bands, direction_group)
         op.run()
 

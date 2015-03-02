@@ -279,8 +279,8 @@ class Subtract(BBS):
     """
     Action to subtract sources
     """
-    def __init__(self, op_parset, vis_datamap, p, model_datamap=None,
-        parmdb_datamap=None, prefix=None, direction=None, clean=True,
+    def __init__(self, op_parset, vis_datamap, p, model_datamap,
+        parmdb_datamap, prefix=None, direction=None, clean=True,
         index=None):
         super(Subtract, self).__init__(op_parset, vis_datamap, p,
             model_datamap=model_datamap, parmdb_datamap=parmdb_datamap,

@@ -74,7 +74,7 @@ class FacetAddCal(Operation):
         # visibilities
         self.log.info('Selecting sources for this direction...')
         action = MakeFacetSkymodel(self.parset, dir_indep_skymodels_mapfile,
-            p['model'], d, prefix='cal', cal_only=True)
+            p['select'], d, prefix='cal', cal_only=True)
         dir_indep_cal_skymodels_mapfile = action.run()
 
         self.log.info('Adding sources for this direction...')
@@ -144,30 +144,34 @@ class FacetSetup(Operation):
                 for band in bands], self.name, prefix='dir_indep_parmdbs',
                 working_dir=self.parset['dir_working']))
 
-        # average to 1 channel per band. Do this twice, once for DATA and once
-        # for CORRECTED_DATA
-        self.log.info('Averaging DATA...')
-        actions = [Average(self.parset, m, p['avg'], prefix='facet',
-            direction=d, index=1) for d, m in zip(d_list, shifted_data_mapfiles)]
-        avg_data_mapfiles = self.s.run(actions)
-
         # apply direction-independent calibration
         self.log.info('Applying direction-independent calibration...')
         actions = [Apply(self.parset, dm, p['apply'],
             pm, prefix='facet_dirindep', direction=d) for d, dm, pm in zip(d_list,
-            avg_data_mapfiles, dir_indep_parmdbs_mapfiles)]
+            shifted_data_mapfiles, dir_indep_parmdbs_mapfiles)]
         self.s.run(actions)
+
+        # average to 1 channel per band. Do this twice, once for DATA and once
+        # for CORRECTED_DATA
+        self.log.info('Averaging DATA...')
+        actions = [Average(self.parset, m, p['avg1'], prefix='facet',
+            direction=d, index=1) for d, m in zip(d_list, shifted_data_mapfiles)]
+        avg1_data_mapfiles = self.s.run(actions)
+        self.log.info('Averaging CORRECTED_DATA...')
+        actions = [Average(self.parset, m, p['avg2'], prefix='facet',
+            direction=d, index=2) for d, m in zip(d_list, shifted_data_mapfiles)]
+        avg2_data_mapfiles = self.s.run(actions)
 
         # concatenate all phase-shifted, averaged bands together. Do this twice,
         # once each of the two averaged file sets
         self.log.info('Concatenating bands...')
         actions = [Concatenate(self.parset, m, p['concat1'],
             prefix='facet_bands', direction=d, index=0) for d, m in zip(d_list,
-            avg_data_mapfiles)]
+            avg1_data_mapfiles)]
         concat_data_mapfiles = self.s.run(actions)
         actions = [Concatenate(self.parset, m, p['concat2'],
             prefix='facet_bands', direction=d, index=1) for d, m in zip(d_list,
-            avg_data_mapfiles)]
+            avg2_data_mapfiles)]
         concat_corrdata_mapfiles = self.s.run(actions)
 
         # Copy over CORRECTED_DATA column from second concat file, so that
@@ -198,7 +202,7 @@ class FacetSelfcal(Operation):
         from factor.actions.images import MakeImage
         from factor.actions.models import MakeSkymodelFromModelImage
         from factor.actions.solutions import Smooth, ResetPhases
-        from factor.lib.operation_lib import copy_column
+        from factor.lib.operation_lib import copy_column, make_chunks, merge_chunks
         from factor.operations.hardcoded_param import facet_selfcal as p
         from factor.lib.datamap_lib import write_mapfile, read_mapfile
 
@@ -251,7 +255,7 @@ class FacetSelfcal(Operation):
         chunks_list = []
         for d in d_list:
             chunks_list.append(self.make_chunks(d.concat_file, d.solint_a,
-                'facet_chunk', direction=d))
+            	self.parset 'facet_chunk', direction=d))
         chunk_data_mapfiles = []
         chunk_parmdb_mapfiles = []
         chunk_model_mapfiles = []
@@ -283,7 +287,7 @@ class FacetSelfcal(Operation):
         self.log.debug('Merging chunks...')
         merged_data_mapfiles = []
         for i, chunks in enumerate(chunks_list):
-            merged_data_mapfiles.append(write_mapfile([self.merge_chunks(
+            merged_data_mapfiles.append(write_mapfile([merge_chunks(
                 [chunk.file for chunk in chunks], prefix='image1')], self.name, prefix='merged_vis',
                 working_dir=self.parset['dir_working'], direction=d_list[i]))
 
@@ -329,7 +333,7 @@ class FacetSelfcal(Operation):
         self.log.debug('Merging chunks...')
         merged_data_mapfiles = []
         for chunks in chunks_list:
-            merged_data_mapfiles.append(write_mapfile([self.merge_chunks(
+            merged_data_mapfiles.append(write_mapfile([merge_chunks(
                 [chunk.file for chunk in chunks], prefix='image2')], self.name, prefix='merged_vis',
                 working_dir=self.parset['dir_working']))
 
@@ -390,7 +394,7 @@ class FacetSelfcal(Operation):
         self.log.debug('Merging chunks...')
         merged_data_mapfiles = []
         for chunks in chunks_list:
-            merged_data_mapfiles.append(write_mapfile([self.merge_chunks(
+            merged_data_mapfiles.append(write_mapfile([merge_chunks(
                 [chunk.file for chunk in chunks], prefix='image3')], self.name, prefix='merged_vis',
                 working_dir=self.parset['dir_working'], direction=d_list[i]))
 
@@ -399,7 +403,7 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             concat_file = read_mapfile(merged_data_mapfiles[i])
             merged_parmdb_phaseamp_amp1_mapfiles.append(write_mapfile(
-                [self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp1 for chunk
+                [merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp1 for chunk
                 in chunks], concat_file, prefix='merged_amps1')], self.name, prefix='merged_amps1',
                 working_dir=self.parset['dir_working']))
 
@@ -496,7 +500,7 @@ class FacetSelfcal(Operation):
         self.log.debug('Merging chunks...')
         merged_data_mapfiles = []
         for chunks in chunks_list:
-            merged_data_mapfiles.append(write_mapfile([self.merge_chunks(
+            merged_data_mapfiles.append(write_mapfile([merge_chunks(
             	[chunk.file for chunk in chunks], prefix='image4')],
             	self.name, prefix='merged_vis',
             	working_dir=self.parset['dir_working'], direction=d_list[i]))
@@ -506,7 +510,7 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             concat_file = read_mapfile(merged_data_mapfiles[i])
             merged_parmdb_phaseamp_amp2_mapfiles.append(write_mapfile(
-            	[self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp2 for
+            	[merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp2 for
             	chunk in chunks], concat_file, prefix='merged_parmdb_amps2')],
             	self.name, prefix='merged_amps2',
             	working_dir=self.parset['dir_working'], direction=d_list[i]))
@@ -514,7 +518,7 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             concat_file = read_mapfile(merged_data_mapfiles[i])
             merged_parmdb_phaseamp_phase2_mapfiles.append(write_mapfile(
-            	[self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_phase2 for
+            	[merge_chunk_parmdbs([chunk.parmdb_phaseamp_phase2 for
             	chunk in chunks], concat_file,
             	prefix='merged_parmdb_phases2')], self.name,
             	prefix='merged_phases2',
@@ -581,99 +585,10 @@ class FacetSelfcal(Operation):
             merged_parmdb_final_mapfiles)]
         self.s.run(actions)
 
-
-    def make_chunks(self, dataset, blockl, prefix=None, direction=None,
-        clobber=False):
-        """
-        Split ms into time chunks of length chunksize time slots
-        """
-        from factor.lib.chunk import Chunk
-        import numpy as np
-        import pyrap.tables as pt
-
-        if blockl < 1:
-            blockl = 1
-
-        # Get time per sample and number of samples
-        t = pt.table(dataset, readonly=True, ack=False)
-        for t2 in t.iter(["ANTENNA1","ANTENNA2"]):
-            if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
-                timepersample = t2[1]['TIME']-t2[0]['TIME'] # sec
-                nsamples = t2.nrows()
-                break
-        t.close()
-
-        nchunks = int(np.ceil((np.float(nsamples) / np.float(blockl))))
-        tlen = timepersample * np.float(blockl) / 3600. # length of block in hours
-        tobs = timepersample * nsamples / 3600.0 # length of obs in hours
-
-        # Set up the chunks
-        chunk_list = []
-        for c in range(nchunks):
-            chunk_obj = Chunk(self.parset, dataset, c, prefix=prefix,
-                direction=direction)
-            chunk_obj.t0 = tlen * float(chunk_obj.index) # hours
-            chunk_obj.t1 = np.float(chunk_obj.t0) + tlen # hours
-            if c == nchunks-1 and chunk_obj.t1 < tobs:
-                chunk_obj.t1 = tobs + 0.1 # make sure last chunk gets all that remains
-            chunk_obj.start_delay = 0.0
-            chunk_list.append(chunk_obj)
-            self.split_ms(dataset, chunk_obj.file, chunk_obj.t0, chunk_obj.t1,
-                clobber=clobber)
-
-        return chunk_list
-
-
-    def split_ms(self, msin, msout, start_out, end_out, clobber=True):
-        """Splits an MS between start and end times in hours relative to first time"""
-        import pyrap.tables as pt
-        import os
-
-        if os.path.exists(msout):
-            if clobber:
-                os.system('rm -rf {0}'.format(msout))
-            else:
-                return
-
-        t = pt.table(msin, ack=False)
-
-        starttime = t[0]['TIME']
-        t1 = t.query('TIME > ' + str(starttime+start_out*3600) + ' && '
-          'TIME < ' + str(starttime+end_out*3600), sortlist='TIME,ANTENNA1,ANTENNA2')
-
-        t1.copy(msout, True)
-        t1.close()
-        t.close()
-
-
-    def merge_chunks(self, chunk_files, prefix=None, clobber=False):
-        """Merges chunks"""
-        import pyrap.tables as pt
-        import os
-
-        msout = None
-        if prefix is not None:
-            pstr = prefix + '_'
-        else:
-            pstr = ''
-        for m in chunk_files:
-            if '-chunk_0' in m:
-                rstr = pstr + 'allchunks'
-                msout = rstr.join(m.split('chunk_0'))
-                break
-        if msout is None:
-            msout = chunk_files[0]
-
-        if os.path.exists(msout):
-            if clobber:
-                os.system('rm -rf {0}'.format(msout))
-            else:
-                return msout
-
-        t = pt.table(chunk_files, ack=False)
-        t.sort('TIME').copy(msout, deep = True)
-        t.close()
-        return msout
+        # Save files to the direction objects
+        files = read_mapfile(merged_parmdb_final_mapfiles)
+        for d, f in zip(d_list, files):
+            d.dirdepparmdb = f
 
 
     def merge_chunk_parmdbs(self, inparmdbs, concat_file, prefix='merged',
@@ -798,14 +713,11 @@ class FacetAddAll(Operation):
         d = self.direction
         bands = self.bands
 
-        if os.path.exists(self.statebasename+'.done'):
-            shifted_data_mapfile = os.path.join(self.parset['dir_working'],
-                'datamaps/FacetAddAll/PhaseShift/facet_output_{0}.datamap'.
-                format(d.name))
-            files = read_mapfile(shifted_data_mapfile)
-            for band, f in zip(bands, files):
-                band.shifted_data_file = f
-            return
+        # Check state for each direction
+#         if os.path.exists(self.statebasename+'.done'):
+#             self.direction.concat_file = 'visdata/allbands_concat_{0}.ms'.format(
+#                 self.direction.name)
+#             return
 
         # Make initial data maps for the empty datasets, their dir-indep
         # instrument parmdbs, and their dir-indep sky models
@@ -818,11 +730,9 @@ class FacetAddAll(Operation):
             for band in bands], self.name, prefix='dir_indep_parmdbs',
             working_dir=self.parset['dir_working'])
 
-        # Add calibrators from the dir-indep sky model for this direction to the
-        # visibilities
         self.log.info('Selecting sources for this direction...')
         action = MakeFacetSkymodel(self.parset, dir_indep_skymodels_mapfile,
-            p['model'], d, prefix='cal', cal_only=False)
+            p['select'], d, prefix='all_final', cal_only=False)
         dir_indep_cal_skymodels_mapfile = action.run()
 
         self.log.info('Adding sources for this direction...')
@@ -831,7 +741,6 @@ class FacetAddAll(Operation):
             prefix='facet_dirindep', direction=d)
         action.run()
 
-        # Phase shift to facet center
         self.log.info('Phase shifting DATA...')
         action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift'],
             prefix='facet', direction=d)
@@ -868,19 +777,12 @@ class FacetImage(Operation):
         bands = self.bands
 
         # Check state for each direction
-        all_done = False
-        for i, d in enumerate(d_list):
-            if os.path.exists(self.statebasename[i]+'.done'):
-                concat_data_mapfile = os.path.join(self.parset['dir_working'],
-                    'datamaps/FacetSetup/Concatenate/facet_bands_output_{0}.datamap'.
-                    format(d.name))
-                file = read_mapfile(concat_data_mapfile)[0]
-                d.concat_file = file
-                all_done = True
-        if all_done:
-            return
+#         if os.path.exists(self.statebasename+'.done'):
+#             self.direction.skymodel_dirdep = 'visdata/allbands_concat_{0}.ms'.format(
+#                 self.direction.name)
+#             return
 
-        # Make initial data maps for the phase-shifted datasets and their dir-indep
+        # Make initial data maps for the phase-shifted datasets and their dir-dep
         # instrument parmdbs
         shifted_data_mapfiles = []
         dir_indep_parmdbs_mapfiles = []
@@ -888,47 +790,128 @@ class FacetImage(Operation):
             shifted_data_mapfiles.append(write_mapfile([band.
             	shifted_data_file for band in bands], self.name,
             	prefix='shifted', working_dir=self.parset['dir_working']))
-            dir_indep_parmdbs_mapfiles.append(write_mapfile([band.
-            	dirindparmdb for band in bands], self.name,
+            dir_dep_parmdbs_mapfiles.append(write_mapfile([band.
+            	dirdepparmdb for band in bands], self.name,
             	prefix='dir_indep_parmdbs',
             	working_dir=self.parset['dir_working']))
 
-        # average to 1 channel per band. Do this twice, once for DATA and once
-        # for CORRECTED_DATA
         self.log.info('Averaging DATA...')
         actions = [Average(self.parset, m, p['avg'], prefix='facet',
             direction=d, index=1) for d, m in zip(d_list, shifted_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
 
-        # apply direction-independent calibration
-        self.log.info('Applying direction-independent calibration...')
-        actions = [Apply(self.parset, dm, p['apply'],
-            pm, prefix='facet_dirindep', direction=d) for d, dm, pm in zip(d_list,
-            avg_data_mapfiles, dir_indep_parmdbs_mapfiles)]
+        self.log.info('Applying direction-dependent calibration...')
+        actions = [Apply(self.parset, dm, p['apply_dirdep'],
+            pm, prefix='facet_dirdep', direction=d) for d, dm, pm in zip(d_list,
+            avg_data_mapfiles, dir_dep_parmdbs_mapfiles)]
         self.s.run(actions)
 
-        # concatenate all phase-shifted, averaged bands together. Do this twice,
-        # once each of the two averaged file sets
         self.log.info('Concatenating bands...')
-        actions = [Concatenate(self.parset, m, p['concat1'],
+        actions = [Concatenate(self.parset, m, p['concat'],
             prefix='facet_bands', direction=d, index=0) for d, m in zip(d_list,
             avg_data_mapfiles)]
         concat_data_mapfiles = self.s.run(actions)
-        actions = [Concatenate(self.parset, m, p['concat2'],
-            prefix='facet_bands', direction=d, index=1) for d, m in zip(d_list,
-            avg_data_mapfiles)]
-        concat_corrdata_mapfiles = self.s.run(actions)
 
-        # Copy over CORRECTED_DATA column from second concat file, so that
-        # first concatenated file has both DATA and dir-indep CORRECTED_DATA
-        for dm, cdm, d in zip(concat_data_mapfiles, concat_corrdata_mapfiles, d_list):
-            concat_data_file = read_mapfile(dm)[0]
-            concat_corrdata_file = read_mapfile(cdm)[0]
-            d.concat_file = concat_data_file
-            copy_column(d.concat_file, p['copy']['incol'], p['copy']['outcol'],
-                ms_from=concat_corrdata_file)
+        self.log.debug('Imaging...')
+        actions = [MakeImage(self.parset, m, p['imager'], prefix='facet_image',
+            direction=d) for d, m in zip(d_list, concat_data_mapfiles)]
+        image_basenames_mapfiles = self.s.run(actions)
+
+        self.log.info('Making sky model...')
+        actions = [MakeSkymodelFromModelImage(self.parset, m, p['model'],
+            prefix='facet_image', direction=d) for d, m in zip(d_list,
+            image_basenames_mapfiles)]
+        skymodels_mapfiles = self.s.run(actions)
+
+        self.log.info('Selecting only those sources inside the facet...')
+        action = MakeFacetSkymodel(self.parset, dir_indep_skymodels_mapfile,
+            p['select'], d, prefix='all_final', cal_only=False)
+        dir_dep_all_skymodels_mapfile = action.run()
+
+        # Save files to the direction objects
+        files = read_mapfile(dir_dep_all_skymodels_mapfile)
+        for d, f in zip(d_list, files):
+            d.skymodel_dirdep = f
 
 
+class FacetSubAll(Operation):
+    """
+    Subtract final facet sky model from visibilties
+    """
+    def __init__(self, parset, bands, direction=None, reset=False):
+        super(FacetImage, self).__init__(parset, bands, direction=direction,
+            reset=reset, name='FacetSubAll')
 
 
+    def run_steps(self):
+        """
+        Run the steps for this operation
+        """
+        from factor.actions.visibilities import Average, Concatenate
+        from factor.actions.calibrations import Apply
+        from factor.lib.operation_lib import copy_column, make_chunks, merge_chunks
+        from factor.operations.hardcoded_param import facet_setup as p
+        from factor.lib.datamap_lib import write_mapfile, read_mapfile
+
+        d = self.direction
+        bands = self.bands
+
+        # Check state
+#         if os.path.exists(self.statebasename+'.done'):
+#             self.direction.skymodel_dirdep = 'visdata/allbands_concat_{0}.ms'.format(
+#                 self.direction.name)
+#             return
+
+        # Make initial data maps for the empty datasets, their dir-dep
+        # instrument parmdbs, and their dir-dep sky models
+        subtracted_all_mapfile = write_mapfile([band.file for band in bands],
+        	self.name, prefix='subtracted_all',
+        	working_dir=self.parset['dir_working'])
+        dir_dep_parmdbs_mapfile = write_mapfile([d.dirdepparmdb]*len(bands),
+            self.name, prefix='dir_dep_parmdbs',
+        	working_dir=self.parset['dir_working'])
+        dir_dep_skymodels_mapfile = write_mapfile([d.skymodel_dirdep]*len(bands),
+            self.name, prefix='dir_dep_skymodels',
+        	working_dir=self.parset['dir_working'])
+
+        self.log.info('Dividing dataset into chunks...')
+        chunks_list = []
+        for band in bands:
+            chunks_list.append(self.make_chunks(band.file, d.solint_a,
+            	self.parset 'facet_chunk', direction=d))
+        chunk_data_mapfiles = []
+        chunk_parmdb_mapfiles = []
+        chunk_model_mapfiles = []
+        for i, chunks in enumerate(chunks_list):
+            chunk_data_mapfiles.append(write_mapfile([chunk.file for chunk in chunks],
+                self.name, prefix='chunks_vis_empty', working_dir=self.parset['dir_working'],
+                direction=d))
+            skymodel = read_mapfile(dir_dep_skymodels_mapfile[i])
+            chunk_model_mapfiles.append(write_mapfile(skymodel*len(chunks),
+                self.name, prefix='chunks_skymodel_final', working_dir=self.parset['dir_working'],
+                direction=d))
+            parmdb = read_mapfile(dir_dep_skymodels_mapfile[i])
+            chunk_parmdb_mapfiles.append(write_mapfile(parmdb*len(chunks),
+                self.name, prefix='chunk_parmdb_final', working_dir=self.parset['dir_working'],
+                direction=d))
+
+        self.log.info('Subtracting sources for this direction using final model...')
+        action = [Subtract(self.parset, dm, p['subtract'], mm, pm,
+            prefix='facet_dirdep', direction=d) for dm, mm, pm in zip(
+            chunk_data_mapfiles, chunk_model_mapfiles, chunk_parmdb_mapfiles)]
+        self.s.run(actions)
+
+        self.log.debug('Merging chunks...')
+        merged_data_mapfiles = []
+        for i, chunks in enumerate(chunks_list):
+            merged_data_mapfiles.append(write_mapfile([merge_chunks(
+            	[chunk.file for chunk in chunks], prefix='final_sub')],
+            	self.name, prefix='band{0}_merged_vis'.format(i),
+            	working_dir=self.parset['dir_working'], direction=d))
+
+        # Clean up files for this direction:
+        #    - unneeded MS files
+        #    - selfcal images
+        self.log.info('Cleaning up files for this direction...')
+#         os.system('rm -rf visdata/*{0}*'.format(d.name))
 
