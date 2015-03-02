@@ -718,7 +718,7 @@ class FacetSelfcal(Operation):
             if clobber:
                 os.system('rm -rf {0}'.format(parmdb_out))
             else:
-                return
+                return parmdb_out
         pdb_out = lofar.parmdb.parmdb(parmdb_out, create=True)
 
         pol_list = ['0:0', '1:1']
@@ -778,6 +778,7 @@ class FacetSelfcal(Operation):
         pdb_out.addValues(parms)
         pdb_out.flush()
 
+        return parmdb_out
 
 
 class FacetAddAll(Operation):
