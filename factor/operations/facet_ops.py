@@ -441,7 +441,7 @@ class FacetSelfcal(Operation):
             merged_parmdb_phaseamp_amp1_mapfiles)]
         self.s.run(actions)
 
-        self.log.info('Preapplying amplitude solutions #1...')
+        self.log.info('Preapplying amplitude solutions...')
         chunk_parmdb_phaseamp_amp1_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             chunk_parmdb_phaseamp_amp1_mapfiles.append(write_mapfile(
@@ -565,10 +565,10 @@ class FacetSelfcal(Operation):
         self.log.info('Merging final instrument parmdbs...')
         merged_parmdb_final_mapfiles = []
         for i, d in enumerate(d_list):
-            phases2_final = read_mapfile(merged_parmdb_phaseamp_phase2_mapfiles[i])
-            smoothed_amps1_final = read_mapfile(merged_parmdb_phaseamp_amp1_mapfiles[i])
-            smoothed_amps2_final = read_mapfile(merged_parmdb_phaseamp_amp2_mapfiles[i])
-            concat_file = read_mapfile(merged_data_mapfiles[i])
+            phases2_final = read_mapfile(merged_parmdb_phaseamp_phase2_mapfiles[i])[0]
+            smoothed_amps1_final = read_mapfile(merged_parmdb_phaseamp_amp1_mapfiles[i])[0]
+            smoothed_amps2_final = read_mapfile(merged_parmdb_phaseamp_amp2_mapfiles[i])[0]
+            concat_file = read_mapfile(merged_data_mapfiles[i])[0]
             merged_parmdb_final_mapfiles.append(write_mapfile(
                 [self.merge_parmdbs(phases2_final, smoothed_amps1_final, smoothed_amps2_final,
                 concat_file)], self.name, prefix='merged_parmdb_final',
