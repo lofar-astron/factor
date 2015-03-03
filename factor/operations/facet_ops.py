@@ -254,7 +254,7 @@ class FacetSelfcal(Operation):
         self.log.info('Dividing dataset into chunks...')
         chunks_list = []
         for d in d_list:
-            chunks_list.append(self.make_chunks(d.concat_file, d.solint_a,
+            chunks_list.append(make_chunks(d.concat_file, d.solint_a,
             	self.parset, 'facet_chunk', direction=d))
         chunk_data_mapfiles = []
         chunk_parmdb_mapfiles = []
@@ -877,7 +877,7 @@ class FacetSubAll(Operation):
         self.log.info('Dividing dataset into chunks...')
         chunks_list = []
         for band in bands:
-            chunks_list.append(self.make_chunks(band.file, d.solint_a,
+            chunks_list.append(make_chunks(band.file, d.solint_a,
             	self.parset, 'facet_chunk', direction=d))
         chunk_data_mapfiles = []
         chunk_parmdb_mapfiles = []
