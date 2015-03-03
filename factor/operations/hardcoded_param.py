@@ -306,8 +306,8 @@ facet_image= {
             'rmsbox': '(70, 20)',
             'threshold': '0mJy',
             'nterms' : 2},
-'model' : {'nterms': 2}
-'select' : {},
+'model' : {'nterms': 2},
+'select' : {}
 }
 
 facet_finalize = {
