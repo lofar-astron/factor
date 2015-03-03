@@ -86,12 +86,33 @@ class BBS(Action):
         Makes the required data maps
         """
         from factor.lib.datamap_lib import write_mapfile
+        import copy
 
         self.p['vis_datamap'] = self.vis_datamap
         if self.model_datamap is not None:
             self.p['skymodel_datamap'] = self.model_datamap
         if self.parmdb_datamap is not None:
             self.p['parmdb_datamap'] = self.parmdb_datamap
+        vis_files = read_mapfile(self.vis_datamap)
+        local_parmdb_files = [os.path.join(v, 'instrument') for v in vis_files]
+        self.local_parmdb_datamap = write_mapfile(local_parmdb_files, self.name,
+                prefix=self.prefix+'_local_parmdbs',
+                working_dir=self.op_parset['dir_working'])
+
+        # Copy the input parmdb (if any) to local parmdb
+        if self.parmdb_datamap is not None:
+            parmdb_files = read_mapfile(self.parmdb_datamap)
+            if not os.path.exists(parmdb_files[0]):
+                self.output_parmdb_datamap = copy.deepcopy(self.parmdb_datamap)
+                self.parmdb_datamap = None
+            else:
+                for inp, outp in zip(parmdb_files, local_parmdb_files):
+                    if os.path.exists(outp):
+                        os.system('rm -rf {0}'.format(outp))
+                    os.system('cp -r {0} {1}'.format(inp, outp))
+                self.output_parmdb_datamap = None
+        else:
+            self.output_parmdb_datamap = None
 
 
     def make_pipeline_control_parset(self):
@@ -105,10 +126,7 @@ class BBS(Action):
             self.p['flags'] = ''
 
         if self.model_datamap is not None:
-            if self.parmdb_datamap is not None:
-                template = env.get_template('bbs.pipeline.parset.tpl')
-            else:
-                template = env.get_template('bbs_noparmdb.pipeline.parset.tpl')
+            template = env.get_template('bbs.pipeline.parset.tpl')
         else:
             template = env.get_template('bbs_nomodel.pipeline.parset.tpl')
         tmp = template.render(self.p)
@@ -135,7 +153,22 @@ class BBS(Action):
         """
         Return results
         """
-        return None
+        from factor.lib.datamap_lib import write_mapfile, read_mapfile
+
+        vis_files = read_mapfile(self.vis_datamap)
+        default_parmdb_files = [os.path.join(v, 'instrument') for v in vis_files]
+
+        if self.output_parmdb_datamap is not None:
+            output_parmdb_files = read_mapfile(self.output_parmdb_datamap)
+            for inp, outp in zip(default_parmdb_files, output_parmdb_files):
+                os.system('cp -r {0} {1}'.format(inp, outp))
+            parmdb_datamap = self.output_parmdb_datamap
+        elif self.parmdb_datamap is not None:
+            parmdb_datamap = self.parmdb_datamap
+        else:
+            parmdb_datamap = self.local_parmdb_datamap
+
+        return parmdb_datamap
 
 
 class DPPP(Action):
@@ -234,45 +267,6 @@ class Solve(BBS):
             model_datamap=model_datamap, parmdb_datamap=parmdb_datamap,
             prefix=prefix, direction=direction, clean=clean, index=index,
             name='Solve')
-
-        # Check whether parmdb exists. If not, use "instrument" and copy
-        # them at the end
-        if self.parmdb_datamap is not None:
-            from factor.lib.datamap_lib import write_mapfile, read_mapfile
-            import copy
-
-            parmdb_files = read_mapfile(self.parmdb_datamap)
-            if not os.path.exists(parmdb_files[0]):
-                self.output_parmdb_datamap = copy.deepcopy(self.parmdb_datamap)
-                self.parmdb_datamap = None
-            else:
-                self.output_parmdb_datamap = None
-        else:
-            self.output_parmdb_datamap = None
-
-
-    def get_results(self):
-        """
-        Return results
-        """
-        from factor.lib.datamap_lib import write_mapfile, read_mapfile
-
-        vis_files = read_mapfile(self.vis_datamap)
-        default_parmdb_files = [os.path.join(v, 'instrument') for v in vis_files]
-
-        if self.output_parmdb_datamap is not None:
-            output_parmdb_files = read_mapfile(self.output_parmdb_datamap)
-            for inp, outp in zip(default_parmdb_files, output_parmdb_files):
-                os.system('cp -r {0} {1}'.format(inp, outp))
-            parmdb_datamap = self.output_parmdb_datamap
-        elif self.parmdb_datamap is not None:
-            parmdb_datamap = self.parmdb_datamap
-        else:
-            parmdb_datamap = write_mapfile(default_parmdb_files, self.name,
-                prefix=self.prefix+'_output_parmdbs',
-                working_dir=self.op_parset['dir_working'])
-
-        return parmdb_datamap
 
 
 class Subtract(BBS):
