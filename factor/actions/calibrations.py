@@ -85,7 +85,7 @@ class BBS(Action):
         """
         Makes the required data maps
         """
-        from factor.lib.datamap_lib import write_mapfile
+        from factor.lib.datamap_lib import read_mapfile, write_mapfile
         import copy
 
         self.p['vis_datamap'] = self.vis_datamap
