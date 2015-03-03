@@ -1,6 +1,5 @@
 """
-Version module.
-This module simply stores the version and changelog
+Module that stores the version and changelog
 """
 
 # Version number
@@ -12,7 +11,6 @@ def changelog():
     """
     Factor Changelog.
     -----------------------------------------------
-    4/9/2014 - Initial version
-    16/2/2015 - Initial support for LOFAR generic pipeline
+    4/3/2014 - Initial version
     """
     pass

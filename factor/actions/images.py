@@ -27,14 +27,14 @@ class Casapy(Action):
 
     Input data maps
     ---------------
-    vis_map : Datamap
+    vis_datamap : Datamap
         Map of MS files
-    mask_map : Datamap, optional
+    mask_datamap : Datamap, optional
         Map of masks
 
     Output data maps
     ----------------
-    image_map : Datamap
+    image_datamap : Datamap
         Map of image basenames
 
     """

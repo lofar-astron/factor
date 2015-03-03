@@ -24,6 +24,19 @@ env = Environment(loader=FileSystemLoader(os.path.join(DIR, 'templates')))
 class Losoto(Action):
     """
     Action to run LoSoTo
+
+    Input data maps
+    ---------------
+    vis_datamap : Datamap
+        Map of vis data files
+    parmdb_datamap : Datamap
+        Map of input parmdb files
+
+    Output data maps
+    ----------------
+    output_datamap : Datamap
+        Map of output parmdb files
+
     """
     def __init__(self, op_parset, vis_datamap, p, parmdb_datamap, prefix=None,
         direction=None, clean=True, index=None, name='Losoto'):

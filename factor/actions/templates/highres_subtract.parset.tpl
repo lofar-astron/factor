@@ -3,7 +3,7 @@ Strategy.ChunkSize   = 200
 Strategy.UseSolver   = F
 Strategy.Steps       = [subtract, correct1]
 
-Step.subtract.Model.Sources                   = []
+Step.subtract.Model.Sources                   = [{{ sources }}]
 Step.subtract.Model.Cache.Enable              = T
 Step.subtract.Model.Phasors.Enable            = F
 Step.subtract.Model.DirectionalGain.Enable    = F

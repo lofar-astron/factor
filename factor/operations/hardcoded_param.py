@@ -43,46 +43,6 @@ init_subtract = {
 }
 
 init_subtract_test = {
-'imagerh' : {'niter': 2000,
-             'imsize': 6250,
-             'mscale': False,
-             'cell': '7.5arcsec',
-             'uvrange': "0.08~7.0klambda",
-             'threshpix': 4,
-             'threshisl': 2.5,
-             'atrous_do': True,
-             'rmsbox': '(70, 20)',
-             'threshold': '0mJy',
-             'nterms' : 1},
-'modelh' : {'nterms': 1},
-'calibh' : {'incol': 'DATA',
-            'outcol1': 'SUBTRACTED_DATA',
-            'outcol2': 'MODEL_DATA',
-            'flags': '--replace-sourcedb'},
-'avgl' : {'columnname': 'MODEL_DATA', # outcol is DATA
-          'freqstep': 5,
-          'timestep': 2},
-'imagerl' : {'niter' : 2000,
-             'imsize': 4800,
-             'mscale': False,
-             'cell': '25arcsec',
-             'uvrange': "0.08~2.0klambda",
-             'threshisl': 5,
-             'threshpix': 5,
-             'atrous_do': True,
-             'rmsbox': '(70, 20)',
-             'threshold': '0mJy',
-             'nterms': 1},
-'modell' : {'nterms': 1},
-'calibl' : {'incol': 'SUBTRACTED_DATA',
-            'outcol': 'SUBTRACTED_DATA_ALL',
-            'flags': '--replace-sourcedb'},
-'merge' : {'matchby': 'name',
-           'keep': 'all',
-           'radius': 0}
-}
-
-init_subtract_test_quick = {
 'imagerh' : {'niter': 200,
              'imsize': 650,
              'mscale': False,
@@ -275,14 +235,13 @@ facet_add_all = {
 'shift' : {'columnname': 'FACET_DATA'} # outcol is DATA
 }
 
-
 facet_image= {
-'avg' : {'columnname': 'DATA', # outcol is DATA
-         'freqstep': 5,
-         'timestep': 3},
 'apply_dirdep' : {'incol': 'DATA',
                   'outcol': 'CORRECTED_DATA'},
-'concat2' : {'columnname': 'CORRECTED_DATA'}, # outcol is DATA
+'avg' : {'columnname': 'CORRECTED_DATA', # outcol is DATA
+         'freqstep': 5,
+         'timestep': 3},
+'concat' : {'columnname': 'DATA'}, # outcol is DATA
 'imager_template' : {'niter': 1,
                      'imsize': 1024,
                      'mscale': False,
@@ -310,13 +269,22 @@ facet_image= {
 'select' : {}
 }
 
-facet_finalize = {
+facet_sub_all = {
+'fft' : {'nterms': 2},
 'subtract' : {'incol': 'FACET_DATA',
               'outcol': 'SUBTRACTED_DATA_ALL',
               'flags': '--replace-sourcedb'}
 }
 
-facet_final_image= {
+facet_add_all_final = {
+'fft' : {'nterms': 2},
+'add' : {'incol': 'SUBTRACTED_DATA_ALL',
+         'outcol': 'FACET_DATA',
+         'flags': '--replace-sourcedb'},
+'shift' : {'columnname': 'FACET_DATA'} # outcol is DATA
+}
+
+facet_image_final = {
 'add_dirdep' : {'incol': 'SUBTRACTED_DATA_ALL',
                 'outcol': 'FACET_DATA',
                 'flags': '--replace-sourcedb'},

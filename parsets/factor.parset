@@ -19,13 +19,15 @@ parmdb_name = instrument_ap_smoothed
 # Full path to file containing calibrator directions. If not given, directions
 # are selected internally using the flux and size cuts below (min flux, max
 # size of a source, and max separation between sources below which they are grouped
-# into one direction)
+# into one direction). Additionally, the maximum number of directions can be
+# specified.
 directions_file = /data/directions.txt
 directions_flux_min_Jy = 0.1
+directions_total_num = 50
 directions_size_max_arcmin = 3.0
 directions_separation_max_arcmin = 6.0
 
-# Maximum number of directions (default = all)
+# Maximum number of directions to process (default = all)
 ndir = 10
 
 # Maximum number of directions to process in parallel (default = 1)
@@ -39,6 +41,9 @@ clusterdesc_file = /lofar/build/gnu_opt/installed/share/my.clusterdesc
 
 # Interactive?
 interactive = False
+
+# Use ftw to FFT model image (instead of using BBS predict)?
+use_ftw = False
 
 # Make final mosaic?
 make_mosaic = False

@@ -3,7 +3,7 @@ Strategy.ChunkSize   = {{ chunksize }}
 Strategy.UseSolver   = F
 Strategy.Steps       = [solve]
 
-Step.solve.Model.Sources                  = []
+Step.solve.Model.Sources                  = [{{ sources }}]
 Step.solve.Model.Cache.Enable             = T
 Step.solve.Model.Phasors.Enable           = F
 Step.solve.Model.DirectionalGain.Enable   = F

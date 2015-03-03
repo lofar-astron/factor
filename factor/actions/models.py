@@ -26,6 +26,17 @@ env = Environment(loader=FileSystemLoader(os.path.join(DIR, 'templates')))
 class MakeSkymodelFromModelImage(Action):
     """
     Action to make a sky model from a CASA model image
+
+    Input data maps
+    ---------------
+    input_datamap : Datamap
+        Map of CASA model images
+
+    Output data maps
+    ----------------
+    output_datamap : Datamap
+        Map of sky model files
+
     """
     def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
         clean=True, index=None):
@@ -137,6 +148,17 @@ class MakeSkymodelFromModelImage(Action):
 class MakeFacetSkymodel(Action):
     """
     Action to make a sky model for a facet
+
+    Input data maps
+    ---------------
+    input_datamap : Datamap
+        Map of full sky model files
+
+    Output data maps
+    ----------------
+    output_datamap : Datamap
+        Map of facet sky model files
+
     """
     def __init__(self, op_parset, input_datamap, p, direction, prefix=None,
         clean=True, index=None, cal_only=True):
@@ -255,6 +277,19 @@ class MakeFacetSkymodel(Action):
 class MergeSkymodels(Action):
     """
     Action to merge two sky models
+
+    Input data maps
+    ---------------
+    skymodel1_datamap : Datamap
+        Map of sky models
+    skymodel2_datamap : Datamap
+        Map of sky models
+
+    Output data maps
+    ----------------
+    output_datamap : Datamap
+        Map of merged sky model files
+
     """
     def __init__(self, op_parset, skymodel1_datamap, skymodel2_datamap, p, prefix=None,
         direction=None, clean=True, index=None):
@@ -354,10 +389,22 @@ class MergeSkymodels(Action):
 
 class FFT(Action):
     """
-    Action to FFT a model into an MS
+    Action to FFT a model into a vis column of an MS
+
+    Input data maps
+    ---------------
+    vis_datamap : Datamap
+        Map of vis data
+    model_datamap : Datamap
+        Map of CASA model images
+
+    Output data maps
+    ----------------
+    None
+
     """
-    def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
-        clean=True, index=None):
+    def __init__(self, op_parset, vis_datamap, model_datamap, p, prefix=None,
+    	direction=None, clean=True, index=None):
         """
         Create action and run pipeline
 
@@ -379,14 +426,95 @@ class FFT(Action):
             Index of action
 
         """
-        super(FFT, self).__init__(op_parset, 'FFT')
+        super(FFT, self).__init__(op_parset, 'FFT', prefix=prefix,
+        	direction=direction, index=index)
 
         # Store input parameters
-        self.input_datamap = input_datamap
+        self.vis_datamap = vis_datamap
+        self.model_datamap = model_datamap
         self.p = p.copy()
-        if prefix is None:
-            prefix = 'fft'
-        self.prefix = prefix
-        self.direction = direction
+        if self.prefix is None:
+            self.prefix = 'fft'
         self.clean = clean
-        self.index = index
+        self.working_dir = self.model_dir + '{0}/{1}/'.format(self.op_name, self.name)
+        if self.direction is not None:
+            self.working_dir += '{0}/'.format(self.direction.name)
+            self.p['imsize'] = self.direction.imsize
+        if not os.path.exists(self.working_dir):
+            os.makedirs(self.working_dir)
+
+        # Define casapy script name
+        self.fft_script_file = self.parsetbasename + 'ftw.py'
+
+
+    def make_datamaps(self):
+        """
+        Makes the required data maps
+        """
+        from factor.lib.datamap_lib import read_mapfile, write_mapfile
+
+        self.p['vis_datamap'] = self.vis_datamap
+
+        imagebasenames = read_mapfile(self.input_datamap)
+        model_files = [bn+'.model' for bn in imagebasenames]
+
+        self.p['model_datamap'] = write_mapfile(model_files,
+            self.op_name, self.name, prefix=self.prefix+'_model',
+            direction=self.direction, working_dir=self.op_parset['dir_working'])
+
+        # Make data map for facet region files
+        if self.direction is not None:
+            region_files = [self.direction.region_file] * len(imagebasenames)
+            self.p['region_datamap'] = write_mapfile(region_files,
+                self.op_name, self.name, prefix=self.prefix+'_region',
+                direction=self.direction, working_dir=self.op_parset['dir_working'])
+        else:
+            self.p['region_datamap'] = None
+
+
+    def make_pipeline_control_parset(self):
+        """
+        Writes the pipeline control parset and any script files
+        """
+        self.p['scriptname'] = os.path.abspath(self.script_file)
+        template = env.get_template('fft.pipeline.parset.tpl')
+        tmp = template.render(self.p)
+        with open(self.pipeline_parset_file, 'w') as f:
+            f.write(tmp)
+
+        template = env.get_template('ftw.tpl')
+        tmp = template.render(self.p)
+        with open(self.script_file, 'w') as f:
+            f.write(tmp)
+
+
+    def make_pipeline_config_parset(self):
+        """
+        Writes the pipeline configuration parset
+        """
+        template = env.get_template('pipeline.cfg.tpl')
+        tmp = template.render(self.op_parset)
+        with open(self.pipeline_config_file, 'w') as f:
+            f.write(tmp)
+
+
+    def get_results(self):
+        """
+        Makes and returns map files for image basenames
+
+        Returns
+        -------
+        images_mapfile : Data map filename
+            Filename to map file with imagebasenames
+
+        """
+        return None
+
+
+    def clean(self):
+        """
+        Remove unneeded files:
+
+        """
+        pass
+

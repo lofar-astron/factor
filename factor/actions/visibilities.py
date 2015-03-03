@@ -26,6 +26,17 @@ env = Environment(loader=FileSystemLoader(os.path.join(DIR, 'templates')))
 class DPPP(Action):
     """
     Action to run DPPP
+
+    Input data maps
+    ---------------
+    input_datamap : Datamap
+        Map of vis data files
+
+    Output data maps
+    ----------------
+    output_datamap : Datamap
+        Map of output vis files
+
     """
     def __init__(self, op_parset, input_datamap, p, prefix=None,
         direction=None, clean=True, index=None, name='DPPP'):

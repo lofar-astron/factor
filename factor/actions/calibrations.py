@@ -30,6 +30,21 @@ env = Environment(loader=FileSystemLoader(os.path.join(DIR, 'templates')))
 class BBS(Action):
     """
     Action to run BBS
+
+    Input data maps
+    ---------------
+    vis_datamap : Datamap
+        Map of MS files
+    model_datamap : Datamap, optional
+        Map of sky models
+    parmdb_datamap: Datamap, optional
+        Map of parmdb files
+
+    Output data maps
+    ----------------
+    parmdb_datamap: Datamap
+        Map of parmdb files
+
     """
     def __init__(self, op_parset, vis_datamap, p, model_datamap=None,
         parmdb_datamap=None, prefix=None, direction=None, clean=True,
@@ -124,7 +139,10 @@ class BBS(Action):
         self.p['parset'] = self.parset_file
         if 'flags' not in self.p:
             self.p['flags'] = ''
-
+        if self.op_parset['use_ftw']:
+            self.p['sources'] = '@MODEL_DATA'
+        else:
+            self.p['sources'] = ''
         if self.model_datamap is not None:
             template = env.get_template('bbs.pipeline.parset.tpl')
         else:
@@ -152,6 +170,12 @@ class BBS(Action):
     def get_results(self):
         """
         Return results
+
+        Returns
+        -------
+        parmdb_datamap : DataMap
+            Output solutions parmdb data map
+
         """
         from factor.lib.datamap_lib import write_mapfile, read_mapfile
 
@@ -174,6 +198,21 @@ class BBS(Action):
 class DPPP(Action):
     """
     Action to run DPPP Gaincal
+
+    Input data maps
+    ---------------
+    vis_datamap : Datamap
+        Map of MS files
+    model_datamap : Datamap, optional
+        Map of sky models
+    parmdb_datamap: Datamap, optional
+        Map of parmdb files
+
+    Output data maps
+    ----------------
+    parmdb_datamap: Datamap, optional
+        Map of parmdb files
+
     """
     def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
         clean=True, index=None, name='DPPP'):
@@ -199,17 +238,6 @@ class DPPP(Action):
 
         """
         super(DPPP, self).__init__(op_parset, name=name)
-
-        # Store input parameters
-        self.input_datamap = input_datamap
-        self.p = p.copy()
-        if prefix is None:
-            prefix = 'run_dppp'
-        self.prefix = prefix
-        self.direction = direction
-        self.localdir = localdir
-        self.clean = clean
-        self.index = index
 
 
 class Add(BBS):
@@ -253,12 +281,6 @@ class Apply(BBS):
 class Solve(BBS):
     """
     Action to solve for solutions
-
-    Returns
-    -------
-    parmdb_datamap : DataMap
-        Output solutions parmdb data map
-
     """
     def __init__(self, op_parset, vis_datamap, p, model_datamap=None,
         parmdb_datamap=None, prefix=None, direction=None, clean=True,

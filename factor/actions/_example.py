@@ -1,4 +1,6 @@
 """
+Module that holds an example actions
+
 Action: Example
 An example action, to be used as a template
 """

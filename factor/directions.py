@@ -62,7 +62,8 @@ def directions_read(directions_file):
 
 
 def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
-    directions_separation_max_arcmin, interactive=False):
+    directions_separation_max_arcmin, directions_total_num=None,
+    interactive=False):
     """
     Selects appropriate calibrators from sky models and makes the directions file
 
@@ -127,6 +128,14 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
                 break
             else:
                 allDone = True
+
+    # Trim directions list to get directions_total_num of directions
+    if directions_total_num is not None:
+        dir_fluxes = s.getColValues('I', aggregate='sum')
+        dir_fluxes_sorted = dir_fluxes.tolist().sort()
+        while len(s) > directions_total_num:
+            cut_jy = dir_fluxes_sorted.pop() + 0.00001
+            s.remove('I < {0} Jy'.format(cut_jy), aggregate='sum')
 
     # Write the file
     s.write(fileName=directions_file, format='factor', sortBy='I', clobber=True)
@@ -302,6 +311,25 @@ def thiessen(directions_list, bounds_scale=2):
         width_deg.append(hyp_deg.value)
 
     return thiessen_polys_deg, width_deg
+
+
+def make_region_file(vertices, dir_name):
+    """
+    Make a CASA region file for given vertices
+
+    Parameters
+    ----------
+    vertices : list
+        List of direction RA and Dec vertices in degrees
+    dir_name : str
+        Name of direction
+
+    Returns
+    -------
+    region_filename : str
+        Name of region file
+    """
+    return None
 
 
 def plot_thiessen(directions_list, bounds_scale=2):

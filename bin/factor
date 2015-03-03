@@ -127,6 +127,8 @@ if __name__=='__main__':
     for i, direction in enumerate(dir_no_reg):
         direction.vertices = polys[i]
         direction.width = widths[i]
+        direction.reg = factor.directions.make_region_file(direction.vertices,
+            direction.name)
 
     # Select subset of directions to process
     if 'ndir' in parset:
@@ -158,10 +160,6 @@ if __name__=='__main__':
         ops = [FacetAddAll(parset, bands, d) for d in dirs_to_image]
         for op in ops:
             op.run()
-
-        # Setup up facet(s) for imaging
-        op = FacetSetupFull(parset, bands, direction_group)
-        op.run()
 
         # Make image of all sources in the facet(s) and get final model(s)
         op = FacetImage(parset, bands, direction_group)

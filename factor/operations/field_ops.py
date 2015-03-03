@@ -28,10 +28,12 @@ class InitSubtract(Operation):
         """
         from factor.actions.images import MakeImage
         from factor.actions.models import MakeSkymodelFromModelImage, MergeSkymodels
-        from factor.actions.calibrations import Subtract
+        from factor.actions.calibrations import Subtract, FFT
         from factor.actions.visibilities import Average
         from factor.lib.datamap_lib import write_mapfile, read_mapfile
-        from factor.operations.hardcoded_param import init_subtract_test_quick as p
+#         from factor.operations.hardcoded_param import init_subtract as p
+        from factor.operations.hardcoded_param import init_subtract_test as p
+        self.log.warn('Using test parameters')
 
         bands = self.bands
 
@@ -57,9 +59,16 @@ class InitSubtract(Operation):
             prefix='highres')
         highres_image_basenames_mapfile = action.run()
 
+        if self.parset['use_ftw']:
+            self.log.debug('FFTing high-res model image...')
+            action = FFT(self.parset, subtracted_all_mapfile,
+                highres_image_basenames_mapfile, p['modelh'], prefix='highres')
+            action.run()
+            highres_skymodels_mapfile = None
+
         self.log.info('Making high-res sky model...')
         action = MakeSkymodelFromModelImage(self.parset,
-        	highres_image_basenames_mapfile, p['modelh'], prefix='highres')
+            highres_image_basenames_mapfile, p['modelh'], prefix='highres')
         highres_skymodels_mapfile = action.run()
 
         self.log.info('Subtracting high-res sky model...')
@@ -77,6 +86,12 @@ class InitSubtract(Operation):
         action = MakeImage(self.parset, avg_files_mapfile, p['imagerl'],
             prefix='lowres')
         lowres_image_basenames_mapfile = action.run()
+
+        if self.parset['use_ftw']:
+            self.log.debug('FFTing low-res model image...')
+            action = FFT(self.parset, subtracted_all_mapfile,
+                lowres_image_basenames_mapfile, p['modell'], prefix='lowres')
+            action.run()
 
         self.log.info('Making low-res sky model...')
         action = MakeSkymodelFromModelImage(self.parset, lowres_image_basenames_mapfile,

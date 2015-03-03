@@ -43,7 +43,7 @@ def parset_read(parset_file):
     try:
         os.chdir(parset_dict['dir_working'])
         for subdir in ['/logs', '/images', '/models', '/state', '/parsets',
-            '/visdata', '/parmdbs', '/pipeline', '/datamaps']:
+            '/visdata', '/parmdbs', '/pipeline', '/datamaps', '/regions']:
             if not os.path.isdir(parset_dict['dir_working']+subdir):
                 os.mkdir(parset_dict['dir_working']+subdir)
     except:
@@ -78,9 +78,17 @@ def parset_read(parset_file):
         log.debug("Using interactive mode")
     else:
         parset_dict['interactive'] = False
+    if 'use_ftw' in parset_dict:
+        parset_dict['use_ftw'] = parset.getboolean('global', 'use_ftw')
+        log.debug("Using ftw to FFT model image")
+    else:
+        parset_dict['use_ftw'] = False
     if 'directions_flux_min_jy' in parset_dict:
         parset_dict['directions_flux_min_jy'] = parset.getfloat('global',
             'directions_flux_min_jy')
+    if 'directions_total_num' in parset_dict:
+        parset_dict['directions_total_num'] = parset.getint('global',
+            'directions_total_num')
     if 'directions_size_max_arcmin' in parset_dict:
         parset_dict['directions_size_max_arcmin'] = parset.getfloat('global',
             'directions_size_max_arcmin')
