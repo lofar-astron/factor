@@ -166,16 +166,17 @@ class FacetSetup(Operation):
         # once each of the two averaged file sets
         self.log.info('Concatenating bands...')
         actions = [Concatenate(self.parset, m, p['concat1'],
-            prefix='facet_bands', direction=d, index=0) for d, m in zip(d_list,
+            prefix='facet_bands', direction=d, index=1) for d, m in zip(d_list,
             avg1_data_mapfiles)]
         concat_data_mapfiles = self.s.run(actions)
         actions = [Concatenate(self.parset, m, p['concat2'],
-            prefix='facet_bands', direction=d, index=1) for d, m in zip(d_list,
+            prefix='facet_bands', direction=d, index=2) for d, m in zip(d_list,
             avg2_data_mapfiles)]
         concat_corrdata_mapfiles = self.s.run(actions)
 
-        # Copy over CORRECTED_DATA column from second concat file, so that
-        # first concatenated file has both DATA and dir-indep CORRECTED_DATA
+        # Copy over DATA column (was phase-shifted CORRECTED_DATA) from second
+        #     concat file, so that first concatenated file has both DATA and
+        #     dir-indep CORRECTED_DATA
         for dm, cdm, d in zip(concat_data_mapfiles, concat_corrdata_mapfiles, d_list):
             concat_data_file = read_mapfile(dm)[0]
             concat_corrdata_file = read_mapfile(cdm)[0]

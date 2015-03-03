@@ -1,5 +1,5 @@
 Strategy.InputColumn = {{ incol }}
-Strategy.ChunkSize   = 200
+Strategy.ChunkSize   = 100
 Strategy.UseSolver   = F
 Strategy.Steps       = [add]
 
