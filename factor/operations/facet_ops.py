@@ -176,8 +176,8 @@ class FacetSetup(Operation):
         concat_corrdata_mapfiles = self.s.run(actions)
 
         # Copy over DATA column (was phase-shifted CORRECTED_DATA) from second
-        #     concat file, so that first concatenated file has both DATA and
-        #     dir-indep CORRECTED_DATA
+        # concat file, so that first concatenated file has both DATA and
+        # dir-indep CORRECTED_DATA
         for dm, cdm, d in zip(concat_data_mapfiles, concat_corrdata_mapfiles, d_list):
             concat_data_file = read_mapfile(dm)[0]
             concat_corrdata_file = read_mapfile(cdm)[0]

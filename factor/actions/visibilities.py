@@ -87,8 +87,12 @@ class DPPP(Action):
             self.p['input_datamap'] = self.input_datamap
 
             msnames = read_mapfile(self.input_datamap)
+            if self.index is not None:
+                indstr = '{0}'.format(self.index)
+            else:
+                indstr = ''
             output_files = [self.working_dir + os.path.splitext(os.path.basename(ms))[0]
-                + '_{0}.ms'.format(self.name.lower()) for ms in msnames]
+                + '_{0}{1}.ms'.format(self.name.lower(), indstr) for ms in msnames]
         else:
             # Handle concatenation separately, as we need a data map with a
             # single "file" (and hence must disable use_abs_path below).
