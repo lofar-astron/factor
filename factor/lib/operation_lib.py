@@ -32,10 +32,10 @@ def copy_column(ms, inputcol, outputcol, ms_from=None):
         data = t.getcol(inputcol)
         cd = t.getcoldesc(inputcol)
     cd['name'] = outputcol
-    try:
-        t.addcols(cd)
-    except:
-        pass
+#     try:
+    t.addcols(cd)
+#     except:
+#         pass
     t.putcol(outputcol, data)
     t.flush()
     t.close()
