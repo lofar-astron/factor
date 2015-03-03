@@ -200,9 +200,9 @@ class FacetSelfcal(Operation):
         Run the steps for this operation
         """
         from factor.actions.visibilities import Average, Concatenate
-        from factor.actions.calibrations import Apply, Solve, FFT
+        from factor.actions.calibrations import Apply, Solve
         from factor.actions.images import MakeImage
-        from factor.actions.models import MakeSkymodelFromModelImage
+        from factor.actions.models import MakeSkymodelFromModelImage, FFT
         from factor.actions.solutions import Smooth, ResetPhases
         from factor.lib.operation_lib import copy_column, make_chunks, merge_chunks
         from factor.operations.hardcoded_param import facet_selfcal as p
@@ -898,7 +898,8 @@ class FacetSubAll(Operation):
         Run the steps for this operation
         """
         from factor.actions.visibilities import Average, Concatenate
-        from factor.actions.calibrations import Apply, Subtract, FFT
+        from factor.actions.calibrations import Apply, Subtract
+        from factor.actions.models import FFT
         from factor.operations.hardcoded_param import facet_sub_all as p
         from factor.lib.datamap_lib import write_mapfile, read_mapfile
 
