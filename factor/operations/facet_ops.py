@@ -869,8 +869,8 @@ class FacetImage(Operation):
             shifted_data_mapfiles.append(write_mapfile([band.
             	shifted_data_file for band in bands], self.name,
             	prefix='shifted', working_dir=self.parset['dir_working']))
-            dir_dep_parmdbs_mapfiles.append(write_mapfile([band.
-            	dirdepparmdb for band in bands], self.name,
+            dir_dep_parmdbs_mapfiles.append(write_mapfile([d.
+            	dirdepparmdb]*len(bands), self.name,
             	prefix='dir_indep_parmdbs',
             	working_dir=self.parset['dir_working']))
 
