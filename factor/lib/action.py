@@ -76,7 +76,8 @@ class Action(object):
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
 
-        self.pipeline_executable = 'genericpipeline.py'
+        self.pipeline_executable = os.path.join(self.op_parset['piperoot'], 'bin',
+            'genericpipeline.py')
 
         # Set up parset and script names needed by every action
         self.parsetbasename = self.parset_dir + make_basename(prefix,
