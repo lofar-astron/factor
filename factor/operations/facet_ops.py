@@ -926,7 +926,7 @@ class FacetImage(Operation):
             dir_dep_all_skymodels_mapfiles = self.s.run(actions)
 
             # Save files to the direction objects
-            for d, mf in zip(d_list, dir_dep_all_skymodels_mapfile):
+            for d, mf in zip(d_list, dir_dep_all_skymodels_mapfiles):
                 d.skymodel_dirdep = read_mapfile(mf)[0]
 
         # Make final data maps
