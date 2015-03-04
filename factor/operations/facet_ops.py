@@ -233,6 +233,7 @@ class FacetSelfcal(Operation):
         for d in d_list:
             facet_data_mapfiles.append(write_mapfile([d.concat_file], self.name,
                 prefix='shifted_vis', working_dir=self.parset['dir_working']))
+            self.log.info(d.reg)
             facet_region_mapfiles.append(write_mapfile([d.reg], self.name,
                 prefix='facet_regions', working_dir=self.parset['dir_working']))
 
