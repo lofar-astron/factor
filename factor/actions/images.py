@@ -77,7 +77,6 @@ class Casapy(Action):
             self.prefix = 'make_image'
         self.clean = clean
         self.image_twice = image_twice
-        self.region = region
         self.image_dir += '{0}/{1}/'.format(self.op_name, self.name)
         if self.direction is not None:
             self.image_dir += '{0}/'.format(self.direction.name)
