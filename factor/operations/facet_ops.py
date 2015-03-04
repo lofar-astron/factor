@@ -193,6 +193,12 @@ class FacetSelfcal(Operation):
     def __init__(self, parset, bands, direction=None, reset=False):
         super(FacetSelfcal, self).__init__(parset, bands, direction=direction,
             reset=reset, name='FacetSelfcal')
+
+
+    def run_steps(self):
+        """
+        Run the steps for this operation
+        """
         from factor.actions.visibilities import Average, Concatenate
         from factor.actions.calibrations import Apply, Solve
         from factor.actions.images import MakeImage
