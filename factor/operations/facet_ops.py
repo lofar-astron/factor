@@ -846,6 +846,8 @@ class FacetImage(Operation):
         """
         from factor.actions.visibilities import Average, Concatenate
         from factor.actions.calibrations import Apply
+        from factor.actions.images import MakeImage
+        from factor.actions.models import MakeFacetSkymodel, MakeSkymodelFromModelImage
         from factor.lib.operation_lib import copy_column
         from factor.operations.hardcoded_param import facet_image as p
         from factor.lib.datamap_lib import write_mapfile, read_mapfile
@@ -932,8 +934,7 @@ class FacetSubAll(Operation):
         """
         Run the steps for this operation
         """
-        from factor.actions.visibilities import Average, Concatenate
-        from factor.actions.calibrations import Apply, Subtract
+        from factor.actions.calibrations import Subtract
         from factor.actions.models import FFT
         from factor.operations.hardcoded_param import facet_sub_all as p
         from factor.lib.datamap_lib import write_mapfile, read_mapfile
@@ -991,8 +992,8 @@ class FacetAddAllFinal(Operation):
         Run the steps for this operation
         """
         from factor.actions.visibilities import PhaseShift
-        from factor.actions.models import MakeFacetSkymodel
         from factor.actions.calibrations import Add
+        from factor.actions.models import FFT
         from factor.operations.hardcoded_param import facet_add_all_final as p
         from factor.lib.datamap_lib import write_mapfile, read_mapfile
 
