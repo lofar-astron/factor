@@ -804,18 +804,18 @@ class FacetAddAll(Operation):
         	band in bands], self.name, prefix='dir_indep_parmdbs',
         	working_dir=self.parset['dir_working'])
         dir_indep_skymodels_mapfile = write_mapfile([band.skymodel_dirindep
-            for band in bands], self.name, prefix='dir_indep_parmdbs',
+            for band in bands], self.name, prefix='dir_indep_skymodels',
             working_dir=self.parset['dir_working'])
 
         self.log.info('Selecting sources for this direction...')
         action = MakeFacetSkymodel(self.parset, dir_indep_skymodels_mapfile,
             p['select'], d, prefix='all_final', cal_only=False)
-        dir_indep_cal_skymodels_mapfile = action.run()
+        dir_indep_all_skymodels_mapfile = action.run()
 
         self.log.info('Adding sources for this direction...')
         self.parset['use_ftw'] = False
         action = Add(self.parset, subtracted_all_mapfile, p['add'],
-            dir_indep_cal_skymodels_mapfile, dir_indep_parmdbs_mapfile,
+            dir_indep_all_skymodels_mapfile, dir_indep_parmdbs_mapfile,
             prefix='facet_dirindep', direction=d)
         action.run()
 
@@ -941,7 +941,7 @@ class FacetSubAll(Operation):
     Operation to subtract final facet sky model from visibilties
     """
     def __init__(self, parset, bands, direction=None, reset=False):
-        super(FacetImage, self).__init__(parset, bands, direction=direction,
+        super(FacetSubAll, self).__init__(parset, bands, direction=direction,
             reset=reset, name='FacetSubAll')
 
 
