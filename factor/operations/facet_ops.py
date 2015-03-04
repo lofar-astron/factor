@@ -226,11 +226,15 @@ class FacetSelfcal(Operation):
         if all_done:
             return
 
-        # Make initial data maps for the averaged, phase-shifted datasets
+        # Make initial data maps for the averaged, phase-shifted datasets and
+        # for facet mask regions
         facet_data_mapfiles = []
+        facet_region_mapfiles = []
         for d in d_list:
             facet_data_mapfiles.append(write_mapfile([d.concat_file], self.name,
-            prefix='shifted_vis', working_dir=self.parset['dir_working']))
+                prefix='shifted_vis', working_dir=self.parset['dir_working']))
+            facet_region_mapfiles.append(write_mapfile([d.reg], self.name,
+                prefix='facet_regions', working_dir=self.parset['dir_working']))
 
         # Set image sizes
         for d in d_list:
@@ -247,8 +251,9 @@ class FacetSelfcal(Operation):
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.debug('Imaging...')
-        actions = [MakeImage(self.parset, m, p['imager0'], prefix='facet_selfcal0',
-            direction=d) for d, m in zip(d_list, avg_data_mapfiles)]
+        actions = [MakeImage(self.parset, dm, p['imager0'],
+        	prefix='facet_selfcal0', mask_datamap=rm, direction=d) for d, dm,
+        	rm in zip(d_list, avg_data_mapfiles, facet_region_mapfiles)]
         image0_basenames_mapfiles = self.s.run(actions)
 
         if not self.parset['use_ftw']:

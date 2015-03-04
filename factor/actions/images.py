@@ -52,7 +52,7 @@ class Casapy(Action):
         p : parset dict
             Input parset dict defining imaging and pipeline parameters
         maks_datamap : Datamap, optional
-            Input data map of mask images
+            Input data map of mask images or CASA-format regions
         prefix : str, optional
             Prefix to use for image names
         direction : Direction object, optional
@@ -63,7 +63,7 @@ class Casapy(Action):
             Index of action
         image_twice : bool, optional
             If True, image two times, making a clean mask in between. If
-            False, image only once; in this case, no clean mask is made.
+            False, image only once; in this case, no clean mask is made
 
         """
         super(Casapy, self).__init__(op_parset, name, prefix=prefix,
@@ -77,6 +77,7 @@ class Casapy(Action):
             self.prefix = 'make_image'
         self.clean = clean
         self.image_twice = image_twice
+        self.region = region
         self.image_dir += '{0}/{1}/'.format(self.op_name, self.name)
         if self.direction is not None:
             self.image_dir += '{0}/'.format(self.direction.name)
@@ -105,17 +106,17 @@ class Casapy(Action):
         """
         from factor.lib.datamap_lib import write_mapfile
 
-        # Make first imaging run data maps:
+        # Make first imaging-run data maps:
         #     - input is list of MS files
         #     - output is list of image names
         self.p['vis_datamap_image1'] = self.vis_datamap
         if self.mask_datamap is not None:
-            self.p['mask_datamap_image1'] = self.mask_datamap
+            self.p['input_mask'] = self.mask_datamap
         self.p['output_datamap_image1'] = write_mapfile(self.imagebasenames1,
             self.op_name, self.name, prefix=self.prefix+'-imager1_output',
             direction=self.direction)
 
-        # Make masking run data maps:
+        # Make masking-run data maps:
         #     - input is list of images
         #     - output is none
         imnames = []
@@ -133,7 +134,7 @@ class Casapy(Action):
             self.name, prefix=self.prefix+'-masker_output', direction=self.direction,
             working_dir=self.op_parset['dir_working'])
 
-        # Make second imaging run data maps
+        # Make second imaging-run data maps
         #     - input is list of MS files (same as imager 1 inputs)
         #     - output is list of image basenames
         self.p['output_datamap_image2'] = write_mapfile(self.imagebasenames2,
@@ -183,9 +184,13 @@ class Casapy(Action):
         """
         Writes the pipeline control parset and any script files
         """
+        from factor.lib.datamap_lib import read_mapfile
+
         self.p['maskscriptname'] = os.path.abspath(self.mask_script_file)
         if self.image_twice:
             if self.mask_datamap is not None:
+                self.p['input_mask'] = read_mapfile(self.p['input_mask'])[0]
+                self.p['bdsm_mask'] = read_mapfile(self.p['output_datamap_mask'])[0]
                 template = env.get_template('make_image_masked.pipeline.parset.tpl')
             else:
                 template = env.get_template('make_image.pipeline.parset.tpl')
