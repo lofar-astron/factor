@@ -786,7 +786,7 @@ class FacetAddAll(Operation):
         d = self.direction
         bands = self.bands
 
-        # Check state for each direction
+        # Check state
         if os.path.exists(self.statebasename+'.done'):
             shifted_data_mapfile = os.path.join(self.parset['dir_working'],
                 'datamaps/FacetAddAll/PhaseShift/facet_output_{0}.datamap'.
@@ -858,13 +858,16 @@ class FacetImage(Operation):
         bands = self.bands
 
         # Check state for each direction
-        if os.path.exists(self.statebasename+'.done'):
-            model_mapfile = os.path.join(self.parset['dir_working'],
+        all_done = False
+        for i, d in enumerate(d_list):
+            if os.path.exists(self.statebasename[i]+'.done'):
+                model_mapfile = os.path.join(self.parset['dir_working'],
                 'datamaps/FacetImage/final_model_{0}.datamap'.
                 format(d.name))
-            files = read_mapfile(model_mapfile)
-            for d, f in zip(bands, files):
-                d.skymodel_dirdep = f
+                file = read_mapfile(model_mapfile)[0]
+                d.skymodel_dirdep = file
+                all_done = True
+        if all_done:
             return
 
         # Make initial data maps for the phase-shifted datasets and their dir-dep
