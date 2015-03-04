@@ -62,7 +62,7 @@ def directions_read(directions_file):
 
 
 def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
-    directions_separation_max_arcmin, directions_total_num=None,
+    directions_separation_max_arcmin, directions_max_num=None,
     interactive=False):
     """
     Selects appropriate calibrators from sky models and makes the directions file
@@ -78,6 +78,8 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     directions_separation_max_arcmin : float
         Maximum separation in arcmin between two calibrators for gouping into a
         single direction
+    directions_max_num : int, optional
+        Limit total number of directions to this value
     interactive : bool, optional
         If True, plot the directions and ask for approval
 
@@ -130,14 +132,16 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
                 allDone = True
 
     # Trim directions list to get directions_total_num of directions
-    if directions_total_num is not None:
+    if directions_max_num is not None:
         dir_fluxes = s.getColValues('I', aggregate='sum')
         dir_fluxes_sorted = dir_fluxes.tolist()
         dir_fluxes_sorted.sort(reverse=True)
-        while len(s.getPatchNames()) > directions_total_num:
+        cut_jy = dir_fluxes_sorted[-1]
+        while len(dir_fluxes_sorted) > directions_total_num:
             cut_jy = dir_fluxes_sorted.pop() + 0.00001
-            s.remove('I < {0} Jy'.format(cut_jy), aggregate='sum')
-        log.info('Kept {0} directions'.format(len(s.getPatchNames())))
+        s.remove('I < {0} Jy'.format(cut_jy), aggregate='sum')
+
+    log.info('Kept {0} directions in total'.format(len(s.getPatchNames())))
 
     # Write the file
     s.write(fileName=directions_file, format='factor', sortBy='I', clobber=True)

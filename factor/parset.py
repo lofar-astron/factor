@@ -86,11 +86,11 @@ def parset_read(parset_file):
     if 'directions_flux_min_jy' in parset_dict:
         parset_dict['directions_flux_min_jy'] = parset.getfloat('global',
             'directions_flux_min_jy')
-    if 'directions_total_num' in parset_dict:
-        parset_dict['directions_total_num'] = parset.getint('global',
-            'directions_total_num')
+    if 'directions_max_num' in parset_dict:
+        parset_dict['directions_max_num'] = parset.getint('global',
+            'directions_max_num')
     else:
-        parset_dict['directions_total_num'] = None
+        parset_dict['directions_max_num'] = None
     if 'directions_size_max_arcmin' in parset_dict:
         parset_dict['directions_size_max_arcmin'] = parset.getfloat('global',
             'directions_size_max_arcmin')

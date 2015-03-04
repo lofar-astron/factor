@@ -83,9 +83,9 @@ if __name__=='__main__':
     # file from a previous run, then for parameters needed to generate it internally
     if 'directions_file' in parset:
         directions = factor.directions.directions_read(parset['directions_file'])
-    elif os.path.exists(parset['dir_working']+'/factor_directions.txt'):
-        directions = factor.directions.directions_read(parset['dir_working']+
-            '/factor_directions.txt')
+    elif os.path.exists(os.path.join(parset['dir_working'], 'factor_directions.txt')):
+        directions = factor.directions.directions_read(os.path.join(parset['dir_working'],
+            '/factor_directions.txt'))
     else:
         if 'directions_flux_min_jy' not in parset or \
             'directions_size_max_arcmin' not in parset or \
@@ -117,7 +117,7 @@ if __name__=='__main__':
         logging.info("No directions file given. Selecting directions internally...")
         parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(bands,
             parset['directions_flux_min_jy'], parset['directions_size_max_arcmin'],
-            parset['directions_separation_max_arcmin'], parset['directions_total_num'],
+            parset['directions_separation_max_arcmin'], parset['directions_max_num'],
             interactive=parset['interactive'])
         directions = factor.directions.directions_read( parset['directions_file'] )
     dir_reg = [d for d in directions if d.reg != '']
@@ -128,7 +128,7 @@ if __name__=='__main__':
     for i, direction in enumerate(dir_no_reg):
         direction.vertices = polys[i]
         direction.width = widths[i]
-        reg_file = parset['dir_working']+'/regions/'+direction.name+'.reg'
+        reg_file = os.path.join(parset['dir_working'], 'regions', direction.name+'.reg')
         factor.directions.make_region_file(direction.vertices, reg_file)
         direction.reg = reg_file
 
@@ -182,11 +182,12 @@ if __name__=='__main__':
     op.run()
 
     # Save final band and direction objects to disk
-    pickle.dump(bands, open(parset['dir_working']+"/bands.sav", "wb" ))
-    pickle.dump(directions, open(parset['dir_working']+"/directions.sav", "wb" ))
+    pickle.dump(bands, open(os.path.join(parset['dir_working'],
+    	"bands.sav"), "wb" ))
+    pickle.dump(directions,	open(os.path.join(parset['dir_working'],
+        "directions.sav"), "wb" ))
 
-    # Mosaic the final facet images together (trim each facet image to Thiessen
-    # region first? What about sources on edge of region? Can we just sum them?)
+    # Mosaic the final facet images together
     if parset['make_mosaic']:
         op = MakeMosaic(parset, directions)
         op.run()

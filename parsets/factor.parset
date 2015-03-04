@@ -12,7 +12,8 @@ piperoot = /path/to/genericpipe/dir
 # Full path to working dir - other paths are relative to this
 dir_working = /data/wdir
 
-# Full path to directory containing selfcaled bands, will be scanned for all .MS / .ms files
+# Full path to directory containing selfcaled bands, will be scanned for all .MS
+# / .ms files
 dir_ms = /data/bands
 
 # Parmdb name for dir-indep. selfcal solutions (stored inside the input
@@ -20,15 +21,15 @@ dir_ms = /data/bands
 parmdb_name = instrument_ap_smoothed
 
 # Full path to file containing calibrator directions. If not given, directions
-# are selected internally using the flux and size cuts below (min flux, max
-# size of a source, and max separation between sources below which they are grouped
-# into one direction). Additionally, the maximum number of directions can be
-# specified.
+# are selected internally using the flux and size cuts below (min flux, max size
+# of a source, and max separation between sources below which they are grouped
+# into one direction). The number of internally derived directions can be
+# limited to a maximum number of directions if desired.
 directions_file = /data/directions.txt
 directions_flux_min_Jy = 0.1
-directions_total_num = 50
 directions_size_max_arcmin = 3.0
 directions_separation_max_arcmin = 6.0
+directions_max_num = 50
 
 # Maximum number of directions to process (default = all)
 ndir = 10
