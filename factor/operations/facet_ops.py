@@ -449,7 +449,7 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             concat_file = read_mapfile(merged_data_mapfiles[i])
             merged_parmdb_phaseamp_amp1_mapfiles.append(write_mapfile(
-                [merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp1 for chunk
+                [self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp1 for chunk
                 in chunks], concat_file, prefix='merged_amps1')], self.name, prefix='merged_amps1',
                 working_dir=self.parset['dir_working']))
 
@@ -571,7 +571,7 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             concat_file = read_mapfile(merged_data_mapfiles[i])
             merged_parmdb_phaseamp_amp2_mapfiles.append(write_mapfile(
-            	[merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp2 for
+            	[self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp2 for
             	chunk in chunks], concat_file, prefix='merged_parmdb_amps2')],
             	self.name, prefix='merged_amps2',
             	working_dir=self.parset['dir_working'], direction=d_list[i]))
@@ -579,7 +579,7 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             concat_file = read_mapfile(merged_data_mapfiles[i])
             merged_parmdb_phaseamp_phase2_mapfiles.append(write_mapfile(
-            	[merge_chunk_parmdbs([chunk.parmdb_phaseamp_phase2 for
+            	[self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_phase2 for
             	chunk in chunks], concat_file,
             	prefix='merged_parmdb_phases2')], self.name,
             	prefix='merged_phases2',
