@@ -137,7 +137,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
         while len(s.getPatchNames()) > directions_total_num:
             cut_jy = dir_fluxes_sorted.pop() + 0.00001
             s.remove('I < {0} Jy'.format(cut_jy), aggregate='sum')
-        log.info('Kept {0} directions'.format(len(s.getPatchNames()))
+        log.info('Kept {0} directions'.format(len(s.getPatchNames())))
 
     # Write the file
     s.write(fileName=directions_file, format='factor', sortBy='I', clobber=True)
