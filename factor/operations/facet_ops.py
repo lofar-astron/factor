@@ -193,12 +193,6 @@ class FacetSelfcal(Operation):
     def __init__(self, parset, bands, direction=None, reset=False):
         super(FacetSelfcal, self).__init__(parset, bands, direction=direction,
             reset=reset, name='FacetSelfcal')
-
-
-    def run_steps(self):
-        """
-        Run the steps for this operation
-        """
         from factor.actions.visibilities import Average, Concatenate
         from factor.actions.calibrations import Apply, Solve
         from factor.actions.images import MakeImage
@@ -208,16 +202,23 @@ class FacetSelfcal(Operation):
         from factor.operations.hardcoded_param import facet_selfcal as p
         from factor.lib.datamap_lib import write_mapfile, read_mapfile
 
-        # Check state for each direction
-#         if os.path.exists(self.statebasename+'.done'):
-#             self.direction.concat_file = 'visdata/allbands_concat_{0}.ms'.format(
-#                 self.direction.name)
-#             return
-
         d_list = self.direction
         if type(d_list) is not list:
             d_list = [d_list]
         bands = self.bands
+
+        # Check state for each direction
+        all_done = False
+        for i, d in enumerate(d_list):
+            if os.path.exists(self.statebasename[i]+'.done'):
+                final_parmdb_datamap = os.path.join(self.parset['dir_working'],
+                    'datamaps/FacetSelfcal/merged_parmdb_final_{0}.datamap'.
+                    format(d.name))
+                file = read_mapfile(final_parmdb_datamap)[0]
+                d.dirdepparmdb = file
+                all_done = True
+        if all_done:
+            return
 
         # Make initial data maps for the averaged, phase-shifted datasets
         facet_data_mapfiles = []
@@ -765,6 +766,11 @@ class FacetAddAll(Operation):
         super(FacetAddAll, self).__init__(parset, bands, direction=direction,
             reset=reset, name=name)
 
+
+    def run_steps(self):
+        """
+        Run the steps for this operation
+        """
         from factor.actions.visibilities import PhaseShift
         from factor.actions.models import MakeFacetSkymodel
         from factor.actions.calibrations import Add
@@ -775,10 +781,14 @@ class FacetAddAll(Operation):
         bands = self.bands
 
         # Check state for each direction
-#         if os.path.exists(self.statebasename+'.done'):
-#             self.direction.concat_file = 'visdata/allbands_concat_{0}.ms'.format(
-#                 self.direction.name)
-#             return
+        if os.path.exists(self.statebasename+'.done'):
+            shifted_data_mapfile = os.path.join(self.parset['dir_working'],
+                'datamaps/FacetAddAll/PhaseShift/facet_output_{0}.datamap'.
+                format(d.name))
+            files = read_mapfile(shifted_data_mapfile)
+            for band, f in zip(bands, files):
+                band.shifted_data_file = f
+            return
 
         # Make initial data maps for the empty datasets, their dir-indep
         # instrument parmdbs, and their dir-indep sky models
@@ -969,6 +979,11 @@ class FacetAddAllFinal(Operation):
         super(FacetAddAllFinal, self).__init__(parset, bands, direction=direction,
             reset=reset, name=name)
 
+
+    def run_steps(self):
+        """
+        Run the steps for this operation
+        """
         from factor.actions.visibilities import PhaseShift
         from factor.actions.models import MakeFacetSkymodel
         from factor.actions.calibrations import Add
