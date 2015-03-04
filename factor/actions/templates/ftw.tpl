@@ -3,6 +3,10 @@ import sys
 import numpy
 import time
 
+# Set up custom ftw task
+!cp {{ task_xml_file }} .
+!cp {{ task_py_file }} .
+!buildmytasks
 execfile('mytasks.py')
 
 ms    = sys.argv[4]
