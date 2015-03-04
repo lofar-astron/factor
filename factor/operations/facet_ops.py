@@ -874,16 +874,16 @@ class FacetImage(Operation):
             	prefix='dir_indep_parmdbs',
             	working_dir=self.parset['dir_working']))
 
+        self.log.info('Applying direction-dependent calibration...')
+        actions = [Apply(self.parset, dm, p['apply_dirdep'],
+            pm, prefix='facet_dirdep', direction=d) for d, dm, pm in zip(d_list,
+            shifted_data_mapfiles, dir_dep_parmdbs_mapfiles)]
+        self.s.run(actions)
+
         self.log.info('Averaging DATA...')
         actions = [Average(self.parset, m, p['avg'], prefix='facet',
             direction=d, index=1) for d, m in zip(d_list, shifted_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
-
-        self.log.info('Applying direction-dependent calibration...')
-        actions = [Apply(self.parset, dm, p['apply_dirdep'],
-            pm, prefix='facet_dirdep', direction=d) for d, dm, pm in zip(d_list,
-            avg_data_mapfiles, dir_dep_parmdbs_mapfiles)]
-        self.s.run(actions)
 
         self.log.info('Concatenating bands...')
         actions = [Concatenate(self.parset, m, p['concat'],
