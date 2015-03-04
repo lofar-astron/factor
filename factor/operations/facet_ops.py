@@ -797,9 +797,11 @@ class FacetAddAll(Operation):
                 'datamaps/FacetAddAll/PhaseShift/facet_output_{0}.datamap'.
                 format(d.name))
             files = read_mapfile(shifted_data_mapfile)
-            for band, f in zip(bands, files):
-                band.shifted_data_file = f
+            d.shifted_data_files = []
+            for f in files:
+                d.shifted_data_files.append(f)
             return
+
 
         # Make initial data maps for the empty datasets, their dir-indep
         # instrument parmdbs, and their dir-indep sky models
@@ -830,9 +832,10 @@ class FacetAddAll(Operation):
         shifted_data_mapfile = action.run()
 
         # Save files to the band objects
+        d.shifted_data_files = []
         files = read_mapfile(shifted_data_mapfile)
-        for band, f in zip(bands, files):
-            band.shifted_data_file = f
+        for f in files:
+            d.shifted_data_files.append(f)
 
 
 class FacetImage(Operation):
@@ -880,9 +883,9 @@ class FacetImage(Operation):
         shifted_data_mapfiles = []
         dir_dep_parmdbs_mapfiles = []
         for d in d_list:
-            shifted_data_mapfiles.append(write_mapfile([band.
-            	shifted_data_file for band in bands], self.name,
-            	prefix='shifted', working_dir=self.parset['dir_working']))
+            shifted_data_mapfiles.append(write_mapfile(d.shifted_data_files,
+            	self.name, prefix='shifted',
+            	working_dir=self.parset['dir_working']))
             dir_dep_parmdbs_mapfiles.append(write_mapfile([d.
             	dirdepparmdb]*len(bands), self.name,
             	prefix='dir_indep_parmdbs',
@@ -905,8 +908,6 @@ class FacetImage(Operation):
             avg_data_mapfiles)]
         concat_data_mapfiles = self.s.run(actions)
 
-        # Image with facet region as initial maskmask=[[110,110,150,145],'mycleanbox.txt',
-#                                     'myimage.mask','myregion.rgn']
         self.log.info('Imaging...')
         actions = [MakeImage(self.parset, m, p['imager'], prefix='facet_image',
             direction=d) for d, m in zip(d_list, concat_data_mapfiles)]
