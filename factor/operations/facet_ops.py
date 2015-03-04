@@ -780,7 +780,7 @@ class FacetAddAll(Operation):
         from factor.actions.visibilities import PhaseShift
         from factor.actions.models import MakeFacetSkymodel
         from factor.actions.calibrations import Add
-        from factor.operations.hardcoded_param import facet_add_cal as p
+        from factor.operations.hardcoded_param import facet_add_all as p
         from factor.lib.datamap_lib import write_mapfile, read_mapfile
 
         d = self.direction
@@ -847,7 +847,7 @@ class FacetImage(Operation):
         from factor.actions.visibilities import Average, Concatenate
         from factor.actions.calibrations import Apply
         from factor.lib.operation_lib import copy_column
-        from factor.operations.hardcoded_param import facet_setup as p
+        from factor.operations.hardcoded_param import facet_image as p
         from factor.lib.datamap_lib import write_mapfile, read_mapfile
 
         d_list = self.direction
@@ -993,7 +993,7 @@ class FacetAddAllFinal(Operation):
         from factor.actions.visibilities import PhaseShift
         from factor.actions.models import MakeFacetSkymodel
         from factor.actions.calibrations import Add
-        from factor.operations.hardcoded_param import facet_add_cal as p
+        from factor.operations.hardcoded_param import facet_add_all_final as p
         from factor.lib.datamap_lib import write_mapfile, read_mapfile
 
         d = self.direction
