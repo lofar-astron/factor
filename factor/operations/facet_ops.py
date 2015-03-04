@@ -858,10 +858,15 @@ class FacetImage(Operation):
         bands = self.bands
 
         # Check state for each direction
-#         if os.path.exists(self.statebasename+'.done'):
-#             self.direction.skymodel_dirdep = 'visdata/allbands_concat_{0}.ms'.format(
-#                 self.direction.name)
-#             return
+        if os.path.exists(self.statebasename+'.done'):
+            model_mapfile = os.path.join(self.parset['dir_working'],
+                'datamaps/FacetImage/final_model_{0}.datamap'.
+                format(d.name))
+            files = read_mapfile(model_mapfile)
+            for d, f in zip(bands, files):
+                d.skymodel_dirdep = f
+            return
+
 
         # Make initial data maps for the phase-shifted datasets and their dir-dep
         # instrument parmdbs
@@ -893,7 +898,7 @@ class FacetImage(Operation):
             avg_data_mapfiles)]
         concat_data_mapfiles = self.s.run(actions)
 
-        self.log.debug('Imaging...')
+        self.log.info('Imaging...')
         actions = [MakeImage(self.parset, m, p['imager'], prefix='facet_image',
             direction=d) for d, m in zip(d_list, concat_data_mapfiles)]
         image_basenames_mapfiles = self.s.run(actions)
@@ -919,6 +924,12 @@ class FacetImage(Operation):
             files = read_mapfile(dir_dep_all_skymodels_mapfile)
             for d, f in zip(d_list, files):
                 d.skymodel_dirdep = f
+
+        # Make final data maps
+        for d in d_list:
+            write_mapfile([d.skymodel_dirdep], self.name,
+            	prefix='final_model', working_dir=self.parset['dir_working']))
+
 
 
 class FacetSubAll(Operation):
