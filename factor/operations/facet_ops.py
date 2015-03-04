@@ -864,7 +864,7 @@ class FacetImage(Operation):
         # Make initial data maps for the phase-shifted datasets and their dir-dep
         # instrument parmdbs
         shifted_data_mapfiles = []
-        dir_indep_parmdbs_mapfiles = []
+        dir_dep_parmdbs_mapfiles = []
         for d in d_list:
             shifted_data_mapfiles.append(write_mapfile([band.
             	shifted_data_file for band in bands], self.name,
