@@ -76,8 +76,7 @@ class Action(object):
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
 
-        self.pipeline_executable = '{0}/bin/genericpipeline.py'.format(
-            self.op_parset['lofarroot'])
+        self.pipeline_executable = 'genericpipeline.py'
 
         # Set up parset and script names needed by every action
         self.parsetbasename = self.parset_dir + make_basename(prefix,

@@ -2,9 +2,9 @@
 lofarroot = {{ lofarroot }}
 pythonpath = {{ lofarpythonpath }}
 runtime_directory = {{ runtime_dir }}
-recipe_directories = [%(pythonpath)s/lofarpipe/recipes, /home/sttf201/PipelineExample]
+recipe_directories = [%(pythonpath)s/lofarpipe/recipes, {{ piperoot }}]
 working_directory = {{ working_dir }}
-task_files = [%(lofarroot)s/share/pipeline/tasks.cfg, /home/sttf201/PipelineExample/tasks.cfg]
+task_files = [%(lofarroot)s/share/pipeline/tasks.cfg, {{ piperoot }}/tasks.cfg]
 
 [layout]
 job_directory = %(runtime_directory)s/%(job_name)s

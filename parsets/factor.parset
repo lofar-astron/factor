@@ -6,6 +6,9 @@
 lofarroot = /lofar/build/gnu_opt/installed
 lofarpythonpath = /lofar/build/gnu_opt/installed/lib/python2.7/dist-packages
 
+# Generic pipeline root directory
+piperoot = /path/to/genericpipe/dir
+
 # Full path to working dir - other paths are relative to this
 dir_working = /data/wdir
 

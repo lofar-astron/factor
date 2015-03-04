@@ -89,6 +89,8 @@ def parset_read(parset_file):
     if 'directions_total_num' in parset_dict:
         parset_dict['directions_total_num'] = parset.getint('global',
             'directions_total_num')
+    else:
+        parset_dict['directions_total_num'] = None
     if 'directions_size_max_arcmin' in parset_dict:
         parset_dict['directions_size_max_arcmin'] = parset.getfloat('global',
             'directions_size_max_arcmin')
