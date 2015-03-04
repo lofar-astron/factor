@@ -867,7 +867,6 @@ class FacetImage(Operation):
                 d.skymodel_dirdep = f
             return
 
-
         # Make initial data maps for the phase-shifted datasets and their dir-dep
         # instrument parmdbs
         shifted_data_mapfiles = []
@@ -898,6 +897,8 @@ class FacetImage(Operation):
             avg_data_mapfiles)]
         concat_data_mapfiles = self.s.run(actions)
 
+        # Image with facet region as initial maskmask=[[110,110,150,145],'mycleanbox.txt',
+#                                     'myimage.mask','myregion.rgn']
         self.log.info('Imaging...')
         actions = [MakeImage(self.parset, m, p['imager'], prefix='facet_image',
             direction=d) for d, m in zip(d_list, concat_data_mapfiles)]
@@ -916,14 +917,14 @@ class FacetImage(Operation):
             skymodels_mapfiles = self.s.run(actions)
 
             self.log.info('Selecting only those sources inside the facet...')
-            action = MakeFacetSkymodel(self.parset, dir_indep_skymodels_mapfile,
-                p['select'], d, prefix='all_final', cal_only=False)
-            dir_dep_all_skymodels_mapfile = action.run()
+            actions = [MakeFacetSkymodel(self.parset, m,
+                p['select'], d, prefix='all_final', cal_only=False) for d, m in
+                zip(d_list, skymodels_mapfiles)]
+            dir_dep_all_skymodels_mapfiles = self.s.run(actions)
 
             # Save files to the direction objects
-            files = read_mapfile(dir_dep_all_skymodels_mapfile)
-            for d, f in zip(d_list, files):
-                d.skymodel_dirdep = f
+            for d, mf in zip(d_list, dir_dep_all_skymodels_mapfile):
+                d.skymodel_dirdep = read_mapfile(mf)[0]
 
         # Make final data maps
         for d in d_list:
