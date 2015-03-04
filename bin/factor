@@ -157,7 +157,7 @@ if __name__=='__main__':
 
         # Add all sources in the facet(s) to empty datasets. These operations
         # must be done in series
-        ops = [FacetAddAll(parset, bands, d) for d in dirs_to_image]
+        ops = [FacetAddAll(parset, bands, d) for d in direction_group]
         for op in ops:
             op.run()
 
