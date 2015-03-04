@@ -646,8 +646,8 @@ class FacetSelfcal(Operation):
         self.s.run(actions)
 
         # Save files to the direction objects
-        files = read_mapfile(merged_parmdb_final_mapfiles)
-        for d, f in zip(d_list, files):
+        for d, m in zip(d_list, merged_parmdb_final_mapfiles):
+            f = read_mapfile(m)[0]
             d.dirdepparmdb = f
 
 
