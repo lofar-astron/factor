@@ -85,7 +85,7 @@ if __name__=='__main__':
         directions = factor.directions.directions_read(parset['directions_file'])
     elif os.path.exists(os.path.join(parset['dir_working'], 'factor_directions.txt')):
         directions = factor.directions.directions_read(os.path.join(parset['dir_working'],
-            '/factor_directions.txt'))
+            'factor_directions.txt'))
     else:
         if 'directions_flux_min_jy' not in parset or \
             'directions_size_max_arcmin' not in parset or \
