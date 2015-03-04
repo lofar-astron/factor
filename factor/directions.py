@@ -313,7 +313,7 @@ def thiessen(directions_list, bounds_scale=2):
     return thiessen_polys_deg, width_deg
 
 
-def make_region_file(vertices, dir_name):
+def make_region_file(vertices, outputfile):
     """
     Make a CASA region file for given vertices
 
@@ -321,15 +321,22 @@ def make_region_file(vertices, dir_name):
     ----------
     vertices : list
         List of direction RA and Dec vertices in degrees
-    dir_name : str
-        Name of direction
+    outputfile : str
+        Name of output region file
 
     Returns
     -------
     region_filename : str
         Name of region file
     """
-    return None
+    lines = ['#CRTF\n\n']
+    xylist = []
+    for x, y in vertices:
+        xylist.append('[{0}deg, {1}deg]'.format(x, y))
+    lines.append('poly[{0}]\n'.format(', '.join(xylist)))
+
+    with open(outputfile, 'wb') as f:
+        f.writelines(lines)
 
 
 def plot_thiessen(directions_list, bounds_scale=2):

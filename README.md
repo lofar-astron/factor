@@ -17,7 +17,7 @@ Beyond the standard LOFAR software packages, Factor requires the following:
 * [CASA][http://casa.nrao.org/]
 * [LSMTool][http://www.numpy.org/]
 * [LoSoTo][http://www.matplotlib.org/]
-
+* [jinja2][http://jinja.pocoo.org/docs/dev/]
 
 Usage
 -----
