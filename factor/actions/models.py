@@ -456,13 +456,7 @@ class FFT(Action):
         from factor.lib.datamap_lib import read_mapfile, write_mapfile
 
         self.p['vis_datamap'] = self.vis_datamap
-
-        imagebasenames = read_mapfile(self.input_datamap)
-        model_files = [bn+'.model' for bn in imagebasenames]
-
-        self.p['model_datamap'] = write_mapfile(model_files,
-            self.op_name, self.name, prefix=self.prefix+'_model',
-            direction=self.direction, working_dir=self.op_parset['dir_working'])
+        self.p['model_datamap'] = model_datamap
 
         # Make data map for facet region files
         if self.direction is not None:
