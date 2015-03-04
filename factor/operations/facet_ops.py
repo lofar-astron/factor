@@ -929,7 +929,7 @@ class FacetImage(Operation):
         # Make final data maps
         for d in d_list:
             write_mapfile([d.skymodel_dirdep], self.name,
-            	prefix='final_model', working_dir=self.parset['dir_working']))
+            	prefix='final_model', working_dir=self.parset['dir_working'])
 
 
 
