@@ -178,7 +178,8 @@ class FacetSetup(Operation):
         # Copy over DATA column (was phase-shifted CORRECTED_DATA) from second
         # concat file, so that first concatenated file has both DATA and
         # dir-indep CORRECTED_DATA
-        for dm, cdm, d in zip(concat_data_mapfiles, concat_corrdata_mapfiles, d_list):
+        for dm, cdm, d in zip(concat_data_mapfiles, concat_corrdata_mapfiles,
+            d_list):
             concat_data_file = read_mapfile(dm)[0]
             concat_corrdata_file = read_mapfile(cdm)[0]
             d.concat_file = concat_data_file
@@ -233,7 +234,6 @@ class FacetSelfcal(Operation):
         for d in d_list:
             facet_data_mapfiles.append(write_mapfile([d.concat_file], self.name,
                 prefix='shifted_vis', working_dir=self.parset['dir_working']))
-            self.log.info(d.reg)
             facet_region_mapfiles.append(write_mapfile([d.reg], self.name,
                 prefix='facet_regions', working_dir=self.parset['dir_working']))
 
