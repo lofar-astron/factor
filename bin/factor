@@ -128,8 +128,9 @@ if __name__=='__main__':
     for i, direction in enumerate(dir_no_reg):
         direction.vertices = polys[i]
         direction.width = widths[i]
-        direction.reg = factor.directions.make_region_file(direction.vertices,
-            parset['dir_working']+'/regions/'+direction.name+'.reg')
+        reg_file = parset['dir_working']+'/regions/'+direction.name+'.reg'
+        factor.directions.make_region_file(direction.vertices, reg_file)
+        direction.reg = reg_file
 
     # Select subset of directions to process
     if 'ndir' in parset:
