@@ -331,7 +331,9 @@ def make_region_file(vertices, outputfile):
     """
     lines = ['#CRTF\n\n']
     xylist = []
-    for x, y in vertices:
+    RAs = vertices[0]
+    Decs = vertices[1]
+    for x, y in zip(RAs, Decs):
         xylist.append('[{0}deg, {1}deg]'.format(x, y))
     lines.append('poly[{0}]\n'.format(', '.join(xylist)))
 
