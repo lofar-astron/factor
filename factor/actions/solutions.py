@@ -112,8 +112,15 @@ class Losoto(Action):
         """
         Writes the pipeline control parset and any script files
         """
+        from distutils import spawn
+
         self.p['lofarroot'] = self.op_parset['lofarroot']
         self.p['parset'] = self.parset_file
+
+        # Get full paths to executables
+        self.p['losoto_exec'] = spawn.find_executable("losoto.py")
+        self.p['h5importer_exec'] = spawn.find_executable("H5parm_importer.py")
+        self.p['h5exporter_exec'] = spawn.find_executable("H5parm_exporter.py")
 
         template = env.get_template('losoto.pipeline.parset.tpl')
         tmp = template.render(self.p)
