@@ -190,8 +190,8 @@ class Casapy(Action):
         self.p['maskscriptname'] = os.path.abspath(self.mask_script_file)
         if self.image_twice:
             if self.mask_datamap is not None:
-                self.p['input_mask'] = read_mapfile(self.p['input_mask'])[0]
-                self.p['bdsm_mask'] = read_mapfile(self.p['output_datamap_mask'])[0]
+                self.p['input_mask'], _ = read_mapfile(self.p['input_mask'])[0]
+                self.p['bdsm_mask'], _ = read_mapfile(self.p['output_datamap_mask'])[0]
                 template = env.get_template('make_image_masked.pipeline.parset.tpl')
             else:
                 template = env.get_template('make_image.pipeline.parset.tpl')

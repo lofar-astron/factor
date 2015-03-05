@@ -100,7 +100,7 @@ class BBS(Action):
         """
         Makes the required data maps
         """
-        from factor.lib.datamap_lib import read_mapfile, write_mapfile
+        from factor.lib.datamap_lib import read_mapfile
         import copy
 
         self.p['vis_datamap'] = self.vis_datamap
@@ -116,7 +116,7 @@ class BBS(Action):
 
         # Copy the input parmdb (if any) to local parmdb
         if self.parmdb_datamap is not None:
-            parmdb_files = read_mapfile(self.parmdb_datamap)
+            parmdb_files, _ = read_mapfile(self.parmdb_datamap)
             if not os.path.exists(parmdb_files[0]):
                 self.output_parmdb_datamap = copy.deepcopy(self.parmdb_datamap)
                 self.parmdb_datamap = None

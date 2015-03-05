@@ -29,7 +29,6 @@ def write_mapfile(data_list, op_name, action_name=None, prefix=None,
         flag_list = [False] * len(data_list)
     if host_list is None:
         host_list = ['localhost'] * len(data_list)
-    print(host_list)
     for i in range(len(data_list)-len(host_list)):
         host_list.append(host_list[i])
 
