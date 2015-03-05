@@ -53,7 +53,7 @@ def make_image_basename(input_datamap, direction=None, prefix=None):
     else:
         prefix += '-'
 
-    msfiles = read_mapfile(input_datamap)
+    msfiles, hosts = read_mapfile(input_datamap)
     image_basenames = []
 
     for msfile in msfiles:

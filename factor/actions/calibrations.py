@@ -108,11 +108,11 @@ class BBS(Action):
             self.p['skymodel_datamap'] = self.model_datamap
         if self.parmdb_datamap is not None:
             self.p['parmdb_datamap'] = self.parmdb_datamap
-        vis_files = read_mapfile(self.vis_datamap)
+        vis_files, vis_hosts = read_mapfile(self.vis_datamap)
         local_parmdb_files = [os.path.join(v, 'instrument') for v in vis_files]
-        self.local_parmdb_datamap = write_mapfile(local_parmdb_files, self.name,
-                prefix=self.prefix+'_local_parmdbs', index=self.index,
-                working_dir=self.op_parset['dir_working'])
+        self.local_parmdb_datamap = self.write_mapfile(local_parmdb_files,
+        	prefix=self.prefix+'_local_parmdbs', index=self.index,
+        	host_list=vis_hosts)
 
         # Copy the input parmdb (if any) to local parmdb
         if self.parmdb_datamap is not None:
@@ -167,13 +167,14 @@ class BBS(Action):
             Output solutions parmdb data map
 
         """
-        from factor.lib.datamap_lib import write_mapfile, read_mapfile
+        from factor.lib.datamap_lib import read_mapfile
 
-        vis_files = read_mapfile(self.vis_datamap)
-        default_parmdb_files = [os.path.join(v, 'instrument') for v in vis_files]
+        default_parmdb_files, default_parmdb_hosts = read_mapfile(
+            self.local_parmdb_datamap)
 
         if self.output_parmdb_datamap is not None:
-            output_parmdb_files = read_mapfile(self.output_parmdb_datamap)
+            output_parmdb_files, output_parmdb_hosts = read_mapfile(
+                self.output_parmdb_datamap)
             for inp, outp in zip(default_parmdb_files, output_parmdb_files):
                 os.system('cp -r {0} {1}'.format(inp, outp))
             parmdb_datamap = self.output_parmdb_datamap
@@ -247,9 +248,9 @@ class Add(BBS):
         from factor.lib.datamap_lib import read_mapfile, read_mapfile_flags, set_mapfile_flags
         from factor.lib.operation_lib import copy_column
 
-        model_files = read_mapfile(self.model_datamap)
+        model_files, model_hosts = read_mapfile(self.model_datamap)
         model_flags = read_mapfile_flags(self.model_datamap)
-        vis_files = read_mapfile(self.vis_datamap)
+        vis_files, vis_hosts = read_mapfile(self.vis_datamap)
         for model_file, model_flag, vis_file in zip(model_files, model_flags, vis_files):
             if model_flag:
                 self.log.info('Skipping add for {0}'.format(vis_file))

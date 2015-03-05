@@ -98,6 +98,24 @@ class Action(object):
         raise NotImplementedError
 
 
+    def write_datamap(self, data_list, prefix=None, direction=None, index=None,
+        host_list=None):
+        """
+        Write operation datamap
+        """
+        from factor.lib.datamap_lib import write_mapfile
+
+        if host_list is None:
+            host_list = self.op_parset['node_list']
+
+        mapfile = write_mapfile(data_list, self.op_name,
+        	action_name=self.name, prefix=prefix, direction=direction,
+        	index=index, host_list=host_list,
+        	working_dir=self.op_parset['dir_working']))
+
+        return mapfile
+
+
     def make_pipeline_control_parset(self):
         """
         Makes the pipeline control parset (specific to given action)

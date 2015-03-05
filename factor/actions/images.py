@@ -103,7 +103,7 @@ class Casapy(Action):
         """
         Makes the required data maps
         """
-        from factor.lib.datamap_lib import write_mapfile
+        from factor.lib.datamap_lib import read_mapfile
 
         # Make first imaging-run data maps:
         #     - input is list of MS files
@@ -111,9 +111,11 @@ class Casapy(Action):
         self.p['vis_datamap_image1'] = self.vis_datamap
         if self.mask_datamap is not None:
             self.p['input_mask'] = self.mask_datamap
-        self.p['output_datamap_image1'] = write_mapfile(self.imagebasenames1,
-            self.op_name, self.name, prefix=self.prefix+'-imager1_output',
-            index=self.index, direction=self.direction)
+
+        vis_files, vis_hosts = read_mapfile(self.vis_datamap)
+        self.p['output_datamap_image1'] = self.write_mapfile(self.imagebasenames1,
+            prefix=self.prefix+'-imager1_output', index=self.index,
+            direction=self.direction, host_list=vis_hosts)
 
         # Make masking-run data maps:
         #     - input is list of images
@@ -126,19 +128,19 @@ class Casapy(Action):
             else:
                 imnames.append(bn+'.image')
             masknames.append(bn+'.cleanmask')
-        self.p['input_datamap_mask'] = write_mapfile(imnames, self.op_name,
-            self.name, prefix=self.prefix+'-masker_input', direction=self.direction,
-            index=self.index, working_dir=self.op_parset['dir_working'])
-        self.p['output_datamap_mask'] = write_mapfile(masknames, self.op_name,
-            self.name, prefix=self.prefix+'-masker_output', direction=self.direction,
-            index=self.index, working_dir=self.op_parset['dir_working'])
+        self.p['input_datamap_mask'] = self.write_mapfile(imnames,
+            prefix=self.prefix+'-masker_input', direction=self.direction,
+            index=self.index, host_list=vis_hosts)
+        self.p['output_datamap_mask'] = self.write_mapfile(masknames,
+            prefix=self.prefix+'-masker_output', direction=self.direction,
+            index=self.index, host_list=vis_hosts)
 
         # Make second imaging-run data maps
         #     - input is list of MS files (same as imager 1 inputs)
         #     - output is list of image basenames
-        self.p['output_datamap_image2'] = write_mapfile(self.imagebasenames2,
-            self.op_name, self.name, prefix=self.prefix+'-imager2_output',
-            index=self.index, direction=self.direction)
+        self.p['output_datamap_image2'] = self.write_mapfile(self.imagebasenames2,
+            prefix=self.prefix+'-imager2_output', index=self.index,
+            direction=self.direction, host_list=vis_hosts)
 
 
     def set_imaging_parameters(self):

@@ -90,23 +90,21 @@ class MakeSkymodelFromModelImage(Action):
         """
         Makes the required data maps
         """
-        from factor.lib.datamap_lib import write_mapfile, read_mapfile
+        from factor.lib.datamap_lib import read_mapfile
 
         # Input is list of image basenames
         # Output is sky model files
-        imagebasenames = read_mapfile(self.input_datamap)
+        imagebasenames, hosts = read_mapfile(self.input_datamap)
         input_files = [bn+'.model' for bn in imagebasenames]
         output_files = [bn+'.skymodel' for bn in self.modelbasenames]
 
-        self.p['input_datamap'] = write_mapfile(input_files,
-            self.op_name, self.name, prefix=self.prefix+'_input',
-            direction=self.direction, index=self.index,
-            working_dir=self.op_parset['dir_working'])
+        self.p['input_datamap'] = self.write_mapfile(input_files,
+            prefix=self.prefix+'_input', direction=self.direction,
+            index=self.index, host_list=hosts)
 
-        self.p['output_datamap'] = write_mapfile(output_files,
-            self.op_name, self.name, prefix=self.prefix+'_output',
-            direction=self.direction, index=self.index,
-            working_dir=self.op_parset['dir_working'])
+        self.p['output_datamap'] = self.write_mapfile(output_files,
+            prefix=self.prefix+'_output', direction=self.direction,
+            index=self.index, host_list=hosts)
 
 
     def make_pipeline_control_parset(self):
@@ -206,15 +204,15 @@ class MakeFacetSkymodel(Action):
         """
         Makes the required data maps
         """
-        from factor.lib.datamap_lib import write_mapfile
+        from factor.lib.datamap_lib import read_mapfile
 
         self.p['input_datamap'] = self.input_datamap
 
+        basenames, hosts = read_mapfile(self.input_datamap)
         output_files = [bn + '_facet.skymodel' for bn in self.modelbasenames]
-        self.p['output_datamap'] = write_mapfile(output_files,
-            self.op_name, self.name, prefix=self.prefix+'_output',
-            direction=self.direction, index=self.index,
-            working_dir=self.op_parset['dir_working'])
+        self.p['output_datamap'] = self.write_mapfile(output_files,
+            prefix=self.prefix+'_output', direction=self.direction,
+            index=self.index, host_list=hosts)
 
 
     def make_pipeline_control_parset(self):
@@ -245,7 +243,7 @@ class MakeFacetSkymodel(Action):
         """
         from factor.lib.datamap_lib import read_mapfile, set_mapfile_flags
 
-        model_files = read_mapfile(self.p['output_datamap'])
+        model_files, hosts = read_mapfile(self.p['output_datamap'])
         skip_flags = []
         for model_file in model_files:
             if not os.path.exists(model_file):
@@ -323,19 +321,18 @@ class MergeSkymodels(Action):
         """
         Makes the required data maps
         """
-        from factor.lib.datamap_lib import write_mapfile, read_mapfile
+        from factor.lib.datamap_lib import read_mapfile
 
         self.p['skymodel1_datamap'] = self.skymodel1_datamap
         self.p['skymodel2_datamap'] = self.skymodel2_datamap
 
-        model1basenames = read_mapfile(self.skymodel1_datamap)
+        model1basenames, hosts = read_mapfile(self.skymodel1_datamap)
         output_files = [os.path.splitext(bn)[0] + '_merged.skymodel' for bn in
             model1basenames]
 
-        self.p['output_datamap'] = write_mapfile(output_files,
-            self.op_name, self.name, prefix=self.prefix+'_output',
-            direction=self.direction, index=self.index,
-            working_dir=self.op_parset['dir_working'])
+        self.p['output_datamap'] = self.write_mapfile(output_files,
+            prefix=self.prefix+'_output', direction=self.direction,
+            index=self.index, host_list=hosts)
 
 
     def make_pipeline_control_parset(self):
@@ -377,7 +374,7 @@ class FFT(Action):
     None
 
     """
-    def __init__(self, op_parset, vis_datamap, model_datamap, p, prefix=None,
+    def __init__(self, op_parset, vis_datamap, model_basenames_datamap, p, prefix=None,
     	direction=None, clean=True, index=None):
         """
         Create action and run pipeline
@@ -386,8 +383,10 @@ class FFT(Action):
         ----------
         op_parset : dict
             Parset dict of the calling operation
-        input_datamap : data map
-            Input data map for CASA model image
+        vis_datamap : data map
+            Input data map for vis data
+        model_basenames_datamap : data map
+            Input data map for model basenames
         p : dict
             Input parset dict defining model and pipeline parameters
         prefix : str, optional
@@ -405,7 +404,7 @@ class FFT(Action):
 
         # Store input parameters
         self.vis_datamap = vis_datamap
-        self.model_datamap = model_datamap
+        self.model_datamap = model_basenames_datamap
         self.p = p.copy()
         if self.prefix is None:
             self.prefix = 'fft'
@@ -427,8 +426,6 @@ class FFT(Action):
         """
         Makes the required data maps
         """
-        from factor.lib.datamap_lib import read_mapfile, write_mapfile
-
         self.p['vis_datamap'] = self.vis_datamap
         self.p['model_datamap'] = self.model_datamap
 

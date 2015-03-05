@@ -85,8 +85,8 @@ class Losoto(Action):
 
         # Copy parmdbs to instrument directory inside MS files
         from factor.lib.datamap_lib import read_mapfile
-        parmdb_names = read_mapfile(self.parmdb_datamap)
-        ms_names = read_mapfile(self.vis_datamap)
+        parmdb_names, hosts = read_mapfile(self.parmdb_datamap)
+        ms_names, hosts = read_mapfile(self.vis_datamap)
         for pn, mn in zip(parmdb_names, ms_names):
             if os.path.exists('{0}/instrument'.format(mn)):
                 os.system('rm -rf {0}/instrument'.format(mn))
@@ -97,16 +97,15 @@ class Losoto(Action):
         """
         Makes the required data maps
         """
-        from factor.lib.datamap_lib import write_mapfile, read_mapfile
+        from factor.lib.datamap_lib import read_mapfile
 
         self.p['input_datamap'] = self.vis_datamap
 
-        parmdb_names = read_mapfile(self.parmdb_datamap)
+        parmdb_names, hosts = read_mapfile(self.parmdb_datamap)
         h5parm_files = [parmdb_name + '.h5parm' for parmdb_name in parmdb_names]
         self.p['h5parm_datamap'] = write_mapfile(h5parm_files,
-            self.op_name, self.name, prefix=self.prefix+'_h5parm',
-            direction=self.direction, index=self.index,
-            working_dir=self.op_parset['dir_working'])
+            prefix=self.prefix+'_h5parm', direction=self.direction,
+            index=self.index, host_list=hosts)
 
 
     def make_pipeline_control_parset(self):
@@ -141,8 +140,8 @@ class Losoto(Action):
         from factor.lib.datamap_lib import read_mapfile
 
         # Copy parmdbs from instrument directory inside MS files to final files
-        parmdb_names = read_mapfile(self.parmdb_datamap)
-        ms_names = read_mapfile(self.vis_datamap)
+        parmdb_names, hosts = read_mapfile(self.parmdb_datamap)
+        ms_names, hosts = read_mapfile(self.vis_datamap)
         for pn, mn in zip(parmdb_names, ms_names):
             if os.path.exists(pn):
                 os.system('rm -rf {0}'.format(pn))

@@ -30,7 +30,7 @@ class InitSubtract(Operation):
         from factor.actions.models import MakeSkymodelFromModelImage, MergeSkymodels
         from factor.actions.calibrations import Subtract, FFT
         from factor.actions.visibilities import Average
-        from factor.lib.datamap_lib import write_mapfile, read_mapfile
+        from factor.lib.datamap_lib import read_mapfile
 #         from factor.operations.hardcoded_param import init_subtract as p
         from factor.operations.hardcoded_param import init_subtract_test as p
         self.log.warn('Using test parameters')
@@ -47,12 +47,10 @@ class InitSubtract(Operation):
 
         # Make initial data maps for the empty datasets and their dir-indep
         # instrument parmdbs
-        subtracted_all_mapfile = write_mapfile([band.file for band in bands],
-        	self.name, prefix='subtracted_all',
-        	working_dir=self.parset['dir_working'])
-        dir_indep_parmdbs_mapfile = write_mapfile([band.dirindparmdb for band
-        	in bands], self.name, prefix='dir_indep_parmdbs',
-        	working_dir=self.parset['dir_working'])
+        subtracted_all_mapfile = self.write_mapfile([band.file for band in bands],
+        	prefix='subtracted_all')
+        dir_indep_parmdbs_mapfile = self.write_mapfile([band.dirindparmdb for band
+        	in bands], prefix='dir_indep_parmdbs')
 
         self.log.info('High-res imaging...')
         action = MakeImage(self.parset, subtracted_all_mapfile, p['imagerh'],

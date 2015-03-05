@@ -81,12 +81,11 @@ class DPPP(Action):
         """
         Makes the required data maps
         """
-        from factor.lib.datamap_lib import write_mapfile, read_mapfile
+        from factor.lib.datamap_lib import read_mapfile
 
+        msnames, hosts = read_mapfile(self.input_datamap)
         if self.name != 'Concatenate':
             self.p['input_datamap'] = self.input_datamap
-
-            msnames = read_mapfile(self.input_datamap)
             if self.index is not None:
                 indstr = '{0}'.format(self.index)
             else:
@@ -96,21 +95,18 @@ class DPPP(Action):
         else:
             # Handle concatenation separately, as we need a data map with a
             # single "file" (and hence must disable use_abs_path below).
-            msnames = read_mapfile(self.input_datamap)
             concat_file_list = ['[' + ','.join([msname for msname in msnames]) + ']']
+            hosts = [hosts[0]]
             self.p['input_datamap'] = write_mapfile(concat_file_list,
-                self.op_name, self.name, prefix=self.prefix+'_input',
-                direction=self.direction, working_dir=self.op_parset['dir_working'],
-                use_abs_path=False, index=self.index)
-
+                prefix=self.prefix+'_input', direction=self.direction,
+                use_abs_path=False, index=self.index, host_list=hosts)
             ms = msnames[0]
             output_files = [self.working_dir + os.path.splitext(os.path.basename(ms))[0]
                 + '_{0}.ms'.format(self.name.lower())]
 
         self.p['output_datamap'] = write_mapfile(output_files,
-            self.op_name, self.name, prefix=self.prefix+'_output',
-            direction=self.direction, working_dir=self.op_parset['dir_working'],
-            index=self.index)
+            prefix=self.prefix+'_output', direction=self.direction,
+            index=self.index, host_list=hosts)
 
 
     def make_pipeline_control_parset(self):

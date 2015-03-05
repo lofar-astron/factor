@@ -74,6 +74,23 @@ class Operation(object):
             self.log.info('<-- Operation %s started (direction(s): %s)' % (self.name, dirstr))
 
 
+    def write_datamap(self, data_list, prefix=None, direction=None, index=None,
+        host_list=None):
+        """
+        Write operation datamap
+        """
+        from factor.lib.datamap_lib import write_mapfile
+
+        if host_list is None:
+            host_list = self.parset['node_list']
+
+        mapfile = write_mapfile(data_list, self.name, prefix=prefix,
+                direction=direction, index=index, host_list=host_list,
+                working_dir=self.parset['dir_working']))
+
+        return mapfile
+
+
     def run_steps(self):
         """
         Define the operation's steps
