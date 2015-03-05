@@ -86,7 +86,7 @@ class Operation(object):
 
         mapfile = write_mapfile(data_list, self.name, prefix=prefix,
                 direction=direction, index=index, host_list=host_list,
-                working_dir=self.parset['dir_working']))
+                working_dir=self.parset['dir_working'])
 
         return mapfile
 
