@@ -101,7 +101,8 @@ if __name__=='__main__':
     # Get nodes from cluster description
     if parset['clusterdesc'].lower() == 'pbs':
         parset['clusterdesc'] = factor.cluster.make_pbs_clusterdesc(node_local_disk)
-    parset['node_list'] = factor.cluster.get_compute_nodes(parset['clusterdesc'])
+    if not 'node_list' in parset:
+        parset['node_list'] = factor.cluster.get_compute_nodes(parset['clusterdesc'])
 
     # Run initial sky model generation and create empty datasets. First check that
     # this operation is needed (only needed if band lacks an initial skymodel or

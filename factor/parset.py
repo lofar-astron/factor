@@ -128,5 +128,6 @@ def parset_read(parset_file):
             sys.exit(1)
     if 'clusterdesc' not in parset_dict:
         parset_dict['clusterdesc'] = parset_dict['lofarroot'] + '/share/local.clusterdesc'
+        parset_dict['node_list'] = ['localhost']
 
     return parset_dict
