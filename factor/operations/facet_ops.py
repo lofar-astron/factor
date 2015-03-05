@@ -188,11 +188,11 @@ class FacetSetup(Operation):
         # dir-indep CORRECTED_DATA
         for dm, cdm, d in zip(concat_data_mapfiles, concat_corrdata_mapfiles,
             d_list):
-            concat_data_file, _ = read_mapfile(dm)[0]
-            concat_corrdata_file, _ = read_mapfile(cdm)[0]
-            d.concat_file = concat_data_file
+            concat_data_file, _ = read_mapfile(dm)
+            concat_corrdata_file, _ = read_mapfile(cdm)
+            d.concat_file = concat_data_file[0]
             copy_column(d.concat_file, p['copy']['incol'], p['copy']['outcol'],
-                ms_from=concat_corrdata_file)
+                ms_from=concat_corrdata_file[0])
 
 
 class FacetSelfcal(Operation):
