@@ -99,7 +99,7 @@ class Action(object):
 
 
     def write_mapfile(self, data_list, prefix=None, direction=None, index=None,
-        host_list=None):
+        host_list=None, use_abs_path=True):
         """
         Write operation datamap
         """
@@ -110,7 +110,7 @@ class Action(object):
 
         mapfile = write_mapfile(data_list, self.op_name,
         	action_name=self.name, prefix=prefix, direction=direction,
-        	index=index, host_list=host_list,
+        	index=index, host_list=host_list, use_abs_path=use_abs_path,
         	working_dir=self.op_parset['dir_working'])
 
         return mapfile
