@@ -13,7 +13,8 @@ def write_mapfile(data_list, op_name, action_name=None, prefix=None,
     """
     if use_abs_path:
         data_list = [os.path.abspath(f) for f in data_list]
-    basename = make_mapfile_basename(prefix, direction, index)
+    basename = make_mapfile_basename(prefix=prefix, direction=direction,
+        index=index)
     mapfile_dir = os.path.join(working_dir, 'datamaps', op_name)
     if action_name is not None:
         mapfile_dir = os.path.join(mapfile_dir, action_name)
@@ -72,7 +73,7 @@ def set_mapfile_flags(mapfile, flag_list):
     datamap.save(mapfile)
 
 
-def make_mapfile_basename(action_name=None, prefix=None, direction=None, index=None):
+def make_mapfile_basename(prefix=None, direction=None, index=None):
     """
     Returns a standard name pattern for datamap files
     """
@@ -85,7 +86,4 @@ def make_mapfile_basename(action_name=None, prefix=None, direction=None, index=N
     else:
         indtxt = ''
 
-    if action_name is not None:
-        return '{0}/{1}{2}{3}'.format(action_name, prefix, dirtxt, indtxt)
-    else:
-        return '{0}{1}{2}'.format(prefix, dirtxt, indtxt)
+    return '{0}{1}{2}'.format(prefix, dirtxt, indtxt)
