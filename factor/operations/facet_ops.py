@@ -88,7 +88,7 @@ class FacetAddCal(Operation):
         shifted_data_mapfile = action.run()
 
         # Save files to the band objects
-        files = read_mapfile(shifted_data_mapfile)
+        files, _ = read_mapfile(shifted_data_mapfile)
         for band, f in zip(bands, files):
             band.shifted_data_file = f
 
@@ -124,7 +124,7 @@ class FacetSetup(Operation):
                 concat_data_mapfile = os.path.join(self.parset['dir_working'],
                     'datamaps/FacetSetup/Concatenate/{0}/facet_bands_output_{0}.datamap'.
                     format(d.name))
-                file = read_mapfile(concat_data_mapfile)[0]
+                file, _ = read_mapfile(concat_data_mapfile)[0]
                 d.concat_file = file
                 all_done = True
         if all_done:
@@ -188,8 +188,8 @@ class FacetSetup(Operation):
         # dir-indep CORRECTED_DATA
         for dm, cdm, d in zip(concat_data_mapfiles, concat_corrdata_mapfiles,
             d_list):
-            concat_data_file = read_mapfile(dm)[0]
-            concat_corrdata_file = read_mapfile(cdm)[0]
+            concat_data_file, _ = read_mapfile(dm)[0]
+            concat_corrdata_file, _ = read_mapfile(cdm)[0]
             d.concat_file = concat_data_file
             copy_column(d.concat_file, p['copy']['incol'], p['copy']['outcol'],
                 ms_from=concat_corrdata_file)
@@ -229,7 +229,7 @@ class FacetSelfcal(Operation):
                 final_parmdb_datamap = os.path.join(self.parset['dir_working'],
                     'datamaps/FacetSelfcal/{0}/merged_parmdb_final_{0}.datamap'.
                     format(d.name))
-                file = read_mapfile(final_parmdb_datamap)[0]
+                file, _ = read_mapfile(final_parmdb_datamap)[0]
                 d.dirdepparmdb = file
                 all_done = True
         if all_done:
@@ -679,7 +679,7 @@ class FacetSelfcal(Operation):
 
         # Save files to the direction objects
         for d, m in zip(d_list, merged_parmdb_final_mapfiles):
-            f = read_mapfile(m)[0]
+            f, _ = read_mapfile(m)[0]
             d.dirdepparmdb = f
 
 
@@ -816,7 +816,7 @@ class FacetAddAll(Operation):
             shifted_data_mapfile = os.path.join(self.parset['dir_working'],
                 'datamaps/FacetAddAll/PhaseShift/{0}/facet_output_{0}.datamap'.
                 format(d.name))
-            d.shifted_data_files = read_mapfile(shifted_data_mapfile)
+            d.shifted_data_files, _ = read_mapfile(shifted_data_mapfile)
             return
 
         # Make initial data maps for the empty datasets, their dir-indep
@@ -883,7 +883,7 @@ class FacetImage(Operation):
                 model_mapfile = os.path.join(self.parset['dir_working'],
                 'datamaps/FacetImage/{0}/final_model_{0}.datamap'.
                 format(d.name))
-                file = read_mapfile(model_mapfile)[0]
+                file, _ = read_mapfile(model_mapfile)[0]
                 d.skymodel_dirdep = file
                 all_done = True
         if all_done:
@@ -943,7 +943,7 @@ class FacetImage(Operation):
 
         if self.parset['use_ftw']:
             # Save image basenames to the direction objects
-            files = read_mapfile(image_basenames_mapfiles)
+            files, _ = read_mapfile(image_basenames_mapfiles)
             for d, f in zip(d_list, files):
                 d.skymodel_dirdep = f
         else:
@@ -1079,7 +1079,7 @@ class FacetAddAllFinal(Operation):
         shifted_data_mapfile = action.run()
 
         # Save files to the band objects
-        files = read_mapfile(shifted_data_mapfile)
+        files, _ = read_mapfile(shifted_data_mapfile)
         for band, f in zip(bands, files):
             band.shifted_data_file = f
 
