@@ -111,7 +111,7 @@ class Action(object):
         mapfile = write_mapfile(data_list, self.op_name,
         	action_name=self.name, prefix=prefix, direction=direction,
         	index=index, host_list=host_list,
-        	working_dir=self.op_parset['dir_working']))
+        	working_dir=self.op_parset['dir_working'])
 
         return mapfile
 
