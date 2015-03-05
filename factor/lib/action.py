@@ -120,7 +120,8 @@ class Action(object):
         from jinja2 import Environment, FileSystemLoader
 
         DIR = os.path.dirname(os.path.abspath(__file__))
-        env = Environment(loader=FileSystemLoader(os.path.join(DIR, 'templates')))
+        env = Environment(loader=FileSystemLoader(os.path.join(DIR,
+            '../actions/templates')))
 
         if os.path.basename(self.op_parset['clusterdesc']) == 'local.clusterdesc':
             self.op_parset['remote'] = '[remote]\n'\
