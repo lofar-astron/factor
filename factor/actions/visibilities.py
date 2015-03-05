@@ -101,7 +101,7 @@ class DPPP(Action):
             self.p['input_datamap'] = write_mapfile(concat_file_list,
                 self.op_name, self.name, prefix=self.prefix+'_input',
                 direction=self.direction, working_dir=self.op_parset['dir_working'],
-                use_abs_path=False)
+                use_abs_path=False, index=self.index)
 
             ms = msnames[0]
             output_files = [self.working_dir + os.path.splitext(os.path.basename(ms))[0]
@@ -109,7 +109,8 @@ class DPPP(Action):
 
         self.p['output_datamap'] = write_mapfile(output_files,
             self.op_name, self.name, prefix=self.prefix+'_output',
-            direction=self.direction, working_dir=self.op_parset['dir_working'])
+            direction=self.direction, working_dir=self.op_parset['dir_working'],
+            index=self.index)
 
 
     def make_pipeline_control_parset(self):

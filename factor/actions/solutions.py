@@ -105,7 +105,8 @@ class Losoto(Action):
         h5parm_files = [parmdb_name + '.h5parm' for parmdb_name in parmdb_names]
         self.p['h5parm_datamap'] = write_mapfile(h5parm_files,
             self.op_name, self.name, prefix=self.prefix+'_h5parm',
-            direction=self.direction, working_dir=self.op_parset['dir_working'])
+            direction=self.direction, index=self.index,
+            working_dir=self.op_parset['dir_working'])
 
 
     def make_pipeline_control_parset(self):

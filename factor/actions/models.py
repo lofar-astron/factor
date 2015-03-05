@@ -100,11 +100,13 @@ class MakeSkymodelFromModelImage(Action):
 
         self.p['input_datamap'] = write_mapfile(input_files,
             self.op_name, self.name, prefix=self.prefix+'_input',
-            direction=self.direction, working_dir=self.op_parset['dir_working'])
+            direction=self.direction, index=self.index,
+            working_dir=self.op_parset['dir_working'])
 
         self.p['output_datamap'] = write_mapfile(output_files,
             self.op_name, self.name, prefix=self.prefix+'_output',
-            direction=self.direction, working_dir=self.op_parset['dir_working'])
+            direction=self.direction, index=self.index,
+            working_dir=self.op_parset['dir_working'])
 
 
     def make_pipeline_control_parset(self):
@@ -211,7 +213,8 @@ class MakeFacetSkymodel(Action):
         output_files = [bn + '_facet.skymodel' for bn in self.modelbasenames]
         self.p['output_datamap'] = write_mapfile(output_files,
             self.op_name, self.name, prefix=self.prefix+'_output',
-            direction=self.direction, working_dir=self.op_parset['dir_working'])
+            direction=self.direction, index=self.index,
+            working_dir=self.op_parset['dir_working'])
 
 
     def make_pipeline_control_parset(self):
@@ -331,7 +334,8 @@ class MergeSkymodels(Action):
 
         self.p['output_datamap'] = write_mapfile(output_files,
             self.op_name, self.name, prefix=self.prefix+'_output',
-            direction=self.direction, working_dir=self.op_parset['dir_working'])
+            direction=self.direction, index=self.index,
+            working_dir=self.op_parset['dir_working'])
 
 
     def make_pipeline_control_parset(self):

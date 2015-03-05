@@ -111,7 +111,7 @@ class BBS(Action):
         vis_files = read_mapfile(self.vis_datamap)
         local_parmdb_files = [os.path.join(v, 'instrument') for v in vis_files]
         self.local_parmdb_datamap = write_mapfile(local_parmdb_files, self.name,
-                prefix=self.prefix+'_local_parmdbs',
+                prefix=self.prefix+'_local_parmdbs', index=self.index,
                 working_dir=self.op_parset['dir_working'])
 
         # Copy the input parmdb (if any) to local parmdb
