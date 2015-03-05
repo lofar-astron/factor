@@ -13,8 +13,12 @@ def write_mapfile(data_list, op_name, action_name=None, prefix=None,
     """
     if use_abs_path:
         data_list = [os.path.abspath(f) for f in data_list]
-    basename = make_mapfile_basename(action_name, prefix, direction, index)
+    basename = make_mapfile_basename(prefix, direction, index)
     mapfile_dir = os.path.join(working_dir, 'datamaps', op_name)
+    if action_name is not None:
+        mapfile_dir = os.path.join(mapfile_dir, action_name)
+    if direction is not None:
+        mapfile_dir = os.path.join(mapfile_dir, direction.name)
     if not os.path.exists(mapfile_dir):
         os.makedirs(mapfile_dir)
     mapfile = os.path.join(mapfile_dir, '{0}.datamap'.format(basename))
