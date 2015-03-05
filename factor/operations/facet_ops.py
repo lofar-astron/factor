@@ -61,14 +61,14 @@ class FacetAddCal(Operation):
         # Make initial data maps for the empty datasets, their dir-indep
         # instrument parmdbs, and their dir-indep sky models
         subtracted_all_mapfile = write_mapfile([band.file for band in bands],
-        	self.name, prefix='subtracted_all',
+        	self.name, prefix='subtracted_all', direction=d,
         	working_dir=self.parset['dir_working'])
         dir_indep_parmdbs_mapfile = write_mapfile([band.dirindparmdb for band
-        	in bands], self.name, prefix='dir_indep_parmdbs',
+        	in bands], self.name, prefix='dir_indep_parmdbs', direction=d,
         	working_dir=self.parset['dir_working'])
         dir_indep_skymodels_mapfile = write_mapfile([band.skymodel_dirindep
         	for band in bands], self.name, prefix='dir_indep_skymodels',
-        	working_dir=self.parset['dir_working'])
+        	direction=d, working_dir=self.parset['dir_working'])
 
         # Add calibrators from the dir-indep sky model for this direction to the
         # visibilities
@@ -140,10 +140,10 @@ class FacetSetup(Operation):
         for d in d_list:
             shifted_data_mapfiles.append(write_mapfile([band.shifted_data_file
                 for band in bands], self.name, prefix='shifted',
-                working_dir=self.parset['dir_working']))
+                direction=d, working_dir=self.parset['dir_working']))
             dir_indep_parmdbs_mapfiles.append(write_mapfile([band.dirindparmdb
                 for band in bands], self.name, prefix='dir_indep_parmdbs',
-                working_dir=self.parset['dir_working']))
+                direction=d, working_dir=self.parset['dir_working']))
 
         # apply direction-independent calibration
         self.log.info('Applying direction-independent calibration...')
@@ -227,15 +227,22 @@ class FacetSelfcal(Operation):
         if all_done:
             return
 
+        # Divide up the cluster equally between directions
+        for d in d_list:
+            d.op_parset = self.parset.copy()
+            d.op_parset['clusterdesc'] = ''
+
         # Make initial data maps for the averaged, phase-shifted datasets and
         # for facet mask regions
         facet_data_mapfiles = []
         facet_region_mapfiles = []
         for d in d_list:
             facet_data_mapfiles.append(write_mapfile([d.concat_file], self.name,
-                prefix='shifted_vis', working_dir=self.parset['dir_working']))
+                prefix='shifted_vis', direction=d,
+                working_dir=self.parset['dir_working']))
             facet_region_mapfiles.append(write_mapfile([d.reg], self.name,
-                prefix='facet_regions', working_dir=self.parset['dir_working']))
+                prefix='facet_regions', direction=d,
+                working_dir=self.parset['dir_working']))
 
         # Set image sizes
         for d in d_list:
@@ -376,9 +383,10 @@ class FacetSelfcal(Operation):
         self.log.info('Imaging (facet image #2)...')
         self.log.debug('Merging chunks...')
         merged_data_mapfiles = []
-        for chunks in chunks_list:
+        for i, chunks in enumerate(chunks_list):
             merged_data_mapfiles.append(write_mapfile([merge_chunks(
-                [chunk.file for chunk in chunks], prefix='image2')], self.name, prefix='merged_vis',
+                [chunk.file for chunk in chunks], prefix='image2')],
+                self.name, prefix='merged_vis', direction=d_list[i],
                 working_dir=self.parset['dir_working']))
 
         self.log.debug('Averaging in preparation for imaging...')
@@ -405,12 +413,15 @@ class FacetSelfcal(Operation):
             if self.parset['use_ftw']:
                 model2 = read_mapfile(image2_basenames_mapfiles[i])
                 chunk_model_mapfiles.append(write_mapfile(model2*len(chunks),
-                    self.name, prefix='chunks_model2', working_dir=self.parset['dir_working'],
+                    self.name, prefix='chunks_model2',
+                    working_dir=self.parset['dir_working'],
                     direction=d_list[i]))
             else:
                 skymodel2 = read_mapfile(skymodels2_mapfiles[i])
                 chunk_model_mapfiles.append(write_mapfile(skymodel2*len(chunks),
-                    self.name, prefix='chunks_skymodel2', working_dir=self.parset['dir_working']))
+                    self.name, prefix='chunks_skymodel2',
+                    working_dir=self.parset['dir_working'],
+                    direction=d_list[i]))
             chunk_parmdb_phaseamp_phase1_mapfiles.append(write_mapfile(
                 [chunk.parmdb_phaseamp_phase1 for chunk in chunks],
                 self.name, prefix='chunk_parmdb_phase1', working_dir=
@@ -452,7 +463,7 @@ class FacetSelfcal(Operation):
 
         self.log.debug('Merging chunks...')
         merged_data_mapfiles = []
-        for chunks in chunks_list:
+        for i, chunks in enumerate(chunks_list):
             merged_data_mapfiles.append(write_mapfile([merge_chunks(
                 [chunk.file for chunk in chunks], prefix='image3')], self.name, prefix='merged_vis',
                 working_dir=self.parset['dir_working'], direction=d_list[i]))
@@ -464,7 +475,7 @@ class FacetSelfcal(Operation):
             merged_parmdb_phaseamp_amp1_mapfiles.append(write_mapfile(
                 [self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp1 for chunk
                 in chunks], concat_file, prefix='merged_amps1')], self.name, prefix='merged_amps1',
-                working_dir=self.parset['dir_working']))
+                working_dir=self.parset['dir_working'], direction=d_list[i]))
 
         self.log.info('Smoothing amplitude solutions...')
         actions = [Smooth(self.parset, dm, p['smooth_amp1'], pm,
@@ -573,7 +584,7 @@ class FacetSelfcal(Operation):
 
         self.log.debug('Merging chunks...')
         merged_data_mapfiles = []
-        for chunks in chunks_list:
+        for i, chunks in enumerate(chunks_list):
             merged_data_mapfiles.append(write_mapfile([merge_chunks(
             	[chunk.file for chunk in chunks], prefix='image4')],
             	self.name, prefix='merged_vis',
@@ -797,23 +808,21 @@ class FacetAddAll(Operation):
             shifted_data_mapfile = os.path.join(self.parset['dir_working'],
                 'datamaps/FacetAddAll/PhaseShift/facet_output_{0}.datamap'.
                 format(d.name))
-            files = read_mapfile(shifted_data_mapfile)
-            d.shifted_data_files = []
-            for f in files:
-                d.shifted_data_files.append(f)
+            d.shifted_data_files = read_mapfile(shifted_data_mapfile)
             return
 
 
         # Make initial data maps for the empty datasets, their dir-indep
         # instrument parmdbs, and their dir-indep sky models
         subtracted_all_mapfile = write_mapfile([band.file for band in bands],
-            self.name, prefix='subtracted_all', working_dir=self.parset['dir_working'])
+            self.name, prefix='subtracted_all', direction=d,
+            working_dir=self.parset['dir_working'])
         dir_indep_parmdbs_mapfile = write_mapfile([band.dirindparmdb for
         	band in bands], self.name, prefix='dir_indep_parmdbs',
-        	working_dir=self.parset['dir_working'])
+            direction=d, working_dir=self.parset['dir_working'])
         dir_indep_skymodels_mapfile = write_mapfile([band.skymodel_dirindep
             for band in bands], self.name, prefix='dir_indep_skymodels',
-            working_dir=self.parset['dir_working'])
+            direction=d, working_dir=self.parset['dir_working'])
 
         self.log.info('Selecting sources for this direction...')
         action = MakeFacetSkymodel(self.parset, dir_indep_skymodels_mapfile,
@@ -833,10 +842,7 @@ class FacetAddAll(Operation):
         shifted_data_mapfile = action.run()
 
         # Save files to the band objects
-        d.shifted_data_files = []
-        files = read_mapfile(shifted_data_mapfile)
-        for f in files:
-            d.shifted_data_files.append(f)
+        d.shifted_data_files = read_mapfile(shifted_data_mapfile)
 
 
 class FacetImage(Operation):
@@ -879,17 +885,25 @@ class FacetImage(Operation):
         if all_done:
             return
 
+        # Set image sizes
+        for d in d_list:
+            cell = float(p['imager']['cell'].split('arcsec')[0]) # arcsec per pixel
+            imsize = d.width * 1.1 * 3600.0 / cell # pixels
+            if imsize < 512:
+                imsize = 512
+            d.imsize = imsize
+
         # Make initial data maps for the phase-shifted datasets and their dir-dep
         # instrument parmdbs
         shifted_data_mapfiles = []
         dir_dep_parmdbs_mapfiles = []
         for d in d_list:
             shifted_data_mapfiles.append(write_mapfile(d.shifted_data_files,
-            	self.name, prefix='shifted',
+            	self.name, prefix='shifted', direction=d,
             	working_dir=self.parset['dir_working']))
             dir_dep_parmdbs_mapfiles.append(write_mapfile([d.
             	dirdepparmdb]*len(bands), self.name,
-            	prefix='dir_dep_parmdbs',
+            	prefix='dir_dep_parmdbs', direction=d,
             	working_dir=self.parset['dir_working']))
 
         self.log.info('Applying direction-dependent calibration...')
@@ -939,7 +953,8 @@ class FacetImage(Operation):
         # Make final data maps
         for d in d_list:
             write_mapfile([d.skymodel_dirdep], self.name,
-            	prefix='final_model', working_dir=self.parset['dir_working'])
+            	prefix='final_model', direction=d,
+            	working_dir=self.parset['dir_working'])
 
 
 
@@ -973,13 +988,13 @@ class FacetSubAll(Operation):
         # Make initial data maps for the empty datasets, their dir-dep
         # instrument parmdbs, and their dir-dep sky models
         subtracted_all_mapfile = write_mapfile([band.file for band in bands],
-        	self.name, prefix='subtracted_all',
+        	self.name, prefix='subtracted_all', direction=d,
         	working_dir=self.parset['dir_working'])
         dir_dep_parmdbs_mapfile = write_mapfile([d.dirdepparmdb]*len(bands),
-            self.name, prefix='dir_dep_parmdbs',
+            self.name, prefix='dir_dep_parmdbs', direction=d,
         	working_dir=self.parset['dir_working'])
         dir_dep_models_mapfile = write_mapfile([d.skymodel_dirdep]*len(bands),
-            self.name, prefix='dir_dep_skymodels',
+            self.name, prefix='dir_dep_skymodels', direction=d,
         	working_dir=self.parset['dir_working'])
 
         if self.parset['use_ftw']:
@@ -1031,13 +1046,13 @@ class FacetAddAllFinal(Operation):
         # Make initial data maps for the empty datasets, their dir-indep
         # instrument parmdbs, and their dir-indep sky models
         subtracted_all_mapfile = write_mapfile([band.file for band in bands],
-        	self.name, prefix='subtracted_all',
+        	self.name, prefix='subtracted_all', direction=d,
         	working_dir=self.parset['dir_working'])
         dir_dep_parmdbs_mapfile = write_mapfile([d.dirdepparmdb]*len(bands),
-            self.name, prefix='dir_dep_parmdbs',
+            self.name, prefix='dir_dep_parmdbs', direction=d,
         	working_dir=self.parset['dir_working'])
         dir_dep_models_mapfile = write_mapfile([d.skymodel_dirdep]*len(bands),
-            self.name, prefix='dir_dep_skymodels',
+            self.name, prefix='dir_dep_skymodels', direction=d,
         	working_dir=self.parset['dir_working'])
 
         if self.parset['use_ftw']:

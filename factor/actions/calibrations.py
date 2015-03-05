@@ -263,9 +263,8 @@ class Apply(BBS):
     def __init__(self, op_parset, vis_datamap, p, parmdb_datamap, prefix=None,
         direction=None, clean=True, index=None):
         super(Apply, self).__init__(op_parset, vis_datamap, p,
-            parmdb_datamap=parmdb_datamap,
-            prefix=prefix, direction=direction, clean=clean, index=index,
-            name='Apply')
+        	parmdb_datamap=parmdb_datamap, prefix=prefix,
+        	direction=direction, clean=clean, index=index, name='Apply')
 
 
 class Solve(BBS):

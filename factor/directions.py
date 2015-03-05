@@ -144,6 +144,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     log.info('Kept {0} directions in total'.format(len(s.getPatchNames())))
 
     # Write the file
+    log.info("Writing directions file: %s" % (directions_file))
     s.write(fileName=directions_file, format='factor', sortBy='I', clobber=True)
     if interactive:
         print("Plotting directions...")
