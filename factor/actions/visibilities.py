@@ -97,7 +97,7 @@ class DPPP(Action):
             # single "file" (and hence must disable use_abs_path below).
             concat_file_list = ['[' + ','.join([msname for msname in msnames]) + ']']
             hosts = [hosts[0]]
-            self.p['input_datamap'] = write_mapfile(concat_file_list,
+            self.p['input_datamap'] = self.write_mapfile(concat_file_list,
                 prefix=self.prefix+'_input', direction=self.direction,
                 use_abs_path=False, index=self.index, host_list=hosts)
             ms = msnames[0]

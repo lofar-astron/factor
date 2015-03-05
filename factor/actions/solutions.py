@@ -103,7 +103,7 @@ class Losoto(Action):
 
         parmdb_names, hosts = read_mapfile(self.parmdb_datamap)
         h5parm_files = [parmdb_name + '.h5parm' for parmdb_name in parmdb_names]
-        self.p['h5parm_datamap'] = write_mapfile(h5parm_files,
+        self.p['h5parm_datamap'] = self.write_mapfile(h5parm_files,
             prefix=self.prefix+'_h5parm', direction=self.direction,
             index=self.index, host_list=hosts)
 
