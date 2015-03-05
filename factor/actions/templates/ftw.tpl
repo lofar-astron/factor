@@ -4,9 +4,9 @@ import numpy
 import time
 
 # Set up custom ftw task
-!cp {{ task_xml_file }} .
-!cp {{ task_py_file }} .
-!buildmytasks
+os.system('cp {{ task_xml_file }} .')
+os.system('cp {{ task_py_file }} .')
+os.system('buildmytasks')
 execfile('mytasks.py')
 
 ms    = sys.argv[4]
