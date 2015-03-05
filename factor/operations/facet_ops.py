@@ -51,7 +51,7 @@ class FacetAddCal(Operation):
 
         if os.path.exists(self.statebasename+'.done'):
             shifted_data_mapfile = os.path.join(self.parset['dir_working'],
-                'datamaps/FacetAddCal/PhaseShift/facet_output_{0}.datamap'.
+                'datamaps/FacetAddCal/PhaseShift/{0}/facet_output_{0}.datamap'.
                 format(d.name))
             files = read_mapfile(shifted_data_mapfile)
             for band, f in zip(bands, files):
@@ -125,7 +125,7 @@ class FacetSetup(Operation):
         for i, d in enumerate(d_list):
             if os.path.exists(self.statebasename[i]+'.done'):
                 concat_data_mapfile = os.path.join(self.parset['dir_working'],
-                    'datamaps/FacetSetup/Concatenate/facet_bands_output_{0}.datamap'.
+                    'datamaps/FacetSetup/Concatenate/{0}/facet_bands_output_{0}.datamap'.
                     format(d.name))
                 file = read_mapfile(concat_data_mapfile)[0]
                 d.concat_file = file
@@ -219,7 +219,7 @@ class FacetSelfcal(Operation):
         for i, d in enumerate(d_list):
             if os.path.exists(self.statebasename[i]+'.done'):
                 final_parmdb_datamap = os.path.join(self.parset['dir_working'],
-                    'datamaps/FacetSelfcal/merged_parmdb_final_{0}.datamap'.
+                    'datamaps/FacetSelfcal/{0}/merged_parmdb_final_{0}.datamap'.
                     format(d.name))
                 file = read_mapfile(final_parmdb_datamap)[0]
                 d.dirdepparmdb = file
@@ -806,7 +806,7 @@ class FacetAddAll(Operation):
         # Check state
         if os.path.exists(self.statebasename+'.done'):
             shifted_data_mapfile = os.path.join(self.parset['dir_working'],
-                'datamaps/FacetAddAll/PhaseShift/facet_output_{0}.datamap'.
+                'datamaps/FacetAddAll/PhaseShift/{0}/facet_output_{0}.datamap'.
                 format(d.name))
             d.shifted_data_files = read_mapfile(shifted_data_mapfile)
             return
@@ -877,7 +877,7 @@ class FacetImage(Operation):
         for i, d in enumerate(d_list):
             if os.path.exists(self.statebasename[i]+'.done'):
                 model_mapfile = os.path.join(self.parset['dir_working'],
-                'datamaps/FacetImage/final_model_{0}.datamap'.
+                'datamaps/FacetImage/{0}/final_model_{0}.datamap'.
                 format(d.name))
                 file = read_mapfile(model_mapfile)[0]
                 d.skymodel_dirdep = file
