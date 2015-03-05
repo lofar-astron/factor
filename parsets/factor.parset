@@ -9,6 +9,10 @@ lofarpythonpath = /lofar/build/gnu_opt/installed/lib/python2.7/dist-packages
 # Generic pipeline root directory
 piperoot = /path/to/genericpipe/dir
 
+# Full path to the cluster description file. If not given, the clusterdesc file
+# for a single (i.e., local) node is used
+clusterdesc = /path/to/clusterdesc
+
 # Full path to working dir - other paths are relative to this
 dir_working = /data/wdir
 

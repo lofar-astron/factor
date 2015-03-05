@@ -10,7 +10,7 @@ task_files = [%(lofarroot)s/share/pipeline/tasks.cfg, {{ piperoot }}/tasks.cfg]
 job_directory = %(runtime_directory)s/%(job_name)s
 
 [cluster]
-clusterdesc = %(lofarroot)s/share/local.clusterdesc
+clusterdesc = {{ clusterdesc }}
 
 [deploy]
 engine_ppath = %(pythonpath)s:%(pyraproot)s/lib:/opt/cep/pythonlibs/lib/python/site-packages
@@ -19,8 +19,3 @@ engine_lpath = %(lofarroot)s/lib:%(casaroot)s/lib:%(pyraproot)s/lib:%(hdf5root)s
 [logging]
 log_file = %(runtime_directory)s/%(job_name)s/logs/%(start_time)s/pipeline.log
 xml_stat_file = %(runtime_directory)s/%(job_name)s/logs/%(start_time)s/statistics.xml
-
-[remote]
-method = local
-max_per_node = {{ ncpu }}
-

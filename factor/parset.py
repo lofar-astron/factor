@@ -56,7 +56,7 @@ def parset_read(parset_file):
     parset_dict['mss'] = glob.glob(parset_dict['dir_ms']+'/*[MS|ms]')
     log.info("Working on %i bands" % (len(parset_dict['mss'])))
 
-    # some check on types
+    # some check on types and defaults
     if 'ndir' in parset_dict:
         parset_dict['ndir'] = parset.getint('global', 'ndir')
         log.debug("Processing up to %s directions in total" % (parset_dict['ndir']))
@@ -126,6 +126,7 @@ def parset_read(parset_file):
             log.critical("The LOFAR Python root directory cannot be determined. "
                 "Please specify it in the parset")
             sys.exit(1)
-
+    if 'clusterdesc' not in parset_dict:
+        parset_dict'clusterdesc'[] = '%(lofarroot)s/share/local.clusterdesc'
 
     return parset_dict
