@@ -137,7 +137,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
         dir_fluxes_sorted = dir_fluxes.tolist()
         dir_fluxes_sorted.sort(reverse=True)
         cut_jy = dir_fluxes_sorted[-1]
-        while len(dir_fluxes_sorted) > directions_total_num:
+        while len(dir_fluxes_sorted) > directions_max_num:
             cut_jy = dir_fluxes_sorted.pop() + 0.00001
         s.remove('I < {0} Jy'.format(cut_jy), aggregate='sum')
 
