@@ -115,8 +115,7 @@ if __name__=='__main__':
     if directions is None:
         # Make directions from dir-indep sky models using flux and size parameters
         logging.info("No directions file given. Selecting directions internally...")
-        parset['directions_file'] =
-        	factor.directions.make_directions_file_from_skymodel(bands,
+        parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(bands,
         	parset['directions_flux_min_jy'],
         	parset['directions_size_max_arcmin'],
         	parset['directions_separation_max_arcmin'],
