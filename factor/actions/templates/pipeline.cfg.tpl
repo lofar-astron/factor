@@ -19,3 +19,5 @@ engine_lpath = %(lofarroot)s/lib:%(casaroot)s/lib:%(pyraproot)s/lib:%(hdf5root)s
 [logging]
 log_file = %(runtime_directory)s/%(job_name)s/logs/%(start_time)s/pipeline.log
 xml_stat_file = %(runtime_directory)s/%(job_name)s/logs/%(start_time)s/statistics.xml
+
+{{ remote }}

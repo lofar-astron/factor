@@ -7,7 +7,7 @@ from lofarpipe.support.data_map import DataMap, DataProduct
 
 def write_mapfile(data_list, op_name, action_name=None, prefix=None,
     direction=None, index=None, working_dir='.', flag_list=None,
-    use_abs_path=True):
+    use_abs_path=True, host='localhost'):
     """
     Returns a datamap for the input data list
     """
@@ -23,7 +23,7 @@ def write_mapfile(data_list, op_name, action_name=None, prefix=None,
     if flag_list is None:
         flag_list = [False] * len(data_list)
     for data, flag in zip(data_list, flag_list):
-        datamap.data.append(DataProduct('localhost', data, flag))
+        datamap.data.append(DataProduct(host, data, flag))
         datamap.save(mapfile)
 
     return mapfile

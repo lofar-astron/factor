@@ -124,16 +124,6 @@ class MakeSkymodelFromModelImage(Action):
             f.write(tmp)
 
 
-    def make_pipeline_config_parset(self):
-        """
-        Writes the pipeline configuration parset
-        """
-        template = env.get_template('pipeline.cfg.tpl')
-        tmp = template.render(self.op_parset)
-        with open(self.pipeline_config_file, 'w') as f:
-            f.write(tmp)
-
-
     def get_results(self):
         """
         Return skymodel names.
@@ -243,16 +233,6 @@ class MakeFacetSkymodel(Action):
         template = env.get_template('make_facet_skymodel.tpl')
         tmp = template.render(self.p)
         with open(self.script_file, 'w') as f:
-            f.write(tmp)
-
-
-    def make_pipeline_config_parset(self):
-        """
-        Writes the pipeline configuration parset
-        """
-        template = env.get_template('pipeline.cfg.tpl')
-        tmp = template.render(self.op_parset)
-        with open(self.pipeline_config_file, 'w') as f:
             f.write(tmp)
 
 
@@ -370,16 +350,6 @@ class MergeSkymodels(Action):
             f.write(tmp)
 
 
-    def make_pipeline_config_parset(self):
-        """
-        Writes the pipeline configuration parset
-        """
-        template = env.get_template('pipeline.cfg.tpl')
-        tmp = template.render(self.op_parset)
-        with open(self.pipeline_config_file, 'w') as f:
-            f.write(tmp)
-
-
     def get_results(self):
         """
         Return skymodel names
@@ -485,16 +455,6 @@ class FFT(Action):
         template = env.get_template('ftw.tpl')
         tmp = template.render(self.p)
         with open(self.script_file, 'w') as f:
-            f.write(tmp)
-
-
-    def make_pipeline_config_parset(self):
-        """
-        Writes the pipeline configuration parset
-        """
-        template = env.get_template('pipeline.cfg.tpl')
-        tmp = template.render(self.op_parset)
-        with open(self.pipeline_config_file, 'w') as f:
             f.write(tmp)
 
 

@@ -115,9 +115,19 @@ class Action(object):
 
     def make_pipeline_config_parset(self):
         """
-        Writes the pipeline configuration parset (specific to given action)
+        Writes the pipeline configuration parset
         """
-        raise NotImplementedError
+        if os.path.basename(self.op_parset['clusterdesc']) == 'local.clusterdesc':
+            self.op_parset['remote'] = '[remote]\n'\
+                + 'method = local\n'\
+                + 'max_per_node = {0}\n'.format(self.op_parset['ncpu'])
+        else:
+            self.op_parset['remote'] = ''
+
+        template = env.get_template('pipeline.cfg.tpl')
+        tmp = template.render(self.op_parset)
+        with open(self.pipeline_config_file, 'w') as f:
+            f.write(tmp)
 
 
     def run(self):
