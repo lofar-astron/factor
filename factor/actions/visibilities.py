@@ -104,7 +104,7 @@ class DPPP(Action):
             output_files = [self.working_dir + os.path.splitext(os.path.basename(ms))[0]
                 + '_{0}.ms'.format(self.name.lower())]
 
-        self.p['output_datamap'] = write_mapfile(output_files,
+        self.p['output_datamap'] = self.write_mapfile(output_files,
             prefix=self.prefix+'_output', direction=self.direction,
             index=self.index, host_list=hosts)
 
