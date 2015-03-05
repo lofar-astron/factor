@@ -44,8 +44,9 @@ ndir_parallel = 4
 # Maximum number of CPUs per node to use
 ncpu = 6
 
-# Full path to cluster description file
-clusterdesc_file = /lofar/build/gnu_opt/installed/share/my.clusterdesc
+# Full path to cluster description file. Use clusterdesc_file = PBS to use
+# the PBS / torque reserved nodes
+clusterdesc_file = PBS
 
 # Interactive?
 interactive = False
