@@ -74,7 +74,7 @@ class Operation(object):
             self.log.info('<-- Operation %s started (direction(s): %s)' % (self.name, dirstr))
 
 
-    def write_datamap(self, data_list, prefix=None, direction=None, index=None,
+    def write_mapfile(self, data_list, prefix=None, direction=None, index=None,
         host_list=None):
         """
         Write operation datamap
