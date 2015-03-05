@@ -513,17 +513,12 @@ class FacetSelfcal(Operation):
                 self.name, prefix='chunk_parmdb_amp1_smoothed', working_dir=
                 self.parset['dir_working'], direction=d_list[i]))
         actions = [Apply(self.parset, dm, p['apply_amp2'],
-            pm, prefix='facet_amp', direction=d, index=2) for d, dm, pm in
+            pm, prefix='facet_amp', direction=d, index=3) for d, dm, pm in
             zip(d_list, chunk_data_mapfiles,
             chunk_parmdb_phaseamp_amp1_mapfiles)]
         self.s.run(actions)
 
         self.log.info('Solving for amplitude solutions (#2)...')
-        p_list = []
-        for d in d_list:
-            p_d = p['solve_phaseamp2_phaseonly'].copy()
-            p_d['timestep'] = d.solint_p
-            p_list.append(p_d)
         chunk_parmdb_phaseamp_phase2_mapfiles = []
         chunk_parmdb_phaseamp_amp2_mapfiles = []
         chunk_model_mapfiles = []
@@ -554,6 +549,11 @@ class FacetSelfcal(Operation):
             	chunk_data_mapfiles, chunk_model_mapfiles)]
             self.s.run(actions)
 
+        p_list = []
+        for d in d_list:
+            p_d = p['solve_phaseamp2_phaseonly'].copy()
+            p_d['timestep'] = d.solint_p
+            p_list.append(p_d)
         actions = [Solve(self.parset, dm, pd, model_datamap=mm,
             parmdb_datamap=pm, prefix='facet_phaseonly', direction=d, index=3)
             for d, dm, pd, mm, pm in zip(d_list, chunk_data_mapfiles, p_list,
@@ -585,7 +585,7 @@ class FacetSelfcal(Operation):
             concat_file = read_mapfile(merged_data_mapfiles[i])
             merged_parmdb_phaseamp_amp2_mapfiles.append(write_mapfile(
             	[self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp2 for
-            	chunk in chunks], concat_file, prefix='merged_parmdb_amps2')],
+            	chunk in chunks], concat_file, prefix='merged_amps2')],
             	self.name, prefix='merged_amps2',
             	working_dir=self.parset['dir_working'], direction=d_list[i]))
         merged_parmdb_phaseamp_phase2_mapfiles = []
@@ -594,7 +594,7 @@ class FacetSelfcal(Operation):
             merged_parmdb_phaseamp_phase2_mapfiles.append(write_mapfile(
             	[self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_phase2 for
             	chunk in chunks], concat_file,
-            	prefix='merged_parmdb_phases2')], self.name,
+            	prefix='merged_phases2')], self.name,
             	prefix='merged_phases2',
             	working_dir=self.parset['dir_working'], direction=d_list[i]))
 
@@ -607,7 +607,7 @@ class FacetSelfcal(Operation):
 
         self.log.info('Applying amplitude solutions...')
         actions = [Apply(self.parset, dm, p['apply_amp3'],
-            pm, prefix='facet_amp', direction=d, index=3) for d, dm, pm in
+            pm, prefix='facet_amp', direction=d, index=4) for d, dm, pm in
             zip(d_list, merged_data_mapfiles,
             merged_parmdb_phaseamp_amp2_mapfiles)]
         self.s.run(actions)
@@ -648,7 +648,7 @@ class FacetSelfcal(Operation):
             concat_file = read_mapfile(merged_data_mapfiles[i])[0]
             merged_parmdb_final_mapfiles.append(write_mapfile(
                 [self.merge_parmdbs(phases2_final, smoothed_amps1_final, smoothed_amps2_final,
-                concat_file)], self.name, prefix='merged_parmdb_final',
+                concat_file)], self.name, prefix='merged_amps_phases_final',
                 working_dir=self.parset['dir_working'], direction=d))
 
         self.log.info('Smoothing amplitude solutions...')
@@ -889,7 +889,7 @@ class FacetImage(Operation):
             	working_dir=self.parset['dir_working']))
             dir_dep_parmdbs_mapfiles.append(write_mapfile([d.
             	dirdepparmdb]*len(bands), self.name,
-            	prefix='dir_indep_parmdbs',
+            	prefix='dir_dep_parmdbs',
             	working_dir=self.parset['dir_working']))
 
         self.log.info('Applying direction-dependent calibration...')
@@ -900,12 +900,12 @@ class FacetImage(Operation):
 
         self.log.info('Averaging DATA...')
         actions = [Average(self.parset, m, p['avg'], prefix='facet',
-            direction=d, index=1) for d, m in zip(d_list, shifted_data_mapfiles)]
+            direction=d) for d, m in zip(d_list, shifted_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.info('Concatenating bands...')
         actions = [Concatenate(self.parset, m, p['concat'],
-            prefix='facet_bands', direction=d, index=0) for d, m in zip(d_list,
+            prefix='facet_bands', direction=d) for d, m in zip(d_list,
             avg_data_mapfiles)]
         concat_data_mapfiles = self.s.run(actions)
 
