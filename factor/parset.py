@@ -127,6 +127,6 @@ def parset_read(parset_file):
                 "Please specify it in the parset")
             sys.exit(1)
     if 'clusterdesc' not in parset_dict:
-        parset_dict['clusterdesc'] = '%(lofarroot)s/share/local.clusterdesc'
+        parset_dict['clusterdesc'] = parset_dict['lofarroot'] + '/share/local.clusterdesc'
 
     return parset_dict
