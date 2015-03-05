@@ -419,8 +419,8 @@ class FFT(Action):
 
         # Define script and task files
         self.script_file = self.parsetbasename + 'ftw.py'
-        self.task_xml_file = self.parsetbasename + 'ftw.xml'
-        self.task_py_file = self.parsetbasename + 'task_ftw.py'
+        self.task_xml_file = os.path.join(self.parset_dir, 'ftw.xml')
+        self.task_py_file = os.path.join(self.parset_dir, 'task_ftw.py')
 
 
     def make_datamaps(self):
