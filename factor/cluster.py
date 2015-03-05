@@ -30,7 +30,7 @@ def make_pbs_clusterdesc(node_local_disk='/tmp'):
     lines = ['# Clusterdesc file to do parallel processing with PBS / torque\n\n']
     lines.append('ClusterName = PBS\n\n')
     lines.append('# Compute nodes\n')
-    lines.append('Compute.Nodes = [{0}]\n'.format(', '.join(nodes))
+    lines.append('Compute.Nodes = [{0}]\n'.format(', '.join(nodes)))
     lines.append('Compute.LocalDisks = [{0}]\n'.format(node_local_disk))
 
     clusterdesc_file = 'factor.clusterdesc'
