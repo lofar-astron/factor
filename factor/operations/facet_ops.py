@@ -122,7 +122,7 @@ class FacetSetup(Operation):
         for i, d in enumerate(d_list):
             if os.path.exists(self.statebasename[i]+'.done'):
                 concat_data_mapfile = os.path.join(self.parset['dir_working'],
-                    'datamaps/FacetSetup/Concatenate/{0}/facet_bands_output_{0}.datamap'.
+                    'datamaps/FacetSetup/Concatenate/{0}/facet_bands_output_{0}-1.datamap'.
                     format(d.name))
                 file, _ = read_mapfile(concat_data_mapfile)[0]
                 d.concat_file = file
