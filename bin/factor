@@ -100,7 +100,8 @@ if __name__=='__main__':
 
     # Get nodes from cluster description
     if parset['clusterdesc'].lower() == 'pbs':
-        parset['clusterdesc'] = factor.cluster.make_pbs_clusterdesc(node_local_disk)
+        parset['clusterdesc'] = factor.cluster.make_pbs_clusterdesc(
+            parset['node_local_disk'])
     if not 'node_list' in parset:
         parset['node_list'] = factor.cluster.get_compute_nodes(parset['clusterdesc'])
 
