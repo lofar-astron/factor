@@ -90,6 +90,11 @@ class BBS(Action):
             self.working_dir += '{0}/'.format(self.direction.name)
         if not os.path.exists(self.working_dir):
             os.makedirs(self.working_dir)
+        self.model_dir += '{0}/{1}/'.format(self.op_name, self.name)
+        if self.direction is not None:
+            self.model_dir += '{0}/'.format(self.direction.name)
+        if not os.path.exists(self.model_dir):
+            os.makedirs(self.model_dir)
 
         # Define parset name
         self.parset_file = self.parsetbasename + '.parset'
@@ -104,11 +109,23 @@ class BBS(Action):
         import copy
 
         self.p['vis_datamap'] = self.vis_datamap
-        if self.model_datamap is not None:
-            self.p['skymodel_datamap'] = self.model_datamap
+        vis_files, vis_hosts = read_mapfile(self.vis_datamap)
+
+        if self.model_datamap is None:
+            emptyskymodel_list = []
+            for v in vis_files:
+                sm = os.path.join(self.model_dir, v+'.emptyskymodel')
+                if not os.path.exists(sm):
+                    os.system('touch {0}'.format(sm))
+                emptyskymodel_list.append(sm)
+            self.model_datamap = self.write_mapfile(emptyskymodel_list,
+                prefix=self.prefix+'_empty_skymodels', index=self.index,
+                host_list=vis_hosts)
+        self.p['skymodel_datamap'] = self.model_datamap
+
         if self.parmdb_datamap is not None:
             self.p['parmdb_datamap'] = self.parmdb_datamap
-        vis_files, vis_hosts = read_mapfile(self.vis_datamap)
+
         local_parmdb_files = [os.path.join(v, 'instrument') for v in vis_files]
         self.local_parmdb_datamap = self.write_mapfile(local_parmdb_files,
         	prefix=self.prefix+'_local_parmdbs', index=self.index,
