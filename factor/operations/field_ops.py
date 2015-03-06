@@ -27,8 +27,8 @@ class InitSubtract(Operation):
         Run the steps for this operation
         """
         from factor.actions.images import MakeImage
-        from factor.actions.models import MakeSkymodelFromModelImage, MergeSkymodels
-        from factor.actions.calibrations import Subtract, FFT
+        from factor.actions.models import MakeSkymodelFromModelImage, MergeSkymodels, FFT
+        from factor.actions.calibrations import Subtract
         from factor.actions.visibilities import Average
         from factor.lib.datamap_lib import read_mapfile
 #         from factor.operations.hardcoded_param import init_subtract as p
