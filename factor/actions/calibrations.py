@@ -151,6 +151,8 @@ class BBS(Action):
         """
         Writes the pipeline control parset and any script files
         """
+        if 'ncpu' not in self.p:
+            self.p['ncpu'] = self.max_cpu
         self.p['outputdir'] = self.working_dir
         self.p['lofarroot'] = self.op_parset['lofarroot']
         self.p['parset'] = self.parset_file
@@ -160,10 +162,8 @@ class BBS(Action):
             self.p['sources'] = '@MODEL_DATA'
         else:
             self.p['sources'] = ''
-        if self.model_datamap is not None:
-            template = env.get_template('bbs.pipeline.parset.tpl')
-        else:
-            template = env.get_template('bbs_nomodel.pipeline.parset.tpl')
+
+        template = env.get_template('bbs.pipeline.parset.tpl')
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)

@@ -111,6 +111,9 @@ class MakeSkymodelFromModelImage(Action):
         """
         Writes the pipeline control parset and any script files
         """
+        if 'ncpu' not in self.p:
+            self.p['ncpu'] = self.max_cpu
+
         self.p['scriptname'] = os.path.abspath(self.script_file)
         self.p['outputdir'] = os.path.abspath(self.working_dir)
         template = env.get_template('make_skymodel_from_model_image.pipeline.parset.tpl')
@@ -219,6 +222,8 @@ class MakeFacetSkymodel(Action):
         """
         Writes the pipeline control parset and any script files
         """
+        if 'ncpu' not in self.p:
+            self.p['ncpu'] = self.max_cpu
         self.p['scriptname'] = os.path.abspath(self.script_file)
         self.p['cal_only'] = self.cal_only
         self.p['vertices'] = self.direction.vertices
@@ -339,6 +344,8 @@ class MergeSkymodels(Action):
         """
         Writes the pipeline control parset and any script files
         """
+        if 'ncpu' not in self.p:
+            self.p['ncpu'] = self.max_cpu
         self.p['mergescriptname'] = os.path.abspath(self.script_file)
         template = env.get_template('merge_skymodels.pipeline.parset.tpl')
         tmp = template.render(self.p)
@@ -434,6 +441,9 @@ class FFT(Action):
         """
         Writes the pipeline control parset and any script files
         """
+        if 'ncpu' not in self.p:
+            self.p['ncpu'] = self.max_cpu
+
         self.p['scriptname'] = os.path.abspath(self.script_file)
         template = env.get_template('fft.pipeline.parset.tpl')
         tmp = template.render(self.p)

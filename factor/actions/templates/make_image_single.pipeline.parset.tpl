@@ -6,6 +6,7 @@ casapy1.control.opts.mapfile_in={{ vis_datamap_image1 }}
 casapy1.control.opts.inputkey=clean.vis
 casapy1.control.opts.outputkey=clean.imagename
 casapy1.control.opts.arguments=[--nologger,--log2term,--nogui,-c]
+casapy1.control.opts.max_per_node=1
 casapy1.parsetarg.clean.gridmode='widefield'
 casapy1.parsetarg.clean.wprojplanes={{ wplanes }}
 casapy1.parsetarg.clean.selectdata=True

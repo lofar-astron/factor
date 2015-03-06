@@ -187,6 +187,9 @@ class Casapy(Action):
         """
         from factor.lib.datamap_lib import read_mapfile
 
+        if 'ncpu' not in self.p:
+            self.p['ncpu'] = self.max_cpu
+
         self.p['maskscriptname'] = os.path.abspath(self.mask_script_file)
         if self.image_twice:
             if self.mask_datamap is not None:

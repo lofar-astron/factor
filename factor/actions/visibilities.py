@@ -113,6 +113,8 @@ class DPPP(Action):
         """
         Writes the pipeline control parset and any script files
         """
+        if 'ncpu' not in self.p:
+            self.p['ncpu'] = self.max_cpu
         self.p['lofarroot'] = self.op_parset['lofarroot']
 
         template = env.get_template('{0}.pipeline.parset.tpl'.format(self.name.lower()))

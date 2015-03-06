@@ -39,9 +39,10 @@ class Action(object):
         self.prefix = prefix
         self.direction = direction
         self.index = index
-        factor_working_dir = op_parset['dir_working']
+        self.max_cpu = self.op_parset['ncpu']
 
         # Set up directories needed by every action
+        factor_working_dir = op_parset['dir_working']
         self.vis_dir = '{0}/visdata/'.format(factor_working_dir)
         self.image_dir = '{0}/images/'.format(factor_working_dir)
         self.model_dir = '{0}/models/'.format(factor_working_dir)

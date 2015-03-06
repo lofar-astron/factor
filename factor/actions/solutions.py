@@ -114,6 +114,8 @@ class Losoto(Action):
         """
         from distutils import spawn
 
+        if 'ncpu' not in self.p:
+            self.p['ncpu'] = self.max_cpu
         self.p['lofarroot'] = self.op_parset['lofarroot']
         self.p['parset'] = self.parset_file
 
