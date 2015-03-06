@@ -300,7 +300,9 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             chunk_data_mapfiles.append(self.write_mapfile([chunk.file for chunk in chunks],
                 prefix='chunks_vis', direction=d_list[i], host_list=d_hosts[i]))
-            if not self.parset['use_ftw']:
+            if self.parset['use_ftw']:
+                chunk_model_mapfiles.append(None)
+            else:
                 skymodel0, _ = read_mapfile(skymodels0_mapfiles[i])
                 chunk_model_mapfiles.append(self.write_mapfile(skymodel0*len(chunks),
                     prefix='chunks_skymodel0', direction=d_list[i],
@@ -362,7 +364,9 @@ class FacetSelfcal(Operation):
         chunk_parmdb_mapfiles = []
         chunk_model_mapfiles = []
         for i, chunks in enumerate(chunks_list):
-            if not self.parset['use_ftw']:
+            if self.parset['use_ftw']:
+                chunk_model_mapfiles.append(None)
+            else:
                 skymodel1, _ = read_mapfile(skymodels1_mapfiles[i])
                 chunk_model_mapfiles.append(self.write_mapfile(skymodel1*len(chunks),
                     prefix='chunks_skymodel1', direction=d_list[i],
@@ -424,7 +428,9 @@ class FacetSelfcal(Operation):
         chunk_parmdb_phaseamp_amp1_mapfiles = []
         chunk_model_mapfiles = []
         for i, chunks in enumerate(chunks_list):
-            if not self.parset['use_ftw']:
+            if self.parset['use_ftw']:
+                chunk_model_mapfiles.append(None)
+            else:
                 skymodel2, _ = read_mapfile(skymodels2_mapfiles[i])
                 chunk_model_mapfiles.append(self.write_mapfile(skymodel2*len(chunks),
                     prefix='chunks_skymodel2', direction=d_list[i],
@@ -546,7 +552,9 @@ class FacetSelfcal(Operation):
         chunk_parmdb_phaseamp_amp2_mapfiles = []
         chunk_model_mapfiles = []
         for i, chunks in enumerate(chunks_list):
-            if not self.parset['use_ftw']:
+            if self.parset['use_ftw']:
+                chunk_model_mapfiles.append(None)
+            else:
                 skymodel3, _ = read_mapfile(skymodels3_mapfiles[i])
                 chunk_model_mapfiles.append(self.write_mapfile(skymodel3*len(chunks),
                     prefix='chunks_skymodel3', direction=d_list[i],
@@ -987,12 +995,18 @@ class FacetSubAll(Operation):
 
         # Make initial data maps for the empty datasets, their dir-dep
         # instrument parmdbs, and their dir-dep sky models
+        if self.parset['use_ftw']:
+            # Copy the model image for each band to avoid conflicts
+            dir_dep_models_mapfile = self.copy_model_images(d.skymodel_dirdep,
+                bands)
+        else:
+            dir_dep_models_mapfile = self.write_mapfile([d.skymodel_dirdep]*len(bands),
+                prefix='dir_dep_skymodels', direction=d)
+
         subtracted_all_mapfile = self.write_mapfile([band.file for band in bands],
         	prefix='subtracted_all', direction=d)
         dir_dep_parmdbs_mapfile = self.write_mapfile([d.dirdepparmdb]*len(bands),
             prefix='dir_dep_parmdbs', direction=d)
-        dir_dep_models_mapfile = self.write_mapfile([d.skymodel_dirdep]*len(bands),
-            prefix='dir_dep_skymodels', direction=d)
 
         if self.parset['use_ftw']:
             self.log.debug('FFTing model image (facet model final)...')
@@ -1011,6 +1025,43 @@ class FacetSubAll(Operation):
         #    - selfcal images
         self.log.info('Cleaning up files for this direction...')
 #         os.system('rm -rf visdata/*{0}*'.format(d.name))
+
+
+    def copy_model_images(self, modelbasename, bands, direction=None):
+        """
+        Copies model images and returns the mapfile
+        """
+        inmodelimages = []
+        outmodelimages = []
+        outmodelbasenames = []
+
+        for i, band in enumerate(bands):
+            outmodelbasenames.append(modelbasename + '_band{0}'.format(i))
+            if self.parset['nterms'] == 1:
+                inmodelimages.append([modelbasename + '.model'])
+                outmodelimages.append([modelbasename + '_band{0}.model'.format(i)])
+            elif self.parset['nterms'] == 2:
+                inmodelimages.append([modelbasename + '.model.tt0',
+                    modelbasename + '.model.tt1'])
+                outmodelimages.append([modelbasename + '_band{0}.model.tt0'.format(i),
+                    modelbasename + '_band{0}.model.tt1'.format(i)])
+            else:
+                inmodelimages.append([modelbasename + '.model.tt0',
+                    modelbasename + '.model.tt1', modelbasename + '.model.tt2'])
+                outmodelimages.append([modelbasename + '_band{0}.model.tt0'.format(i),
+                    modelbasename + '_band{0}.model.tt1'.format(i),
+                    modelbasename + '_band{0}.model.tt2'.format(i)])
+
+        for inmods, outmods in zip(inmodelimages, outmodelimages):
+            for inmod, outmod in zip(inmods, outmods):
+                if os.path.exists(outmod):
+                    os.system('rm -rf {0}'.format(outmod))
+                os.system('cp -r {0} {1}'.format(inmod, outmod))
+
+        outdatamap = self.write_mapfile(outmodelbasenames,
+                prefix='dir_dep_skymodels_perband', direction=direction)
+
+        return outdatamap
 
 
 class FacetAddAllFinal(Operation):
