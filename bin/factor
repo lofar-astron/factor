@@ -148,10 +148,16 @@ if __name__=='__main__':
             directions = directions[:parset['ndir']]
 
     # Group directions into groups that are processed in parallel
-    direction_groups = factor.directions.group_directions(directions)
+    if parset['ndir_parallel'] > 1:
+        one_at_a_time = False
+    else:
+        one_at_a_time = True
+    direction_groups = factor.directions.group_directions(directions, one_at_a_time)
 
     # Iterate over direction groups
     for direction_group in direction_groups:
+        log.info('Processing {0} direction(s) in parallel'.format(
+            len(direction_group)))
 
         # Add calibrator(s) to empty datasets. These operations
         # must be done in series
