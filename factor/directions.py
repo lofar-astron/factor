@@ -160,8 +160,8 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     return directions_file
 
 
-def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':5,
-    '2':0, '4':8, '8':20, '16':100}, allow_reordering=True):
+def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
+    '2':2, '4':8, '8':20, '16':100}, allow_reordering=True):
     """
     Sorts directions into groups that can be selfcaled simultaneously
 
