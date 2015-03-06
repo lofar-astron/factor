@@ -1,0 +1,260 @@
+\documentclass[structabstract]{article}
+\usepackage[varg]{txfonts}
+% include packages
+%\usepackage[dvips]{graphicx}
+\usepackage{url}
+\usepackage[breaklinks=true]{hyperref}
+\usepackage{twoopt}
+\usepackage{natbib}
+\bibpunct{(}{)}{;}{a}{}{,}%% natbib format for A&A and ApJ
+\usepackage{ctable}
+\usepackage{multirow}
+\usepackage[farskip=0pt]{subfig}
+
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{9in}
+\setlength{\topmargin}{-0.0625in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+\setlength{\hoffset}{0in}
+\setlength{\voffset}{0in}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%CUTCUTCUT
+
+%\svnInfo $Id: bbs.tex 12951 2014-03-08 18:40:31Z dijkema $
+\section[Factor: Facet Calibration for LOFAR]{Factor: Facet Calibration for
+LOFAR\footnote{This section is maintained by David Rafferty
+({\tt drafferty@hs.uni-hamburg.de}).}}
+\label{factor}
+
+Factor is a Python package which allows for the production of wide-field HBA
+LOFAR images. Note that Factor is still in beta. Please report bugs to
+drafferty@hs.uni-hamburg.de. To initialize your environment for Factor, users on
+CEP2 and CEP3 should run the following commands:
+\begin{verbatim}
+use LofIm
+source ~rafferty/init_factor
+use Casa
+use Pythonlibs
+\end{verbatim}
+
+%-----------------------------------------------------------
+\subsection{Usage}
+\label{factor:usage}
+
+Factor can be run from the command-line as follows:
+\begin{verbatim}
+Usage: factor <parset>
+Options:
+  --version   show program's version number and exit
+  -h, --help  show this help message and exit
+  -v          Verbose
+\end{verbatim}
+The parset specifies the parameters of the run. These are described in the next
+sections.
+
+%-----------------------------------------------------------
+\subsection{Parset}
+\label{factor:parset}
+
+This is an example parset that shows the available parameters:
+\begin{verbatim}
+[global]
+# LOFAR installation root directories. If not given, they will be determined
+# from the environment
+lofarroot = /lofar/build/gnu_opt/installed
+lofarpythonpath = /lofar/build/gnu_opt/installed/lib/python2.7/dist-packages
+
+# Full path to Generic Pipeline root directory
+piperoot = /path/to/genericpipe/dir
+
+# Full path to the cluster description file. If not given, the clusterdesc file
+# for a single (i.e., local) node is used
+clusterdesc = /path/to/clusterdesc
+
+# Full path to working dir - other paths are relative to this
+dir_working = /data/wdir
+
+# Full path to directory containing selfcaled bands, will be scanned for all .MS
+# and .ms files
+dir_ms = /data/bands
+
+# Parmdb name for dir-indep. selfcal solutions (stored inside the input
+# band measurement sets, so path should be relative to those)
+parmdb_name = instrument_ap_smoothed
+
+# Full path to file containing calibrator directions. If not given, directions
+# are selected internally using the flux and size cuts below (min flux, max size
+# of a source, and max separation between sources below which they are grouped
+# into one direction). The number of internally derived directions can be
+# limited to a maximum number of directions if desired.
+directions_file = /data/directions.txt
+directions_flux_min_Jy = 0.1
+directions_size_max_arcmin = 3.0
+directions_separation_max_arcmin = 6.0
+directions_max_num = 50
+
+# Maximum number of directions to process (default = all)
+ndir = 10
+
+# Maximum number of directions to process in parallel (default = 1)
+ndir_parallel = 4
+
+# Maximum number of CPUs per node to use (default = all)
+ncpu = 6
+
+# Full path to cluster description file. Use clusterdesc_file = PBS to use
+# the PBS / torque reserved nodes. Set distribute to True if the cluster
+# has a distributed file system. Set to False if the cluster has a shared
+# file system (the default)
+clusterdesc_file = PBS
+distribute = False (default = False)
+
+# Use interactive mode (default = False)
+interactive = False
+
+# Use ftw to FFT model image instead of BBS predict (default = True)
+use_ftw = True
+
+# Make final mosaic (default = True)
+make_mosaic = False
+
+# MS-specific parameters
+[ms1.ms]
+init_skymodel = /data/ms1strangename.sky
+param1 = 123
+param2 = 123
+
+[ms2.ms]
+init_skymodel = /data/ms2strangename.sky
+param1 = 123
+param2 = 123
+\end{verbatim}
+
+%-----------------------------------------------------------
+\subsection{Directions}
+\label{factor:directions
+
+The directions for which DDE calibration is performed can be selected automatically
+by factor or specified in a file. The format of the file is as follows:
+
+\begin{verbatim}
+# This is an example directions file for Factor.
+#
+# Directions should be sorted in order of reduction (e.g., bright to faint).
+#
+# Columns are defined as follows (in [] are optional parameters with their default values):
+# Name (str), RA (float), DEC (float), [regionfile (str, default='')],
+# [multiscale (bool, default=True)], [solint_amp (int, default=600)],
+# [solint_ph (int, default=5)], [make_final_image (bool, default=True)],
+# [cal_radius (float arcmin, default=3.0)]
+
+calibrator_1, 111.11, 22.22, , , , , ,
+calibrator_2, 222.22, 33.33, reg/cal2.reg, True, 600, 5, False, 4.5
+calibrator_3, 333.33, 44.44, , True, 600, 5, ,
+\end{verbatim}
+
+
+%-----------------------------------------------------------
+\subsection{Parallelization}
+\label{factor:parallel}
+
+Factor has been designed to run as much as possible in a parallel manner. To this
+end, support is present for distributing the reduction over nodes of a compute
+cluster and over the processors of a single computer.
+
+To use Factor on a single computer, no setup is necessary. To use factor on
+multiple nodes of a compute cluster, the required setup depends on the cluster
+layout (distributed vs. shared file system) and scheduling system (if any).
+
+\subsubsection{Torque / PBS scheduler}
+For use on a compute cluster that uses torque and PBS, set 'clusterdesc = PBS'.
+Factor will then automatically determine the nodes for which you have a PBS
+reservation and use them.
+
+\subsubsection{Shared file system}
+Factor works by default on a compute cluster with a shared file system.
+
+\subsubsection{Distributed file system}
+For use on a cluster with a distributed file system (such as CEP2 and CEP3), set
+'distribute = True'. Factor will then synchronize files between the available
+nodes. Note that all data will be mirrored on each node, so all nodes should
+have sufficient disk space. Additionally, the local disks must have the same
+name on each node.
+
+%-----------------------------------------------------------
+\subsection{Example Reduction}
+\label{factor:example}
+
+A example reduction is shown below:
+
+\begin{verbatim}
+$ factor factor.parset
+INFO - parset - Reading parset file: factor.parset
+INFO - parset - Working directory is Test_run
+INFO - parset - Working on 4 bands
+INFO - directions - Reading directions file: factor_directions.txt
+INFO - root - Sky models found for all MS files. Skipping initial subtraction operation.
+INFO - root - No directions file given. Selecting directions internally...
+INFO - LSMTool.Filter - Kept 138 patches.
+INFO - directions - Found 138 directions with fluxes above 0.2 Jy
+INFO - LSMTool.Filter - Kept 137 patches.
+INFO - directions - Found 137 directions with fluxes above 0.2 Jy and sizes below 3.0 arcmin
+INFO - directions - Merging directions within 6.0 arcmin of each other...
+INFO - LSMTool.Filter - Removed 34 patches.
+INFO - directions - Kept 100 directions in total
+INFO - directions - Writing directions file: factor_directions.txt
+INFO - directions - Reading directions file: factor_directions.txt
+INFO - FacetAddCal - <-- Operation FacetAddCal started (direction(s): mask_patch_497)
+INFO - FacetAddCal - Selecting sources for this direction...
+INFO - FacetAddCal - Adding sources for this direction...
+INFO - FacetAddCal - Phase shifting DATA...
+INFO - FacetAddCal - --> Operation FacetAddCal finished (direction(s): mask_patch_497)
+INFO - FacetSetup - <-- Operation FacetSetup started (direction(s): mask_patch_497)
+INFO - FacetSetup - Applying direction-independent calibration...
+INFO - FacetSetup - Averaging DATA...
+INFO - FacetSetup - Averaging CORRECTED_DATA...
+INFO - FacetSetup - Concatenating bands...
+INFO - FacetSetup - --> Operation FacetSetup finished (direction(s): mask_patch_497)
+INFO - FacetSelfcal - <-- Operation FacetSelfcal started (direction(s): mask_patch_497)
+INFO - FacetSelfcal - Imaging (facet image #0)...
+INFO - FacetSelfcal - FFTing model image (facet model #0)...
+INFO - FacetSelfcal - Solving for phase solutions and applying them (#1)...
+INFO - FacetSelfcal - Imaging (facet image #1)...
+INFO - FacetSelfcal - FFTing model image (facet model #1)...
+INFO - FacetSelfcal - Solving for phase solutions and applying them (#2)...
+INFO - FacetSelfcal - Imaging (facet image #2)...
+INFO - FacetSelfcal - FFTing model image (facet model #2)...
+INFO - FacetSelfcal - Solving for amplitude solutions and applying them (#1)...
+INFO - FacetSelfcal - Merging instrument parmdbs...
+INFO - FacetSelfcal - Smoothing amplitude solutions...
+INFO - FacetSelfcal - Applying amplitude solutions...
+INFO - FacetSelfcal - Imaging (facet image #3)...
+INFO - FacetSelfcal - FFTing model image (facet model #3)...
+INFO - FacetSelfcal - Preapplying amplitude solutions...
+INFO - FacetSelfcal - Solving for amplitude solutions (#2)...
+INFO - FacetSelfcal - Merging instrument parmdbs...
+INFO - FacetSelfcal - Smoothing amplitude solutions...
+INFO - FacetSelfcal - Applying amplitude solutions...
+INFO - FacetSelfcal - Imaging (facet image #4)...
+INFO - FacetSelfcal - Merging final instrument parmdbs...
+INFO - FacetSelfcal - Smoothing amplitude solutions...
+INFO - FacetSelfcal - --> Operation FacetSelfcal finished (direction(s): mask_patch_497)
+INFO - FacetAddAll - <-- Operation FacetAddAll started (direction(s): mask_patch_497)
+INFO - FacetAddAll - Selecting sources for this direction...
+INFO - FacetAddAll - Adding sources for this direction...
+INFO - FacetAddAll - Phase shifting DATA...
+INFO - FacetAddAll - --> Operation FacetAddAll finished (direction(s): mask_patch_497)
+INFO - FacetImage - <-- Operation FacetImage started (direction(s): mask_patch_497)
+INFO - FacetImage - Applying direction-dependent calibration...
+INFO - FacetImage - Averaging DATA...
+INFO - FacetImage - Concatenating bands...
+INFO - FacetImage - Imaging...
+\end{verbatim}
+
+
+\end{document}
