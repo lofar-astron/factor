@@ -658,14 +658,15 @@ class FacetSelfcal(Operation):
         self.log.info('Merging final instrument parmdbs...')
         merged_parmdb_final_mapfiles = []
         for i, d in enumerate(d_list):
-            phases2_final, _ = read_mapfile(merged_parmdb_phaseamp_phase2_mapfiles[i])[0]
-            smoothed_amps1_final, _ = read_mapfile(merged_parmdb_phaseamp_amp1_mapfiles[i])[0]
-            smoothed_amps2_final, _ = read_mapfile(merged_parmdb_phaseamp_amp2_mapfiles[i])[0]
-            concat_file, _ = read_mapfile(merged_data_mapfiles[i])[0]
+            phases2_final, _ = read_mapfile(merged_parmdb_phaseamp_phase2_mapfiles[i])
+            smoothed_amps1_final, _ = read_mapfile(merged_parmdb_phaseamp_amp1_mapfiles[i])
+            smoothed_amps2_final, _ = read_mapfile(merged_parmdb_phaseamp_amp2_mapfiles[i])
+            concat_file, _ = read_mapfile(merged_data_mapfiles[i])
             merged_parmdb_final_mapfiles.append(self.write_mapfile(
-                [self.merge_parmdbs(phases2_final, smoothed_amps1_final, smoothed_amps2_final,
-                concat_file)], prefix='merged_amps_phases_final',
-                direction=d, host_list=d_hosts[i]))
+            	[self.merge_parmdbs(phases2_final[0],
+            	smoothed_amps1_final[0], smoothed_amps2_final[0],
+            	concat_file[0])], prefix='merged_amps_phases_final',
+            	direction=d, host_list=d_hosts[i]))
 
         self.log.info('Smoothing amplitude solutions...')
         actions = [Smooth(self.parset, dm, p['smooth_amp3'], pm,
@@ -676,8 +677,8 @@ class FacetSelfcal(Operation):
 
         # Save files to the direction objects
         for d, m in zip(d_list, merged_parmdb_final_mapfiles):
-            f, _ = read_mapfile(m)[0]
-            d.dirdepparmdb = f
+            f, _ = read_mapfile(m)
+            d.dirdepparmdb = f[0]
 
 
     def merge_chunk_parmdbs(self, inparmdbs, concat_file, prefix='merged',
@@ -958,7 +959,8 @@ class FacetImage(Operation):
 
             # Save files to the direction objects
             for d, mf in zip(d_list, dir_dep_all_skymodels_mapfiles):
-                d.skymodel_dirdep, _ = read_mapfile(mf)[0]
+                file, _ = read_mapfile(mf)
+                d.skymodel_dirdep = file[0]
 
         # Make final data maps
         for d, h in zip(d_list, d_hosts):
