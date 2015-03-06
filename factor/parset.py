@@ -129,6 +129,6 @@ def parset_read(parset_file):
     if 'clusterdesc' not in parset_dict:
         parset_dict['clusterdesc'] = parset_dict['lofarroot'] + '/share/local.clusterdesc'
         parset_dict['node_list'] = ['localhost']
-        parset_dict['node_local_disk'] = '/tmp'
+    parset_dict['node_local_disk'] = '/tmp'
 
     return parset_dict
