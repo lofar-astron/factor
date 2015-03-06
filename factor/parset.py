@@ -130,5 +130,9 @@ def parset_read(parset_file):
         parset_dict['clusterdesc'] = parset_dict['lofarroot'] + '/share/local.clusterdesc'
         parset_dict['node_list'] = ['localhost']
     parset_dict['node_local_disk'] = '/tmp'
+    if 'distribute' in parset_dict:
+        parset_dict['distribute'] = parset.getboolean('global', 'distribute')
+    else:
+        parset_dict['distribute'] = False
 
     return parset_dict

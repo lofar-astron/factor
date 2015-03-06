@@ -5,6 +5,7 @@ Contains the master class for operations
 """
 import os
 import logging
+import socket
 from factor.lib.context import Timer
 from factor.lib.scheduler import Scheduler
 
@@ -41,6 +42,7 @@ class Operation(object):
         self.exit_on_error = True
         self.log = logging.getLogger(self.name)
         self.s = Scheduler(parset['ncpu'], name=name)
+        self.hostname = socket.gethostname()
 
         factor_working_dir = parset['dir_working']
         if self.direction is not None:
@@ -83,6 +85,10 @@ class Operation(object):
 
         if host_list is None:
             host_list = self.parset['node_list']
+
+        for data, host in zip(data_list, host_list):
+            if host != self.hostname and self.parset['distribute']:
+                os.system('rsync -az {0}/ {1}:{0}'.format(data, host))
 
         mapfile = write_mapfile(data_list, self.name, prefix=prefix,
                 direction=direction, index=index, host_list=host_list,

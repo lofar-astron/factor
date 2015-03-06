@@ -45,8 +45,11 @@ ndir_parallel = 4
 ncpu = 6
 
 # Full path to cluster description file. Use clusterdesc_file = PBS to use
-# the PBS / torque reserved nodes
+# the PBS / torque reserved nodes. Set distribute to True if the cluster
+# has a distributed file system. Set to False if the cluster has a shared
+# file system (the default)
 clusterdesc_file = PBS
+distribute = False
 
 # Interactive?
 interactive = False
