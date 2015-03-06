@@ -31,8 +31,7 @@ class InitSubtract(Operation):
         from factor.actions.calibrations import Subtract
         from factor.actions.visibilities import Average
         from factor.lib.datamap_lib import read_mapfile
-#         from factor.operations.hardcoded_param import init_subtract as p
-        from factor.operations.hardcoded_param import init_subtract_test as p
+        from factor.operations.hardcoded_param import init_subtract as p
         self.log.warn('Using test parameters')
 
         bands = self.bands
@@ -56,57 +55,57 @@ class InitSubtract(Operation):
         self.log.info('High-res imaging...')
         action = MakeImage(self.parset, subtracted_all_mapfile, p['imagerh'],
             prefix='highres')
-        highres_image_basenames_mapfile = action.run()
+        highres_image_basenames_mapfile = self.s.run(action)
 
         if self.parset['use_ftw']:
             self.log.debug('FFTing high-res model image...')
             action = FFT(self.parset, subtracted_all_mapfile,
                 highres_image_basenames_mapfile, p['modelh'], prefix='highres')
-            action.run()
+            self.s.run(action)
             highres_skymodels_mapfile = None
 
         self.log.info('Making high-res sky model...')
         action = MakeSkymodelFromModelImage(self.parset,
             highres_image_basenames_mapfile, p['modelh'], prefix='highres')
-        highres_skymodels_mapfile = action.run()
+        highres_skymodels_mapfile = self.s.run(action)
 
         self.log.info('Subtracting high-res sky model...')
         action = Subtract(self.parset, subtracted_all_mapfile, p['calibh'],
             model_datamap=highres_skymodels_mapfile,
             parmdb_datamap=dir_indep_parmdbs_mapfile, prefix='highres')
-        action.run()
+        self.s.run(action)
 
         self.log.info('Averaging...')
         action = Average(self.parset, subtracted_all_mapfile, p['avgl'],
             prefix='highres')
-        avg_files_mapfile = action.run()
+        avg_files_mapfile = self.s.run(action)
 
         self.log.info('Low-res imaging...')
         action = MakeImage(self.parset, avg_files_mapfile, p['imagerl'],
             prefix='lowres')
-        lowres_image_basenames_mapfile = action.run()
+        lowres_image_basenames_mapfile = self.s.run(action)
 
         if self.parset['use_ftw']:
             self.log.debug('FFTing low-res model image...')
             action = FFT(self.parset, subtracted_all_mapfile,
                 lowres_image_basenames_mapfile, p['modell'], prefix='lowres')
-            action.run()
+            self.s.run(action)
 
         self.log.info('Making low-res sky model...')
         action = MakeSkymodelFromModelImage(self.parset, lowres_image_basenames_mapfile,
             p['modell'], prefix='lowres')
-        lowres_skymodels_mapfile = action.run()
+        lowres_skymodels_mapfile = self.s.run(action)
 
         self.log.info('Subtracting low-res sky model...')
         action = Subtract(self.parset, subtracted_all_mapfile, p['calibl'],
             model_datamap=lowres_skymodels_mapfile,
             parmdb_datamap=dir_indep_parmdbs_mapfile, prefix='lowres')
-        action.run()
+        self.s.run(action)
 
         self.log.info('Merging low- and high-res sky models...')
         action = MergeSkymodels(self.parset, lowres_skymodels_mapfile,
             highres_skymodels_mapfile, p['merge'], prefix='merge')
-        merged_skymodels_mapfile = action.run()
+        merged_skymodels_mapfile = self.s.run(action)
         skymodels, _ = read_mapfile(merged_skymodels_mapfile)
         for band, skymodel in zip(bands, skymodels):
             band.skymodel_dirindep = skymodel

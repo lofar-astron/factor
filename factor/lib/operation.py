@@ -41,7 +41,7 @@ class Operation(object):
         self.reset = reset
         self.exit_on_error = True
         self.log = logging.getLogger(self.name)
-        self.s = Scheduler(parset['ncpu'], name=name)
+        self.s = Scheduler(parset['ncpu'], name=name, op_parset=self.parset)
         self.hostname = socket.gethostname()
 
         factor_working_dir = parset['dir_working']
@@ -49,8 +49,8 @@ class Operation(object):
             if type(self.direction) is list:
                 self.statebasename = []
                 for d in self.direction:
-                    self.statebasename.append('{0}/state/{1}-{2}'.format(factor_working_dir,
-                        self.name, d.name)            )
+                    self.statebasename.append('{0}/state/{1}-{2}'.format(
+                        factor_working_dir, self.name, d.name))
             else:
                 self.statebasename = '{0}/state/{1}-{2}'.format(factor_working_dir,
                     self.name, self.direction.name)
@@ -73,24 +73,33 @@ class Operation(object):
                 dirstr = ', '.join([d.name for d in self.direction])
             else:
                 dirstr = self.direction.name
-            self.log.info('<-- Operation %s started (direction(s): %s)' % (self.name, dirstr))
+            self.log.info('<-- Operation %s started (direction(s): %s)' %
+                (self.name, dirstr))
 
 
     def write_mapfile(self, data_list, prefix=None, direction=None, index=None,
         host_list=None):
         """
-        Write operation datamap
+        Write an operation datamap.
+
+        Parameters
+        ----------
+        data_list : list of str
+            List of files for datamap
+        prefix : str, optional
+            A prefix for the name
+        direction : Direction object, optional
+            A direction name
+        index : int, optional
+            An index for the datamap
+        host_list : list of str, optional
+            List of hosts for datamap
+
         """
         from factor.lib.datamap_lib import write_mapfile
 
         if host_list is None:
             host_list = self.parset['node_list']
-
-        for data, host in zip(data_list, host_list):
-            if host != self.hostname and self.parset['distribute']:
-                self.log.info('ms = {0}'.format(data))
-                self.log.info('localhost = {0}, remote = {1}'.format(self.hostname, host))
-                os.system('rsync -az {0}/ {1}:{0}'.format(data, host))
 
         mapfile = write_mapfile(data_list, self.name, prefix=prefix,
                 direction=direction, index=index, host_list=host_list,
@@ -120,8 +129,7 @@ class Operation(object):
         """
         Finalize the operation
         """
-        # Set the operation completion state. How to determine if all steps
-        # completed successfully? Check pipeline state for each step?
+        # Set the operation completion state
         self.set_state(0)
         if self.direction is None:
             self.log.info('--> Operation %s finished' % self.name)
@@ -130,12 +138,19 @@ class Operation(object):
                 dirstr = ', '.join([d.name for d in self.direction])
             else:
                 dirstr = self.direction.name
-            self.log.info('--> Operation %s finished (direction(s): %s)' % (self.name, dirstr))
+            self.log.info('--> Operation %s finished (direction(s): %s)' %
+                (self.name, dirstr))
 
 
     def set_state(self, returncode):
         """
         Set success or failure state
+
+        Parameters
+        ----------
+        returncode : int
+            0 = success, 1 = failure
+
         """
         if type(self.statebasename) is list:
             for s in self.statebasename:

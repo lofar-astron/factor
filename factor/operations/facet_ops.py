@@ -72,20 +72,20 @@ class FacetAddCal(Operation):
         self.log.info('Selecting sources for this direction...')
         action = MakeFacetSkymodel(self.parset, dir_indep_skymodels_mapfile,
             p['select'], d, prefix='cal', cal_only=True)
-        dir_indep_cal_skymodels_mapfile = action.run()
+        dir_indep_cal_skymodels_mapfile = self.s.run(action)
 
         self.log.info('Adding sources for this direction...')
         self.parset['use_ftw'] = False
         action = Add(self.parset, subtracted_all_mapfile, p['add'],
             dir_indep_cal_skymodels_mapfile, dir_indep_parmdbs_mapfile,
             prefix='facet_dirindep', direction=d)
-        action.run()
+        self.s.run(action)
 
         # Phase shift to facet center
         self.log.info('Phase shifting DATA...')
         action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift'],
             prefix='facet', direction=d)
-        shifted_data_mapfile = action.run()
+        shifted_data_mapfile = self.s.run(action)
 
         # Save files to the band objects
         files, _ = read_mapfile(shifted_data_mapfile)
@@ -637,22 +637,27 @@ class FacetSelfcal(Operation):
         self.log.debug('Imaging...')
         actions = [MakeImage(self.parset, m, p['imager4'], prefix='facet_selfcal4',
             direction=d) for d, m in zip(d_list, avg_data_mapfiles)]
-        image3_basenames_mapfiles = self.s.run(actions)
+        image4_basenames_mapfiles = self.s.run(actions)
 
         # Check images if interactive=True
         # If not OK: stop and reset state for this direction
         # If OK, continue
         if self.parset['interactive']:
             import pyrap.images as pim
-            for d in d_list:
-                im = pim.image([image1[0], image2[0], image3[0], image4[0]])
+            for i, d in enumerate(d_list):
+                self.log.info('Showing selfcal images (initial, 2nd phase-only, '
+                    '2nd phase+amp) for direction {0}...'.format(d.name))
+                image1, _ = read_mapfile(image0_basenames_mapfiles[i])
+                image2, _ = read_mapfile(image2_basenames_mapfiles[i])
+                image3, _ = read_mapfile(image4_basenames_mapfiles[i])
+                im = pim.image([image1[0], image2[0], image3[0]])
                 im.view()
                 prompt = "Continue processing (y/n)? "
                 answ = raw_input(prompt)
                 while answ.lower() not in  ['y', 'n', 'yes', 'no']:
                     answ = raw_input(prompt)
                 if answ.lower() in ['n', 'no']:
-                    self.log.info('Resetting facet {0} and exiting...'.format(d.name))
+                    self.log.info('Exiting...')
                     sys.exit()
 
         self.log.info('Merging final instrument parmdbs...')
@@ -829,19 +834,19 @@ class FacetAddAll(Operation):
         self.log.info('Selecting sources for this direction...')
         action = MakeFacetSkymodel(self.parset, dir_indep_skymodels_mapfile,
             p['select'], d, prefix='all_final', cal_only=False)
-        dir_indep_all_skymodels_mapfile = action.run()
+        dir_indep_all_skymodels_mapfile = self.s.run(action)
 
         self.log.info('Adding sources for this direction...')
         self.parset['use_ftw'] = False
         action = Add(self.parset, subtracted_all_mapfile, p['add'],
             dir_indep_all_skymodels_mapfile, dir_indep_parmdbs_mapfile,
             prefix='facet_dirindep', direction=d)
-        action.run()
+        self.s.run(action)
 
         self.log.info('Phase shifting DATA...')
         action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift'],
             prefix='facet', direction=d)
-        shifted_data_mapfile = action.run()
+        shifted_data_mapfile = self.s.run(action)
 
         # Save files to the band objects
         d.shifted_data_files, _ = read_mapfile(shifted_data_mapfile)
@@ -1014,13 +1019,13 @@ class FacetSubAll(Operation):
             self.log.debug('FFTing model image (facet model final)...')
             action = FFT(self.parset, subtracted_all_mapfile,
             	dir_dep_models_mapfile, p['fft'], prefix='fft', direction=d)
-            action.run()
+            self.s.run(action)
 
         self.log.info('Subtracting sources for this direction using final model...')
         action = Subtract(self.parset, subtracted_all_mapfile, p['subtract'],
             dir_dep_models_mapfile, dir_dep_parmdbs_mapfile,
             prefix='facet_dirdep', direction=d)
-        action.run()
+        self.s.run(action)
 
         # Clean up files for this direction:
         #    - unneeded MS files
@@ -1107,18 +1112,18 @@ class FacetAddAllFinal(Operation):
             self.log.debug('FFTing model image (facet model final)...')
             action = FFT(self.parset, subtracted_all_mapfile,
             	dir_dep_models_mapfile, p['fft'], prefix='fft', direction=d)
-            action.run()
+            self.s.run(action)
 
         self.log.info('Adding sources for this direction...')
         action = Add(self.parset, subtracted_all_mapfile, p['add'],
             dir_indep_cal_skymodels_mapfile, dir_indep_parmdbs_mapfile,
             prefix='facet_dirdep', direction=d)
-        action.run()
+        self.s.run(action)
 
         self.log.info('Phase shifting DATA...')
         action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift'],
             prefix='facet', direction=d)
-        shifted_data_mapfile = action.run()
+        shifted_data_mapfile = self.s.run(action)
 
         # Save files to the band objects
         files, _ = read_mapfile(shifted_data_mapfile)
