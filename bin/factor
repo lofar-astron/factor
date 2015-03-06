@@ -14,15 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-# Authors:
-# Francesco de Gasperin
-# Jose Sabater Montes
-# Wendy Williams
-# Martin Hardcastle
-# David Rafferty
-# Stefan Fröhlich
-# Tim Shimwell
 #
 # The code is based on an original idea of Reinout van Weeren
 
@@ -191,11 +182,12 @@ if __name__=='__main__':
 
     # Make final facet images (from final empty datasets) if desired
     dirs_to_image = [d for d in directions if d.make_final_image]
-    ops = [FacetAddAllFinal(parset, bands, d) for d in dirs_to_image]
-    for op in ops:
+    if len(dirs_to_image) > 0:
+        ops = [FacetAddAllFinal(parset, bands, d) for d in dirs_to_image]
+        for op in ops:
+            op.run()
+        op = FacetImageFinal(parset, bands, dirs_to_image)
         op.run()
-    op = FacetImageFinal(parset, bands, dirs_to_image)
-    op.run()
 
     # Save final band and direction objects to disk
     pickle.dump(bands, open(os.path.join(parset['dir_working'],
