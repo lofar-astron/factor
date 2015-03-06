@@ -156,7 +156,7 @@ if __name__=='__main__':
 
     # Iterate over direction groups
     for direction_group in direction_groups:
-        log.info('Processing {0} direction(s) in parallel'.format(
+        logging.info('Processing {0} direction(s) in parallel'.format(
             len(direction_group)))
 
         # Add calibrator(s) to empty datasets. These operations
