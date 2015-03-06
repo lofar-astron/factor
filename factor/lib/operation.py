@@ -88,6 +88,8 @@ class Operation(object):
 
         for data, host in zip(data_list, host_list):
             if host != self.hostname and self.parset['distribute']:
+                self.log.info('ms = {0}'.format(data))
+                self.log.info('localhost = {0}, remote = {1}'.format(self.hostname, host))
                 os.system('rsync -az {0}/ {1}:{0}'.format(data, host))
 
         mapfile = write_mapfile(data_list, self.name, prefix=prefix,
