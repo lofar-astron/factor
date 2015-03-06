@@ -55,7 +55,7 @@ def parset_read(parset_file):
     # get all the MS in the directory
     parset_dict['mss'] = glob.glob(os.path.join(parset_dict['dir_ms'],'/*[MS|ms]'))
     if len(parset_dict['mss']) == 0:
-        log.error('No MS files found in {0}!'.format(parset_dict['dir_ms']
+        log.error('No MS files found in {0}!'.format(parset_dict['dir_ms']))
         sys.exit(1)
     log.info("Working on %i bands" % (len(parset_dict['mss'])))
 
