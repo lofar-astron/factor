@@ -124,8 +124,8 @@ class FacetSetup(Operation):
                 concat_data_mapfile = os.path.join(self.parset['dir_working'],
                     'datamaps/FacetSetup/Concatenate/{0}/facet_bands_output_{0}-1.datamap'.
                     format(d.name))
-                file, _ = read_mapfile(concat_data_mapfile)[0]
-                d.concat_file = file
+                file, _ = read_mapfile(concat_data_mapfile)
+                d.concat_file = file[0]
                 all_done = True
         if all_done:
             return
@@ -229,8 +229,8 @@ class FacetSelfcal(Operation):
                 final_parmdb_datamap = os.path.join(self.parset['dir_working'],
                     'datamaps/FacetSelfcal/{0}/merged_parmdb_final_{0}.datamap'.
                     format(d.name))
-                file, _ = read_mapfile(final_parmdb_datamap)[0]
-                d.dirdepparmdb = file
+                file, _ = read_mapfile(final_parmdb_datamap)
+                d.dirdepparmdb = file[0]
                 all_done = True
         if all_done:
             return
@@ -875,8 +875,8 @@ class FacetImage(Operation):
                 model_mapfile = os.path.join(self.parset['dir_working'],
                 'datamaps/FacetImage/{0}/final_model_{0}.datamap'.
                 format(d.name))
-                file, _ = read_mapfile(model_mapfile)[0]
-                d.skymodel_dirdep = file
+                file, _ = read_mapfile(model_mapfile)
+                d.skymodel_dirdep = file[0]
                 all_done = True
         if all_done:
             return
