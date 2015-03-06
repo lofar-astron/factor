@@ -41,7 +41,8 @@ def copy_column(ms, inputcol, outputcol, ms_from=None):
     t.close()
 
 
-def make_chunks(dataset, blockl, op_parset, prefix=None, direction=None, clobber=False):
+def make_chunks(dataset, blockl, op_parset, prefix=None, direction=None,
+    clobber=False):
     """
     Split ms into time chunks of length chunksize time slots
     """

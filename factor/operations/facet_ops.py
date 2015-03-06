@@ -276,17 +276,20 @@ class FacetSelfcal(Operation):
         	rm in zip(d_list, avg_data_mapfiles, facet_region_mapfiles)]
         image0_basenames_mapfiles = self.s.run(actions)
 
-        if not self.parset['use_ftw']:
+        if self.parset['use_ftw']:
+            self.log.info('FFTing model image (facet model #0)...')
+            actions = [FFT(self.parset, dm, mm, p['model0'], prefix='fft0',
+            	direction=d, index=0) for d, dm, mm in zip(d_list,
+            	facet_data_mapfiles, image0_basenames_mapfiles)]
+            self.s.run(actions)
+        else:
             self.log.info('Making sky model (facet model #0)...')
             actions = [MakeSkymodelFromModelImage(self.parset, m, p['model0'],
                 prefix='facet_selfcal0', direction=d) for d, m in zip(d_list,
                 image0_basenames_mapfiles)]
             skymodels0_mapfiles = self.s.run(actions)
 
-        # Chunk phase-shifted concatenated MS of all bands in time. Chunks should
-        # be the length of the desired amplitude solution interval (otherwise they
-        # must be concatenated together later before amp. calibration)
-        self.log.info('Dividing dataset into chunks...')
+        self.log.debug('Dividing dataset into chunks...')
         chunks_list = []
         for d in d_list:
             chunks_list.append(make_chunks(d.concat_file, d.solint_a,
@@ -297,12 +300,7 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             chunk_data_mapfiles.append(self.write_mapfile([chunk.file for chunk in chunks],
                 prefix='chunks_vis', direction=d_list[i], host_list=d_hosts[i]))
-            if self.parset['use_ftw']:
-                model0, _ = read_mapfile(image0_basenames_mapfiles[i])
-                chunk_model_mapfiles.append(self.write_mapfile(model0*len(chunks),
-                    prefix='chunks_model0', direction=d_list[i],
-                    host_list=d_hosts[i]))
-            else:
+            if not self.parset['use_ftw']:
                 skymodel0, _ = read_mapfile(skymodels0_mapfiles[i])
                 chunk_model_mapfiles.append(self.write_mapfile(skymodel0*len(chunks),
                     prefix='chunks_skymodel0', direction=d_list[i],
@@ -311,13 +309,6 @@ class FacetSelfcal(Operation):
                 [chunk.parmdb_phaseonly1 for chunk in chunks],
                 prefix='chunk_parmdb_phaseonly1', direction=d_list[i],
                 host_list=d_hosts[i]))
-
-        if self.parset['use_ftw']:
-            self.log.info('FFTing model image (facet model #0)...')
-            actions = [FFT(self.parset, dm, mm, p['model0'], prefix='fft0',
-            	direction=d, index=0) for d, dm, mm in zip(d_list,
-            	chunk_data_mapfiles, chunk_model_mapfiles)]
-            self.s.run(actions)
 
         self.log.info('Solving for phase solutions and applying them (#1)...')
         p_list = []
@@ -350,22 +341,29 @@ class FacetSelfcal(Operation):
             direction=d) for d, m in zip(d_list, avg_data_mapfiles)]
         image1_basenames_mapfiles = self.s.run(actions)
 
-        if not self.parset['use_ftw']:
+        if self.parset['use_ftw']:
+            self.log.info('FFTing model image (facet model #1)...')
+            actions = [FFT(self.parset, dm, mm, p['model1'], prefix='fft1',
+            	direction=d, index=1) for d, dm, mm in zip(d_list,
+            	merged_data_mapfiles, image1_basenames_mapfiles)]
+            self.s.run(actions)
+        else:
             self.log.info('Making sky model (facet model #1)...')
             actions = [MakeSkymodelFromModelImage(self.parset, m, p['model1'],
                 prefix='facet_selfcal1', direction=d) for d, m in zip(d_list,
                 image1_basenames_mapfiles)]
             skymodels1_mapfiles = self.s.run(actions)
 
+        self.log.debug('Dividing dataset into chunks...')
+        chunks_list = []
+        merged_files, _ = read_mapfile(merged_data_mapfiles)
+        for d, m in zip(d_list, merged_files):
+            chunks_list.append(make_chunks(m, d.solint_a,
+            	self.parset, 'facet_chunk', direction=d, clobber=True))
         chunk_parmdb_mapfiles = []
         chunk_model_mapfiles = []
         for i, chunks in enumerate(chunks_list):
-            if self.parset['use_ftw']:
-                model1, _ = read_mapfile(image1_basenames_mapfiles[i])
-                chunk_model_mapfiles.append(self.write_mapfile(model1*len(chunks),
-                    prefix='chunks_model1', direction=d_list[i],
-                    host_list=d_hosts[i]))
-            else:
+            if not self.parset['use_ftw']:
                 skymodel1, _ = read_mapfile(skymodels1_mapfiles[i])
                 chunk_model_mapfiles.append(self.write_mapfile(skymodel1*len(chunks),
                     prefix='chunks_skymodel1', direction=d_list[i],
@@ -374,13 +372,6 @@ class FacetSelfcal(Operation):
                 [chunk.parmdb_phaseonly2 for chunk in chunks],
                 prefix='chunk_parmdb_phaseonly2', direction=d_list[i],
                 host_list=d_hosts[i]))
-
-        if self.parset['use_ftw']:
-            self.log.info('FFTing model image (facet model #1)...')
-            actions = [FFT(self.parset, dm, mm, p['model1'], prefix='fft1',
-            	direction=d, index=1) for d, dm, mm in zip(d_list,
-            	chunk_data_mapfiles, chunk_model_mapfiles)]
-            self.s.run(actions)
 
         self.log.info('Solving for phase solutions and applying them (#2)...')
         p_list = []
@@ -412,23 +403,30 @@ class FacetSelfcal(Operation):
             direction=d) for d, m in zip(d_list, avg_data_mapfiles)]
         image2_basenames_mapfiles = self.s.run(actions)
 
-        if not self.parset['use_ftw']:
+        if self.parset['use_ftw']:
+            self.log.info('FFTing model image (facet model #2)...')
+            actions = [FFT(self.parset, dm, mm, p['model2'], prefix='fft2',
+            	direction=d, index=2) for d, dm, mm in zip(d_list,
+            	merged_data_mapfiles, image2_basenames_mapfiles)]
+            self.s.run(actions)
+        else:
             self.log.info('Making sky model (facet model #2)...')
             actions = [MakeSkymodelFromModelImage(self.parset, m, p['model2'],
                 prefix='facet_selfcal2', direction=d) for d, m in zip(d_list,
                 image2_basenames_mapfiles)]
             skymodels2_mapfiles = self.s.run(actions)
 
+        self.log.debug('Dividing dataset into chunks...')
+        chunks_list = []
+        merged_files, _ = read_mapfile(merged_data_mapfiles)
+        for d, m in zip(d_list, merged_files):
+            chunks_list.append(make_chunks(m, d.solint_a,
+            	self.parset, 'facet_chunk', direction=d, clobber=True))
         chunk_parmdb_phaseamp_phase1_mapfiles = []
         chunk_parmdb_phaseamp_amp1_mapfiles = []
         chunk_model_mapfiles = []
         for i, chunks in enumerate(chunks_list):
-            if self.parset['use_ftw']:
-                model2, _ = read_mapfile(image2_basenames_mapfiles[i])
-                chunk_model_mapfiles.append(self.write_mapfile(model2*len(chunks),
-                    prefix='chunks_model2', direction=d_list[i],
-                    host_list=d_hosts[i]))
-            else:
+            if not self.parset['use_ftw']:
                 skymodel2, _ = read_mapfile(skymodels2_mapfiles[i])
                 chunk_model_mapfiles.append(self.write_mapfile(skymodel2*len(chunks),
                     prefix='chunks_skymodel2', direction=d_list[i],
@@ -441,13 +439,6 @@ class FacetSelfcal(Operation):
                 [chunk.parmdb_phaseamp_amp1 for chunk in chunks],
                 prefix='chunk_parmdb_amp1', direction=d_list[i],
                 host_list=d_hosts[i]))
-
-        if self.parset['use_ftw']:
-            self.log.info('FFTing model image (facet model #2)...')
-            actions = [FFT(self.parset, dm, mm, p['model2'], prefix='fft2',
-            	direction=d, index=2) for d, dm, mm in zip(d_list,
-            	chunk_data_mapfiles, chunk_model_mapfiles)]
-            self.s.run(actions)
 
         self.log.info('Solving for amplitude solutions and applying them (#1)...')
         p_list = []
@@ -513,7 +504,13 @@ class FacetSelfcal(Operation):
             direction=d) for d, m in zip(d_list, avg_data_mapfiles)]
         image3_basenames_mapfiles = self.s.run(actions)
 
-        if not self.parset['use_ftw']:
+        if self.parset['use_ftw']:
+            self.log.info('FFTing model image (facet model #2)...')
+            actions = [FFT(self.parset, dm, mm, p['model3'], prefix='fft3',
+            	direction=d, index=3) for d, dm, mm in zip(d_list,
+            	merged_data_mapfiles, image3_basenames_mapfiles)]
+            self.s.run(actions)
+        else:
             self.log.info('Making sky model (facet model #3)...')
             actions = [MakeSkymodelFromModelImage(self.parset, m, p['model3'],
                 prefix='facet_selfcal3', direction=d) for d, m in zip(d_list,
@@ -526,6 +523,13 @@ class FacetSelfcal(Operation):
             for d, dm, pm in zip(d_list, merged_data_mapfiles,
             merged_parmdb_phaseamp_amp1_mapfiles)]
         self.s.run(actions)
+
+        self.log.debug('Dividing dataset into chunks...')
+        chunks_list = []
+        merged_files, _ = read_mapfile(merged_data_mapfiles)
+        for d, m in zip(d_list, merged_files):
+            chunks_list.append(make_chunks(m, d.solint_a,
+            	self.parset, 'facet_chunk', direction=d, clobber=True))
 
         self.log.info('Preapplying amplitude solutions...')
         chunk_parmdb_phaseamp_amp1_mapfiles = []
@@ -545,12 +549,7 @@ class FacetSelfcal(Operation):
         chunk_parmdb_phaseamp_amp2_mapfiles = []
         chunk_model_mapfiles = []
         for i, chunks in enumerate(chunks_list):
-            if self.parset['use_ftw']:
-                model3, _ = read_mapfile(image3_basenames_mapfiles[i])
-                chunk_model_mapfiles.append(self.write_mapfile(model3*len(chunks),
-                    prefix='chunks_model3', direction=d_list[i],
-                    host_list=d_hosts[i]))
-            else:
+            if not self.parset['use_ftw']:
                 skymodel3, _ = read_mapfile(skymodels3_mapfiles[i])
                 chunk_model_mapfiles.append(self.write_mapfile(skymodel3*len(chunks),
                     prefix='chunks_skymodel3', direction=d_list[i],
@@ -563,13 +562,6 @@ class FacetSelfcal(Operation):
                 [chunk.parmdb_phaseamp_amp2 for chunk in chunks],
                 prefix='chunk_parmdb_amp2', direction=d_list[i],
                 host_list=d_hosts[i]))
-
-        if self.parset['use_ftw']:
-            self.log.info('FFTing model image (facet model #2)...')
-            actions = [FFT(self.parset, dm, mm, p['model3'], prefix='fft3',
-            	direction=d, index=3) for d, dm, mm in zip(d_list,
-            	chunk_data_mapfiles, chunk_model_mapfiles)]
-            self.s.run(actions)
 
         p_list = []
         for d in d_list:
