@@ -34,7 +34,6 @@ class Direction(object):
         cal_radius : float
             Radius in degrees of calibrator source for this direction
         """
-        logging.debug("Setting up direction %s." % name)
         self.name = name
         self.ra = ra
         self.dec = dec

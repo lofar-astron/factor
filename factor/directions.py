@@ -32,20 +32,25 @@ def directions_read(directions_file):
         sys.exit(1)
 
     log.info("Reading directions file: %s" % (directions_file))
-    types = np.dtype({'names':['name','ra','dec','reg','multiscale','solint_a','solint_p','make_final_image','cal_radius'], \
-                    'formats':['S100',np.float,np.float,'S100',np.bool,np.int,np.int,np.bool,np.float]})
-    directions = np.genfromtxt(directions_file, comments='#', delimiter=',', unpack=False,
-                      converters={0: lambda x: x.strip(), 3: lambda x: x.strip()}, dtype=types)
+    types = np.dtype({'names': ['name', 'ra', 'dec', 'reg', 'multiscale',
+    	'solint_a', 'solint_p', 'make_final_image', 'cal_radius'],
+    	'formats':['S100', np.float, np.float, 'S100', np.bool, np.int,
+    	np.int, np.bool, np.float]})
+    directions = np.genfromtxt(directions_file, comments='#', delimiter=',',
+    	unpack=False, converters={0: lambda x: x.strip(), 3: lambda x:
+    	x.strip()}, dtype=types)
     # NOTE: undefined int are "-1", undefined bool are "False", undefined float are nan
 
     data = []
     for direction in directions:
         # some checks on values
         if np.isnan(direction['ra']) or direction['ra'] < 0 or direction['ra'] > 360:
-            log.error('RA %f is wrong for direction: %s. Ignoring direction.' % (direction['ra'], direction['name']))
+            log.error('RA %f is wrong for direction: %s. Ignoring direction.'
+            	% (direction['ra'], direction['name']))
             continue
         if np.isnan(direction['dec']) or direction['dec'] < -90 or direction['dec'] > 90:
-            log.error('DEC %f is wrong for direction: %s. Ignoring direction.' % (direction['dec'], direction['name']))
+            log.error('DEC %f is wrong for direction: %s. Ignoring direction.'
+                % (direction['dec'], direction['name']))
             continue
 
         # set defaults
@@ -104,7 +109,8 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     if len(s) == 0:
         log.critical("No directions found that meet the specified min flux criteria.")
         sys.exit(1)
-    log.info('Found {0} directions with fluxes above {1} Jy'.format(len(s.getPatchNames()), flux_min_Jy))
+    log.info('Found {0} directions with fluxes above {1} Jy'.format(
+        len(s.getPatchNames()), flux_min_Jy))
     sizes = s.getPatchSizes(units='arcmin', weight=True)
     s.select(sizes < size_max_arcmin, aggregate=True, force=True)
     if len(s) == 0:
@@ -312,8 +318,10 @@ def thiessen(directions_list, bounds_scale=2):
         thiessen_polys_deg.append([np.array(ra), np.array(dec)])
 
         # Find size of regions in degrees
-        ra1, dec1 = xy2radec([np.min(poly[:, 0])], [np.min(poly[:, 1])], midRA, midDec)
-        ra2, dec2 = xy2radec([np.max(poly[:, 0])], [np.max(poly[:, 1])], midRA, midDec)
+        ra1, dec1 = xy2radec([np.min(poly[:, 0])], [np.min(poly[:, 1])], midRA,
+            midDec)
+        ra2, dec2 = xy2radec([np.max(poly[:, 0])], [np.max(poly[:, 1])], midRA,
+            midDec)
         hyp_deg = calculateSeparation(ra1, dec1, ra2, dec2)
         width_deg.append(hyp_deg.value)
 
@@ -393,8 +401,10 @@ def _circumcenter(vertices):
     if D == 0:
         D = 0.000000001
 
-    ux = ((ax**2 + ay**2) * (by - cy) + (bx**2 + by**2) * (cy - ay) + (cx**2 + cy**2) * (ay - by)) / D
-    uy = ((ax**2 + ay**2) * (cx - bx) + (bx**2 + by**2) * (ax - cx) + (cx**2 + cy**2) * (bx - ax)) / D
+    ux = ((ax**2 + ay**2) * (by - cy) + (bx**2 + by**2) * (cy - ay) +
+        (cx**2 + cy**2) * (ay - by)) / D
+    uy = ((ax**2 + ay**2) * (cx - bx) + (bx**2 + by**2) * (ax - cx) +
+        (cx**2 + cy**2) * (bx - ax)) / D
 
     return ux, uy
 
@@ -427,7 +437,8 @@ def _find_triangles_for_vertex(tri, n):
 
         # find the vertex of the triangle that is not the central
         # vertex and is not shared with the previous triangle
-        next_vertex_idx = this_triangle[(this_triangle != n) & (this_triangle != previous_vertex_idx)]
+        next_vertex_idx = this_triangle[(this_triangle != n) & (this_triangle
+            != previous_vertex_idx)]
 
         # append the next triangle (note: match will return both the
         # previous triangle and the next triangle, since they both
@@ -445,7 +456,8 @@ def _find_triangles_for_vertex(tri, n):
         for triangle in sorted_triangles]
 
     # if we're sorted counter-clockwise, then we need to reverse order
-    test_point = tri.points[triangles[0][(triangles[0] != n) & (triangles[0] != common_edge_vertex_idx)]].flatten()
+    test_point = tri.points[triangles[0][(triangles[0] != n) & (triangles[0]
+        != common_edge_vertex_idx)]].flatten()
     if not _is_right(tri.points[n], tri.points[common_edge_vertex_idx], test_point):
         return sorted_triangle_indices[::-1]
 

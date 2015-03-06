@@ -32,6 +32,7 @@ class Action(object):
             Direction for this action
         index : int, optional
             Index of action
+
         """
         self.op_name = op_parset['op_name']
         self.name = name
@@ -100,9 +101,27 @@ class Action(object):
 
 
     def write_mapfile(self, data_list, prefix=None, direction=None, index=None,
-        host_list=None, use_abs_path=True):
+        host_list=None, flag_list=None, use_abs_path=True):
         """
         Write operation datamap
+
+        Parameters
+        ----------
+        data_list : list of str
+            List of files
+        prefix : str
+            A prefix for the name
+        direction : Direction object or str, optional
+            A direction name
+        index : int, optional
+            An index for the datamap
+        flag_list : list of bools, optional
+            List of datamap flags
+        use_abs_path : bool, optional
+            If True, make sure all files use absolute paths
+        host_list : list, optional
+            List of datamap host names
+
         """
         from factor.lib.datamap_lib import write_mapfile
 

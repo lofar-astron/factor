@@ -29,8 +29,6 @@ setup(
     name='factor',
     version=factor._version.__version__,
     url='http://github.com/revoltek/factor/',
-    author='Francesco de Gasperin',
-    author_email='fdg@hs.uni-hamburg.de',
     description=description,
     long_description=long_description,
     platforms='any',

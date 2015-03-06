@@ -45,6 +45,22 @@ def make_chunks(dataset, blockl, op_parset, prefix=None, direction=None,
     clobber=False):
     """
     Split ms into time chunks of length chunksize time slots
+
+    Parameters
+    ----------
+    dataset : str
+        Name of MS file to split
+    blockl : int
+        Number of time slots per chunk
+    op_parset : dict
+        Parset of parent operation
+    prefix : str
+        A prefix for the name
+    direction : Direction object or str, optional
+        A direction name
+    clobber : bool, optional
+        If True, existing files are overwritten
+
     """
     from factor.lib.chunk import Chunk
     import numpy as np
@@ -84,7 +100,23 @@ def make_chunks(dataset, blockl, op_parset, prefix=None, direction=None,
 
 
 def split_ms(msin, msout, start_out, end_out, clobber=True):
-    """Splits an MS between start and end times in hours relative to first time"""
+    """
+    Splits an MS between start and end times in hours relative to first time
+
+    Parameters
+    ----------
+    msin : str
+        Name of MS file to split
+    msout : str
+        Name of output MS file
+    start_out : float
+        Start time in hours relative to first time
+    end_out : float
+        End time in hours relative to first time
+    clobber : bool, optional
+        If True, existing files are overwritten
+
+    """
     import pyrap.tables as pt
     import os
 
@@ -106,7 +138,19 @@ def split_ms(msin, msout, start_out, end_out, clobber=True):
 
 
 def merge_chunks(chunk_files, prefix=None, clobber=False):
-    """Merges chunks"""
+    """
+    Merges chunks
+
+    Parameters
+    ----------
+    chunk_files : list
+        List of MS files to merge
+    prefix: str, optional
+        String to prepend to output file
+    clobber : bool, optional
+        If True, existing files are overwritten
+
+    """
     import pyrap.tables as pt
     import os
 

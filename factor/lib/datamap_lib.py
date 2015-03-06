@@ -10,6 +10,30 @@ def write_mapfile(data_list, op_name, action_name=None, prefix=None,
     use_abs_path=True, host_list=None):
     """
     Returns a datamap for the input data list
+
+    Parameters
+    ----------
+    data_list : list of str
+        List of files
+    op_name : str
+        Parent operation name
+    action_name : str
+        Parent action name
+    prefix : str
+        A prefix for the name
+    direction : Direction object or str, optional
+        A direction name
+    index : int, optional
+        An index for the datamap
+    working_dir : str, optional
+        Factor working directory
+    flag_list : list of bools, optional
+        List of datamap flags
+    use_abs_path : bool, optional
+        If True, make sure all files use absolute paths
+    host_list : list, optional
+        List of datamap host names
+
     """
     if use_abs_path:
         data_list = [os.path.abspath(f) for f in data_list]
@@ -56,6 +80,12 @@ def read_mapfile(mapfile):
 def read_mapfile_flags(mapfile):
     """
     Returns a list of skip flags in the input map file
+
+    Parameters
+    ----------
+    mapfile : str
+        File name of Datamap file to read
+
     """
     indata = DataMap.load(mapfile)
     flags = []
@@ -68,6 +98,14 @@ def read_mapfile_flags(mapfile):
 def set_mapfile_flags(mapfile, flag_list):
     """
     Sets flages in a datamap
+
+    Parameters
+    ----------
+    mapfile : str
+        File name of Datamap file to alter
+    flag_list : list of bools
+        List of flags to set
+
     """
     datamap = DataMap.load(mapfile)
     if len(datamap) != len(flag_list):
@@ -83,6 +121,16 @@ def set_mapfile_flags(mapfile, flag_list):
 def make_mapfile_basename(prefix=None, direction=None, index=None):
     """
     Returns a standard name pattern for datamap files
+
+    Parameters
+    ----------
+    prefix : str
+        A prefix for the name
+    direction : Direction object, optional
+        A direction name
+    index : int, optional
+        An index for the datamap
+
     """
     if direction is not None:
         dirtxt = '_{0}'.format(direction.name)

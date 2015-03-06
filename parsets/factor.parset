@@ -6,7 +6,7 @@
 lofarroot = /lofar/build/gnu_opt/installed
 lofarpythonpath = /lofar/build/gnu_opt/installed/lib/python2.7/dist-packages
 
-# Generic pipeline root directory
+# Full path to Generic Pipeline root directory
 piperoot = /path/to/genericpipe/dir
 
 # Full path to the cluster description file. If not given, the clusterdesc file
@@ -17,7 +17,7 @@ clusterdesc = /path/to/clusterdesc
 dir_working = /data/wdir
 
 # Full path to directory containing selfcaled bands, will be scanned for all .MS
-# / .ms files
+# and .ms files
 dir_ms = /data/bands
 
 # Parmdb name for dir-indep. selfcal solutions (stored inside the input
@@ -41,7 +41,7 @@ ndir = 10
 # Maximum number of directions to process in parallel (default = 1)
 ndir_parallel = 4
 
-# Maximum number of CPUs per node to use
+# Maximum number of CPUs per node to use (default = all)
 ncpu = 6
 
 # Full path to cluster description file. Use clusterdesc_file = PBS to use
@@ -49,15 +49,15 @@ ncpu = 6
 # has a distributed file system. Set to False if the cluster has a shared
 # file system (the default)
 clusterdesc_file = PBS
-distribute = False
+distribute = False (default = False)
 
-# Interactive?
+# Use interactive mode (default = False)
 interactive = False
 
-# Use ftw to FFT model image (instead of using BBS predict)?
-use_ftw = False
+# Use ftw to FFT model image instead of BBS predict (default = True)
+use_ftw = True
 
-# Make final mosaic?
+# Make final mosaic (default = True)
 make_mosaic = False
 
 # MS-specific parameters

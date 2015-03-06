@@ -7,8 +7,6 @@ Casapy : Action
     Makes an image with CASA
 MakeImage : Action
     Make an image using a clean mask
-ExpandMask : Action
-    Expand a clean mask to match a larger image
 
 """
 
