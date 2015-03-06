@@ -53,7 +53,7 @@ def parset_read(parset_file):
     log.info("Working directory is {0}".format(parset_dict['dir_working']))
 
     # get all the MS in the directory
-    parset_dict['mss'] = glob.glob(os.path.join(parset_dict['dir_ms'],'/*[MS|ms]'))
+    parset_dict['mss'] = glob.glob(parset_dict['dir_ms']+'/*[MS|ms]')
     if len(parset_dict['mss']) == 0:
         log.error('No MS files found in {0}!'.format(parset_dict['dir_ms']))
         sys.exit(1)
