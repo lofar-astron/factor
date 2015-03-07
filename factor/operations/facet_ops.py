@@ -227,7 +227,7 @@ class FacetSelfcal(Operation):
         for i, d in enumerate(d_list):
             if os.path.exists(self.statebasename[i]+'.done'):
                 final_parmdb_datamap = os.path.join(self.parset['dir_working'],
-                    'datamaps/FacetSelfcal/{0}/merged_parmdb_final_{0}.datamap'.
+                    'datamaps/FacetSelfcal/{0}/merged_amps_phases_final_{0}.datamap'.
                     format(d.name))
                 file, _ = read_mapfile(final_parmdb_datamap)
                 d.dirdepparmdb = file[0]
