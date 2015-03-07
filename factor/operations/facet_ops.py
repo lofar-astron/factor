@@ -1005,7 +1005,7 @@ class FacetSubAll(Operation):
         if self.parset['use_ftw']:
             # Copy the model image for each band to avoid conflicts
             dir_dep_models_mapfile = self.copy_model_images(d.skymodel_dirdep,
-                bands)
+                bands, p['fft'])
         else:
             dir_dep_models_mapfile = self.write_mapfile([d.skymodel_dirdep]*len(bands),
                 prefix='dir_dep_skymodels', direction=d)
@@ -1034,7 +1034,7 @@ class FacetSubAll(Operation):
 #         os.system('rm -rf visdata/*{0}*'.format(d.name))
 
 
-    def copy_model_images(self, modelbasename, bands, direction=None):
+    def copy_model_images(self, modelbasename, bands, p, direction=None):
         """
         Copies model images and returns the mapfile
         """
@@ -1044,10 +1044,10 @@ class FacetSubAll(Operation):
 
         for i, band in enumerate(bands):
             outmodelbasenames.append(modelbasename + '_band{0}'.format(i))
-            if self.parset['nterms'] == 1:
+            if p['nterms'] == 1:
                 inmodelimages.append([modelbasename + '.model'])
                 outmodelimages.append([modelbasename + '_band{0}.model'.format(i)])
-            elif self.parset['nterms'] == 2:
+            elif p['nterms'] == 2:
                 inmodelimages.append([modelbasename + '.model.tt0',
                     modelbasename + '.model.tt1'])
                 outmodelimages.append([modelbasename + '_band{0}.model.tt0'.format(i),
