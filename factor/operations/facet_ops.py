@@ -1021,7 +1021,7 @@ class FacetSubAll(Operation):
             prefix='dir_dep_parmdbs', direction=d)
 
         if self.parset['use_ftw']:
-            self.log.debug('FFTing model image (facet model final)...')
+            self.log.info('FFTing model image (facet model final)...')
             action = FFT(self.parset, subtracted_all_mapfile,
             	dir_dep_models_mapfile, p['fft'], prefix='fft', direction=d)
             self.s.run(action)

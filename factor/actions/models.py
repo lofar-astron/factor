@@ -15,7 +15,7 @@ FFT : Action
 """
 
 from factor.lib.action import Action
-from factor.lib.action_lib import make_image_basename
+from factor.lib.action_lib import make_image_basename, getOptimumSize
 from jinja2 import Environment, FileSystemLoader
 import os
 
@@ -419,7 +419,7 @@ class FFT(Action):
         self.working_dir = self.model_dir + '{0}/{1}/'.format(self.op_name, self.name)
         if self.direction is not None:
             self.working_dir += '{0}/'.format(self.direction.name)
-            self.p['imsize'] = self.direction.imsize
+            self.p['imsize'] = getOptimumSize(int(self.direction.imsize))
         if not os.path.exists(self.working_dir):
             os.makedirs(self.working_dir)
 
