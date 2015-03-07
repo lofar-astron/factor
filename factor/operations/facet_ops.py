@@ -1009,26 +1009,27 @@ class FacetSubAll(Operation):
         # instrument parmdbs, and their dir-dep sky models
         if self.parset['use_ftw']:
             # Copy the model image for each band to avoid conflicts
-            dir_dep_models_mapfile = self.copy_model_images(d.skymodel_dirdep,
+            dir_dep_model_mapfile = self.copy_model_images(d.skymodel_dirdep,
                 bands, p['fft'])
         else:
-            dir_dep_models_mapfile = self.write_mapfile([d.skymodel_dirdep]*len(bands),
+            dir_dep_model_mapfile = self.write_mapfile([d.skymodel_dirdep]*len(bands),
                 prefix='dir_dep_skymodels', direction=d)
 
         subtracted_all_mapfile = self.write_mapfile([band.file for band in bands],
         	prefix='subtracted_all', direction=d)
-        dir_dep_parmdbs_mapfile = self.write_mapfile([d.dirdepparmdb]*len(bands),
+        dir_dep_parmdb_mapfile = self.write_mapfile([d.dirdepparmdb]*len(bands),
             prefix='dir_dep_parmdbs', direction=d)
 
         if self.parset['use_ftw']:
             self.log.info('FFTing model image (facet model final)...')
             action = FFT(self.parset, subtracted_all_mapfile,
-            	dir_dep_models_mapfile, p['fft'], prefix='fft', direction=d)
+            	dir_dep_model_mapfile, p['fft'], prefix='fft', direction=d)
             self.s.run(action)
+            dir_dep_model_mapfile = None
 
         self.log.info('Subtracting sources for this direction using final model...')
         action = Subtract(self.parset, subtracted_all_mapfile, p['subtract'],
-            dir_dep_models_mapfile, dir_dep_parmdbs_mapfile,
+            dir_dep_model_mapfile, dir_dep_parmdb_mapfile,
             prefix='facet_dirdep', direction=d)
         self.s.run(action)
 
