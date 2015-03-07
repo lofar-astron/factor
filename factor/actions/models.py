@@ -471,13 +471,7 @@ class FFT(Action):
 
     def get_results(self):
         """
-        Makes and returns map files for image basenames
-
-        Returns
-        -------
-        images_mapfile : Data map filename
-            Filename to map file with imagebasenames
-
+        Returns results
         """
         return None
 
