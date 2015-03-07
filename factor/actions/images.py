@@ -158,7 +158,7 @@ class Casapy(Action):
         if self.direction is not None:
             if hasattr(self.direction, 'imsize'):
                 self.imsize = self.direction.imsize
-        self.p['imsize'] = self.getOptimumSize(int(self.imsize))
+        self.p['imsize'] = getOptimumSize(int(self.imsize))
         if self.p['imsize'] > 512:
             self.p['wplanes'] = 64
         if self.p['imsize'] > 799:
