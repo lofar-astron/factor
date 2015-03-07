@@ -946,9 +946,9 @@ class FacetImage(Operation):
 
         if self.parset['use_ftw']:
             # Save image basenames to the direction objects
-            files, _ = read_mapfile(image_basenames_mapfiles)
-            for d, f in zip(d_list, files):
-                d.skymodel_dirdep = f
+            for d, mf in zip(d_list, image_basenames_mapfiles):
+                file, _ = read_mapfile(mf)
+                d.skymodel_dirdep = file[0]
         else:
             self.log.info('Making sky model...')
             actions = [MakeSkymodelFromModelImage(self.parset, m, p['model'],
