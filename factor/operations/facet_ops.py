@@ -888,6 +888,11 @@ class FacetImage(Operation):
                 format(d.name))
                 file, _ = read_mapfile(model_mapfile)
                 d.skymodel_dirdep = file[0]
+                cell = float(p['imager']['cell'].split('arcsec')[0]) # arcsec per pixel
+                imsize = d.width * 1.1 * 3600.0 / cell # pixels
+                if imsize < 512:
+                    imsize = 512
+                d.imsize = imsize
                 all_done = True
         if all_done:
             return
