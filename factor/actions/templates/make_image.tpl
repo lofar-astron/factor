@@ -5,8 +5,9 @@ import sys
 
 ms        = sys.argv[6]
 imageout  = '{{ imagebasename }}'
-mask      = {{ mask }}
+mask      = '{{ mask }}'
 threshold = '{{ threshold }}'
+threshold_5rms = threshold
 uvrange   = '{{ uvrange }}'
 niter     = {{ niter }}
 nterms    = {{ nterms }}

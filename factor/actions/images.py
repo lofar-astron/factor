@@ -100,6 +100,7 @@ class Casapy(Action):
         #     - input is list of MS files
         #     - output is list of image names
         self.p['vis_datamap'] = self.vis_datamap
+        self.p['mask_datamap'] = self.mask_datamap
 
         vis_files, vis_hosts = read_mapfile(self.vis_datamap)
         self.p['output_datamap'] = self.write_mapfile(self.imagebasenames,
@@ -153,6 +154,8 @@ class Casapy(Action):
 
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
+        if self.mask_datamap is None:
+            self.p['mask'] = ''
 
         self.p['scriptname'] = os.path.abspath(self.script_file)
         template = env.get_template('make_image.pipeline.parset.tpl')
