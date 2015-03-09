@@ -3,7 +3,7 @@ import numpy
 import sys
 
 
-ms        = {{ ms }}
+ms        = sys.argv[6]
 imageout  = '{{ imagebasename }}'
 mask      = {{ mask }}
 threshold = '{{ threshold }}'
