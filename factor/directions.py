@@ -344,7 +344,7 @@ def make_region_file(vertices, outputfile):
     region_filename : str
         Name of region file
     """
-    lines = ['#CRTF\n\n']
+    lines = ['#CRTFv0\n\n']
     xylist = []
     RAs = vertices[0]
     Decs = vertices[1]
