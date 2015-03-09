@@ -37,7 +37,7 @@ class Casapy(Action):
 
     """
     def __init__(self, op_parset, vis_datamap, p, mask_datamap=None, prefix=None,
-        direction=None, clean=True, index=None, image_twice=True, name='Casapy'):
+        direction=None, clean=True, index=None, name='Casapy'):
         """
         Create action and run pipeline
 
@@ -59,9 +59,6 @@ class Casapy(Action):
             Remove unneeded files?
         index : int, optional
             Index of action
-        image_twice : bool, optional
-            If True, image two times, making a clean mask in between. If
-            False, image only once; in this case, no clean mask is made
 
         """
         super(Casapy, self).__init__(op_parset, name, prefix=prefix,
@@ -82,16 +79,13 @@ class Casapy(Action):
             os.makedirs(self.image_dir)
         self.working_dir = self.image_dir
 
-        # Define mask script name
-        self.mask_script_file = self.parsetbasename + 'make_clean_mask.py'
+        # Define script name
+        self.mask_script_file = self.parsetbasename + 'make_image.py'
 
         # Define names for output images
-        imagebasenames1 = make_image_basename(self.vis_datamap,
-            direction=self.direction, prefix=self.prefix+'1')
-        self.imagebasenames1 = [self.image_dir+bn for bn in imagebasenames1]
-        imagebasenames2 = make_image_basename(self.vis_datamap,
-            direction=self.direction, prefix=self.prefix+'2')
-        self.imagebasenames2 = [self.image_dir+bn for bn in imagebasenames2]
+        imagebasenames = make_image_basename(self.vis_datamap,
+            direction=self.direction, prefix=self.prefix)
+        self.imagebasenames = [self.image_dir+bn for bn in imagebasenames]
 
         # Define imaging parameters
         self.set_imaging_parameters()
@@ -106,38 +100,11 @@ class Casapy(Action):
         # Make first imaging-run data maps:
         #     - input is list of MS files
         #     - output is list of image names
-        self.p['vis_datamap_image1'] = self.vis_datamap
-        if self.mask_datamap is not None:
-            self.p['input_mask'] = self.mask_datamap
+        self.p['vis_datamap'] = self.vis_datamap
 
         vis_files, vis_hosts = read_mapfile(self.vis_datamap)
-        self.p['output_datamap_image1'] = self.write_mapfile(self.imagebasenames1,
-            prefix=self.prefix+'-imager1_output', index=self.index,
-            direction=self.direction, host_list=vis_hosts)
-
-        # Make masking-run data maps:
-        #     - input is list of images
-        #     - output is none
-        imnames = []
-        masknames = []
-        for bn in self.imagebasenames1:
-            if self.p['nterms'] > 1:
-                imnames.append(bn+'.image.tt0')
-            else:
-                imnames.append(bn+'.image')
-            masknames.append(bn+'.cleanmask')
-        self.p['input_datamap_mask'] = self.write_mapfile(imnames,
-            prefix=self.prefix+'-masker_input', direction=self.direction,
-            index=self.index, host_list=vis_hosts)
-        self.p['output_datamap_mask'] = self.write_mapfile(masknames,
-            prefix=self.prefix+'-masker_output', direction=self.direction,
-            index=self.index, host_list=vis_hosts)
-
-        # Make second imaging-run data maps
-        #     - input is list of MS files (same as imager 1 inputs)
-        #     - output is list of image basenames
-        self.p['output_datamap_image2'] = self.write_mapfile(self.imagebasenames2,
-            prefix=self.prefix+'-imager2_output', index=self.index,
+        self.p['output_datamap'] = self.write_mapfile(self.imagebasenames,
+            prefix=self.prefix+'-imager_output', index=self.index,
             direction=self.direction, host_list=vis_hosts)
 
 
@@ -188,23 +155,15 @@ class Casapy(Action):
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
 
-        self.p['maskscriptname'] = os.path.abspath(self.mask_script_file)
-        if self.image_twice:
-            if self.mask_datamap is not None:
-                self.p['input_mask'], _ = read_mapfile(self.p['input_mask'])[0]
-                self.p['bdsm_mask'], _ = read_mapfile(self.p['output_datamap_mask'])[0]
-                template = env.get_template('make_image_masked.pipeline.parset.tpl')
-            else:
-                template = env.get_template('make_image.pipeline.parset.tpl')
-        else:
-            template = env.get_template('make_image_single.pipeline.parset.tpl')
+        self.p['scriptname'] = os.path.abspath(self.script_file)
+        template = env.get_template('make_image.pipeline.parset.tpl')
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
 
-        template_mask = env.get_template('make_clean_mask.tpl')
-        tmp = template_mask.render(self.p)
-        with open(self.mask_script_file, 'w') as f:
+        template = env.get_template('make_image.tpl')
+        tmp = template.render(self.p)
+        with open(self.script_file, 'w') as f:
             f.write(tmp)
 
 
@@ -218,7 +177,7 @@ class Casapy(Action):
             Filename to map file with imagebasenames
 
         """
-        return self.p['output_datamap_image2']
+        return self.p['output_datamap']
 
 
     def clean(self):
