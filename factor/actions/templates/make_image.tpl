@@ -55,20 +55,20 @@ for i in range(ncycles):
     exportfits(imagename=image_name, fitsimage=fits_image, overwrite=True)
 
     # Now run PyBDSM
-    img = bdsm.process_image(imfits_imageage_name, mean_map='zero',
+    img = bdsm.process_image(fits_image, mean_map='zero',
         thresh_pix=numpy.float(threshpix), thresh_isl=numpy.float(threshisl),
         atrous_do=atrous_do, ini_method='curvature', adaptive_rms_box=True,
         adaptive_thresh=20, quiet=True)
     threshold_5rms = '{0}Jy'.format(img.clipped_rms*5.0)
     fits_mask  = imageout + '.cleanmask.fits'
-    img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
+    img.export_image(img_type='island_mask', mask_dilation=0, outfile=fits_mask,
         img_format='casa', clobber=True)
 
     # Now import FITS mask
-    mask_image = imageout + '.cleanmask.temp'
-    importfits(fitsimage=fits_mask, imagename=mask_image, overwrite=True)
+    mask_image_temp = imageout + '.cleanmask.temp'
+    importfits(fitsimage=fits_mask, imagename=mask_image_temp, overwrite=True)
 
     # Now match mask to image
     mask_image = imageout + '.cleanmask'
-    makemask(mode='copy', inpimage=image_name, inpmask=mask_image, output=mask_image, overwrite=True)
+    makemask(mode='copy', inpimage=image_name, inpmask=mask_image_temp, output=mask_image, overwrite=True)
     mask = mask_image
