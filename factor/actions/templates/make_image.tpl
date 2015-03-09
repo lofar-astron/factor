@@ -4,7 +4,7 @@ import sys
 
 
 ms        = sys.argv[6]
-imageout  = '{{ imagebasename }}'
+imageout  = sys.argv[7]
 mask      = '{{ mask }}'
 threshold = '{{ threshold }}'
 threshold_5rms = threshold
