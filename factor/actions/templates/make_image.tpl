@@ -1,7 +1,7 @@
 from lofar import bdsm
 import numpy
 import sys
-
+import os
 
 ms        = sys.argv[6]
 imageout  = sys.argv[7]
@@ -27,6 +27,10 @@ if atrous_do:
    threshisl = 4.0
 threshpix = {{ threshpix }}
 rmsbox = {{ rmsbox }}
+
+# Change to imaging directory, since makemask cannot be used with absolute paths
+dirname = os.path.dirname(imageout)
+os.chdir(dirname)
 
 for i in range(ncycles):
     # Set threshold of last cycle to 5 * rms
@@ -71,5 +75,22 @@ for i in range(ncycles):
 
     # Now match mask to image
     mask_image = imageout + '.cleanmask'
-    makemask(mode='copy', inpimage=image_name, inpmask=mask_image_temp, output=mask_image, overwrite=True)
+    makemask(mode='copy', inpimage=os.path.basename(image_name), inpmask=os.path.basename(mask_image_temp), output=os.path.basename(mask_image), overwrite=True)
     mask = mask_image
+
+# Reimage from scratch with last mask
+if image_final:
+    mask_image_final = '
+    os.system('cp -r {0} {1}'.format(mask_image, mask_image_final))
+    os.system('rm -rf {0}*'.format(imageout))
+    clean(vis=ms,imagename=imageout,outlierfile="",field="",spw="",selectdata=True,timerange=timer,
+        uvrange=uvrange,antenna="",scan="",observation="",mode="mfs",gridmode="widefield",wprojplanes=wplanes,
+        facets=nfacets,cfcache="cfcache.dir",painc=360.0,epjtable="",interpolation="linear",
+        niter=niter,gain=0.1,threshold=threshold,psfmode="clark",imagermode="csclean",
+        ftmachine="mosaic",mosweight=False,scaletype="SAULT",multiscale=scales,negcomponent=-1,
+        smallscalebias=0.6,interactive=False,mask=mask,nchan=-1,start=0,width=1,outframe="",
+        veltype="radio",imsize=imsize,cell=cell,phasecenter="",restfreq="",stokes="I",
+        weighting="briggs",robust=-0.25,uvtaper=False,outertaper=[''],innertaper=['1.0'],
+        modelimage="",restoringbeam=[''],pbcor=False,minpb=0.2,usescratch=False,noise="1.0Jy",
+        npixels=0,npercycle=100,cyclefactor=cycfactor,cyclespeedup=-1,nterms=nterms,reffreq="",
+        chaniter=False,flatnoise=True,allowchunk=False)
