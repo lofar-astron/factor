@@ -5,7 +5,8 @@ import os
 
 ms        = sys.argv[6]
 imageout  = sys.argv[7]
-mask      = '{{ mask }}'
+regmask   = '{{ mask }}'
+mask      = regmask
 threshold = '{{ threshold }}'
 threshold_5rms = threshold
 use_rms = {{ use_rms }}
@@ -52,7 +53,7 @@ for i in range(ncycles):
           chaniter=False,flatnoise=True,allowchunk=False)
 
     # Make / refine clean mask and find noise. First export to FITS format, as
-    # pyrap does not load in casapy
+    # pyrap does not load inside casapy
     if nterms > 1:
         image_name = imageout + '.image.tt0'
     else:
@@ -75,10 +76,21 @@ for i in range(ncycles):
     os.system('rm -rf {0}*'.format(mask_image_temp))
     importfits(fitsimage=fits_mask, imagename=mask_image_temp, overwrite=True)
 
-    # Now match mask to image
+    # Now match mask to image. We have to use simple filenames to avoid problems
+    # with makemask()
     mask_image_new_temp = 'temp.cleanmask'
     os.system('rm -rf {0}*'.format(mask_image_new_temp))
-    makemask(mode='copy', inpimage=os.path.basename(image_name), inpmask=os.path.basename(mask_image_temp), output=os.path.basename(mask_image_new_temp), overwrite=True)
+    if regmask != '':
+        regmask_temp = 'temp.rgn'
+        os.system('rm -f {0}*'.format(regmask_temp))
+        os.system('cp -r {0} {1}'.format(regmask, regmask_temp))
+        makemask(mode='copy', inpimage=os.path.basename(image_name),
+        inpmask=[os.path.basename(mask_image_temp), regmask_temp],
+        output=os.path.basename(mask_image_new_temp), overwrite=True)
+    else:
+        makemask(mode='copy', inpimage=os.path.basename(image_name),
+        inpmask=os.path.basename(mask_image_temp),
+        output=os.path.basename(mask_image_new_temp), overwrite=True)
     mask_image = imageout + '.cleanmask'
     os.system('cp -r {0} {1}'.format(mask_image_new_temp, mask_image))
     mask = mask_image
