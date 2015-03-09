@@ -8,6 +8,7 @@ imageout  = sys.argv[7]
 mask      = '{{ mask }}'
 threshold = '{{ threshold }}'
 threshold_5rms = threshold
+use_rms = {{ use_rms }}
 uvrange   = '{{ uvrange }}'
 niter     = {{ niter }}
 nterms    = {{ nterms }}
@@ -62,7 +63,7 @@ for i in range(ncycles):
     threshold_5rms = '{0}Jy'.format(img.clipped_rms*5.0)
     fits_mask  = imageout + '.cleanmask.fits'
     img.export_image(img_type='island_mask', mask_dilation=0, outfile=fits_mask,
-        img_format='casa', clobber=True)
+        img_format='fits', clobber=True)
 
     # Now import FITS mask
     mask_image_temp = imageout + '.cleanmask.temp'
