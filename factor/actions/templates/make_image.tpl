@@ -30,7 +30,7 @@ rmsbox = {{ rmsbox }}
 
 for i in range(ncycles):
     # Set threshold of last cycle to 5 * rms
-    if i == ncycles-1:
+    if i == ncycles-1 and use_rms:
         threshold = threshold_5rms
 
     # Image for niter iterations
