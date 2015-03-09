@@ -81,20 +81,15 @@ for i in range(ncycles):
     # with makemask()
     mask_image_new_temp = 'temp_new.cleanmask'
     os.system('rm -rf {0}*'.format(mask_image_new_temp))
-    if regmask != '':
-        regmask_temp = 'temp.rgn'
-        os.system('rm -f {0}*'.format(regmask_temp))
-        os.system('cp -r {0} {1}'.format(regmask, regmask_temp))
-        makemask(mode='copy', inpimage=os.path.basename(image_name),
-        inpmask=[os.path.basename(mask_image_temp), regmask_temp],
-        output=os.path.basename(mask_image_new_temp), overwrite=True)
-    else:
         makemask(mode='copy', inpimage=os.path.basename(image_name),
         inpmask=os.path.basename(mask_image_temp),
         output=os.path.basename(mask_image_new_temp), overwrite=True)
     mask_image = imageout + '.cleanmask'
     os.system('cp -r {0} {1}'.format(mask_image_new_temp, mask_image))
-    mask = mask_image
+    if regmask != '':
+        mask = [regmask, mask_image]
+    else:
+        mask = mask_image
 
 # Reimage from scratch with last mask
 if image_final:

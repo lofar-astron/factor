@@ -156,6 +156,8 @@ class Casapy(Action):
             self.p['ncpu'] = self.max_cpu
         if self.mask_datamap is None:
             self.p['mask'] = ''
+        if self.direction is not None:
+            self.p['mask'] = self.direction.reg
 
         self.p['scriptname'] = os.path.abspath(self.script_file)
         template = env.get_template('make_image.pipeline.parset.tpl')
