@@ -29,7 +29,7 @@ threshpix = {{ threshpix }}
 rmsbox = {{ rmsbox }}
 image_final = {{ image_final }}
 
-# Change to imaging directory, since makemask cannot be used with absolute paths
+# Change to imaging directory, since makemask() cannot be used with absolute paths
 dirname = os.path.dirname(imageout)
 os.chdir(dirname)
 
@@ -71,15 +71,16 @@ for i in range(ncycles):
         img_format='fits', clobber=True)
 
     # Now import FITS mask
-    mask_image_temp = imageout + '.cleanmask.temp'
+    mask_image_temp = 'cleanmask.temp'
+    os.system('rm -rf {0}*'.format(mask_image_temp))
     importfits(fitsimage=fits_mask, imagename=mask_image_temp, overwrite=True)
 
     # Now match mask to image
-    mask_image = 'temp.cleanmask'
-    os.system('rm -rf {0}*'.format(mask_image))
-    makemask(mode='copy', inpimage=os.path.basename(image_name), inpmask=os.path.basename(mask_image_temp), output=os.path.basename(mask_image), overwrite=True)
+    mask_image_new_temp = 'temp.cleanmask'
+    os.system('rm -rf {0}*'.format(mask_image_new_temp))
+    makemask(mode='copy', inpimage=os.path.basename(image_name), inpmask=os.path.basename(mask_image_temp), output=os.path.basename(mask_image_new_temp), overwrite=True)
     mask_image = imageout + '.cleanmask'
-    os.system('cp -r temp.cleanmask {1}'.format(mask_image))
+    os.system('cp -r {0} {1}'.format(mask_image_new_temp, mask_image))
     mask = mask_image
 
 # Reimage from scratch with last mask
