@@ -49,7 +49,7 @@ for i in range(ncycles):
     # pyrap does not load in casapy
     if nterms > 1:
         image_name = imageout + '.image.tt0'
-    else
+    else:
         image_name = imageout + '.image'
     fits_image = image_name + '.fits'
     exportfits(imagename=image_name, fitsimage=fits_image, overwrite=True)
