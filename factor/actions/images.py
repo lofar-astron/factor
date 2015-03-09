@@ -195,7 +195,6 @@ class MakeImage(Casapy):
     Action to make an image using a clean mask
     """
     def __init__(self, op_parset, vis_datamap, p, mask_datamap=None, prefix=None,
-        direction=None, clean=True, index=None, image_twice=True):
+        direction=None, clean=True, index=None):
         super(MakeImage, self).__init__(op_parset, vis_datamap, p, prefix=prefix,
-            direction=direction, clean=clean, index=index,
-            image_twice=image_twice, name='MakeImage')
+            direction=direction, clean=clean, index=index, name='MakeImage')
