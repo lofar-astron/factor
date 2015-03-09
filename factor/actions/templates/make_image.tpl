@@ -75,8 +75,11 @@ for i in range(ncycles):
     importfits(fitsimage=fits_mask, imagename=mask_image_temp, overwrite=True)
 
     # Now match mask to image
-    mask_image = imageout + '.cleanmask'
+    mask_image = 'temp.cleanmask'
+    os.system('rm -rf {0}*'.format(mask_image))
     makemask(mode='copy', inpimage=os.path.basename(image_name), inpmask=os.path.basename(mask_image_temp), output=os.path.basename(mask_image), overwrite=True)
+    mask_image = imageout + '.cleanmask'
+    os.system('cp -r temp.cleanmask {1}'.format(mask_image))
     mask = mask_image
 
 # Reimage from scratch with last mask
