@@ -79,7 +79,7 @@ class Casapy(Action):
         self.working_dir = self.image_dir
 
         # Define script name
-        self.mask_script_file = self.parsetbasename + 'make_image.py'
+        self.script_file = self.parsetbasename + 'make_image.py'
 
         # Define names for output images
         imagebasenames = make_image_basename(self.vis_datamap,
