@@ -38,6 +38,7 @@ for i in range(ncycles):
     # Set threshold of last cycle to 5 * rms
     if i == ncycles-1 and use_rms:
         threshold = threshold_5rms
+        niter = 100000
 
     # Image for niter iterations
     clean(vis=ms,imagename=imageout,outlierfile="",field="",spw="",selectdata=True,timerange=timer,
@@ -71,14 +72,14 @@ for i in range(ncycles):
     img.export_image(img_type='island_mask', mask_dilation=0, outfile=fits_mask,
         img_format='fits', clobber=True)
 
-    # Now import FITS mask
-    mask_image_temp = 'cleanmask.temp'
+    # Now change FITS mask to CASA image
+    mask_image_temp = 'temp.cleanmask'
     os.system('rm -rf {0}*'.format(mask_image_temp))
     importfits(fitsimage=fits_mask, imagename=mask_image_temp, overwrite=True)
 
     # Now match mask to image. We have to use simple filenames to avoid problems
     # with makemask()
-    mask_image_new_temp = 'temp.cleanmask'
+    mask_image_new_temp = 'temp_new.cleanmask'
     os.system('rm -rf {0}*'.format(mask_image_new_temp))
     if regmask != '':
         regmask_temp = 'temp.rgn'
@@ -97,9 +98,10 @@ for i in range(ncycles):
 
 # Reimage from scratch with last mask
 if image_final:
-    os.system('cp -r {0} {1}'.format(mask, os.path.join(dirname, 'temp.mask')))
+    os.system('rm -rf {0}*'.format('final.cleanmask'))
+    os.system('cp -r {0} {1}'.format(mask, os.path.join(dirname, 'final.cleanmask')))
     os.system('rm -rf {0}*'.format(imageout))
-    os.system('cp -r {0} {1}'.format(os.path.join(dirname, 'temp.mask'), mask))
+    os.system('cp -r {0} {1}'.format(os.path.join(dirname, 'final.cleanmask'), mask))
     clean(vis=ms,imagename=imageout,outlierfile="",field="",spw="",selectdata=True,timerange=timer,
         uvrange=uvrange,antenna="",scan="",observation="",mode="mfs",gridmode="widefield",wprojplanes=wplanes,
         facets=nfacets,cfcache="cfcache.dir",painc=360.0,epjtable="",interpolation="linear",
