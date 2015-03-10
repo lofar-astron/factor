@@ -189,7 +189,11 @@ class Action(object):
             open("{0}.err.log".format(self.logbasename), "wb") as err:
             p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err,
                 close_fds=True)
-            p.wait()
+            p.communicate()
+            try:
+                p.kill()
+            except OSError:
+                pass
 
         return self.get_results()
 
