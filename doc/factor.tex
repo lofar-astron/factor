@@ -167,7 +167,10 @@ Factor has been designed to run as much as possible in a parallel manner. To thi
 end, support is present for distributing the reduction over nodes of a compute
 cluster and over the processors of a single computer.
 
-To use Factor on a single computer, no setup is necessary. To use factor on
+To use Factor on a single computer, no setup is necessary beyond specifying the
+maximum number of CPUs to use.
+
+To use factor on
 multiple nodes of a compute cluster, the required setup depends on the cluster
 layout (distributed vs. shared file system) and scheduling system (if any).
 
@@ -185,6 +188,33 @@ For use on a cluster with a distributed file system (such as CEP2 and CEP3), set
 nodes. Note that all data will be mirrored on each node, so all nodes should
 have sufficient disk space. Additionally, the local disks must have the same
 name on each node.
+
+
+%-----------------------------------------------------------
+\subsection{Resuming}
+\label{factor:resuming}
+
+Due to the potentially long run times and the consequent non-negligible chance
+of some unforeseen failure occurring, Factor has been designed to allow easy
+resumption of a reduction from a saved state and will skip over any steps that
+were successfully completed previously. In this way, one can quickly resume a
+reduction that was halted (either by the user or due to some problem) by simply
+re-running Factor.
+
+For example, once can specify that only the first 5 directions be processed.
+Once these directions are done, Factor will exit. One can then alter the parset
+and specify that 10 directions should be done. Upon restarting, Factor will skip
+over the first 5 directions and start with the 6th one.
+
+
+%-----------------------------------------------------------
+\subsection{Structure}
+\label{factor:structure}
+
+Factor is structured based on operations and actions. An operation is a sequence of actions. For example, the InitSubtract operation performs the following actions: image at high resolution, make a sky model, subtract the sky model, average, image and low resolution, make another sky model, and finally subtract the second sky model.
+
+After each action finishes, the saved state is updated, allowing for resumption of steps at the granularity of the actions in a given operation.
+
 
 %-----------------------------------------------------------
 \subsection{Example Reduction}
