@@ -101,6 +101,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     min_freq_indx = np.argmin(freqs)
     band = bands[min_freq_indx]
     directions_file = 'factor_directions.txt'
+    ds9_directions_file = 'factor_directions_ds9.reg'
 
     # Load sky model and filter it
     s = lsmtool.load(band.skymodel_dirindep)
@@ -152,6 +153,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     # Write the file
     log.info("Writing directions file: %s" % (directions_file))
     s.write(fileName=directions_file, format='factor', sortBy='I', clobber=True)
+    s.write(fileName=ds9_directions_file, format='ds9', clobber=True)
     if interactive:
         print("Plotting directions...")
         s.plot(labelBy='patch')
