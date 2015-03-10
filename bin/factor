@@ -132,6 +132,8 @@ if __name__=='__main__':
         reg_file = os.path.join(parset['dir_working'], 'regions', direction.name+'.reg')
         factor.directions.make_region_file(direction.vertices, reg_file)
         direction.reg = reg_file
+    ds9_reg_file = os.path.join(parset['dir_working'], 'factor_directions_ds9.reg')
+    factor.directions.make_ds9_region_file(directions, ds9_reg_file)
 
     # Select subset of directions to process
     if 'ndir' in parset:
