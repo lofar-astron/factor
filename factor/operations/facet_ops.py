@@ -120,7 +120,6 @@ class FacetSetup(Operation):
         bands = self.bands
 
         # Check state for each direction
-        all_done = False
         for i, d in enumerate(d_list):
             if os.path.exists(self.statebasename[i]+'.done'):
                 concat_data_mapfile = os.path.join(self.parset['dir_working'],
@@ -129,6 +128,8 @@ class FacetSetup(Operation):
                 file, _ = read_mapfile(concat_data_mapfile)
                 d.concat_file = file[0]
                 all_done = True
+            else:
+                all_done = False
         if all_done:
             return
 
@@ -225,7 +226,6 @@ class FacetSelfcal(Operation):
         bands = self.bands
 
         # Check state for each direction
-        all_done = False
         for i, d in enumerate(d_list):
             if os.path.exists(self.statebasename[i]+'.done'):
                 final_parmdb_datamap = os.path.join(self.parset['dir_working'],
@@ -234,6 +234,8 @@ class FacetSelfcal(Operation):
                 file, _ = read_mapfile(final_parmdb_datamap)
                 d.dirdepparmdb = file[0]
                 all_done = True
+            else:
+                all_done = False
         if all_done:
             return
 
@@ -881,7 +883,6 @@ class FacetImage(Operation):
         bands = self.bands
 
         # Check state for each direction
-        all_done = False
         for i, d in enumerate(d_list):
             if os.path.exists(self.statebasename[i]+'.done'):
                 model_mapfile = os.path.join(self.parset['dir_working'],
@@ -895,6 +896,8 @@ class FacetImage(Operation):
                     imsize = 512
                 d.imsize = imsize
                 all_done = True
+            else:
+                all_done = False
         if all_done:
             return
 
