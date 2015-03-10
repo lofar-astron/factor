@@ -29,6 +29,7 @@ if atrous_do:
 threshpix = {{ threshpix }}
 rmsbox = {{ rmsbox }}
 image_final = {{ image_final }}
+iterate_threshold = {{ iterate_threshold }}
 
 # Change to imaging directory, since makemask() cannot be used with absolute paths
 dirname = os.path.dirname(imageout)
@@ -63,10 +64,28 @@ for i in range(ncycles):
     exportfits(imagename=image_name, fitsimage=fits_image, overwrite=True)
 
     # Now run PyBDSM
-    img = bdsm.process_image(fits_image, mean_map='zero',
-        thresh_pix=numpy.float(threshpix), thresh_isl=numpy.float(threshisl),
-        atrous_do=atrous_do, ini_method='curvature', adaptive_rms_box=True,
-        adaptive_thresh=20, quiet=True)
+    if i == 0 and iterate_threshold:
+        # Start with high threshold and lower it until we get at least one island
+        threshpix_orig = threshpix
+        threshisl_orig = threshisl
+        nisl = 0
+        threspix = 25
+        thresisl = 15
+        while nisl == 0:
+            img = bdsm.process_image(fits_image, mean_map='zero',
+                thresh_pix=numpy.float(threshpix), thresh_isl=numpy.float(threshisl),
+                atrous_do=atrous_do, ini_method='curvature', adaptive_rms_box=True,
+                adaptive_thresh=20, quiet=True)
+            nisl = img.nisl
+            threshpix /= 1.2
+            threshisl /= 1.2
+        threshpix = threshpix_orig
+        threshisl = threshisl_orig
+    else:
+        img = bdsm.process_image(fits_image, mean_map='zero',
+            thresh_pix=numpy.float(threshpix), thresh_isl=numpy.float(threshisl),
+            atrous_do=atrous_do, ini_method='curvature', adaptive_rms_box=True,
+            adaptive_thresh=20, quiet=True)
     threshold_5rms = '{0}Jy'.format(img.clipped_rms*5.0)
     fits_mask  = imageout + '.cleanmask.fits'
     img.export_image(img_type='island_mask', mask_dilation=0, outfile=fits_mask,
