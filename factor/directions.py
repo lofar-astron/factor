@@ -169,7 +169,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
 
 
 def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
-    '2':2, '4':8, '8':20, '16':100}, allow_reordering=True):
+    '2':0, '4':8, '8':16, '16':80}, allow_reordering=True):
     """
     Sorts directions into groups that can be selfcaled simultaneously
 
@@ -183,7 +183,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
     one_at_a_time : bool, optional
         If True, run one direction at a time
     n_per_grouping : dict, optional
-        Dict specifying the number of sources at each grouping level
+        Dict specifying the total number of sources at each grouping level
     allow_reordering : bool, optional
         If True, allow sources in neighboring groups to be reordered to increase
         the minimum separation between sources within a group
@@ -221,7 +221,10 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
                 start = 0
             else:
                 start = end
-            end = start + n_per_grouping[str(g)]
+            if i < len(grouping_levels)-1:
+                end = start + n_per_grouping[str(g)]
+            else:
+                end = len(directions)
             if end > len(directions):
                 end = len(directions)
             if end > start:
