@@ -27,7 +27,7 @@ init_subtract = {
           'freqstep': 5,
           'timestep': 2},
 'imagerl' : {'niter' : 2000,
-             'imsize': 2000,
+             'imsize': 2800,
              'mscale': False,
              'cell': '25arcsec',
              'uvrange': "0.08~2.0klambda",
