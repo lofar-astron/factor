@@ -187,7 +187,8 @@ class Action(object):
             self.pipeline_parset_file, self.pipeline_config_file)
         with open("{0}.out.log".format(self.logbasename), "wb") as out, \
             open("{0}.err.log".format(self.logbasename), "wb") as err:
-            p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
+            p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err,
+                close_fds=True)
             p.wait()
 
         return self.get_results()
