@@ -105,6 +105,12 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
 
     # Load sky model and filter it
     s = lsmtool.load(band.skymodel_dirindep)
+
+   # Filter out sources that lie more than 5 degrees from center
+    log.info('Removing sources beyond the FWHM of the primary beam...')
+    dist = s.getDistance(band.ra, band.dec)
+    s.remove(dist > 5.0) # 5 degree radius
+
     s.group('threshold', FWHM='60.0 arcsec', root='facet')
     s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='sum', force=True)
     if len(s) == 0:
@@ -137,12 +143,6 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
                 break
             else:
                 allDone = True
-
-    # Filter out sources that lie more than 5 degrees from center
-    log.info('Removing sources beyond the FWHM of the primary beam...')
-    x, y, refRA, refDec = s._getXY()
-    dist = s.getDistance(refRA, refDec)
-    s.remove(dist > 5.0) # 2 degree radius
 
     # Trim directions list to get directions_total_num of directions
     if directions_max_num is not None:
