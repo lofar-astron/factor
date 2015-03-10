@@ -54,8 +54,9 @@ class FacetAddCal(Operation):
                 'datamaps/FacetAddCal/PhaseShift/{0}/facet_output_{0}.datamap'.
                 format(d.name))
             files, hosts = read_mapfile(shifted_data_mapfile)
+            d.shifted_data_files = {}
             for band, f in zip(bands, files):
-                band.shifted_data_file = f
+                d.shifted_data_files[band.name] = f
             return
 
         # Make initial data maps for the empty datasets, their dir-indep
@@ -89,8 +90,9 @@ class FacetAddCal(Operation):
 
         # Save files to the band objects
         files, _ = read_mapfile(shifted_data_mapfile)
+        d.shifted_data_files = {}
         for band, f in zip(bands, files):
-            band.shifted_data_file = f
+            d.shifted_data_files[band.name] = f
 
 
 class FacetSetup(Operation):
@@ -146,8 +148,8 @@ class FacetSetup(Operation):
         shifted_data_mapfiles = []
         dir_indep_parmdbs_mapfiles = []
         for d, h in zip(d_list, d_hosts):
-            shifted_data_mapfiles.append(self.write_mapfile([band.
-            	shifted_data_file for band in bands], prefix='shifted',
+            shifted_data_mapfiles.append(self.write_mapfile([d.
+            	shifted_data_files[band.name] for band in bands], prefix='shifted',
             	direction=d, host_list=h))
             dir_indep_parmdbs_mapfiles.append(self.write_mapfile([band.
             	dirindparmdb for band in bands], prefix='dir_indep_parmdbs',
@@ -848,7 +850,6 @@ class FacetAddAll(Operation):
             prefix='facet', direction=d)
         shifted_data_mapfile = self.s.run(action)
 
-        # Save files to the band objects
         d.shifted_data_files, _ = read_mapfile(shifted_data_mapfile)
 
 
