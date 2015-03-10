@@ -156,16 +156,16 @@ class Operation(object):
             for s in self.statebasename:
                 success_file = s + '.done'
                 failure_file = s + '.failed'
-            if returncode == 0:
-                state_file = success_file
-                if os.path.exists(failure_file):
-                    os.remove(failure_file)
-            else:
-                state_file = failure_file
-                if os.path.exists(success_file):
-                    os.remove(success_file)
-            with open(state_file, 'w') as f:
-                f.write(' ')
+                if returncode == 0:
+                    state_file = success_file
+                    if os.path.exists(failure_file):
+                        os.remove(failure_file)
+                else:
+                    state_file = failure_file
+                    if os.path.exists(success_file):
+                        os.remove(success_file)
+                with open(state_file, 'w') as f:
+                    f.write(' ')
             if returncode != 0 and self.exit_on_error:
                 import sys
                 sys.exit(1)
