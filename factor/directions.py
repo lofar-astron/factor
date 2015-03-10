@@ -142,7 +142,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     log.info('Removing sources beyond the FWHM of the primary beam...')
     x, y, refRA, refDec = s._getXY()
     dist = s.getDistance(refRA, refDec)
-	s.remove(dist > 5.0) # 2 degree radius
+    s.remove(dist > 5.0) # 2 degree radius
 
     # Trim directions list to get directions_total_num of directions
     if directions_max_num is not None:
