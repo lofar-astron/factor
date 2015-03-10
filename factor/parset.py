@@ -57,7 +57,7 @@ def parset_read(parset_file):
     if len(parset_dict['mss']) == 0:
         log.error('No MS files found in {0}!'.format(parset_dict['dir_ms']))
         sys.exit(1)
-    log.info("Working on %i bands" % (len(parset_dict['mss'])))
+    log.info("Working on %i band(s)" % (len(parset_dict['mss'])))
 
     # some check on types and defaults
     if 'ndir' in parset_dict:
