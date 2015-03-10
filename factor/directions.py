@@ -302,22 +302,32 @@ def thiessen(directions_list, bounds_scale=0.6):
     # something that is way bigger than the points
     x_scale, y_scale = (points.min(axis=0) - points.max(axis=0)) * bounds_scale
 
-    means = np.ones((4, 2)) * points.mean(axis=0)
+    means = np.ones((16, 2)) * points.mean(axis=0)
 
-    scale_offsets = np.array([
-        [-1 * x_scale, -1 * y_scale],
-        [-1 * x_scale,  y_scale],
-        [x_scale, -1 * y_scale],
-        [x_scale,  y_scale]])
+    radius = np.sqrt(x_scale**2 + y_scale**2)
+    angles = [np.pi/8.0*i for i in range(0, 16)]
+    offsets = []
+    for ang in angles:
+        offsets.append(np.cos(ang))
+        offsets.append(np.sin(ang))
+    scale_offsets = radius * np.array(offsets)
 
+#     scale_offsets = np.array([
+#         [-1 * x_scale, -1 * y_scale],
+#         [-1 * x_scale,  y_scale],
+#         [x_scale, -1 * y_scale],
+#         [x_scale,  y_scale]])
+#
     outer_box = means + scale_offsets
 
     points = np.vstack([points, outer_box])
     tri = Delaunay(points)
     circumcenters = np.array([_circumcenter(tri.points[t])
                               for t in tri.vertices])
+#     thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
+#                       for n in range(len(points) - 4)]
     thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
-                      for n in range(len(points) - 4)]
+                      for n in range(len(points) - 16)]
 
     # Convert from x, y to RA, Dec
     thiessen_polys_deg = []
