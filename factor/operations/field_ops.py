@@ -32,7 +32,6 @@ class InitSubtract(Operation):
         from factor.actions.visibilities import Average
         from factor.lib.datamap_lib import read_mapfile
         from factor.operations.hardcoded_param import init_subtract as p
-#         self.log.warn('Using test parameters')
 
         bands = self.bands
 
