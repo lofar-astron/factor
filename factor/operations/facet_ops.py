@@ -130,6 +130,7 @@ class FacetSetup(Operation):
                 all_done = True
             else:
                 all_done = False
+                break
         if all_done:
             return
 
@@ -236,6 +237,7 @@ class FacetSelfcal(Operation):
                 all_done = True
             else:
                 all_done = False
+                break
         if all_done:
             return
 
@@ -898,6 +900,7 @@ class FacetImage(Operation):
                 all_done = True
             else:
                 all_done = False
+                break
         if all_done:
             return
 
