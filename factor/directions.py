@@ -308,8 +308,7 @@ def thiessen(directions_list, bounds_scale=0.6):
     angles = [np.pi/8.0*i for i in range(0, 16)]
     offsets = []
     for ang in angles:
-        offsets.append(np.cos(ang))
-        offsets.append(np.sin(ang))
+        offsets.append([np.cos(ang), np.sin(ang)])
     scale_offsets = radius * np.array(offsets)
 
 #     scale_offsets = np.array([
