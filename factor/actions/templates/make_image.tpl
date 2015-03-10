@@ -113,9 +113,9 @@ for i in range(ncycles):
 # Reimage from scratch with last mask
 if image_final:
     os.system('rm -rf {0}*'.format('final.cleanmask'))
-    os.system('cp -r {0} {1}'.format(mask, os.path.join(dirname, 'final.cleanmask')))
+    os.system('cp -r {0} {1}'.format(mask_image, os.path.join(dirname, 'final.cleanmask')))
     os.system('rm -rf {0}*'.format(imageout))
-    os.system('cp -r {0} {1}'.format(os.path.join(dirname, 'final.cleanmask'), mask))
+    os.system('cp -r {0} {1}'.format(os.path.join(dirname, 'final.cleanmask'), mask_image))
     clean(vis=ms,imagename=imageout,outlierfile="",field="",spw="",selectdata=True,timerange=timer,
         uvrange=uvrange,antenna="",scan="",observation="",mode="mfs",gridmode="widefield",wprojplanes=wplanes,
         facets=nfacets,cfcache="cfcache.dir",painc=360.0,epjtable="",interpolation="linear",
