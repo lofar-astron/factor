@@ -108,7 +108,7 @@ if __name__=='__main__':
         op.run()
     else:
         logging.info("Sky models found for all MS files. Skipping initial subtraction "
-            "operation.")
+            "operation")
 
     # Prepare directions
     if directions is None:
