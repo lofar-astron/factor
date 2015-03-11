@@ -299,7 +299,6 @@ def thiessen(directions_list, bounds_scale=0.6):
     points, midRA, midDec = getxy(directions_list)
     points = points.T
 
-    # something that is way bigger than the points
     x_scale, y_scale = (points.min(axis=0) - points.max(axis=0)) * bounds_scale
 
     means = np.ones((16, 2)) * points.mean(axis=0)
@@ -310,21 +309,12 @@ def thiessen(directions_list, bounds_scale=0.6):
     for ang in angles:
         offsets.append([np.cos(ang), np.sin(ang)])
     scale_offsets = radius * np.array(offsets)
-
-#     scale_offsets = np.array([
-#         [-1 * x_scale, -1 * y_scale],
-#         [-1 * x_scale,  y_scale],
-#         [x_scale, -1 * y_scale],
-#         [x_scale,  y_scale]])
-#
     outer_box = means + scale_offsets
 
     points = np.vstack([points, outer_box])
     tri = Delaunay(points)
     circumcenters = np.array([_circumcenter(tri.points[t])
                               for t in tri.vertices])
-#     thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
-#                       for n in range(len(points) - 4)]
     thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
                       for n in range(len(points) - 16)]
 
