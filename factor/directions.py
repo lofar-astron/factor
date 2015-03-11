@@ -152,8 +152,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
         if len(nearby[0]) > 1:
             patches = s.getPatchNames()[nearby]
             s.merge(patches.tolist())
-            pos = s.getPatchPositions(patchName=patches[0], method='mid')
-            s.setPatchPositions(patchDict=pos)
+    s.setPatchPositions(method='mid')
 
     # Filter fainter patches
     s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='sum', force=True)
