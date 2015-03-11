@@ -133,20 +133,31 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     # Look for nearby pairs
     log.info('Merging directions within {0} arcmin of each other...'.format(
         directions_separation_max_arcmin))
-    allDone = False
-    while not allDone:
-        pRA, pDec = s.getPatchPositions(asArray=True)
-        for ra, dec in zip(pRA.tolist()[:], pDec.tolist()[:]):
-            dist = s.getDistance(ra, dec, byPatch=True, units='arcmin')
-            nearby = np.where(dist < directions_separation_max_arcmin)
-            if len(nearby[0]) > 1:
-                patches = s.getPatchNames()[nearby]
+    for pname in s.getPatchNames().tolist()[:]:
+        if pname in s.getPatchNames().tolist():
+            s_single = s.select('Patch == {0}'.format(pname))
+            m1, m2 = lsmtool.operations_lib.matchSky(s_single, s, byPatch=True,
+                radius='{0} arcmin'.format(directions_separation_max_arcmin))
+            if len(m2) > 0:
+                patches = s.getPatchNames()[m2]
                 s.merge(patches.tolist())
                 s.setPatchPositions(method='mid')
-                allDone = False
-                break
-            else:
-                allDone = True
+
+
+#     allDone = False
+#     while not allDone:
+#         pRA, pDec = s.getPatchPositions(asArray=True)
+#         for ra, dec in zip(pRA.tolist()[:], pDec.tolist()[:]):
+#             dist = s.getDistance(ra, dec, byPatch=True, units='arcmin')
+#             nearby = np.where(dist < directions_separation_max_arcmin)
+#             if len(nearby[0]) > 1:
+#                 patches = s.getPatchNames()[nearby]
+#                 s.merge(patches.tolist())
+#                 s.setPatchPositions(method='mid')
+#                 allDone = False
+#                 break
+#             else:
+#                 allDone = True
 
     # Filter fainter patches
     s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='sum', force=True)
