@@ -299,7 +299,7 @@ class FacetSelfcal(Operation):
         chunks_list = []
         for d in d_list:
             chunks_list.append(make_chunks(d.concat_file, d.solint_a,
-            	self.parset, 'facet_chunk', direction=d))
+            	self.parset, 'facet_chunk', direction=d, clobber=True))
         chunk_data_mapfiles = []
         chunk_parmdb_mapfiles = []
         chunk_model_mapfiles = []
@@ -366,7 +366,7 @@ class FacetSelfcal(Operation):
         chunks_list = []
         for d in d_list:
             chunks_list.append(make_chunks(d.concat_file, d.solint_a,
-            	self.parset, 'facet_chunk', direction=d))
+            	self.parset, 'facet_chunk', direction=d, clobber=True))
         chunk_parmdb_mapfiles = []
         chunk_model_mapfiles = []
         for i, chunks in enumerate(chunks_list):
@@ -429,7 +429,7 @@ class FacetSelfcal(Operation):
         chunks_list = []
         for d in d_list:
             chunks_list.append(make_chunks(d.concat_file, d.solint_a,
-            	self.parset, 'facet_chunk', direction=d))
+            	self.parset, 'facet_chunk', direction=d, clobber=True))
         chunk_parmdb_phaseamp_phase1_mapfiles = []
         chunk_parmdb_phaseamp_amp1_mapfiles = []
         chunk_model_mapfiles = []
@@ -538,7 +538,7 @@ class FacetSelfcal(Operation):
         chunks_list = []
         for d in d_list:
             chunks_list.append(make_chunks(d.concat_file, d.solint_a,
-            	self.parset, 'facet_chunk', direction=d))
+            	self.parset, 'facet_chunk', direction=d, clobber=True))
 
         self.log.info('Preapplying amplitude solutions...')
         chunk_parmdb_phaseamp_amp1_mapfiles = []
