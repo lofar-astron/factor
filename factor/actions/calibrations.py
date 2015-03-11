@@ -120,7 +120,7 @@ class BBS(Action):
                 emptyskymodel_list.append(sm)
             self.model_datamap = self.write_mapfile(emptyskymodel_list,
                 prefix=self.prefix+'_empty_skymodels', index=self.index,
-                host_list=vis_hosts)
+                host_list=vis_hosts, direction=self.direction)
         self.p['skymodel_datamap'] = self.model_datamap
 
         if self.parmdb_datamap is not None:
@@ -129,7 +129,7 @@ class BBS(Action):
         local_parmdb_files = [os.path.join(v, 'instrument') for v in vis_files]
         self.local_parmdb_datamap = self.write_mapfile(local_parmdb_files,
         	prefix=self.prefix+'_local_parmdbs', index=self.index,
-        	host_list=vis_hosts)
+        	host_list=vis_hosts, direction=self.direction)
 
         # Copy the input parmdb (if any) to local parmdb
         if self.parmdb_datamap is not None:
