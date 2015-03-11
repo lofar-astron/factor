@@ -135,7 +135,8 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
         directions_separation_max_arcmin))
     for pname in s.getPatchNames().tolist()[:]:
         if pname in s.getPatchNames().tolist():
-            s_single = s.select('Patch == {0}'.format(pname))
+            s_single = s.copy()
+            s_single.select('Patch == {0}'.format(pname))
             m1, m2 = lsmtool.operations_lib.matchSky(s_single, s, byPatch=True,
                 radius='{0} arcmin'.format(directions_separation_max_arcmin))
             if len(m2) > 0:
