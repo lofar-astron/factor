@@ -133,18 +133,6 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     # Look for nearby pairs
     log.info('Merging directions within {0} arcmin of each other...'.format(
         directions_separation_max_arcmin))
-#     for pname in s.getPatchNames().tolist()[:]:
-#         if pname in s.getPatchNames().tolist():
-#             s_single = s.copy()
-#             s_single.select('Patch == {0}'.format(pname))
-#             m1, m2 = lsmtool.operations_lib.matchSky(s_single, s, byPatch=True,
-#                 radius='{0} arcmin'.format(directions_separation_max_arcmin))
-#             if len(m2) > 0:
-#                 patches = s.getPatchNames()[m2]
-#                 s.merge(patches.tolist())
-#                 s.setPatchPositions(method='mid')
-
-
     pRA, pDec = s.getPatchPositions(asArray=True)
     for ra, dec in zip(pRA.tolist()[:], pDec.tolist()[:]):
         dist = s.getDistance(ra, dec, byPatch=True, units='arcmin')
@@ -196,7 +184,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
     """
     Sorts directions into groups that can be selfcaled simultaneously
 
-    Directions are grouped by flux and then optionally reodered to maximize
+    Directions are grouped by flux and then optionally reordered to maximize
     the miniumum separation between sources in a group
 
     Parameters
@@ -206,7 +194,9 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
     one_at_a_time : bool, optional
         If True, run one direction at a time
     n_per_grouping : dict, optional
-        Dict specifying the total number of sources at each grouping level
+        Dict specifying the total number of sources at each grouping level. The
+        sources at each grouping level can be reordered to maximize the
+        minimum separation between sources within a group
     allow_reordering : bool, optional
         If True, allow sources in neighboring groups to be reordered to increase
         the minimum separation between sources within a group
@@ -226,7 +216,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
     else:
         def find_min_separation(group):
             """
-            Finds the minimum separation between sources in a group
+            Finds the minimum separation in degrees between sources in a group
             """
             sep = []
             for direction1 in group:
@@ -276,7 +266,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
                         k = i - 1
                     group2 = direction_groups_orig[k]
 
-                    min_sep_global = 0.0
+                    min_sep_global = 100.0 # degrees
                     for j in range(10):
                         group_merged = shuffle(group1[:] + group2[:])
                         group1_test = group_merged[range(len(group1))]
@@ -284,7 +274,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
                         min_sep1 = find_min_separation(group1_test)
                         min_sep2 = find_min_separation(group2_test)
                         min_sep = min(min_sep1, min_sep2)
-                        if min_sep > min_sep_global:
+                        if min_sep < min_sep_global:
                             min_sep_global = min_sep
                             group1_best = group1_test
                             group2_best = group2_test
