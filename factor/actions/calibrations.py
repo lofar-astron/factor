@@ -100,6 +100,9 @@ class BBS(Action):
         self.parset_file = self.parsetbasename + '.parset'
         self.templatename = '{0}_{1}.parset.tpl'.format(prefix, self.name.lower())
 
+        # Set up all required files
+        self.setup()
+
 
     def make_datamaps(self):
         """

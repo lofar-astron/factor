@@ -89,6 +89,9 @@ class Casapy(Action):
         # Define imaging parameters
         self.set_imaging_parameters()
 
+        # Set up all required files
+        self.setup()
+
 
     def make_datamaps(self):
         """

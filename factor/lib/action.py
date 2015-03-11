@@ -174,15 +174,20 @@ class Action(object):
             f.write(tmp)
 
 
-    def run(self):
+    def setup(self):
         """
-        Runs the pipeline
+        Sets up the action for running
         """
         self.make_datamaps()
         self.set_pipeline_parameters()
         self.make_pipeline_control_parset()
         self.make_pipeline_config_parset()
 
+
+    def run(self):
+        """
+        Runs the pipeline
+        """
         cmd = 'python {0} {1} -d -c {2}'.format(self.pipeline_executable,
             self.pipeline_parset_file, self.pipeline_config_file)
         with open("{0}.out.log".format(self.logbasename), "wb") as out, \

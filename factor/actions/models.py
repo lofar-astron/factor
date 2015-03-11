@@ -85,6 +85,9 @@ class MakeSkymodelFromModelImage(Action):
             direction=self.direction)
         self.modelbasenames = [self.working_dir+bn for bn in modelbasenames]
 
+        # Set up all required files
+        self.setup()
+
 
     def make_datamaps(self):
         """
@@ -201,6 +204,9 @@ class MakeFacetSkymodel(Action):
         modelbasenames = make_image_basename(self.input_datamap,
             direction=self.direction, prefix=self.prefix)
         self.modelbasenames = [self.working_dir+bn for bn in modelbasenames]
+
+        # Set up all required files
+        self.setup()
 
 
     def make_datamaps(self):
@@ -321,6 +327,9 @@ class MergeSkymodels(Action):
         # Define script name
         self.script_file = self.parsetbasename + 'merge_skymodels.py'
 
+        # Set up all required files
+        self.setup()
+
 
     def make_datamaps(self):
         """
@@ -427,6 +436,9 @@ class FFT(Action):
         self.script_file = self.parsetbasename + 'ftw.py'
         self.task_xml_file = os.path.join(self.parset_dir, 'ftw.xml')
         self.task_py_file = os.path.join(self.parset_dir, 'task_ftw.py')
+
+        # Set up all required files
+        self.setup()
 
 
     def make_datamaps(self):

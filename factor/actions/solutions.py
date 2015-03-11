@@ -92,6 +92,9 @@ class Losoto(Action):
                 os.system('rm -rf {0}/instrument'.format(mn))
             os.system('cp -r {0} {1}/instrument'.format(pn, mn))
 
+        # Set up all required files
+        self.setup()
+
 
     def make_datamaps(self):
         """

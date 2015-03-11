@@ -76,6 +76,9 @@ class DPPP(Action):
         if not os.path.exists(self.working_dir):
             os.makedirs(self.working_dir)
 
+        # Set up all required files
+        self.setup()
+
 
     def make_datamaps(self):
         """
