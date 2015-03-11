@@ -480,7 +480,7 @@ class FacetSelfcal(Operation):
                 [chunk.file for chunk in chunks], prefix='image3')],
                 prefix='merged_vis', direction=d_list[i], host_list=d_hosts[i]))
 
-        self.log.info('Merging instrument parmdbs...')
+        self.log.debug('Merging instrument parmdbs...')
         merged_parmdb_phaseamp_amp1_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             concat_file, _ = read_mapfile(merged_data_mapfiles[i])
@@ -603,7 +603,7 @@ class FacetSelfcal(Operation):
             	[chunk.file for chunk in chunks], prefix='image4')],
             	prefix='merged_vis', direction=d_list[i], host_list=d_hosts[i]))
 
-        self.log.info('Merging instrument parmdbs...')
+        self.log.debug('Merging instrument parmdbs...')
         merged_parmdb_phaseamp_amp2_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             concat_file, _ = read_mapfile(merged_data_mapfiles[i])
