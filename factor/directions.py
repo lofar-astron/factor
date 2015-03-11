@@ -106,25 +106,14 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     # Load sky model and filter it
     s = lsmtool.load(band.skymodel_dirindep)
 
-   # Filter out sources that lie more than 5 degrees from center
-    log.info('Removing sources beyond the FWHM of the primary beam...')
-    dist = s.getDistance(band.ra, band.dec)
-    s.remove(dist > 5.0) # 5 degree radius
-
+    # Group to clean components by thresholding after convolving model with
+    # 1 arcmin beam
     s.group('threshold', FWHM='60.0 arcsec', root='facet')
-    s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='sum', force=True)
-    if len(s) == 0:
-        log.critical("No directions found that meet the specified min flux criteria.")
-        sys.exit(1)
-    log.info('Found {0} directions with fluxes above {1} Jy'.format(
-        len(s.getPatchNames()), flux_min_Jy))
-    sizes = s.getPatchSizes(units='arcmin', weight=True)
-    s.select(sizes < size_max_arcmin, aggregate=True, force=True)
-    if len(s) == 0:
-        log.critical("No directions found that meet the specified max size criteria.")
-        sys.exit(1)
-    log.info('Found {0} directions with fluxes above {1} Jy and sizes below {2} '
-        'arcmin'.format(len(s.getPatchNames()), flux_min_Jy, size_max_arcmin))
+
+    # Filter out sources that lie more than 5 degrees from center
+    log.info('Removing sources beyond the FWHM of the primary beam...')
+    dist = s.getDistance(band.ra, band.dec, byPatch=True)
+    s.remove(dist > 5.0, aggregate=True) # 5 degree radius
 
     # Look for nearby pairs
     log.info('Merging directions within {0} arcmin of each other...'.format(
@@ -143,6 +132,21 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
                 break
             else:
                 allDone = True
+
+    # Filter fainter patches
+    s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='sum', force=True)
+    if len(s) == 0:
+        log.critical("No directions found that meet the specified min flux criteria.")
+        sys.exit(1)
+    log.info('Found {0} directions with fluxes above {1} Jy'.format(
+        len(s.getPatchNames()), flux_min_Jy))
+    sizes = s.getPatchSizes(units='arcmin', weight=True)
+    s.select(sizes < size_max_arcmin, aggregate=True, force=True)
+    if len(s) == 0:
+        log.critical("No directions found that meet the specified max size criteria.")
+        sys.exit(1)
+    log.info('Found {0} directions with fluxes above {1} Jy and sizes below {2} '
+        'arcmin'.format(len(s.getPatchNames()), flux_min_Jy, size_max_arcmin))
 
     # Trim directions list to get directions_total_num of directions
     if directions_max_num is not None:
