@@ -222,6 +222,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
             for direction1 in group:
                 for direction2 in group:
                     if direction1 != direction2:
+                        print('here')
                         sep.append(calculateSeparation(direction1.ra, direction1.dec,
                             direction2.ra, direction2.dec))
             return min(sep)
