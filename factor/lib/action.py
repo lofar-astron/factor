@@ -142,7 +142,7 @@ class Action(object):
             host_list = self.op_parset['node_list']
 
         mapfile = write_mapfile(data_list, self.op_name,
-        	action_name=self.name, prefix=prefix, direction=direction,
+        	action_name=self.name, prefix=prefix, direction=direction, band=band,
         	index=index, host_list=host_list, use_abs_path=use_abs_path,
         	working_dir=self.op_parset['dir_working'])
 
