@@ -257,7 +257,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
         # and picking the group with the largest minimum separation
         if allow_reordering:
             direction_groups_orig = direction_groups[:]
-            self.log.info('{0}'.format(len(direction_groups_orig)))
+            log.info('{0}'.format(len(direction_groups_orig)))
             if len(direction_groups_orig) > 1:
                 for i in range(len(direction_groups_orig), 2):
                     group1 = direction_groups_orig[i]
@@ -269,7 +269,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
 
                     min_sep_global = 0.0 # degrees
                     for j in range(10):
-                        self.log.info('{0}'.format(min_sep_global))
+                        log.info('{0}'.format(min_sep_global))
                         group_merged = shuffle(group1[:] + group2[:])
                         group1_test = group_merged[range(len(group1))]
                         group2_test = group_merged[range(len(group1), len(group2))]
