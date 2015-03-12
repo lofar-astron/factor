@@ -269,7 +269,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
                     min_sep_global = 0.0 # degrees
                     for j in range(10):
                         log.info('{0}'.format(min_sep_global))
-                        log.info('{0}'.format(group1))
+                        log.info('{0}'.format(len(group1)))
                         log.info('{0}'.format(group2))
                         group_merged = shuffle(group1[:] + group2[:])
                         group1_test = group_merged[0:len(group1)]
