@@ -113,7 +113,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     if len(s) == 0:
         log.critical("No sources found through thresholding.")
         sys.exit(1)
-    log.info('Found {0} directions through thresholding'.format(
+    log.info('Found {0} sources through thresholding'.format(
         len(s.getPatchNames())))
 
     # Filter out sources that lie more than 5 degrees from center
@@ -125,13 +125,13 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     sizes = s.getPatchSizes(units='arcmin', weight=True)
     s.select(sizes < size_max_arcmin, aggregate=True, force=True)
     if len(s) == 0:
-        log.critical("No directions found that meet the specified max size criteria.")
+        log.critical("No sources found that meet the specified max size criteria.")
         sys.exit(1)
-    log.info('Found {0} directions with sizes below {1} '
+    log.info('Found {0} sources with sizes below {1} '
         'arcmin'.format(len(s.getPatchNames()), size_max_arcmin))
 
     # Look for nearby pairs
-    log.info('Merging directions within {0} arcmin of each other...'.format(
+    log.info('Merging sources within {0} arcmin of each other...'.format(
         directions_separation_max_arcmin))
     pRA, pDec = s.getPatchPositions(asArray=True)
     for ra, dec in zip(pRA.tolist()[:], pDec.tolist()[:]):
@@ -145,9 +145,9 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     # Filter fainter patches
     s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='sum', force=True)
     if len(s) == 0:
-        log.critical("No directions found that meet the specified min flux criteria.")
+        log.critical("No sources found that meet the specified min flux criteria.")
         sys.exit(1)
-    log.info('Found {0} directions with fluxes above {1} Jy'.format(
+    log.info('Found {0} sources with fluxes above {1} Jy'.format(
         len(s.getPatchNames()), flux_min_Jy))
 
     # Trim directions list to get directions_total_num of directions
@@ -268,6 +268,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
 
                     min_sep_global = 0.0 # degrees
                     for j in range(10):
+                        print(min_sep_global)
                         group_merged = shuffle(group1[:] + group2[:])
                         group1_test = group_merged[range(len(group1))]
                         group2_test = group_merged[range(len(group1), len(group2))]

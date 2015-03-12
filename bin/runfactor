@@ -146,9 +146,6 @@ if __name__=='__main__':
     else:
         one_at_a_time = True
     direction_groups = factor.directions.group_directions(directions, one_at_a_time)
-    for direction_group in direction_groups:
-        print('{0}'.format(direction_group))
-    sys.exit()
 
     # Iterate over direction groups
     for direction_group in direction_groups:
