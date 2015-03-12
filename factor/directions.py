@@ -273,8 +273,8 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
                         log.info('{0}'.format(group2))
                         group_merged = group1[:] + group2[:]
                         shuffle(group_merged)
-                        group1_test = group_merged[0:len(group1)]
-                        group2_test = group_merged[len(group1), len(group2)]
+                        group1_test = group_merged[0: len(group1)]
+                        group2_test = group_merged[len(group1): len(group2)]
                         min_sep1 = find_min_separation(group1_test)
                         min_sep2 = find_min_separation(group2_test)
                         min_sep = min(min_sep1, min_sep2)
