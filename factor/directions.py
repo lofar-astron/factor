@@ -235,7 +235,11 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
             else:
                 start = end
             if i < len(grouping_levels)-1:
-                end = start + n_per_grouping[str(g)]
+                if n_per_grouping[str(g)] <= 0:
+                    # check for 0 as indicator of "take all the rest"
+                    end = len(directions)
+                else:
+                    end = start + n_per_grouping[str(g)]
             else:
                 end = len(directions)
             if end > len(directions):
