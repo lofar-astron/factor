@@ -45,16 +45,30 @@ class InitSubtract(Operation):
             return
 
         # Make initial data maps for the empty datasets and their dir-indep
-        # instrument parmdbs
+        # instrument parmdbs. Also make datamaps with one file each for casapy
+        # imaging run (otherwise we get conflicts with temp files)
         subtracted_all_mapfile = self.write_mapfile([band.file for band in bands],
         	prefix='subtracted_all')
+        vis_mapfiles = []
+        files, hosts = read_mapfile(subtracted_all_mapfile)
+        for f, h in zip(files, hosts):
+            vis_mapfiles.append(self.write_mapfile([f],
+        	prefix='subtracted_all_vis', host_list=[h])
         dir_indep_parmdbs_mapfile = self.write_mapfile([band.dirindparmdb for band
         	in bands], prefix='dir_indep_parmdbs')
 
         self.log.info('High-res imaging...')
-        action = MakeImage(self.parset, subtracted_all_mapfile, p['imagerh'],
-            prefix='highres')
-        highres_image_basenames_mapfile = self.s.run(action)
+        actions = [MakeImage(self.parset, dm, p['imagerh'],
+            prefix='highres', band=band) for dm, band in zip(vis_mapfiles, bands)]
+        highres_image_basenames_mapfiles = self.s.run(actions)
+        basenames = []
+        hosts = []
+        for bm in highres_image_basenames_mapfiles:
+            file_list, host_list = read_mapfile(bm)
+            basenames += file_list
+            hosts += host_list
+        highres_image_basenames_mapfile = self.write_mapfile(basenames,
+        	prefix='highres_basenames', host_list=hosts)
 
         if self.parset['use_ftw']:
             self.log.debug('FFTing high-res model image...')
@@ -78,11 +92,24 @@ class InitSubtract(Operation):
         action = Average(self.parset, subtracted_all_mapfile, p['avgl'],
             prefix='highres')
         avg_files_mapfile = self.s.run(action)
+        vis_mapfiles = []
+        files, hosts = read_mapfile(vg_files_mapfile)
+        for f, h in zip(files, hosts):
+            vis_mapfiles.append(self.write_mapfile([f],
+        	prefix='subtracted_all_vis', host_list=[h])
 
         self.log.info('Low-res imaging...')
-        action = MakeImage(self.parset, avg_files_mapfile, p['imagerl'],
-            prefix='lowres')
-        lowres_image_basenames_mapfile = self.s.run(action)
+        actions = [MakeImage(self.parset, dm, p['imagerl'],
+            prefix='lowres', band=band) for dm, band in zip(vis_mapfiles, bands)]
+        lowres_image_basenames_mapfiles = self.s.run(actions)
+        basenames = []
+        hosts = []
+        for bm in lowres_image_basenames_mapfiles:
+            file_list, host_list = read_mapfile(bm)
+            basenames += file_list
+            hosts += host_list
+        lowres_image_basenames_mapfile = self.write_mapfile(basenames,
+        	prefix='lowres_basenames', host_list=hosts)
 
         if self.parset['use_ftw']:
             self.log.debug('FFTing low-res model image...')

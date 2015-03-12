@@ -15,7 +15,7 @@ class Action(object):
     """
     Generic action class
     """
-    def __init__(self, op_parset, name, prefix=None, direction=None,
+    def __init__(self, op_parset, name, prefix=None, direction=None, band=None,
         index=None):
         """
         Create Action object
@@ -30,6 +30,8 @@ class Action(object):
             Prefix to use for names
         direction : Direction object, optional
             Direction for this action
+        band : Band object, optional
+            Band for this action
         index : int, optional
             Index of action
 
@@ -39,6 +41,7 @@ class Action(object):
         self.op_parset = op_parset.copy()
         self.prefix = prefix
         self.direction = direction
+        self.band = band
         self.index = index
         self.max_cpu = self.op_parset['ncpu']
 
@@ -53,6 +56,8 @@ class Action(object):
             self.op_name, self.name)
         if self.direction is not None:
             self.datamap_dir += '{0}/'.format(self.direction.name)
+        if self.band is not None:
+            self.datamap_dir += '{0}/'.format(self.band.name)
         if not os.path.exists(self.datamap_dir):
             os.makedirs(self.datamap_dir)
 
@@ -60,6 +65,8 @@ class Action(object):
             self.op_name, self.name)
         if self.direction is not None:
             self.parset_dir += '{0}/'.format(self.direction.name)
+        if self.band is not None:
+            self.parset_dir += '{0}/'.format(self.band.name)
         if not os.path.exists(self.parset_dir):
             os.makedirs(self.parset_dir)
 
@@ -67,6 +74,8 @@ class Action(object):
             self.op_name, self.name)
         if self.direction is not None:
             self.pipeline_run_dir += '{0}/'.format(self.direction.name)
+        if self.band is not None:
+            self.pipeline_run_dir += '{0}/'.format(self.band.name)
         if not os.path.exists(self.pipeline_run_dir):
             os.makedirs(self.pipeline_run_dir)
 
@@ -75,6 +84,8 @@ class Action(object):
             self.op_name, self.name)
         if self.direction is not None:
             self.log_dir += '{0}/'.format(self.direction.name)
+        if self.band is not None:
+            self.log_dir += '{0}/'.format(self.band.name)
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
 
@@ -83,13 +94,13 @@ class Action(object):
 
         # Set up parset and script names needed by every action
         self.parsetbasename = self.parset_dir + make_basename(prefix,
-            direction, index)
+            direction, band, index)
         self.pipeline_parset_file = self.parsetbasename + 'pipe.parset'
         self.pipeline_config_file = self.parsetbasename + 'pipe.cfg'
-        self.pipeline_run_dir += make_basename(prefix, direction, index)
+        self.pipeline_run_dir += make_basename(prefix, direction, band, index)
         if not os.path.exists(self.pipeline_run_dir):
             os.makedirs(self.pipeline_run_dir)
-        self.logbasename = self.log_dir + make_basename(prefix, direction,
+        self.logbasename = self.log_dir + make_basename(prefix, direction, band,
             index)
 
 

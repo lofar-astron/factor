@@ -31,7 +31,7 @@ class Band(object):
         obs = pt.table(self.file+'::FIELD', ack=False)
         self.ra = np.degrees(float(obs.col('REFERENCE_DIR')[0][0][0]))
         if self.ra < 0.:
-            self.ra=360.+(self.ra)
+            self.ra = 360.0 + (self.ra)
         self.dec = np.degrees(float(obs.col('REFERENCE_DIR')[0][0][1]))
         obs.close()
 
@@ -39,8 +39,8 @@ class Band(object):
         diam = float(ant.col('DISH_DIAMETER')[0])
         ant.close()
 
-        self.fwhm_deg = 1.1*((3.0e8/self.freq)/diam)*180./np.pi
-        self.name = str(self.freq)
+        self.fwhm_deg = 1.1 * ((3.0e8 / self.freq) / diam) * 180. / np.pi
+        self.name = 'Band_{0:.2f}MHz'.format(self.freq/1e6)
 
         # Check for SUBTRACTED_DATA_ALL column
         tab = pt.table(self.file, ack=False)

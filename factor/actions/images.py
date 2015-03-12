@@ -11,7 +11,7 @@ MakeImage : Action
 """
 
 from factor.lib.action import Action
-from factor.lib.action_lib import make_basename, make_image_basename, getOptimumSize
+from factor.lib.action_lib import make_image_basename, getOptimumSize
 from jinja2 import Environment, FileSystemLoader
 import os
 
@@ -37,7 +37,7 @@ class Casapy(Action):
 
     """
     def __init__(self, op_parset, vis_datamap, p, mask_datamap=None, prefix=None,
-        direction=None, clean=True, index=None, name='Casapy'):
+        direction=None, band=None, clean=True, index=None, name='Casapy'):
         """
         Create action and run pipeline
 
@@ -55,6 +55,8 @@ class Casapy(Action):
             Prefix to use for image names
         direction : Direction object, optional
             Direction for this image
+        band : Band object, optional
+            Band for this image
         clean : bool, optional
             Remove unneeded files?
         index : int, optional
@@ -62,7 +64,7 @@ class Casapy(Action):
 
         """
         super(Casapy, self).__init__(op_parset, name, prefix=prefix,
-            direction=direction, index=index)
+            direction=direction, band=band, index=index)
 
         # Store input parameters
         self.vis_datamap = vis_datamap
@@ -74,6 +76,8 @@ class Casapy(Action):
         self.image_dir += '{0}/{1}/'.format(self.op_name, self.name)
         if self.direction is not None:
             self.image_dir += '{0}/'.format(self.direction.name)
+        if self.band is not None:
+            self.image_dir += '{0}/'.format(self.band.name)
         if not os.path.exists(self.image_dir):
             os.makedirs(self.image_dir)
         self.working_dir = self.image_dir
@@ -83,7 +87,7 @@ class Casapy(Action):
 
         # Define names for output images
         imagebasenames = make_image_basename(self.vis_datamap,
-            direction=self.direction, prefix=self.prefix)
+            direction=self.direction, band=self.band, prefix=self.prefix)
         self.imagebasenames = [self.image_dir+bn for bn in imagebasenames]
 
         # Define imaging parameters
@@ -202,6 +206,7 @@ class MakeImage(Casapy):
     Action to make an image using a clean mask
     """
     def __init__(self, op_parset, vis_datamap, p, mask_datamap=None, prefix=None,
-        direction=None, clean=True, index=None):
+        direction=None, band=None, clean=True, index=None):
         super(MakeImage, self).__init__(op_parset, vis_datamap, p, prefix=prefix,
-            direction=direction, clean=clean, index=index, name='MakeImage')
+            direction=direction, band=band, clean=clean, index=index,
+            name='MakeImage')

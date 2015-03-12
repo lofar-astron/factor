@@ -3,7 +3,7 @@ Some functions called by multiple actions
 """
 
 
-def make_basename(prefix, direction=None, index=None):
+def make_basename(prefix, direction=None, band=None, index=None):
     """
     Returns a standard name pattern
 
@@ -11,8 +11,10 @@ def make_basename(prefix, direction=None, index=None):
     ----------
     prefix : str
         A prefix for the name, usually related to the particular operation step
-    direction : Direction object or str, optional
-        A direction name
+    direction : Direction object, optional
+        A direction
+    band : Band object, optional
+        A band
     index : int, optional
         An index for the particular operation step
     """
@@ -20,12 +22,13 @@ def make_basename(prefix, direction=None, index=None):
     import os
 
     if direction is not None:
-        try:
-            dirtxt = '_{0}'.format(direction.name)
-        except:
-            dirtxt = '_{0}'.format(direction)
+        dirtxt = '_{0}'.format(direction.name)
     else:
         dirtxt = ''
+    if band is not None:
+        bandtxt = '_{0}'.format(band.name)
+    else:
+        bandtxt = ''
     if index is not None:
         indtxt = '-{0}'.format(index)
     else:
@@ -34,12 +37,18 @@ def make_basename(prefix, direction=None, index=None):
     return '{0}{1}{2}'.format(prefix, dirtxt, indtxt)
 
 
-def make_image_basename(input_datamap, direction=None, prefix=None):
+def make_image_basename(input_datamap, direction=None, band=None, prefix=None):
     """
     Define a standard name pattern for imaging files
 
     Parameters
     ----------
+    input_datamap : Datamap
+        Data map to files
+    direction : Direction object, optional
+        A direction
+    band : Band object, optional
+        A band
     prefix : str, optional
         String to prepend to the image basename. If None, 'image' is used
 
@@ -60,13 +69,15 @@ def make_image_basename(input_datamap, direction=None, prefix=None):
         msbase = os.path.basename(msfile)
 
         if direction is not None:
-            try:
-                dirtxt = direction.name
-            except:
-                dirtxt = direction
-            image_basenames.append('%s%s_%s' % (prefix, re.sub(r'.MS|.ms', '', msbase), dirtxt))
+            dirtxt = '_{0}'.format(direction.name)
         else:
-            image_basenames.append('%s%s' % (prefix, re.sub(r'.MS|.ms', '', msbase)))
+            dirtxt = ''
+        if band is not None:
+            bandtxt = '_{0}'.format(band.name)
+        else:
+            bandtxt = ''
+
+        image_basenames.append('%s%s%s%s' % (prefix, re.sub(r'.MS|.ms', '', msbase), dirtxt, bandtxt))
 
     return image_basenames
 
