@@ -100,6 +100,22 @@ def parset_read(parset_file):
     if 'directions_separation_max_arcmin' in parset_dict:
         parset_dict['directions_separation_max_arcmin'] = parset.getfloat('global',
             'directions_separation_max_arcmin')
+    if 'directions_groupings' in parset_dict:
+        groupings={}
+        keys = []
+        vals = []
+        kvs = parset_dict['directions_groupings'].split(',')
+        for kv in kvs:
+            key, val = kv.split(':')
+            keys.append(key.strip())
+            vals.append(val.strip())
+        for key, val in zip(keys, vals):
+            groupings[key] = int(val)
+        parset_dict['groupings'] = groupings
+        parset_dict['one_at_a_time'] = False
+        log.info("Using the following groupings for directions: {0}".format(groupings))
+    else:
+        parset_dict['one_at_a_time'] = True
 
     # load MS-specific parameters
     parset_dict['ms_specific'] = {}

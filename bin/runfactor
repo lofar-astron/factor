@@ -145,7 +145,8 @@ if __name__=='__main__':
         one_at_a_time = False
     else:
         one_at_a_time = True
-    direction_groups = factor.directions.group_directions(directions, one_at_a_time)
+    direction_groups = factor.directions.group_directions(directions,
+        one_at_a_time=parset['one_at_a_time'], n_per_grouping=parset['groupings'])
 
     # Iterate over direction groups
     for direction_group in direction_groups:
