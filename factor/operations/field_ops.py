@@ -51,6 +51,8 @@ class InitSubtract(Operation):
         	prefix='subtracted_all')
         vis_mapfiles = []
         files, hosts = read_mapfile(subtracted_all_mapfile)
+        self.log.info('{0}'.format(files))
+        self.log.info('{0}'.format(hosts))
         for f, h in zip(files, hosts):
             vis_mapfiles.append(self.write_mapfile([f],
         	prefix='subtracted_all_vis', host_list=[h]))
