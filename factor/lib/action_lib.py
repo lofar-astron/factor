@@ -18,9 +18,6 @@ def make_basename(prefix, direction=None, band=None, index=None):
     index : int, optional
         An index for the particular operation step
     """
-    import re
-    import os
-
     if direction is not None:
         dirtxt = '_{0}'.format(direction.name)
     else:
@@ -34,7 +31,7 @@ def make_basename(prefix, direction=None, band=None, index=None):
     else:
         indtxt = ''
 
-    return '{0}{1}{2}'.format(prefix, dirtxt, indtxt)
+    return '{0}{1}{2}{3}'.format(prefix, dirtxt, bandtxt, indtxt)
 
 
 def make_image_basename(input_datamap, direction=None, band=None, prefix=None):

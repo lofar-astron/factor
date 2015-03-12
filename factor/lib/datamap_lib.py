@@ -3,10 +3,11 @@ Datamap functions
 """
 import os
 from lofarpipe.support.data_map import DataMap, DataProduct
+from factor.lib.action_lib import make_basename
 
 
 def write_mapfile(data_list, op_name, action_name=None, prefix=None,
-    direction=None, index=None, working_dir='.', flag_list=None,
+    direction=None, band=None, index=None, working_dir='.', flag_list=None,
     use_abs_path=True, host_list=None):
     """
     Returns a datamap for the input data list
@@ -21,8 +22,10 @@ def write_mapfile(data_list, op_name, action_name=None, prefix=None,
         Parent action name
     prefix : str
         A prefix for the name
-    direction : Direction object or str, optional
-        A direction name
+    direction : Direction object, optional
+        A direction
+    band : Band object, optional
+        A band
     index : int, optional
         An index for the datamap
     working_dir : str, optional
@@ -37,13 +40,15 @@ def write_mapfile(data_list, op_name, action_name=None, prefix=None,
     """
     if use_abs_path:
         data_list = [os.path.abspath(f) for f in data_list]
-    basename = make_mapfile_basename(prefix=prefix, direction=direction,
+    basename = make_basename(prefix=prefix, direction=direction, band=band,
         index=index)
     mapfile_dir = os.path.join(working_dir, 'datamaps', op_name)
     if action_name is not None:
         mapfile_dir = os.path.join(mapfile_dir, action_name)
     if direction is not None:
         mapfile_dir = os.path.join(mapfile_dir, direction.name)
+    if band is not None:
+        mapfile_dir = os.path.join(mapfile_dir, band.name)
     if not os.path.exists(mapfile_dir):
         os.makedirs(mapfile_dir)
     mapfile = os.path.join(mapfile_dir, '{0}.datamap'.format(basename))
@@ -116,29 +121,3 @@ def set_mapfile_flags(mapfile, flag_list):
         item.skip = flag
 
     datamap.save(mapfile)
-
-
-def make_mapfile_basename(prefix=None, direction=None, index=None):
-    """
-    Returns a standard name pattern for datamap files
-
-    Parameters
-    ----------
-    prefix : str
-        A prefix for the name
-    direction : Direction object, optional
-        A direction name
-    index : int, optional
-        An index for the datamap
-
-    """
-    if direction is not None:
-        dirtxt = '_{0}'.format(direction.name)
-    else:
-        dirtxt = ''
-    if index is not None:
-        indtxt = '-{0}'.format(index)
-    else:
-        indtxt = ''
-
-    return '{0}{1}{2}'.format(prefix, dirtxt, indtxt)

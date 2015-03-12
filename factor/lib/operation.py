@@ -77,8 +77,8 @@ class Operation(object):
                 (self.name, dirstr))
 
 
-    def write_mapfile(self, data_list, prefix=None, direction=None, index=None,
-        host_list=None):
+    def write_mapfile(self, data_list, prefix=None, direction=None, band=None,
+        index=None, host_list=None):
         """
         Write an operation datamap.
 
@@ -89,7 +89,9 @@ class Operation(object):
         prefix : str, optional
             A prefix for the name
         direction : Direction object, optional
-            A direction name
+            A direction
+        band : Band object, optional
+            A band
         index : int, optional
             An index for the datamap
         host_list : list of str, optional
@@ -102,7 +104,7 @@ class Operation(object):
             host_list = self.parset['node_list']
 
         mapfile = write_mapfile(data_list, self.name, prefix=prefix,
-                direction=direction, index=index, host_list=host_list,
+                direction=direction, band=band, index=index, host_list=host_list,
                 working_dir=self.parset['dir_working'])
 
         return mapfile
