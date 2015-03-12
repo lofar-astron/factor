@@ -213,6 +213,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
     if one_at_a_time:
         for d in directions:
             direction_groups.append([d])
+        log.debug('Processing each direction in series')
     else:
         def find_min_separation(group):
             """
@@ -285,6 +286,9 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
                             group2_best = group2_test
                     direction_groups[i] = group1_best
                     direction_groups[k] = group2_best
+        log.debug('Processing directions in the following groups:')
+        for i, group in enumerate(direction_groups):
+            log.debug('Group {0}: {1}'.format(i, group))
 
     return direction_groups
 
