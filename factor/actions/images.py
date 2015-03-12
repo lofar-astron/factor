@@ -112,7 +112,7 @@ class Casapy(Action):
         vis_files, vis_hosts = read_mapfile(self.vis_datamap)
         self.p['output_datamap'] = self.write_mapfile(self.imagebasenames,
             prefix=self.prefix+'-imager_output', index=self.index,
-            direction=self.direction, host_list=vis_hosts)
+            direction=self.direction, band=self.band, host_list=vis_hosts)
 
 
     def set_imaging_parameters(self):
