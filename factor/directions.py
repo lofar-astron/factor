@@ -257,9 +257,8 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
         # and picking the group with the largest minimum separation
         if allow_reordering:
             direction_groups_orig = direction_groups[:]
-            log.info('{0}'.format(len(direction_groups_orig)))
             if len(direction_groups_orig) > 1:
-                for i in range(len(direction_groups_orig), 2):
+                for i in range(0, len(direction_groups_orig), 2):
                     group1 = direction_groups_orig[i]
                     if i < len(direction_groups)-1:
                         k = 1 + 1
