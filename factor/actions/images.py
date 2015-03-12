@@ -164,7 +164,8 @@ class Casapy(Action):
         if self.mask_datamap is None:
             self.p['mask'] = ''
         if self.direction is not None:
-            self.p['mask'] = self.direction.reg
+            if 'Selfcal' not in self.op_parset['op_name']:
+                self.p['mask'] = self.direction.reg
 
         self.p['scriptname'] = os.path.abspath(self.script_file)
         template = env.get_template('make_image.pipeline.parset.tpl')
