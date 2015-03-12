@@ -255,6 +255,12 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
         # Reorganize groups in each grouping level based on distance. This
         # is done by swapping the directions of neighboring groups randomly
         # and picking the group with the largest minimum separation
+        for d in direction_groups[0]:
+            print d.name
+        for d in direction_groups[1]:
+            print d.name
+
+
         if allow_reordering:
             direction_groups_orig = direction_groups[:]
             if len(direction_groups_orig) > 1:
@@ -269,8 +275,6 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
                     min_sep_global = 0.0 # degrees
                     for j in range(10):
                         log.info('{0}'.format(min_sep_global))
-                        log.info('{0}'.format(len(group1)))
-                        log.info('{0}'.format(group2))
                         group_merged = group1[:] + group2[:]
                         shuffle(group_merged)
                         group1_test = group_merged[0: len(group1)]
@@ -284,6 +288,11 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
                             group2_best = group2_test
                     direction_groups[i] = group1_best
                     direction_groups[k] = group2_best
+    for d in direction_groups[0]:
+        print d.name
+
+    for d in direction_groups[1]:
+        print d.name
 
     sys.exit()
     return direction_groups
