@@ -53,7 +53,7 @@ class InitSubtract(Operation):
         files, hosts = read_mapfile(subtracted_all_mapfile)
         for f, h in zip(files, hosts):
             vis_mapfiles.append(self.write_mapfile([f],
-        	prefix='subtracted_all_vis', host_list=[h])
+        	prefix='subtracted_all_vis', host_list=[h]))
         dir_indep_parmdbs_mapfile = self.write_mapfile([band.dirindparmdb for band
         	in bands], prefix='dir_indep_parmdbs')
 
@@ -96,7 +96,7 @@ class InitSubtract(Operation):
         files, hosts = read_mapfile(vg_files_mapfile)
         for f, h in zip(files, hosts):
             vis_mapfiles.append(self.write_mapfile([f],
-        	prefix='subtracted_all_vis', host_list=[h])
+        	prefix='subtracted_all_vis', host_list=[h]))
 
         self.log.info('Low-res imaging...')
         actions = [MakeImage(self.parset, dm, p['imagerl'],
