@@ -103,7 +103,7 @@ class Casapy(Action):
         """
         from factor.lib.datamap_lib import read_mapfile
 
-        # Make first imaging-run data maps:
+        # Make first imaging run data maps:
         #     - input is list of MS files
         #     - output is list of image names
         self.p['vis_datamap'] = self.vis_datamap
