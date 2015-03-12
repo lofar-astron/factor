@@ -111,8 +111,8 @@ class Action(object):
         raise NotImplementedError
 
 
-    def write_mapfile(self, data_list, prefix=None, direction=None, index=None,
-        host_list=None, flag_list=None, use_abs_path=True):
+    def write_mapfile(self, data_list, prefix=None, direction=None, band=None,
+        index=None, host_list=None, flag_list=None, use_abs_path=True):
         """
         Write operation datamap
 
@@ -124,6 +124,8 @@ class Action(object):
             A prefix for the name
         direction : Direction object or str, optional
             A direction name
+        band : Band object, optional
+            Band for this action
         index : int, optional
             An index for the datamap
         flag_list : list of bools, optional
