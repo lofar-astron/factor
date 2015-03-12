@@ -266,7 +266,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
                         k = i - 1
                     group2 = direction_groups_orig[k]
 
-                    min_sep_global = 100.0 # degrees
+                    min_sep_global = 0.0 # degrees
                     for j in range(10):
                         group_merged = shuffle(group1[:] + group2[:])
                         group1_test = group_merged[range(len(group1))]
@@ -274,7 +274,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
                         min_sep1 = find_min_separation(group1_test)
                         min_sep2 = find_min_separation(group2_test)
                         min_sep = min(min_sep1, min_sep2)
-                        if min_sep < min_sep_global:
+                        if min_sep > min_sep_global:
                             min_sep_global = min_sep
                             group1_best = group1_test
                             group2_best = group2_test
