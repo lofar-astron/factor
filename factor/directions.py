@@ -340,7 +340,7 @@ def thiessen(directions_list, bounds_scale=0.6):
     thiessen_polys_deg = []
     width_deg = []
     for poly in thiessen_polys:
-        poly = np.vstack([poly, poly[0]])
+#         poly = np.vstack([poly, poly[0]])
         ra, dec = xy2radec(poly[:, 0], poly[:, 1], midRA, midDec)
         thiessen_polys_deg.append([np.array(ra), np.array(dec)])
 
@@ -373,8 +373,8 @@ def make_region_file(vertices, outputfile):
     """
     lines = ['#CRTFv0\n\n']
     xylist = []
-    RAs = vertices[0]
-    Decs = vertices[1]
+    RAs = vertices[0][0:-1] # trim last point, as it is a repeat of the first
+    Decs = vertices[1][0:-1]
     for x, y in zip(RAs, Decs):
         xylist.append('[{0}deg, {1}deg]'.format(x, y))
     lines.append('poly[{0}]\n'.format(', '.join(xylist)))
