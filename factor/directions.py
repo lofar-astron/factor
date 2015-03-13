@@ -294,7 +294,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
     return direction_groups
 
 
-def thiessen(directions_list, bounds_scale=0.6):
+def thiessen(directions_list, bounds_scale=0.52):
     """
     Return list of thiessen polygons and their widths in degrees
 
@@ -319,10 +319,10 @@ def thiessen(directions_list, bounds_scale=0.6):
 
     x_scale, y_scale = (points.min(axis=0) - points.max(axis=0)) * bounds_scale
 
-    means = np.ones((16, 2)) * points.mean(axis=0)
+    means = np.ones((32, 2)) * points.mean(axis=0)
 
     radius = np.sqrt(x_scale**2 + y_scale**2)
-    angles = [np.pi/8.0*i for i in range(0, 16)]
+    angles = [np.pi/16.0*i for i in range(0, 32)]
     offsets = []
     for ang in angles:
         offsets.append([np.cos(ang), np.sin(ang)])
@@ -334,7 +334,7 @@ def thiessen(directions_list, bounds_scale=0.6):
     circumcenters = np.array([_circumcenter(tri.points[t])
                               for t in tri.vertices])
     thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
-                      for n in range(len(points) - 16)]
+                      for n in range(len(points) - 32)]
 
     # Convert from x, y to RA, Dec
     thiessen_polys_deg = []
