@@ -102,7 +102,7 @@ class Operation(object):
         from factor.lib.datamap_lib import write_mapfile
 
         if host_list is None:
-            host_list = self.parset['node_list']
+            host_list = self.parset['cluster-specific']['node_list']
 
         mapfile = write_mapfile(data_list, self.name, prefix=prefix,
                 direction=direction, band=band, index=index, host_list=host_list,
