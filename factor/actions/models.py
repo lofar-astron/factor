@@ -356,6 +356,7 @@ class MergeSkymodels(Action):
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
         self.p['mergescriptname'] = os.path.abspath(self.script_file)
+
         template = env.get_template('merge_skymodels.pipeline.parset.tpl')
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:

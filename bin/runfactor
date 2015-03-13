@@ -79,22 +79,29 @@ if __name__=='__main__':
         directions = factor.directions.directions_read(os.path.join(parset['dir_working'],
             'factor_directions.txt'))
     else:
-        if 'directions_flux_min_jy' not in parset or \
-            'directions_size_max_arcmin' not in parset or \
-            'directions_separation_max_arcmin' not in parset:
+        dir_parset = parset['direction_specific']
+        if 'flux_min_jy' not in dir_parset or \
+            'size_max_arcmin' not in dir_parset or \
+            'separation_max_arcmin' not in dir_parset:
                 logging.critical('If no directions file is specified, you must '
-                    'give values for directions_flux_min_Jy, '
-                    'directions_size_max_arcmin, and directions_separation_max_arcmin')
+                    'give values for flux_min_Jy, size_max_arcmin, and '
+                    'separation_max_arcmin')
                 sys.exit(1)
         else:
             directions = None
 
-    # Get nodes from cluster description
-    if parset['clusterdesc'].lower() == 'pbs':
-        parset['clusterdesc'] = factor.cluster.make_pbs_clusterdesc(
-            parset['node_local_disk'])
-    if not 'node_list' in parset:
-        parset['node_list'] = factor.cluster.get_compute_nodes(parset['clusterdesc'])
+    # Get clusterdesc and nodes
+    cluster_parset = parset['cluster_specific']
+    if 'clusterdesc_file' not in cluster_parset:
+        parset['cluster_specific']['clusterdesc'] = 'local.clusterdesc'
+    else:
+        if cluster_parset['clusterdesc_file'].lower() == 'pbs':
+            parset['cluster_specific']['clusterdesc'] = factor.cluster.make_pbs_clusterdesc()
+        else:
+            parset['cluster_specific']['clusterdesc'] = cluster_parset['clusterdesc_file']
+    if not 'node_list' in cluster_parset:
+        parset['cluster_specific']['node_list'] = factor.cluster.get_compute_nodes(
+            parset['cluster_specific']['clusterdesc'])
 
     # Run initial sky model generation and create empty datasets. First check that
     # this operation is needed (only needed if band lacks an initial skymodel or
@@ -115,12 +122,12 @@ if __name__=='__main__':
         # Make directions from dir-indep sky models using flux and size parameters
         logging.info("No directions file given. Selecting directions internally...")
         parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(bands,
-        	parset['directions_flux_min_jy'],
-        	parset['directions_size_max_arcmin'],
-        	parset['directions_separation_max_arcmin'],
-        	directions_max_num=parset['directions_max_num'],
+        	parset['direction_specific']['flux_min_jy'],
+        	parset['direction_specific']['size_max_arcmin'],
+        	parset['direction_specific']['separation_max_arcmin'],
+        	directions_max_num=parset['direction_specific']['max_num'],
         	interactive=parset['interactive'])
-        directions = factor.directions.directions_read( parset['directions_file'] )
+        directions = factor.directions.directions_read(parset['directions_file'])
     dir_reg = [d for d in directions if d.reg != '']
     for i, direction in enumerate(dir_reg):
         direction.vertices, direction.width = factor.directions.region_read(direction.reg)
@@ -140,13 +147,9 @@ if __name__=='__main__':
         if parset['ndir'] > 0 and parset['ndir'] <= len(directions):
             directions = directions[:parset['ndir']]
 
-    # Group directions into groups that are processed in parallel
-    if parset['ndir_parallel'] > 1:
-        one_at_a_time = False
-    else:
-        one_at_a_time = True
     direction_groups = factor.directions.group_directions(directions,
-        one_at_a_time=parset['one_at_a_time'], n_per_grouping=parset['groupings'])
+        one_at_a_time=parset['direction_specific']['one_at_a_time'],
+        n_per_grouping=parset['direction_specific']['groupings'])
 
     # Iterate over direction groups
     for direction_group in direction_groups:
@@ -191,12 +194,6 @@ if __name__=='__main__':
             op.run()
         op = FacetImageFinal(parset, bands, dirs_to_image)
         op.run()
-
-    # Save final band and direction objects to disk
-    pickle.dump(bands, open(os.path.join(parset['dir_working'],
-    	"bands.sav"), "wb" ))
-    pickle.dump(directions,	open(os.path.join(parset['dir_working'],
-        "directions.sav"), "wb" ))
 
     # Mosaic the final facet images together
     if parset['make_mosaic']:

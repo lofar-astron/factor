@@ -43,7 +43,7 @@ class Action(object):
         self.direction = direction
         self.band = band
         self.index = index
-        self.max_cpu = self.op_parset['ncpu']
+        self.max_cpu = self.op_parset['cluster_specific']['ncpu']
 
         # Set up directories needed by every action
         factor_working_dir = op_parset['dir_working']
@@ -139,7 +139,7 @@ class Action(object):
         from factor.lib.datamap_lib import write_mapfile
 
         if host_list is None:
-            host_list = self.op_parset['node_list']
+            host_list = self.op_parset['cluster_specific']['node_list']
 
         mapfile = write_mapfile(data_list, self.op_name,
         	action_name=self.name, prefix=prefix, direction=direction, band=band,
@@ -174,7 +174,7 @@ class Action(object):
         env = Environment(loader=FileSystemLoader(os.path.join(DIR,
             '../actions/templates')))
 
-        if os.path.basename(self.op_parset['clusterdesc']) == 'local.clusterdesc':
+        if os.path.basename(self.op_parset['cluster_specific']['clusterdesc']) == 'local.clusterdesc':
             self.op_parset['remote'] = '[remote]\n'\
                 + 'method = local\n'\
                 + 'max_per_node = {0}\n'.format(self.op_parset['ncpu'])

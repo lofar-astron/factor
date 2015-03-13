@@ -83,8 +83,8 @@ class Scheduler(object):
             single = False
 
         # Sync the local node to the remote nodes
-        if self.op_parset['distribute']:
-            host_list = self.op_parset['node_list']
+        if self.op_parset['cluster_specific']['distribute']:
+            host_list = self.op_parset['cluster_specific']['node_list']
             working_dir = self.op_parset['dir_working']
             for host in host_list:
                 if host != self.hostname:
@@ -101,8 +101,8 @@ class Scheduler(object):
                 t.join() # wait for completion
 
         # Sync the remote nodes to the local node
-        if self.op_parset['distribute']:
-            host_list = self.op_parset['node_list']
+        if self.op_parset['cluster_specific']['distribute']:
+            host_list = self.op_parset['cluster_specific']['node_list']
             working_dir = self.op_parset['dir_working']
             for host in host_list:
                 if host != self.hostname:
