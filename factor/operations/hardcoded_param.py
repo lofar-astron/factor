@@ -3,7 +3,7 @@ Module that holds all hard-coded parameters
 """
 
 init_subtract = {
-'imagerh' : {'niter': 8000,
+'imagerh' : {'niter': 10000,
              'imsize': 6250,
              'mscale': False,
              'cell': '7.5arcsec',
@@ -14,7 +14,7 @@ init_subtract = {
              'rmsbox': '(70, 20)',
              'threshold': '0mJy',
              'nterms': 1,
-             'ncycles': 5,
+             'ncycles': 3,
              'use_rms': True,
              'image_final': True,
              'iterate_threshold': True},
@@ -26,7 +26,7 @@ init_subtract = {
 'avgl' : {'columnname': 'MODEL_DATA', # outcol is DATA
           'freqstep': 5,
           'timestep': 2},
-'imagerl' : {'niter' : 2000,
+'imagerl' : {'niter' : 3000,
              'imsize': 2800,
              'mscale': False,
              'cell': '25arcsec',
@@ -37,7 +37,7 @@ init_subtract = {
              'rmsbox': '(70, 20)',
              'threshold': '0mJy',
              'nterms': 1,
-             'ncycles': 5,
+             'ncycles': 3,
              'use_rms': True,
              'image_final': True,
              'iterate_threshold': True},
@@ -230,7 +230,7 @@ facet_image= {
          'freqstep': 5,
          'timestep': 3},
 'concat' : {'columnname': 'DATA'}, # outcol is DATA
-'imager' : {'niter': 500,
+'imager' : {'niter': 1500,
             'imsize': 1024,
             'mscale': True,
             'cell': '1.5arcsec',
@@ -241,7 +241,7 @@ facet_image= {
             'rmsbox': '(70, 20)',
             'threshold': '0mJy',
             'nterms': 2,
-            'ncycles': 10,
+            'ncycles': 3,
             'use_rms': True,
             'image_final': True,
              'iterate_threshold': True},
@@ -274,7 +274,7 @@ facet_image_final = {
 'avg' : {'columnname': 'DATA', # outcol is DATA
          'freqstep': 5,
          'timestep': 3},
-'imager' : {'niter': 500,
+'imager' : {'niter': 1500,
             'imsize': 1024,
             'mscale': True,
             'cell': '1.5arcsec',
@@ -285,7 +285,7 @@ facet_image_final = {
             'rmsbox': '(70, 20)',
             'threshold': '0mJy',
             'nterms': 2,
-            'ncycles': 10,
+            'ncycles': 3,
             'use_rms': True,
             'image_final': True,
              'iterate_threshold': True},
