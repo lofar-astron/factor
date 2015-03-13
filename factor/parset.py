@@ -89,12 +89,16 @@ def parset_read(parset_file):
         log.debug("Using interactive mode")
     else:
         parset_dict['interactive'] = False
-
     if 'make_mosaic' in parset_dict:
         parset_dict['make_mosaic'] = parset.getboolean('global', 'make_mosaic')
         log.debug("Making final mosaic")
     else:
         parset_dict['make_mosaic'] = False
+    if 'use_ftw' in parset_dict:
+        parset_dict['use_ftw'] = parset.getboolean('global', 'use_ftw')
+        log.debug("Using FT / FTW")
+    else:
+        parset_dict['use_ftw'] = True
 
     # Handle direction parameters
     if 'directions' in parset._sections.keys():

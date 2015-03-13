@@ -22,25 +22,30 @@ dir_ms = /data/bands
 # instrument
 parmdb_name = instrument_ap_smoothed
 
-# Full path to file containing calibrator directions. If not given, directions
-# are selected internally using the flux and size cuts below
-directions_file = /data/directions.txt
-
 # Make final mosaic (default = True)
 make_mosaic = False
 
 # Use interactive mode (default = False)
 interactive = False
 
+# Use FT / FTW for all operations except initial subtraction (default = True)
+use_ftw = True
+
 
 [directions]
+# Full path to file containing calibrator directions. If not given, directions
+# are selected internally using the flux and size cuts below
+directions_file = /data/directions.txt
+
 # Flux and size cuts for selecting directions internally (min flux, max size
 # of a source, and max separation between sources below which they are grouped
-# into one direction). The number of internally derived directions can be
-# limited to a maximum number of directions if desired.
+# into one direction).
 flux_min_Jy = 0.1
 size_max_arcmin = 3.0
 separation_max_arcmin = 6.0
+
+# The number of internally derived directions can be limited to a maximum number
+# of directions if desired
 max_num = 50
 
 # Total number of directions to process (default = all)
