@@ -143,9 +143,10 @@ if __name__=='__main__':
     factor.directions.make_ds9_region_file(directions, ds9_reg_file)
 
     # Select subset of directions to process
-    if 'ndir' in parset:
-        if parset['ndir'] > 0 and parset['ndir'] <= len(directions):
-            directions = directions[:parset['ndir']]
+    if 'ndir' in parset['direction_specific']:
+        if parset['direction_specific']['ndir'] > 0 and \
+            parset['direction_specific']['ndir'] <= len(directions):
+            directions = directions[:parset['direction_specific']['ndir']]
 
     direction_groups = factor.directions.group_directions(directions,
         one_at_a_time=parset['direction_specific']['one_at_a_time'],

@@ -128,13 +128,14 @@ def parset_read(parset_file):
             groupings[key] = int(val)
         parset_dict['direction_specific']['groupings'] = groupings
         parset_dict['direction_specific']['one_at_a_time'] = False
-        log.info("Using the following groupings for directions: {0}".format(groupings))
+        log.debug("Using the following groupings for directions: {0}".format(groupings))
     else:
         parset_dict['direction_specific']['one_at_a_time'] = True
     if 'ndir' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['ndir'] = parset.getint('directions', 'ndir')
         log.debug("Processing up to %s directions in total" % (parset_dict['direction_specific']['ndir']))
     else:
+        parset_dict['direction_specific']['groupings'] = {'1': 0}
         parset_dict['direction_specific']['ndir'] = -1
 
     # Handle cluster parameters

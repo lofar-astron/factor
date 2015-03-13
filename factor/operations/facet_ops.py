@@ -135,7 +135,7 @@ class FacetSetup(Operation):
             return
 
         # Divide up the nodes among the directions
-        node_list = self.parset['node_list']
+        node_list = self.parset['cluster_specific']['node_list']
         if len(d_list) >= len(node_list):
             for i in range(len(d_list)-len(node_list)):
                 node_list.append(node_list[i])
@@ -242,7 +242,7 @@ class FacetSelfcal(Operation):
             return
 
         # Divide up the nodes among the directions
-        node_list = self.parset['node_list']
+        node_list = self.parset['cluster_specific']['node_list']
         if len(d_list) >= len(node_list):
             for i in range(len(d_list)-len(node_list)):
                 node_list.append(node_list[i])
@@ -913,7 +913,7 @@ class FacetImage(Operation):
             d.imsize = imsize
 
         # Divide up the nodes among the directions
-        node_list = self.parset['node_list']
+        node_list = self.parset['cluster_specific']['node_list']
         if len(d_list) >= len(node_list):
             for i in range(len(d_list)-len(node_list)):
                 node_list.append(node_list[i])
