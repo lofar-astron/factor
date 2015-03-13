@@ -154,6 +154,9 @@ class PhaseShift(DPPP):
         self.p['ra'] = direction.ra
         self.p['dec'] = direction.dec
 
+        # Set up all required files
+        self.setup()
+
 
 class Concatenate(DPPP):
     """

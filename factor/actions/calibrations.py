@@ -276,6 +276,9 @@ class Add(BBS):
                 self.log.info('Skipping add for {0}'.format(vis_file))
                 copy_column(vis_file, self.p['incol'], self.p['outcol'])
 
+        # Set up all required files
+        self.setup()
+
 
 class Apply(BBS):
     """
