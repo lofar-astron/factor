@@ -244,7 +244,7 @@ facet_image= {
             'ncycles': 3,
             'use_rms': True,
             'image_final': True,
-             'iterate_threshold': True},
+            'iterate_threshold': True},
 'model' : {'nterms': 2},
 'select' : {}
 }
@@ -288,6 +288,6 @@ facet_image_final = {
             'ncycles': 3,
             'use_rms': True,
             'image_final': True,
-             'iterate_threshold': True},
+            'iterate_threshold': True},
 'model' : {'nterms': 2}
 }

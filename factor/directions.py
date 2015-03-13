@@ -340,9 +340,9 @@ def thiessen(directions_list, bounds_scale=0.6):
     thiessen_polys_deg = []
     width_deg = []
     for poly in thiessen_polys:
-#         poly = np.vstack([poly, poly[0]])
+        poly = np.vstack([poly, poly[0]])
         ra, dec = xy2radec(poly[:, 0], poly[:, 1], midRA, midDec)
-        thiessen_polys_deg.append([np.array(ra), np.array(dec)])
+        thiessen_polys_deg.append([np.array(ra[0: -1]), np.array(dec[0: -1])])
 
         # Find size of regions in degrees
         ra1, dec1 = xy2radec([np.min(poly[:, 0])], [np.min(poly[:, 1])], midRA,
