@@ -41,6 +41,14 @@ ndir = 10
 # Maximum number of directions to process in parallel (default = 1)
 ndir_parallel = 4
 
+# Grouping of directions, defined as grouping:n_total_per_grouping. For example,
+# groupings = 1:5, 4:0 means two groupings are used, with the first 5
+# directions put into groups of one (i.e., each direction processed in series)
+# and the rest of the directions divided into groups of 4 (i.e., 4 directions
+# processed in parallel). Shuffling is done between neighboring groups to
+# achieve the largest min separation.
+directions_groupings = 1:5, 4:0
+
 # Maximum number of CPUs per node to use (default = all)
 ncpu = 6
 
