@@ -194,10 +194,7 @@ class Casapy(Action):
 
     def clean(self):
         """
-        Remove unneeded files:
-
-        E.g., images/InitSubtract/init_highres/init_highrespipe directory?
-
+        Remove unneeded files
         """
         pass
 
