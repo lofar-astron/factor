@@ -113,9 +113,9 @@ if not image_final or not os.path.exists(os.path.join(dirname, 'final.cleanmask'
 
 # Reimage from scratch with last mask
 if image_final:
-    os.system('rm -rf {0}*'.format('final.cleanmask'))
+    mask_image = imageout + '.cleanmask'
+    os.system('rm -rf {0}'.format('final.cleanmask'))
     os.system('cp -r {0} {1}'.format(mask_image, os.path.join(dirname, 'final.cleanmask')))
-    os.system('rm -rf {0}*'.format(imageout))
     if regmask != '':
         mask = [regmask, 'final.cleanmask']
     else:
