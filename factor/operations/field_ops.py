@@ -44,18 +44,28 @@ class InitSubtract(Operation):
                 band.skymodel_dirindep = skymodel
             return
 
-        # Make initial data maps for the empty datasets and their dir-indep
+        # Make initial data maps for the input datasets and their dir-indep
         # instrument parmdbs. Also make datamaps with one file each for casapy
         # imaging run (otherwise we get conflicts with temp files)
-        subtracted_all_mapfile = self.write_mapfile([band.file for band in bands],
-        	prefix='subtracted_all')
+        input_data_mapfile = self.write_mapfile([band.file for band in bands],
+        	prefix='input_data')
         vis_mapfiles = []
-        files, hosts = read_mapfile(subtracted_all_mapfile)
+        files, hosts = read_mapfile(input_data_mapfile)
         for f, h, b in zip(files, hosts, bands):
             vis_mapfiles.append(self.write_mapfile([f],
-        	prefix='subtracted_all_vis', host_list=[h], band=b, index=1))
+        	prefix='input_data_vis', host_list=[h], band=b, index=1))
         dir_indep_parmdbs_mapfile = self.write_mapfile([band.dirindparmdb for band
         	in bands], prefix='dir_indep_parmdbs')
+
+        self.log.info('Spliting corrected data...')
+        action = Average(self.parset, input_data_mapfile, p['split'],
+            prefix='highres')
+        split_files_mapfile = self.s.run(action)
+        vis_mapfiles = []
+        files, hosts = read_mapfile(split_files_mapfile)
+        for f, h, b in zip(files, hosts, bands):
+            vis_mapfiles.append(self.write_mapfile([f],
+        	prefix='corrected_vis', host_list=[h], band=b))
 
         self.log.info('High-res imaging...')
         actions = [MakeImage(self.parset, dm, p['imagerh'],
@@ -72,7 +82,7 @@ class InitSubtract(Operation):
 
         if self.parset['use_ftw']:
             self.log.debug('FFTing high-res model image...')
-            action = FFT(self.parset, subtracted_all_mapfile,
+            action = FFT(self.parset, input_data_mapfile,
                 highres_image_basenames_mapfile, p['modelh'], prefix='highres')
             self.s.run(action)
             highres_skymodels_mapfile = None
@@ -83,20 +93,20 @@ class InitSubtract(Operation):
         highres_skymodels_mapfile = self.s.run(action)
 
         self.log.info('Subtracting high-res sky model...')
-        action = Subtract(self.parset, subtracted_all_mapfile, p['calibh'],
+        action = Subtract(self.parset, input_data_mapfile, p['calibh'],
             model_datamap=highres_skymodels_mapfile,
             parmdb_datamap=dir_indep_parmdbs_mapfile, prefix='highres')
         self.s.run(action)
 
         self.log.info('Averaging...')
-        action = Average(self.parset, subtracted_all_mapfile, p['avgl'],
+        action = Average(self.parset, input_data_mapfile, p['avgl'],
             prefix='highres')
         avg_files_mapfile = self.s.run(action)
         vis_mapfiles = []
         files, hosts = read_mapfile(vg_files_mapfile)
         for f, h, b in zip(files, hosts, bands):
             vis_mapfiles.append(self.write_mapfile([f],
-        	prefix='subtracted_all_vis', host_list=[h], band=b, index=2))
+        	prefix='input_data_vis', host_list=[h], band=b, index=2))
 
         self.log.info('Low-res imaging...')
         actions = [MakeImage(self.parset, dm, p['imagerl'],
@@ -113,7 +123,7 @@ class InitSubtract(Operation):
 
         if self.parset['use_ftw']:
             self.log.debug('FFTing low-res model image...')
-            action = FFT(self.parset, subtracted_all_mapfile,
+            action = FFT(self.parset, input_data_mapfile,
                 lowres_image_basenames_mapfile, p['modell'], prefix='lowres')
             self.s.run(action)
 
@@ -123,7 +133,7 @@ class InitSubtract(Operation):
         lowres_skymodels_mapfile = self.s.run(action)
 
         self.log.info('Subtracting low-res sky model...')
-        action = Subtract(self.parset, subtracted_all_mapfile, p['calibl'],
+        action = Subtract(self.parset, input_data_mapfile, p['calibl'],
             model_datamap=lowres_skymodels_mapfile,
             parmdb_datamap=dir_indep_parmdbs_mapfile, prefix='lowres')
         self.s.run(action)

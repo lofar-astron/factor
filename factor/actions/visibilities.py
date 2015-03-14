@@ -167,3 +167,13 @@ class Concatenate(DPPP):
         super(Concatenate, self).__init__(op_parset, input_datamap, p, prefix=prefix,
             direction=direction, clean=clean, index=index, name='Concatenate')
 
+
+class Split(DPPP):
+    """
+    Action to split off visibilities
+    """
+    def __init__(self, op_parset, input_datamap, p, direction, prefix=None,
+        clean=True, index=None):
+        super(Split, self).__init__(op_parset, input_datamap, p, prefix=prefix,
+            direction=direction, clean=clean, index=index, name='Split')
+
