@@ -11,6 +11,8 @@ PhaseShift : Action
     Phase shifts visibilities
 Concatenate : Action
     Concatenates visibilities
+Split : Action
+    Splits visibilities
 
 """
 

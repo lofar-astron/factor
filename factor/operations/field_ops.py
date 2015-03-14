@@ -29,7 +29,7 @@ class InitSubtract(Operation):
         from factor.actions.images import MakeImage
         from factor.actions.models import MakeSkymodelFromModelImage, MergeSkymodels, FFT
         from factor.actions.calibrations import Subtract
-        from factor.actions.visibilities import Average
+        from factor.actions.visibilities import Average, Split
         from factor.lib.datamap_lib import read_mapfile
         from factor.operations.hardcoded_param import init_subtract as p
 
@@ -58,7 +58,7 @@ class InitSubtract(Operation):
         	in bands], prefix='dir_indep_parmdbs')
 
         self.log.info('Spliting corrected data...')
-        action = Average(self.parset, input_data_mapfile, p['split'],
+        action = Split(self.parset, input_data_mapfile, p['split'],
             prefix='highres')
         split_files_mapfile = self.s.run(action)
         vis_mapfiles = []
