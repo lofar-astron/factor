@@ -120,7 +120,7 @@ if image_final:
         mask = [regmask, 'final.cleanmask']
     else:
         mask = 'final.cleanmask'
-    clean(vis=ms,imagename=imageout,outlierfile="",field="",spw="",selectdata=True,timerange=timer,
+    clean(vis=ms,imagename=imageout+'_final',outlierfile="",field="",spw="",selectdata=True,timerange=timer,
         uvrange=uvrange,antenna="",scan="",observation="",mode="mfs",gridmode="widefield",wprojplanes=wplanes,
         facets=nfacets,cfcache="cfcache.dir",painc=360.0,epjtable="",interpolation="linear",
         niter=niter,gain=0.1,threshold=threshold,psfmode="clark",imagermode="csclean",

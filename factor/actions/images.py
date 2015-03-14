@@ -110,7 +110,11 @@ class Casapy(Action):
         self.p['mask_datamap'] = self.mask_datamap
 
         vis_files, vis_hosts = read_mapfile(self.vis_datamap)
-        self.p['output_datamap'] = self.write_mapfile(self.imagebasenames,
+        if self.p['image_final']:
+            imagebasenames = self.imagebasenames + '_final'
+        else:
+            imagebasenames = self.imagebasenames
+        self.p['output_datamap'] = self.write_mapfile(imagebasenames,
             prefix=self.prefix+'-imager_output', index=self.index,
             direction=self.direction, band=self.band, host_list=vis_hosts)
 

@@ -103,7 +103,7 @@ class InitSubtract(Operation):
             prefix='highres')
         avg_files_mapfile = self.s.run(action)
         vis_mapfiles = []
-        files, hosts = read_mapfile(vg_files_mapfile)
+        files, hosts = read_mapfile(avg_files_mapfile)
         for f, h, b in zip(files, hosts, bands):
             vis_mapfiles.append(self.write_mapfile([f],
         	prefix='input_data_vis', host_list=[h], band=b, index=2))
