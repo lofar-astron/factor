@@ -311,32 +311,20 @@ class MakeImageIterate(Action):
         if self.prefix is None:
             self.prefix = 'make_mask'
         self.clean = clean
-        self.image_dir += '{0}/{1}/'.format(self.op_name, self.name)
-        if self.direction is not None:
-            self.image_dir += '{0}/'.format(self.direction.name)
-        if self.band is not None:
-            self.image_dir += '{0}/'.format(self.band.name)
-        if not os.path.exists(self.image_dir):
-            os.makedirs(self.image_dir)
-        self.working_dir = self.image_dir
-
-        # Set up all required files
-        self.setup()
 
 
     def make_datamaps(self):
         """
         Makes the required data maps
         """
-        self.p['vis_datamap'] = self.vis_datamap
+        pass
 
 
     def make_pipeline_control_parset(self):
         """
         Writes the pipeline control parset and any script files
         """
-        if 'ncpu' not in self.p:
-            self.p['ncpu'] = self.max_cpu
+        pass
 
 
     def run(self):
