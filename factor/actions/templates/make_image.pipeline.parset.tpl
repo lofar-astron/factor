@@ -28,4 +28,4 @@ casapy.parsetarg.clean.uvtaper=False
 casapy.parsetarg.clean.pbcor=False
 casapy.parsetarg.clean.minpb=0.2
 casapy.parsetarg.clean.multiscale={{ scales }}
-casapy.parsetarg.clean.mask={{ input_mask }}
+casapy.parsetarg.clean.mask={{ mask }}
