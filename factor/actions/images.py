@@ -36,8 +36,9 @@ class Casapy(Action):
         Map of image basenames
 
     """
-    def __init__(self, op_parset, vis_datamap, p, mask_datamap=None, prefix=None,
-        direction=None, band=None, clean=True, index=None, name='Casapy'):
+    def __init__(self, op_parset, vis_datamap, p, mask_datamap=None,
+    	prefix=None, direction=None, band=None,
+    	clean=True, index=None, name='Casapy'):
         """
         Create action and run pipeline
 
@@ -49,7 +50,7 @@ class Casapy(Action):
             Input data map of MS file(s) to image
         p : parset dict
             Input parset dict defining imaging and pipeline parameters
-        maks_datamap : Datamap, optional
+        mask_datamap : Datamap, optional
             Input data map of mask images or CASA-format regions
         prefix : str, optional
             Prefix to use for image names
@@ -81,9 +82,6 @@ class Casapy(Action):
         if not os.path.exists(self.image_dir):
             os.makedirs(self.image_dir)
         self.working_dir = self.image_dir
-
-        # Define script name
-        self.script_file = self.parsetbasename + 'make_image.py'
 
         # Define names for output images
         imagebasenames = make_image_basename(self.vis_datamap,
@@ -165,11 +163,15 @@ class Casapy(Action):
 
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
-        if self.mask_datamap is None:
-            self.p['mask'] = ''
+        if self.mask_datamap is None and self.direction is None:
+            self.p['mask'] = ['']
+        else:
+            self.p['mask'] = []
+        if self.mask_datamap is not None:
+            mask_file, _ = read_datamap(mask_datamap)
+            self.p['mask'] += mask_file
         if self.direction is not None:
-            if 'Selfcal' not in self.op_parset['op_name']:
-                self.p['mask'] = self.direction.reg
+            self.p['mask'] += self.direction.reg
 
         self.p['scriptname'] = os.path.abspath(self.script_file)
         template = env.get_template('make_image.pipeline.parset.tpl')
@@ -209,6 +211,146 @@ class MakeImage(Casapy):
     """
     def __init__(self, op_parset, vis_datamap, p, mask_datamap=None, prefix=None,
         direction=None, band=None, clean=True, index=None):
-        super(MakeImage, self).__init__(op_parset, vis_datamap, p, prefix=prefix,
-            direction=direction, band=band, clean=clean, index=index,
-            name='MakeImage')
+        super(MakeImage, self).__init__(op_parset, vis_datamap, p,
+        	mask_datamap=mask_datamap, prefix=prefix, direction=direction,
+        	band=band, clean=clean, index=index, name='MakeImage')
+
+
+class MakeMask(Action):
+    """
+    Action to make a clean mask from an image
+    """
+    def __init__(self, op_parset, input_datamap, p, prefix=None,
+        direction=None, band=None, clean=True, index=None):
+        super(MakeMask, self).__init__(op_parset, name, prefix=prefix,
+            direction=direction, band=band, index=index, name='MakeMask')
+
+        # Store input parameters
+        self.input_datamap = input_datamap
+        self.p = p.copy()
+        if self.prefix is None:
+            self.prefix = 'make_mask'
+        self.clean = clean
+        self.image_dir += '{0}/{1}/'.format(self.op_name, self.name)
+        if self.direction is not None:
+            self.image_dir += '{0}/'.format(self.direction.name)
+        if self.band is not None:
+            self.image_dir += '{0}/'.format(self.band.name)
+        if not os.path.exists(self.image_dir):
+            os.makedirs(self.image_dir)
+        self.working_dir = self.image_dir
+
+        # Define script name
+        self.script_file = self.parsetbasename + 'make_clean_mask.py'
+
+        # Set up all required files
+        self.setup()
+
+
+    def make_datamaps(self):
+        """
+        Makes the required data maps
+        """
+        from factor.lib.datamap_lib import read_mapfile
+
+        # Input is list of image basenames
+        # Output is clean mask files
+        imagebasenames, hosts = read_mapfile(self.input_datamap)
+        if self.p['nterms'] == 1:
+            input_files = [bn+'.image' for bn in imagebasenames]
+        else:
+            input_files = [bn+'.image.tt0' for bn in imagebasenames]
+        output_files = [bn+'.cleanmask' for bn in self.modelbasenames]
+
+        self.p['input_datamap'] = self.write_mapfile(input_files,
+            prefix=self.prefix+'_input', direction=self.direction,
+            index=self.index, host_list=hosts)
+
+        self.p['output_datamap'] = self.write_mapfile(output_files,
+            prefix=self.prefix+'_output', direction=self.direction,
+            index=self.index, host_list=hosts)
+
+
+    def make_pipeline_control_parset(self):
+        """
+        Writes the pipeline control parset and any script files
+        """
+        if 'ncpu' not in self.p:
+            self.p['ncpu'] = self.max_cpu
+
+        self.p['scriptname'] = os.path.abspath(self.script_file)
+        self.p['outputdir'] = os.path.abspath(self.working_dir)
+        template = env.get_template('make_clean_mask.pipeline.parset.tpl')
+        tmp = template.render(self.p)
+        with open(self.pipeline_parset_file, 'w') as f:
+            f.write(tmp)
+
+        template = env.get_template('make_clean_mask.tpl')
+        tmp = template.render(self.p)
+        with open(self.script_file, 'w') as f:
+            f.write(tmp)
+
+
+    def get_results(self):
+        """
+        Return skymodel names.
+
+        If a skymodel was not made because there were no sources in the facet,
+        set the skip flag to True.
+
+        """
+        return self.p['output_datamap']
+
+
+
+class MakeImageIterate(Action):
+    """
+    Compound action to make iteratively an image using a clean mask
+    """
+    def __init__(self, op_parset, vis_datamap, p, mask_datamap=None, prefix=None,
+        direction=None, band=None, clean=True, index=None):
+        super(MakeImageIterate, self).__init__(op_parset, name, prefix=prefix,
+            direction=direction, band=band, index=index)
+
+
+    def run(self):
+        """
+        Runs the compound action
+        """
+        from factor.lib.datamap_lib import read_mapfile
+
+        vis_datamap = self.p['vis_datamap']
+        mask_datamap = None
+        threshold_5rms = self.p['threshold']
+        for i in range(self.p['ncycles']):
+            if self.p['use_rms'] and i == self.ncycles-1:
+                self.p['threshold'] = threshold_5rms
+                self.p['niter'] = 100000
+
+            imager = MakeImage(self.parset, vis_datamap,
+                mask_datamap=mask_datamap, self.p,
+                prefix=self.prefix, band=self.band, index=i)
+            image_basename_mapfile = imager.run()
+
+            if i > 0 and self.p['iterate_threshold']:
+                # Only iterate the threshold for the first pass
+                self.p['iterate_threshold'] = False
+            masker = MakeMask(self.parset, image_basename_mapfile, self.p,
+                prefix=self.prefix, band=self.band, index=i)
+            mask_datamap = masker.run()
+
+            mask_file, _ = read_datamap(mask_datamap)
+            log_file = mask_file[0] + '.log'
+            with open(log_file, 'r') as f:
+                lines = f.readlines()
+                threshold_5rms = lines[0].split(': ')[-1] + 'Jy'
+
+        if self.p['image_final']:
+            imager = MakeImage(self.parset, vis_datamap,
+                mask_datamap=mask_datamap, self.p,
+                prefix=self.prefix+'_final', band=self.band)
+            image_basename_mapfile = imager.run()
+
+        self.p['output_datamap'] = image_basename_mapfile
+
+

@@ -68,7 +68,7 @@ class InitSubtract(Operation):
         	prefix='corrected_vis', host_list=[h], band=b))
 
         self.log.info('High-res imaging...')
-        actions = [MakeImage(self.parset, dm, p['imagerh'],
+        actions = [MakeImageIterate(self.parset, dm, p['imagerh'],
             prefix='highres', band=band) for dm, band in zip(vis_mapfiles, bands)]
         highres_image_basenames_mapfiles = self.s.run(actions)
         basenames = []
@@ -110,7 +110,7 @@ class InitSubtract(Operation):
         	prefix='input_data_vis', host_list=[h], band=b, index=2))
 
         self.log.info('Low-res imaging...')
-        actions = [MakeImage(self.parset, dm, p['imagerl'],
+        actions = [MakeImageIterate(self.parset, dm, p['imagerl'],
             prefix='lowres', band=band) for dm, band in zip(vis_mapfiles, bands)]
         lowres_image_basenames_mapfiles = self.s.run(actions)
         basenames = []
