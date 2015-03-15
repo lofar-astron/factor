@@ -328,7 +328,7 @@ class MakeImageIterate(Action):
                 self.p['niter'] = 100000
 
             imager = MakeImage(self.parset, vis_datamap,
-                mask_datamap=mask_datamap, self.p,
+                self.p, mask_datamap=mask_datamap,
                 prefix=self.prefix, band=self.band, index=i)
             image_basename_mapfile = imager.run()
 
@@ -347,7 +347,7 @@ class MakeImageIterate(Action):
 
         if self.p['image_final']:
             imager = MakeImage(self.parset, vis_datamap,
-                mask_datamap=mask_datamap, self.p,
+                self.p, mask_datamap=mask_datamap,
                 prefix=self.prefix+'_final', band=self.band)
             image_basename_mapfile = imager.run()
 

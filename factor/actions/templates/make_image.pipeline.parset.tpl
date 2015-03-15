@@ -1,0 +1,31 @@
+pipeline.steps=[casapy]
+
+casapy.control.kind=recipe
+casapy.control.type=casapy
+casapy.control.opts.mapfile_in={{ vis_datamap }}
+casapy.control.opts.mapfile_out={{ output_datamap }}
+casapy.control.opts.inputkey=clean.vis
+casapy.control.opts.outputkey=clean.imagename
+casapy.control.opts.arguments=[--nologger,--log2term,--nogui,-c]
+casapy.control.opts.max_per_node={{ ncpu }}
+
+casapy.parsetarg.clean.gridmode='widefield'
+casapy.parsetarg.clean.wprojplanes={{ wplanes }}
+casapy.parsetarg.clean.selectdata=True
+casapy.parsetarg.clean.uvrange='{{ uvrange }}'
+casapy.parsetarg.clean.mode='mfs'
+casapy.parsetarg.clean.nterms={{ nterms }}
+casapy.parsetarg.clean.niter={{ niter }}
+casapy.parsetarg.clean.gain=0.01
+casapy.parsetarg.clean.threshold='{{ threshold }}'
+casapy.parsetarg.clean.psfmode='clark'
+casapy.parsetarg.clean.interactive=False
+casapy.parsetarg.clean.imsize=[{{ imsize }}, {{ imsize }}]
+casapy.parsetarg.clean.cell=['{{ cell }}', '{{ cell }}']
+casapy.parsetarg.clean.weighting='briggs'
+casapy.parsetarg.clean.robust=-0.25
+casapy.parsetarg.clean.uvtaper=False
+casapy.parsetarg.clean.pbcor=False
+casapy.parsetarg.clean.minpb=0.2
+casapy.parsetarg.clean.multiscale={{ scales }}
+casapy.parsetarg.clean.mask={{ input_mask }}
