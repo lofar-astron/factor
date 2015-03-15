@@ -26,7 +26,7 @@ class InitSubtract(Operation):
         """
         Run the steps for this operation
         """
-        from factor.actions.images import MakeImage
+        from factor.actions.images import MakeImageIterate
         from factor.actions.models import MakeSkymodelFromModelImage, MergeSkymodels, FFT
         from factor.actions.calibrations import Subtract
         from factor.actions.visibilities import Average, Split
