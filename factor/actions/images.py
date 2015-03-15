@@ -167,7 +167,7 @@ class Casapy(Action):
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
         if self.mask_datamap is None and self.direction is None:
-            self.p['mask'] = ''
+            self.p['mask'] = "''"
         else:
             self.p['mask'] = []
         if self.mask_datamap is not None:
