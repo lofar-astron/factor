@@ -335,8 +335,6 @@ class MakeImageIterate(Action):
         """
         Writes the pipeline control parset and any script files
         """
-        from factor.lib.datamap_lib import read_mapfile
-
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
 
@@ -367,7 +365,7 @@ class MakeImageIterate(Action):
                 prefix=self.prefix, band=self.band, index=i)
             mask_datamap = masker.run()
 
-            mask_file, _ = read_datamap(mask_datamap)
+            mask_file, _ = read_mapfile(mask_datamap)
             log_file = mask_file[0] + '.log'
             with open(log_file, 'r') as f:
                 lines = f.readlines()
