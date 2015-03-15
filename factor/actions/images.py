@@ -173,15 +173,9 @@ class Casapy(Action):
         if self.direction is not None:
             self.p['mask'] += self.direction.reg
 
-        self.p['scriptname'] = os.path.abspath(self.script_file)
         template = env.get_template('make_image.pipeline.parset.tpl')
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
-            f.write(tmp)
-
-        template = env.get_template('make_image.tpl')
-        tmp = template.render(self.p)
-        with open(self.script_file, 'w') as f:
             f.write(tmp)
 
 
