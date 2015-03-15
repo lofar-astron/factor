@@ -312,6 +312,24 @@ class MakeImageIterate(Action):
         super(MakeImageIterate, self).__init__(op_parset, 'MakeImageIterate',
             prefix=prefix, direction=direction, index=index)
 
+        self.vis_datamap = vis_datamap
+        self.mask_datamap = mask_datamap
+        self.p = p.copy()
+        if self.prefix is None:
+            self.prefix = 'make_mask'
+        self.clean = clean
+        self.image_dir += '{0}/{1}/'.format(self.op_name, self.name)
+        if self.direction is not None:
+            self.image_dir += '{0}/'.format(self.direction.name)
+        if self.band is not None:
+            self.image_dir += '{0}/'.format(self.band.name)
+        if not os.path.exists(self.image_dir):
+            os.makedirs(self.image_dir)
+        self.working_dir = self.image_dir
+
+        # Set up all required files
+        self.setup()
+
 
     def run(self):
         """
@@ -319,7 +337,7 @@ class MakeImageIterate(Action):
         """
         from factor.lib.datamap_lib import read_mapfile
 
-        vis_datamap = self.p['vis_datamap']
+        vis_datamap = vis_datamap
         mask_datamap = None
         threshold_5rms = self.p['threshold']
         for i in range(self.p['ncycles']):
