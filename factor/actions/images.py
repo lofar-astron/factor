@@ -351,6 +351,9 @@ class MakeImageIterate(Action):
                 prefix=self.prefix+'_final', band=self.band)
             image_basename_mapfile = imager.run()
 
-        self.p['output_datamap'] = image_basename_mapfile
+        self.output_datamap = image_basename_mapfile
+
+        return self.get_results()
+
 
 
