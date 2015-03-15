@@ -307,13 +307,12 @@ class MakeImageIterate(Action):
     """
     Compound action to make iteratively an image using a clean mask
     """
-    def __init__(self, op_parset, vis_datamap, p, mask_datamap=None, prefix=None,
+    def __init__(self, op_parset, vis_datamap, p, prefix=None,
         direction=None, band=None, clean=True, index=None):
         super(MakeImageIterate, self).__init__(op_parset, 'MakeImageIterate',
             prefix=prefix, direction=direction, index=index)
 
         self.vis_datamap = vis_datamap
-        self.mask_datamap = mask_datamap
         self.p = p.copy()
         if self.prefix is None:
             self.prefix = 'make_mask'
@@ -331,13 +330,20 @@ class MakeImageIterate(Action):
         self.setup()
 
 
+    def make_datamaps(self):
+        """
+        Makes the required data maps
+        """
+        self.p['vis_datamap'] = self.vis_datamap
+
+
     def run(self):
         """
         Runs the compound action
         """
         from factor.lib.datamap_lib import read_mapfile
 
-        vis_datamap = vis_datamap
+        vis_datamap = self.vis_datamap
         mask_datamap = None
         threshold_5rms = self.p['threshold']
         for i in range(self.p['ncycles']):
