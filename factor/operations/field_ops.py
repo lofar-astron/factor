@@ -82,6 +82,7 @@ class InitSubtract(Operation):
 
         if self.parset['use_ftw']:
             self.log.debug('FFTing high-res model image...')
+            p['modelh']['imsize'] = p['imagerh']['imsize']
             action = FFT(self.parset, input_data_mapfile,
                 highres_image_basenames_mapfile, p['modelh'], prefix='highres')
             self.s.run(action)
@@ -123,6 +124,7 @@ class InitSubtract(Operation):
 
         if self.parset['use_ftw']:
             self.log.debug('FFTing low-res model image...')
+            p['modell']['imsize'] = p['imagerl']['imsize']
             action = FFT(self.parset, input_data_mapfile,
                 lowres_image_basenames_mapfile, p['modell'], prefix='lowres')
             self.s.run(action)
