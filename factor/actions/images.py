@@ -361,7 +361,7 @@ class MakeImageIterate(Action):
                 self.p['threshold'] = threshold_5rms
                 self.p['niter'] = 100000
 
-            imager = MakeImage(self.parset, vis_datamap,
+            imager = MakeImage(self.op_parset, vis_datamap,
                 self.p, mask_datamap=mask_datamap,
                 prefix=self.prefix, band=self.band, index=i)
             image_basename_mapfile = imager.run()
@@ -369,7 +369,7 @@ class MakeImageIterate(Action):
             if i > 0 and self.p['iterate_threshold']:
                 # Only iterate the threshold for the first pass
                 self.p['iterate_threshold'] = False
-            masker = MakeMask(self.parset, image_basename_mapfile, self.p,
+            masker = MakeMask(self.op_parset, image_basename_mapfile, self.p,
                 prefix=self.prefix, band=self.band, index=i)
             mask_datamap = masker.run()
 
@@ -380,7 +380,7 @@ class MakeImageIterate(Action):
                 threshold_5rms = lines[0].split(': ')[-1] + 'Jy'
 
         if self.p['image_final']:
-            imager = MakeImage(self.parset, vis_datamap,
+            imager = MakeImage(self.op_parset, vis_datamap,
                 self.p, mask_datamap=mask_datamap,
                 prefix=self.prefix+'_final', band=self.band)
             image_basename_mapfile = imager.run()
