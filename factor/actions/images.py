@@ -222,8 +222,8 @@ class MakeMask(Action):
     """
     def __init__(self, op_parset, input_datamap, p, prefix=None,
         direction=None, band=None, clean=True, index=None):
-        super(MakeMask, self).__init__(op_parset, name, prefix=prefix,
-            direction=direction, band=band, index=index, name='MakeMask')
+        super(MakeMask, self).__init__(op_parset, 'MakeMask',
+            prefix=prefix, direction=direction, index=index)
 
         # Store input parameters
         self.input_datamap = input_datamap
@@ -309,8 +309,8 @@ class MakeImageIterate(Action):
     """
     def __init__(self, op_parset, vis_datamap, p, mask_datamap=None, prefix=None,
         direction=None, band=None, clean=True, index=None):
-        super(MakeImageIterate, self).__init__(op_parset, name, prefix=prefix,
-            direction=direction, band=band, index=index)
+        super(MakeImageIterate, self).__init__(op_parset, 'MakeImageIterate',
+            prefix=prefix, direction=direction, index=index)
 
 
     def run(self):
