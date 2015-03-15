@@ -4,7 +4,7 @@ Module that holds all hard-coded parameters
 
 init_subtract = {
 'split' : {'columnname': 'CORRECTED_DATA'}, # outcol is DATA
-'imagerh' : {'niter': 20000,
+'imagerh' : {'niter': 10000,
              'imsize': 6250,
              'mscale': False,
              'cell': '7.5arcsec',

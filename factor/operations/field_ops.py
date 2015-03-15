@@ -57,7 +57,7 @@ class InitSubtract(Operation):
         dir_indep_parmdbs_mapfile = self.write_mapfile([band.dirindparmdb for band
         	in bands], prefix='dir_indep_parmdbs')
 
-        self.log.info('Spliting corrected data...')
+        self.log.info('Spliting off corrected data...')
         action = Split(self.parset, input_data_mapfile, p['split'],
             prefix='highres')
         split_files_mapfile = self.s.run(action)
