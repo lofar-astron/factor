@@ -80,7 +80,10 @@ class Casapy(Action):
         if self.band is not None:
             self.image_dir += '{0}/'.format(self.band.name)
         if not os.path.exists(self.image_dir):
-            os.makedirs(self.image_dir)
+            try:
+                os.makedirs(self.image_dir)
+            except OSError:
+                pass
         self.working_dir = self.image_dir
 
         # Define names for output images
