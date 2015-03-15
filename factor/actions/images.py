@@ -37,8 +37,8 @@ class Casapy(Action):
 
     """
     def __init__(self, op_parset, vis_datamap, p, mask_datamap=None,
-    	prefix=None, direction=None, band=None,
-    	clean=True, index=None, name='Casapy'):
+    	prefix=None, direction=None, band=None, clean=True, index=None,
+    	name='Casapy'):
         """
         Create action and run pipeline
 
@@ -309,8 +309,7 @@ class MakeImageIterate(Action):
         self.vis_datamap = vis_datamap
         self.p = p.copy()
         if self.prefix is None:
-            self.prefix = 'make_mask'
-        self.clean = clean
+            self.prefix = 'make_image_iter'
 
 
     def make_datamaps(self):
