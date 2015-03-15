@@ -337,6 +337,16 @@ class MakeImageIterate(Action):
         self.p['vis_datamap'] = self.vis_datamap
 
 
+    def make_pipeline_control_parset(self):
+        """
+        Writes the pipeline control parset and any script files
+        """
+        from factor.lib.datamap_lib import read_mapfile
+
+        if 'ncpu' not in self.p:
+            self.p['ncpu'] = self.max_cpu
+
+
     def run(self):
         """
         Runs the compound action
