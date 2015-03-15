@@ -357,7 +357,7 @@ class MakeImageIterate(Action):
         mask_datamap = None
         threshold_5rms = self.p['threshold']
         for i in range(self.p['ncycles']):
-            if self.p['use_rms'] and i == self.ncycles-1:
+            if self.p['use_rms'] and i == self.p['ncycles'] - 1:
                 self.p['threshold'] = threshold_5rms
                 self.p['niter'] = 100000
 
