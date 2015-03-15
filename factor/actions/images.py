@@ -254,7 +254,7 @@ class MakeMask(Action):
             input_files = [bn+'.image' for bn in imagebasenames]
         else:
             input_files = [bn+'.image.tt0' for bn in imagebasenames]
-        output_files = [bn+'.cleanmask' for bn in self.modelbasenames]
+        output_files = [bn+'.cleanmask' for bn in imagebasenames]
 
         self.p['input_datamap'] = self.write_mapfile(input_files,
             prefix=self.prefix+'_input', direction=self.direction,
