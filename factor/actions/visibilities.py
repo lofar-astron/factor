@@ -144,7 +144,7 @@ class Average(DPPP):
     Action to average visibilities
     """
     def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
-        band=band, clean=True, index=None):
+        band=None, clean=True, index=None):
         super(Average, self).__init__(op_parset, input_datamap, p, prefix=prefix,
             direction=direction, band=band, clean=clean, index=index, name='Average')
 
@@ -179,7 +179,7 @@ class Split(DPPP):
     Action to split off visibilities
     """
     def __init__(self, op_parset, input_datamap, p, direction=None, prefix=None,
-        band=band, clean=True, index=None):
+        band=None, clean=True, index=None):
         super(Split, self).__init__(op_parset, input_datamap, p, prefix=prefix,
             direction=direction, band=band, clean=clean, index=index, name='Split')
 
