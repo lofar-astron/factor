@@ -22,9 +22,10 @@ class InitSubtract(Operation):
         super(InitSubtract, self).__init__(parset, bands, direction=None,
             reset=reset, name='InitSubtract')
 
-        # Set up imager scheduler
-        self.s_imager = Scheduler(parset['cluster_specific']['ncpu'], name=name,
-            op_parset=self.parset, max_threads=1)
+        # Set up imager scheduler (runs at most num_nodes imagers in parallel)
+        num_nodes = len(self.parset['cluster_specific']['node_list'])
+        self.s_imager = Scheduler(parset['cluster_specific']['ncpu'], name=self.name,
+            op_parset=self.parset, max_threads=num_nodes)
 
 
     def run_steps(self):
