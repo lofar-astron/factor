@@ -31,7 +31,7 @@ if iterate_threshold:
     threshpix = threshpix_orig
     threshisl = threshisl_orig
 else:
-    img = bdsm.process_image(fits_image, mean_map='zero',
+    img = bdsm.process_image(image_name, mean_map='zero',
         thresh_pix=numpy.float(threshpix), thresh_isl=numpy.float(threshisl),
         atrous_do=atrous_do, ini_method='curvature', adaptive_rms_box=True,
         adaptive_thresh=20, quiet=True)
