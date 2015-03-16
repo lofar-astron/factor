@@ -174,7 +174,7 @@ class Casapy(Action):
             mask_file, _ = read_mapfile(self.mask_datamap)
             self.p['mask'] += mask_file
         if self.direction is not None:
-            self.p['mask'] += self.direction.reg
+            self.p['mask'] += [self.direction.reg]
 
         template = env.get_template('make_image.pipeline.parset.tpl')
         tmp = template.render(self.p)

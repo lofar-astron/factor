@@ -47,4 +47,4 @@ def get_compute_nodes(clusterdesc_file):
     from lofarpipe.support import clusterdesc
 
     cluster = clusterdesc.ClusterDesc(clusterdesc_file)
-    return clusterdesc.get_compute_nodes(cluster)
+    return sorted(clusterdesc.get_compute_nodes(cluster))
