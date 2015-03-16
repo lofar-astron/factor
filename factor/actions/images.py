@@ -355,7 +355,7 @@ class MakeImageIterate(Action):
 
             vis_copy_datamap = self.write_mapfile(copy_files, prefix=self.prefix,
                 direction=self.direction, band=self.band, index=self.band,
-                host_list=host_list):
+                host_list=host_list)
 
             imager = MakeImage(self.op_parset, vis_copy_datamap, self.p,
             	mask_datamap=mask_datamap, direction=self.direction,

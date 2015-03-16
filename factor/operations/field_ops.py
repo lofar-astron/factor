@@ -51,15 +51,9 @@ class InitSubtract(Operation):
             return
 
         # Make initial data maps for the input datasets and their dir-indep
-        # instrument parmdbs. Also make datamaps with one file each for casapy
-        # imaging run (otherwise we get conflicts with temp files)
+        # instrument parmdbs.
         input_data_mapfile = self.write_mapfile([band.file for band in bands],
         	prefix='input_data')
-        vis_mapfiles = []
-        files, hosts = read_mapfile(input_data_mapfile)
-        for f, h, b in zip(files, hosts, bands):
-            vis_mapfiles.append(self.write_mapfile([f],
-        	prefix='input_data_vis', host_list=[h], band=b, index=1))
         dir_indep_parmdbs_mapfile = self.write_mapfile([band.dirindparmdb for band
         	in bands], prefix='dir_indep_parmdbs')
 
