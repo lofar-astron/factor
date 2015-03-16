@@ -277,7 +277,7 @@ class FacetSelfcal(Operation):
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.debug('Imaging...')
-        actions = [MakeImage(self.parset, dm, p['imager0'],
+        actions = [MakeImageIterate(self.parset, dm, p['imager0'],
         	prefix='facet_selfcal0', mask_datamap=rm, direction=d) for d, dm,
         	rm in zip(d_list, avg_data_mapfiles, facet_region_mapfiles)]
         image0_basenames_mapfiles = self.s.run(actions)
@@ -345,7 +345,7 @@ class FacetSelfcal(Operation):
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.debug('Imaging...')
-        actions = [MakeImage(self.parset, m, p['imager1'], prefix='facet_selfcal1',
+        actions = [MakeImageIterate(self.parset, m, p['imager1'], prefix='facet_selfcal1',
             direction=d) for d, m in zip(d_list, avg_data_mapfiles)]
         image1_basenames_mapfiles = self.s.run(actions)
 
@@ -408,7 +408,7 @@ class FacetSelfcal(Operation):
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.debug('Imaging...')
-        actions = [MakeImage(self.parset, m, p['imager2'], prefix='facet_selfcal2',
+        actions = [MakeImageIterate(self.parset, m, p['imager2'], prefix='facet_selfcal2',
             direction=d) for d, m in zip(d_list, avg_data_mapfiles)]
         image2_basenames_mapfiles = self.s.run(actions)
 
@@ -510,7 +510,7 @@ class FacetSelfcal(Operation):
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.debug('Imaging...')
-        actions = [MakeImage(self.parset, m, p['imager3'], prefix='facet_selfcal3',
+        actions = [MakeImageIterate(self.parset, m, p['imager3'], prefix='facet_selfcal3',
             direction=d) for d, m in zip(d_list, avg_data_mapfiles)]
         image3_basenames_mapfiles = self.s.run(actions)
 
@@ -641,7 +641,7 @@ class FacetSelfcal(Operation):
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.debug('Imaging...')
-        actions = [MakeImage(self.parset, m, p['imager4'], prefix='facet_selfcal4',
+        actions = [MakeImageIterate(self.parset, m, p['imager4'], prefix='facet_selfcal4',
             direction=d) for d, m in zip(d_list, avg_data_mapfiles)]
         image4_basenames_mapfiles = self.s.run(actions)
 
@@ -952,7 +952,7 @@ class FacetImage(Operation):
         concat_data_mapfiles = self.s.run(actions)
 
         self.log.info('Imaging...')
-        actions = [MakeImage(self.parset, m, p['imager'], prefix='facet_image',
+        actions = [MakeImageIterate(self.parset, m, p['imager'], prefix='facet_image',
             direction=d) for d, m in zip(d_list, concat_data_mapfiles)]
         image_basenames_mapfiles = self.s.run(actions)
 
@@ -1007,10 +1007,8 @@ class FacetSubAll(Operation):
         bands = self.bands
 
         # Check state
-#         if os.path.exists(self.statebasename+'.done'):
-#             self.direction.skymodel_dirdep = 'visdata/allbands_concat_{0}.ms'.format(
-#                 self.direction.name)
-#             return
+        if os.path.exists(self.statebasename+'.done'):
+            return
 
         # Make initial data maps for the empty datasets, their dir-dep
         # instrument parmdbs, and their dir-dep sky models
@@ -1107,10 +1105,12 @@ class FacetAddAllFinal(Operation):
         bands = self.bands
 
         # Check state for each direction
-#         if os.path.exists(self.statebasename+'.done'):
-#             self.direction.concat_file = 'visdata/allbands_concat_{0}.ms'.format(
-#                 self.direction.name)
-#             return
+        if os.path.exists(self.statebasename+'.done'):
+            shifted_data_mapfile = os.path.join(self.parset['dir_working'],
+                'datamaps/FacetAddAllFinal/PhaseShift/{0}/facet_output_{0}.datamap'.
+                format(d.name))
+            d.shifted_data_files, _ = read_mapfile(shifted_data_mapfile)
+            return
 
         # Make initial data maps for the empty datasets, their dir-indep
         # instrument parmdbs, and their dir-indep sky models
@@ -1139,9 +1139,7 @@ class FacetAddAllFinal(Operation):
         shifted_data_mapfile = self.s.run(action)
 
         # Save files to the band objects
-        files, _ = read_mapfile(shifted_data_mapfile)
-        for band, f in zip(bands, files):
-            band.shifted_data_file = f
+        d.shifted_data_files, _ = read_mapfile(shifted_data_mapfile)
 
 
 def FacetImageFinal(FacetImage):
