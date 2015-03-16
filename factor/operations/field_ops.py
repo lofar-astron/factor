@@ -54,22 +54,22 @@ class InitSubtract(Operation):
         # instrument parmdbs.
         input_data_mapfile = self.write_mapfile([band.file for band in bands],
         	prefix='input_data')
+        vis_mapfiles = []
+        files, hosts = read_mapfile(input_data_mapfile)
+        for f, h, b in zip(files, hosts, bands):
+            vis_mapfiles.append(self.write_mapfile([f],
+        	prefix='input_data_vis', host_list=[h], band=b, index=1))
         dir_indep_parmdbs_mapfile = self.write_mapfile([band.dirindparmdb for band
         	in bands], prefix='dir_indep_parmdbs')
 
         self.log.info('Spliting off corrected data...')
-        action = Split(self.parset, input_data_mapfile, p['split'],
-            prefix='highres')
-        split_files_mapfile = self.s.run(action)
-        vis_mapfiles = []
-        files, hosts = read_mapfile(split_files_mapfile)
-        for f, h, b in zip(files, hosts, bands):
-            vis_mapfiles.append(self.write_mapfile([f],
-        	prefix='corrected_vis', host_list=[h], band=b))
+        actions = [Split(self.parset, dm, p['split'],
+            prefix='highres', band=band) for dm, band in zip(vis_mapfiles, bands)]
+        split_files_mapfiles= self.s.run(actions)
 
         self.log.info('High-res imaging...')
         actions = [MakeImageIterate(self.parset, dm, p['imagerh'],
-            prefix='highres', band=band) for dm, band in zip(vis_mapfiles, bands)]
+            prefix='highres', band=band) for dm, band in zip(split_files_mapfiles, bands)]
         highres_image_basenames_mapfiles = self.s_imager.run(actions)
         basenames = []
         hosts = []
@@ -100,18 +100,13 @@ class InitSubtract(Operation):
         self.s.run(action)
 
         self.log.info('Averaging...')
-        action = Average(self.parset, input_data_mapfile, p['avgl'],
-            prefix='highres')
-        avg_files_mapfile = self.s.run(action)
-        vis_mapfiles = []
-        files, hosts = read_mapfile(avg_files_mapfile)
-        for f, h, b in zip(files, hosts, bands):
-            vis_mapfiles.append(self.write_mapfile([f],
-        	prefix='input_data_vis', host_list=[h], band=b, index=2))
+        actions = [Average(self.parset, dm, p['avgl'],
+            prefix='highres', band=band) for dm, band in zip(vis_mapfiles, bands)]
+        avg_files_mapfiles = self.s.run(actions)
 
         self.log.info('Low-res imaging...')
         actions = [MakeImageIterate(self.parset, dm, p['imagerl'],
-            prefix='lowres', band=band) for dm, band in zip(vis_mapfiles, bands)]
+            prefix='lowres', band=band) for dm, band in zip(avg_files_mapfiles, bands)]
         lowres_image_basenames_mapfiles = self.s_imager.run(actions)
         basenames = []
         hosts = []

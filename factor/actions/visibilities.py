@@ -41,7 +41,7 @@ class DPPP(Action):
 
     """
     def __init__(self, op_parset, input_datamap, p, prefix=None,
-        direction=None, clean=True, index=None, name='DPPP'):
+        direction=None, band=None, clean=True, index=None, name='DPPP'):
         """
         Create action and run pipeline
 
@@ -52,11 +52,13 @@ class DPPP(Action):
         input_datamap : data map
             Input data map for action
         p : dict
-            Input parset dict defining model and pipeline parameters
+            Input parset dict defining dppp and pipeline parameters
         prefix : str, optional
-            Prefix to use for model names
+            Prefix to use
         direction : Direction object, optional
-            Direction for this model
+            Direction for this action
+        band : Band object, optional
+            Band for this action
         clean : bool, optional
             Remove unneeded files?
         index : int, optional
@@ -64,7 +66,7 @@ class DPPP(Action):
 
         """
         super(DPPP, self).__init__(op_parset, name=name, prefix=prefix,
-            direction=direction, index=index)
+            direction=direction, band=band, index=index)
 
         # Store input parameters
         self.input_datamap = input_datamap
@@ -75,6 +77,8 @@ class DPPP(Action):
         self.working_dir = self.vis_dir + '{0}/{1}/'.format(self.op_name, self.name)
         if self.direction is not None:
             self.working_dir += '{0}/'.format(self.direction.name)
+        if self.band is not None:
+            self.working_dir += '{0}/'.format(self.band.name)
         if not os.path.exists(self.working_dir):
             os.makedirs(self.working_dir)
 
@@ -103,7 +107,7 @@ class DPPP(Action):
             concat_file_list = ['[' + ','.join([msname for msname in msnames]) + ']']
             hosts = [hosts[0]]
             self.p['input_datamap'] = self.write_mapfile(concat_file_list,
-                prefix=self.prefix+'_input', direction=self.direction,
+                prefix=self.prefix+'_input', direction=self.direction, band=self.band,
                 use_abs_path=False, index=self.index, host_list=hosts)
             ms = msnames[0]
             output_files = [self.working_dir + os.path.splitext(os.path.basename(ms))[0]
@@ -111,7 +115,7 @@ class DPPP(Action):
 
         self.p['output_datamap'] = self.write_mapfile(output_files,
             prefix=self.prefix+'_output', direction=self.direction,
-            index=self.index, host_list=hosts)
+            index=self.index, band=self.band, host_list=hosts)
 
 
     def make_pipeline_control_parset(self):
@@ -140,9 +144,9 @@ class Average(DPPP):
     Action to average visibilities
     """
     def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
-        clean=True, index=None):
+        band=band, clean=True, index=None):
         super(Average, self).__init__(op_parset, input_datamap, p, prefix=prefix,
-            direction=direction, clean=clean, index=index, name='Average')
+            direction=direction, band=band, clean=clean, index=index, name='Average')
 
 
 class PhaseShift(DPPP):
@@ -175,7 +179,7 @@ class Split(DPPP):
     Action to split off visibilities
     """
     def __init__(self, op_parset, input_datamap, p, direction=None, prefix=None,
-        clean=True, index=None):
+        band=band, clean=True, index=None):
         super(Split, self).__init__(op_parset, input_datamap, p, prefix=prefix,
-            direction=direction, clean=clean, index=index, name='Split')
+            direction=direction, band=band, clean=clean, index=index, name='Split')
 
