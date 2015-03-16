@@ -261,11 +261,11 @@ class MakeMask(Action):
 
         self.p['input_datamap'] = self.write_mapfile(input_files,
             prefix=self.prefix+'_input', direction=self.direction,
-            index=self.index, host_list=hosts)
+            index=self.index, band=self.band, host_list=hosts)
 
         self.p['output_datamap'] = self.write_mapfile(output_files,
             prefix=self.prefix+'_output', direction=self.direction,
-            index=self.index, host_list=hosts)
+            index=self.index, band=self.band, host_list=hosts)
 
 
     def make_pipeline_control_parset(self):
@@ -343,16 +343,17 @@ class MakeImageIterate(Action):
                 self.p['threshold'] = threshold_5rms
                 self.p['niter'] = 100000
 
-            imager = MakeImage(self.op_parset, vis_datamap,
-                self.p, mask_datamap=mask_datamap,
-                prefix=self.prefix, band=self.band, index=i)
+            imager = MakeImage(self.op_parset, vis_datamap, self.p,
+            	mask_datamap=mask_datamap, direction=self.direction,
+            	prefix=self.prefix, band=self.band, index=i)
             image_basename_mapfile = imager.run()
 
             if i > 0 and self.p['iterate_threshold']:
                 # Only iterate the threshold for the first pass
                 self.p['iterate_threshold'] = False
             masker = MakeMask(self.op_parset, image_basename_mapfile, self.p,
-                prefix=self.prefix, band=self.band, index=i)
+                prefix=self.prefix, direction=self.direction, band=self.band,
+                index=i)
             mask_datamap = masker.run()
 
             mask_file, _ = read_mapfile(mask_datamap)
@@ -362,9 +363,9 @@ class MakeImageIterate(Action):
                 threshold_5rms = lines[0].split(': ')[-1] + 'Jy'
 
         if self.p['image_final']:
-            imager = MakeImage(self.op_parset, vis_datamap,
-                self.p, mask_datamap=mask_datamap,
-                prefix=self.prefix+'_final', band=self.band)
+            imager = MakeImage(self.op_parset, vis_datamap, self.p,
+            	mask_datamap=mask_datamap, direction=self.direction,
+            	prefix=self.prefix+'_final', band=self.band)
             image_basename_mapfile = imager.run()
 
         self.output_datamap = image_basename_mapfile
