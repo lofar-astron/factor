@@ -171,7 +171,7 @@ class Casapy(Action):
         else:
             self.p['mask'] = []
         if self.mask_datamap is not None:
-            mask_file, _ = read_mapfile(mask_datamap)
+            mask_file, _ = read_mapfile(self.mask_datamap)
             self.p['mask'] += mask_file
         if self.direction is not None:
             self.p['mask'] += self.direction.reg
