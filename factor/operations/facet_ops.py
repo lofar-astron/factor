@@ -214,7 +214,7 @@ class FacetSelfcal(Operation):
         """
         from factor.actions.visibilities import Average, Concatenate
         from factor.actions.calibrations import Apply, Solve
-        from factor.actions.images import MakeImage
+        from factor.actions.images import MakeImageIterate
         from factor.actions.models import MakeSkymodelFromModelImage, FFT
         from factor.actions.solutions import Smooth, ResetPhases
         from factor.lib.operation_lib import copy_column, make_chunks, merge_chunks
@@ -873,7 +873,7 @@ class FacetImage(Operation):
         """
         from factor.actions.visibilities import Average, Concatenate
         from factor.actions.calibrations import Apply
-        from factor.actions.images import MakeImage
+        from factor.actions.images import MakeImageIterate
         from factor.actions.models import MakeFacetSkymodel, MakeSkymodelFromModelImage
         from factor.lib.operation_lib import copy_column
         from factor.operations.hardcoded_param import facet_image as p
