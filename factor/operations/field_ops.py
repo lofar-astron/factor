@@ -21,6 +21,10 @@ class InitSubtract(Operation):
         super(InitSubtract, self).__init__(parset, bands, direction=None,
             reset=reset, name='InitSubtract')
 
+        # Set up imager scheduler
+        self.s_imager = Scheduler(parset['cluster_specific']['ncpu'], name=name,
+            op_parset=self.parset, max_threads=1)
+
 
     def run_steps(self):
         """
@@ -70,7 +74,7 @@ class InitSubtract(Operation):
         self.log.info('High-res imaging...')
         actions = [MakeImageIterate(self.parset, dm, p['imagerh'],
             prefix='highres', band=band) for dm, band in zip(vis_mapfiles, bands)]
-        highres_image_basenames_mapfiles = self.s.run(actions)
+        highres_image_basenames_mapfiles = self.s_imager.run(actions)
         basenames = []
         hosts = []
         for bm in highres_image_basenames_mapfiles:
@@ -112,7 +116,7 @@ class InitSubtract(Operation):
         self.log.info('Low-res imaging...')
         actions = [MakeImageIterate(self.parset, dm, p['imagerl'],
             prefix='lowres', band=band) for dm, band in zip(vis_mapfiles, bands)]
-        lowres_image_basenames_mapfiles = self.s.run(actions)
+        lowres_image_basenames_mapfiles = self.s_imager.run(actions)
         basenames = []
         hosts = []
         for bm in lowres_image_basenames_mapfiles:
