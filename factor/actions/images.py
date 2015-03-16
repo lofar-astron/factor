@@ -171,7 +171,7 @@ class Casapy(Action):
         else:
             self.p['mask'] = []
         if self.mask_datamap is not None:
-            mask_file, _ = read_datamap(mask_datamap)
+            mask_file, _ = read_mapfile(mask_datamap)
             self.p['mask'] += mask_file
         if self.direction is not None:
             self.p['mask'] += self.direction.reg
@@ -276,7 +276,6 @@ class MakeMask(Action):
             self.p['ncpu'] = self.max_cpu
 
         self.p['scriptname'] = os.path.abspath(self.script_file)
-        self.p['outputdir'] = os.path.abspath(self.working_dir)
         template = env.get_template('make_clean_mask.pipeline.parset.tpl')
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
