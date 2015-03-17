@@ -59,10 +59,7 @@ class Action(object):
         if self.band is not None:
             self.datamap_dir += '{0}/'.format(self.band.name)
         if not os.path.exists(self.datamap_dir):
-            try:
-                os.makedirs(self.datamap_dir)
-            except OSError:
-                pass
+            os.makedirs(self.datamap_dir)
 
         self.parset_dir = '{0}/parsets/{1}/{2}/'.format(factor_working_dir,
             self.op_name, self.name)
@@ -71,10 +68,7 @@ class Action(object):
         if self.band is not None:
             self.parset_dir += '{0}/'.format(self.band.name)
         if not os.path.exists(self.parset_dir):
-            try:
-                os.makedirs(self.parset_dir)
-            except OSError:
-                pass
+            os.makedirs(self.parset_dir)
 
         self.pipeline_run_dir = '{0}/pipeline/{1}/{2}/'.format(factor_working_dir,
             self.op_name, self.name)
@@ -83,10 +77,7 @@ class Action(object):
         if self.band is not None:
             self.pipeline_run_dir += '{0}/'.format(self.band.name)
         if not os.path.exists(self.pipeline_run_dir):
-            try:
-                os.makedirs(self.pipeline_run_dir)
-            except OSError:
-                pass
+            os.makedirs(self.pipeline_run_dir)
 
         self.log = logging.getLogger('%s::%s' % (self.op_name, self.name))
         self.log_dir = '{0}/logs/{1}/{2}/'.format(factor_working_dir,
@@ -96,10 +87,7 @@ class Action(object):
         if self.band is not None:
             self.log_dir += '{0}/'.format(self.band.name)
         if not os.path.exists(self.log_dir):
-            try:
-                os.makedirs(self.log_dir)
-            except OSError:
-                pass
+            os.makedirs(self.log_dir)
 
         self.pipeline_executable = os.path.join(self.op_parset['piperoot'], 'bin',
             'genericpipeline.py')
@@ -111,10 +99,7 @@ class Action(object):
         self.pipeline_config_file = self.parsetbasename + 'pipe.cfg'
         self.pipeline_run_dir += make_basename(prefix, direction, band, index)
         if not os.path.exists(self.pipeline_run_dir):
-            try:
-                os.makedirs(self.pipeline_run_dir)
-            except OSError:
-                pass
+            os.makedirs(self.pipeline_run_dir)
 
         self.logbasename = self.log_dir + make_basename(prefix, direction, band,
             index)
