@@ -69,7 +69,8 @@ class InitSubtract(Operation):
 
         self.log.info('High-res imaging...')
         actions = [MakeImageIterate(self.parset, dm, p['imagerh'],
-            prefix='highres', band=band) for dm, band in zip(split_files_mapfiles, bands)]
+            prefix='highres', band=band) for dm, band in
+            zip(split_files_mapfiles, bands)]
         highres_image_basenames_mapfiles = self.s_imager.run(actions)
         basenames = []
         hosts = []

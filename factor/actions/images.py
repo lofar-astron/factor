@@ -344,9 +344,22 @@ class MakeImageIterate(Action):
                 self.p['niter'] = 100000
 
             # Copy data before each iteration
-            imager = MakeImage(self.op_parset, vis_datamap, self.p,
+            vis_files, host_list = read_mapfile(vis_datamap)
+            copy_files = []
+            for f in vis_files:
+                dest = f + '.copy{0}'.format(i)
+                if os.path.exists(dest):
+                    os.system('rm -rf {0}'.format(dest))
+                os.system('cp -r {0} {1}'.format(f, dest))
+                copy_files.append(dest)
+
+            vis_copy_datamap = self.write_mapfile(copy_files, prefix=self.prefix,
+                direction=self.direction, band=self.band, index=self.band,
+                host_list=host_list)
+
+            imager = MakeImage(self.op_parset, vis_copy_datamap, self.p,
             	mask_datamap=mask_datamap, direction=self.direction,
-            	prefix=self.prefix, band=self.band, index=i)
+            	prefix=self.prefix, band=self.band)
             image_basename_mapfile = imager.run()
 
             if i > 0 and self.p['iterate_threshold']:
@@ -364,7 +377,7 @@ class MakeImageIterate(Action):
                 threshold_5rms = lines[0].split(': ')[-1] + 'Jy'
 
         if self.p['image_final']:
-            imager = MakeImage(self.op_parset, vis_datamap, self.p,
+            imager = MakeImage(self.op_parset, vis_copy_datamap, self.p,
             	mask_datamap=mask_datamap, direction=self.direction,
             	prefix=self.prefix+'_final', band=self.band)
             image_basename_mapfile = imager.run()
