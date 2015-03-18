@@ -8,8 +8,10 @@ the pipeline.
 import logging
 try:
     import subprocess32 as subprocess
+    has32 = True
 except ImportError:
     import subprocess
+    has32 = False
 import os
 from factor.lib.action_lib import make_basename
 
@@ -209,17 +211,22 @@ class Action(object):
         """
         Runs the pipeline
         """
+
         cmd = 'ulimit -n 2048; python {0} {1} -d -c {2}'.format(self.pipeline_executable,
             self.pipeline_parset_file, self.pipeline_config_file)
-        with open("{0}.out.log".format(self.logbasename), "wb") as out, \
-            open("{0}.err.log".format(self.logbasename), "wb") as err:
-            p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err,
-                close_fds=True)
-            p.communicate()
-            try:
-                p.kill()
-            except OSError:
-                pass
+        if has32:
+            with open("{0}.out.log".format(self.logbasename), "wb") as out, \
+                open("{0}.err.log".format(self.logbasename), "wb") as err:
+                p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
+                try:
+                    p.comminucate(timeout=2400)
+                except TimeoutExpired:
+                    p.kill()
+        else:
+            with open("{0}.out.log".format(self.logbasename), "wb") as out, \
+                open("{0}.err.log".format(self.logbasename), "wb") as err:
+                p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
+                p.comminucate()
 
         return self.get_results()
 
