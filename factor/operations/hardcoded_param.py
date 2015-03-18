@@ -7,7 +7,7 @@ init_subtract = {
 'imagerh' : {'niter': 10000,
              'imsize': 4800,
              'mscale': False,
-             'cell': '10arcsec',
+             'cell': '7.5arcsec',
              'uvrange': "0.08~7.0klambda",
              'threshpix': 4,
              'threshisl': 2.5,
@@ -23,9 +23,9 @@ init_subtract = {
 'modelh' : {'nterms': 1},
 'calibh' : {'incol': 'DATA',
             'outcol1': 'SUBTRACTED_DATA',
-            'outcol2': 'MODEL_DATA',
+            'outcol2': 'CORRECTED_SUBTRACTED_DATA',
             'flags': '--replace-sourcedb'},
-'avgl' : {'columnname': 'MODEL_DATA', # outcol is DATA
+'avgl' : {'columnname': 'CORRECTED_SUBTRACTED_DATA', # outcol is DATA
           'freqstep': 5,
           'timestep': 2},
 'imagerl' : {'niter' : 5000,
