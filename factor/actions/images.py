@@ -306,7 +306,8 @@ class MakeImageIterate(Action):
     def __init__(self, op_parset, vis_datamap, p, prefix=None,
         direction=None, band=None, clean=True, index=None):
         super(MakeImageIterate, self).__init__(op_parset, 'MakeImageIterate',
-        	prefix=prefix, direction=direction, band=band, index=index)
+        	prefix=prefix, direction=direction, band=band, index=index,
+        	set_up=False)
 
         self.vis_datamap = vis_datamap
         self.p = p.copy()
