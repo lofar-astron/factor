@@ -342,7 +342,7 @@ class MakeImageIterate(Action):
         for i in range(self.p['ncycles']):
             if self.p['use_rms'] and i == self.p['ncycles'] - 1:
                 self.p['threshold'] = threshold_5rms
-                self.p['niter'] = 100000
+                self.p['niter'] = 1000000
 
             imager = MakeImage(self.op_parset, vis_datamap, self.p,
             	mask_datamap=mask_datamap, direction=self.direction,
