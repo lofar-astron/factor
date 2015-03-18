@@ -16,7 +16,7 @@ class Action(object):
     Generic action class
     """
     def __init__(self, op_parset, name, prefix=None, direction=None, band=None,
-        index=None):
+        index=None, set_up=True):
         """
         Create Action object
 
@@ -34,6 +34,8 @@ class Action(object):
             Band for this action
         index : int, optional
             Index of action
+        set_up : bool, optional
+            If True, make directories, etc. used by all actions
 
         """
         self.op_name = op_parset['op_name']
@@ -46,63 +48,63 @@ class Action(object):
         self.max_cpu = self.op_parset['cluster_specific']['ncpu']
 
         # Set up directories needed by every action
-        factor_working_dir = op_parset['dir_working']
-        self.vis_dir = '{0}/visdata/'.format(factor_working_dir)
-        self.image_dir = '{0}/images/'.format(factor_working_dir)
-        self.model_dir = '{0}/models/'.format(factor_working_dir)
-        self.parmdb_dir = '{0}/parmdbs/'.format(factor_working_dir)
+        if set_up:
+            factor_working_dir = op_parset['dir_working']
+            self.vis_dir = '{0}/visdata/'.format(factor_working_dir)
+            self.image_dir = '{0}/images/'.format(factor_working_dir)
+            self.model_dir = '{0}/models/'.format(factor_working_dir)
+            self.parmdb_dir = '{0}/parmdbs/'.format(factor_working_dir)
 
-        self.datamap_dir = '{0}/datamaps/{1}/{2}/'.format(factor_working_dir,
-            self.op_name, self.name)
-        if self.direction is not None:
-            self.datamap_dir += '{0}/'.format(self.direction.name)
-        if self.band is not None:
-            self.datamap_dir += '{0}/'.format(self.band.name)
-        if not os.path.exists(self.datamap_dir):
-            os.makedirs(self.datamap_dir)
+            self.datamap_dir = '{0}/datamaps/{1}/{2}/'.format(factor_working_dir,
+                self.op_name, self.name)
+            if self.direction is not None:
+                self.datamap_dir += '{0}/'.format(self.direction.name)
+            if self.band is not None:
+                self.datamap_dir += '{0}/'.format(self.band.name)
+            if not os.path.exists(self.datamap_dir):
+                os.makedirs(self.datamap_dir)
 
-        self.parset_dir = '{0}/parsets/{1}/{2}/'.format(factor_working_dir,
-            self.op_name, self.name)
-        if self.direction is not None:
-            self.parset_dir += '{0}/'.format(self.direction.name)
-        if self.band is not None:
-            self.parset_dir += '{0}/'.format(self.band.name)
-        if not os.path.exists(self.parset_dir):
-            os.makedirs(self.parset_dir)
+            self.parset_dir = '{0}/parsets/{1}/{2}/'.format(factor_working_dir,
+                self.op_name, self.name)
+            if self.direction is not None:
+                self.parset_dir += '{0}/'.format(self.direction.name)
+            if self.band is not None:
+                self.parset_dir += '{0}/'.format(self.band.name)
+            if not os.path.exists(self.parset_dir):
+                os.makedirs(self.parset_dir)
 
-        self.pipeline_run_dir = '{0}/pipeline/{1}/{2}/'.format(factor_working_dir,
-            self.op_name, self.name)
-        if self.direction is not None:
-            self.pipeline_run_dir += '{0}/'.format(self.direction.name)
-        if self.band is not None:
-            self.pipeline_run_dir += '{0}/'.format(self.band.name)
-        if not os.path.exists(self.pipeline_run_dir):
-            os.makedirs(self.pipeline_run_dir)
+            self.pipeline_run_dir = '{0}/pipeline/{1}/{2}/'.format(factor_working_dir,
+                self.op_name, self.name)
+            if self.direction is not None:
+                self.pipeline_run_dir += '{0}/'.format(self.direction.name)
+            if self.band is not None:
+                self.pipeline_run_dir += '{0}/'.format(self.band.name)
+            if not os.path.exists(self.pipeline_run_dir):
+                os.makedirs(self.pipeline_run_dir)
 
-        self.log = logging.getLogger('%s::%s' % (self.op_name, self.name))
-        self.log_dir = '{0}/logs/{1}/{2}/'.format(factor_working_dir,
-            self.op_name, self.name)
-        if self.direction is not None:
-            self.log_dir += '{0}/'.format(self.direction.name)
-        if self.band is not None:
-            self.log_dir += '{0}/'.format(self.band.name)
-        if not os.path.exists(self.log_dir):
-            os.makedirs(self.log_dir)
+            self.log = logging.getLogger('%s::%s' % (self.op_name, self.name))
+            self.log_dir = '{0}/logs/{1}/{2}/'.format(factor_working_dir,
+                self.op_name, self.name)
+            if self.direction is not None:
+                self.log_dir += '{0}/'.format(self.direction.name)
+            if self.band is not None:
+                self.log_dir += '{0}/'.format(self.band.name)
+            if not os.path.exists(self.log_dir):
+                os.makedirs(self.log_dir)
 
-        self.pipeline_executable = os.path.join(self.op_parset['piperoot'], 'bin',
-            'genericpipeline.py')
+            # Set up parset and script names needed by every action
+            self.pipeline_executable = os.path.join(self.op_parset['piperoot'], 'bin',
+                'genericpipeline.py')
+            self.parsetbasename = self.parset_dir + make_basename(prefix,
+                direction, band, index)
+            self.pipeline_parset_file = self.parsetbasename + 'pipe.parset'
+            self.pipeline_config_file = self.parsetbasename + 'pipe.cfg'
+            self.pipeline_run_dir += make_basename(prefix, direction, band, index)
+            if not os.path.exists(self.pipeline_run_dir):
+                os.makedirs(self.pipeline_run_dir)
 
-        # Set up parset and script names needed by every action
-        self.parsetbasename = self.parset_dir + make_basename(prefix,
-            direction, band, index)
-        self.pipeline_parset_file = self.parsetbasename + 'pipe.parset'
-        self.pipeline_config_file = self.parsetbasename + 'pipe.cfg'
-        self.pipeline_run_dir += make_basename(prefix, direction, band, index)
-        if not os.path.exists(self.pipeline_run_dir):
-            os.makedirs(self.pipeline_run_dir)
-
-        self.logbasename = self.log_dir + make_basename(prefix, direction, band,
-            index)
+            self.logbasename = self.log_dir + make_basename(prefix, direction, band,
+                index)
 
 
     def make_datamaps(self):
@@ -181,6 +183,7 @@ class Action(object):
                 + 'max_per_node = {0}\n'.format(self.op_parset['ncpu'])
         else:
             self.op_parset['remote'] = ''
+        self.op_parset['clusterdesc'] = self.op_parset['cluster_specific']['clusterdesc']
 
         template = env.get_template('pipeline.cfg.tpl')
         tmp = template.render(self.op_parset)
