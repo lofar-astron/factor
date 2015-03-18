@@ -220,7 +220,7 @@ class Action(object):
                 p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
                 try:
                     p.comminucate(timeout=2400)
-                except TimeoutExpired:
+                except subprocess.TimeoutExpired:
                     p.kill()
         else:
             with open("{0}.out.log".format(self.logbasename), "wb") as out, \
