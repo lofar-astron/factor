@@ -240,7 +240,7 @@ facet_image= {
 'concat' : {'columnname': 'DATA'}, # outcol is DATA
 'imager' : {'niter': 5000,
             'imsize': 1024,
-            'mscale': True,
+            'mscale': False,
             'cell': '1.5arcsec',
             'uvrange': '>80lambda',
             'threshpix': 6.0,
@@ -285,7 +285,7 @@ facet_image_final = {
          'timestep': 3},
 'imager' : {'niter': 5000,
             'imsize': 1024,
-            'mscale': True,
+            'mscale': False,
             'cell': '1.5arcsec',
             'uvrange': '>80lambda',
             'threshpix': 6.0,
