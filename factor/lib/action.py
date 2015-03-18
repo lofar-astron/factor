@@ -183,7 +183,8 @@ class Action(object):
                 + 'max_per_node = {0}\n'.format(self.op_parset['ncpu'])
         else:
             self.op_parset['remote'] = ''
-        self.op_parset['clusterdesc'] = self.op_parset['cluster_specific']['clusterdesc']
+        self.op_parset['clusterdesc'] = os.path.join(self.op_parset['dir_working'],
+            self.op_parset['cluster_specific']['clusterdesc'])
 
         template = env.get_template('pipeline.cfg.tpl')
         tmp = template.render(self.op_parset)
@@ -209,8 +210,7 @@ class Action(object):
             self.pipeline_parset_file, self.pipeline_config_file)
         with open("{0}.out.log".format(self.logbasename), "wb") as out, \
             open("{0}.err.log".format(self.logbasename), "wb") as err:
-            p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err,
-                close_fds=True)
+            p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
             p.communicate()
             try:
                 p.kill()
