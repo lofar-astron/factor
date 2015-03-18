@@ -6,7 +6,10 @@ the pipeline.
 """
 
 import logging
-import subprocess
+try:
+    import subprocess32 as subprocess
+except ImportError:
+    import subprocess
 import os
 from factor.lib.action_lib import make_basename
 

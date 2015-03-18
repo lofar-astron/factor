@@ -1,5 +1,8 @@
 import sys
-import subprocess
+try:
+    import subprocess32 as subprocess
+except ImportError:
+    import subprocess
 import os
 
 model = sys.argv[1]
