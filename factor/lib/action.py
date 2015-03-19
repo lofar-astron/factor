@@ -218,6 +218,8 @@ class Action(object):
                 open("{0}.err.log".format(self.logbasename), "wb") as err:
                 p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
                 try:
+                    # Use a timeout to stop casapy runs that never return (but
+                    # actually completed successfully)
                     p.communicate(timeout=3600)
                 except subprocess.TimeoutExpired:
                     p.kill()
