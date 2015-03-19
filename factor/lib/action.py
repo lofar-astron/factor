@@ -211,7 +211,6 @@ class Action(object):
         """
         Runs the pipeline
         """
-
         cmd = 'ulimit -n 2048; python {0} {1} -d -c {2}'.format(self.pipeline_executable,
             self.pipeline_parset_file, self.pipeline_config_file)
         if has32:
@@ -225,7 +224,8 @@ class Action(object):
         else:
             with open("{0}.out.log".format(self.logbasename), "wb") as out, \
                 open("{0}.err.log".format(self.logbasename), "wb") as err:
-                p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
+                p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err,
+                    close_fds=True)
                 p.communicate()
 
         return self.get_results()
