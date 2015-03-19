@@ -9,6 +9,7 @@ threshisl = {{ threshisl }}
 threshpix = {{ threshpix }}
 rmsbox = {{ rmsbox }}
 iterate_threshold = {{ iterate_threshold }}
+adaptive_rmsbox = {{ adaptive_rmsbox }}
 
 if atrous_do:
    threshisl = 4.0
@@ -21,20 +22,20 @@ if iterate_threshold:
     threspix = 25
     thresisl = 15
     while nisl == 0:
-        img = bdsm.process_image(image_name, mean_map='zero',
+        img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
             thresh_pix=numpy.float(threshpix), thresh_isl=numpy.float(threshisl),
-            atrous_do=atrous_do, ini_method='curvature', adaptive_rms_box=True,
-            adaptive_thresh=20, quiet=True)
+            atrous_do=atrous_do, ini_method='curvature',
+            adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=20, quiet=True)
         nisl = img.nisl
         threshpix /= 1.2
         threshisl /= 1.2
     threshpix = threshpix_orig
     threshisl = threshisl_orig
 else:
-    img = bdsm.process_image(image_name, mean_map='zero',
+    img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
         thresh_pix=numpy.float(threshpix), thresh_isl=numpy.float(threshisl),
-        atrous_do=atrous_do, ini_method='curvature', adaptive_rms_box=True,
-        adaptive_thresh=20, quiet=True)
+        atrous_do=atrous_do, ini_method='curvature',
+        adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=20, quiet=True)
 
 img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
     img_format='casa', clobber=True)
