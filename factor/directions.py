@@ -109,7 +109,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     # Group to clean components by thresholding after convolving model with
     # 1 arcmin beam
     s.group('threshold', FWHM='60.0 arcsec', root='facet')
-    s.remove('Patch = patch_*', force=True)
+    s.remove('Patch = patch_*', force=True) # Remove sources that did not threshold
     if len(s) == 0:
         log.critical("No sources found through thresholding.")
         sys.exit(1)
@@ -120,6 +120,9 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     log.info('Removing sources beyond the FWHM of the primary beam...')
     dist = s.getDistance(band.ra, band.dec, byPatch=True)
     s.remove(dist > 5.0, aggregate=True) # 5 degree radius
+
+    # Save this sky model for later checks of sources falling on facet edges
+    s.write(fileName='factor_inital.skymodel', clobber=True)
 
     # Filter larger patches
     sizes = s.getPatchSizes(units='arcmin', weight=True)
@@ -294,7 +297,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
     return direction_groups
 
 
-def thiessen(directions_list, bounds_scale=0.52):
+def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
     """
     Return list of thiessen polygons and their widths in degrees
 
@@ -311,8 +314,12 @@ def thiessen(directions_list, bounds_scale=0.52):
         List of polygon RA and Dec vertices in degrees
     width_deg : list
         List of polygon bounding box width in degrees
+    check_sources : bool, optional
+        If True, check whether any know source falls on a facet edge. If sources
+        are found that do, the facet is adjusted
 
     """
+    import lsmtool
 
     points, midRA, midDec = getxy(directions_list)
     points = points.T
@@ -329,12 +336,30 @@ def thiessen(directions_list, bounds_scale=0.52):
     scale_offsets = radius * np.array(offsets)
     outer_box = means + scale_offsets
 
-    points = np.vstack([points, outer_box])
-    tri = Delaunay(points)
-    circumcenters = np.array([_circumcenter(tri.points[t])
-                              for t in tri.vertices])
-    thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
-                      for n in range(len(points) - 32)]
+    if check_sources:
+        s = lsmtool.load('factor_inital.skymodel')
+        source_points = radec2xy(x, y, refRA=midRA, refDec=midDec)
+        source_points = source_points.T
+
+        source_on_edge = True
+        points = np.vstack([points, outer_box])
+        while source_on_edge:
+            tri = Delaunay(points)
+            circumcenters = np.array([_circumcenter(tri.points[t])
+                                      for t in tri.vertices])
+            thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
+                              for n in range(len(points) - 32)]
+
+            # Check if any known sources fall on a facet edge
+            source_on_edge, points = adjust_points(points, source_points,
+                thiessen_polys)
+    else:
+        points = np.vstack([points, outer_box])
+        tri = Delaunay(points)
+        circumcenters = np.array([_circumcenter(tri.points[t])
+                                  for t in tri.vertices])
+        thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
+                          for n in range(len(points) - 32)]
 
     # Convert from x, y to RA, Dec
     thiessen_polys_deg = []
@@ -353,6 +378,13 @@ def thiessen(directions_list, bounds_scale=0.52):
         width_deg.append(hyp_deg.value)
 
     return thiessen_polys_deg, width_deg
+
+
+def adjust_points(points, source_points, polys):
+    """
+    Adjust points to avoid known sources
+    """
+    pass
 
 
 def make_region_file(vertices, outputfile):
