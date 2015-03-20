@@ -51,6 +51,7 @@ class Action(object):
         self.band = band
         self.index = index
         self.max_cpu = self.op_parset['cluster_specific']['ncpu']
+        self.timeout = None
 
         # Set up directories needed by every action
         if set_up:
@@ -220,10 +221,10 @@ class Action(object):
                 try:
                     # Use a timeout to stop casapy runs that never return (but
                     # actually completed successfully)
-                    if 'makeimage' in self.name.lower():
+                    if self.timeout is not None:
                         # Use a timeout to return from casapy clean() runs that
-                        # that hang (but actually completed successfully)
-                        p.communicate(timeout=7200)
+                        # that hang (but have actually completed successfully)
+                        p.communicate(timeout=self.timeout)
                     else:
                         p.communicate()
                 except subprocess.TimeoutExpired:

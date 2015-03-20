@@ -85,6 +85,10 @@ class Casapy(Action):
             except OSError:
                 pass
         self.working_dir = self.image_dir
+        if 'timeout' in self.p:
+            self.timeout = self.p['timeout']
+        else:
+            self.timeout = 7200
 
         # Define names for output images
         imagebasenames = make_image_basename(self.vis_datamap,
@@ -339,10 +343,12 @@ class MakeImageIterate(Action):
         vis_datamap = self.vis_datamap
         mask_datamap = None
         threshold_5rms = self.p['threshold']
+        self.p['timeout'] = 3600
         for i in range(self.p['ncycles']):
             if self.p['use_rms'] and i == self.p['ncycles'] - 1:
                 self.p['threshold'] = threshold_5rms
                 self.p['niter'] = 1000000
+                self.p['timeout'] = 7200
 
             imager = MakeImage(self.op_parset, vis_datamap, self.p,
             	mask_datamap=mask_datamap, direction=self.direction,
