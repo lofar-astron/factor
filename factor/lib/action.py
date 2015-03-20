@@ -222,7 +222,7 @@ class Action(object):
                     # Use a timeout to stop casapy runs that never return (but
                     # actually completed successfully)
                     if self.timeout is not None:
-                        # Use a timeout to return from casapy clean() runs that
+                        # Use a timeout to return from casapy clean() runs
                         # that hang (but have actually completed successfully)
                         p.communicate(timeout=self.timeout)
                     else:
