@@ -87,7 +87,6 @@ class InitSubtract(Operation):
             action = FFT(self.parset, input_data_mapfile,
                 highres_image_basenames_mapfile, p['modelh'], prefix='highres')
             self.s.run(action)
-            highres_skymodels_mapfile = None
 
         self.log.info('Making high-res sky model...')
         action = MakeSkymodelFromModelImage(self.parset,
@@ -95,6 +94,8 @@ class InitSubtract(Operation):
         highres_skymodels_mapfile = self.s.run(action)
 
         self.log.info('Subtracting high-res sky model...')
+        if self.parset['use_ftw']:
+            highres_skymodels_mapfile = None
         action = Subtract(self.parset, input_data_mapfile, p['calibh'],
             model_datamap=highres_skymodels_mapfile,
             parmdb_datamap=dir_indep_parmdbs_mapfile, prefix='highres')
@@ -131,6 +132,8 @@ class InitSubtract(Operation):
         lowres_skymodels_mapfile = self.s.run(action)
 
         self.log.info('Subtracting low-res sky model...')
+        if self.parset['use_ftw']:
+            lowhres_skymodels_mapfile = None
         action = Subtract(self.parset, input_data_mapfile, p['calibl'],
             model_datamap=lowres_skymodels_mapfile,
             parmdb_datamap=dir_indep_parmdbs_mapfile, prefix='lowres')

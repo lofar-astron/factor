@@ -19,9 +19,9 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 env = Environment(loader=FileSystemLoader(os.path.join(DIR, 'templates')))
 
 
-class Casapy(Action):
+class MakeImage(Action):
     """
-    Action to make an image with casapy clean()
+    Action to make an image
 
     Input data maps
     ---------------
@@ -38,7 +38,7 @@ class Casapy(Action):
     """
     def __init__(self, op_parset, vis_datamap, p, mask_datamap=None,
     	prefix=None, direction=None, band=None, clean=True, index=None,
-    	name='Casapy'):
+    	name='MakeImage'):
         """
         Create action and run pipeline
 
@@ -64,7 +64,7 @@ class Casapy(Action):
             Index of action
 
         """
-        super(Casapy, self).__init__(op_parset, name, prefix=prefix,
+        super(MakeImage, self).__init__(op_parset, name, prefix=prefix,
             direction=direction, band=band, index=index)
 
         # Store input parameters
@@ -173,10 +173,16 @@ class Casapy(Action):
         if self.mask_datamap is not None:
             mask_file, _ = read_mapfile(self.mask_datamap)
             self.p['mask'] += mask_file
-        if self.direction is not None:
+        if self.direction is not None and self.p['use_casapy_clean']:
+            # TODO: deal with region mask and AWimager
             self.p['mask'] += [self.direction.reg]
 
-        template = env.get_template('make_image.pipeline.parset.tpl')
+        if self.op_parset['imager'].lower() == 'awimager':
+            template = env.get_template('make_image_awimager.pipeline.parset.tpl')
+        elif self.op_parset['imager'].lower() == 'casapy':
+            template = env.get_template('make_image_casapy.pipeline.parset.tpl')
+        elif self.op_parset['imager'].lower() == 'wsclean':
+            template = env.get_template('make_image_wsclean.pipeline.parset.tpl')
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
@@ -200,17 +206,6 @@ class Casapy(Action):
         Remove unneeded files
         """
         pass
-
-
-class MakeImage(Casapy):
-    """
-    Action to make an image using a clean mask
-    """
-    def __init__(self, op_parset, vis_datamap, p, mask_datamap=None, prefix=None,
-        direction=None, band=None, clean=True, index=None):
-        super(MakeImage, self).__init__(op_parset, vis_datamap, p,
-        	mask_datamap=mask_datamap, prefix=prefix, direction=direction,
-        	band=band, clean=clean, index=index, name='MakeImage')
 
 
 class MakeMask(Action):

@@ -1,16 +1,16 @@
 """
-Definition of context managers (with statements) used for operations
+Definition of context managers (with statements) used for actions and operations
 """
 import time
 import logging
 
 class Timer():
     """
-    Context manager used to time operations
+    Context manager used to time actions and operations
     """
-    def __init__(self, log=None):
+    def __init__(self, log=None, type='action'):
         """
-        Create Direction object
+        Create object
 
         Parameters
         ----------
@@ -32,5 +32,5 @@ class Timer():
             raise type, value, tb
 
         elapsed = (time.time() - self.start)
-        self.log.debug('Time for operation: %i sec' % (elapsed))
+        self.log.debug('Time for {0}: {1} sec' % (type, int(elapsed)))
 

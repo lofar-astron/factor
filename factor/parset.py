@@ -57,7 +57,7 @@ def parset_read(parset_file):
                 "Please specify it in the parset")
             sys.exit(1)
 
-    # set-up the working dir (other paths are relative to this)
+    # Set-up the working dir (other paths are relative to this)
     if not os.path.isdir(parset_dict['dir_working']):
         os.mkdir(parset_dict['dir_working'])
     try:
@@ -72,7 +72,7 @@ def parset_read(parset_file):
     set_log_file(parset_dict['dir_working']+'/factor.log')
     log.info("Working directory is {0}".format(parset_dict['dir_working']))
 
-    # get all the MS in the directory
+    # Get all the MS files in the input directory
     parset_dict['mss'] = glob.glob(parset_dict['dir_ms']+'/*[MS|ms]')
     if len(parset_dict['mss']) == 0:
         log.error('No MS files found in {0}!'.format(parset_dict['dir_ms']))
@@ -99,8 +99,15 @@ def parset_read(parset_file):
         log.debug("Using FT / FTW")
     else:
         parset_dict['use_ftw'] = True
+    if 'imager' not in parset_dict:
+        parset_dict['imager'] = 'awimager'
+    if parset_dict['imager'].lower() not in ['awimager', 'casapy', 'wsclean']:
+        log.error('Imager "{0}" not understood'.format(parset_dict['imager']))
+        sys.exit(1)
+    if 'imagerroot' not in parset_dict:
+        parset_dict['imagerroot'] = parset_dict['lofarroot']
 
-    # Handle direction parameters
+    # Handle directions-related parameters
     if 'directions' in parset._sections.keys():
         parset_dict['direction_specific'] = parset._sections['directions']
     else:
@@ -142,7 +149,7 @@ def parset_read(parset_file):
         parset_dict['direction_specific']['groupings'] = {'1': 0}
         parset_dict['direction_specific']['ndir'] = -1
 
-    # Handle cluster parameters
+    # Handle cluster-related parameters
     if 'cluster' in parset._sections.keys():
         parset_dict['cluster_specific'] = parset._sections['cluster']
     else:
