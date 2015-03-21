@@ -122,7 +122,7 @@ class Operation(object):
         """
         Run the operation
         """
-        with Timer(self.log):
+        with Timer(self.log, 'operation'):
             self.setup()
             self.run_steps()
             self.finalize()
