@@ -33,5 +33,5 @@ class Timer():
             raise type, value, tb
 
         elapsed = (time.time() - self.start)
-        self.log.debug('Time for {0}: {1} sec' % (self.type, int(elapsed)))
+        self.log.debug('Time for {0}: {1} sec'.format(self.type, int(elapsed)))
 
