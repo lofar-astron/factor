@@ -160,7 +160,7 @@ def parset_read(parset_file):
     else:
         parset_dict['cluster_specific']['ncpu'] = 1
     if 'clusterdesc_file' not in parset_dict['cluster_specific']:
-        parset_dict['cluster_specific']['clusterdesc_file'] = parset_dict['cluster_specific']['lofarroot'] + '/share/local.clusterdesc'
+        parset_dict['cluster_specific']['clusterdesc_file'] = parset_dict['lofarroot'] + '/share/local.clusterdesc'
         parset_dict['cluster_specific']['node_list'] = ['localhost']
     if 'distribute' in parset_dict['cluster_specific']:
         parset_dict['cluster_specific']['distribute'] = parset.getboolean('cluster', 'distribute')
