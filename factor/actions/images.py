@@ -173,7 +173,7 @@ class MakeImage(Action):
         if self.mask_datamap is not None:
             mask_file, _ = read_mapfile(self.mask_datamap)
             self.p['mask'] += mask_file
-        if self.direction is not None and self.p['use_casapy_clean']:
+        if self.direction is not None and self.op_parset['imager'].lower() == 'casapy':
             # TODO: deal with region mask and AWimager
             self.p['mask'] += [self.direction.reg]
 
