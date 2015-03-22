@@ -120,7 +120,7 @@ class InitSubtract(Operation):
                 skymodel, hosts = read_mapfile(highres_skymodels_mapfile)
                 chunk_model_mapfiles.append(self.write_mapfile([skymodel[i]]*len(chunks),
                     prefix='chunks_highres_skymodel', host_list=hosts[i]))
-            parmdb_file, hosts = read_mapfile(dir_indep_parmdbs_mapfile_
+            parmdb_file, hosts = read_mapfile(dir_indep_parmdbs_mapfile)
             chunk_parmdb_mapfiles.append(self.write_mapfile([parmdb_file[i]]*len(chunks),
                 prefix='chunk_parmdb', host_list=hosts[i]))
 
