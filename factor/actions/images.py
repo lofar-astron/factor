@@ -184,7 +184,10 @@ class MakeImage(Action):
             template = env.get_template('make_image_casapy.pipeline.parset.tpl')
         elif self.op_parset['imager'].lower() == 'wsclean':
             template = env.get_template('make_image_wsclean.pipeline.parset.tpl')
-            self.p['cell'] = float(self.p['cell'].split('arcsec')[0]) / 3600.0
+            # TODO: make these conversions more general with astropy units:
+            self.p['cell_deg'] = float(self.p['cell'].split('arcsec')[0]) / 3600.0
+            self.p['threshold_jy'] = float(self.p['threshold'].split('mJy')[0]) / 1000.0
+            self.p['nchannels'] = len(self.op_parset['mss']) # one image per band
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
@@ -336,6 +339,13 @@ class MakeImageIterate(Action):
         vis_datamap = self.vis_datamap
         mask_datamap = None
         threshold_5rms = self.p['threshold']
+
+        if self.op_parset['imager'].lower() == 'wsclean':
+            # Can't resume clean with WSclean, so use all iterations on each
+            # pass
+            self.p['niter'] *= self.p['ncycles']
+            self.p['ncycles'] = 2
+
         for i in range(self.p['ncycles']):
             if self.p['use_rms'] and i == self.p['ncycles'] - 1:
                 self.p['threshold'] = threshold_5rms
@@ -361,6 +371,9 @@ class MakeImageIterate(Action):
                 threshold_5rms = lines[0].split(': ')[-1] + 'Jy'
 
         if self.p['image_final']:
+            if self.p['use_rms']:
+                self.p['threshold'] = threshold_5rms
+                self.p['niter'] = 1000000
             imager = MakeImage(self.op_parset, vis_datamap, self.p,
             	mask_datamap=mask_datamap, direction=self.direction,
             	prefix=self.prefix+'_final', band=self.band)
