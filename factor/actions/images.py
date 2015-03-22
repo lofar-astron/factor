@@ -254,7 +254,7 @@ class MakeMask(Action):
         # Output is clean mask files
         imagebasenames, hosts = read_mapfile(self.input_datamap)
         if self.op_parset['imager'].lower() == 'wsclean':
-            input_files = imagebasenames
+            input_files = [bn+'-MFS-image.fits' for bn in imagebasenames]
         elif self.op_parset['imager'].lower() == 'awimager':
             pass
         else:
