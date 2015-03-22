@@ -184,6 +184,7 @@ class MakeImage(Action):
             template = env.get_template('make_image_casapy.pipeline.parset.tpl')
         elif self.op_parset['imager'].lower() == 'wsclean':
             template = env.get_template('make_image_wsclean.pipeline.parset.tpl')
+            self.p['cell'] = float(self.p['cell'].split('arcsec')[0]) / 3600.0
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
