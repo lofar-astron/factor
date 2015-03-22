@@ -253,10 +253,15 @@ class MakeMask(Action):
         # Input is list of image basenames
         # Output is clean mask files
         imagebasenames, hosts = read_mapfile(self.input_datamap)
-        if self.p['nterms'] == 1:
-            input_files = [bn+'.image' for bn in imagebasenames]
+        if self.op_parset['imager'].lower() == 'wsclean':
+            input_files = imagebasenames
+        elif self.op_parset['imager'].lower() == 'awimager':
+            pass
         else:
-            input_files = [bn+'.image.tt0' for bn in imagebasenames]
+            if self.p['nterms'] == 1:
+                input_files = [bn+'.image' for bn in imagebasenames]
+            else:
+                input_files = [bn+'.image.tt0' for bn in imagebasenames]
         output_files = [bn+'.cleanmask' for bn in imagebasenames]
 
         self.p['input_datamap'] = self.write_mapfile(input_files,

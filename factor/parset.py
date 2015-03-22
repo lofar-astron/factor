@@ -104,6 +104,8 @@ def parset_read(parset_file):
     if parset_dict['imager'].lower() not in ['awimager', 'casapy', 'wsclean']:
         log.error('Imager "{0}" not understood'.format(parset_dict['imager']))
         sys.exit(1)
+    elif:
+        log.debug("Using {0} for imaging".format(imager))
     if 'imagerroot' not in parset_dict:
         parset_dict['imagerroot'] = parset_dict['lofarroot']
 
