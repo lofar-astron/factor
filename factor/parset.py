@@ -105,7 +105,7 @@ def parset_read(parset_file):
         log.error('Imager "{0}" not understood'.format(parset_dict['imager']))
         sys.exit(1)
     else:
-        log.debug("Using {0} for imaging".format(imager))
+        log.debug("Using {0} for imaging".format(parset_dict['imager'].lower()))
     if 'imagerroot' not in parset_dict:
         parset_dict['imagerroot'] = parset_dict['lofarroot']
 
