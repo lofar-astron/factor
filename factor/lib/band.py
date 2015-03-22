@@ -48,3 +48,6 @@ class Band(object):
             self.has_sub_data = True
         else:
             self.has_sub_data = False
+        self.starttime = tab[0]['TIME']
+        self.endtime = tab[-1]['TIME']
+        tab.close()
