@@ -176,6 +176,7 @@ class MakeImage(Action):
         if self.direction is not None and self.op_parset['imager'].lower() == 'casapy':
             # TODO: deal with region mask and AWimager
             self.p['mask'] += [self.direction.reg]
+        self.p['imagerroot'] = self.op_parset['imagerroot']
 
         if self.op_parset['imager'].lower() == 'awimager':
             template = env.get_template('make_image_awimager.pipeline.parset.tpl')
