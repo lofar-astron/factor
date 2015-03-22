@@ -2,7 +2,7 @@ pipeline.steps=[wsclean]
 
 wsclean.control.kind=recipe
 wsclean.control.type=executable_args
-wsclean.control.opts.executable={{ lofarroot }}/bin/wsclean
+wsclean.control.opts.executable={{ imagerroot }}/bin/wsclean
 wsclean.control.opts.mapfile_in={{ vis_datamap }}
 wsclean.control.opts.mapfile_out={{ output_datamap }}
 wsclean.control.opts.inputkey=msin
