@@ -246,20 +246,6 @@ class MakeMask(Action):
         # Set up all required files
         self.setup()
 
-        # Get beam for WSClean images
-        if self.op_parset['imager'].lower() == 'wsclean' and self.p['nterms'] > 1:
-            from astropy.io import fits
-
-            image_basenames, _ = read_mapfile(self.input_datamap)
-            for bn in image_basenames:
-                image_file = bn + '.MFS.fits'
-                fits_file = fits.open(image_file, mode="readonly",
-                    ignore_missing_end=True)
-                hdr = fits_file[0].header
-                self.p['beam'] = '({0}, {1}, {2})'.format(hdr['BMAJ'],
-                    hdr['BMIN'], hdr['BPA'])
-        else:
-            self.p['beam'] = 'None'
 
 
     def make_datamaps(self):
@@ -297,6 +283,22 @@ class MakeMask(Action):
         """
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
+
+        if self.op_parset['imager'].lower() == 'wsclean' and self.p['nterms'] > 1:
+            # Get beam for WSClean images
+            from astropy.io import fits
+
+            image_basenames, _ = read_mapfile(self.input_datamap)
+            for bn in image_basenames:
+                image_file = bn + '.MFS.fits'
+                fits_file = fits.open(image_file, mode="readonly",
+                    ignore_missing_end=True)
+                hdr = fits_file[0].header
+                self.p['beam'] = '({0}, {1}, {2})'.format(hdr['BMAJ'],
+                    hdr['BMIN'], hdr['BPA'])
+        else:
+            self.p['beam'] = 'None'
+
 
         self.p['scriptname'] = os.path.abspath(self.script_file)
         template = env.get_template('make_clean_mask.pipeline.parset.tpl')
