@@ -39,6 +39,7 @@ class InitSubtract(Operation):
         from factor.lib.datamap_lib import read_mapfile
         from factor.operations.hardcoded_param import init_subtract as p
         from factor.lib.operation_lib import make_chunks, merge_chunks
+        import numpy as np
 
         bands = self.bands
 
@@ -102,10 +103,11 @@ class InitSubtract(Operation):
 
         self.log.debug('Dividing dataset into chunks...')
         chunks_list = []
+        ncpus = max(int(self.parset['cluster_specific']['ncpu'] * len(
+            self.parset['cluster_specific']['node_list']) / len(bands)), 1)
         for band in bands:
             total_time = (band.endtime - band.starttime) / 3600.0 # hours
-            ncpus = self.parset['cluster_specific']['ncpu'] * len(self.parset['cluster_specific']['node_list'])
-            chunk_time = np.ceil(total_time/ncpus) + 0.01
+            chunk_time = min(np.ceil(total_time/ncpus) + 0.01, 1.0) # max of 1 hour per chunk
             chunks_list.append(make_chunks(band.file, chunk_time,
             	self.parset, 'initsub_chunk', clobber=True))
         chunk_data_mapfiles = []
