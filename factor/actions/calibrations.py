@@ -77,7 +77,7 @@ class BBS(Action):
 
         """
         super(BBS, self).__init__(op_parset, name, prefix=prefix,
-            direction=direction, index=index)
+            direction=direction, index=index, band=band)
 
         # Store input parameters
         self.vis_datamap = vis_datamap
