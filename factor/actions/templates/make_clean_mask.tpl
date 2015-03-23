@@ -3,7 +3,7 @@ import numpy
 import sys
 
 image_name = sys.argv[1]
-mask_name  = image_name.split('.image')[0] + '.cleanmask'
+mask_name  = sys.argv[2]
 atrous_do = {{ atrous_do}}
 threshisl = {{ threshisl }}
 threshpix = {{ threshpix }}
