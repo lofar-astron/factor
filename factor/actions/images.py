@@ -129,7 +129,7 @@ class MakeImage(Action):
             self.p['cycfactor'] = 4.0
         self.p['scales'] = []
         if self.p['mscale']:
-            self.p['scales'] = [0,3,7,25,60,150]
+            self.p['scales'] = [0, 3, 7, 25, 60, 150]
             self.p['wsclean_multiscale'] = '-multiscale, ' # need comma for parset
         self.p['timer'] = ''
         self.p['nfacets'] = 1
@@ -170,7 +170,7 @@ class MakeImage(Action):
         if self.op_parset['imager'].lower() == 'wsclean':
             if self.mask_datamap is not None:
                 mask_file, _ = read_mapfile(self.mask_datamap)
-                self.p['mask'] = '-fitsmask {0}, '.format(mask_file[0])
+                self.p['mask'] = '-fitsmask, {0}, '.format(mask_file[0])
             else:
                 self.p['mask'] = ''
             # TODO: deal with region mask
@@ -270,7 +270,7 @@ class MakeMask(Action):
                 input_files = [bn+'-image-MFS.fits' for bn in imagebasenames]
             else:
                 input_files = [bn+'-image.fits' for bn in imagebasenames]
-            output_files = [infile+'.cleanmask' for infile in input_files]
+            output_files = [infile+'.cleanmask.fits' for infile in input_files]
         elif self.op_parset['imager'].lower() == 'awimager':
             pass
         else:
