@@ -283,8 +283,7 @@ class MakeMask(Action):
         self.p['input_datamap'] = self.write_mapfile(input_files,
             prefix=self.prefix+'_input', direction=self.direction,
             index=self.index, band=self.band, host_list=hosts)
-
-            self.p['output_datamap'] = self.write_mapfile(output_files,
+        self.p['output_datamap'] = self.write_mapfile(output_files,
             prefix=self.prefix+'_output', direction=self.direction,
             index=self.index, band=self.band, host_list=hosts)
 
