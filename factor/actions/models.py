@@ -101,6 +101,12 @@ class MakeSkymodelFromModelImage(Action):
         input_files = [bn+'.model' for bn in imagebasenames]
         output_files = [bn+'.skymodel' for bn in self.modelbasenames]
 
+        if self.op_parset['imager'].lower() == 'wsclean':
+            # Convert WSClean model fits images to casapy images
+            if self.p['nterms'] > 1:
+                pass
+            else:
+                pass
         self.p['input_datamap'] = self.write_mapfile(input_files,
             prefix=self.prefix+'_input', direction=self.direction,
             index=self.index, host_list=hosts)
@@ -392,7 +398,7 @@ class FFT(Action):
 
     """
     def __init__(self, op_parset, vis_datamap, model_basenames_datamap, p, prefix=None,
-    	direction=None, clean=True, index=None):
+    	direction=None, band=None, clean=True, index=None):
         """
         Create action and run pipeline
 
@@ -410,6 +416,8 @@ class FFT(Action):
             Prefix to use for model names
         direction : Direction object, optional
             Direction for this model
+        band : Band object, optional
+            Band for this model
         clean : bool, optional
             Remove unneeded files?
         index : int, optional
@@ -417,7 +425,7 @@ class FFT(Action):
 
         """
         super(FFT, self).__init__(op_parset, 'FFT', prefix=prefix,
-        	direction=direction, index=index)
+        	direction=direction, band=band, index=index)
 
         # Store input parameters
         self.vis_datamap = vis_datamap
@@ -430,6 +438,8 @@ class FFT(Action):
         if self.direction is not None:
             self.working_dir += '{0}/'.format(self.direction.name)
             self.p['imsize'] = getOptimumSize(int(self.direction.imsize))
+        if self.band is not None:
+            self.working_dir += '{0}/'.format(self.band.name)
         if not os.path.exists(self.working_dir):
             os.makedirs(self.working_dir)
 
