@@ -72,7 +72,7 @@ class InitSubtract(Operation):
         self.log.info('Spliting off corrected data...')
         actions = [Split(self.parset, dm, p['split'],
             prefix='highres', band=band) for dm, band in zip(vis_mapfiles, bands)]
-        split_files_mapfiles= self.s.run(actions)
+        split_files_mapfiles = self.s.run(actions)
 
         self.log.info('High-res imaging...')
         actions = [MakeImageIterate(self.parset, dm, p['imagerh'],
@@ -105,10 +105,14 @@ class InitSubtract(Operation):
         chunks_list = []
         ncpus = max(int(self.parset['cluster_specific']['ncpu'] * len(
             self.parset['cluster_specific']['node_list']) / len(bands)), 1)
-        for band in bands:
+        for i, band in enumerate(bands):
+            files, _ = read_mapfile(split_files_mapfiles[i])
             total_time = (band.endtime - band.starttime) / 3600.0 # hours
-            chunk_time = min(np.ceil(total_time/ncpus) + 0.01, 1.0) # max of 1 hour per chunk
-            chunks_list.append(make_chunks(band.file, chunk_time,
+            chunk_time = min(np.ceil(total_time/ncpus), 1.0) # max of 1 hour per chunk
+            chunk_block = np.ceil(chunk_time / band.timepersample)
+            self.log.debug('Using {0} time slots per chunk for band {1}'.format(
+                chunk_block, band.name))
+            chunks_list.append(make_chunks(files[0], chunk_block,
             	self.parset, 'initsub_chunk', clobber=True))
         chunk_data_mapfiles = []
         chunk_parmdb_mapfiles = []

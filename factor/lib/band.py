@@ -50,4 +50,9 @@ class Band(object):
             self.has_sub_data = False
         self.starttime = tab[0]['TIME']
         self.endtime = tab[-1]['TIME']
+        for t2 in tab.iter(["ANTENNA1","ANTENNA2"]):
+            if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
+                self.timepersample = t2[1]['TIME'] - t2[0]['TIME']
+                self.nsamples = t2.nrows()
+                break
         tab.close()
