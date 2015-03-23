@@ -119,16 +119,16 @@ class InitSubtract(Operation):
         chunk_model_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             chunk_data_mapfiles.append(self.write_mapfile([chunk.file for chunk in chunks],
-                prefix='chunks_vis', host_list=[hosts[i]]))
+                prefix='chunks_vis', band=bands[i], host_list=[hosts[i]]))
             if self.parset['use_ftw']:
                 chunk_model_mapfiles.append(None)
             else:
                 skymodel, hosts = read_mapfile(highres_skymodels_mapfile)
                 chunk_model_mapfiles.append(self.write_mapfile([skymodel[i]]*len(chunks),
-                    prefix='chunks_highres_skymodel', host_list=[hosts[i]]))
+                    prefix='chunks_highres_skymodel', band=bands[i], host_list=[hosts[i]]))
             parmdb_file, hosts = read_mapfile(dir_indep_parmdbs_mapfile)
             chunk_parmdb_mapfiles.append(self.write_mapfile([parmdb_file[i]]*len(chunks),
-                prefix='chunk_parmdb', host_list=[hosts[i]]))
+                prefix='chunk_parmdb', band=bands[i], host_list=[hosts[i]]))
 
         self.log.info('Subtracting high-res sky model...')
         actions = [Subtract(self.parset, dm, p['calibh'],
