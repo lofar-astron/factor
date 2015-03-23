@@ -11,7 +11,7 @@ rmsbox = {{ rmsbox }}
 iterate_threshold = {{ iterate_threshold }}
 adaptive_rmsbox = {{ adaptive_rmsbox }}
 beam = {{ beam }}
-img_format = {{ format }}
+img_format = '{{ format }}'
 
 if atrous_do:
    threshisl = 4.0
