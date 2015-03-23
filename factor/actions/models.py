@@ -456,9 +456,14 @@ class FFT(Action):
         """
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
-
         self.p['scriptname'] = os.path.abspath(self.script_file)
-        template = env.get_template('fft.pipeline.parset.tpl')
+
+        if self.op_parset['imager'].lower() == 'awimager':
+            template = env.get_template('fft_awimager.pipeline.parset.tpl')
+        elif self.op_parset['imager'].lower() == 'casapy':
+            template = env.get_template('fft_casapy.pipeline.parset.tpl')
+        elif self.op_parset['imager'].lower() == 'wsclean':
+            template = env.get_template('fft_wsclean.pipeline.parset.tpl')
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
