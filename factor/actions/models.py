@@ -94,19 +94,25 @@ class MakeSkymodelFromModelImage(Action):
         Makes the required data maps
         """
         from factor.lib.datamap_lib import read_mapfile
+        from factor.lib.action_lib import convert_fits_to_image
 
         # Input is list of image basenames
         # Output is sky model files
         imagebasenames, hosts = read_mapfile(self.input_datamap)
-        input_files = [bn+'.model' for bn in imagebasenames]
-        output_files = [bn+'.skymodel' for bn in self.modelbasenames]
 
         if self.op_parset['imager'].lower() == 'wsclean':
             # Convert WSClean model fits images to casapy images
             if self.p['nterms'] > 1:
-                pass
+                input_fits_files = [bn+'-model-MFS.fits' for bn in imagebasenames]
             else:
-                pass
+                input_fits_files = [bn+'-model.fits' for bn in imagebasenames]
+            input_files = []
+            for f in input_files:
+                input_files.append(convert_fits_to_image(f))
+        else:
+            input_files = [bn+'.model' for bn in imagebasenames]
+        output_files = [bn+'.skymodel' for bn in self.modelbasenames]
+
         self.p['input_datamap'] = self.write_mapfile(input_files,
             prefix=self.prefix+'_input', direction=self.direction,
             index=self.index, host_list=hosts)

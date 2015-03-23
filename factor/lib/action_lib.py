@@ -139,3 +139,17 @@ def getOptimumSize(size):
         if ((numpy.max(prime_factors(k)) < 8)):
             return k
     return newlarge
+
+
+def convert_fits_to_image(fitsimage):
+    """
+    Convert a fits image to a CASA image
+    """
+    import pyrap.images as pim
+
+    outfilename = fitsimage.split('.fits')[0]
+    casaimage = pim.image(fitsimage)
+    casaimage.saveas(outfilename, overwrite=True)
+
+    return outfilename
+
