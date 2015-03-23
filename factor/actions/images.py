@@ -187,7 +187,10 @@ class MakeImage(Action):
             # TODO: make these conversions more general with astropy units:
             self.p['cell_deg'] = float(self.p['cell'].split('arcsec')[0]) / 3600.0
             self.p['threshold_jy'] = float(self.p['threshold'].split('mJy')[0]) / 1000.0
-            self.p['nchannels'] = len(self.op_parset['mss']) # one image per band
+            if self.p['nterms'] > 1:
+                self.p['nchannels'] = len(self.op_parset['mss']) # one image per band
+            else:
+                self.p['nchannels'] = 1
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
@@ -242,6 +245,21 @@ class MakeMask(Action):
 
         # Set up all required files
         self.setup()
+
+        # Get beam for WSClean images
+        if self.op_parset['imager'].lower() == 'wsclean' and if self.p['nterms'] > 1:
+            from astropy.io import fits
+
+            image_basenames, _ = read_mapfile(self.input_datamap)
+            for bn in image_basenames:
+                image_file = bn + '.MFS.fits'
+                fits_file = fits.open(image_file, mode="readonly",
+                    ignore_missing_end=True)
+                hdr = fits_file[0].header
+                self.p['beam'] = '({0}, {1}, {2})'.format(hdr['BMAJ'],
+                    hdr['BMIN'], hdr['BPA'])
+        else:
+            self.p['beam'] = 'None'
 
 
     def make_datamaps(self):

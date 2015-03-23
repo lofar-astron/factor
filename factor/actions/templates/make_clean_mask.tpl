@@ -10,6 +10,7 @@ threshpix = {{ threshpix }}
 rmsbox = {{ rmsbox }}
 iterate_threshold = {{ iterate_threshold }}
 adaptive_rmsbox = {{ adaptive_rmsbox }}
+beam = {{ beam }}
 
 if atrous_do:
    threshisl = 4.0
@@ -24,7 +25,7 @@ if iterate_threshold:
     while nisl == 0:
         img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
             thresh_pix=numpy.float(threshpix), thresh_isl=numpy.float(threshisl),
-            atrous_do=atrous_do, ini_method='curvature',
+            atrous_do=atrous_do, ini_method='curvature', beam=beam,
             adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=20, quiet=True)
         nisl = img.nisl
         threshpix /= 1.2
@@ -34,7 +35,7 @@ if iterate_threshold:
 else:
     img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
         thresh_pix=numpy.float(threshpix), thresh_isl=numpy.float(threshisl),
-        atrous_do=atrous_do, ini_method='curvature',
+        atrous_do=atrous_do, ini_method='curvature', beam=beam,
         adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=20, quiet=True)
 
 img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
