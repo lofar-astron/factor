@@ -101,7 +101,7 @@ class InitSubtract(Operation):
             self.s.run(action)
             highres_skymodels_mapfile = None
 
-        self.log.debug('Dividing dataset into chunks...')
+        self.log.debug('Dividing datasets into chunks...')
         chunks_list = []
         ncpus = max(int(self.parset['cluster_specific']['ncpu'] * len(
             self.parset['cluster_specific']['node_list']) / len(bands)), 1)
@@ -109,7 +109,7 @@ class InitSubtract(Operation):
             files, _ = read_mapfile(split_files_mapfiles[i])
             total_time = (band.endtime - band.starttime) / 3600.0 # hours
             chunk_time = min(np.ceil(total_time/ncpus), 1.0) # max of 1 hour per chunk
-            chunk_block = np.ceil(chunk_time / band.timepersample)
+            chunk_block = np.ceil(chunk_time * 3600.0 / band.timepersample)
             self.log.debug('Using {0} time slots per chunk for band {1}'.format(
                 chunk_block, band.name))
             chunks_list.append(make_chunks(files[0], chunk_block,
