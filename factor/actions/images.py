@@ -268,9 +268,9 @@ class MakeMask(Action):
         if self.op_parset['imager'].lower() == 'wsclean':
             if self.p['nterms'] > 1:
                 input_files = [bn+'-image-MFS.fits' for bn in imagebasenames]
-
             else:
                 input_files = [bn+'-image.fits' for bn in imagebasenames]
+            output_files = [infile+'.cleanmask' for infile in input_files]
         elif self.op_parset['imager'].lower() == 'awimager':
             pass
         else:
@@ -278,7 +278,7 @@ class MakeMask(Action):
                 input_files = [bn+'.image' for bn in imagebasenames]
             else:
                 input_files = [bn+'.image.tt0' for bn in imagebasenames]
-        output_files = [bn+'.cleanmask' for bn in imagebasenames]
+            output_files = [bn+'.cleanmask' for bn in imagebasenames]
 
         self.p['input_datamap'] = self.write_mapfile(input_files,
             prefix=self.prefix+'_input', direction=self.direction,
@@ -316,6 +316,11 @@ class MakeMask(Action):
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
+
+        if self.op_parset['imager'].lower() == 'wsclean'
+            self.p['format'] = 'fits'
+        else:
+            self.p['format'] = 'casa'
 
         template = env.get_template('make_clean_mask.tpl')
         tmp = template.render(self.p)
@@ -377,7 +382,7 @@ class MakeImageIterate(Action):
         threshold_5rms = self.p['threshold']
 
         if self.op_parset['imager'].lower() == 'wsclean':
-            # Can't resume clean with WSclean, so use all iterations on each
+            # Can't resume with WSclean, so use all iterations on each
             # pass
             self.p['niter'] *= self.p['ncycles']
             self.p['ncycles'] = 2

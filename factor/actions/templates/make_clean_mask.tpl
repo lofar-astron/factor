@@ -11,6 +11,7 @@ rmsbox = {{ rmsbox }}
 iterate_threshold = {{ iterate_threshold }}
 adaptive_rmsbox = {{ adaptive_rmsbox }}
 beam = {{ beam }}
+img_format = {{ format }}
 
 if atrous_do:
    threshisl = 4.0
@@ -39,7 +40,7 @@ else:
         adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=20, quiet=True)
 
 img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
-    img_format='casa', clobber=True)
+    img_format=img_format, clobber=True)
 
 log_file = mask_name + '.log'
 with open(log_file, 'wb') as f:
