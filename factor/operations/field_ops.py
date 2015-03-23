@@ -104,7 +104,7 @@ class InitSubtract(Operation):
         chunks_list = []
         for band in bands:
             total_time = (band.endtime - band.starttime) / 3600.0 # hours
-            ncpus = self.parset('ncpus') * len(self.parset['cluster_specific']['node_list'])
+            ncpus = self.parset['cluster_specific']['ncpu'] * len(self.parset['cluster_specific']['node_list'])
             chunk_time = np.ceil(total_time/ncpus) + 0.01
             chunks_list.append(make_chunks(band.file, chunk_time,
             	self.parset, 'initsub_chunk', clobber=True))
