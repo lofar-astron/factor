@@ -137,12 +137,12 @@ class InitSubtract(Operation):
             bands)]
         self.s.run(actions)
 
-        self.log.debug('Merging chunks...')
+        self.log.debug('Merging chunks for imaging...')
         merged_data_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             merged_data_mapfiles.append(self.write_mapfile([merge_chunks(
             	[chunk.file for chunk in chunks], prefix='highres_merge')],
-            	prefix='highres_merged_vis', band=bands[i], host_list=hosts[i]))
+            	prefix='highres_merged_vis', band=bands[i], host_list=[hosts[i]]))
 
         self.log.info('Averaging...')
         actions = [Average(self.parset, dm, p['avgl'], prefix='highres',
@@ -174,7 +174,7 @@ class InitSubtract(Operation):
             else:
                 chunk_model_mapfiles.append(self.write_mapfile([skymodel[i]]*
                 	len(chunks), prefix='chunks_lowres_skymodel',
-                	host_list=hosts[i]))
+                	host_list=[hosts[i]]))
 
         if self.parset['use_ftw']:
             self.log.debug('FFTing low-res model image...')
@@ -197,7 +197,7 @@ class InitSubtract(Operation):
         for i, chunks in enumerate(chunks_list):
             merged_data_mapfiles.append(self.write_mapfile([merge_chunks(
                 [chunk.file for chunk in chunks], prefix='lowres_merge')],
-                prefix='lowres_merged_vis', band=bands[i], host_list=hosts[i]))
+                prefix='lowres_merged_vis', band=bands[i], host_list=[hosts[i]]))
         for band, merged_data_mapfile in zip(bands, merged_data_mapfiles):
             f, _ = read_mapfile(merged_data_mapfile)
             band.file = f[0]
