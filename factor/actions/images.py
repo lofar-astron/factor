@@ -247,7 +247,7 @@ class MakeMask(Action):
         self.setup()
 
         # Get beam for WSClean images
-        if self.op_parset['imager'].lower() == 'wsclean' and if self.p['nterms'] > 1:
+        if self.op_parset['imager'].lower() == 'wsclean' and self.p['nterms'] > 1:
             from astropy.io import fits
 
             image_basenames, _ = read_mapfile(self.input_datamap)
