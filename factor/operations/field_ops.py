@@ -128,12 +128,13 @@ class InitSubtract(Operation):
                     prefix='chunks_highres_skymodel', band=bands[i], host_list=[hosts[i]]))
             parmdb_file, hosts = read_mapfile(dir_indep_parmdbs_mapfile)
             chunk_parmdb_mapfiles.append(self.write_mapfile([parmdb_file[i]]*len(chunks),
-                prefix='chunk_parmdb', band=bands[i], host_list=[hosts[i]]))
+                prefix='chunks_parmdb', band=bands[i], host_list=[hosts[i]]))
 
         self.log.info('Subtracting high-res sky model...')
         actions = [Subtract(self.parset, dm, p['calibh'],
-            mm, pm, prefix='highres') for dm, mm, pm in zip(chunk_data_mapfiles,
-            chunk_model_mapfiles, chunk_parmdb_mapfiles)]
+            mm, pm, prefix='highres', band=band) for dm, mm, pm, band in
+            zip(chunk_data_mapfiles, chunk_model_mapfiles, chunk_parmdb_mapfiles,
+            bands)]
         self.s.run(actions)
 
         self.log.debug('Merging chunks...')
@@ -141,7 +142,7 @@ class InitSubtract(Operation):
         for i, chunks in enumerate(chunks_list):
             merged_data_mapfiles.append(self.write_mapfile([merge_chunks(
             	[chunk.file for chunk in chunks], prefix='highres_merge')],
-            	prefix='highres_merged_vis', host_list=hosts[i]))
+            	prefix='highres_merged_vis', band=bands[i], host_list=hosts[i]))
 
         self.log.info('Averaging...')
         actions = [Average(self.parset, dm, p['avgl'], prefix='highres',
@@ -178,16 +179,17 @@ class InitSubtract(Operation):
         if self.parset['use_ftw']:
             self.log.debug('FFTing low-res model image...')
             p['modell']['imsize'] = p['imagerl']['imsize']
-            action = [FFT(self.parset, dm, bm, p['modell'], prefix='lowres')
-            	for dm, bm in zip(chunk_data_mapfiles,
-        	chunk_model_mapfiles)]
-            self.s.run(action)
+            actions = [FFT(self.parset, dm, bm, p['modell'], band=band,
+            	prefix='lowres') for dm, bm, band in zip(chunk_data_mapfiles,
+            	chunk_model_mapfiles, bands)]
+            self.s.run(actions)
             lowhres_skymodels_mapfile = None
 
         self.log.info('Subtracting low-res sky model...')
         actions = [Subtract(self.parset, dm, p['calibl'], mm, pm,
-        	prefix='highres') for dm, mm, pm in zip(chunk_data_mapfiles,
-        	chunk_model_mapfiles, chunk_parmdb_mapfiles)]
+        	prefix='highres', band=band) for dm, mm, pm, band in
+        	zip(chunk_data_mapfiles, chunk_model_mapfiles,
+        	chunk_parmdb_mapfiles, bands)]
         self.s.run(actions)
 
         self.log.debug('Merging chunks...')
@@ -195,7 +197,7 @@ class InitSubtract(Operation):
         for i, chunks in enumerate(chunks_list):
             merged_data_mapfiles.append(self.write_mapfile([merge_chunks(
                 [chunk.file for chunk in chunks], prefix='lowres_merge')],
-                prefix='lowres_merged_vis', host_list=hosts[i]))
+                prefix='lowres_merged_vis', band=bands[i], host_list=hosts[i]))
         for band, merged_data_mapfile in zip(bands, merged_data_mapfiles):
             f, _ = read_mapfile(merged_data_mapfile)
             band.file = f[0]
