@@ -166,8 +166,8 @@ class InitSubtract(Operation):
         action = MakeSkymodelFromModelImage(self.parset, lowres_image_basenames_mapfile,
             p['modell'], prefix='lowres')
         lowres_skymodels_mapfile = self.s.run(action)
-        chunk_model_mapfiles = []
         skymodel, hosts = read_mapfile(lowres_skymodels_mapfile)
+        chunk_model_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             if self.parset['use_ftw']:
                 chunk_model_mapfiles.append(None)
@@ -181,7 +181,7 @@ class InitSubtract(Operation):
             p['modell']['imsize'] = p['imagerl']['imsize']
             actions = [FFT(self.parset, dm, bm, p['modell'], band=band,
             	prefix='lowres') for dm, bm, band in zip(chunk_data_mapfiles,
-            	chunk_model_mapfiles, bands)]
+            	lowres_image_basenames_mapfiles, bands)]
             self.s.run(actions)
             lowhres_skymodels_mapfile = None
 
