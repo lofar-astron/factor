@@ -130,6 +130,7 @@ class MakeImage(Action):
         self.p['scales'] = []
         if self.p['mscale']:
             self.p['scales'] = [0,3,7,25,60,150]
+            self.p['wsclean_multiscale'] = '-multiscale, ' # need comma for parset
         self.p['timer'] = ''
         self.p['nfacets'] = 1
         self.p['wplanes'] = 1
@@ -166,16 +167,24 @@ class MakeImage(Action):
 
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
-        if self.mask_datamap is None and self.direction is None:
-            self.p['mask'] = ['']
+        if self.op_parset['imager'].lower() == 'wsclean':
+            if self.mask_datamap is not None:
+                mask_file, _ = read_mapfile(self.mask_datamap)
+                self.p['mask'] = '-fitsmask {0}, '.format(mask_file[0])
+            else:
+                self.p['mask'] = ''
+            # TODO: deal with region mask
         else:
-            self.p['mask'] = []
-        if self.mask_datamap is not None:
-            mask_file, _ = read_mapfile(self.mask_datamap)
-            self.p['mask'] += mask_file
-        if self.direction is not None and self.op_parset['imager'].lower() == 'casapy':
-            # TODO: deal with region mask and AWimager
-            self.p['mask'] += [self.direction.reg]
+            if self.mask_datamap is None and self.direction is None:
+                self.p['mask'] = ['']
+            else:
+                self.p['mask'] = []
+            if self.mask_datamap is not None:
+                mask_file, _ = read_mapfile(self.mask_datamap)
+                self.p['mask'] += mask_file
+            if self.direction is not None and self.op_parset['imager'].lower() == 'casapy':
+                # TODO: deal with region mask and AWimager
+                self.p['mask'] += [self.direction.reg]
         self.p['imagerroot'] = self.op_parset['imagerroot']
 
         if self.op_parset['imager'].lower() == 'awimager':
@@ -247,7 +256,6 @@ class MakeMask(Action):
         self.setup()
 
 
-
     def make_datamaps(self):
         """
         Makes the required data maps
@@ -258,7 +266,11 @@ class MakeMask(Action):
         # Output is clean mask files
         imagebasenames, hosts = read_mapfile(self.input_datamap)
         if self.op_parset['imager'].lower() == 'wsclean':
-            input_files = [bn+'-MFS-image.fits' for bn in imagebasenames]
+            if self.p['nterms'] > 1:
+                input_files = [bn+'-image-MFS.fits' for bn in imagebasenames]
+
+            else:
+                input_files = [bn+'-image.fits' for bn in imagebasenames]
         elif self.op_parset['imager'].lower() == 'awimager':
             pass
         else:
@@ -290,7 +302,7 @@ class MakeMask(Action):
 
             image_basenames, _ = read_mapfile(self.input_datamap)
             for bn in image_basenames:
-                image_file = bn + '.MFS.fits'
+                image_file = bn + '-image.MFS.fits'
                 fits_file = fits.open(image_file, mode="readonly",
                     ignore_missing_end=True)
                 hdr = fits_file[0].header
@@ -298,7 +310,6 @@ class MakeMask(Action):
                     hdr['BMIN'], hdr['BPA'])
         else:
             self.p['beam'] = 'None'
-
 
         self.p['scriptname'] = os.path.abspath(self.script_file)
         template = env.get_template('make_clean_mask.pipeline.parset.tpl')
