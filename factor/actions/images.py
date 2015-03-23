@@ -317,7 +317,7 @@ class MakeMask(Action):
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
 
-        if self.op_parset['imager'].lower() == 'wsclean'
+        if self.op_parset['imager'].lower() == 'wsclean':
             self.p['format'] = 'fits'
         else:
             self.p['format'] = 'casa'
