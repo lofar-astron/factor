@@ -51,6 +51,7 @@ class Action(object):
         self.band = band
         self.index = index
         self.max_cpu = self.op_parset['cluster_specific']['ncpu']
+        self.timeout = None
 
         # Set up directories needed by every action
         if set_up:
@@ -217,17 +218,15 @@ class Action(object):
             with open("{0}.out.log".format(self.logbasename), "wb") as out, \
                 open("{0}.err.log".format(self.logbasename), "wb") as err:
                 p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
-                try:
-                    if 'makeimage' in self.name.lower():
+                if self.timeout is not None:
+                    try:
                         # Use a timeout to return from casapy runs
                         # that hang (but actually completed successfully)
-                        p.communicate(timeout=7200)
-                    elif 'fft' in  self.name.lower():
-                        p.communicate(timeout=1200)
-                    else:
-                        p.communicate()
-                except subprocess.TimeoutExpired:
-                    p.kill()
+                        p.communicate(timeout=self.timeout)
+                    except subprocess.TimeoutExpired:
+                        p.kill()
+                else:
+                    p.communicate()
         else:
             with open("{0}.out.log".format(self.logbasename), "wb") as out, \
                 open("{0}.err.log".format(self.logbasename), "wb") as err:

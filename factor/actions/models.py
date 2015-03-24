@@ -458,6 +458,10 @@ class FFT(Action):
         if 'wplanes' not in self.p:
             self.setup_wplanes()
 
+        # Set a timeout for casapy runs
+        if self.op_parset['imager'].lower() == 'casapy':
+            self.timeout = 1200
+
         # Set up all required files
         self.setup()
 

@@ -94,6 +94,10 @@ class MakeImage(Action):
         # Define imaging parameters
         self.set_imaging_parameters()
 
+        # Set a timeout for casapy runs
+        if self.op_parset['imager'].lower() == 'casapy':
+            self.timeout = 7200
+
         # Set up all required files
         self.setup()
 
@@ -390,10 +394,14 @@ class MakeImageIterate(Action):
             if self.p['use_rms'] and i == self.p['ncycles'] - 1:
                 self.p['threshold'] = threshold_5rms
                 self.p['niter'] = 1000000
+                if self.op_parset['imager'].lower() == 'casapy':
+                    imager.timeout = 7200 # two hours for final pass
 
             imager = MakeImage(self.op_parset, vis_datamap, self.p,
             	mask_datamap=mask_datamap, direction=self.direction,
             	prefix=self.prefix, band=self.band, index=i)
+            if self.op_parset['imager'].lower() == 'casapy':
+                imager.timeout = 1800 # half an hour for iterations
             image_basename_mapfile = imager.run()
 
             if i > 0 and self.p['iterate_threshold']:
@@ -417,6 +425,8 @@ class MakeImageIterate(Action):
             imager = MakeImage(self.op_parset, vis_datamap, self.p,
             	mask_datamap=mask_datamap, direction=self.direction,
             	prefix=self.prefix+'_final', band=self.band)
+            if self.op_parset['imager'].lower() == 'casapy':
+                imager.timeout = 7200 # two hours for final pass
             image_basename_mapfile = imager.run()
 
         self.output_datamap = image_basename_mapfile
