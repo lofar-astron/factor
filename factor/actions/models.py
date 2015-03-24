@@ -473,6 +473,7 @@ class FFT(Action):
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
         self.p['scriptname'] = os.path.abspath(self.script_file)
+        self.p['imagerroot'] = self.op_parset['imagerroot']
 
         if self.op_parset['imager'].lower() == 'awimager':
             template = env.get_template('fft_awimager.pipeline.parset.tpl')
@@ -484,23 +485,24 @@ class FFT(Action):
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
 
-        # Make ftw.xml and task_ftw.py files needed for custom task in casapy
-        self.p['task_xml_file'] = self.task_xml_file
-        template = env.get_template('ftw.xml.tpl')
-        tmp = template.render(self.p)
-        with open(self.task_xml_file, 'w') as f:
-            f.write(tmp)
+        if self.op_parset['imager'].lower() == 'casapy':
+            # Make ftw.xml and task_ftw.py files needed for custom task in casapy
+            self.p['task_xml_file'] = self.task_xml_file
+            template = env.get_template('ftw.xml.tpl')
+            tmp = template.render(self.p)
+            with open(self.task_xml_file, 'w') as f:
+                f.write(tmp)
 
-        self.p['task_py_file'] = self.task_py_file
-        template = env.get_template('task_ftw.tpl')
-        tmp = template.render(self.p)
-        with open(self.task_py_file, 'w') as f:
-            f.write(tmp)
+            self.p['task_py_file'] = self.task_py_file
+            template = env.get_template('task_ftw.tpl')
+            tmp = template.render(self.p)
+            with open(self.task_py_file, 'w') as f:
+                f.write(tmp)
 
-        template = env.get_template('ftw.tpl')
-        tmp = template.render(self.p)
-        with open(self.script_file, 'w') as f:
-            f.write(tmp)
+            template = env.get_template('ftw.tpl')
+            tmp = template.render(self.p)
+            with open(self.script_file, 'w') as f:
+                f.write(tmp)
 
 
     def get_results(self):
