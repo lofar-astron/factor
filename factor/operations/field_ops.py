@@ -99,7 +99,6 @@ class InitSubtract(Operation):
             action = FFT(self.parset, input_data_mapfile,
                 highres_image_basenames_mapfile, p['modelh'], prefix='highres')
             self.s.run(action)
-            highres_skymodels_mapfile = None
 
         self.log.debug('Dividing datasets into chunks...')
         chunks_list = []
