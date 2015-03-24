@@ -454,8 +454,42 @@ class FFT(Action):
         self.task_xml_file = os.path.join(self.parset_dir, 'ftw.xml')
         self.task_py_file = os.path.join(self.parset_dir, 'task_ftw.py')
 
+        # Set up wplanes
+        if 'wplanes' not in self.p:
+            self.setup_wplanes()
+
         # Set up all required files
         self.setup()
+
+
+    def setup_wplanes(self):
+        """
+        Set up wplane from imsize
+        """
+        imsizep = self.p['imsize']
+
+        if imsizep > 512:
+            wplanes = 64
+
+        if imsizep > 799:
+            wplanes = 96
+
+        if imsizep > 1023:
+            wplanes = 128
+
+        if imsizep > 1599:
+            wplanes = 256
+
+        if imsizep > 2047:
+            wplanes = 384
+
+        if imsizep > 3000:
+            wplanes = 448
+
+        if imsizep > 4095:
+            wplanes = 512
+
+        self.p['wplanes'] = wplanes
 
 
     def make_datamaps(self):
