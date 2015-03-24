@@ -218,8 +218,8 @@ class Action(object):
                 open("{0}.err.log".format(self.logbasename), "wb") as err:
                 p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
                 try:
-                    if 'makeimage' in self.name.lower():
-                        # Use a timeout to return from casapy clean() runs that
+                    if 'makeimage' in self.name.lower() or 'fft' in  self.name.lower():
+                        # Use a timeout to return from casapy runs
                         # that hang (but actually completed successfully)
                         p.communicate(timeout=7200)
                     else:
