@@ -280,13 +280,13 @@ class FacetSelfcal(Operation):
 
         if self.parset['use_ftw']:
             self.log.info('FFTing model image (facet model #0)...')
-            actions = [FFT(self.parset, dm, mm, p['model0'], prefix='fft0',
+            actions = [FFT(self.parset, dm, mm, p['imager0'], prefix='fft0',
             	direction=d, index=0) for d, dm, mm in zip(d_list,
             	facet_data_mapfiles, image0_basenames_mapfiles)]
             self.s.run(actions)
         else:
             self.log.info('Making sky model (facet model #0)...')
-            actions = [MakeSkymodelFromModelImage(self.parset, m, p['model0'],
+            actions = [MakeSkymodelFromModelImage(self.parset, m, p['imager0'],
                 prefix='facet_selfcal0', direction=d) for d, m in zip(d_list,
                 image0_basenames_mapfiles)]
             skymodels0_mapfiles = self.s.run(actions)
