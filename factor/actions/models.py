@@ -107,7 +107,7 @@ class MakeSkymodelFromModelImage(Action):
             else:
                 input_fits_files = [bn+'-model.fits' for bn in imagebasenames]
             input_files = []
-            for f in input_files:
+            for f in input_fits_files:
                 input_files.append(convert_fits_to_image(f))
         else:
             input_files = [bn+'.model' for bn in imagebasenames]

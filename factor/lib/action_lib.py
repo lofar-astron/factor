@@ -147,7 +147,7 @@ def convert_fits_to_image(fitsimage):
     """
     import pyrap.images as pim
 
-    outfilename = fitsimage.split('.fits')[0]
+    outfilename = fitsimage.split('.fits')[0] + '.image'
     casaimage = pim.image(fitsimage)
     casaimage.saveas(outfilename, overwrite=True)
 
