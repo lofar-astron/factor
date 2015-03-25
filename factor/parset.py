@@ -144,6 +144,7 @@ def parset_read(parset_file):
         log.debug("Using the following groupings for directions: {0}".format(groupings))
     else:
         parset_dict['direction_specific']['one_at_a_time'] = True
+        parset_dict['direction_specific']['groupings'] = None
     if 'ndir' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['ndir'] = parset.getint('directions', 'ndir')
         log.debug("Processing up to %s directions in total" % (parset_dict['direction_specific']['ndir']))
