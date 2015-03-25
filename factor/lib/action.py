@@ -186,7 +186,7 @@ class Action(object):
         if os.path.basename(self.op_parset['cluster_specific']['clusterdesc']) == 'local.clusterdesc':
             self.op_parset['remote'] = '[remote]\n'\
                 + 'method = local\n'\
-                + 'max_per_node = {0}\n'.format(self.op_parset['ncpu'])
+                + 'max_per_node = {0}\n'.format(self.op_parset['cluster_specific']['ncpu'])
         else:
             self.op_parset['remote'] = ''
         self.op_parset['clusterdesc'] = os.path.join(self.op_parset['dir_working'],
