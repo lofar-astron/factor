@@ -211,7 +211,7 @@ class InitSubtract(Operation):
 
         self.log.info('Subtracting low-res sky model...')
         actions = [Subtract(self.parset, dm, p['calibl'], mm, pm,
-        	prefix='highres', band=band) for dm, mm, pm, band in
+        	prefix='lowres', band=band) for dm, mm, pm, band in
         	zip(chunk_data_mapfiles, chunk_model_mapfiles,
         	chunk_parmdb_mapfiles, bands)]
         self.s.run(actions)
