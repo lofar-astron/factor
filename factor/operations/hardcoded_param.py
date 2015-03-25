@@ -21,8 +21,6 @@ init_subtract = {
              'image_final': False,
              'iterate_threshold': False,
              'ncpu': 1},
-'modelh' : {'nterms': 1,
-            'wplanes': 512},
 'calibh' : {'incol': 'DATA',
             'outcol1': 'SUBTRACTED_DATA',
             'outcol2': 'CORRECTED_SUBTRACTED_DATA',
@@ -47,8 +45,6 @@ init_subtract = {
              'image_final': False,
              'iterate_threshold': False,
              'ncpu': 1},
-'modell' : {'nterms': 1,
-            'wplanes': 512},
 'calibl' : {'incol': 'SUBTRACTED_DATA',
             'outcol': 'SUBTRACTED_DATA_ALL',
             'flags': '--replace-sourcedb'},
@@ -102,7 +98,6 @@ facet_selfcal = {
              'image_final': False,
              'iterate_threshold' : True,
              'ncpu': 1},
-'model0' : {'nterms': 2},
 'solve_phaseonly1' : {'incol': 'DATA',
                       'outcol': 'CORRECTED_DATA',
                       'chunksize': 200,
@@ -128,7 +123,6 @@ facet_selfcal = {
              'image_final': False,
              'iterate_threshold' : True,
              'ncpu': 1},
-'model1' : {'nterms': 2},
 'solve_phaseonly2' : {'incol': 'DATA',
                       'outcol': 'CORRECTED_DATA',
                       'chunksize': 200,
@@ -154,7 +148,6 @@ facet_selfcal = {
              'image_final': False,
              'iterate_threshold' : True,
              'ncpu': 1},
-'model2' : {'nterms': 2},
 'solve_phaseamp1_phaseonly': {'incol': 'DATA',
                               'outcol': 'CORRECTED_DATA_PHASE',
                               'uvrange': 80,
@@ -188,7 +181,6 @@ facet_selfcal = {
              'image_final': False,
              'iterate_threshold' : True,
              'ncpu': 1},
-'model3' : {'nterms': 2},
 'reset_phases' : {'solset': 'sol000',
                   'soltab': 'phase000'},
 'apply_amp2' : {'incol': 'DATA',
@@ -264,12 +256,13 @@ facet_image= {
             'image_final': False,
             'iterate_threshold': True,
              'ncpu': 1},
-'model' : {'nterms': 2},
 'select' : {}
 }
 
 facet_sub_all = {
-'fft' : {'nterms': 2},
+'fft' : {'imsize': 1024,
+         'cell': '1.5arcsec',
+         'nterms': 2}
 'subtract' : {'incol': 'FACET_DATA',
               'outcol': 'SUBTRACTED_DATA_ALL',
               'flags': '--replace-sourcedb'}
@@ -310,5 +303,4 @@ facet_image_final = {
             'image_final': False,
             'iterate_threshold': True,
              'ncpu': 1},
-'model' : {'nterms': 2}
 }

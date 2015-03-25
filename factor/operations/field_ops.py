@@ -90,14 +90,14 @@ class InitSubtract(Operation):
 
         self.log.info('Making high-res sky model...')
         action = MakeSkymodelFromModelImage(self.parset,
-            highres_image_basenames_mapfile, p['modelh'], prefix='highres')
+            highres_image_basenames_mapfile, p['imagerh'], prefix='highres')
         highres_skymodels_mapfile = self.s.run(action)
 
         if self.parset['use_ftw']:
             self.log.debug('FFTing high-res model image...')
             p['modelh']['imsize'] = p['imagerh']['imsize']
             action = FFT(self.parset, input_data_mapfile,
-                highres_image_basenames_mapfile, p['modelh'], prefix='highres')
+                highres_image_basenames_mapfile, p['imagerh'], prefix='highres')
             self.s.run_imager(action)
 
         self.log.debug('Dividing datasets into chunks...')
@@ -163,7 +163,7 @@ class InitSubtract(Operation):
 
         self.log.info('Making low-res sky model...')
         action = MakeSkymodelFromModelImage(self.parset, lowres_image_basenames_mapfile,
-            p['modell'], prefix='lowres')
+            p['imagerl'], prefix='lowres')
         lowres_skymodels_mapfile = self.s.run(action)
         skymodel, hosts = read_mapfile(lowres_skymodels_mapfile)
         chunk_model_mapfiles = []
@@ -177,8 +177,7 @@ class InitSubtract(Operation):
 
         if self.parset['use_ftw']:
             self.log.debug('FFTing low-res model image...')
-            p['modell']['imsize'] = p['imagerl']['imsize']
-            actions = [FFT(self.parset, dm, bm, p['modell'], band=band,
+            actions = [FFT(self.parset, dm, bm, p['imagerl'], band=band,
             	prefix='lowres') for dm, bm, band in zip(merged_data_mapfiles,
             	lowres_image_basenames_mapfiles, bands)]
             self.s.run_imager(actions)

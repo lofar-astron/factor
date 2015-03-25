@@ -347,13 +347,13 @@ class FacetSelfcal(Operation):
 
         if self.parset['use_ftw']:
             self.log.info('FFTing model image (facet model #1)...')
-            actions = [FFT(self.parset, dm, mm, p['model1'], prefix='fft1',
+            actions = [FFT(self.parset, dm, mm, p['imager1'], prefix='fft1',
             	direction=d, index=1) for d, dm, mm in zip(d_list,
             	facet_data_mapfiles, image1_basenames_mapfiles)]
             self.s.run(actions)
         else:
             self.log.info('Making sky model (facet model #1)...')
-            actions = [MakeSkymodelFromModelImage(self.parset, m, p['model1'],
+            actions = [MakeSkymodelFromModelImage(self.parset, m, p['imager1'],
                 prefix='facet_selfcal1', direction=d) for d, m in zip(d_list,
                 image1_basenames_mapfiles)]
             skymodels1_mapfiles = self.s.run(actions)
@@ -410,13 +410,13 @@ class FacetSelfcal(Operation):
 
         if self.parset['use_ftw']:
             self.log.info('FFTing model image (facet model #2)...')
-            actions = [FFT(self.parset, dm, mm, p['model2'], prefix='fft2',
+            actions = [FFT(self.parset, dm, mm, p['image2'], prefix='fft2',
             	direction=d, index=2) for d, dm, mm in zip(d_list,
             	facet_data_mapfiles, image2_basenames_mapfiles)]
             self.s.run(actions)
         else:
             self.log.info('Making sky model (facet model #2)...')
-            actions = [MakeSkymodelFromModelImage(self.parset, m, p['model2'],
+            actions = [MakeSkymodelFromModelImage(self.parset, m, p['image2'],
                 prefix='facet_selfcal2', direction=d) for d, m in zip(d_list,
                 image2_basenames_mapfiles)]
             skymodels2_mapfiles = self.s.run(actions)
@@ -512,13 +512,13 @@ class FacetSelfcal(Operation):
 
         if self.parset['use_ftw']:
             self.log.info('FFTing model image (facet model #3)...')
-            actions = [FFT(self.parset, dm, mm, p['model3'], prefix='fft3',
+            actions = [FFT(self.parset, dm, mm, p['imager3'], prefix='fft3',
             	direction=d, index=3) for d, dm, mm in zip(d_list,
             	facet_data_mapfiles, image3_basenames_mapfiles)]
             self.s.run(actions)
         else:
             self.log.info('Making sky model (facet model #3)...')
-            actions = [MakeSkymodelFromModelImage(self.parset, m, p['model3'],
+            actions = [MakeSkymodelFromModelImage(self.parset, m, p['imager3'],
                 prefix='facet_selfcal3', direction=d) for d, m in zip(d_list,
                 image3_basenames_mapfiles)]
             skymodels3_mapfiles = self.s.run(actions)
@@ -959,7 +959,7 @@ class FacetImage(Operation):
                 d.skymodel_dirdep = file[0]
         else:
             self.log.info('Making sky model...')
-            actions = [MakeSkymodelFromModelImage(self.parset, m, p['model'],
+            actions = [MakeSkymodelFromModelImage(self.parset, m, p['imager'],
                 prefix='facet_image', direction=d) for d, m in zip(d_list,
                 image_basenames_mapfiles)]
             skymodels_mapfiles = self.s.run(actions)
@@ -1023,6 +1023,7 @@ class FacetSubAll(Operation):
 
         if self.parset['use_ftw']:
             self.log.info('FFTing model image (facet model final)...')
+            p['imsize'] = d.imsize
             action = FFT(self.parset, subtracted_all_mapfile,
             	dir_dep_model_mapfile, p['fft'], prefix='fft', direction=d)
             self.s.run(action)
