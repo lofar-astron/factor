@@ -289,7 +289,11 @@ class MakeMask(Action):
                 input_files = [bn+'-image.fits' for bn in imagebasenames]
             output_files = [infile+'.cleanmask.fits' for infile in input_files]
         elif self.op_parset['imager'].lower() == 'awimager':
-            pass
+             if self.p['nterms'] == 1:
+                input_files = [bn+'.image.restored' for bn in imagebasenames]
+            else:
+                input_files = [bn+'.image.tt0.restored' for bn in imagebasenames]
+
         else:
             if self.p['nterms'] == 1:
                 input_files = [bn+'.image' for bn in imagebasenames]

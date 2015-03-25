@@ -9,11 +9,12 @@ awimager.control.opts.outputkey=output.imagename
 awimager.control.opts.arguments=[]
 awimager.control.opts.max_per_node={{ ncpu }}
 
+awimager.parsetarg.operation = clean
 awimager.parsetarg.data.uvrange='{{ uvrange }}'
 awimager.parsetarg.image.nterms={{ nterms }}
-awimager.parsetarg.image.cellsize=['{{ cell }}', '{{ cell }}']
+awimager.parsetarg.image.cellsize='{{ cell }}'
 awimager.parsetarg.image.npix={{ imsize }}
-awimager.parsetarg.weight.type='briggs'
+awimager.parsetarg.weight.type='robust'
 awimager.parsetarg.weight.robust=-0.25
 awimager.parsetarg.clean.niter={{ niter }}
 awimager.parsetarg.clean.gain=0.01
