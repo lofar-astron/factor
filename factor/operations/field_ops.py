@@ -50,9 +50,10 @@ class InitSubtract(Operation):
             skymodels, _ = read_mapfile(merged_skymodels_mapfile)
             for band, skymodel in zip(bands, skymodels):
                 band.skymodel_dirindep = skymodel
-            merged_data_mapfiles = os.path.join(self.parset['dir_working'],
-                'datamaps/InitSubtract/Split/lowres_merged_vis.datamap')
-            for band, merged_data_mapfile in zip(bands, merged_data_mapfiles):
+            merged_data_mapfiles = [os.path.join(self.parset['dir_working'],
+                'datamaps/InitSubtract/{0}/lowres_merged_vis_{0}.datamap'.format(band.name))
+                for band in bands]
+            for band, merged_data_mapfile in zip(bands, merged_data_mapfile):
                 f, _ = read_mapfile(merged_data_mapfile)
                 band.file = f[0]
             return
