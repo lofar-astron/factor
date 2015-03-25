@@ -262,14 +262,16 @@ facet_image= {
 facet_sub_all = {
 'fft' : {'imsize': 1024,
          'cell': '1.5arcsec',
-         'nterms': 2}
+         'nterms': 2},
 'subtract' : {'incol': 'FACET_DATA',
               'outcol': 'SUBTRACTED_DATA_ALL',
               'flags': '--replace-sourcedb'}
 }
 
 facet_add_all_final = {
-'fft' : {'nterms': 2},
+'fft' : {'imsize': 1024,
+         'cell': '1.5arcsec',
+         'nterms': 2},
 'add' : {'incol': 'SUBTRACTED_DATA_ALL',
          'outcol': 'FACET_DATA',
          'flags': '--replace-sourcedb'},
