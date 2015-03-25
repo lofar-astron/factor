@@ -133,8 +133,12 @@ class MakeImage(Action):
             self.p['cycfactor'] = 4.0
         self.p['scales'] = []
         if self.p['mscale']:
+            self.p['nscales'] = 6
             self.p['scales'] = [0, 3, 7, 25, 60, 150]
             self.p['wsclean_multiscale'] = '-multiscale, ' # need comma for parset
+        else:
+            self.p['nscales'] = 1
+            self.p['scales'] = [0]
         self.p['timer'] = ''
         self.p['nfacets'] = 1
         self.p['wplanes'] = 1
@@ -171,6 +175,9 @@ class MakeImage(Action):
 
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
+
+        # Set up mask
+        # TODO: use mask datamap
         if self.op_parset['imager'].lower() == 'wsclean':
             if self.mask_datamap is not None:
                 mask_file, _ = read_mapfile(self.mask_datamap)
@@ -178,6 +185,12 @@ class MakeImage(Action):
             else:
                 self.p['mask'] = ''
             # TODO: deal with region mask
+        elif self.op_parset['imager'].lower() == 'awimager':
+            if self.mask_datamap is not None:
+                mask_file, _ = read_mapfile(self.mask_datamap)
+                self.p['mask'] = '{0}'.format(mask_file[0])
+            else:
+                self.p['mask'] = ''
         else:
             if self.mask_datamap is None and self.direction is None:
                 self.p['mask'] = ['']
