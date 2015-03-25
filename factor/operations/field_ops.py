@@ -97,7 +97,7 @@ class InitSubtract(Operation):
             self.log.debug('FFTing high-res model image...')
             action = FFT(self.parset, input_data_mapfile,
                 highres_image_basenames_mapfile, p['imagerh'], prefix='highres')
-            self.s.run_imager(action)
+            self.s_imager.run(action)
 
         self.log.debug('Dividing datasets into chunks...')
         chunks_list = []
@@ -179,7 +179,7 @@ class InitSubtract(Operation):
             actions = [FFT(self.parset, dm, bm, p['imagerl'], band=band,
             	prefix='lowres') for dm, bm, band in zip(merged_data_mapfiles,
             	lowres_image_basenames_mapfiles, bands)]
-            self.s.run_imager(actions)
+            self.s_imager.run(actions)
 
         self.log.debug('Dividing datasets into chunks...')
         chunks_list = []
