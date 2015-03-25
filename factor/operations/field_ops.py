@@ -98,7 +98,7 @@ class InitSubtract(Operation):
             p['modelh']['imsize'] = p['imagerh']['imsize']
             action = FFT(self.parset, input_data_mapfile,
                 highres_image_basenames_mapfile, p['modelh'], prefix='highres')
-            self.s.run(action)
+            self.s.run_imager(action)
 
         self.log.debug('Dividing datasets into chunks...')
         chunks_list = []
@@ -109,8 +109,8 @@ class InitSubtract(Operation):
             total_time = (band.endtime - band.starttime) / 3600.0 # hours
             chunk_time = min(np.ceil(total_time/ncpus), 1.0) # max of 1 hour per chunk
             chunk_block = int(np.ceil(chunk_time * 3600.0 / band.timepersample))
-            self.log.debug('Using {0} time slots per chunk for {1}'.format(
-                chunk_block, band.name))
+            self.log.debug('Using {0} time slots ({1:.1f} hr) per chunk for {2}'.format(
+                chunk_block, chunk_time, band.name))
             chunks_list.append(make_chunks(files[0], chunk_block,
             	self.parset, 'initsub_chunk', clobber=False))
         chunk_data_mapfiles = []
@@ -179,10 +179,36 @@ class InitSubtract(Operation):
             self.log.debug('FFTing low-res model image...')
             p['modell']['imsize'] = p['imagerl']['imsize']
             actions = [FFT(self.parset, dm, bm, p['modell'], band=band,
-            	prefix='lowres') for dm, bm, band in zip(chunk_data_mapfiles,
+            	prefix='lowres') for dm, bm, band in zip(merged_data_mapfiles,
             	lowres_image_basenames_mapfiles, bands)]
-            self.s.run(actions)
-            lowhres_skymodels_mapfile = None
+            self.s.run_imager(actions)
+
+        self.log.debug('Dividing datasets into chunks...')
+        chunks_list = []
+        for i, band in enumerate(bands):
+            files, _ = read_mapfile(merged_data_mapfiles[i])
+            total_time = (band.endtime - band.starttime) / 3600.0 # hours
+            chunk_time = min(np.ceil(total_time/ncpus), 1.0) # max of 1 hour per chunk
+            chunk_block = int(np.ceil(chunk_time * 3600.0 / band.timepersample))
+            self.log.debug('Using {0} time slots ({1:.1f} hr) per chunk for {2}'.format(
+                chunk_block, chunk_time, band.name))
+            chunks_list.append(make_chunks(files[0], chunk_block,
+            	self.parset, 'initsub_chunk', clobber=True))
+        chunk_data_mapfiles = []
+        chunk_parmdb_mapfiles = []
+        chunk_model_mapfiles = []
+        for i, chunks in enumerate(chunks_list):
+            chunk_data_mapfiles.append(self.write_mapfile([chunk.file for chunk in chunks],
+                prefix='chunks_vis', band=bands[i], host_list=[hosts[i]]))
+            if self.parset['use_ftw']:
+                chunk_model_mapfiles.append(None)
+            else:
+                skymodel, hosts = read_mapfile(lowres_skymodels_mapfile)
+                chunk_model_mapfiles.append(self.write_mapfile([skymodel[i]]*len(chunks),
+                    prefix='chunks_highres_skymodel', band=bands[i], host_list=[hosts[i]]))
+            parmdb_file, hosts = read_mapfile(dir_indep_parmdbs_mapfile)
+            chunk_parmdb_mapfiles.append(self.write_mapfile([parmdb_file[i]]*len(chunks),
+                prefix='chunks_parmdb', band=bands[i], host_list=[hosts[i]]))
 
         self.log.info('Subtracting low-res sky model...')
         actions = [Subtract(self.parset, dm, p['calibl'], mm, pm,
