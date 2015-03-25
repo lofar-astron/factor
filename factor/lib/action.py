@@ -212,7 +212,7 @@ class Action(object):
         """
         Runs the pipeline
         """
-        cmd = 'ulimit -n 2048; python {0} {1} -d -c {2}'.format(self.pipeline_executable,
+        cmd = 'python {0} {1} -d -c {2}'.format(self.pipeline_executable,
             self.pipeline_parset_file, self.pipeline_config_file)
         if has32:
             with open("{0}.out.log".format(self.logbasename), "wb") as out, \
