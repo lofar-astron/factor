@@ -284,7 +284,7 @@ class MakeMask(Action):
         imagebasenames, hosts = read_mapfile(self.input_datamap)
         if self.op_parset['imager'].lower() == 'wsclean':
             if self.p['nterms'] > 1:
-                input_files = [bn+'-image-MFS.fits' for bn in imagebasenames]
+                input_files = [bn+'-MFS-image.fits' for bn in imagebasenames]
             else:
                 input_files = [bn+'-image.fits' for bn in imagebasenames]
             output_files = [infile+'.cleanmask.fits' for infile in input_files]
@@ -313,6 +313,8 @@ class MakeMask(Action):
         """
         Writes the pipeline control parset and any script files
         """
+        from factor.lib.datamap_lib import read_mapfile
+
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
 
@@ -322,7 +324,7 @@ class MakeMask(Action):
 
             image_basenames, _ = read_mapfile(self.input_datamap)
             for bn in image_basenames:
-                image_file = bn + '-image.MFS.fits'
+                image_file = bn + '-MFS-image.fits'
                 fits_file = fits.open(image_file, mode="readonly",
                     ignore_missing_end=True)
                 hdr = fits_file[0].header

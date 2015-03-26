@@ -103,7 +103,7 @@ class MakeSkymodelFromModelImage(Action):
         if self.op_parset['imager'].lower() == 'wsclean':
             # Convert WSClean model fits images to casapy images
             if self.p['nterms'] > 1:
-                input_fits_files = [bn+'-model-MFS.fits' for bn in imagebasenames]
+                input_fits_files = [bn+'-MFS-model.fits' for bn in imagebasenames]
             else:
                 input_fits_files = [bn+'-model.fits' for bn in imagebasenames]
             input_files = []
