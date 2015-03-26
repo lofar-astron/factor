@@ -153,3 +153,29 @@ def convert_fits_to_image(fitsimage):
 
     return outfilename
 
+
+def get_val_from_str(val_str, retunits):
+    """
+    Convert a string with optional units to value in units of retunits
+
+    I string does not have any units, it's assumed to be in units of retunits
+    """
+    from itertools import groupby
+    from astropy import units as u
+
+    parts = [''.join(g).strip() for _, g in groupby(val_str, str.isalpha)]
+    val = float(parts[0])
+    if len(parts) > 1:
+        if type(parts[1]) is str:
+            if parts[1].lower() == 'e':
+                # Check if number uses exponential notation (e.g., 1e8)
+                parts = [parts[0] + parts[1] + parts[2]] + parts[3:]
+            units = parts[1]
+        else:
+            units = None
+    if units is None:
+        units = retunits
+
+    q = u.Quantity(val, units).to(retunits)
+
+    return q.value

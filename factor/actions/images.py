@@ -172,6 +172,7 @@ class MakeImage(Action):
         Writes the pipeline control parset and any script files
         """
         from factor.lib.datamap_lib import read_mapfile
+        from factor.lib.action_lib import get_val_from_str
 
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
@@ -210,9 +211,8 @@ class MakeImage(Action):
             template = env.get_template('make_image_casapy.pipeline.parset.tpl')
         elif self.op_parset['imager'].lower() == 'wsclean':
             template = env.get_template('make_image_wsclean.pipeline.parset.tpl')
-            # TODO: make these conversions more general with astropy units:
-            self.p['cell_deg'] = float(self.p['cell'].split('arcsec')[0]) / 3600.0
-            self.p['threshold_jy'] = float(self.p['threshold'].split('mJy')[0]) / 1000.0
+            self.p['cell_deg'] = get_val_from_str(self.p['cell'], 'deg')
+            self.p['threshold_jy'] = get_val_from_str(self.p['threshold'], 'Jy')
             if self.p['nterms'] > 1:
                 self.p['nchannels'] = len(self.op_parset['mss']) # one image per band
             else:
