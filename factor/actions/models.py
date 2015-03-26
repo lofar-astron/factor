@@ -503,6 +503,8 @@ class FFT(Action):
         """
         Writes the pipeline control parset and any script files
         """
+        from factor.lib.action_lib import get_val_from_str
+
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
         self.p['scriptname'] = os.path.abspath(self.script_file)
@@ -513,8 +515,13 @@ class FFT(Action):
         elif self.op_parset['imager'].lower() == 'casapy':
             template = env.get_template('fft_casapy.pipeline.parset.tpl')
         elif self.op_parset['imager'].lower() == 'wsclean':
+            if self.p['nterms'] > 1:
+                self.p['nchannels'] = len(self.op_parset['mss']) # one image per band
+            else:
+                self.p['nchannels'] = 1
+
             template = env.get_template('fft_wsclean.pipeline.parset.tpl')
-            self.p['cell_deg'] = float(self.p['cell'].split('arcsec')[0]) / 3600.0
+            self.p['cell_deg'] = get_val_from_str(self.p['cell'], 'deg')
 
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
