@@ -80,7 +80,6 @@ facet_selfcal = {
 'avg0' : {'columnname': 'CORRECTED_DATA', # outcol is DATA
           'freqstep': 1,
           'timestep': 12},
-'concat0' : {'columnname': 'DATA'}, # outcol is DATA
 'imager0' : {'niter': 500,
              'imsize': 1024,
              'mscale': True,
