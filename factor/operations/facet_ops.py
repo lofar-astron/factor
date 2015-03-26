@@ -25,6 +25,7 @@ FacetImageFinal : Operation
 """
 import os
 from factor.lib.operation import Operation
+from factor.lib.scheduler import Scheduler
 
 
 class FacetAddCal(Operation):
