@@ -113,6 +113,10 @@ class DPPP(Action):
             output_files = [self.working_dir + os.path.splitext(os.path.basename(ms))[0]
                 + '_{0}.ms'.format(self.name.lower())]
 
+        for output_file in output_files:
+            if os.path.exists(output_file):
+                os.system('rm -rf {0}'.format(output_file))
+
         self.p['output_datamap'] = self.write_mapfile(output_files,
             prefix=self.prefix+'_output', direction=self.direction,
             index=self.index, band=self.band, host_list=hosts)
