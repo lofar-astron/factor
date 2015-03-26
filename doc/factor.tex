@@ -32,13 +32,12 @@ LOFAR\footnote{This section is maintained by David Rafferty
 \label{factor}
 
 Factor is a Python package which allows for the production of wide-field HBA
-LOFAR images. Note that Factor is still in beta. Please report bugs to
+LOFAR images. Note that Factor is still beta software. Please report bugs to
 drafferty@hs.uni-hamburg.de. To initialize your environment for Factor, users on
 CEP2 and CEP3 should run the following commands:
 \begin{verbatim}
 use LofIm
 source ~rafferty/init_factor
-use Casa
 use Pythonlibs
 \end{verbatim}
 
@@ -61,7 +60,10 @@ sections.
 \subsection{Parset}
 \label{factor:parset}
 
-This is an example parset that shows the available parameters:
+Below is an example parset that shows the available parameters. Note that the
+parameters are grouped by sections (global, directions, etc.). Required
+parameters are noted.
+
 \begin{verbatim}
 [global]
 # LOFAR installation root directories. If not given, they will be determined
@@ -69,68 +71,86 @@ This is an example parset that shows the available parameters:
 lofarroot = /lofar/build/gnu_opt/installed
 lofarpythonpath = /lofar/build/gnu_opt/installed/lib/python2.7/dist-packages
 
-# Full path to Generic Pipeline root directory
+# Full path to Generic Pipeline root directory (required)
 piperoot = /path/to/genericpipe/dir
 
-# Full path to the cluster description file. If not given, the clusterdesc file
-# for a single (i.e., local) node is used
-clusterdesc = /path/to/clusterdesc
-
-# Full path to working dir - other paths are relative to this
+# Full path to working dir - other paths are relative to this (required)
 dir_working = /data/wdir
 
 # Full path to directory containing selfcaled bands, will be scanned for all .MS
-# and .ms files
+# and .ms files (required)
 dir_ms = /data/bands
 
 # Parmdb name for dir-indep. selfcal solutions (stored inside the input
-# band measurement sets, so path should be relative to those)
+# band measurement sets, so path should be relative to those). Default is
+# instrument
 parmdb_name = instrument_ap_smoothed
-
-# Full path to file containing calibrator directions. If not given, directions
-# are selected internally using the flux and size cuts below (min flux, max size
-# of a source, and max separation between sources below which they are grouped
-# into one direction). The number of internally derived directions can be
-# limited to a maximum number of directions if desired.
-directions_file = /data/directions.txt
-directions_flux_min_Jy = 0.1
-directions_size_max_arcmin = 3.0
-directions_separation_max_arcmin = 6.0
-directions_max_num = 50
-
-# Maximum number of directions to process (default = all)
-ndir = 10
-
-# Maximum number of directions to process in parallel (default = 1)
-ndir_parallel = 4
-
-# Maximum number of CPUs per node to use (default = all)
-ncpu = 6
-
-# Full path to cluster description file. Use clusterdesc_file = PBS to use
-# the PBS / torque reserved nodes. Set distribute to True if the cluster
-# has a distributed file system. Set to False if the cluster has a shared
-# file system (the default)
-clusterdesc_file = PBS
-distribute = False (default = False)
-
-# Use interactive mode (default = False)
-interactive = False
-
-# Use ftw to FFT model image instead of BBS predict (default = True)
-use_ftw = True
 
 # Make final mosaic (default = True)
 make_mosaic = False
 
-# MS-specific parameters
+# Use interactive mode (default = False)
+interactive = False
+
+# Use FT / FTW for all operations except initial subtraction (default = True)
+use_ftw = True
+
+# Choose imager to use (one of awimager, casapy, wsclean; default = awimager)
+imager = awimager
+imagerroot = /lofar/build/gnu_opt/installed
+
+
+[directions]
+# Full path to file containing calibrator directions. If not given, directions
+# are selected internally using the flux and size cuts below
+directions_file = /data/directions.txt
+
+# Flux and size cuts for selecting directions internally (min flux, max size
+# of a source, and max separation between sources below which they are grouped
+# into one direction) (required if no directions_file is given)
+flux_min_Jy = 0.1
+size_max_arcmin = 3.0
+separation_max_arcmin = 6.0
+
+# The number of internally derived directions can be limited to a maximum number
+# of directions if desired (default = all)
+max_num = 50
+
+# Total number of directions to process (default = all)
+ndir = 10
+
+# Grouping of directions into groups that are processed in parallel, defined as
+# grouping:n_total_per_grouping. For example, groupings = 1:5, 4:0 means two
+# groupings are used, with the first 5 directions put into groups of one (i.e.,
+# each direction processed in series) and the rest of the directions divided
+# into groups of 4 (i.e., 4 directions processed in parallel). Shuffling is done
+# between neighboring groups to achieve the largest min separation. Default is
+# one at a time (i.e., groupings = 1:0)
+groupings = 1:5, 4:0
+
+
+[cluster]
+# Full path to cluster description file. Use clusterdesc_file = PBS to use the
+# PBS / torque reserved nodes. If not given, the clusterdesc file for a single
+# (i.e., local) node is used
+clusterdesc_file = PBS
+
+# Set distribute to True if the cluster has a distributed file system. Set to
+# False if the cluster has a shared file system (the default)
+distribute = False
+
+# Maximum number of CPUs per node to use (default = all)
+ncpu = 6
+
+
+# MS-specific parameters (optional)
 [ms1.ms]
-init_skymodel = /data/ms1strangename.sky
+init_skymodel = /data/ms1.sky
 param1 = 123
 param2 = 123
 
 [ms2.ms]
-init_skymodel = /data/ms2strangename.sky
+init_skymodel = /data/ms2.sky
 param1 = 123
 param2 = 123
 \end{verbatim}
@@ -139,8 +159,9 @@ param2 = 123
 \subsection{Directions}
 \label{factor:directions
 
-The directions for which DDE calibration is performed can be selected automatically
-by factor or specified in a file. The format of the file is as follows:
+The directions for which DDE calibration is performed can be selected
+automatically by factor or specified in a file. The format of the file is as
+follows:
 
 \begin{verbatim}
 # This is an example directions file for Factor.
@@ -158,21 +179,55 @@ calibrator_2, 222.22, 33.33, reg/cal2.reg, True, 600, 5, False, 4.5
 calibrator_3, 333.33, 44.44, , True, 600, 5, ,
 \end{verbatim}
 
+This file should be specified in the parset file as the directions_file
+parameter.
+
+If no directions_file is given, the directions and their order of
+processing are determined internally using the flux, size, and separation limits
+specified in the parset as follows. First, the initial apparent-flux clean-component (CC)
+skymodels (either given as input in the parset or generated by the initial
+subtraction operation) are grouped by LSMTool using the thresholding algorithm.
+These grouped patches of CCs are then filtered to meet the specified flux and
+size limits (flux_min_Jy and size_max_arcmin, respectively) and nearby patches
+are merged (specified by separation_max_arcmin). The resulting patches are then
+sorted by apparent flux at the lowest available frequency (from bright to faint).
+
+Additionally, the direction centers used for tessellation can be automatically
+adjusted to avoid cases in which known sources (from the initial CC skymodels)
+fall too near to a facet boundary. This adjustment only affects the facet
+regions and does not affect the phase centers of the directions (specified in the
+directions_file). The amount of adjustment allowed is specified with the
+max_adjustment_arcmin parameter (setting this parameter to 0 will disable
+adjustment).
+
+Lastly, one can specify that more than one direction be processed in
+parallel with the groupings parameter. Note that more than one node is required
+to process directions in parallel (as little benefit will result from running
+multiple directions in parallel on a single node). The groupings parameter specifies the the
+grouping level (the number of directions to process simultaneously) and the
+total number of directions at each grouping level. For example, groupings = 1:5,
+4:0 means two groupings are used, with the first 5 directions put into groups of
+one (i.e., each direction is processed in series) and the rest of the directions
+divided into groups of 4 (i.e., 4 directions processed in parallel). Shuffling
+is done between neighboring groups to achieve the largest minimum separation
+between directions in the groups. This sorting attempts to minimize the effects that
+any artifacts from the simultaneously processed directions have on one another.
+
 
 %-----------------------------------------------------------
 \subsection{Parallelization}
 \label{factor:parallel}
 
-Factor has been designed to run as much as possible in a parallel manner. To this
-end, support is present for distributing the reduction over nodes of a compute
-cluster and over the processors of a single computer.
+Factor has been designed to run as much as possible in a parallel manner. To
+this end, support is present for distributing the reduction over nodes of a
+compute cluster and over the processors of a single computer.
 
 To use Factor on a single computer, no setup is necessary beyond specifying the
 maximum number of CPUs to use.
 
-To use factor on
-multiple nodes of a compute cluster, the required setup depends on the cluster
-layout (distributed vs. shared file system) and scheduling system (if any).
+To use factor on multiple nodes of a compute cluster, the required setup depends
+on the cluster layout (distributed vs. shared file system) and scheduling system
+(if any).
 
 \subsubsection{Torque / PBS scheduler}
 For use on a compute cluster that uses torque and PBS, set 'clusterdesc = PBS'.
@@ -185,9 +240,9 @@ Factor works by default on a compute cluster with a shared file system.
 \subsubsection{Distributed file system}
 For use on a cluster with a distributed file system (such as CEP2 and CEP3), set
 'distribute = True'. Factor will then synchronize files between the available
-nodes. Note that all data will be mirrored on each node, so one must ensure that all nodes
-have sufficient disk space. Additionally, the local disk must have the same
-name on each node.
+nodes. Note that all data will be mirrored on each node, so one must ensure that
+all nodes have sufficient disk space. Additionally, the local disk must have the
+same name on each node.
 
 
 %-----------------------------------------------------------
@@ -199,105 +254,46 @@ of some unforeseen failure occurring, Factor has been designed to allow easy
 resumption of a reduction from a saved state and will skip over any steps that
 were successfully completed previously. In this way, one can quickly resume a
 reduction that was halted (either by the user or due to some problem) by simply
-re-running Factor.
+re-running Factor with the same parset.
 
-For example, once can specify that only the first 5 directions be processed.
+For example, one can specify that only the first 5 directions be processed.
 Once these directions are done, Factor will exit. One can then alter the parset
 and specify that 10 directions should be done. Upon restarting, Factor will skip
-over the first 5 directions and start with the 6th one.
+over the first 5 directions and start with the 6th one (and ending with the 10th
+one).
 
 
 %-----------------------------------------------------------
 \subsection{Structure}
 \label{factor:structure}
 
-Factor is structured based on operations and actions. An operation is composed of a sequence of actions. For example, the InitSubtract operation performs the following actions: image at high resolution, make a sky model, subtract the sky model, average, image and low resolution, make another sky model, and finally subtract the second sky model.
-Operations divide the reduction into logical groupings of actions as follows.
+Factor is structured based on operations and actions. An operation is composed
+of a sequence of actions. For example, the initial subtraction operation
+(denoted InitSubtract) performs the following actions: image at high resolution,
+make a sky model, subtract the sky model, average, image and low resolution,
+make another sky model, and finally subtract the second sky model. Operations
+divide the reduction into logical groupings of actions as follows.
 
 \begin{enumerate}
-\item InitSubtract: initial imaging and subtraction of sources to create "source-free" data. This operation may be skipped if sky models are specified for each band in the parset and the SUBTRACTED_DATA column is present in all the bands
-\item FacetAddCal: For each direction, the calibrator source is added to the "source-free" data. The data are then phase shifted to the appropriate coordinates.
-\item FacetSetup: The direction-independent calibration is applied, and the bands are concatenated and averaged.
+\item InitSubtract: initial imaging and subtraction of sources
+to create "source-free" data. This operation may be skipped if sky models are
+specified for each band in the parset and the SUBTRACTED_DATA_ALL column is
+present in all the bands
+\item FacetAddCal: For each direction, the calibrator source is added to the
+"source-free" data. The data are then phase shifted to the appropriate
+coordinates.
+\item FacetSetup: The direction-independent calibration is applied, and the
+bands are concatenated and averaged.
 \item FacetSelfcal:
 \item FacetAddAll
 \item FacetImage
 \item FacetSubAll
 \item
 
-Some operations, such as the FacetSelfcal operation, can run on multiple directions simultaneously.
+Some operations, such as the FacetSelfcal operation, can run on multiple
+directions simultaneously.
 
-After each action finishes, the saved state is updated, allowing for resumption of steps at the granularity of the actions in a given operation.
-
-
-%-----------------------------------------------------------
-\subsection{Example Reduction}
-\label{factor:example}
-
-A example reduction is shown below:
-
-\begin{verbatim}
-$ factor factor.parset
-INFO - parset - Reading parset file: factor.parset
-INFO - parset - Working directory is Test_run
-INFO - parset - Working on 4 bands
-INFO - directions - Reading directions file: factor_directions.txt
-INFO - root - Sky models found for all MS files. Skipping initial subtraction operation.
-INFO - root - No directions file given. Selecting directions internally...
-INFO - LSMTool.Filter - Kept 138 patches.
-INFO - directions - Found 138 directions with fluxes above 0.2 Jy
-INFO - LSMTool.Filter - Kept 137 patches.
-INFO - directions - Found 137 directions with fluxes above 0.2 Jy and sizes below 3.0 arcmin
-INFO - directions - Merging directions within 6.0 arcmin of each other...
-INFO - LSMTool.Filter - Removed 34 patches.
-INFO - directions - Kept 100 directions in total
-INFO - directions - Writing directions file: factor_directions.txt
-INFO - directions - Reading directions file: factor_directions.txt
-INFO - FacetAddCal - <-- Operation FacetAddCal started (direction(s): mask_patch_497)
-INFO - FacetAddCal - Selecting sources for this direction...
-INFO - FacetAddCal - Adding sources for this direction...
-INFO - FacetAddCal - Phase shifting DATA...
-INFO - FacetAddCal - --> Operation FacetAddCal finished (direction(s): mask_patch_497)
-INFO - FacetSetup - <-- Operation FacetSetup started (direction(s): mask_patch_497)
-INFO - FacetSetup - Applying direction-independent calibration...
-INFO - FacetSetup - Averaging DATA...
-INFO - FacetSetup - Averaging CORRECTED_DATA...
-INFO - FacetSetup - Concatenating bands...
-INFO - FacetSetup - --> Operation FacetSetup finished (direction(s): mask_patch_497)
-INFO - FacetSelfcal - <-- Operation FacetSelfcal started (direction(s): mask_patch_497)
-INFO - FacetSelfcal - Imaging (facet image #0)...
-INFO - FacetSelfcal - FFTing model image (facet model #0)...
-INFO - FacetSelfcal - Solving for phase solutions and applying them (#1)...
-INFO - FacetSelfcal - Imaging (facet image #1)...
-INFO - FacetSelfcal - FFTing model image (facet model #1)...
-INFO - FacetSelfcal - Solving for phase solutions and applying them (#2)...
-INFO - FacetSelfcal - Imaging (facet image #2)...
-INFO - FacetSelfcal - FFTing model image (facet model #2)...
-INFO - FacetSelfcal - Solving for amplitude solutions and applying them (#1)...
-INFO - FacetSelfcal - Merging instrument parmdbs...
-INFO - FacetSelfcal - Smoothing amplitude solutions...
-INFO - FacetSelfcal - Applying amplitude solutions...
-INFO - FacetSelfcal - Imaging (facet image #3)...
-INFO - FacetSelfcal - FFTing model image (facet model #3)...
-INFO - FacetSelfcal - Preapplying amplitude solutions...
-INFO - FacetSelfcal - Solving for amplitude solutions (#2)...
-INFO - FacetSelfcal - Merging instrument parmdbs...
-INFO - FacetSelfcal - Smoothing amplitude solutions...
-INFO - FacetSelfcal - Applying amplitude solutions...
-INFO - FacetSelfcal - Imaging (facet image #4)...
-INFO - FacetSelfcal - Merging final instrument parmdbs...
-INFO - FacetSelfcal - Smoothing amplitude solutions...
-INFO - FacetSelfcal - --> Operation FacetSelfcal finished (direction(s): mask_patch_497)
-INFO - FacetAddAll - <-- Operation FacetAddAll started (direction(s): mask_patch_497)
-INFO - FacetAddAll - Selecting sources for this direction...
-INFO - FacetAddAll - Adding sources for this direction...
-INFO - FacetAddAll - Phase shifting DATA...
-INFO - FacetAddAll - --> Operation FacetAddAll finished (direction(s): mask_patch_497)
-INFO - FacetImage - <-- Operation FacetImage started (direction(s): mask_patch_497)
-INFO - FacetImage - Applying direction-dependent calibration...
-INFO - FacetImage - Averaging DATA...
-INFO - FacetImage - Concatenating bands...
-INFO - FacetImage - Imaging...
-\end{verbatim}
-
+After each action finishes, the saved state is updated, allowing for resumption
+of steps at the granularity of the actions in a given operation.
 
 \end{document}
