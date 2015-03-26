@@ -40,7 +40,7 @@ init_subtract = {
              'adaptive_rmsbox': False,
              'threshold': '0mJy',
              'nterms': 1,
-             'ncycles': 4,
+             'ncycles': 2,
              'use_rms': False,
              'image_final': False,
              'iterate_threshold': False,
