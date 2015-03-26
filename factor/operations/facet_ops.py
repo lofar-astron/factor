@@ -207,6 +207,11 @@ class FacetSelfcal(Operation):
         super(FacetSelfcal, self).__init__(parset, bands, direction=direction,
             reset=reset, name='FacetSelfcal')
 
+        # Set up scheduler (runs at most num_nodes directions in parallel)
+        num_nodes = len(self.parset['cluster_specific']['node_list'])
+        self.s = Scheduler(max_threads=num_nodes, name=self.name,
+            op_parset=self.parset)
+
 
     def run_steps(self):
         """
@@ -861,6 +866,11 @@ class FacetImage(Operation):
         name='FacetImage'):
         super(FacetImage, self).__init__(parset, bands, direction=direction,
             reset=reset, name=name)
+
+        # Set up scheduler (runs at most num_nodes directions in parallel)
+        num_nodes = len(self.parset['cluster_specific']['node_list'])
+        self.s = Scheduler(max_threads=num_nodes, name=self.name,
+            op_parset=self.parset)
 
 
     def run_steps(self):
