@@ -319,12 +319,13 @@ class MakeMask(Action):
             self.p['ncpu'] = self.max_cpu
 
         if self.op_parset['imager'].lower() == 'wsclean' and self.p['nterms'] > 1:
-            # Get beam for WSClean images
+            # Get beam for WSClean images: since MFS image does not (yet) have
+            # the beam in its header, we look in the first channel image instead
             from astropy.io import fits
 
             image_basenames, _ = read_mapfile(self.input_datamap)
             for bn in image_basenames:
-                image_file = bn + '-MFS-image.fits'
+                image_file = bn + '-0000-image.fits'
                 fits_file = fits.open(image_file, mode="readonly",
                     ignore_missing_end=True)
                 hdr = fits_file[0].header
