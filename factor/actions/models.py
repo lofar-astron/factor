@@ -515,12 +515,11 @@ class FFT(Action):
         elif self.op_parset['imager'].lower() == 'casapy':
             template = env.get_template('fft_casapy.pipeline.parset.tpl')
         elif self.op_parset['imager'].lower() == 'wsclean':
+            template = env.get_template('fft_wsclean.pipeline.parset.tpl')
             if self.p['nterms'] > 1:
                 self.p['nchannels'] = len(self.op_parset['mss']) # one image per band
             else:
                 self.p['nchannels'] = 1
-
-            template = env.get_template('fft_wsclean.pipeline.parset.tpl')
             self.p['cell_deg'] = get_val_from_str(self.p['cell'], 'deg')
 
         tmp = template.render(self.p)
