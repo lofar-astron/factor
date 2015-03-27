@@ -43,3 +43,4 @@ class Direction(object):
         self.solint_p = solint_p
         self.make_final_image = make_final_image
         self.cal_radius_deg = cal_radius / 60.0
+        self.nchannels = 1

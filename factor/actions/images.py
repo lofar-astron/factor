@@ -213,8 +213,9 @@ class MakeImage(Action):
             template = env.get_template('make_image_wsclean.pipeline.parset.tpl')
             self.p['cell_deg'] = get_val_from_str(self.p['cell'], 'deg')
             self.p['threshold_jy'] = get_val_from_str(self.p['threshold'], 'Jy')
-            if self.p['nterms'] > 1:
-                self.p['nchannels'] = len(self.op_parset['mss']) # one image per band
+            if self.p['nterms'] > 1 and self.direction is not None:
+                # nterms > 1 should only be used with a direction
+                self.p['nchannels'] = self.direction.nchannels
             else:
                 self.p['nchannels'] = 1
         tmp = template.render(self.p)

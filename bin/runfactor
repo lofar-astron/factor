@@ -141,6 +141,9 @@ if __name__=='__main__':
         direction.reg = reg_file
     ds9_reg_file = os.path.join(parset['dir_working'], 'factor_directions_ds9.reg')
     factor.directions.make_ds9_region_file(directions, ds9_reg_file)
+    for direction in directions:
+        # For WSClean, set number of channels to number of bands
+        direction.nchannels = len(bands)
 
     # Select subset of directions to process
     if 'ndir' in parset['direction_specific']:
