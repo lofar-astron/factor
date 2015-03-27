@@ -128,6 +128,8 @@ class MakeSkymodelFromModelImage(Action):
         """
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
+        if 'n_per_node' not in self.p:
+            self.p['n_per_node'] = self.max_cpu
 
         self.p['scriptname'] = os.path.abspath(self.script_file)
         self.p['outputdir'] = os.path.abspath(self.working_dir)
@@ -242,6 +244,8 @@ class MakeFacetSkymodel(Action):
         """
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
+        if 'n_per_node' not in self.p:
+            self.p['n_per_node'] = self.max_cpu
         self.p['scriptname'] = os.path.abspath(self.script_file)
         self.p['cal_only'] = self.cal_only
         self.p['vertices'] = self.direction.vertices
@@ -367,6 +371,8 @@ class MergeSkymodels(Action):
         """
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
+        if 'n_per_node' not in self.p:
+            self.p['n_per_node'] = self.max_cpu
         self.p['mergescriptname'] = os.path.abspath(self.script_file)
 
         template = env.get_template('merge_skymodels.pipeline.parset.tpl')
@@ -507,6 +513,8 @@ class FFT(Action):
 
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
+        if 'n_per_node' not in self.p:
+            self.p['n_per_node'] = self.max_cpu
         self.p['scriptname'] = os.path.abspath(self.script_file)
         self.p['imagerroot'] = self.op_parset['imagerroot']
 

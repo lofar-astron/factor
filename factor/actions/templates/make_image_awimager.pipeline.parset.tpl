@@ -7,7 +7,7 @@ awimager.control.opts.mapfile_out={{ output_datamap }}
 awimager.control.opts.inputkey=data.ms
 awimager.control.opts.outputkey=output.imagename
 awimager.control.opts.arguments=[]
-awimager.control.opts.max_per_node={{ ncpu }}
+awimager.control.opts.max_per_node={{ n_per_node }}
 
 awimager.parsetarg.operation = clean
 awimager.parsetarg.data.uvrange='{{ uvrange }}'

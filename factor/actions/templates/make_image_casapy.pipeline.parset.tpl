@@ -7,7 +7,7 @@ casapy.control.opts.mapfile_out={{ output_datamap }}
 casapy.control.opts.inputkey=clean.vis
 casapy.control.opts.outputkey=clean.imagename
 casapy.control.opts.arguments=[--nologger,--log2term,--nogui,-c]
-casapy.control.opts.max_per_node={{ ncpu }}
+casapy.control.opts.max_per_node={{ n_per_node }}
 
 casapy.parsetarg.clean.gridmode='widefield'
 casapy.parsetarg.clean.wprojplanes={{ wplanes }}

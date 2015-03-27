@@ -176,6 +176,8 @@ class MakeImage(Action):
 
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
+        if 'n_per_node' not in self.p:
+            self.p['n_per_node'] = self.max_cpu
 
         # Set up mask
         # TODO: use mask datamap
@@ -318,6 +320,8 @@ class MakeMask(Action):
 
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
+        if 'n_per_node' not in self.p:
+            self.p['n_per_node'] = self.max_cpu
 
         if self.op_parset['imager'].lower() == 'wsclean' and self.p['nterms'] > 1:
             # Get beam for WSClean images: since MFS image does not (yet) have
