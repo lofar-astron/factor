@@ -1019,10 +1019,10 @@ class FacetSubAll(Operation):
 
         # Make initial data maps for the empty datasets, their dir-dep
         # instrument parmdbs, and their dir-dep sky models
-        if self.parset['use_ftw']:
-            # Copy the model image for each band to avoid conflicts
+        if self.parset['use_ftw'] and self.op_parset['imager'].lower() != 'wsclean':
+            # Copy the model image for each band to avoid write conflicts
             dir_dep_model_mapfile = self.copy_model_images(d.skymodel_dirdep,
-                bands, p['fft'])
+                bands, p['fft'], d)
         else:
             dir_dep_model_mapfile = self.write_mapfile([d.skymodel_dirdep]*len(bands),
                 prefix='dir_dep_skymodels', direction=d)
@@ -1048,12 +1048,12 @@ class FacetSubAll(Operation):
 
         # Clean up files for this direction:
         #    - unneeded MS files
-        #    - selfcal images
+        #    - unneeded images
         self.log.info('Cleaning up files for this direction...')
 #         os.system('rm -rf visdata/*{0}*'.format(d.name))
 
 
-    def copy_model_images(self, modelbasename, bands, p, direction=None):
+    def copy_model_images(self, modelbasename, bands, p, direction):
         """
         Copies model images and returns the mapfile
         """
@@ -1063,20 +1063,31 @@ class FacetSubAll(Operation):
 
         for i, band in enumerate(bands):
             outmodelbasenames.append(modelbasename + '_band{0}'.format(i))
-            if p['nterms'] == 1:
-                inmodelimages.append([modelbasename + '.model'])
-                outmodelimages.append([modelbasename + '_band{0}.model'.format(i)])
-            elif p['nterms'] == 2:
-                inmodelimages.append([modelbasename + '.model.tt0',
-                    modelbasename + '.model.tt1'])
-                outmodelimages.append([modelbasename + '_band{0}.model.tt0'.format(i),
-                    modelbasename + '_band{0}.model.tt1'.format(i)])
+            if self.op_parset['imager'].lower() == 'wsclean':
+                if p['nterms'] == 1:
+                    inmodelimages.append([modelbasename + '.model.fits'])
+                    outmodelimages.append([modelbasename + '_band{0}.model.fits'.format(i)])
+                else:
+                    nfiles = direction.nchannels
+                    inmodelimages.append([modelbasename +
+                        '-{0:04d}-model.fits'.format(j) for j in range(nfiles)])
+                    outmodelimages.append([modelbasename +
+                        '_band{0}-{0:04d}-model.fits'.format(j) for j in range(nfiles)])
             else:
-                inmodelimages.append([modelbasename + '.model.tt0',
-                    modelbasename + '.model.tt1', modelbasename + '.model.tt2'])
-                outmodelimages.append([modelbasename + '_band{0}.model.tt0'.format(i),
-                    modelbasename + '_band{0}.model.tt1'.format(i),
-                    modelbasename + '_band{0}.model.tt2'.format(i)])
+                if p['nterms'] == 1:
+                    inmodelimages.append([modelbasename + '.model'])
+                    outmodelimages.append([modelbasename + '_band{0}.model'.format(i)])
+                elif p['nterms'] == 2:
+                    inmodelimages.append([modelbasename + '.model.tt0',
+                        modelbasename + '.model.tt1'])
+                    outmodelimages.append([modelbasename + '_band{0}.model.tt0'.format(i),
+                        modelbasename + '_band{0}.model.tt1'.format(i)])
+                else:
+                    inmodelimages.append([modelbasename + '.model.tt0',
+                        modelbasename + '.model.tt1', modelbasename + '.model.tt2'])
+                    outmodelimages.append([modelbasename + '_band{0}.model.tt0'.format(i),
+                        modelbasename + '_band{0}.model.tt1'.format(i),
+                        modelbasename + '_band{0}.model.tt2'.format(i)])
 
         for inmods, outmods in zip(inmodelimages, outmodelimages):
             for inmod, outmod in zip(inmods, outmods):
