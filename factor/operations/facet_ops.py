@@ -1019,7 +1019,7 @@ class FacetSubAll(Operation):
 
         # Make initial data maps for the empty datasets, their dir-dep
         # instrument parmdbs, and their dir-dep sky models
-        if self.parset['use_ftw'] and self.op_parset['imager'].lower() != 'wsclean':
+        if self.parset['use_ftw'] and self.parset['imager'].lower() != 'wsclean':
             # Copy the model image for each band to avoid write conflicts
             dir_dep_model_mapfile = self.copy_model_images(d.skymodel_dirdep,
                 bands, p['fft'], d)
@@ -1063,7 +1063,7 @@ class FacetSubAll(Operation):
 
         for i, band in enumerate(bands):
             outmodelbasenames.append(modelbasename + '_band{0}'.format(i))
-            if self.op_parset['imager'].lower() == 'wsclean':
+            if self.parset['imager'].lower() == 'wsclean':
                 if p['nterms'] == 1:
                     inmodelimages.append([modelbasename + '.model.fits'])
                     outmodelimages.append([modelbasename + '_band{0}.model.fits'.format(i)])
