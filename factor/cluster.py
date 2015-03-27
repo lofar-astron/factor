@@ -17,7 +17,7 @@ def make_pbs_clusterdesc(node_local_disk='/tmp'):
     try:
         filename = os.environ['PBS_NODEFILE']
     except KeyError:
-        self.log.error('PBS_NODEFILE not found. You must have a reservation to '
+        log.error('PBS_NODEFILE not found. You must have a reservation to '
             'use clusterdesc = PBS.')
         sys.exit(1)
 
@@ -30,12 +30,13 @@ def make_pbs_clusterdesc(node_local_disk='/tmp'):
     lines = ['# Clusterdesc file to do parallel processing with PBS / torque\n\n']
     lines.append('ClusterName = PBS\n\n')
     lines.append('# Compute nodes\n')
-    lines.append('Compute.Nodes = [{0}]\n'.format(', '.join(nodes)))
+    lines.append('Compute.Nodes = [{0}]\n'.format(', '.join(sorted(nodes))))
     lines.append('Compute.LocalDisks = [{0}]\n'.format(node_local_disk))
 
     clusterdesc_file = 'factor.clusterdesc'
     with open(clusterdesc_file, 'wb') as file:
         file.writelines(lines)
+    log.debug('Using {0} node(s)'.format(len(nodes)))
 
     return clusterdesc_file
 

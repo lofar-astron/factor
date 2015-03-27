@@ -7,14 +7,14 @@
 lofarroot = /lofar/build/gnu_opt/installed
 lofarpythonpath = /lofar/build/gnu_opt/installed/lib/python2.7/dist-packages
 
-# Full path to Generic Pipeline root directory
+# Full path to Generic Pipeline root directory (required)
 piperoot = /path/to/genericpipe/dir
 
-# Full path to working dir - other paths are relative to this
+# Full path to working dir - other paths are relative to this (required)
 dir_working = /data/wdir
 
 # Full path to directory containing selfcaled bands, will be scanned for all .MS
-# and .ms files
+# and .ms files (required)
 dir_ms = /data/bands
 
 # Parmdb name for dir-indep. selfcal solutions (stored inside the input
@@ -31,7 +31,7 @@ interactive = False
 # Use FT / FTW for all operations except initial subtraction (default = True)
 use_ftw = True
 
-# Choose imager to use (one of awimager, casapy, wsclean)
+# Choose imager to use (one of awimager, casapy, wsclean; default = awimager)
 imager = awimager
 imagerroot = /lofar/build/gnu_opt/installed
 
@@ -43,13 +43,13 @@ directions_file = /data/directions.txt
 
 # Flux and size cuts for selecting directions internally (min flux, max size
 # of a source, and max separation between sources below which they are grouped
-# into one direction).
+# into one direction) (required if no directions_file is given)
 flux_min_Jy = 0.1
 size_max_arcmin = 3.0
 separation_max_arcmin = 6.0
 
 # The number of internally derived directions can be limited to a maximum number
-# of directions if desired
+# of directions if desired (default = all)
 max_num = 50
 
 # Total number of directions to process (default = all)
@@ -79,7 +79,7 @@ distribute = False
 ncpu = 6
 
 
-# MS-specific parameters
+# MS-specific parameters (optional)
 [ms1.ms]
 init_skymodel = /data/ms1.sky
 param1 = 123
