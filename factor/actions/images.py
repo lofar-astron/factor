@@ -141,30 +141,33 @@ class MakeImage(Action):
             self.p['scales'] = [0]
         self.p['timer'] = ''
         self.p['nfacets'] = 1
-        self.p['wplanes'] = 1
         self.imsize = self.p['imsize']
         if self.direction is not None:
             if hasattr(self.direction, 'imsize'):
                 self.imsize = self.direction.imsize
         self.p['imsize'] = getOptimumSize(int(self.imsize))
-        if self.p['imsize'] > 512:
-            self.p['wplanes'] = 64
-        if self.p['imsize'] > 799:
-            self.p['wplanes'] = 96
-        if self.p['imsize'] > 1023:
-            self.p['wplanes'] = 128
-        if self.p['imsize'] > 1599:
-            self.p['wplanes'] = 256
-            self.p['nfacets'] = 1
-        if self.p['imsize'] > 2047:
-            self.p['wplanes'] = 384
-            self.p['nfacets'] = 1
-        if self.p['imsize'] > 3000:
-            self.p['wplanes'] = 448
-            self.p['nfacets'] = 1
-        if self.p['imsize'] > 4095:
-            self.p['wplanes'] = 512
-            self.p['nfacets'] = 1
+
+        if 'wplanes' not in self.p:
+            # calculate wplanes assuming 1.5" cellsize
+            self.p['wplanes'] = 1
+            if self.p['imsize'] > 512:
+                self.p['wplanes'] = 64
+            if self.p['imsize'] > 799:
+                self.p['wplanes'] = 96
+            if self.p['imsize'] > 1023:
+                self.p['wplanes'] = 128
+            if self.p['imsize'] > 1599:
+                self.p['wplanes'] = 256
+                self.p['nfacets'] = 1
+            if self.p['imsize'] > 2047:
+                self.p['wplanes'] = 384
+                self.p['nfacets'] = 1
+            if self.p['imsize'] > 3000:
+                self.p['wplanes'] = 448
+                self.p['nfacets'] = 1
+            if self.p['imsize'] > 4095:
+                self.p['wplanes'] = 512
+                self.p['nfacets'] = 1
 
 
     def make_pipeline_control_parset(self):

@@ -474,7 +474,7 @@ class FFT(Action):
 
     def setup_wplanes(self):
         """
-        Set up wplanes from imsize
+        Set up wplanes from imsize, assuming 1.5" cellsize
         """
         imsizep = self.p['imsize']
 
