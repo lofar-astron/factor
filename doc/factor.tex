@@ -48,9 +48,10 @@ use Pythonlibs
 \subsection{Usage}
 \label{factor:usage}
 
-Factor can be run from the command-line as follows:
+Factor is run from the command-line with the {\tt runfactor} executable as
+follows:
 \begin{verbatim}
-Usage: factor <parset>
+Usage: runfactor <parset>
 Options:
   --version   show program's version number and exit
   -h, --help  show this help message and exit
@@ -237,7 +238,23 @@ on the cluster layout (distributed vs. shared file system) and scheduling system
 \subsubsection{Torque / PBS scheduler}
 For use on a compute cluster that uses torque and PBS, set {\tt clusterdesc =
 PBS}. Factor will then automatically determine the nodes for which you have a
-PBS reservation and use them.
+PBS reservation and use them. Note that you must ask for all the nodes you need
+in a single PBS script (e.g., with {\tt #PBS -l nodes=6:ppn=6}), so that all
+nodes are available for the full Factor run. An example PBS script is shown
+below.
+
+\begin{verbatim}
+#!/bin/bash
+#PBS -N Factor
+#PBS -l walltime=100:00:00
+#PBS -l nodes=6:ppn=6
+#PBS -j oe
+#PBS -o output-$PBS_JOBNAME-$PBS_JOBID
+
+cd $PBS_O_WORKDIR
+source /home/sttf201/init-lofar.sh
+runfactor factor.parset
+\end{verbatim}
 
 \subsubsection{Shared file system}
 Factor works by default on a compute cluster with a shared file system.
