@@ -141,15 +141,26 @@ def getOptimumSize(size):
     return newlarge
 
 
-def convert_fits_to_image(fitsimage):
+def convert_fits_to_image(fitsimage, force_stokes_I=True):
     """
     Convert a fits image to a CASA image
+
+    For WSClean 1.7, use force_stokes_I = True to overide incorrect Stokes
+    keyword in model image headers
     """
     import pyrap.images as pim
+    import pyrap.tables as pt
 
     outfilename = fitsimage.split('.fits')[0] + '.image'
     casaimage = pim.image(fitsimage)
     casaimage.saveas(outfilename, overwrite=True)
+
+    if force_stokes_I:
+        coords = casaimage.coordinates().dict()
+        coords['stokes1']['stokes'] = ['I']
+        outtable = pt.table(outfilename, readonly=False, ack=False)
+        outtable.putkeywords({'coords': coords})
+        outtable.done()
 
     return outfilename
 
@@ -158,7 +169,7 @@ def get_val_from_str(val_str, retunits):
     """
     Convert a string with optional units to value in units of retunits
 
-    I string does not have any units, it's assumed to be in units of retunits
+    If a string does not have any units, it's assumed to be in units of retunits
     """
     from itertools import groupby
     from astropy import units as u
