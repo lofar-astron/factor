@@ -62,23 +62,18 @@ class InitSubtract(Operation):
         # instrument parmdbs.
         input_data_mapfile = self.write_mapfile([band.file for band in bands],
         	prefix='input_data')
-        vis_mapfiles = []
+        input_data_mapfiles = []
         files, hosts = read_mapfile(input_data_mapfile)
         for f, h, b in zip(files, hosts, bands):
-            vis_mapfiles.append(self.write_mapfile([f],
+            input_data_mapfiles.append(self.write_mapfile([f],
         	prefix='input_data_vis', host_list=[h], band=b, index=1))
         dir_indep_parmdbs_mapfile = self.write_mapfile([band.dirindparmdb for band
         	in bands], prefix='dir_indep_parmdbs')
 
-        self.log.info('Spliting off corrected data...')
-        actions = [Split(self.parset, dm, p['split'],
-            prefix='highres', band=band) for dm, band in zip(vis_mapfiles, bands)]
-        split_files_mapfiles = self.s.run(actions)
-
         self.log.info('High-res imaging...')
         actions = [MakeImageIterate(self.parset, dm, p['imagerh'],
             prefix='highres', band=band) for dm, band in
-            zip(split_files_mapfiles, bands)]
+            zip(input_data_mapfiles, bands)]
         highres_image_basenames_mapfiles = self.s_imager.run(actions)
         basenames = []
         hosts = []
@@ -105,7 +100,7 @@ class InitSubtract(Operation):
         ncpus = max(int(self.parset['cluster_specific']['ncpu'] * len(
             self.parset['cluster_specific']['node_list']) / len(bands)), 1)
         for i, band in enumerate(bands):
-            files, _ = read_mapfile(split_files_mapfiles[i])
+            files, _ = read_mapfile(input_data_mapfiles[i])
             total_time = (band.endtime - band.starttime) / 3600.0 # hours
             chunk_time = min(np.ceil(total_time/ncpus), 1.0) # max of 1 hour per chunk
             chunk_block = int(np.ceil(chunk_time * 3600.0 / band.timepersample))
