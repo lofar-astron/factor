@@ -135,7 +135,7 @@ class MakeImage(Action):
         if self.p['mscale']:
             self.p['nscales'] = 6
             self.p['scales'] = [0, 3, 7, 25, 60, 150]
-            self.p['wsclean_multiscale'] = '-multiscale, ' # need comma for parset
+            self.p['wsclean_multiscale'] = '' #'-multiscale, ' # need comma for parset
         else:
             self.p['nscales'] = 1
             self.p['scales'] = [0]
@@ -431,6 +431,9 @@ class MakeImageIterate(Action):
             if self.op_parset['imager'].lower() == 'casapy':
                 imager.timeout = 1800 # half an hour for iterations
             image_basename_mapfile = imager.run()
+
+            if i == self.p['ncycles'] - 1:
+                break
 
             if i > 0 and self.p['iterate_threshold']:
                 # Only iterate the threshold for the first pass

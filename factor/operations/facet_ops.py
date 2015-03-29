@@ -1026,7 +1026,6 @@ class FacetSubAll(Operation):
         else:
             dir_dep_model_mapfile = self.write_mapfile([d.skymodel_dirdep]*len(bands),
                 prefix='dir_dep_skymodels', direction=d)
-
         subtracted_all_mapfile = self.write_mapfile([band.file for band in bands],
         	prefix='subtracted_all', direction=d)
         dir_dep_parmdb_mapfile = self.write_mapfile([d.dirdepparmdb]*len(bands),
