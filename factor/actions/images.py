@@ -299,7 +299,7 @@ class MakeMask(Action):
                 input_files = [bn+'.image.restored' for bn in imagebasenames]
             else:
                 input_files = [bn+'.image.tt0.restored' for bn in imagebasenames]
-
+            output_files = [bn+'.cleanmask' for bn in imagebasenames]
         else:
             if self.p['nterms'] == 1:
                 input_files = [bn+'.image' for bn in imagebasenames]
