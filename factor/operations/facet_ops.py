@@ -184,7 +184,7 @@ class FacetSetup(Operation):
             	dirindparmdb for band in bands], prefix='dir_indep_parmdbs',
             	direction=d, host_list=h))
             split_data_mapfiles.append(self.write_mapfile([d.
-            	split_data_files[band.name] for band in bands], prefix='shifted',
+            	split_data_files[band.name] for band in bands], prefix='split',
             	direction=d, host_list=h))
 
         # apply direction-independent calibration
@@ -349,10 +349,10 @@ class FacetSelfcal(Operation):
                 shifted_model_data_mapfiles)]
             avg_shifted_model_data_mapfiles = self.s.run(actions)
             # Copy over DATA column (was phase-shifted MODEL_DATA)
-            for dm, cdm, d in zip(facet_data_mapfiles, avg_shifted_model_data_mapfiles,
+            for dm, adm, d in zip(facet_data_mapfiles, avg_shifted_model_data_mapfiles,
                 d_list):
                 facet_data_file, _ = read_mapfile(dm)
-                model_data_file, _ = read_mapfile(cdm)
+                model_data_file, _ = read_mapfile(adm)
                 copy_column(facet_data_file[0], p['copy_fft']['incol'],
                     p['copy_fft']['outcol'], ms_from=model_data_file[0])
         else:

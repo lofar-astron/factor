@@ -61,7 +61,7 @@ class Chunk(object):
         self.parmdb_phaseamp_amp1 = self.parmdb_dir + 'chunk{0}_instrument_phaseamp_amp1'.format(self.index)
         self.parmdb_phaseamp_amp2 = self.parmdb_dir + 'chunk{0}_instrument_phaseamp_amp2'.format(self.index)
 
-    def copy_from_parent(column_list):
+    def copy_from_parent(self, column_list):
         """
         Copy columns from the parent MS file to the chunk file
 
@@ -73,7 +73,7 @@ class Chunk(object):
             copy_column(self.parent_file, column, column, ms_from=self.file)
 
 
-    def copy_to_parent(column_list):
+    def copy_to_parent(self, column_list):
         """
         Copy columns from the chunk file to the parent MS file
 
