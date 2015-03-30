@@ -88,11 +88,10 @@ class InitSubtract(Operation):
             highres_image_basenames_mapfile, p['imagerh'], prefix='highres')
         highres_skymodels_mapfile = self.s.run(action)
 
-        if self.parset['use_ftw']:
-            self.log.debug('FFTing high-res model image...')
-            action = FFT(self.parset, input_data_mapfile,
-                highres_image_basenames_mapfile, p['imagerh'], prefix='highres')
-            self.s_imager.run(action)
+        self.log.debug('FFTing high-res model image...')
+        action = FFT(self.parset, input_data_mapfile,
+            highres_image_basenames_mapfile, p['imagerh'], prefix='highres')
+        self.s_imager.run(action)
 
         self.log.debug('Dividing datasets into chunks...')
         chunks_list = []
@@ -109,25 +108,17 @@ class InitSubtract(Operation):
             	self.parset, 'initsub_chunk', outdir=self.visbasename, clobber=False))
         chunk_data_mapfiles = []
         chunk_parmdb_mapfiles = []
-        chunk_model_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             chunk_data_mapfiles.append(self.write_mapfile([chunk.file for chunk in chunks],
                 prefix='chunks_vis', band=bands[i], host_list=[hosts[i]]))
-            if self.parset['use_ftw']:
-                chunk_model_mapfiles.append(None)
-            else:
-                skymodel, hosts = read_mapfile(highres_skymodels_mapfile)
-                chunk_model_mapfiles.append(self.write_mapfile([skymodel[i]]*len(chunks),
-                    prefix='chunks_highres_skymodel', band=bands[i], host_list=[hosts[i]]))
             parmdb_file, hosts = read_mapfile(dir_indep_parmdbs_mapfile)
             chunk_parmdb_mapfiles.append(self.write_mapfile([parmdb_file[i]]*len(chunks),
                 prefix='chunks_parmdb', band=bands[i], host_list=[hosts[i]]))
 
         self.log.info('Subtracting high-res sky model...')
         actions = [Subtract(self.parset, dm, p['calibh'],
-            mm, pm, prefix='highres', band=band) for dm, mm, pm, band in
-            zip(chunk_data_mapfiles, chunk_model_mapfiles, chunk_parmdb_mapfiles,
-            bands)]
+            None, pm, prefix='highres', band=band) for dm, pm, band in
+            zip(chunk_data_mapfiles, chunk_parmdb_mapfiles, bands)]
         self.s.run(actions)
 
         self.log.debug('Updating parent files...')
@@ -158,40 +149,22 @@ class InitSubtract(Operation):
             p['imagerl'], prefix='lowres')
         lowres_skymodels_mapfile = self.s.run(action)
         skymodel, hosts = read_mapfile(lowres_skymodels_mapfile)
-        chunk_model_mapfiles = []
-        for i, chunks in enumerate(chunks_list):
-            if self.parset['use_ftw']:
-                chunk_model_mapfiles.append(None)
-            else:
-                chunk_model_mapfiles.append(self.write_mapfile([skymodel[i]]*
-                	len(chunks), prefix='chunks_lowres_skymodel',
-                	host_list=[hosts[i]]))
 
-        if self.parset['use_ftw']:
-            self.log.debug('FFTing low-res model image...')
-            actions = [FFT(self.parset, dm, bm, p['imagerl'], band=band,
-            	prefix='lowres') for dm, bm, band in zip(input_data_mapfiles,
-            	lowres_image_basenames_mapfiles, bands)]
-            self.s_imager.run(actions)
+        self.log.debug('FFTing low-res model image...')
+        actions = [FFT(self.parset, dm, bm, p['imagerl'], band=band,
+            prefix='lowres') for dm, bm, band in zip(input_data_mapfiles,
+            lowres_image_basenames_mapfiles, bands)]
+        self.s_imager.run(actions)
 
         self.log.debug('Updating chunks...')
-        chunk_model_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             for chunk in chunks:
                 chunk.copy_from_parent(p['calibl']['outcol1'])
-            if self.parset['use_ftw']:
-                chunk_model_mapfiles.append(None)
-            else:
-                skymodel, hosts = read_mapfile(lowres_skymodels_mapfile)
-                chunk_model_mapfiles.append(self.write_mapfile([skymodel[i]]*
-                    len(chunks), prefix='chunks_highres_skymodel', band=bands[i],
-                    host_list=[hosts[i]]))
 
         self.log.info('Subtracting low-res sky model...')
-        actions = [Subtract(self.parset, dm, p['calibl'], mm, pm,
-        	prefix='lowres', band=band) for dm, mm, pm, band in
-        	zip(chunk_data_mapfiles, chunk_model_mapfiles,
-        	chunk_parmdb_mapfiles, bands)]
+        actions = [Subtract(self.parset, dm, p['calibl'], None, pm,
+        	prefix='lowres', band=band) for dm, pm, band in
+        	zip(chunk_data_mapfiles, chunk_parmdb_mapfiles, bands)]
         self.s.run(actions)
 
         self.log.debug('Updating parent files...')
