@@ -101,6 +101,7 @@ class FacetAddCal(Operation):
         for band, f in zip(bands, files):
             d.shifted_data_files[band.name] = f
         splfiles, _ = read_mapfile(shifted_data_mapfile)
+        d.split_data_files = {}
         for band, f in zip(bands, splfiles):
             d.split_data_files[band.name] = f
 
