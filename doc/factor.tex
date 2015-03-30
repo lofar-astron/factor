@@ -82,7 +82,8 @@ piperoot = /path/to/genericpipe/dir
 dir_working = /data/wdir
 
 # Full path to directory containing selfcaled bands, will be scanned for all .MS
-# and .ms files (required)
+# and .ms files (required). Note that these files will be modified by Factor, so
+# please keep a copy of these data elsewhere
 dir_ms = /data/bands
 
 # Parmdb name for dir-indep. selfcal solutions (stored inside the input
@@ -102,6 +103,7 @@ use_ftw = True
 # Choose imager to use (one of awimager, casapy, wsclean; default = awimager)
 imager = awimager
 imagerroot = /lofar/build/gnu_opt/installed
+imager_selfcal = awimager
 
 
 [directions]

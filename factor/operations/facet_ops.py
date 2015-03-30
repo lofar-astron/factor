@@ -254,6 +254,11 @@ class FacetSelfcal(Operation):
             d_list = [d_list]
         bands = self.bands
 
+        # Set imager. For now, since WSClean does not yet support clean masks
+        # with multiscale clean, casapy can be used instead for this operation
+        # only
+        self.parset['imager'] = self.parset['imager_selfcal']
+
         # Check state for each direction
         for i, d in enumerate(d_list):
             if os.path.exists(self.statebasename[i]+'.done'):
