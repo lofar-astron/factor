@@ -342,7 +342,7 @@ class FacetSelfcal(Operation):
                 facet_unshifted_data_mapfiles)]
             shifted_model_data_mapfiles = self.s.run(actions)
             actions = [Average(self.parset, m, p['avg_fft'], prefix='facet',
-                direction=d, index=0) for d, m in zip(d_list,
+                direction=d, index=10) for d, m in zip(d_list,
                 shifted_model_data_mapfiles)]
             avg_shifted_model_data_mapfiles = self.s.run(actions)
             # Copy over DATA column (was phase-shifted MODEL_DATA)
@@ -429,7 +429,7 @@ class FacetSelfcal(Operation):
                 facet_unshifted_data_mapfiles)]
             shifted_model_data_mapfiles = self.s.run(actions)
             actions = [Average(self.parset, m, p['avg_fft'], prefix='facet',
-                direction=d, index=1) for d, m in zip(d_list,
+                direction=d, index=11) for d, m in zip(d_list,
                 shifted_model_data_mapfiles)]
             avg_shifted_model_data_mapfiles = self.s.run(actions)
             # Copy over DATA column (was phase-shifted MODEL_DATA)
@@ -512,7 +512,7 @@ class FacetSelfcal(Operation):
                 facet_unshifted_data_mapfiles)]
             shifted_model_data_mapfiles = self.s.run(actions)
             actions = [Average(self.parset, m, p['avg_fft'], prefix='facet',
-                direction=d, index=2) for d, m in zip(d_list,
+                direction=d, index=12) for d, m in zip(d_list,
                 shifted_model_data_mapfiles)]
             avg_shifted_model_data_mapfiles = self.s.run(actions)
             # Copy over DATA column (was phase-shifted MODEL_DATA)
@@ -634,7 +634,7 @@ class FacetSelfcal(Operation):
                 facet_unshifted_data_mapfiles)]
             shifted_model_data_mapfiles = self.s.run(actions)
             actions = [Average(self.parset, m, p['avg_fft'], prefix='facet',
-                direction=d, index=3) for d, m in zip(d_list,
+                direction=d, index=13) for d, m in zip(d_list,
                 shifted_model_data_mapfiles)]
             avg_shifted_model_data_mapfiles = self.s.run(actions)
             # Copy over DATA column (was phase-shifted MODEL_DATA)
