@@ -41,7 +41,7 @@ class FacetAddCal(Operation):
         """
         Run the steps for this operation
         """
-        from factor.actions.visibilities import PhaseShift
+        from factor.actions.visibilities import PhaseShift, Split
         from factor.actions.models import MakeFacetSkymodel
         from factor.actions.calibrations import Add
         from factor.operations.hardcoded_param import facet_add_cal as p

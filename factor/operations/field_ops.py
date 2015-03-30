@@ -35,7 +35,7 @@ class InitSubtract(Operation):
         from factor.actions.images import MakeImageIterate
         from factor.actions.models import MakeSkymodelFromModelImage, MergeSkymodels, FFT
         from factor.actions.calibrations import Subtract
-        from factor.actions.visibilities import Average, Split
+        from factor.actions.visibilities import Average
         from factor.lib.datamap_lib import read_mapfile
         from factor.operations.hardcoded_param import init_subtract as p
         from factor.lib.operation_lib import make_chunks, merge_chunks
