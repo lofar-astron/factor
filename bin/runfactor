@@ -31,10 +31,10 @@ from factor.operations.facet_ops import *
 
 if __name__=='__main__':
     import optparse
-    opt = optparse.OptionParser(usage='%prog [-v|-q] parset [default: factor.parset] \n',
+    opt = optparse.OptionParser(usage='%prog [-v|-q] parset [default: factor.parset]',
             version='%%prog %s' % (factor._version.__version__))
-    opt.add_option('-q', help='Quiet', action='store_true', default=False)
-    opt.add_option('-v', help='Verbose', action='store_true', default=False)
+    opt.add_option('-q', help='enable quiet mode', action='store_true', default=False)
+    opt.add_option('-v', help='enable verbose mode', action='store_true', default=False)
     (options, args) = opt.parse_args()
 
     if len(args) not in [0, 1]:

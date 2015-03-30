@@ -66,3 +66,15 @@ Session.vim
 .idea/*
 *.iml
 
+
+doc/factor.aux
+
+doc/factor.fdb_latexmk
+
+doc/factor.fls
+
+doc/factor.out
+
+doc/factor.pdf
+
+doc/factor.synctex.gz
