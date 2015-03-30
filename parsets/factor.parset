@@ -29,9 +29,6 @@ make_mosaic = False
 # Use interactive mode (default = False)
 interactive = False
 
-# Use FT / FTW for all operations except initial subtraction (default = True)
-use_ftw = True
-
 # Choose imager to use (one of awimager, casapy, wsclean; default = awimager)
 imager = awimager
 imager_selfcal = awimager
