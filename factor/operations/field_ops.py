@@ -106,7 +106,7 @@ class InitSubtract(Operation):
             self.log.debug('Using {0} time slots ({1:.1f} hr) per chunk for {2}'.format(
                 chunk_block, chunk_time, band.name))
             chunks_list.append(make_chunks(files[0], chunk_block,
-            	self.parset, 'initsub_chunk', clobber=False))
+            	self.parset, 'initsub_chunk', outdir=self.visbasename, clobber=False))
         chunk_data_mapfiles = []
         chunk_parmdb_mapfiles = []
         chunk_model_mapfiles = []

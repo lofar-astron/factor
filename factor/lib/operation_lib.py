@@ -42,7 +42,7 @@ def copy_column(ms, inputcol, outputcol, ms_from=None):
 
 
 def make_chunks(dataset, blockl, op_parset, prefix=None, direction=None,
-    columns=None, clobber=False):
+    columns=None, outdir=None, clobber=False):
     """
     Split ms into time chunks of length chunksize time slots
 
@@ -60,6 +60,9 @@ def make_chunks(dataset, blockl, op_parset, prefix=None, direction=None,
         A direction name
     columns : str, optional
         List of column names to chunk. If None, all columns are chunked.
+    outdir : str, optional
+        Absolute path to output directory. If None, the directory of the
+        parent is used
     clobber : bool, optional
         If True, existing files are overwritten
 
@@ -88,7 +91,7 @@ def make_chunks(dataset, blockl, op_parset, prefix=None, direction=None,
     chunk_list = []
     for c in range(nchunks):
         chunk_obj = Chunk(op_parset, dataset, c, prefix=prefix,
-            direction=direction)
+            direction=direction, outdir=outdir)
         chunk_obj.t0 = tlen * float(chunk_obj.index) # hours
         chunk_obj.t1 = np.float(chunk_obj.t0) + tlen # hours
         if c == nchunks-1 and chunk_obj.t1 < tobs:

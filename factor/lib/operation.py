@@ -61,6 +61,9 @@ class Operation(object):
         self.mapbasename = '{0}/datamaps/{1}/'.format(factor_working_dir, self.name)
         if not os.path.exists(self.mapbasename):
             os.makedirs(self.mapbasename)
+        self.visbasename = '{0}/visdata/{1}/'.format(factor_working_dir, self.name)
+        if not os.path.exists(self.visbasename):
+            os.makedirs(self.visbasename)
 
 
     def setup(self):
