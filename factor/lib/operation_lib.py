@@ -187,17 +187,3 @@ def merge_chunks(chunk_files, prefix=None, clobber=False):
     t.sort('TIME').copy(msout, deep = True)
     t.close()
     return msout
-
-
-def copy_from_parent_to_chunks(parent_ms, chunk_files, column_list):
-    """
-    Copy columns from the parent MS file to the chunk files
-    """
-    pass
-
-
-def copy_from_chunks_to_parent(parent_ms, chunk_files, column_list):
-    """
-    Copy columns from the chunk files to the parent MS file
-    """
-    pass
