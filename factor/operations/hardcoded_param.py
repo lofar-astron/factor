@@ -64,6 +64,7 @@ facet_add_cal = {
 'add' : {'incol': 'SUBTRACTED_DATA_ALL',
          'outcol': 'FACET_DATA',
          'flags': '--replace-sourcedb'},
+'split' : {'columnname': 'FACET_DATA'}, # outcol is DATA
 'shift' : {'columnname': 'FACET_DATA'} # outcol is DATA
 }
 
@@ -83,6 +84,12 @@ facet_setup = {
 }
 
 facet_selfcal = {
+'shift_fft' : {'columnname': 'MODEL_DATA'}, # outcol is DATA
+'avg_fft': {'columnname': 'DATA', # outcol is DATA
+            'freqstep': 20,
+            'timestep': 1},
+'copy_fft' : {'incol': 'DATA',
+              'outcol': 'MODEL_DATA'}
 'avg0' : {'columnname': 'CORRECTED_DATA', # outcol is DATA
           'freqstep': 1,
           'timestep': 12},
