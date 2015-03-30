@@ -1,6 +1,9 @@
 """
 Module that holds all facet operations
 
+Operations are somewhat arbitrarily defined by logical groups of actions, but
+they also break up the processing into parallel or serial steps.
+
 Classes
 -------
 FacetAddCal : Operation
@@ -423,7 +426,7 @@ class FacetSelfcal(Operation):
 
             # Now shift and average MODEL_DATA (to get around a bug in WSClean)
             # and copy it to facet MS files
-            self.log.info('Phase shifting...')
+            self.log.debug('Phase shifting...')
             actions = [PhaseShift(self.parset, m, p['shift_fft'],
                 prefix='facet', direction=d, index=1) for d, m in zip(d_list,
                 facet_unshifted_data_mapfiles)]
@@ -506,7 +509,7 @@ class FacetSelfcal(Operation):
 
             # Now shift and average MODEL_DATA (to get around a bug in WSClean)
             # and copy it to facet MS files
-            self.log.info('Phase shifting...')
+            self.log.debug('Phase shifting...')
             actions = [PhaseShift(self.parset, m, p['shift_fft'],
                 prefix='facet', direction=d, index=2) for d, m in zip(d_list,
                 facet_unshifted_data_mapfiles)]
@@ -628,7 +631,7 @@ class FacetSelfcal(Operation):
 
             # Now shift and average MODEL_DATA (to get around a bug in WSClean)
             # and copy it to facet MS files
-            self.log.info('Phase shifting...')
+            self.log.debug('Phase shifting...')
             actions = [PhaseShift(self.parset, m, p['shift_fft'],
                 prefix='facet', direction=d, index=3) for d, m in zip(d_list,
                 facet_unshifted_data_mapfiles)]
