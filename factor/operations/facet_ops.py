@@ -253,7 +253,7 @@ class FacetSelfcal(Operation):
         """
         Run the steps for this operation
         """
-        from factor.actions.visibilities import Average, Concatenate
+        from factor.actions.visibilities import Average, Concatenate, PhaseShift
         from factor.actions.calibrations import Apply, Solve
         from factor.actions.images import MakeImageIterate
         from factor.actions.models import MakeSkymodelFromModelImage, FFT
