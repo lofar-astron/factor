@@ -38,13 +38,13 @@ def copy_column(ms, inputcol, outputcol, ms_from=None,):
         except RuntimeError:
             # Column already exists
             pass
-        t0f = t[0]['TIME']
-        t1f = t[-1]['TIME']
+        t0f = tf[0]['TIME']
+        t1f = tf[-1]['TIME']
         if t0f >= t0 and t1f <= t1:
             # From-table is of equal or shorter length, so get indices for
             # to-table
             startrow = np.where(t.getcol('TIME') >= t0f)[0][0]
-            nrow = np.where(t.getcol('TIME') < t1f)[0][-1] - startrow
+            nrow = np.where(t.getcol('TIME') <= t1f)[0][-1] - startrow + 1
             data = tf.getcol(inputcol)
             t.putcol(inputcol, data, startrow=startrow, nrow=nrow)
         else:
