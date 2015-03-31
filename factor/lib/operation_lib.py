@@ -50,7 +50,7 @@ def copy_column(ms, inputcol, outputcol, ms_from=None,):
         else:
             # From-table is longer, so get indices for from-table
             startrow = np.where(tf.getcol('TIME') >= t0)[0][0]
-            nrow = np.where(tf.getcol('TIME') < t1)[0][-1] - startrow
+            nrow = np.where(tf.getcol('TIME') <= t1)[0][-1] - startrow + 1
             data = tf.getcol(inputcol, startrow=startrow, nrow=nrow)
             t.putcol(outputcol, data)
     else:
