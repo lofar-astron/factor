@@ -68,7 +68,6 @@ facet_add_cal = {
 'add' : {'incol': 'SUBTRACTED_DATA_ALL',
          'outcol': 'FACET_DATA',
          'flags': '--replace-sourcedb'},
-'split' : {'columnname': 'FACET_DATA'}, # outcol is DATA
 'shift' : {'columnname': 'FACET_DATA'} # outcol is DATA
 }
 

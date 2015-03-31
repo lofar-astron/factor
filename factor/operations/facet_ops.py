@@ -1,7 +1,7 @@
 """
 Module that holds all facet operations
 
-Operations are somewhat arbitrarily defined by logical groups of actions, but
+Operations are largely defined by logical groups of actions, but
 they also break up the processing into parallel or serial steps.
 
 Classes
@@ -93,12 +93,6 @@ class FacetAddCal(Operation):
             prefix='facet_dirindep', direction=d)
         self.s.run(action)
 
-        # Split before phase shifting for later FFT (to get around a bug in WSClean)
-        self.log.info('Spliting...')
-        action = Split(self.parset, subtracted_all_mapfile, p['split'],
-            prefix='facet', direction=d)
-        split_data_mapfile = self.s.run(action)
-
         # Phase shift to facet center
         self.log.info('Phase shifting...')
         action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift'],
@@ -110,10 +104,6 @@ class FacetAddCal(Operation):
         d.shifted_data_files = {}
         for band, f in zip(bands, files):
             d.shifted_data_files[band.name] = f
-        files, _ = read_mapfile(split_data_mapfile)
-        d.split_data_files = {}
-        for band, f in zip(bands, files):
-            d.split_data_files[band.name] = f
 
 
 class FacetSetup(Operation):
@@ -148,11 +138,11 @@ class FacetSetup(Operation):
                     format(d.name))
                 file, _ = read_mapfile(concat_data_mapfile)
                 d.concat_file = file[0]
-                split_data_mapfile = os.path.join(self.parset['dir_working'],
+                unavg_data_mapfile = os.path.join(self.parset['dir_working'],
                     'datamaps/FacetSetup/Concatenate/{0}/facet_bands_output_{0}-3.datamap'.
                     format(d.name))
-                file, _ = read_mapfile(split_data_mapfile)
-                d.split_concat_file = file[0]
+                file, _ = read_mapfile(unavg_data_mapfile)
+                d.unavg_concat_file = file[0]
                 all_done = True
             else:
                 all_done = False
@@ -174,7 +164,6 @@ class FacetSetup(Operation):
         # Make initial data maps for the phase-shifted datasets and their dir-indep
         # instrument parmdbs
         shifted_data_mapfiles = []
-        split_data_mapfiles = []
         dir_indep_parmdbs_mapfiles = []
         for d, h in zip(d_list, d_hosts):
             shifted_data_mapfiles.append(self.write_mapfile([d.
@@ -182,9 +171,6 @@ class FacetSetup(Operation):
             	direction=d, host_list=h))
             dir_indep_parmdbs_mapfiles.append(self.write_mapfile([band.
             	dirindparmdb for band in bands], prefix='dir_indep_parmdbs',
-            	direction=d, host_list=h))
-            split_data_mapfiles.append(self.write_mapfile([d.
-            	split_data_files[band.name] for band in bands], prefix='split',
             	direction=d, host_list=h))
 
         # apply direction-independent calibration
@@ -218,8 +204,8 @@ class FacetSetup(Operation):
         # Also concat unaveraged split data (to get around a bug in WSClean)
         actions = [Concatenate(self.parset, m, p['concat1'],
             prefix='facet_bands', direction=d, index=3) for d, m in zip(d_list,
-            split_data_mapfiles)]
-        concat_splitdata_mapfiles = self.s.run(actions)
+            shifted_data_mapfiles)]
+        concat_unavgdata_mapfiles = self.s.run(actions)
 
         # Copy over DATA column (was phase-shifted CORRECTED_DATA) from second
         # concat file, so that first concatenated file has both DATA and
@@ -231,10 +217,11 @@ class FacetSetup(Operation):
             d.concat_file = concat_data_file[0]
             copy_column(d.concat_file, p['copy']['incol'], p['copy']['outcol'],
                 ms_from=concat_corrdata_file[0])
-        # Also save split data (to get around a bug in WSClean)
-        for dm, d in zip(concat_splitdata_mapfiles, d_list):
-            concat_splitdata_file, _ = read_mapfile(dm)
-            d.split_concat_file = concat_splitdata_file[0]
+
+        # Also save unavg data (to get around a bug in WSClean)
+        for dm, d in zip(concat_unavgdata_mapfiles, d_list):
+            concat_unavgdata_file, _ = read_mapfile(dm)
+            d.unavg_concat_file = concat_unavgdata_file[0]
 
 
 class FacetSelfcal(Operation):
@@ -302,12 +289,12 @@ class FacetSelfcal(Operation):
 
         # Make initial data maps for the averaged, phase-shifted datasets
         facet_data_mapfiles = []
-        facet_unshifted_data_mapfiles = []
+        facet_unavg_data_mapfiles = []
         for d, h in zip(d_list, d_hosts):
             facet_data_mapfiles.append(self.write_mapfile([d.concat_file],
                 prefix='shifted_vis', direction=d, host_list=h))
-            facet_unshifted_data_mapfiles.append(self.write_mapfile([d.split_concat_file],
-                prefix='unshifted_vis', direction=d, host_list=h))
+            facet_unavg_data_mapfiles.append(self.write_mapfile([d.unavg_concat_file],
+                prefix='unavg_vis', direction=d, host_list=h))
 
         # Set image sizes
         for d in d_list:
@@ -329,65 +316,43 @@ class FacetSelfcal(Operation):
         	avg_data_mapfiles)]
         image0_basenames_mapfiles = self.s.run(actions)
 
-        if self.parset['use_ftw']:
-            self.log.info('FFTing model image (facet model #0)...')
+        self.log.info('FFTing model image (facet model #0)...')
+        if self.parset['imager'].lower() == 'wsclean':
+            actions = [FFT(self.parset, dm, mm, p['imager0'], prefix='fft0',
+                direction=d, index=0) for d, dm, mm in zip(d_list,
+                facet_unavg_data_mapfiles, image0_basenames_mapfiles)]
+            self.s.run(actions)
 
-            if self.parset['imager'].lower() == 'wsclean':
-                self.log.debug('Phase shifting...')
-                actions = [PhaseShift(self.parset, m, p['shift_fft'],
-                    prefix='facet', direction=d, index=0) for d, m in zip(d_list,
-                    facet_unshifted_data_mapfiles)]
-                shifted_model_data_mapfiles = self.s.run(actions)
-                actions = [FFT(self.parset, dm, mm, p['imager0'], prefix='fft0',
-                    direction=d, index=0) for d, dm, mm in zip(d_list,
-                    shifted_model_data_mapfiles, image0_basenames_mapfiles)]
-                self.s.run(actions)
+            # Now average MODEL_DATA (to get around a bug in WSClean)
+            # and copy it to facet MS files
+            actions = [Average(self.parset, m, p['avg_fft'], prefix='facet',
+                direction=d, index=10) for d, m in zip(d_list,
+                facet_unavg_data_mapfiles)]
+            avg_shifted_model_data_mapfiles = self.s.run(actions)
 
-                # Now average MODEL_DATA (to get around a bug in WSClean)
-                # and copy it to facet MS files
-                actions = [Average(self.parset, m, p['avg_fft'], prefix='facet',
-                    direction=d, index=10) for d, m in zip(d_list,
-                    shifted_model_data_mapfiles)]
-                avg_shifted_model_data_mapfiles = self.s.run(actions)
-
-                # Copy over DATA column (was phase-shifted MODEL_DATA)
-                for dm, adm in zip(facet_data_mapfiles, avg_shifted_model_data_mapfiles):
-                    facet_data_file, _ = read_mapfile(dm)
-                    model_data_file, _ = read_mapfile(adm)
-                    copy_column(facet_data_file[0], p['copy_fft']['incol'],
-                        p['copy_fft']['outcol'], ms_from=model_data_file[0])
-            else:
-                actions = [FFT(self.parset, dm, mm, p['imager0'], prefix='fft0',
-                    direction=d, index=0) for d, dm, mm in zip(d_list,
-                    facet_data_mapfiles, image0_basenames_mapfiles)]
-                self.s.run(actions)
-
+            # Copy over DATA column (was phase-shifted MODEL_DATA)
+            for dm, adm in zip(facet_data_mapfiles, avg_shifted_model_data_mapfiles):
+                facet_data_file, _ = read_mapfile(dm)
+                model_data_file, _ = read_mapfile(adm)
+                copy_column(facet_data_file[0], p['copy_fft']['incol'],
+                    p['copy_fft']['outcol'], ms_from=model_data_file[0])
         else:
-            self.log.info('Making sky model (facet model #0)...')
-            actions = [MakeSkymodelFromModelImage(self.parset, m, p['imager0'],
-                prefix='facet_selfcal0', direction=d) for d, m in zip(d_list,
-                image0_basenames_mapfiles)]
-            skymodels0_mapfiles = self.s.run(actions)
+            actions = [FFT(self.parset, dm, mm, p['imager0'], prefix='fft0',
+                direction=d, index=0) for d, dm, mm in zip(d_list,
+                facet_data_mapfiles, image0_basenames_mapfiles)]
+            self.s.run(actions)
 
         self.log.debug('Dividing dataset into chunks...')
         chunks_list = []
         for d, m in zip(d_list, facet_data_mapfiles):
             files, _ = read_mapfile(m)
-            chunks_list.append(make_chunks(files[0], d.solint_a,
+            chunks_list.append(make_chunks(files[0], d.solint_a*3,
             	self.parset, 'facet_chunk', direction=d, clobber=True))
         chunk_data_mapfiles = []
         chunk_parmdb_mapfiles = []
-        chunk_model_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             chunk_data_mapfiles.append(self.write_mapfile([chunk.file for chunk in chunks],
                 prefix='chunks_vis', direction=d_list[i], host_list=d_hosts[i]))
-            if self.parset['use_ftw']:
-                chunk_model_mapfiles.append(None)
-            else:
-                skymodel0, _ = read_mapfile(skymodels0_mapfiles[i])
-                chunk_model_mapfiles.append(self.write_mapfile(skymodel0*len(chunks),
-                    prefix='chunks_skymodel0', direction=d_list[i],
-                    host_list=d_hosts[i]))
             chunk_parmdb_mapfiles.append(self.write_mapfile(
                 [chunk.parmdb_phaseonly1 for chunk in chunks],
                 prefix='chunk_parmdb_phaseonly1', direction=d_list[i],
@@ -399,29 +364,20 @@ class FacetSelfcal(Operation):
             p_d = p['solve_phaseonly1'].copy()
             p_d['timestep'] = d.solint_p
             p_list.append(p_d)
-        actions = [Solve(self.parset, dm, pd, model_datamap=mm,
+        actions = [Solve(self.parset, dm, pd, model_datamap=None,
             prefix='facet_phaseonly', direction=d, index=0)
-            for d, dm, pd, mm in zip(d_list, chunk_data_mapfiles, p_list,
-            chunk_model_mapfiles)]
+            for d, dm, pd in zip(d_list, chunk_data_mapfiles, p_list)]
         self.s.run(actions)
 
         self.log.info('Imaging (facet image #1)...')
-#         self.log.debug('Updating chunk parents...')
-#         for i, chunks in enumerate(chunks_list):
-#             for chunk in chunks:
-#                 chunk.copy_to_parent([p['solve_phaseonly1']['outcol']])
-
-        self.log.debug('Merging chunks...')
-        merged_data_mapfiles = []
+        self.log.debug('Updating chunk parents...')
         for i, chunks in enumerate(chunks_list):
-            merged_data_mapfiles.append(self.write_mapfile([merge_chunks(
-                [chunk.file for chunk in chunks], prefix='image1')],
-                prefix='merged_vis', direction=d_list[i],
-                host_list=d_hosts[i]))
+            for chunk in chunks:
+                chunk.copy_to_parent([p['solve_phaseonly1']['outcol']])
 
         self.log.debug('Averaging in preparation for imaging...')
         actions = [Average(self.parset, m, p['avg1'], prefix='facet',
-            direction=d, index=1) for d, m in zip(d_list, merged_data_mapfiles)]
+            direction=d, index=1) for d, m in zip(d_list, facet_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.debug('Imaging...')
@@ -429,63 +385,36 @@ class FacetSelfcal(Operation):
             direction=d) for d, m in zip(d_list, avg_data_mapfiles)]
         image1_basenames_mapfiles = self.s.run(actions)
 
-        if self.parset['use_ftw']:
-            self.log.info('FFTing model image (facet model #1)...')
-            if self.parset['imager'].lower() == 'wsclean':
-                self.log.debug('Phase shifting...')
-                actions = [PhaseShift(self.parset, m, p['shift_fft'],
-                    prefix='facet', direction=d, index=1) for d, m in zip(d_list,
-                    facet_unshifted_data_mapfiles)]
-                shifted_model_data_mapfiles = self.s.run(actions)
-                actions = [FFT(self.parset, dm, mm, p['imager1'], prefix='fft1',
-                    direction=d, index=1) for d, dm, mm in zip(d_list,
-                    shifted_model_data_mapfiles, image1_basenames_mapfiles)]
-                self.s.run(actions)
+        self.log.info('FFTing model image (facet model #1)...')
+        if self.parset['imager'].lower() == 'wsclean':
+            actions = [FFT(self.parset, dm, mm, p['imager1'], prefix='fft1',
+                direction=d, index=1) for d, dm, mm in zip(d_list,
+                facet_unavg_data_mapfiles, image1_basenames_mapfiles)]
+            self.s.run(actions)
 
-                # Now average MODEL_DATA (to get around a bug in WSClean)
-                # and copy it to facet MS files
-                actions = [Average(self.parset, m, p['avg_fft'], prefix='facet',
-                    direction=d, index=11) for d, m in zip(d_list,
-                    shifted_model_data_mapfiles)]
-                avg_shifted_model_data_mapfiles = self.s.run(actions)
-                # Copy over DATA column (was phase-shifted MODEL_DATA)
-                for dm, cdm in zip(facet_data_mapfiles, avg_shifted_model_data_mapfiles):
-                    facet_data_file, _ = read_mapfile(dm)
-                    model_data_file, _ = read_mapfile(cdm)
-                    copy_column(facet_data_file[0], p['copy_fft']['incol'],
-                        p['copy_fft']['outcol'], ms_from=model_data_file[0])
-            else:
-                actions = [FFT(self.parset, dm, mm, p['imager1'], prefix='fft1',
-                    direction=d, index=1) for d, dm, mm in zip(d_list,
-                    facet_data_mapfiles, image1_basenames_mapfiles)]
-                self.s.run(actions)
+            # Now average MODEL_DATA (to get around a bug in WSClean)
+            # and copy it to facet MS files
+            actions = [Average(self.parset, m, p['avg_fft'], prefix='facet',
+                direction=d, index=11) for d, m in zip(d_list,
+                facet_unavg_data_mapfiles)]
+            avg_shifted_model_data_mapfiles = self.s.run(actions)
+
+            # Copy over DATA column (was phase-shifted MODEL_DATA)
+            for dm, cdm in zip(facet_data_mapfiles, avg_shifted_model_data_mapfiles):
+                facet_data_file, _ = read_mapfile(dm)
+                model_data_file, _ = read_mapfile(cdm)
+                copy_column(facet_data_file[0], p['copy_fft']['incol'],
+                    p['copy_fft']['outcol'], ms_from=model_data_file[0])
         else:
-            self.log.info('Making sky model (facet model #1)...')
-            actions = [MakeSkymodelFromModelImage(self.parset, m, p['imager1'],
-                prefix='facet_selfcal1', direction=d) for d, m in zip(d_list,
-                image1_basenames_mapfiles)]
-            skymodels1_mapfiles = self.s.run(actions)
+            actions = [FFT(self.parset, dm, mm, p['imager1'], prefix='fft1',
+                direction=d, index=1) for d, dm, mm in zip(d_list,
+                facet_data_mapfiles, image1_basenames_mapfiles)]
+            self.s.run(actions)
 
-        self.log.debug('Dividing dataset into chunks...')
-        chunks_list = []
-        for d, m in zip(d_list, facet_data_mapfiles):
-            files, _ = read_mapfile(m)
-            chunks_list.append(make_chunks(files[0], d.solint_a,
-            	self.parset, 'facet_chunk', direction=d, clobber=False))
-        chunk_parmdb_mapfiles = []
-        chunk_model_mapfiles = []
+        self.log.debug('Updating chunks...')
         for i, chunks in enumerate(chunks_list):
-            if self.parset['use_ftw']:
-                chunk_model_mapfiles.append(None)
-            else:
-                skymodel1, _ = read_mapfile(skymodels1_mapfiles[i])
-                chunk_model_mapfiles.append(self.write_mapfile(skymodel1*len(chunks),
-                    prefix='chunks_skymodel1', direction=d_list[i],
-                    host_list=d_hosts[i]))
-            chunk_parmdb_mapfiles.append(self.write_mapfile(
-                [chunk.parmdb_phaseonly2 for chunk in chunks],
-                prefix='chunk_parmdb_phaseonly2', direction=d_list[i],
-                host_list=d_hosts[i]))
+            for chunk in chunks:
+                chunk.copy_from_parent(['MODEL_DATA'])
 
         self.log.info('Solving for phase solutions and applying them (#2)...')
         p_list = []
@@ -500,16 +429,14 @@ class FacetSelfcal(Operation):
         self.s.run(actions)
 
         self.log.info('Imaging (facet image #2)...')
-        self.log.debug('Merging chunks...')
-        merged_data_mapfiles = []
+        self.log.debug('Updating chunk parents...')
         for i, chunks in enumerate(chunks_list):
-            merged_data_mapfiles.append(self.write_mapfile([merge_chunks(
-                [chunk.file for chunk in chunks], prefix='image2')],
-                prefix='merged_vis', direction=d_list[i], host_list=d_hosts[i]))
+            for chunk in chunks:
+                chunk.copy_to_parent([p['solve_phaseonly2']['outcol']])
 
         self.log.debug('Averaging in preparation for imaging...')
         actions = [Average(self.parset, m, p['avg2'], prefix='facet',
-            direction=d, index=2) for d, m in zip(d_list, merged_data_mapfiles)]
+            direction=d, index=2) for d, m in zip(d_list, facet_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.debug('Imaging...')
@@ -517,68 +444,36 @@ class FacetSelfcal(Operation):
             direction=d) for d, m in zip(d_list, avg_data_mapfiles)]
         image2_basenames_mapfiles = self.s.run(actions)
 
-        if self.parset['use_ftw']:
-            self.log.info('FFTing model image (facet model #2)...')
-            if self.parset['imager'].lower() == 'wsclean':
-                self.log.debug('Phase shifting...')
-                actions = [PhaseShift(self.parset, m, p['shift_fft'],
-                    prefix='facet', direction=d, index=2) for d, m in zip(d_list,
-                    facet_unshifted_data_mapfiles)]
-                shifted_model_data_mapfiles = self.s.run(actions)
-                actions = [FFT(self.parset, dm, mm, p['imager2'], prefix='fft2',
-                    direction=d, index=2) for d, dm, mm in zip(d_list,
-                    shifted_model_data_mapfiles, image2_basenames_mapfiles)]
-                self.s.run(actions)
+        self.log.info('FFTing model image (facet model #2)...')
+        if self.parset['imager'].lower() == 'wsclean':
+            actions = [FFT(self.parset, dm, mm, p['imager2'], prefix='fft2',
+                direction=d, index=2) for d, dm, mm in zip(d_list,
+                facet_unavg_data_mapfiles, image2_basenames_mapfiles)]
+            self.s.run(actions)
 
-                # Now shift and average MODEL_DATA (to get around a bug in WSClean)
-                # and copy it to facet MS files
-                actions = [Average(self.parset, m, p['avg_fft'], prefix='facet',
-                    direction=d, index=12) for d, m in zip(d_list,
-                    shifted_model_data_mapfiles)]
-                avg_shifted_model_data_mapfiles = self.s.run(actions)
-                # Copy over DATA column (was phase-shifted MODEL_DATA)
-                for dm, cdm in zip(facet_data_mapfiles, avg_shifted_model_data_mapfiles):
-                    facet_data_file, _ = read_mapfile(dm)
-                    model_data_file, _ = read_mapfile(cdm)
-                    copy_column(facet_data_file[0], p['copy_fft']['incol'],
-                        p['copy_fft']['outcol'], ms_from=model_data_file[0])
-            else:
-                actions = [FFT(self.parset, dm, mm, p['imager2'], prefix='fft2',
-                    direction=d, index=2) for d, dm, mm in zip(d_list,
-                    facet_data_mapfiles, image2_basenames_mapfiles)]
-                self.s.run(actions)
+            # Now shift and average MODEL_DATA (to get around a bug in WSClean)
+            # and copy it to facet MS files
+            actions = [Average(self.parset, m, p['avg_fft'], prefix='facet',
+                direction=d, index=12) for d, m in zip(d_list,
+                facet_unavg_data_mapfiles)]
+            avg_shifted_model_data_mapfiles = self.s.run(actions)
+
+            # Copy over DATA column (was phase-shifted MODEL_DATA)
+            for dm, cdm in zip(facet_data_mapfiles, avg_shifted_model_data_mapfiles):
+                facet_data_file, _ = read_mapfile(dm)
+                model_data_file, _ = read_mapfile(cdm)
+                copy_column(facet_data_file[0], p['copy_fft']['incol'],
+                    p['copy_fft']['outcol'], ms_from=model_data_file[0])
         else:
-            self.log.info('Making sky model (facet model #2)...')
-            actions = [MakeSkymodelFromModelImage(self.parset, m, p['imager2'],
-                prefix='facet_selfcal2', direction=d) for d, m in zip(d_list,
-                image2_basenames_mapfiles)]
-            skymodels2_mapfiles = self.s.run(actions)
+            actions = [FFT(self.parset, dm, mm, p['imager2'], prefix='fft2',
+                direction=d, index=2) for d, dm, mm in zip(d_list,
+                facet_data_mapfiles, image2_basenames_mapfiles)]
+            self.s.run(actions)
 
-        self.log.debug('Dividing dataset into chunks...')
-        chunks_list = []
-        for d, m in zip(d_list, facet_data_mapfiles):
-            files, _ = read_mapfile(m)
-            chunks_list.append(make_chunks(files[0], d.solint_a,
-            	self.parset, 'facet_chunk', direction=d, clobber=True))
-        chunk_parmdb_phaseamp_phase1_mapfiles = []
-        chunk_parmdb_phaseamp_amp1_mapfiles = []
-        chunk_model_mapfiles = []
+        self.log.debug('Updating chunks...')
         for i, chunks in enumerate(chunks_list):
-            if self.parset['use_ftw']:
-                chunk_model_mapfiles.append(None)
-            else:
-                skymodel2, _ = read_mapfile(skymodels2_mapfiles[i])
-                chunk_model_mapfiles.append(self.write_mapfile(skymodel2*len(chunks),
-                    prefix='chunks_skymodel2', direction=d_list[i],
-                    host_list=d_hosts[i]))
-            chunk_parmdb_phaseamp_phase1_mapfiles.append(self.write_mapfile(
-                [chunk.parmdb_phaseamp_phase1 for chunk in chunks],
-                prefix='chunk_parmdb_phase1', direction=d_list[i],
-                host_list=d_hosts[i]))
-            chunk_parmdb_phaseamp_amp1_mapfiles.append(self.write_mapfile(
-                [chunk.parmdb_phaseamp_amp1 for chunk in chunks],
-                prefix='chunk_parmdb_amp1', direction=d_list[i],
-                host_list=d_hosts[i]))
+            for chunk in chunks:
+                chunk.copy_from_parent(['MODEL_DATA'])
 
         self.log.info('Solving for amplitude solutions and applying them (#1)...')
         p_list = []
@@ -603,40 +498,38 @@ class FacetSelfcal(Operation):
             chunk_model_mapfiles, chunk_parmdb_phaseamp_amp1_mapfiles)]
         self.s.run(actions)
 
-        self.log.debug('Merging chunks...')
-        merged_data_mapfiles = []
+        self.log.debug('Updating chunk parents...')
         for i, chunks in enumerate(chunks_list):
-            merged_data_mapfiles.append(self.write_mapfile([merge_chunks(
-                [chunk.file for chunk in chunks], prefix='image3')],
-                prefix='merged_vis', direction=d_list[i], host_list=d_hosts[i]))
+            for chunk in chunks:
+                chunk.copy_to_parent([p['solve_phaseamp1_phaseonly']['outcol']])
 
         self.log.debug('Merging instrument parmdbs...')
         merged_parmdb_phaseamp_amp1_mapfiles = []
         for i, chunks in enumerate(chunks_list):
-            concat_file, _ = read_mapfile(merged_data_mapfiles[i])
+            concat_file, _ = read_mapfile(facet_data_mapfiles[i])
             merged_parmdb_phaseamp_amp1_mapfiles.append(self.write_mapfile(
                 [self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp1 for chunk
-                in chunks], concat_file, prefix='merged_amps1')],
-                prefix='merged_amps1', direction=d_list[i], host_list=d_hosts[i]))
+                in chunks], prefix='merged_amps1')], prefix='merged_amps1',
+                direction=d_list[i], host_list=d_hosts[i]))
 
         self.log.info('Smoothing amplitude solutions...')
         actions = [Smooth(self.parset, dm, p['smooth_amp1'], pm,
             prefix='facet_amp', direction=d, index=2)
-            for d, dm, pm in zip(d_list, merged_data_mapfiles,
+            for d, dm, pm in zip(d_list, facet_data_mapfiles,
             merged_parmdb_phaseamp_amp1_mapfiles)]
         self.s.run(actions)
 
         self.log.info('Applying amplitude solutions...')
         actions = [Apply(self.parset, dm, p['apply_amp1'],
             pm, prefix='facet_amp', direction=d, index=2) for d, dm, pm in
-            zip(d_list, merged_data_mapfiles,
+            zip(d_list, facet_data_mapfiles,
             merged_parmdb_phaseamp_amp1_mapfiles)]
         self.s.run(actions)
 
         self.log.info('Imaging (facet image #3)...')
         self.log.debug('Averaging in preparation for imaging...')
         actions = [Average(self.parset, m, p['avg3'], prefix='facet',
-            direction=d, index=3) for d, m in zip(d_list, merged_data_mapfiles)]
+            direction=d, index=3) for d, m in zip(d_list, facet_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.debug('Imaging...')
@@ -644,56 +537,43 @@ class FacetSelfcal(Operation):
             direction=d) for d, m in zip(d_list, avg_data_mapfiles)]
         image3_basenames_mapfiles = self.s.run(actions)
 
-        if self.parset['use_ftw']:
-            self.log.info('FFTing model image (facet model #3)...')
-            if self.parset['imager'].lower() == 'wsclean':
-                self.log.debug('Phase shifting...')
-                actions = [PhaseShift(self.parset, m, p['shift_fft'],
-                    prefix='facet', direction=d, index=3) for d, m in zip(d_list,
-                    facet_unshifted_data_mapfiles)]
-                shifted_model_data_mapfiles = self.s.run(actions)
-                actions = [FFT(self.parset, dm, mm, p['imager3'], prefix='fft3',
-                    direction=d, index=3) for d, dm, mm in zip(d_list,
-                    shifted_model_data_mapfiles, image3_basenames_mapfiles)]
-                self.s.run(actions)
+        self.log.info('FFTing model image (facet model #3)...')
+        if self.parset['imager'].lower() == 'wsclean':
+            actions = [FFT(self.parset, dm, mm, p['imager3'], prefix='fft3',
+                direction=d, index=3) for d, dm, mm in zip(d_list,
+                facet_unavg_data_mapfiles, image3_basenames_mapfiles)]
+            self.s.run(actions)
 
-                # Now shift and average MODEL_DATA (to get around a bug in WSClean)
-                # and copy it to facet MS files
-                actions = [Average(self.parset, m, p['avg_fft'], prefix='facet',
-                    direction=d, index=13) for d, m in zip(d_list,
-                    shifted_model_data_mapfiles)]
-                avg_shifted_model_data_mapfiles = self.s.run(actions)
-                # Copy over DATA column (was phase-shifted MODEL_DATA)
-                for dm, cdm in zip(facet_data_mapfiles, avg_shifted_model_data_mapfiles):
-                    facet_data_file, _ = read_mapfile(dm)
-                    model_data_file, _ = read_mapfile(cdm)
-                    copy_column(facet_data_file[0], p['copy_fft']['incol'],
-                        p['copy_fft']['outcol'], ms_from=model_data_file[0])
-            else:
-                actions = [FFT(self.parset, dm, mm, p['imager3'], prefix='fft3',
-                    direction=d, index=3) for d, dm, mm in zip(d_list,
-                    facet_data_mapfiles, image3_basenames_mapfiles)]
-                self.s.run(actions)
+            # Now shift and average MODEL_DATA (to get around a bug in WSClean)
+            # and copy it to facet MS files
+            actions = [Average(self.parset, m, p['avg_fft'], prefix='facet',
+                direction=d, index=13) for d, m in zip(d_list,
+                facet_unavg_data_mapfiles)]
+            avg_shifted_model_data_mapfiles = self.s.run(actions)
+
+            # Copy over DATA column (was phase-shifted MODEL_DATA)
+            for dm, cdm in zip(facet_data_mapfiles, avg_shifted_model_data_mapfiles):
+                facet_data_file, _ = read_mapfile(dm)
+                model_data_file, _ = read_mapfile(cdm)
+                copy_column(facet_data_file[0], p['copy_fft']['incol'],
+                    p['copy_fft']['outcol'], ms_from=model_data_file[0])
         else:
-            self.log.info('Making sky model (facet model #3)...')
-            actions = [MakeSkymodelFromModelImage(self.parset, m, p['imager3'],
-                prefix='facet_selfcal3', direction=d) for d, m in zip(d_list,
-                image3_basenames_mapfiles)]
-            skymodels3_mapfiles = self.s.run(actions)
+            actions = [FFT(self.parset, dm, mm, p['imager3'], prefix='fft3',
+                direction=d, index=3) for d, dm, mm in zip(d_list,
+                facet_data_mapfiles, image3_basenames_mapfiles)]
+            self.s.run(actions)
 
         self.log.debug('Resetting phases...')
         actions = [ResetPhases(self.parset, dm, p['reset_phases'], pm,
             prefix='facet', direction=d)
-            for d, dm, pm in zip(d_list, merged_data_mapfiles,
+            for d, dm, pm in zip(d_list, facet_data_file,
             merged_parmdb_phaseamp_amp1_mapfiles)]
         self.s.run(actions)
 
-        self.log.debug('Dividing dataset into chunks...')
-        chunks_list = []
-        for d, m in zip(d_list, facet_data_mapfiles):
-            files, _ = read_mapfile(m)
-            chunks_list.append(make_chunks(files[0], d.solint_a,
-            	self.parset, 'facet_chunk', direction=d, clobber=True))
+        self.log.debug('Updating chunks...')
+        for i, chunks in enumerate(chunks_list):
+            for chunk in chunks:
+                chunk.copy_from_parent(['MODEL_DATA'])
 
         self.log.info('Preapplying amplitude solutions...')
         chunk_parmdb_phaseamp_amp1_mapfiles = []
@@ -711,15 +591,7 @@ class FacetSelfcal(Operation):
         self.log.info('Solving for amplitude solutions (#2)...')
         chunk_parmdb_phaseamp_phase2_mapfiles = []
         chunk_parmdb_phaseamp_amp2_mapfiles = []
-        chunk_model_mapfiles = []
         for i, chunks in enumerate(chunks_list):
-            if self.parset['use_ftw']:
-                chunk_model_mapfiles.append(None)
-            else:
-                skymodel3, _ = read_mapfile(skymodels3_mapfiles[i])
-                chunk_model_mapfiles.append(self.write_mapfile(skymodel3*len(chunks),
-                    prefix='chunks_skymodel3', direction=d_list[i],
-                    host_list=d_hosts[i]))
             chunk_parmdb_phaseamp_phase2_mapfiles.append(self.write_mapfile(
                 [chunk.parmdb_phaseamp_phase2 for chunk in chunks],
                 prefix='chunk_parmdb_phase2', direction=d_list[i],
@@ -734,10 +606,10 @@ class FacetSelfcal(Operation):
             p_d = p['solve_phaseamp2_phaseonly'].copy()
             p_d['timestep'] = d.solint_p
             p_list.append(p_d)
-        actions = [Solve(self.parset, dm, pd, model_datamap=mm,
+        actions = [Solve(self.parset, dm, pd, model_datamap=None,
             parmdb_datamap=pm, prefix='facet_phaseonly', direction=d, index=3)
-            for d, dm, pd, mm, pm in zip(d_list, chunk_data_mapfiles, p_list,
-            chunk_model_mapfiles, chunk_parmdb_phaseamp_phase2_mapfiles)]
+            for d, dm, pd, pm in zip(d_list, chunk_data_mapfiles, p_list,
+            chunk_parmdb_phaseamp_phase2_mapfiles)]
         self.s.run(actions)
         p_list = []
         for d in d_list:
@@ -745,54 +617,49 @@ class FacetSelfcal(Operation):
             p_d['timestep'] = d.solint_a
             p_d['chunksize'] = d.solint_a
             p_list.append(p_d)
-        actions = [Solve(self.parset, dm, pd, model_datamap=mm,
+        actions = [Solve(self.parset, dm, pd, model_datamap=None,
             parmdb_datamap=pm, prefix='facet_amponly', direction=d, index=3)
-            for d, dm, pd, mm, pm in zip(d_list, chunk_data_mapfiles, p_list,
-            chunk_model_mapfiles, chunk_parmdb_phaseamp_amp2_mapfiles)]
+            for d, dm, pd, pm in zip(d_list, chunk_data_mapfiles, p_list,
+            chunk_parmdb_phaseamp_amp2_mapfiles)]
         self.s.run(actions)
 
-        self.log.debug('Merging chunks...')
-        merged_data_mapfiles = []
+        self.log.debug('Updating chunk parents...')
         for i, chunks in enumerate(chunks_list):
-            merged_data_mapfiles.append(self.write_mapfile([merge_chunks(
-            	[chunk.file for chunk in chunks], prefix='image4')],
-            	prefix='merged_vis', direction=d_list[i], host_list=d_hosts[i]))
+            for chunk in chunks:
+                chunk.copy_to_parent([p['solve_phaseamp2_phaseonly']['outcol']])
 
         self.log.debug('Merging instrument parmdbs...')
         merged_parmdb_phaseamp_amp2_mapfiles = []
-        for i, chunks in enumerate(chunks_list):
-            concat_file, _ = read_mapfile(merged_data_mapfiles[i])
-            merged_parmdb_phaseamp_amp2_mapfiles.append(self.write_mapfile(
-            	[self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp2 for
-            	chunk in chunks], concat_file, prefix='merged_amps2')],
-            	prefix='merged_amps2', direction=d_list[i], host_list=d_hosts[i]))
         merged_parmdb_phaseamp_phase2_mapfiles = []
         for i, chunks in enumerate(chunks_list):
-            concat_file, _ = read_mapfile(merged_data_mapfiles[i])
+            concat_file, _ = read_mapfile(facet_data_mapfiles[i])
+            merged_parmdb_phaseamp_amp2_mapfiles.append(self.write_mapfile(
+            	[self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp2 for
+            	chunk in chunks], prefix='merged_amps2')],
+            	prefix='merged_amps2', direction=d_list[i], host_list=d_hosts[i]))
             merged_parmdb_phaseamp_phase2_mapfiles.append(self.write_mapfile(
             	[self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_phase2 for
-            	chunk in chunks], concat_file,
-            	prefix='merged_phases2')], prefix='merged_phases2',
+            	chunk in chunks], prefix='merged_phases2')], prefix='merged_phases2',
             	direction=d_list[i], host_list=d_hosts[i]))
 
         self.log.info('Smoothing amplitude solutions...')
         actions = [Smooth(self.parset, dm, p['smooth_amp2'], pm,
             prefix='facet_amp', direction=d, index=3)
-            for d, dm, pm in zip(d_list, merged_data_mapfiles,
+            for d, dm, pm in zip(d_list, facet_data_mapfiles,
             merged_parmdb_phaseamp_amp2_mapfiles)]
         self.s.run(actions)
 
         self.log.info('Applying amplitude solutions...')
         actions = [Apply(self.parset, dm, p['apply_amp3'],
             pm, prefix='facet_amp', direction=d, index=4) for d, dm, pm in
-            zip(d_list, merged_data_mapfiles,
+            zip(d_list, facet_data_mapfiles,
             merged_parmdb_phaseamp_amp2_mapfiles)]
         self.s.run(actions)
 
         self.log.info('Imaging (facet image #4)...')
         self.log.debug('Averaging in preparation for imaging...')
         actions = [Average(self.parset, m, p['avg4'], prefix='facet',
-            direction=d, index=4) for d, m in zip(d_list, merged_data_mapfiles)]
+            direction=d, index=4) for d, m in zip(d_list, facet_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.debug('Imaging...')
@@ -827,7 +694,7 @@ class FacetSelfcal(Operation):
             phases2_final, _ = read_mapfile(merged_parmdb_phaseamp_phase2_mapfiles[i])
             smoothed_amps1_final, _ = read_mapfile(merged_parmdb_phaseamp_amp1_mapfiles[i])
             smoothed_amps2_final, _ = read_mapfile(merged_parmdb_phaseamp_amp2_mapfiles[i])
-            concat_file, _ = read_mapfile(merged_data_mapfiles[i])
+            concat_file, _ = read_mapfile(facet_data_mapfiles[i])
             merged_parmdb_final_mapfiles.append(self.write_mapfile(
             	[self.merge_parmdbs(phases2_final[0],
             	smoothed_amps1_final[0], smoothed_amps2_final[0],
@@ -837,7 +704,7 @@ class FacetSelfcal(Operation):
         self.log.info('Smoothing amplitude solutions...')
         actions = [Smooth(self.parset, dm, p['smooth_amp3'], pm,
             prefix='facet_amp', direction=d, index=4)
-            for d, dm, pm in zip(d_list, merged_data_mapfiles,
+            for d, dm, pm in zip(d_list, facet_data_mapfiles,
             merged_parmdb_final_mapfiles)]
         self.s.run(actions)
 
@@ -847,8 +714,7 @@ class FacetSelfcal(Operation):
             d.dirdepparmdb = f[0]
 
 
-    def merge_chunk_parmdbs(self, inparmdbs, concat_file, prefix='merged',
-        clobber=False):
+    def merge_chunk_parmdbs(self, inparmdbs, prefix='merged', clobber=False):
         """Merges parmdbs"""
         import os
         import lofar.parmdb
@@ -1116,28 +982,10 @@ class FacetImage(Operation):
             direction=d) for d, m in zip(d_list, concat_data_mapfiles)]
         image_basenames_mapfiles = self.s.run(actions)
 
-        if self.parset['use_ftw']:
-            # Save image basenames to the direction objects
-            for d, mf in zip(d_list, image_basenames_mapfiles):
-                file, _ = read_mapfile(mf)
-                d.skymodel_dirdep = file[0]
-        else:
-            self.log.info('Making sky model...')
-            actions = [MakeSkymodelFromModelImage(self.parset, m, p['imager'],
-                prefix='facet_image', direction=d) for d, m in zip(d_list,
-                image_basenames_mapfiles)]
-            skymodels_mapfiles = self.s.run(actions)
-
-            self.log.info('Selecting only those sources inside the facet...')
-            actions = [MakeFacetSkymodel(self.parset, m,
-                p['select'], d, prefix='all_final', cal_only=False) for d, m in
-                zip(d_list, skymodels_mapfiles)]
-            dir_dep_all_skymodels_mapfiles = self.s.run(actions)
-
-            # Save files to the direction objects
-            for d, mf in zip(d_list, dir_dep_all_skymodels_mapfiles):
-                file, _ = read_mapfile(mf)
-                d.skymodel_dirdep = file[0]
+        # Save image basenames to the direction objects
+        for d, mf in zip(d_list, image_basenames_mapfiles):
+            file, _ = read_mapfile(mf)
+            d.skymodel_dirdep = file[0]
 
         # Make final data maps
         for d, h in zip(d_list, d_hosts):
@@ -1172,7 +1020,7 @@ class FacetSubAll(Operation):
 
         # Make initial data maps for the empty datasets, their dir-dep
         # instrument parmdbs, and their dir-dep sky models
-        if self.parset['use_ftw'] and self.parset['imager'].lower() != 'wsclean':
+        if self.parset['imager'].lower() != 'wsclean':
             # Copy the model image for each band to avoid write conflicts
             dir_dep_model_mapfile = self.copy_model_images(d.skymodel_dirdep,
                 bands, p['fft'], d)
@@ -1184,13 +1032,12 @@ class FacetSubAll(Operation):
         dir_dep_parmdb_mapfile = self.write_mapfile([d.dirdepparmdb]*len(bands),
             prefix='dir_dep_parmdbs', direction=d)
 
-        if self.parset['use_ftw']:
-            self.log.info('FFTing model image (facet model final)...')
-            p['imsize'] = d.imsize
-            action = FFT(self.parset, subtracted_all_mapfile,
-            	dir_dep_model_mapfile, p['fft'], prefix='fft', direction=d)
-            self.s.run(action)
-            dir_dep_model_mapfile = None
+        self.log.info('FFTing model image (facet model final)...')
+        p['imsize'] = d.imsize
+        action = FFT(self.parset, subtracted_all_mapfile,
+            dir_dep_model_mapfile, p['fft'], prefix='fft', direction=d)
+        self.s.run(action)
+        dir_dep_model_mapfile = None
 
         self.log.info('Subtracting sources for this direction using final model...')
         action = Subtract(self.parset, subtracted_all_mapfile, p['subtract'],
@@ -1292,11 +1139,10 @@ class FacetAddAllFinal(Operation):
         dir_dep_models_mapfile = self.write_mapfile([d.skymodel_dirdep]*len(bands),
             prefix='dir_dep_skymodels', direction=d)
 
-        if self.parset['use_ftw']:
-            self.log.debug('FFTing model image (facet model final)...')
-            action = FFT(self.parset, subtracted_all_mapfile,
-            	dir_dep_models_mapfile, p['fft'], prefix='fft', direction=d)
-            self.s.run(action)
+        self.log.debug('FFTing model image (facet model final)...')
+        action = FFT(self.parset, subtracted_all_mapfile,
+            dir_dep_models_mapfile, p['fft'], prefix='fft', direction=d)
+        self.s.run(action)
 
         self.log.info('Adding sources for this direction...')
         action = Add(self.parset, subtracted_all_mapfile, p['add'],
