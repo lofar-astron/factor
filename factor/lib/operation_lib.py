@@ -46,7 +46,7 @@ def copy_column(ms, inputcol, outputcol, ms_from=None,):
             startrow = np.where(t.getcol('TIME') >= t0f)[0][0]
             nrow = np.where(t.getcol('TIME') < t1f)[0][-1] - startrow
             data = tf.getcol(inputcol)
-            t.putcolslice(inputcol, data, startrow=startrow, nrow=nrow)
+            t.putcol(inputcol, data, startrow=startrow, nrow=nrow)
         else:
             # From-table is longer, so get indices for from-table
             startrow = np.where(tf.getcol('TIME') >= t0)[0][0]
