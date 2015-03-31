@@ -641,7 +641,7 @@ class FacetSelfcal(Operation):
 
         if self.parset['use_ftw']:
             self.log.info('FFTing model image (facet model #3)...')
-            self.log.info('FFTing model image (facet model #2)...')
+            if self.parset['imager'].lower() == 'wsclean':
                 self.log.debug('Phase shifting...')
                 actions = [PhaseShift(self.parset, m, p['shift_fft'],
                     prefix='facet', direction=d, index=3) for d, m in zip(d_list,
