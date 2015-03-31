@@ -70,11 +70,7 @@ class Chunk(object):
         from factor.lib.operation_lib import copy_column
 
         for column in column_list:
-            copy_column(self.parent_file, column, column, t0=chunk.t0, t1=chunk.t1,
-                ms_from=self.file)
-    t1 = t.query('TIME > ' + str(starttime+start_out*3600) + ' && '
-      'TIME < ' + str(starttime+end_out*3600), sortlist='TIME,ANTENNA1,ANTENNA2',
-      columns=colnames)
+            copy_column(self.parent_file, column, column, ms_from=self.file)
 
 
     def copy_to_parent(self, column_list):
