@@ -100,19 +100,25 @@ def parset_read(parset_file):
     else:
         parset_dict['use_ftw'] = True
     if 'imager' not in parset_dict:
-        parset_dict['imager'] = 'awimager'
+        parset_dict['imager'] = 'wsclean'
     if parset_dict['imager'].lower() not in ['awimager', 'casapy', 'wsclean']:
         log.error('Imager "{0}" not understood'.format(parset_dict['imager']))
         sys.exit(1)
     else:
         log.debug("Using {0} for imaging".format(parset_dict['imager'].lower()))
+    if parset_dict['imager'].lower() == 'awimager':
+        log.error('Sorry, the AWimager is not currently supported')
+        sys.exit(1)
     if 'imager_selfcal' not in parset_dict:
-        parset_dict['imager_selfcal'] = 'awimager'
+        parset_dict['imager_selfcal'] = 'wsclean'
     if parset_dict['imager_selfcal'].lower() not in ['awimager', 'casapy', 'wsclean']:
         log.error('Imager "{0}" not understood'.format(parset_dict['imager_selfcal']))
         sys.exit(1)
     else:
         log.debug("Using {0} for selfcal imaging".format(parset_dict['imager_selfcal'].lower()))
+    if parset_dict['imager_selfcal'].lower() == 'awimager':
+        log.error('Sorry, the AWimager is not currently supported')
+        sys.exit(1)
     if 'imagerroot' not in parset_dict:
         parset_dict['imagerroot'] = parset_dict['lofarroot']
 

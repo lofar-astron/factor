@@ -421,7 +421,7 @@ class FacetSelfcal(Operation):
 
         self.log.debug('Averaging in preparation for imaging...')
         actions = [Average(self.parset, m, p['avg1'], prefix='facet',
-            direction=d, index=1) for d, m in zip(d_list, facet_data_mapfiles)]
+            direction=d, index=1) for d, m in zip(d_list, merged_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.debug('Imaging...')
