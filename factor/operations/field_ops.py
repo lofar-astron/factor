@@ -121,7 +121,7 @@ class InitSubtract(Operation):
             zip(chunk_data_mapfiles, chunk_parmdb_mapfiles, bands)]
         self.s.run(actions)
 
-        self.log.debug('Updating parent files...')
+        self.log.debug('Updating chunk parents...')
         for i, chunks in enumerate(chunks_list):
             for chunk in chunks:
                 chunk.copy_to_parent([p['calibh']['outcol2']])
@@ -159,7 +159,7 @@ class InitSubtract(Operation):
         self.log.debug('Updating chunks...')
         for i, chunks in enumerate(chunks_list):
             for chunk in chunks:
-                chunk.copy_from_parent(p['calibl']['outcol1'])
+                chunk.copy_from_parent(['MODEL_DATA'])
 
         self.log.info('Subtracting low-res sky model...')
         actions = [Subtract(self.parset, dm, p['calibl'], None, pm,
@@ -167,10 +167,10 @@ class InitSubtract(Operation):
         	zip(chunk_data_mapfiles, chunk_parmdb_mapfiles, bands)]
         self.s.run(actions)
 
-        self.log.debug('Updating parent files...')
+        self.log.debug('Updating chunk parents...')
         for i, chunks in enumerate(chunks_list):
             for chunk in chunks:
-                chunk.copy_to_parent(['SUBTRACTED_DATA_ALL'])
+                chunk.copy_to_parent([p['calibl']['outcol']])
 
         self.log.info('Merging low- and high-res sky models...')
         action = MergeSkymodels(self.parset, lowres_skymodels_mapfile,

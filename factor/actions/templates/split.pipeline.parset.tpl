@@ -9,6 +9,5 @@ dpppex.control.opts.mapfile_out={{ output_datamap }}
 dpppex.control.opts.outputkey=msout
 dpppex.control.opts.max_per_node={{ n_per_node }}
 
-dpppex.parsetarg.msin.name=temp
 dpppex.parsetarg.msin.datacolumn={{ columnname }}
 dpppex.parsetarg.steps=[]

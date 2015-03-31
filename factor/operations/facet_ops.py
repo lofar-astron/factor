@@ -110,9 +110,9 @@ class FacetAddCal(Operation):
         d.shifted_data_files = {}
         for band, f in zip(bands, files):
             d.shifted_data_files[band.name] = f
-        splfiles, _ = read_mapfile(split_data_mapfile)
+        files, _ = read_mapfile(split_data_mapfile)
         d.split_data_files = {}
-        for band, f in zip(bands, splfiles):
+        for band, f in zip(bands, files):
             d.split_data_files[band.name] = f
 
 
@@ -332,25 +332,24 @@ class FacetSelfcal(Operation):
 
         if self.parset['use_ftw']:
             self.log.info('FFTing model image (facet model #0)...')
-            actions = [FFT(self.parset, dm, mm, p['imager0'], prefix='fft0',
-            	direction=d, index=0) for d, dm, mm in zip(d_list,
-            	facet_unshifted_data_mapfiles, image0_basenames_mapfiles)]
-            self.s.run(actions)
-
-            # Now shift and average MODEL_DATA (to get around a bug in WSClean)
-            # and copy it to facet MS files
-            self.log.info('Phase shifting...')
+            self.log.debug('Phase shifting...')
             actions = [PhaseShift(self.parset, m, p['shift_fft'],
                 prefix='facet', direction=d, index=0) for d, m in zip(d_list,
                 facet_unshifted_data_mapfiles)]
             shifted_model_data_mapfiles = self.s.run(actions)
+            actions = [FFT(self.parset, dm, mm, p['imager0'], prefix='fft0',
+            	direction=d, index=0) for d, dm, mm in zip(d_list,
+            	shifted_model_data_mapfiles, image0_basenames_mapfiles)]
+            self.s.run(actions)
+
+            # Now average MODEL_DATA (to get around a bug in WSClean)
+            # and copy it to facet MS files
             actions = [Average(self.parset, m, p['avg_fft'], prefix='facet',
                 direction=d, index=10) for d, m in zip(d_list,
                 shifted_model_data_mapfiles)]
             avg_shifted_model_data_mapfiles = self.s.run(actions)
             # Copy over DATA column (was phase-shifted MODEL_DATA)
-            for dm, adm, d in zip(facet_data_mapfiles, avg_shifted_model_data_mapfiles,
-                d_list):
+            for dm, adm in zip(facet_data_mapfiles, avg_shifted_model_data_mapfiles):
                 facet_data_file, _ = read_mapfile(dm)
                 model_data_file, _ = read_mapfile(adm)
                 copy_column(facet_data_file[0], p['copy_fft']['incol'],
@@ -419,25 +418,24 @@ class FacetSelfcal(Operation):
 
         if self.parset['use_ftw']:
             self.log.info('FFTing model image (facet model #1)...')
-            actions = [FFT(self.parset, dm, mm, p['imager1'], prefix='fft1',
-            	direction=d, index=1) for d, dm, mm in zip(d_list,
-            	facet_unshifted_data_mapfiles, image1_basenames_mapfiles)]
-            self.s.run(actions)
-
-            # Now shift and average MODEL_DATA (to get around a bug in WSClean)
-            # and copy it to facet MS files
             self.log.debug('Phase shifting...')
             actions = [PhaseShift(self.parset, m, p['shift_fft'],
                 prefix='facet', direction=d, index=1) for d, m in zip(d_list,
                 facet_unshifted_data_mapfiles)]
             shifted_model_data_mapfiles = self.s.run(actions)
+            actions = [FFT(self.parset, dm, mm, p['imager1'], prefix='fft1',
+            	direction=d, index=1) for d, dm, mm in zip(d_list,
+            	shifted_model_data_mapfiles, image1_basenames_mapfiles)]
+            self.s.run(actions)
+
+            # Now average MODEL_DATA (to get around a bug in WSClean)
+            # and copy it to facet MS files
             actions = [Average(self.parset, m, p['avg_fft'], prefix='facet',
                 direction=d, index=11) for d, m in zip(d_list,
                 shifted_model_data_mapfiles)]
             avg_shifted_model_data_mapfiles = self.s.run(actions)
             # Copy over DATA column (was phase-shifted MODEL_DATA)
-            for dm, cdm, d in zip(facet_data_mapfiles, avg_shifted_model_data_mapfiles,
-                d_list):
+            for dm, cdm in zip(facet_data_mapfiles, avg_shifted_model_data_mapfiles):
                 facet_data_file, _ = read_mapfile(dm)
                 model_data_file, _ = read_mapfile(cdm)
                 copy_column(facet_data_file[0], p['copy_fft']['incol'],
@@ -502,25 +500,24 @@ class FacetSelfcal(Operation):
 
         if self.parset['use_ftw']:
             self.log.info('FFTing model image (facet model #2)...')
-            actions = [FFT(self.parset, dm, mm, p['imager2'], prefix='fft2',
-            	direction=d, index=2) for d, dm, mm in zip(d_list,
-            	facet_unshifted_data_mapfiles, image2_basenames_mapfiles)]
-            self.s.run(actions)
-
-            # Now shift and average MODEL_DATA (to get around a bug in WSClean)
-            # and copy it to facet MS files
             self.log.debug('Phase shifting...')
             actions = [PhaseShift(self.parset, m, p['shift_fft'],
                 prefix='facet', direction=d, index=2) for d, m in zip(d_list,
                 facet_unshifted_data_mapfiles)]
             shifted_model_data_mapfiles = self.s.run(actions)
+            actions = [FFT(self.parset, dm, mm, p['imager2'], prefix='fft2',
+            	direction=d, index=2) for d, dm, mm in zip(d_list,
+            	shifted_model_data_mapfiles, image2_basenames_mapfiles)]
+            self.s.run(actions)
+
+            # Now shift and average MODEL_DATA (to get around a bug in WSClean)
+            # and copy it to facet MS files
             actions = [Average(self.parset, m, p['avg_fft'], prefix='facet',
                 direction=d, index=12) for d, m in zip(d_list,
                 shifted_model_data_mapfiles)]
             avg_shifted_model_data_mapfiles = self.s.run(actions)
             # Copy over DATA column (was phase-shifted MODEL_DATA)
-            for dm, cdm, d in zip(facet_data_mapfiles, avg_shifted_model_data_mapfiles,
-                d_list):
+            for dm, cdm in zip(facet_data_mapfiles, avg_shifted_model_data_mapfiles):
                 facet_data_file, _ = read_mapfile(dm)
                 model_data_file, _ = read_mapfile(cdm)
                 copy_column(facet_data_file[0], p['copy_fft']['incol'],
@@ -624,25 +621,24 @@ class FacetSelfcal(Operation):
 
         if self.parset['use_ftw']:
             self.log.info('FFTing model image (facet model #3)...')
-            actions = [FFT(self.parset, dm, mm, p['imager3'], prefix='fft3',
-            	direction=d, index=3) for d, dm, mm in zip(d_list,
-            	facet_unshifted_data_mapfiles, image3_basenames_mapfiles)]
-            self.s.run(actions)
-
-            # Now shift and average MODEL_DATA (to get around a bug in WSClean)
-            # and copy it to facet MS files
             self.log.debug('Phase shifting...')
             actions = [PhaseShift(self.parset, m, p['shift_fft'],
                 prefix='facet', direction=d, index=3) for d, m in zip(d_list,
                 facet_unshifted_data_mapfiles)]
             shifted_model_data_mapfiles = self.s.run(actions)
+            actions = [FFT(self.parset, dm, mm, p['imager3'], prefix='fft3',
+            	direction=d, index=3) for d, dm, mm in zip(d_list,
+            	shifted_model_data_mapfiles, image3_basenames_mapfiles)]
+            self.s.run(actions)
+
+            # Now shift and average MODEL_DATA (to get around a bug in WSClean)
+            # and copy it to facet MS files
             actions = [Average(self.parset, m, p['avg_fft'], prefix='facet',
                 direction=d, index=13) for d, m in zip(d_list,
                 shifted_model_data_mapfiles)]
             avg_shifted_model_data_mapfiles = self.s.run(actions)
             # Copy over DATA column (was phase-shifted MODEL_DATA)
-            for dm, cdm, d in zip(facet_data_mapfiles, avg_shifted_model_data_mapfiles,
-                d_list):
+            for dm, cdm in zip(facet_data_mapfiles, avg_shifted_model_data_mapfiles):
                 facet_data_file, _ = read_mapfile(dm)
                 model_data_file, _ = read_mapfile(cdm)
                 copy_column(facet_data_file[0], p['copy_fft']['incol'],
