@@ -86,8 +86,8 @@ facet_setup = {
 }
 
 facet_selfcal = {
-'shift_fft' : {'columnname': 'MODEL_DATA'}, # outcol is DATA
-'avg_fft': {'columnname': 'DATA', # outcol is DATA
+'shift_fft' : {'columnname': 'DATA'}, # outcol is DATA
+'avg_fft': {'columnname': 'MODEL_DATA', # outcol is DATA
             'freqstep': 20,
             'timestep': 1},
 'copy_fft' : {'incol': 'DATA',
