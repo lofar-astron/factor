@@ -139,6 +139,7 @@ class MakeImage(Action):
         else:
             self.p['nscales'] = 1
             self.p['scales'] = [0]
+            self.p['wsclean_multiscale'] = ''
         self.p['timer'] = ''
         self.p['nfacets'] = 1
         self.imsize = self.p['imsize']
