@@ -471,7 +471,7 @@ class FacetSelfcal(Operation):
         for d, m in zip(d_list, facet_data_mapfiles):
             files, _ = read_mapfile(m)
             chunks_list.append(make_chunks(files[0], d.solint_a,
-            	self.parset, 'facet_chunk', direction=d, clobber=True))
+            	self.parset, 'facet_chunk', direction=d, clobber=False))
         chunk_parmdb_mapfiles = []
         chunk_model_mapfiles = []
         for i, chunks in enumerate(chunks_list):
