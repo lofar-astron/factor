@@ -70,7 +70,7 @@ class Chunk(object):
         from factor.lib.operation_lib import copy_column
 
         for column in column_list:
-            copy_column(self.parent_file, column, column, ms_from=self.file)
+            copy_column(self.file, column, column, ms_from=self.parent_file)
 
 
     def copy_to_parent(self, column_list):
@@ -82,6 +82,6 @@ class Chunk(object):
         from factor.lib.operation_lib import copy_column
 
         for column in column_list:
-            copy_column(self.file, column, column, ms_from=self.parent_file)
+            copy_column(self.parent_file, column, column, ms_from=self.file)
 
 
