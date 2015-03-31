@@ -5,7 +5,7 @@ import logging
 import os
 
 
-def copy_column(ms, inputcol, outputcol, ms_from=None,):
+def copy_column(ms, inputcol, outputcol, ms_from=None):
     """
     Copies one column to another
 
@@ -25,34 +25,35 @@ def copy_column(ms, inputcol, outputcol, ms_from=None,):
     import numpy as np
 
     t = pt.table(ms, readonly=False, ack=False)
-
-    t0 = t[0]['TIME']
-    t1 = t[-1]['TIME']
+    ts = t.sort('TIME,ANTENNA1,ANTENNA2')
+    t0 = np.min(t.getcol('TIME'))
+    t1 = np.max(t.getcol('TIME'))
 
     if ms_from is not None:
         tf = pt.table(ms_from, readonly=False, ack=False)
-        cd = tf.getcoldesc(inputcol)
+        tfs = tf.sort('TIME,ANTENNA1,ANTENNA2')
+        cd = tfs.getcoldesc(inputcol)
         cd['name'] = outputcol
         try:
-            t.addcols(cd)
+            ts.addcols(cd, addtoparent=True)
         except RuntimeError:
             # Column already exists
             pass
-        t0f = tf[0]['TIME']
-        t1f = tf[-1]['TIME']
+        t0f = np.min(tf.getcol('TIME'))
+        t1f = np.max(tf.getcol('TIME'))
         if t0f >= t0 and t1f <= t1:
             # From-table is of equal or shorter length, so get indices for
             # to-table
-            startrow = np.where(t.getcol('TIME') >= t0f)[0][0]
-            nrow = np.where(t.getcol('TIME') <= t1f)[0][-1] - startrow + 1
-            data = tf.getcol(inputcol)
-            t.putcol(inputcol, data, startrow=startrow, nrow=nrow)
+            startrow = np.where(ts.getcol('TIME') >= t0f)[0][0]
+            nrow = np.where(ts.getcol('TIME') <= t1f)[0][-1] - startrow + 1
+            data = tfs.getcol(inputcol)
+            ts.putcol(outputcol, data, startrow=startrow, nrow=nrow)
         else:
             # From-table is longer, so get indices for from-table
-            startrow = np.where(tf.getcol('TIME') >= t0)[0][0]
-            nrow = np.where(tf.getcol('TIME') <= t1)[0][-1] - startrow + 1
-            data = tf.getcol(inputcol, startrow=startrow, nrow=nrow)
-            t.putcol(outputcol, data)
+            startrow = np.where(tfs.getcol('TIME') >= t0)[0][0]
+            nrow = np.where(tfs.getcol('TIME') <= t1)[0][-1] - startrow + 1
+            data = tfs.getcol(inputcol, startrow=startrow, nrow=nrow)
+            ts.putcol(outputcol, data)
     else:
         data = t.getcol(inputcol)
         cd = t.getcoldesc(inputcol)
