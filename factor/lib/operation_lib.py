@@ -5,7 +5,7 @@ import logging
 import os
 
 
-def copy_column(ms, inputcol, outputcol, ms_from=None):
+def copy_column(ms, inputcol, outputcol, ms_from=None,):
     """
     Copies one column to another
 
@@ -22,21 +22,48 @@ def copy_column(ms, inputcol, outputcol, ms_from=None):
 
     """
     import pyrap.tables as pt
+    import numpy as np
 
     t = pt.table(ms, readonly=False, ack=False)
+
+    t0 = t[0]['TIME']
+    t1 = t[-1]['TIME']
+
     if ms_from is not None:
         tf = pt.table(ms_from, readonly=False, ack=False)
-        data = tf.getcol(inputcol)
         cd = tf.getcoldesc(inputcol)
+        cd['name'] = outputcol
+        try:
+            t.addcols(cd)
+        except RuntimeError:
+            # Column already exists
+            pass
+        t0f = t[0]['TIME']
+        t1f = t[-1]['TIME']
+        if t0f >= t0 and t1f <= t1:
+            # From-table is of equal or shorter length, so get indices for
+            # to-table
+            startrow = np.where(t.getcol('TIME') >= t0f)[0][0]
+            nrow = np.where(t.getcol('TIME') < t1f)[0][-1] - startrow
+            data = tf.getcol(inputcol)
+            t.putcolslice(inputcol, data, startrow=startrow, nrow=nrow)
+        else:
+            # From-table is longer, so get indices for from-table
+            startrow = np.where(tf.getcol('TIME') >= t0)[0][0]
+            nrow = np.where(tf.getcol('TIME') < t1)[0][-1] - startrow
+            data = tf.getcol(inputcol, startrow=startrow, nrow=nrow)
+            t.putcol(outputcol, data)
     else:
         data = t.getcol(inputcol)
         cd = t.getcoldesc(inputcol)
-    cd['name'] = outputcol
-    try:
-        t.addcols(cd)
-    except:
-        pass
-    t.putcol(outputcol, data)
+        cd['name'] = outputcol
+        try:
+            t.addcols(cd)
+        except:
+            pass
+        t.putcol(outputcol, data)
+
+    # Write the changes
     t.flush()
     t.close()
 
@@ -44,7 +71,7 @@ def copy_column(ms, inputcol, outputcol, ms_from=None):
 def make_chunks(dataset, blockl, op_parset, prefix=None, direction=None,
     columns=None, outdir=None, clobber=False):
     """
-    Split ms into time chunks of length chunksize time slots
+    Split dataset into time chunks of length chunksize time slots
 
     Parameters
     ----------
@@ -141,7 +168,7 @@ def split_ms(msin, msout, start_out, end_out, columns=None, clobber=True):
     else:
         colnames = ''
 
-    t1 = t.query('TIME > ' + str(starttime+start_out*3600) + ' && '
+    t1 = t.query('TIME >= ' + str(starttime+start_out*3600) + ' && '
       'TIME < ' + str(starttime+end_out*3600), sortlist='TIME,ANTENNA1,ANTENNA2',
       columns=colnames)
 
