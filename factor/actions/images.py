@@ -372,6 +372,7 @@ class MakeMask(Action):
         regions outside of the direction facet
         """
         from factor.directions import Polygon
+        from factor.lib.datamap_lib import read_mapfile
         import pyrap.images as pim
         import numpy as np
 
