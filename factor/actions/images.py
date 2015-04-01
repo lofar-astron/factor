@@ -172,7 +172,7 @@ class MakeImage(Action):
             # Let WSClean decide the best value for itself
             self.p['wsclean_wplanes'] = ''
         else:
-            self.p['wsclean_wplanes'] = '-nwlayers, {0}'.format(self.p['wplanes'])
+            self.p['wsclean_wplanes'] = '-nwlayers, {0},'.format(self.p['wplanes'])
 
 
     def make_pipeline_control_parset(self):
