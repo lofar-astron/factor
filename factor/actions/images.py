@@ -377,8 +377,8 @@ class MakeMask(Action):
 
         if self.direction is not None:
             output_files = []
-            RAverts = self.direction.vertices[:, 0]
-            Decverts = self.direction.vertices[:, 1]
+            RAverts = self.direction.vertices[0]
+            Decverts = self.direction.vertices[1]
 
             maskfiles, hosts = read_mapfile(self.p['output_datamap'])
             for maskfile in maskfiles:
