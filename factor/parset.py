@@ -118,6 +118,7 @@ def parset_read(parset_file):
         sys.exit(1)
     if 'imagerroot' not in parset_dict:
         parset_dict['imagerroot'] = parset_dict['lofarroot']
+    parset_dict['use_ftw'] = True
 
     # Handle directions-related parameters
     if 'directions' in parset._sections.keys():
