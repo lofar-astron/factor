@@ -422,10 +422,10 @@ class FacetSelfcal(Operation):
             p_d = p['solve_phaseonly2'].copy()
             p_d['timestep'] = d.solint_p
             p_list.append(p_d)
-        actions = [Solve(self.parset, dm, pd, model_datamap=mm,
+        actions = [Solve(self.parset, dm, pd, model_datamap=None,
             parmdb_datamap=pm, prefix='facet_phaseonly', direction=d, index=1)
-            for d, dm, pd, mm, pm in zip(d_list, chunk_data_mapfiles, p_list,
-            chunk_model_mapfiles, chunk_parmdb_mapfiles)]
+            for d, dm, pd, pm in zip(d_list, chunk_data_mapfiles, p_list,
+            chunk_parmdb_mapfiles)]
         self.s.run(actions)
 
         self.log.info('Imaging (facet image #2)...')
@@ -481,10 +481,10 @@ class FacetSelfcal(Operation):
             p_d = p['solve_phaseamp1_phaseonly'].copy()
             p_d['timestep'] = d.solint_p
             p_list.append(p_d)
-        actions = [Solve(self.parset, dm, pd, model_datamap=mm,
+        actions = [Solve(self.parset, dm, pd, model_datamap=None,
             parmdb_datamap=pm, prefix='facet_phaseonly', direction=d, index=2)
-            for d, dm, pd, mm, pm in zip(d_list, chunk_data_mapfiles, p_list,
-            chunk_model_mapfiles, chunk_parmdb_phaseamp_phase1_mapfiles)]
+            for d, dm, pd, pm in zip(d_list, chunk_data_mapfiles, p_list,
+            chunk_parmdb_phaseamp_phase1_mapfiles)]
         self.s.run(actions)
         p_list = []
         for d in d_list:
@@ -492,10 +492,10 @@ class FacetSelfcal(Operation):
             p_d['timestep'] = d.solint_a
             p_d['chunksize'] = d.solint_a
             p_list.append(p_d)
-        actions = [Solve(self.parset, dm, pd, model_datamap=mm,
+        actions = [Solve(self.parset, dm, pd, model_datamap=None,
             parmdb_datamap=pm, prefix='facet_amponly', direction=d, index=2)
-            for d, dm, pd, mm, pm in zip(d_list, chunk_data_mapfiles, p_list,
-            chunk_model_mapfiles, chunk_parmdb_phaseamp_amp1_mapfiles)]
+            for d, dm, pd, pm in zip(d_list, chunk_data_mapfiles, p_list,
+            chunk_parmdb_phaseamp_amp1_mapfiles)]
         self.s.run(actions)
 
         self.log.debug('Updating chunk parents...')
