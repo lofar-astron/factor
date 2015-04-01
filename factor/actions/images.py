@@ -168,7 +168,7 @@ class MakeImage(Action):
             if self.p['imsize'] > 4095:
                 self.p['wplanes'] = 512
                 self.p['nfacets'] = 1
-        if self.parset('use_chgcentre'):
+        if self.op_parset('use_chgcentre'):
             # Let WSClean decide the best value for itself
             self.p['wsclean_wplanes'] = ''
         else:
