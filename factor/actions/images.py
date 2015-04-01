@@ -381,7 +381,7 @@ class MakeMask(Action):
             Decverts = self.direction.vertices[:, 1]
 
             maskfiles, hosts = read_mapfile(self.p['output_datamap'])
-            for maskfile in maskfiles
+            for maskfile in maskfiles:
                 parts = maskfile.split('.cleanmask')
                 outfile = parts[0] + '.facet_cleanmask' + parts[1]
                 output_files.append(outfile)
