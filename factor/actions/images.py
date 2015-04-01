@@ -147,7 +147,6 @@ class MakeImage(Action):
             if hasattr(self.direction, 'imsize'):
                 self.imsize = self.direction.imsize
         self.p['imsize'] = getOptimumSize(int(self.imsize))
-
         if 'wplanes' not in self.p:
             # calculate wplanes assuming 1.5" cellsize
             self.p['wplanes'] = 1
@@ -169,6 +168,11 @@ class MakeImage(Action):
             if self.p['imsize'] > 4095:
                 self.p['wplanes'] = 512
                 self.p['nfacets'] = 1
+        if self.parset('use_chgcentre'):
+            # Let WSClean decide the best value for itself
+            self.p['wsclean_wplanes'] = ''
+        else:
+            self.p['wsclean_wplanes'] = '-nwlayers, {0}'.format(self.p['wplanes'])
 
 
     def make_pipeline_control_parset(self):
@@ -362,12 +366,23 @@ class MakeMask(Action):
 
     def get_results(self):
         """
-        Return skymodel names.
+        Return mask file names.
 
-        If a skymodel was not made because there were no sources in the facet,
-        set the skip flag to True.
-
+        If the action has an associated direction, modify the mask to exclude
+        regions outside of the direction facet
         """
+        from factor.directions import Polygon
+
+        if self.direction is not None:
+#             xvert = [10, 90, 90]
+#             yvert = [10, 90, 10]
+#             poly = Polygon(xvert, yvert)
+#             # Test
+#             x = np.arange(101)
+#             xx, yy = np.meshgrid(x, x)
+#             grid = poly.is_inside(xx, yy)
+            pass
+
         return self.p['output_datamap']
 
 
