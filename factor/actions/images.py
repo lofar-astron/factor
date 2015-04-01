@@ -385,7 +385,6 @@ class MakeMask(Action):
             for maskfile in maskfiles:
                 parts = maskfile.split('.cleanmask')
                 outfile = parts[0] + '.facet_cleanmask' + parts[1]
-                output_files.append(outfile)
 
                 mask_im = pim.image(maskfile)
                 img_type = mask_im.imagetype()
@@ -414,6 +413,7 @@ class MakeMask(Action):
                     data[0, 0, masked_ind[0][outside_ind], [masked_ind[1][outside_ind]]] = 0
 
                     # Save changes
+                    output_files.append(outfile)
                     mask_im.putdata(data)
                     if img_type == 'FITSImage':
                         mask_im.tofits(outfile, overwrite=True)
@@ -422,13 +422,14 @@ class MakeMask(Action):
 
                     # Copy log file that holds clipped rms
                     os.system('cp {0} {1}'.format(maskfile+'.log', outfile+'.log'))
+                else:
+                    output_files.append(maskfile)
 
-                    self.p['output_datamap'] = self.write_mapfile(output_files,
-                        prefix=self.prefix+'_output', direction=self.direction,
-                        index=self.index, band=self.band, host_list=hosts)
+            self.p['output_datamap'] = self.write_mapfile(output_files,
+                prefix=self.prefix+'_output', direction=self.direction,
+                index=self.index, band=self.band, host_list=hosts)
 
         return self.p['output_datamap']
-
 
 
 class MakeImageIterate(Action):
