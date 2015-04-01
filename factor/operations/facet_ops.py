@@ -367,6 +367,12 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             for chunk in chunks:
                 chunk.copy_to_parent([p['solve_phaseonly1']['outcol']])
+        chunk_parmdb_mapfiles = []
+        for i, chunks in enumerate(chunks_list):
+            chunk_parmdb_mapfiles.append(self.write_mapfile(
+                [chunk.parmdb_phaseonly2 for chunk in chunks],
+                prefix='chunk_parmdb_phaseonly2', direction=d_list[i],
+                host_list=d_hosts[i]))
 
         self.log.debug('Averaging in preparation for imaging...')
         actions = [Average(self.parset, m, p['avg1'], prefix='facet',
@@ -467,6 +473,17 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             for chunk in chunks:
                 chunk.copy_from_parent(['MODEL_DATA'])
+        chunk_parmdb_phaseamp_phase1_mapfiles = []
+        chunk_parmdb_phaseamp_amp1_mapfiles = []
+        for i, chunks in enumerate(chunks_list):
+            chunk_parmdb_phaseamp_phase1_mapfiles.append(self.write_mapfile(
+                [chunk.parmdb_phaseamp_phase1 for chunk in chunks],
+                prefix='chunk_parmdb_phase1', direction=d_list[i],
+                host_list=d_hosts[i]))
+            chunk_parmdb_phaseamp_amp1_mapfiles.append(self.write_mapfile(
+                [chunk.parmdb_phaseamp_amp1 for chunk in chunks],
+                prefix='chunk_parmdb_amp1', direction=d_list[i],
+                host_list=d_hosts[i]))
 
         self.log.info('Solving for amplitude solutions and applying them (#1)...')
         p_list = []
