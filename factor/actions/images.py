@@ -372,16 +372,55 @@ class MakeMask(Action):
         regions outside of the direction facet
         """
         from factor.directions import Polygon
+        import pyrap.images as pim
+        import numpy as np
 
         if self.direction is not None:
-#             xvert = [10, 90, 90]
-#             yvert = [10, 90, 10]
-#             poly = Polygon(xvert, yvert)
-#             # Test
-#             x = np.arange(101)
-#             xx, yy = np.meshgrid(x, x)
-#             grid = poly.is_inside(xx, yy)
-            pass
+            output_files = []
+            RAverts = self.direction.vertices[:, 0]
+            Decverts = self.direction.vertices[:, 1]
+
+            maskfiles, hosts = read_mapfile(self.p['output_datamap'])
+            for maskfile in maskfiles
+                parts = maskfile.split('.cleanmask')
+                outfile = parts[0] + '.facet_cleanmask' + parts[1]
+                output_files.append(outfile)
+
+                mask_im = pim.image(maskfile)
+                img_type = mask_im.imagetype()
+                if img_type == 'FITSImage':
+                    mask_im.saveas(outfile+'tmp')
+                    mask_im = pim.image(outfile+'tmp')
+
+                xvert = []
+                yvert = []
+                for RAvert, Decvert in zip(RAverts, Decverts):
+                    pixels = mask_im.topixel([0, 1, Decvert*np.pi/180.0,
+                        RAvert*np.pi/180.0])
+                    xvert.append(pixels[2]) # x -> Dec
+                    yvert.append(pixels[3]) # y -> RA
+                poly = Polygon(xvert, yvert)
+
+                # Find masked regions
+                data = mask_im.getdata()
+                masked_ind = np.where(data[0, 0])
+
+                # Find distance to nearest poly edge and unmask those that
+                # are outside the facet
+                dist = poly.is_inside(masked_ind[0], masked_ind[1])
+                outside_ind = np.where(dist < 0.0)
+                if len(outside_ind[0]) > 0:
+                    data[0, 0, masked_ind[0][outside_ind], [masked_ind[1][outside_ind]]] = 0
+
+                    # Save changes
+                    mask_im.putdata(data)
+                    if img_type == 'FITSImage':
+                        mask_im.tofits(outfile, overwrite=True)
+                    else:
+                        mask_im.saveas(outfile, overwrite=True)
+            self.p['output_datamap'] = self.write_mapfile(output_files,
+                prefix=self.prefix+'_output', direction=self.direction,
+                index=self.index, band=self.band, host_list=hosts)
 
         return self.p['output_datamap']
 

@@ -948,25 +948,3 @@ class Polygon:
         if scalar:
             mindst = float(mindst)
         return mindst
-
-
-# if __name__ == '__main__':
-#     # Define a triangle
-#     xvert = [10, 90, 90]
-#     yvert = [10, 90, 10]
-#     poly = Polygon(xvert, yvert)
-#     # Test
-#     x = np.arange(101)
-#     xx, yy = np.meshgrid(x, x)
-#     grid = poly.is_inside(xx, yy)
-#     # Plot
-#     try:
-#         import matplotlib.pyplot as plt
-#     except ImportError:
-#         print(grid)
-#     else:
-#         plt.contour(xx, yy, grid, levels=np.linspace(-100, 100, 51), colors='k')
-#         plt.pcolor(xx, yy, grid, vmin=-80, vmax=80, cmap=plt.get_cmap('RdBu'))
-#         plt.colorbar()
-#         plt.title('Distance to polygon border')
-#         plt.show(block=True)
