@@ -86,19 +86,16 @@ def parset_read(parset_file):
     # Some check on types and defaults
     if 'interactive' in parset_dict:
         parset_dict['interactive'] = parset.getboolean('global', 'interactive')
-        log.debug("Using interactive mode")
     else:
         parset_dict['interactive'] = False
     if 'make_mosaic' in parset_dict:
         parset_dict['make_mosaic'] = parset.getboolean('global', 'make_mosaic')
-        log.debug("Making final mosaic")
     else:
         parset_dict['make_mosaic'] = False
-    if 'use_ftw' in parset_dict:
-        parset_dict['use_ftw'] = parset.getboolean('global', 'use_ftw')
-        log.debug("Using FT / FTW")
+    if 'use_chgcentre' in parset_dict:
+        parset_dict['use_chgcentre'] = parset.getboolean('global', 'use_chgcentre')
     else:
-        parset_dict['use_ftw'] = True
+        parset_dict['use_chgcentre'] = False
     if 'imager' not in parset_dict:
         parset_dict['imager'] = 'wsclean'
     if parset_dict['imager'].lower() not in ['awimager', 'casapy', 'wsclean']:
