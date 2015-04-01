@@ -61,13 +61,6 @@ class FacetAddCal(Operation):
             d.shifted_data_files = {}
             for band, f in zip(bands, files):
                 d.shifted_data_files[band.name] = f
-            split_data_mapfile = os.path.join(self.parset['dir_working'],
-                'datamaps/FacetAddCal/Split/{0}/facet_output_{0}.datamap'.
-                format(d.name))
-            files, hosts = read_mapfile(split_data_mapfile)
-            d.split_data_files = {}
-            for band, f in zip(bands, files):
-                d.split_data_files[band.name] = f
             return
 
         # Make initial data maps for the empty datasets, their dir-indep
