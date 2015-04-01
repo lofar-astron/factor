@@ -265,6 +265,10 @@ class ChgCentre(Action):
             indstr = ''
         output_files = [self.working_dir + os.path.splitext(os.path.basename(ms))[0]
             + '_{0}{1}.ms'.format(self.name.lower(), indstr) for ms in msnames]
+        for inp, outp in zip(msnames, output_files):
+            if os.path.exists(outp):
+                os.system('rm -rf {0}'.format(outp))
+            os.system('cp -r {0} {1}'.format(inp, outp))
 
         self.p['output_datamap'] = self.write_mapfile(output_files,
             prefix=self.prefix+'_output', direction=self.direction,
