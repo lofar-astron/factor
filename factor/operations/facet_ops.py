@@ -342,14 +342,9 @@ class FacetSelfcal(Operation):
             chunks_list.append(make_chunks(files[0], d.solint_a*3,
             	self.parset, 'facet_chunk', direction=d, clobber=True))
         chunk_data_mapfiles = []
-        chunk_parmdb_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             chunk_data_mapfiles.append(self.write_mapfile([chunk.file for chunk in chunks],
                 prefix='chunks_vis', direction=d_list[i], host_list=d_hosts[i]))
-            chunk_parmdb_mapfiles.append(self.write_mapfile(
-                [chunk.parmdb_phaseonly1 for chunk in chunks],
-                prefix='chunk_parmdb_phaseonly1', direction=d_list[i],
-                host_list=d_hosts[i]))
 
         self.log.info('Solving for phase solutions and applying them (#1)...')
         p_list = []
@@ -414,6 +409,12 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             for chunk in chunks:
                 chunk.copy_from_parent(['MODEL_DATA'])
+        chunk_parmdb_mapfiles = []
+        for i, chunks in enumerate(chunks_list):
+            chunk_parmdb_mapfiles.append(self.write_mapfile(
+                [chunk.parmdb_phaseonly2 for chunk in chunks],
+                prefix='chunk_parmdb_phaseonly2', direction=d_list[i],
+                host_list=d_hosts[i]))
 
         self.log.info('Solving for phase solutions and applying them (#2)...')
         p_list = []
