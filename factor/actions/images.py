@@ -419,12 +419,13 @@ class MakeMask(Action):
                         mask_im.tofits(outfile, overwrite=True)
                     else:
                         mask_im.saveas(outfile, overwrite=True)
+
                     # Copy log file that holds clipped rms
                     os.system('cp {0} {1}'.format(maskfile+'.log', outfile+'.log')
 
-            self.p['output_datamap'] = self.write_mapfile(output_files,
-                prefix=self.prefix+'_output', direction=self.direction,
-                index=self.index, band=self.band, host_list=hosts)
+                    self.p['output_datamap'] = self.write_mapfile(output_files,
+                        prefix=self.prefix+'_output', direction=self.direction,
+                        index=self.index, band=self.band, host_list=hosts)
 
         return self.p['output_datamap']
 
