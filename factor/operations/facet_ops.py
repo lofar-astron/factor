@@ -577,7 +577,7 @@ class FacetSelfcal(Operation):
         self.log.debug('Resetting phases...')
         actions = [ResetPhases(self.parset, dm, p['reset_phases'], pm,
             prefix='facet', direction=d)
-            for d, dm, pm in zip(d_list, facet_data_file,
+            for d, dm, pm in zip(d_list, facet_data_mapfiles,
             merged_parmdb_phaseamp_amp1_mapfiles)]
         self.s.run(actions)
 
