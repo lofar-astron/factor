@@ -70,7 +70,7 @@ class InitSubtract(Operation):
         	in bands], prefix='dir_indep_parmdbs')
 
         self.log.info('High-res imaging...')
-        if self.parset('use_chgcentre'):
+        if self.parset['use_chgcentre']:
             self.log.debug('Changing center to zenith...')
             actions = [ChgCentre(self.parset, dm, {},
                 prefix='highres', band=band) for dm, band in
@@ -136,7 +136,7 @@ class InitSubtract(Operation):
                 chunk.copy_to_parent([p['calibh']['outcol2']])
 
         self.log.info('Averaging...')
-        if self.parset('use_chgcentre'):
+        if self.parset['use_chgcentre']:
             self.log.debug('Changing center to zenith...')
             actions = [ChgCentre(self.parset, dm, {},
                 prefix='lowres', band=band) for dm, band in
@@ -150,7 +150,7 @@ class InitSubtract(Operation):
         avg_files_mapfiles = self.s.run(actions)
 
         self.log.info('Low-res imaging...')
-        if self.parset('use_chgcentre'):
+        if self.parset['use_chgcentre']:
             input_to_imager_mapfiles = chgcentre_data_mapfiles
         else:
             input_to_imager_mapfiles = avg_files_mapfiles
