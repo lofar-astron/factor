@@ -122,7 +122,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     s.remove(dist > 5.0, aggregate=True) # 5 degree radius
 
     # Save this sky model for later checks of sources falling on facet edges
-    s.write(fileName='factor_inital.skymodel', clobber=True)
+    s.write(fileName='models/initial.skymodel', clobber=True)
 
     # Filter larger patches
     sizes = s.getPatchSizes(units='arcmin', weight=True)
@@ -307,6 +307,9 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
         List of input directions
     bounds_scale : int, optional
         Scale to use for bounding box
+    check_sources : bool, optional
+        If True, check whether any know source falls on a facet edge. If sources
+        are found that do, the facet is adjusted
 
     Returns
     -------
@@ -314,12 +317,17 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
         List of polygon RA and Dec vertices in degrees
     width_deg : list
         List of polygon bounding box width in degrees
-    check_sources : bool, optional
-        If True, check whether any know source falls on a facet edge. If sources
-        are found that do, the facet is adjusted
 
     """
     import lsmtool
+    try:
+        import shapely
+        has_shapely = True
+    except ImportError:
+        log.error('Shapely could not be imported. Facet polygons will not be '
+            'adjusted to avoid known sources.')
+        has_shapely = False
+    from itertools import combinations
 
     points, midRA, midDec = getxy(directions_list)
     points = points.T
@@ -336,30 +344,35 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
     scale_offsets = radius * np.array(offsets)
     outer_box = means + scale_offsets
 
-    if check_sources:
-        s = lsmtool.load('factor_inital.skymodel')
+    points = np.vstack([points, outer_box])
+    tri = Delaunay(points)
+    circumcenters = np.array([_circumcenter(tri.points[t])
+                              for t in tri.vertices])
+    thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
+                      for n in range(len(points) - 32)]
+
+    # Check for sources near / on facet edges and adjust regions accordingly
+    if has_shapely:
+        s = lsmtool.load('models/initial.skymodel')
         source_points = radec2xy(x, y, refRA=midRA, refDec=midDec)
-        source_points = source_points.T
 
-        source_on_edge = True
-        points = np.vstack([points, outer_box])
-        while source_on_edge:
-            tri = Delaunay(points)
-            circumcenters = np.array([_circumcenter(tri.points[t])
-                                      for t in tri.vertices])
-            thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
-                              for n in range(len(points) - 32)]
+        for thiessen_poly in thiessen_polys:
+            # Check each facet for sources near boundaries. If any are found,
+            # perform a union of the source and facet regions if the source is
+            # inside the facet and a difference if it is outside
+            p1 = shapely.geometry.Polygon(thiessen_poly)
+            p2 = shapely.geometry.Point(source)
+            p2.buffer(pix_radius)
+            pols = [p1, p2]
+            new_pol = ops.cascaded_union(pols)
 
-            # Check if any known sources fall on a facet edge
-            source_on_edge, points = adjust_points(points, source_points,
-                thiessen_polys)
-    else:
-        points = np.vstack([points, outer_box])
-        tri = Delaunay(points)
-        circumcenters = np.array([_circumcenter(tri.points[t])
-                                  for t in tri.vertices])
-        thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
-                          for n in range(len(points) - 32)]
+            if outside:
+                # If point is outside, difference the itersections
+                inter = cascaded_union([pair[0].intersection(pair[1]) for
+                    pair in combinations(pols, 2)])
+                new_pol = cascaded_union(pols).difference(inter)
+
+            poly_x, poly_y = new_pol.exterior.coords.xy
 
     # Convert from x, y to RA, Dec
     thiessen_polys_deg = []
@@ -378,13 +391,6 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
         width_deg.append(hyp_deg.value)
 
     return thiessen_polys_deg, width_deg
-
-
-def adjust_points(points, source_points, polys):
-    """
-    Adjust points to avoid known sources
-    """
-    pass
 
 
 def make_region_file(vertices, outputfile):
