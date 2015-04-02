@@ -359,15 +359,9 @@ class FacetSelfcal(Operation):
 
         self.log.info('Imaging (facet image #1)...')
         self.log.debug('Updating chunk parents...')
-        for i, chunks in enumerate(chunks_list):
+        for chunks in chunks_list:
             for chunk in chunks:
                 chunk.copy_to_parent([p['solve_phaseonly1']['outcol']])
-        chunk_parmdb_mapfiles = []
-        for i, chunks in enumerate(chunks_list):
-            chunk_parmdb_mapfiles.append(self.write_mapfile(
-                [chunk.parmdb_phaseonly2 for chunk in chunks],
-                prefix='chunk_parmdb_phaseonly2', direction=d_list[i],
-                host_list=d_hosts[i]))
 
         self.log.debug('Averaging in preparation for imaging...')
         actions = [Average(self.parset, m, p['avg1'], prefix='facet',
@@ -375,8 +369,9 @@ class FacetSelfcal(Operation):
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.debug('Imaging...')
-        actions = [MakeImageIterate(self.parset, m, p['imager1'], prefix='facet_selfcal1',
-            direction=d) for d, m in zip(d_list, avg_data_mapfiles)]
+        actions = [MakeImageIterate(self.parset, m, p['imager1'],
+            prefix='facet_selfcal1', direction=d) for d, m in zip(d_list,
+            avg_data_mapfiles)]
         image1_basenames_mapfiles = self.s.run(actions)
 
         self.log.info('FFTing model image (facet model #1)...')
