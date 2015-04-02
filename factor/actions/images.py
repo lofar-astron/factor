@@ -484,7 +484,7 @@ class MakeImageIterate(Action):
                 self.p['threshold'] = threshold_5rms
                 self.p['niter'] = 1000000
                 if self.op_parset['imager'].lower() == 'casapy':
-                    imager.timeout = 7200 # two hours for final pass
+                    imager.timeout = 3600 # one hour for final pass
 
             imager = MakeImage(self.op_parset, vis_datamap, self.p,
             	mask_datamap=mask_datamap, direction=self.direction,
