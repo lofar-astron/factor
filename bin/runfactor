@@ -128,12 +128,8 @@ if __name__=='__main__':
         	directions_max_num=parset['direction_specific']['max_num'],
         	interactive=parset['interactive'])
         directions = factor.directions.directions_read(parset['directions_file'])
-    dir_reg = [d for d in directions if d.reg != '']
-    for i, direction in enumerate(dir_reg):
-        direction.vertices, direction.width = factor.directions.region_read(direction.reg)
-    dir_no_reg = [d for d in directions if d.reg == '']
-    polys, widths = factor.directions.thiessen(dir_no_reg)
-    for i, direction in enumerate(dir_no_reg):
+    polys, widths = factor.directions.thiessen(directions)
+    for i, direction in enumerate(directions):
         direction.vertices = polys[i]
         direction.width = widths[i]
         reg_file = os.path.join(parset['dir_working'], 'regions', direction.name+'.reg')
