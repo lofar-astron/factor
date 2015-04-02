@@ -81,7 +81,7 @@ class InitSubtract(Operation):
             input_to_imager_mapfiles = input_data_mapfiles
         actions = [MakeImageIterate(self.parset, dm, p['imagerh'],
             prefix='highres', band=band) for dm, band in
-            zip(input_data_mapfiles, bands)]
+            zip(input_to_imager_mapfiles, bands)]
         highres_image_basenames_mapfiles = self.s_imager.run(actions)
         basenames = []
         hosts = []
@@ -150,13 +150,9 @@ class InitSubtract(Operation):
         avg_files_mapfiles = self.s.run(actions)
 
         self.log.info('Low-res imaging...')
-        if self.parset['use_chgcentre']:
-            input_to_imager_mapfiles = chgcentre_data_mapfiles
-        else:
-            input_to_imager_mapfiles = avg_files_mapfiles
         actions = [MakeImageIterate(self.parset, dm, p['imagerl'],
             prefix='lowres', band=band) for dm, band in zip(
-            input_to_imager_mapfiles, bands)]
+            avg_files_mapfiles, bands)]
         lowres_image_basenames_mapfiles = self.s_imager.run(actions)
         basenames = []
         hosts = []
