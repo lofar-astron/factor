@@ -209,14 +209,6 @@ apparent flux at the lowest available frequency (from bright to faint), and the
 final {\tt directions\_file} is written to the file {\tt
 factor\_directions.txt} in the working directory.
 
-%Additionally, the direction centers used for tessellation can be automatically
-%adjusted to avoid cases in which known sources (from the initial CC skymodels)
-%fall too near to a facet boundary. This adjustment only affects the facet
-%regions and does not affect the phase centers of the directions (specified in the
-%{\tt directions\_file}). The amount of adjustment allowed is specified with the
-%{\tt max\_adjustment\_arcmin} parameter (setting this parameter to 0 will disable
-%adjustment).
-
 Lastly, one can specify that more than one direction be processed in parallel
 with the groupings parameter. Note that more than one node is required to
 process directions in parallel (as little benefit will result from running
