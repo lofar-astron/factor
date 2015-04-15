@@ -324,7 +324,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
         import shapely
         has_shapely = True
     except ImportError:
-        log.error('Shapely could not be imported. Facet polygons will not be '
+        log.warn('Shapely could not be imported. Facet polygons will not be '
             'adjusted to avoid known sources.')
         has_shapely = False
     from itertools import combinations
