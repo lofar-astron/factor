@@ -5,13 +5,13 @@ import logging
 import os
 
 
-def copy_column(ms, inputcol, outputcol, ms_from=None):
+def copy_column(ms_to, inputcol, outputcol, ms_from=None):
     """
     Copies one column to another
 
     Parameters
     ----------
-    ms : str
+    ms_to : str
         MS file receiving copy
     inputcol : str
         Column name to copy from
@@ -24,49 +24,59 @@ def copy_column(ms, inputcol, outputcol, ms_from=None):
     import pyrap.tables as pt
     import numpy as np
 
-    t = pt.table(ms, readonly=False, ack=False)
-    ts = t.sort('TIME,ANTENNA1,ANTENNA2')
-    t0 = np.min(t.getcol('TIME'))
-    t1 = np.max(t.getcol('TIME'))
+    t_to = pt.table(ms_to, readonly=False, ack=False)
+    t0_to = np.min(t_to.getcol('TIME'))
+    t1_to = np.max(t_to.getcol('TIME'))
 
     if ms_from is not None:
-        tf = pt.table(ms_from, readonly=False, ack=False)
-        tfs = tf.sort('TIME,ANTENNA1,ANTENNA2')
-        cd = tfs.getcoldesc(inputcol)
-        cd['name'] = outputcol
+        t_from = pt.table(ms_from, ack=False)
+        cdesc = t_from.getcoldesc(inputcol)
+        cdesc['name'] = outputcol
         try:
-            ts.addcols(cd, addtoparent=True)
+            t_to.addcols(cdesc)
         except RuntimeError:
             # Column already exists
             pass
-        t0f = np.min(tf.getcol('TIME'))
-        t1f = np.max(tf.getcol('TIME'))
-        if t0f >= t0 and t1f <= t1:
+        t0_from = np.min(t_from.getcol('TIME'))
+        t1_from = np.max(t_from.getcol('TIME'))
+        if t0_from >= t0_to and t1_from <= t1_to:
             # From-table is of equal or shorter length, so get indices for
             # to-table
-            startrow = np.where(ts.getcol('TIME') >= t0f)[0][0]
-            nrow = np.where(ts.getcol('TIME') <= t1f)[0][-1] - startrow + 1
-            data = tfs.getcol(inputcol)
-            ts.putcol(outputcol, data, startrow=startrow, nrow=nrow)
+            tinx_to = t_to.index(['TIME', "ANTENNA1", "ANTENNA2"])
+            rownrs_to = tinx_to.rownrs({'TIME':t0_from, 'ANTENNA1':0, 'ANTENNA2':0},
+                {'TIME':t1_from, 'ANTENNA1':500, 'ANTENNA2':500}, lowerincl=True,
+                upperincl=True)
+            tinx_from = t_from.index(['TIME', "ANTENNA1", "ANTENNA2"])
+            rownrs_from = tinx_from.rownrs({'TIME':t0_from, 'ANTENNA1':0, 'ANTENNA2':0},
+                {'TIME':t1_from, 'ANTENNA1':500, 'ANTENNA2':500}, lowerincl=True,
+                upperincl=True)
         else:
             # From-table is longer, so get indices for from-table
-            startrow = np.where(tfs.getcol('TIME') >= t0)[0][0]
-            nrow = np.where(tfs.getcol('TIME') <= t1)[0][-1] - startrow + 1
-            data = tfs.getcol(inputcol, startrow=startrow, nrow=nrow)
-            ts.putcol(outputcol, data)
+            tinx_to = t_to.index(['TIME', "ANTENNA1", "ANTENNA2"])
+            rownrs_to = tinx_to.rownrs({'TIME':t0_to, 'ANTENNA1':0, 'ANTENNA2':0},
+                {'TIME':t1_to, 'ANTENNA1':500, 'ANTENNA2':500}, lowerincl=True,
+                upperincl=True)
+            tinx_from = t_from.index(['TIME', "ANTENNA1", "ANTENNA2"])
+            rownrs_from = tinx_from.rownrs({'TIME':t0_to, 'ANTENNA1':0, 'ANTENNA2':0},
+                {'TIME':t1_to, 'ANTENNA1':500, 'ANTENNA2':500}, lowerincl=True,
+                upperincl=True)
+
+        data_to = t_to.getcol(outputcol)
+        data_from = t_from.getcol(inputcol)
+        data_to[rownrs_to] = data_from[rownrs_from]
+        t_to.putcol(outputcol, data_to)
     else:
-        data = t.getcol(inputcol)
-        cd = t.getcoldesc(inputcol)
-        cd['name'] = outputcol
+        data = t_to.getcol(inputcol)
+        cdesc = t_to.getcoldesc(inputcol)
+        cdesc['name'] = outputcol
         try:
-            t.addcols(cd)
+            t_to.addcols(cdesc)
         except:
             pass
-        t.putcol(outputcol, data)
+        t_to.putcol(outputcol, data)
 
     # Write the changes
-    t.flush()
-    t.close()
+    t_to.close()
 
 
 def make_chunks(dataset, blockl, op_parset, prefix=None, direction=None,
@@ -121,6 +131,8 @@ def make_chunks(dataset, blockl, op_parset, prefix=None, direction=None,
         chunk_obj = Chunk(op_parset, dataset, c, prefix=prefix,
             direction=direction, outdir=outdir)
         chunk_obj.t0 = tlen * float(chunk_obj.index) # hours
+        if c == 0:
+            chunk_obj.t0 -= 0.1 # make sure first chunk gets first slot
         chunk_obj.t1 = np.float(chunk_obj.t0) + tlen # hours
         if c == nchunks-1 and chunk_obj.t1 < tobs:
             chunk_obj.t1 = tobs + 0.1 # make sure last chunk gets all that remains
@@ -215,6 +227,6 @@ def merge_chunks(chunk_files, prefix=None, clobber=False):
             return msout
 
     t = pt.table(chunk_files, ack=False)
-    t.sort('TIME').copy(msout, deep = True)
+    t.sort('TIME').copy(msout, deep=True)
     t.close()
     return msout
