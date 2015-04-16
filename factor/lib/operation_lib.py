@@ -30,18 +30,15 @@ def copy_column(ms_to, inputcol, outputcol, ms_from=None):
 
     if ms_from is not None:
         t_from = pt.table(ms_from, ack=False)
-        cdesc = t_from.getcoldesc(inputcol)
-        cdesc['name'] = outputcol
-        try:
+        if outputcol not in t_to.colnames():
+            cdesc = t_from.getcoldesc(inputcol)
+            cdesc['name'] = outputcol
             t_to.addcols(cdesc)
-        except RuntimeError:
-            # Column already exists
-            pass
         t0_from = np.min(t_from.getcol('TIME'))
         t1_from = np.max(t_from.getcol('TIME'))
+
         if t0_from >= t0_to and t1_from <= t1_to:
-            # From-table is of equal or shorter length, so get indices for
-            # to-table
+            # From-table is of equal or shorter length
             tinx_to = t_to.index(['TIME', "ANTENNA1", "ANTENNA2"])
             rownrs_to = tinx_to.rownrs({'TIME':t0_from, 'ANTENNA1':0, 'ANTENNA2':0},
                 {'TIME':t1_from, 'ANTENNA1':500, 'ANTENNA2':500}, lowerincl=True,
@@ -51,7 +48,7 @@ def copy_column(ms_to, inputcol, outputcol, ms_from=None):
                 {'TIME':t1_from, 'ANTENNA1':500, 'ANTENNA2':500}, lowerincl=True,
                 upperincl=True)
         else:
-            # From-table is longer, so get indices for from-table
+            # From-table is longer
             tinx_to = t_to.index(['TIME', "ANTENNA1", "ANTENNA2"])
             rownrs_to = tinx_to.rownrs({'TIME':t0_to, 'ANTENNA1':0, 'ANTENNA2':0},
                 {'TIME':t1_to, 'ANTENNA1':500, 'ANTENNA2':500}, lowerincl=True,
@@ -64,18 +61,15 @@ def copy_column(ms_to, inputcol, outputcol, ms_from=None):
         data_to = t_to.getcol(outputcol)
         data_from = t_from.getcol(inputcol)
         data_to[rownrs_to] = data_from[rownrs_from]
-        t_to.putcol(outputcol, data_to)
     else:
-        data = t_to.getcol(inputcol)
-        cdesc = t_to.getcoldesc(inputcol)
-        cdesc['name'] = outputcol
-        try:
+        data_to = t_to.getcol(inputcol)
+        if outputcol not in t_to.colnames():
+            cdesc = t_to.getcoldesc(inputcol)
+            cdesc['name'] = outputcol
             t_to.addcols(cdesc)
-        except:
-            pass
-        t_to.putcol(outputcol, data)
 
     # Write the changes
+    t_to.putcol(outputcol, data_to)
     t_to.close()
 
 
