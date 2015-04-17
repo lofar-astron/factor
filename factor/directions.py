@@ -359,6 +359,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
         RA = s.getColValues('Ra').tolist()
         Dec = s.getColValues('Dec').tolist()
         sx, sy = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
+        sizes = s.getPatchSizes(units='degree')
 
         # Check each facet for sources near boundaries
         for thiessen_poly in thiessen_polys:
@@ -368,7 +369,11 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
             dist = poly.is_inside(sx, sy)
             p1 = shapely.geometry.Polygon(poly_tuple)
 
-            for x, y, d in zip(sx, sy, dist):
+            for x, y, d, size in zip(sx, sy, dist, sizes):
+                pix_radius = size / 0.066667 # size of source in pixels
+                print('deg rad: {0}'.format(size))
+                print('pix rad: {0}'.format(pix_radius))
+
                 if d < pix_radius:
                     p2 = shapely.geometry.Point((x, y))
                     p2buf = p2.buffer(pix_radius)
