@@ -362,9 +362,9 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
 
         # Check each facet for sources near boundaries
         for thiessen_poly in thiessen_polys:
-            poly_tuple = tuple([(x, y) for x, y in zip(thiessen_poly.T[:, 0],
-                thiessen_poly.T[:, 1])])
-            poly = Polygon(thiessen_poly)
+            polyv = np.vstack(thiessen_poly)
+            poly_tuple = tuple([(x, y) for x, y in zip(polyv[:, 0], polyv[:, 1])])
+            poly = Polygon(polyv[:, 0], polyv[:, 1])
             dist = poly.is_inside(sx, sy)
             p1 = shapely.geometry.Polygon(poly_tuple)
 
