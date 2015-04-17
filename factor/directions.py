@@ -321,7 +321,8 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
     """
     import lsmtool
     try:
-        import shapely
+        import shapely.geometry
+        from shapely.ops import cascaded_union
         has_shapely = True
     except ImportError:
         log.warn('Shapely could not be imported. Facet polygons will not be '
@@ -353,26 +354,31 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
 
     # Check for sources near / on facet edges and adjust regions accordingly
     if has_shapely:
+        new_thiessen_polys = []
         s = lsmtool.load('models/initial.skymodel')
-        source_points = radec2xy(x, y, refRA=midRA, refDec=midDec)
+        sx, sy = radec2xy(x, y, refRA=midRA, refDec=midDec)
 
+        # Check each facet for sources near boundaries
         for thiessen_poly in thiessen_polys:
-            # Check each facet for sources near boundaries. If any are found,
-            # perform a union of the source and facet regions if the source is
-            # inside the facet and a difference if it is outside
-            p1 = shapely.geometry.Polygon(thiessen_poly)
-            p2 = shapely.geometry.Point(source)
-            p2.buffer(pix_radius)
-            pols = [p1, p2]
-            new_pol = ops.cascaded_union(pols)
+            poly_tuple = tuple([(x, y) for x, y in zip(thiessen_poly.T[:, 0],
+                thiessen_poly.T[:, 1])])
+            poly = Polygon(thiessen_poly)
+            dist = poly.is_inside(sx, sy)
+            p1 = shapely.geometry.Polygon(poly_tuple)
 
-            if outside:
-                # If point is outside, difference the itersections
-                inter = cascaded_union([pair[0].intersection(pair[1]) for
-                    pair in combinations(pols, 2)])
-                new_pol = cascaded_union(pols).difference(inter)
+            for x, y, d in zip(sx, sy, dist):
+                if d < pix_radius:
+                    p2 = shapely.geometry.Point((x, y))
+                    p2buf = p2.buffer(pix_radius)
+                    if d < 0.0:
+                        # If point is outside, difference the polys
+                        p1 = p1.difference(p2buf)
+                    else:
+                        # If point is inside, union the polys
+                        p1 = p1.union(p2buf)
 
-            poly_x, poly_y = new_pol.exterior.coords.xy
+            new_thiessen_polys.append(p1.exterior.coords.xy)
+        thiessen_polys = new_thiessen_polys
 
     # Convert from x, y to RA, Dec
     thiessen_polys_deg = []
