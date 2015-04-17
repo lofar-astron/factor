@@ -371,10 +371,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
 
             for x, y, d, size in zip(sx, sy, dist, sizes):
                 pix_radius = size / 0.066667 # size of source in pixels
-                print('deg rad: {0}'.format(size))
-                print('pix rad: {0}'.format(pix_radius))
-
-                if d < pix_radius:
+                if abs(d) < pix_radius:
                     p2 = shapely.geometry.Point((x, y))
                     p2buf = p2.buffer(pix_radius)
                     if d < 0.0:
@@ -383,6 +380,14 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
                     else:
                         # If point is inside, union the polys
                         p1 = p1.union(p2buf)
+            if len(p1) > 1:
+                # Deal with multiple polys, due to small regions that are
+                # disconnected from the main region
+                area = 0
+                for p1_part in p1:
+                    if p1_part.area > area:
+                        p1_largest = p1_part
+                p1 = p1_largest
 
             new_thiessen_polys.append(p1.exterior.coords.xy)
         thiessen_polys = new_thiessen_polys
