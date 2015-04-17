@@ -391,7 +391,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
 
             xyverts = [np.array([x, y]) for x, y in zip(p1.exterior.coords.xy[0].tolist(),
                 p1.exterior.coords.xy[0].tolist())]
-            new_thiessen_polys.append(p1.exterior.coords.xy)
+            new_thiessen_polys.append(xyverts)
         thiessen_polys = new_thiessen_polys
 
     # Convert from x, y to RA, Dec
