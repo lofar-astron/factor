@@ -380,7 +380,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
                     else:
                         # If point is inside, union the polys
                         p1 = p1.union(p2buf)
-            if len(p1) > 1:
+            if type(p1) is shapely.geometry.multipolygon.MultiPolygon:
                 # Deal with multiple polys, due to small regions that are
                 # disconnected from the main region
                 area = 0
