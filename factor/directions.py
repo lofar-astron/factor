@@ -356,7 +356,9 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
     if has_shapely:
         new_thiessen_polys = []
         s = lsmtool.load('models/initial.skymodel')
-        sx, sy = radec2xy(x, y, refRA=midRA, refDec=midDec)
+        RA = s.getColValues('Ra').tolist()
+        Dec = s.getColValues('Dec').tolist()
+        sx, sy = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
 
         # Check each facet for sources near boundaries
         for thiessen_poly in thiessen_polys:
