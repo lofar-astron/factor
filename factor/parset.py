@@ -173,7 +173,7 @@ def parset_read(parset_file):
     else:
         import multiprocessing
         parset_dict['cluster_specific']['ncpu'] = multiprocessing.cpu_count()
-    log.debug("Using up to %s CPUs per node" % (parset_dict['cluster_specific']['ncpu']))
+    log.debug("Using up to %s CPU(s) per node" % (parset_dict['cluster_specific']['ncpu']))
     if 'clusterdesc_file' not in parset_dict['cluster_specific']:
         parset_dict['cluster_specific']['clusterdesc_file'] = parset_dict['lofarroot'] + '/share/local.clusterdesc'
         parset_dict['cluster_specific']['node_list'] = ['localhost']

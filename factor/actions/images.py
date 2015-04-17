@@ -406,7 +406,7 @@ class MakeMask(Action):
                 masked_ind = np.where(data[0, 0])
 
                 # Find distance to nearest poly edge and unmask those that
-                # are outside the facet
+                # are outside the facet (dist < 0)
                 dist = poly.is_inside(masked_ind[0], masked_ind[1])
                 outside_ind = np.where(dist < 0.0)
                 if len(outside_ind[0]) > 0:
