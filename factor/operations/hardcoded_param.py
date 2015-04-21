@@ -276,7 +276,7 @@ facet_image= {
             'minuv': '80',
             'maxuv': '1000000',
             'gain': 0.01,
-            'mgain': 0.75,
+            'mgain': 0.8,
             'threshpix': 6.0,
             'threshisl': 3.0,
             'atrous_do': False,
