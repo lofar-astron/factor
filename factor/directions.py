@@ -374,11 +374,11 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
         sy = np.array(sy)[ind_near_edge]
         sizes = sizes[ind_near_edge]
 
-        # Check all facets for each source to determine if it's near a boundary
+        # Check all facets for each source
         for x, y, size in zip(sx, sy, sizes):
             for i, thiessen_poly in enumerate(thiessen_polys):
                 polyv = np.vstack(thiessen_poly)
-                poly_tuple = tuple([(x, y) for x, y in zip(polyv[:, 0], polyv[:, 1])])
+                poly_tuple = tuple([(xp, yp) for xp, yp in zip(polyv[:, 0], polyv[:, 1])])
                 poly = Polygon(polyv[:, 0], polyv[:, 1])
                 dist = poly.is_inside(x, y)
                 p1 = shapely.geometry.Polygon(poly_tuple)
@@ -393,15 +393,6 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
                     else:
                         # If point is inside, union the polys
                         p1 = p1.union(p2buf)
-#                 if type(p1) is shapely.geometry.multipolygon.MultiPolygon:
-#                     # Deal with multiple polys, due to small regions that are
-#                     # disconnected from the main region
-#                     area = 0
-#                     for p1_part in p1:
-#                         if p1_part.area > area:
-#                             p1_largest = p1_part
-#                     p1 = p1_largest
-
                 xyverts = [np.array([xp, yp]) for xp, yp in zip(p1.exterior.coords.xy[0].tolist(),
                     p1.exterior.coords.xy[1].tolist())]
                 thiessen_polys[i] = xyverts
