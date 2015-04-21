@@ -359,6 +359,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
         Dec = s.getColValues('Dec')
         sx, sy = radec2xy(RA.tolist(), Dec.tolist(), refRA=midRA, refDec=midDec)
         sizes = s.getPatchSizes(units='degree')
+        print('sizes: {0}'.format(sizes.shape))
 
         # Filter sources to get only those close to a boundary
         ind_near_edge = []
