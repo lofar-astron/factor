@@ -237,7 +237,7 @@ class MakeImage(Action):
 
         # For casapy only, make a clean script
         self.p['scriptname'] = os.path.abspath(self.script_file)
-        self.p['completed_file'] = self.os.path.abspath(self.completed_file)
+        self.p['completed_file'] = os.path.abspath(self.completed_file)
 
         if self.op_parset['imager'].lower() == 'casapy':
             template = env.get_template('casapy_clean.tpl')

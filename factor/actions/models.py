@@ -551,7 +551,7 @@ class FFT(Action):
                 f.write(tmp)
 
             template = env.get_template('ftw.tpl')
-            self.p['completed_file'] = self.os.path.abspath(self.completed_file)
+            self.p['completed_file'] = os.path.abspath(self.completed_file)
             tmp = template.render(self.p)
             with open(self.script_file, 'w') as f:
                 f.write(tmp)
