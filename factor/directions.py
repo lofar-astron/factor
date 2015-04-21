@@ -370,8 +370,8 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
                 pix_radius = sizes.tolist()[j] / 0.066667 # size of source in pixels
                 if abs(dist) < pix_radius and j not in ind_near_edge:
                     ind_near_edge.append(j)
-        sx = sx[ind_near_edge]
-        sy = sy[ind_near_edge]
+        sx = np.array(sx)[ind_near_edge]
+        sy = np.array(sy)[ind_near_edge]
         sizes = sizes[ind_near_edge]
 
         # Check all facets for each source to determine if it's near a boundary
