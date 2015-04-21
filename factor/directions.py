@@ -354,22 +354,21 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
 
     # Check for sources near / on facet edges and adjust regions accordingly
     if has_shapely:
-        new_thiessen_polys = []
         s = lsmtool.load('models/initial.skymodel')
         RA = s.getColValues('Ra').tolist()
         Dec = s.getColValues('Dec').tolist()
         sx, sy = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
         sizes = s.getPatchSizes(units='degree')
 
-        # Check each facet for sources near boundaries
-        for thiessen_poly in thiessen_polys:
-            polyv = np.vstack(thiessen_poly)
-            poly_tuple = tuple([(x, y) for x, y in zip(polyv[:, 0], polyv[:, 1])])
-            poly = Polygon(polyv[:, 0], polyv[:, 1])
-            dist = poly.is_inside(sx, sy)
-            p1 = shapely.geometry.Polygon(poly_tuple)
+        # Check all facets for each source to determine if it's near a boundary
+        for x, y, size in zip(sx, sy, sizes):
+            for i, thiessen_poly in enumerate(thiessen_polys):
+                polyv = np.vstack(thiessen_poly)
+                poly_tuple = tuple([(x, y) for x, y in zip(polyv[:, 0], polyv[:, 1])])
+                poly = Polygon(polyv[:, 0], polyv[:, 1])
+                dist = poly.is_inside(x, y)
+                p1 = shapely.geometry.Polygon(poly_tuple)
 
-            for x, y, d, size in zip(sx, sy, dist, sizes):
                 pix_radius = size / 0.066667 # size of source in pixels
                 if abs(d) < pix_radius:
                     p2 = shapely.geometry.Point((x, y))
@@ -380,19 +379,18 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
                     else:
                         # If point is inside, union the polys
                         p1 = p1.union(p2buf)
-            if type(p1) is shapely.geometry.multipolygon.MultiPolygon:
-                # Deal with multiple polys, due to small regions that are
-                # disconnected from the main region
-                area = 0
-                for p1_part in p1:
-                    if p1_part.area > area:
-                        p1_largest = p1_part
-                p1 = p1_largest
+#                 if type(p1) is shapely.geometry.multipolygon.MultiPolygon:
+#                     # Deal with multiple polys, due to small regions that are
+#                     # disconnected from the main region
+#                     area = 0
+#                     for p1_part in p1:
+#                         if p1_part.area > area:
+#                             p1_largest = p1_part
+#                     p1 = p1_largest
 
-            xyverts = [np.array([x, y]) for x, y in zip(p1.exterior.coords.xy[0].tolist(),
-                p1.exterior.coords.xy[1].tolist())]
-            new_thiessen_polys.append(xyverts)
-        thiessen_polys = new_thiessen_polys
+                xyverts = [np.array([xp, yp]) for xp, yp in zip(p1.exterior.coords.xy[0].tolist(),
+                    p1.exterior.coords.xy[1].tolist())]
+                thiessen_polys[i] = xyverts
 
     # Convert from x, y to RA, Dec
     thiessen_polys_deg = []

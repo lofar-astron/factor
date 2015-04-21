@@ -225,7 +225,8 @@ class FacetSelfcal(Operation):
         from factor.actions.images import MakeImageIterate
         from factor.actions.models import MakeSkymodelFromModelImage, FFT
         from factor.actions.solutions import Smooth, ResetPhases
-        from factor.lib.operation_lib import copy_column, make_chunks, merge_chunks
+        from factor.lib.operation_lib import copy_column, make_chunks, \
+            merge_chunks, merge_parmdbs, merge_chunk_parmdbs
         from factor.operations.hardcoded_param import facet_selfcal as p
         from factor.lib.datamap_lib import read_mapfile
 
@@ -437,7 +438,7 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             concat_file, _ = read_mapfile(facet_data_mapfiles[i])
             merged_parmdb_phaseamp_amp1_mapfiles.append(self.write_mapfile(
-                [self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp1 for chunk
+                [merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp1 for chunk
                 in chunks], prefix='merged_amps1')], prefix='merged_amps1',
                 direction=d_list[i], host_list=d_hosts[i]))
 
@@ -543,11 +544,11 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             concat_file, _ = read_mapfile(facet_data_mapfiles[i])
             merged_parmdb_phaseamp_amp2_mapfiles.append(self.write_mapfile(
-            	[self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp2 for
+            	[merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp2 for
             	chunk in chunks], prefix='merged_amps2')],
             	prefix='merged_amps2', direction=d_list[i], host_list=d_hosts[i]))
             merged_parmdb_phaseamp_phase2_mapfiles.append(self.write_mapfile(
-            	[self.merge_chunk_parmdbs([chunk.parmdb_phaseamp_phase2 for
+            	[merge_chunk_parmdbs([chunk.parmdb_phaseamp_phase2 for
             	chunk in chunks], prefix='merged_phases2')], prefix='merged_phases2',
             	direction=d_list[i], host_list=d_hosts[i]))
 
@@ -605,7 +606,7 @@ class FacetSelfcal(Operation):
             smoothed_amps2_final, _ = read_mapfile(merged_parmdb_phaseamp_amp2_mapfiles[i])
             concat_file, _ = read_mapfile(facet_data_mapfiles[i])
             merged_parmdb_final_mapfiles.append(self.write_mapfile(
-            	[self.merge_parmdbs(phases2_final[0],
+            	[merge_parmdbs(phases2_final[0],
             	smoothed_amps1_final[0], smoothed_amps2_final[0],
             	concat_file[0])], prefix='merged_amps_phases_final',
             	direction=d, host_list=d_hosts[i]))
@@ -621,110 +622,6 @@ class FacetSelfcal(Operation):
         for d, m in zip(d_list, merged_parmdb_final_mapfiles):
             f, _ = read_mapfile(m)
             d.dirdepparmdb = f[0]
-
-
-    def merge_chunk_parmdbs(self, inparmdbs, prefix='merged', clobber=False):
-        """Merges parmdbs"""
-        import os
-        import lofar.parmdb
-        import pyrap.tables as pt
-
-        root_dir = inparmdbs[0].split('chunks')[0]
-        outparmdb = '{0}/{1}_instrument'.format(root_dir, prefix)
-        if os.path.exists(outparmdb):
-            if clobber:
-                os.system('rm -rf {0}'.format(outparmdb))
-            else:
-                return outparmdb
-
-        os.system('cp -r {0} {1}'.format(inparmdbs[0], outparmdb))
-        pdb_concat = lofar.parmdb.parmdb(outparmdb)
-
-        for parmname in pdb_concat.getNames():
-            pdb_concat.deleteValues(parmname)
-
-        for inparmdb in inparmdbs:
-            pdb = lofar.parmdb.parmdb(inparmdb)
-            for parmname in pdb.getNames():
-                v = pdb.getValuesGrid(parmname)
-                pdb_concat.addValues(v)
-        pdb_concat.flush()
-
-        return outparmdb
-
-
-    def merge_parmdbs(self, parmdb_p, pre_apply_parmdb, parmdb_a, ms, clobber=True):
-        """Merges amp+phase parmdbs"""
-        import lofar.parmdb
-        import pyrap.tables as pt
-        import numpy as np
-
-        parmdb_out = parmdb_p.split('phases2')[0] + 'final' + parmdb_p.split('phases2')[1]
-        if os.path.exists(parmdb_out):
-            if clobber:
-                os.system('rm -rf {0}'.format(parmdb_out))
-            else:
-                return parmdb_out
-        pdb_out = lofar.parmdb.parmdb(parmdb_out, create=True)
-
-        pol_list = ['0:0', '1:1']
-        gain = 'Gain'
-        anttab = pt.table(ms + '::ANTENNA', ack=False)
-        antenna_list = anttab.getcol('NAME')
-        anttab.close()
-
-        # Copy over the CommonScalar phases and TEC
-        pdb_p   = lofar.parmdb.parmdb(parmdb_p)
-        for parmname in pdb_p.getNames():
-            parms = pdb_p.getValuesGrid(parmname)
-            pdb_out.addValues(parms)
-
-        # Get amplitude solutions
-        pdb_pre = lofar.parmdb.parmdb(pre_apply_parmdb)
-        pdb_a = lofar.parmdb.parmdb(parmdb_a)
-        parms_pre = pdb_pre.getValuesGrid("*")
-        parms_a = pdb_a.getValuesGrid("*")
-
-        # Get array sizes and initialize values using first antenna (all
-        # antennas should be the same)
-        parmname = 'Gain:0:0:Real:' + antenna_list[0]
-        N_times, N_freqs = parms_a[parmname]['values'].shape
-        times = parms_a[parmname]['times'].copy()
-        timewidths = parms_a[parmname]['timewidths'].copy()
-        freqs = parms_a[parmname]['freqs'].copy()
-        freqwidths = parms_a[parmname]['freqwidths'].copy()
-        parms = {}
-        v = {}
-        v['times'] = times
-        v['timewidths'] = timewidths
-        v['freqs'] = freqs
-        v['freqwidths'] = freqwidths
-
-        # Multiply gains
-        for pol in pol_list:
-            for antenna in antenna_list:
-                real1 = np.copy(parms_pre[gain+':'+pol+':Real:'+antenna]['values'])
-                real2 = np.copy(parms_a[gain+':' +pol+':Real:'+antenna]['values'])
-                imag1 = np.copy(parms_pre[gain+':'+pol+':Imag:'+antenna]['values'])
-                imag2 = np.copy(parms_a[gain+':'+pol+':Imag:'+antenna]['values'])
-
-                G1 = real1 + 1j * imag1
-                G2 = real2 + 1j * imag2
-                Gnew = G1 * G2
-                v['values'] = np.zeros((N_times, N_freqs), dtype=np.double)
-
-                parmname = gain + ':' + pol + ':Imag:' + antenna
-                v['values'] = np.copy(np.imag(Gnew))
-                parms[parmname] = v.copy()
-
-                parmname = gain + ':' + pol + ':Real:' + antenna
-                v['values'] = np.copy(np.real(Gnew))
-                parms[parmname] = v.copy()
-
-        pdb_out.addValues(parms)
-        pdb_out.flush()
-
-        return parmdb_out
 
 
 class FacetAddAll(Operation):
