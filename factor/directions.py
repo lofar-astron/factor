@@ -367,8 +367,8 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
             poly_tuple = tuple([(x, y) for x, y in zip(polyv[:, 0], polyv[:, 1])])
             poly = Polygon(polyv[:, 0], polyv[:, 1])
             dists = poly.is_inside(sx, sy)
-            for j, dist, size in enumerate(zip(dists, sizes)):
-                pix_radius = size / 0.066667 # size of source in pixels
+            for j, dist in enumerate(dists):
+                pix_radius = sizes[j] / 0.066667 # size of source in pixels
                 if abs(dist) < pix_radius and j not in ind_near_edge:
                     ind_near_edge.append(j)
         sx = sx[ind_near_edge]
