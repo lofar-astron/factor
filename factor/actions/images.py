@@ -221,6 +221,7 @@ class MakeImage(Action):
         if self.op_parset['imager'].lower() == 'awimager':
             template = env.get_template('make_image_awimager.pipeline.parset.tpl')
         elif self.op_parset['imager'].lower() == 'casapy':
+            self.p['scriptname'] = os.path.abspath(self.script_file)
             template = env.get_template('make_image_casapy_comp.pipeline.parset.tpl')
         elif self.op_parset['imager'].lower() == 'wsclean':
             template = env.get_template('make_image_wsclean.pipeline.parset.tpl')
@@ -236,7 +237,6 @@ class MakeImage(Action):
             f.write(tmp)
 
         # For casapy only, make a clean script
-        self.p['scriptname'] = os.path.abspath(self.script_file)
         self.p['completed_file'] = os.path.abspath(self.completed_file)
 
         if self.op_parset['imager'].lower() == 'casapy':
