@@ -370,7 +370,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
                 p1 = shapely.geometry.Polygon(poly_tuple)
 
                 pix_radius = size / 0.066667 # size of source in pixels
-                if abs(d) < pix_radius:
+                if abs(dist) < pix_radius:
                     p2 = shapely.geometry.Point((x, y))
                     p2buf = p2.buffer(pix_radius)
                     if d < 0.0:
