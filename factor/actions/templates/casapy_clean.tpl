@@ -5,7 +5,7 @@ ms = sys.argv[6]
 imageout = sys.argv[7]
 
 mask = {{ mask }}
-multiscale={{ scales }}
+scales={{ scales }}
 cell=['{{ cell }}', '{{ cell }}']
 imsize=[{{ imsize }}, {{ imsize }}]
 threshold='{{ threshold }}'
@@ -14,6 +14,9 @@ wprojplanes={{ wplanes }}
 nterms={{ nterms }}
 niter={{ niter }}
 gain={{ gain }}
+timer = '{{ timer }}'
+nfacets = {{ nfacets }}
+cycfactor = {{ cycfactor }}
 
 clean(vis=ms,imagename=imageout,outlierfile="",field="",spw="",selectdata=True,timerange=timer,\
       uvrange=uvrange,antenna="",scan="",observation="",mode="mfs",gridmode="widefield",wprojplanes=wplanes,\

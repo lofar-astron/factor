@@ -223,7 +223,7 @@ class Action(object):
                         try:
                             p.communicate(timeout=self.timeout)
                         except subprocess.TimeoutExpired:
-                            pass
+                            continue
                     try:
                         # Give process time to return normally
                         p.communicate(timeout=self.timeout)
