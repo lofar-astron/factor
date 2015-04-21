@@ -360,6 +360,21 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
         sx, sy = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
         sizes = s.getPatchSizes(units='degree')
 
+        # Filter sources to get only those close to a boundary
+        ind_near_edge = []
+        for i, thiessen_poly in enumerate(thiessen_polys):
+            polyv = np.vstack(thiessen_poly)
+            poly_tuple = tuple([(x, y) for x, y in zip(polyv[:, 0], polyv[:, 1])])
+            poly = Polygon(polyv[:, 0], polyv[:, 1])
+            dists = poly.is_inside(x, y)
+            for j, dist, size in enumerate(zip(dists, sizes)):
+                pix_radius = size / 0.066667 # size of source in pixels
+                if abs(dist) < pix_radius and j not in ind_near_edge:
+                    ind_near_edge.append(j)
+        sx = sx[ind_near_edge]
+        sy = sy[ind_near_edge]
+        sizes = sizes[ind_near_edge]
+
         # Check all facets for each source to determine if it's near a boundary
         for x, y, size in zip(sx, sy, sizes):
             for i, thiessen_poly in enumerate(thiessen_polys):
