@@ -10,8 +10,7 @@ dpppex.control.opts.outputkey=msout
 dpppex.control.opts.max_per_node={{ n_per_node }}
 
 dpppex.parsetarg.msin.datacolumn={{ columnname }}
-dpppex.parsetarg.steps=[flag, avg]
-dpppex.parsetarg.flag.type=aoflagger
+dpppex.parsetarg.steps=[avg]
 dpppex.parsetarg.avg.type=squash
 dpppex.parsetarg.avg.freqstep={{ freqstep }}
 dpppex.parsetarg.avg.timestep={{ timestep }}
