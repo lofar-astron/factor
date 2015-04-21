@@ -367,7 +367,8 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
             poly_tuple = tuple([(x, y) for x, y in zip(polyv[:, 0], polyv[:, 1])])
             poly = Polygon(polyv[:, 0], polyv[:, 1])
             dists = poly.is_inside(sx, sy)
-            print(dists)
+            print(len(dists))
+            print(len(sizes.tolist())
             for j, dist in enumerate(dists):
                 print(j, dist)
                 pix_radius = sizes.tolist()[j] / 0.066667 # size of source in pixels
