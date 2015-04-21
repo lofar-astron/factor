@@ -225,7 +225,7 @@ class Action(object):
                             self.log.info('Trying p.communicate()')
                             p.communicate(timeout=self.timeout)
                         except subprocess.TimeoutExpired:
-                            continue
+                            self.log.info('Timeout reached')
                     try:
                         # Give process time to return normally
                         p.communicate(timeout=self.timeout)
