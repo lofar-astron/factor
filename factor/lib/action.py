@@ -219,9 +219,13 @@ class Action(object):
                 open("{0}.err.log".format(self.logbasename), "wb") as err:
                 p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
                 if self.timeout is not None:
+                    while not os.path.exists(self.completed_file):
+                        try:
+                            p.communicate(timeout=self.timeout)
+                        except subprocess.TimeoutExpired:
+                            pass
                     try:
-                        # Use a timeout to return from casapy runs
-                        # that hang (but actually completed successfully)
+                        # Give process time to return normally
                         p.communicate(timeout=self.timeout)
                     except subprocess.TimeoutExpired:
                         p.kill()

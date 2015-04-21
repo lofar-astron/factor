@@ -29,3 +29,5 @@ else:
     ft(vis=ms, field="", spw="", model=mod, nterms=ntermsi, reffreq="",
     complist="", incremental=False, usescratch=True, async=False)
 
+os.system('touch {{ completed_file }}')
+

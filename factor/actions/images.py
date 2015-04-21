@@ -90,13 +90,16 @@ class MakeImage(Action):
         imagebasenames = make_image_basename(self.vis_datamap,
             direction=self.direction, band=self.band, prefix=self.prefix)
         self.imagebasenames = [self.image_dir+bn for bn in imagebasenames]
+        self.script_file = self.parsetbasename + '_image.py'
 
         # Define imaging parameters
         self.set_imaging_parameters()
 
         # Set a timeout for casapy runs
         if self.op_parset['imager'].lower() == 'casapy':
-            self.timeout = 7200
+            self.timeout = 60 # check every 1 minute
+            # Define completed file (assumes single image only)
+            self.completed_file = self.imagebasenames[0] + '.done'
 
         # Set up all required files
         self.setup()
@@ -218,7 +221,7 @@ class MakeImage(Action):
         if self.op_parset['imager'].lower() == 'awimager':
             template = env.get_template('make_image_awimager.pipeline.parset.tpl')
         elif self.op_parset['imager'].lower() == 'casapy':
-            template = env.get_template('make_image_casapy.pipeline.parset.tpl')
+            template = env.get_template('make_image_casapy_comp.pipeline.parset.tpl')
         elif self.op_parset['imager'].lower() == 'wsclean':
             template = env.get_template('make_image_wsclean.pipeline.parset.tpl')
             self.p['cell_deg'] = get_val_from_str(self.p['cell'], 'deg')
@@ -231,6 +234,16 @@ class MakeImage(Action):
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
+
+        # For casapy only, make a clean script
+        self.p['scriptname'] = os.path.abspath(self.script_file)
+        self.p['completed_file'] = self.os.path.abspath(self.completed_file)
+
+        if self.op_parset['imager'].lower() == 'casapy':
+            template = env.get_template('casapy_clean.tpl')
+            tmp = template.render(self.p)
+            with open(self.script_file, 'w') as f:
+                f.write(tmp)
 
 
     def get_results(self):

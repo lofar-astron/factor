@@ -467,6 +467,7 @@ class FFT(Action):
         # Set a timeout for casapy runs
         if self.op_parset['imager'].lower() == 'casapy':
             self.timeout = 1200
+            self.completed_file = self.parsetbasename + '.done'
 
         # Set up all required files
         self.setup()
@@ -550,6 +551,7 @@ class FFT(Action):
                 f.write(tmp)
 
             template = env.get_template('ftw.tpl')
+            self.p['completed_file'] = self.os.path.abspath(self.completed_file)
             tmp = template.render(self.p)
             with open(self.script_file, 'w') as f:
                 f.write(tmp)
