@@ -353,6 +353,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
                       for n in range(len(points) - 32)]
 
     # Check for sources near / on facet edges and adjust regions accordingly
+    has_shapely = False
     if has_shapely:
         s = lsmtool.load('models/initial.skymodel')
         RA, Dec = s.getPatchPositions(asArray=True)
@@ -374,7 +375,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
         sy = np.array(sy)[ind_near_edge]
         sizes = sizes[ind_near_edge]
 
-        # Check all facets for each source
+        # Adjust all facets for each source near a boundary
         for x, y, size in zip(sx, sy, sizes):
             for i, thiessen_poly in enumerate(thiessen_polys):
                 polyv = np.vstack(thiessen_poly)
