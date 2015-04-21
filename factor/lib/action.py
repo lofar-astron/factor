@@ -219,13 +219,11 @@ class Action(object):
                 open("{0}.err.log".format(self.logbasename), "wb") as err:
                 p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
                 if self.timeout is not None:
-                    self.log.info(self.completed_file)
                     while not os.path.exists(self.completed_file):
                         try:
-                            self.log.info('Trying p.communicate()')
                             p.communicate(timeout=self.timeout)
                         except subprocess.TimeoutExpired:
-                            self.log.info('Timeout reached')
+                            continue
                     try:
                         # Give process time to return normally
                         p.communicate(timeout=self.timeout)
