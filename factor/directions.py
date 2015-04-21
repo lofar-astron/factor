@@ -355,9 +355,9 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
     # Check for sources near / on facet edges and adjust regions accordingly
     if has_shapely:
         s = lsmtool.load('models/initial.skymodel')
-        RA = s.getColValues('Ra').tolist()
-        Dec = s.getColValues('Dec').tolist()
-        sx, sy = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
+        RA = s.getColValues('Ra')
+        Dec = s.getColValues('Dec')
+        sx, sy = radec2xy(RA.tolist(), Dec.tolist(), refRA=midRA, refDec=midDec)
         sizes = s.getPatchSizes(units='degree')
 
         # Filter sources to get only those close to a boundary
@@ -368,7 +368,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
             poly = Polygon(polyv[:, 0], polyv[:, 1])
             dists = poly.is_inside(sx, sy)
             for j, dist in enumerate(dists):
-                pix_radius = sizes[j] / 0.066667 # size of source in pixels
+                pix_radius = sizes.tolist()[j] / 0.066667 # size of source in pixels
                 if abs(dist) < pix_radius and j not in ind_near_edge:
                     ind_near_edge.append(j)
         sx = sx[ind_near_edge]
