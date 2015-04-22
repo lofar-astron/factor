@@ -170,12 +170,6 @@ if __name__=='__main__':
         op = FacetSelfcal(parset, bands, direction_group)
         op.run()
 
-        # Add all sources in the facet(s) to empty datasets. These operations
-        # must be done in series
-        ops = [FacetAddAll(parset, bands, d) for d in direction_group]
-        for op in ops:
-            op.run()
-
         # Make image of all sources in the facet(s) and get final model(s)
         op = FacetImage(parset, bands, direction_group)
         op.run()
