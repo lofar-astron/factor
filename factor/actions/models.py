@@ -468,6 +468,8 @@ class FFT(Action):
         if self.op_parset['imager'].lower() == 'casapy':
             self.timeout = 60
             self.completed_file = self.parsetbasename + '.done'
+            if self.index is not None:
+                self.completed_file += '{0}'.format(self.index)
 
         # Set up all required files
         self.setup()

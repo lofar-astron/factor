@@ -100,6 +100,8 @@ class MakeImage(Action):
             self.timeout = 60 # check every 1 minute
             # Define completed file (assumes single image only)
             self.completed_file = self.imagebasenames[0] + '.done'
+            if self.index is not None:
+                self.completed_file += '{0}'.format(self.index)
 
         # Set up all required files
         self.setup()
