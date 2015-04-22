@@ -48,6 +48,7 @@ class Band(object):
             self.has_sub_data = True
         else:
             self.has_sub_data = False
+        self.has_sub_data_new = False
         self.starttime = tab[0]['TIME']
         self.endtime = tab[-1]['TIME']
         for t2 in tab.iter(["ANTENNA1","ANTENNA2"]):
