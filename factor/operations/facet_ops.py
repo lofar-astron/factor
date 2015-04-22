@@ -107,10 +107,9 @@ class FacetAddCal(Operation):
 
         # Concatenate SUBTRACTED_DATA for all phase-shifted bands together
         self.log.info('Concatenating bands...')
-        actions = [Concatenate(self.parset, m, p['concat1'],
-            prefix='facet_bands', direction=d, index=1) for d, m in zip(d_list,
-            avg1_data_mapfiles)]
-        concat_data_mapfiles = self.s.run(actions)
+        action = Concatenate(self.parset, shifted_data_mapfile, p['concat1'],
+            prefix='facet_bands', direction=d, index=1)
+        concat_data_mapfile = self.s.run(action)
 
         # Save files to the direction objects
         d.shifted_data_files = {}
