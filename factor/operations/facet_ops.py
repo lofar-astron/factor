@@ -81,6 +81,8 @@ class FacetAddCal(Operation):
 
         self.log.info('Adding sources for this direction...')
         self.parset['use_ftw'] = False
+        if bands[0].has_sub_data_new:
+            p['add']['incol'] += '_NEW'
         action = Add(self.parset, subtracted_all_mapfile, p['add'],
             dir_indep_cal_skymodels_mapfile, dir_indep_parmdbs_mapfile,
             prefix='facet_dirindep', direction=d)
@@ -88,14 +90,30 @@ class FacetAddCal(Operation):
 
         # Phase shift to facet center
         self.log.info('Phase shifting...')
-        action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift'],
+        action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift1'],
             prefix='facet', direction=d)
         shifted_data_mapfile = self.s.run(action)
+        action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift2'],
+            prefix='facet', direction=d)
+        shifted_sub_data_mapfile = self.s.run(action)
+
+        # Copy shifted subtracted data to first phase-shifted dataset
+        shifted_facet_data_files, _ = read_mapfile(shifted_data_mapfile)
+        shifted_sub_data_files, _ = read_mapfile(shifted_sub_data_mapfile)
+        for i, band in enumerate(bands):
+            copy_column(shifted_facet_data_files[i], 'DATA', 'SUBTRACTED_DATA',
+                ms_from=shifted_sub_data_files[i])
+
+        # Concatenate SUBTRACTED_DATA for all phase-shifted bands together
+        self.log.info('Concatenating bands...')
+        actions = [Concatenate(self.parset, m, p['concat1'],
+            prefix='facet_bands', direction=d, index=1) for d, m in zip(d_list,
+            avg1_data_mapfiles)]
+        concat_data_mapfiles = self.s.run(actions)
 
         # Save files to the direction objects
-        files, _ = read_mapfile(shifted_data_mapfile)
         d.shifted_data_files = {}
-        for band, f in zip(bands, files):
+        for band, f in zip(bands, shifted_facet_data_files):
             d.shifted_data_files[band.name] = f
 
 
@@ -772,7 +790,7 @@ class FacetImage(Operation):
             shifted_data_mapfiles, dir_dep_parmdbs_mapfiles)]
         self.s.run(actions)
 
-        self.log.info('Averaging DATA...')
+        self.log.info('Averaging...')
         actions = [Average(self.parset, m, p['avg'], prefix='facet',
             direction=d) for d, m in zip(d_list, shifted_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
@@ -813,9 +831,11 @@ class FacetSubAll(Operation):
         Run the steps for this operation
         """
         from factor.actions.calibrations import Subtract
+        from factor.actions.visibilities import PhaseShift
         from factor.actions.models import FFT
         from factor.operations.hardcoded_param import facet_sub_all as p
         from factor.lib.datamap_lib import read_mapfile
+        from factor.lib.operation_lib import copy_column
 
         d = self.direction
         bands = self.bands
@@ -834,27 +854,52 @@ class FacetSubAll(Operation):
             dir_dep_model_mapfile = self.write_mapfile([d.skymodel_dirdep]*len(bands),
                 prefix='dir_dep_skymodels', direction=d)
         subtracted_all_mapfile = self.write_mapfile([band.file for band in bands],
-        	prefix='subtracted_all', direction=d)
+            prefix='subtracted_all', direction=d)
+        shifted_data_mapfile = self.write_mapfile(d.shifted_data_files,
+            	prefix='shifted', direction=d)
         dir_dep_parmdb_mapfile = self.write_mapfile([d.dirdepparmdb]*len(bands),
             prefix='dir_dep_parmdbs', direction=d)
 
-        self.log.info('FFTing model image (facet model final)...')
+        self.log.info('FFTing model image (final facet model)...')
         p['imsize'] = d.imsize
-        action = FFT(self.parset, subtracted_all_mapfile,
-            dir_dep_model_mapfile, p['fft'], prefix='fft', direction=d)
+        action = FFT(self.parset, shifted_data_mapfile, dir_dep_model_mapfile,
+            p['fft'], prefix='fft', direction=d)
         self.s.run(action)
-        dir_dep_model_mapfile = None
 
-        self.log.info('Subtracting sources for this direction using final model...')
-        action = Subtract(self.parset, subtracted_all_mapfile, p['subtract'],
+#         self.log.info('Phase shifting MODEL_DATA...')
+#         p_shift = p['shift']
+#         p_shift['ra'] = bands[0].ra
+#         p_shift['dec'] = bands[0].dec
+#         action = PhaseShift(self.parset, shifted_data_mapfile, p_shift,
+#             prefix='model_shift')
+#         shifted_model_data_mapfile = self.s.run(action)
+#
+#         # Copy unshifted model data to original datasets
+#         shifted_model_data_files, _ = read_mapfile(shifted_model_data_mapfile)
+#         for i, band in enumerate(bands):
+#             copy_column(band.file, 'DATA', 'MODEL_DATA',
+#                 ms_from=shifted_model_data_file[i])
+
+        self.log.info('Subtracting sources for this direction...')
+        dir_dep_model_mapfile = None
+        action = Subtract(self.parset, shifted_data_mapfile, p['subtract'],
             dir_dep_model_mapfile, dir_dep_parmdb_mapfile,
             prefix='facet_dirdep', direction=d)
         self.s.run(action)
 
+        self.log.info('Averaging...')
+        action = Average(self.parset, subtracted_all_mapfile, p['avg'], prefix='facet')
+        avg_data_mapfile = self.s.run(action)
+
+        avg_data_files, _ = read_mapfile(avg_data_mapfile)
+        for band, avg_data_file in zip(bands, avg_data_files):
+            band.has_sub_data_new = True
+            band.residual_file = avg_data_file
+
         # Clean up files for this direction:
         #    - unneeded MS files
         #    - unneeded images
-        self.log.info('Cleaning up files for this direction...')
+#         self.log.info('Cleaning up files for this direction...')
 #         os.system('rm -rf visdata/*{0}*'.format(d.name))
 
 

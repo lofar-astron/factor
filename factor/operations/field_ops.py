@@ -5,6 +5,8 @@ Classes
 -------
 InitSubtract : Operation
     Images each band at high and low resolution to make and subtract sky models
+ResidualImage : Operation
+    Images residual data for each band at low resolution to check for problems
 MakeMosaic : Operation
     Makes a mosaic from the facet images
 
@@ -198,6 +200,56 @@ class InitSubtract(Operation):
         skymodels, _ = read_mapfile(merged_skymodels_mapfile)
         for band, skymodel in zip(bands, skymodels):
             band.skymodel_dirindep = skymodel
+
+
+class ResidualImage(Operation):
+    """
+    Operation to mosiac facet images
+    """
+    def __init__(self, parset, bands, direction=None, reset=False):
+        super(ResidualImage, self).__init__(parset, bands, direction=direction,
+            reset=reset, name='ResidualImage')
+
+
+    def run_steps(self):
+        """
+        Run the steps for this operation
+        """
+        from factor.actions.images import MakeImageIterate
+        from factor.actions.visibilities import Average, ChgCentre
+        from factor.lib.datamap_lib import read_mapfile
+        from factor.operations.hardcoded_param import residual_image as p
+
+        bands = self.bands
+
+        # Check operation state
+        if os.path.exists(self.statebasename+'.done'):
+            return
+
+        # Make initial data maps for the input datasets and their dir-indep
+        # instrument parmdbs.
+        input_data_mapfile = self.write_mapfile([band.residual_image for band in bands],
+        	prefix='input_data')
+
+        self.log.info('Concatenating bands...')
+        action = Concatenate(self.parset, input_data_mapfile, p['concat'],
+            prefix='suball_bands')
+        concat_data_mapfile = self.s.run(action)
+
+        self.log.info('Imaging...')
+        if self.parset['use_chgcentre']:
+            self.log.debug('Changing center to zenith...')
+            action = ChgCentre(self.parset, concat_data_mapfile, {},
+                prefix='highres')
+            chgcentre_data_mapfile = self.s.run(action)
+            input_to_imager_mapfile = chgcentre_data_mapfile
+        else:
+            input_to_imager_mapfile = concat_data_mapfile
+        action = MakeImageIterate(self.parset, input_to_imager_mapfile, p['imager'],
+            prefix='suball_image')
+        image_basenames_mapfiles = self.s.run(action)
+
+        # TODO: Check images for problems
 
 
 class MakeMosaic(Operation):

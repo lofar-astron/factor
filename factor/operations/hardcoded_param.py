@@ -68,8 +68,13 @@ facet_add_cal = {
 'add' : {'incol': 'SUBTRACTED_DATA_ALL',
          'outcol': 'FACET_DATA',
          'flags': '--replace-sourcedb'},
-'shift' : {'columnname': 'FACET_DATA'} # outcol is DATA
-}
+'shift1' : {'columnname': 'FACET_DATA'}, # outcol is DATA
+'shift2' : {'columnname': 'SUBTRACTED_DATA_ALL'}, # outcol is DATA
+'copy' : {'incol': 'DATA',
+          'outcol': 'SUBTRACTED_DATA_ALL'},
+'concat1' : {'columnname': 'DATA'}, # outcol is DATA
+'concat2' : {'columnname': 'SUBTRACTED_DATA_ALL'} # outcol is DATA
+} # Final result is shifted, concatenated, full resolution file, with DATA and SUBTRACTED_DATA_ALL
 
 facet_setup = {
 'apply' : {'incol': 'DATA',
@@ -80,8 +85,6 @@ facet_setup = {
 'avg2' : {'columnname': 'CORRECTED_DATA', # outcol is DATA
           'freqstep': 20,
           'timestep': 1},
-'concat1' : {'columnname': 'DATA'}, # outcol is DATA
-'concat2' : {'columnname': 'DATA'}, # outcol is DATA
 'copy' : {'incol': 'DATA',
           'outcol': 'CORRECTED_DATA'}
 }
@@ -253,16 +256,20 @@ facet_selfcal = {
                 'smoothing_window': 1},
 }
 
-facet_add_all = {
+facet_add_all = {# Input is shifted, concatenated, full resolution file, with DATA and SUBTRACTED_DATA_ALL
 'select' : {},
 'add' : {'incol': 'SUBTRACTED_DATA_ALL',
          'outcol': 'FACET_DATA',
          'flags': '--replace-sourcedb'},
-'shift' : {'columnname': 'FACET_DATA'} # outcol is DATA
+#'shift' : {'columnname': 'FACET_DATA'} # outcol is DATA
 }
 
 facet_image= {
-'apply_dirdep' : {'incol': 'DATA',
+'select' : {},
+'add' : {'incol': 'SUBTRACTED_DATA_ALL',
+         'outcol': 'FACET_DATA',
+         'flags': '--replace-sourcedb'},
+'apply_dirdep' : {'incol': 'FACET_DATA',
                   'outcol': 'CORRECTED_DATA'},
 'avg' : {'columnname': 'CORRECTED_DATA', # outcol is DATA
          'freqstep': 5,
@@ -297,9 +304,45 @@ facet_sub_all = {
          'cell': '1.5arcsec',
          'nterms': 2,
          'n_per_node': 1},
+'shift' : {'columnname': 'MODEL_DATA'}, # outcol is DATA
+'select' : {},
+'add' : {'incol': 'SUBTRACTED_DATA_ALL',
+         'outcol': 'FACET_DATA',
+         'flags': '--replace-sourcedb'},
 'subtract' : {'incol': 'FACET_DATA',
-              'outcol': 'SUBTRACTED_DATA_ALL',
-              'flags': '--replace-sourcedb'}
+              'outcol': 'SUBTRACTED_DATA_ALL_TEMP',
+              'flags': '--replace-sourcedb'},
+'avg' : {'columnname': 'CORRECTED_SUBTRACTED_DATA', # outcol is DATA
+          'freqstep': 5,
+          'timestep': 2}
+}
+
+residual_image = {
+'concat' : {'columnname': 'DATA'}, # outcol is DATA
+'apply' : {'incol': 'DATA',
+           'outcol': 'CORRECTED_DATA'},
+'imager' : {'niter' : 5000,
+             'imsize': 4800,
+             'mscale': False,
+             'cell': '25arcsec',
+             'uvrange': "0.08~2.0klambda",
+             'minuv': '80',
+             'maxuv': '2000',
+             'wplanes': 700,
+             'gain': 0.1,
+             'mgain': 0.8,
+             'nterms': 1,
+             'ncycles': 1,
+             'threshold': '0mJy',
+             'threshisl': 5,
+             'threshpix': 5,
+             'atrous_do': False,
+             'rmsbox': '(60, 20)',
+             'adaptive_rmsbox': False,
+             'use_rms': False,
+             'image_final': False,
+             'iterate_threshold': False,
+             'n_per_node': 1},
 }
 
 facet_add_all_final = {
@@ -314,7 +357,7 @@ facet_add_all_final = {
 }
 
 facet_image_final = {
-'add_dirdep' : {'incol': 'SUBTRACTED_DATA_ALL',
+'add_dirdep' : {'incol': 'SUBTRACTED_DATA_ALL_NEW',
                 'outcol': 'FACET_DATA',
                 'flags': '--replace-sourcedb'},
 'apply_dirdep' : {'incol': 'FACET_DATA',
