@@ -86,6 +86,8 @@ facet_setup = {
 'avg2' : {'columnname': 'CORRECTED_DATA', # outcol is DATA
           'freqstep': 20,
           'timestep': 1},
+'concat1' : {'columnname': 'DATA'}, # outcol is DATA
+'concat2' : {'columnname': 'DATA'}, # outcol is DATA
 'copy' : {'incol': 'DATA',
           'outcol': 'CORRECTED_DATA'}
 }
