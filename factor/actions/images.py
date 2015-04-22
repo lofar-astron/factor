@@ -238,10 +238,9 @@ class MakeImage(Action):
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
 
-        # For casapy only, make a clean script
-        self.p['completed_file'] = os.path.abspath(self.completed_file)
-
         if self.op_parset['imager'].lower() == 'casapy':
+            # For casapy only, make a clean script
+            self.p['completed_file'] = os.path.abspath(self.completed_file)
             template = env.get_template('casapy_clean.tpl')
             tmp = template.render(self.p)
             with open(self.script_file, 'w') as f:

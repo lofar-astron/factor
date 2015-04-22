@@ -72,9 +72,10 @@ facet_add_cal = {
 'shift2' : {'columnname': 'SUBTRACTED_DATA_ALL'}, # outcol is DATA
 'copy' : {'incol': 'DATA',
           'outcol': 'SUBTRACTED_DATA_ALL'},
-'concat1' : {'columnname': 'DATA'}, # outcol is DATA
-'concat2' : {'columnname': 'SUBTRACTED_DATA_ALL'} # outcol is DATA
-} # Final result is shifted, concatenated, full resolution file, with DATA and SUBTRACTED_DATA_ALL
+'concat' : {'columnname': 'SUBTRACTED_DATA_ALL'} # outcol is DATA
+}
+# Final result is shifted, concatenated, full resolution file, with DATA (cal
+# added) and SUBTRACTED_DATA_ALL
 
 facet_setup = {
 'apply' : {'incol': 'DATA',
@@ -256,14 +257,8 @@ facet_selfcal = {
                 'smoothing_window': 1},
 }
 
-facet_add_all = {# Input is shifted, concatenated, full resolution file, with DATA and SUBTRACTED_DATA_ALL
-'select' : {},
-'add' : {'incol': 'SUBTRACTED_DATA_ALL',
-         'outcol': 'FACET_DATA',
-         'flags': '--replace-sourcedb'},
-#'shift' : {'columnname': 'FACET_DATA'} # outcol is DATA
-}
-
+# Input is shifted, concatenated, full resolution file, with DATA (with cal added)
+# and SUBTRACTED_DATA_ALL
 facet_image= {
 'select' : {},
 'add' : {'incol': 'SUBTRACTED_DATA_ALL',

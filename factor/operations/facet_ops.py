@@ -105,16 +105,21 @@ class FacetAddCal(Operation):
             copy_column(shifted_facet_data_files[i], 'DATA', 'SUBTRACTED_DATA',
                 ms_from=shifted_sub_data_files[i])
 
-        # Concatenate SUBTRACTED_DATA for all phase-shifted bands together
+        # Concatenate SUBTRACTED_DATA_ALL for all phase-shifted bands together
+        # for use later with full facet imaging / subtraction
         self.log.info('Concatenating bands...')
-        action = Concatenate(self.parset, shifted_data_mapfile, p['concat1'],
+        action = Concatenate(self.parset, shifted_data_mapfile, p['concat'],
             prefix='facet_bands', direction=d, index=1)
-        concat_data_mapfile = self.s.run(action)
+        concat_sub_data_mapfile = self.s.run(action)
+        concat_sub_data_files, _ = read_mapfile(concat_sub_data_mapfile)
 
         # Save files to the direction objects
         d.shifted_data_files = {}
-        for band, f in zip(bands, shifted_facet_data_files):
+        d.concat_sub_data_files = {}
+        for band, f, fsub in zip(bands, shifted_facet_data_files,
+            concat_sub_data_files):
             d.shifted_data_files[band.name] = f
+            d.concat_sub_data_files[band.name] = fsub
 
 
 class FacetSetup(Operation):
@@ -778,11 +783,23 @@ class FacetImage(Operation):
         shifted_data_mapfiles = []
         dir_dep_parmdbs_mapfiles = []
         for d, h in zip(d_list, d_hosts):
-            shifted_data_mapfiles.append(self.write_mapfile(d.shifted_data_files,
+            shifted_data_mapfiles.append(self.write_mapfile(d.concat_sub_data_files,
             	prefix='shifted', direction=d, host_list=h))
             dir_dep_parmdbs_mapfiles.append(self.write_mapfile([d.
             	dirdepparmdb]*len(bands), prefix='dir_dep_parmdbs', direction=d,
             	host_list=h))
+
+        self.log.info('Selecting all sources for this direction...')
+        action = MakeFacetSkymodel(self.parset, dir_indep_skymodels_mapfile,
+            p['select'], d, prefix='all_final', cal_only=False)
+        dir_indep_all_skymodels_mapfile = self.s.run(action)
+
+        self.log.info('Adding sources for this direction...')
+        self.parset['use_ftw'] = False
+        action = Add(self.parset, subtracted_all_mapfile, p['add'],
+            dir_indep_all_skymodels_mapfile, dir_indep_parmdbs_mapfile,
+            prefix='facet_dirindep', direction=d)
+        self.s.run(action)
 
         self.log.info('Applying direction-dependent calibration...')
         actions = [Apply(self.parset, dm, p['apply_dirdep'],
@@ -794,12 +811,6 @@ class FacetImage(Operation):
         actions = [Average(self.parset, m, p['avg'], prefix='facet',
             direction=d) for d, m in zip(d_list, shifted_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
-
-        self.log.info('Concatenating bands...')
-        actions = [Concatenate(self.parset, m, p['concat'],
-            prefix='facet_bands', direction=d) for d, m in zip(d_list,
-            avg_data_mapfiles)]
-        concat_data_mapfiles = self.s.run(actions)
 
         self.log.info('Imaging...')
         actions = [MakeImageIterate(self.parset, m, p['imager'], prefix='facet_image',
@@ -855,7 +866,7 @@ class FacetSubAll(Operation):
                 prefix='dir_dep_skymodels', direction=d)
         subtracted_all_mapfile = self.write_mapfile([band.file for band in bands],
             prefix='subtracted_all', direction=d)
-        shifted_data_mapfile = self.write_mapfile(d.shifted_data_files,
+        shifted_data_mapfile = self.write_mapfile(d.concat_sub_data_files,
             	prefix='shifted', direction=d)
         dir_dep_parmdb_mapfile = self.write_mapfile([d.dirdepparmdb]*len(bands),
             prefix='dir_dep_parmdbs', direction=d)
