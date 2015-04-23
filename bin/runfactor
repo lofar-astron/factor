@@ -174,9 +174,13 @@ if __name__=='__main__':
         op = FacetImage(parset, bands, direction_group)
         op.run()
 
-        # Subtract final model(s) from empty datasets. These operations
+        # Subtract model(s) from empty facet datasets and image to check if OK
+        op = FacetSub(parset, bands, direction_group)
+        op.run()
+
+        # Subtract final model(s) from empty field datasets. These operations
         # must be done in series
-        ops = [FacetSubAll(parset, bands, d) for d in direction_group]
+        ops = [FieldSub(parset, bands, d) for d in direction_group]
         for op in ops:
             op.run()
 
