@@ -75,7 +75,7 @@ class InitSubtract(Operation):
             input_to_imager_mapfile = chgcentre_data_mapfile
         else:
             input_to_imager_mapfile = input_data_mapfile
-        actions = MakeImageIterate(self.parset, input_to_imager_mapfile, p['imagerh'],
+        action = MakeImageIterate(self.parset, input_to_imager_mapfile, p['imagerh'],
             prefix='highres')
         highres_image_basenames_mapfile = self.s_imager.run(action)
 
