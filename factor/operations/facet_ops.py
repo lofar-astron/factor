@@ -117,7 +117,7 @@ class FacetAdd(Operation):
         for band, fcal in zip(bands, shifted_data_files):
             d.shifted_data_files[band.name] = fcal
             d.concat_sub_data_file = concat_all_data_files[0]
-            copy_column(fsub, p['copy']['incol'], p['copy']['outcol'],
+            copy_column(d.concat_sub_data_file, p['copy']['incol'], p['copy']['outcol'],
                 ms_from=concat_sub_data_files[0])
 
 
