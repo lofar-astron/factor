@@ -43,7 +43,7 @@ class FacetAdd(Operation):
         from factor.actions.visibilities import PhaseShift, Split, Concatenate
         from factor.actions.models import MakeFacetSkymodel
         from factor.actions.calibrations import Add
-        from factor.operations.hardcoded_param import facet_add_cal as p
+        from factor.operations.hardcoded_param import facet_add as p
         from factor.lib.datamap_lib import read_mapfile
         from factor.lib.operation_lib import copy_column
 
