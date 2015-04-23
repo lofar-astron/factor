@@ -21,7 +21,7 @@ class Direction(object):
         dec : float
             Dec in degrees of direction center
         reg : str
-            Region file
+            CASA region file for clean
         multiscale : bool
             Use multiscale clean?
         solint_a : int

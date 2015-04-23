@@ -467,7 +467,13 @@ class MakeImageIterate(Action):
         """
         Makes the required data maps
         """
-        pass
+        if self.direction is not None:
+            if self.direction.reg != '':
+                self.p['mask_datamap'] = self.write_mapfile([self.direction.reg],
+                    prefix=self.prefix+'_input', direction=self.direction,
+                    index=self.index, band=self.band)
+            else:
+                self.p['mask_datamap'] = None
 
 
     def make_pipeline_control_parset(self):
@@ -484,7 +490,7 @@ class MakeImageIterate(Action):
         from factor.lib.datamap_lib import read_mapfile
 
         vis_datamap = self.vis_datamap
-        mask_datamap = None
+        mask_datamap = self.p['mask_datamap']
         threshold_5rms = self.p['threshold']
 
         if self.op_parset['imager'].lower() == 'wsclean':
