@@ -218,7 +218,7 @@ def split_ms(msin, msout, start_out, end_out, columns=None, clobber=True):
     t.close()
 
 
-def merge_chunks(chunk_files, prefix=None, clobber=False):
+def merge_chunks(chunk_files, prefix=None, virtual=True, clobber=False):
     """
     Merges chunks
 
@@ -226,8 +226,10 @@ def merge_chunks(chunk_files, prefix=None, clobber=False):
     ----------
     chunk_files : list
         List of MS files to merge
-    prefix: str, optional
+    prefix : str, optional
         String to prepend to output file
+    virtual : bool. optional
+        If True, perform a virtual concat
     clobber : bool, optional
         If True, existing files are overwritten
 
@@ -254,10 +256,44 @@ def merge_chunks(chunk_files, prefix=None, clobber=False):
         else:
             return msout
 
-    t = pt.table(chunk_files, ack=False)
-    t.sort('TIME').copy(msout, deep=True)
-    t.close()
+    if virtual:
+        pt.msutil.msconcat(chunk_files, msout)
+    else:
+        t = pt.table(chunk_files, ack=False)
+        t.sort('TIME').copy(msout, deep=True)
+        t.close()
+
     return msout
+
+
+def concatenate_chunks(chunk_files, prefix=None clobber=False):
+    """
+    Does a virtual oncatenation of chunks
+
+    Parameters
+    ----------
+    chunk_files : list
+        List of MS files to merge
+    prefix: str, optional
+        String to prepend to output file
+    clobber : bool, optional
+        If True, existing files are overwritten
+
+    """
+    msout = None
+    if prefix is not None:
+        pstr = prefix + '_'
+    else:
+        pstr = ''
+    for m in chunk_files:
+        if '-chunk_0' in m:
+            rstr = pstr + 'allchunks'
+            msout = rstr.join(m.split('chunk_0'))
+            break
+    if msout is None:
+        msout = chunk_files[0]
+
+    return concat_msname
 
 
 def merge_chunk_parmdbs(inparmdbs, prefix='merged', clobber=False):

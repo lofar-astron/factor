@@ -331,7 +331,7 @@ class FacetSelfcal(Operation):
         chunks_list = []
         for d, m in zip(d_list, facet_data_mapfiles):
             files, _ = read_mapfile(m)
-            chunks_list.append(make_chunks(files[0], d.solint_a,
+            chunks_list.append(make_chunks(files[0], d.solint_a*5.0,
             	self.parset, 'facet_chunk', direction=d, clobber=True))
         chunk_data_mapfiles = []
         for i, chunks in enumerate(chunks_list):
@@ -350,14 +350,13 @@ class FacetSelfcal(Operation):
         self.s.run(actions)
 
         self.log.info('Imaging (facet image #1)...')
-        self.log.debug('Updating chunk parents...')
-        for chunks in chunks_list:
-            for chunk in chunks:
-                chunk.copy_to_parent([p['solve_phaseonly1']['outcol']])
+        self.log.debug('Merging chunks...')
+        merged_data_mapfiles = self.write_mapfile([merge_chunks(chunks,
+            prefix=None, clobber=True) for chunks in chunks_list]
 
         self.log.debug('Averaging in preparation for imaging...')
         actions = [Average(self.parset, m, p['avg1'], prefix='facet',
-            direction=d, index=1) for d, m in zip(d_list, facet_data_mapfiles)]
+            direction=d, index=1) for d, m in zip(d_list, merged_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.debug('Imaging...')
@@ -369,13 +368,9 @@ class FacetSelfcal(Operation):
         self.log.info('FFTing model image (facet model #1)...')
         actions = [FFT(self.parset, dm, mm, p['imager1'], prefix='fft1',
             direction=d, index=1) for d, dm, mm in zip(d_list,
-            facet_data_mapfiles, image1_basenames_mapfiles)]
+            chunk_data_mapfiles, image1_basenames_mapfiles)]
         self.s.run(actions)
 
-        self.log.debug('Updating chunks...')
-        for i, chunks in enumerate(chunks_list):
-            for chunk in chunks:
-                chunk.copy_from_parent(['MODEL_DATA'])
         chunk_parmdb_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             chunk_parmdb_mapfiles.append(self.write_mapfile(
@@ -396,14 +391,13 @@ class FacetSelfcal(Operation):
         self.s.run(actions)
 
         self.log.info('Imaging (facet image #2)...')
-        self.log.debug('Updating chunk parents...')
-        for i, chunks in enumerate(chunks_list):
-            for chunk in chunks:
-                chunk.copy_to_parent([p['solve_phaseonly2']['outcol']])
+        self.log.debug('Merging chunks...')
+        merged_data_mapfiles = self.write_mapfile([merge_chunks(chunks,
+            prefix=None, clobber=True) for chunks in chunks_list]
 
         self.log.debug('Averaging in preparation for imaging...')
         actions = [Average(self.parset, m, p['avg2'], prefix='facet',
-            direction=d, index=2) for d, m in zip(d_list, facet_data_mapfiles)]
+            direction=d, index=2) for d, m in zip(d_list, merged_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.debug('Imaging...')
@@ -414,13 +408,9 @@ class FacetSelfcal(Operation):
         self.log.info('FFTing model image (facet model #2)...')
         actions = [FFT(self.parset, dm, mm, p['imager2'], prefix='fft2',
             direction=d, index=2) for d, dm, mm in zip(d_list,
-            facet_data_mapfiles, image2_basenames_mapfiles)]
+            chunk_data_mapfiles, image2_basenames_mapfiles)]
         self.s.run(actions)
 
-        self.log.debug('Updating chunks...')
-        for i, chunks in enumerate(chunks_list):
-            for chunk in chunks:
-                chunk.copy_from_parent(['MODEL_DATA'])
         chunk_parmdb_phaseamp_phase1_mapfiles = []
         chunk_parmdb_phaseamp_amp1_mapfiles = []
         for i, chunks in enumerate(chunks_list):
@@ -456,11 +446,6 @@ class FacetSelfcal(Operation):
             chunk_parmdb_phaseamp_amp1_mapfiles)]
         self.s.run(actions)
 
-        self.log.debug('Updating chunk parents...')
-        for i, chunks in enumerate(chunks_list):
-            for chunk in chunks:
-                chunk.copy_to_parent([p['solve_phaseamp1_phaseonly']['outcol']])
-
         self.log.debug('Merging instrument parmdbs...')
         merged_parmdb_phaseamp_amp1_mapfiles = []
         for i, chunks in enumerate(chunks_list):
@@ -479,14 +464,18 @@ class FacetSelfcal(Operation):
         self.log.info('Applying amplitude solutions...')
         actions = [Apply(self.parset, dm, p['apply_amp1'],
             pm, prefix='facet_amp', direction=d, index=2) for d, dm, pm in
-            zip(d_list, facet_data_mapfiles,
+            zip(d_list, chunk_data_mapfiles,
             merged_parmdb_phaseamp_amp1_mapfiles)]
         self.s.run(actions)
 
         self.log.info('Imaging (facet image #3)...')
+        self.log.debug('Merging chunks...')
+        merged_data_mapfiles = self.write_mapfile([merge_chunks(chunks,
+            prefix=None, clobber=True) for chunks in chunks_list]
+
         self.log.debug('Averaging in preparation for imaging...')
         actions = [Average(self.parset, m, p['avg3'], prefix='facet',
-            direction=d, index=3) for d, m in zip(d_list, facet_data_mapfiles)]
+            direction=d, index=3) for d, m in zip(d_list, merged_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.debug('Imaging...')
@@ -497,7 +486,7 @@ class FacetSelfcal(Operation):
         self.log.info('FFTing model image (facet model #3)...')
         actions = [FFT(self.parset, dm, mm, p['imager3'], prefix='fft3',
             direction=d, index=3) for d, dm, mm in zip(d_list,
-            facet_data_mapfiles, image3_basenames_mapfiles)]
+            chunk_data_mapfiles, image3_basenames_mapfiles)]
         self.s.run(actions)
 
         self.log.debug('Resetting phases...')
@@ -506,11 +495,6 @@ class FacetSelfcal(Operation):
             for d, dm, pm in zip(d_list, facet_data_mapfiles,
             merged_parmdb_phaseamp_amp1_mapfiles)]
         self.s.run(actions)
-
-        self.log.debug('Updating chunks...')
-        for i, chunks in enumerate(chunks_list):
-            for chunk in chunks:
-                chunk.copy_from_parent(['MODEL_DATA'])
 
         self.log.info('Preapplying amplitude solutions...')
         chunk_parmdb_phaseamp_amp1_mapfiles = []
@@ -560,11 +544,6 @@ class FacetSelfcal(Operation):
             chunk_parmdb_phaseamp_amp2_mapfiles)]
         self.s.run(actions)
 
-        self.log.debug('Updating chunk parents...')
-        for i, chunks in enumerate(chunks_list):
-            for chunk in chunks:
-                chunk.copy_to_parent([p['solve_phaseamp2_phaseonly']['outcol']])
-
         self.log.debug('Merging instrument parmdbs...')
         merged_parmdb_phaseamp_amp2_mapfiles = []
         merged_parmdb_phaseamp_phase2_mapfiles = []
@@ -589,14 +568,18 @@ class FacetSelfcal(Operation):
         self.log.info('Applying amplitude solutions...')
         actions = [Apply(self.parset, dm, p['apply_amp3'],
             pm, prefix='facet_amp', direction=d, index=4) for d, dm, pm in
-            zip(d_list, facet_data_mapfiles,
+            zip(d_list, chunk_data_mapfiles,
             merged_parmdb_phaseamp_amp2_mapfiles)]
         self.s.run(actions)
 
         self.log.info('Imaging (facet image #4)...')
+        self.log.debug('Merging chunks...')
+        merged_data_mapfiles = self.write_mapfile([merge_chunks(chunks,
+            prefix=None, clobber=True) for chunks in chunks_list]
+
         self.log.debug('Averaging in preparation for imaging...')
         actions = [Average(self.parset, m, p['avg4'], prefix='facet',
-            direction=d, index=4) for d, m in zip(d_list, facet_data_mapfiles)]
+            direction=d, index=4) for d, m in zip(d_list, merged_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.debug('Imaging...')
