@@ -266,36 +266,6 @@ def merge_chunks(chunk_files, prefix=None, virtual=True, clobber=False):
     return msout
 
 
-def concatenate_chunks(chunk_files, prefix=None clobber=False):
-    """
-    Does a virtual oncatenation of chunks
-
-    Parameters
-    ----------
-    chunk_files : list
-        List of MS files to merge
-    prefix: str, optional
-        String to prepend to output file
-    clobber : bool, optional
-        If True, existing files are overwritten
-
-    """
-    msout = None
-    if prefix is not None:
-        pstr = prefix + '_'
-    else:
-        pstr = ''
-    for m in chunk_files:
-        if '-chunk_0' in m:
-            rstr = pstr + 'allchunks'
-            msout = rstr.join(m.split('chunk_0'))
-            break
-    if msout is None:
-        msout = chunk_files[0]
-
-    return concat_msname
-
-
 def merge_chunk_parmdbs(inparmdbs, prefix='merged', clobber=False):
     """Merges parmdbs"""
     import os
