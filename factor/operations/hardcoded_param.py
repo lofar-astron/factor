@@ -13,7 +13,7 @@ init_subtract = {
              'maxuv': '7000',
              'wplanes': 700,
              'gain': 0.1,
-             'mgain': 0.8,
+             'mgain': 0.5,
              'nterms': 1,
              'ncycles': 4,
              'threshold': '0mJy',
@@ -42,7 +42,7 @@ init_subtract = {
              'maxuv': '2000',
              'wplanes': 700,
              'gain': 0.1,
-             'mgain': 0.8,
+             'mgain': 0.5,
              'nterms': 1,
              'ncycles': 2,
              'threshold': '0mJy',
@@ -63,18 +63,18 @@ init_subtract = {
            'radius': 0}
 }
 
-facet_add_cal = {
-'add1' : {'incol': 'SUBTRACTED_DATA_ALL',
+facet_add = {
+'add_cal' : {'incol': 'SUBTRACTED_DATA_ALL',
          'outcol': 'FACET_DATA_CAL',
          'flags': '--replace-sourcedb'},
-'add2' : {'incol': 'SUBTRACTED_DATA_ALL',
+'add_all' : {'incol': 'SUBTRACTED_DATA_ALL',
          'outcol': 'FACET_DATA_ALL',
          'flags': '--replace-sourcedb'},
-'shift1' : {'columnname': 'FACET_DATA_CAL'}, # outcol is DATA
-'shift2' : {'columnname': 'FACET_DATA_ALL'}, # outcol is DATA
-'shift3' : {'columnname': 'SUBTRACTED_DATA_ALL'}, # outcol is DATA
-'concat1' : {'columnname': 'FACET_DATA_ALL'}, # outcol is DATA
-'concat2' : {'columnname': 'SUBTRACTED_DATA_ALL'}, # outcol is DATA
+'shift_cal' : {'columnname': 'FACET_DATA_CAL'}, # outcol is DATA
+'shift_all' : {'columnname': 'FACET_DATA_ALL'}, # outcol is DATA
+'shift_sub' : {'columnname': 'SUBTRACTED_DATA_ALL'}, # outcol is DATA
+'concat_all' : {'columnname': 'FACET_DATA_ALL'}, # outcol is DATA
+'concat_sub' : {'columnname': 'SUBTRACTED_DATA_ALL'}, # outcol is DATA
 'copy' : {'incol': 'DATA',
           'outcol': 'FACET_DATA_ALL'}
 }
@@ -258,15 +258,11 @@ facet_selfcal = {
 'smooth_amp3': {'solset': 'sol000',
                 'soltab_amp': 'amplitude000',
                 'soltab_phase': 'phase000',
-                'smoothing_window': 1},
+                'smoothing_window': 1}
 }
 
 facet_image= {
-'select' : {},
-'add' : {'incol': 'DATA',
-         'outcol': 'FACET_DATA',
-         'flags': '--replace-sourcedb'},
-'apply_dirdep' : {'incol': 'FACET_DATA',
+'apply_dirdep' : {'incol': 'FACET_DATA_ALL',
                   'outcol': 'CORRECTED_DATA'},
 'avg' : {'columnname': 'CORRECTED_DATA', # outcol is DATA
          'freqstep': 5,
@@ -280,7 +276,7 @@ facet_image= {
             'minuv': '80',
             'maxuv': '1000000',
             'gain': 0.01,
-            'mgain': 0.8,
+            'mgain': 0.5,
             'threshpix': 6.0,
             'threshisl': 3.0,
             'atrous_do': False,
@@ -295,8 +291,8 @@ facet_image= {
             'n_per_node': 1}
 }
 
-facet_sub_all = {
-'subtract' : {'incol': 'FACET_DATA',
+facet_sub = {
+'subtract' : {'incol': 'FACET_DATA_ALL',
               'outcol': 'CORRECTED_SUBTRACTED_DATA',
               'flags': '--replace-sourcedb'},
 'shift' : {'columnname': 'CORRECTED_SUBTRACTED_DATA'}, # outcol is DATA
@@ -304,38 +300,37 @@ facet_sub_all = {
           'freqstep': 5,
           'timestep': 2},
 'imager' : {'niter' : 10,
-             'imsize': 4800,
-             'mscale': False,
-             'cell': '25arcsec',
-             'uvrange': "0.08~2.0klambda",
-             'minuv': '80',
-             'maxuv': '2000',
-             'wplanes': 700,
-             'gain': 0.1,
-             'mgain': 0.8,
-             'nterms': 1,
-             'ncycles': 1,
-             'threshold': '0mJy',
-             'threshisl': 5,
-             'threshpix': 5,
-             'atrous_do': False,
-             'rmsbox': '(60, 20)',
-             'adaptive_rmsbox': False,
-             'use_rms': False,
-             'image_final': False,
-             'iterate_threshold': False,
-             'n_per_node': 1}
+            'imsize': 2400,
+            'mscale': False,
+            'cell': '25arcsec',
+            'uvrange': "0.08~2.0klambda",
+            'minuv': '80',
+            'maxuv': '2000',
+            'wplanes': 700,
+            'gain': 0.1,
+            'mgain': 0.5,
+            'nterms': 1,
+            'ncycles': 1,
+            'threshold': '0mJy',
+            'threshisl': 5,
+            'threshpix': 5,
+            'atrous_do': False,
+            'rmsbox': '(60, 20)',
+            'adaptive_rmsbox': False,
+            'use_rms': False,
+            'image_final': False,
+            'iterate_threshold': False,
+            'n_per_node': 1}
 }
 
 field_sub = {
 'shift' : {'columnname': 'MODEL_DATA'}, # outcol is DATA
 'copy' : {'incol': 'DATA',
            'outcol': 'MODEL_DATA'},
-'select' : {},
 'add' : {'incol': 'SUBTRACTED_DATA_ALL',
-         'outcol': 'FACET_DATA',
+         'outcol': 'FACET_DATA_ALL',
          'flags': '--replace-sourcedb'},
-'subtract' : {'incol': 'FACET_DATA',
+'subtract' : {'incol': 'FACET_DATA_ALL',
               'outcol': 'SUBTRACTED_DATA_ALL_NEW',
               'flags': '--replace-sourcedb'},
 }
@@ -358,7 +353,7 @@ facet_image_final = {
             'minuv': '80',
             'maxuv': '1000000',
             'gain': 0.01,
-            'mgain': 0.75,
+            'mgain': 0.5,
             'threshpix': 6.0,
             'threshisl': 3.0,
             'atrous_do': False,

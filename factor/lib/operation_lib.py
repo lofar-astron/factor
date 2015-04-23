@@ -73,6 +73,40 @@ def copy_column(ms_to, inputcol, outputcol, ms_from=None):
     t_to.close()
 
 
+def copy_column_freq(mslist, ms_from, inputcol, outputcol):
+    """
+    Copies column to bands
+
+    Parameters
+    ----------
+    mslist : list
+        MS files receiving copy
+    ms_from : str
+        MS file to copy from.
+    inputcol : str
+        Column name to copy from
+    outputcol : str
+        Column name to copy to
+
+    """
+    import sys
+    import pyrap.tables as pt
+    import numpy
+
+    datain = pt.table(ms_from)
+    data = datain.getcol(inputcol, nrow=1)
+    numberofchans = numpy.int(numpy.shape(data)[1])
+    chanperms = numberofchans/numpy.int(len(mslist))
+
+    for ms_id, ms in enumerate(mslist):
+        if os.path.isdir(ms):
+            data = datain.getcolslice(inputcol, [chanperms*ms_id,0], [(chanperms*(ms_id+1))-1,3])
+            dataout = pt.table(ms, readonly=False)
+            dataout.putcol(outputcol, data)
+            dataout.flush()
+            dataout.close()
+
+
 def make_chunks(dataset, blockl, op_parset, prefix=None, direction=None,
     columns=None, outdir=None, clobber=False):
     """

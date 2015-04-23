@@ -5,8 +5,8 @@ Classes
 -------
 InitSubtract : Operation
     Images each band at high and low resolution to make and subtract sky models
-ResidualImage : Operation
-    Images residual data for each band at low resolution to check for problems
+FieldSub : Operation
+    Subtracts facet model from data
 MakeMosaic : Operation
     Makes a mosaic from the facet images
 
@@ -63,36 +63,21 @@ class InitSubtract(Operation):
         # instrument parmdbs.
         input_data_mapfile = self.write_mapfile([band.file for band in bands],
         	prefix='input_data')
-        input_data_mapfiles = []
-        files, hosts = read_mapfile(input_data_mapfile)
-        for f, h, b in zip(files, hosts, bands):
-            input_data_mapfiles.append(self.write_mapfile([f],
-        	prefix='input_data_vis', host_list=[h], band=b, index=1))
         dir_indep_parmdbs_mapfile = self.write_mapfile([band.dirindparmdb for band
         	in bands], prefix='dir_indep_parmdbs')
 
         self.log.info('High-res imaging...')
         if self.parset['use_chgcentre']:
             self.log.debug('Changing center to zenith...')
-            actions = [ChgCentre(self.parset, dm, {},
-                prefix='highres', band=band) for dm, band in
-                zip(input_data_mapfiles, bands)]
-            chgcentre_data_mapfiles = self.s.run(actions)
-            input_to_imager_mapfiles = chgcentre_data_mapfiles
+            action = ChgCentre(self.parset, input_data_mapfile, {},
+                prefix='highres', band=band)
+            chgcentre_data_mapfile = self.s.run(action)
+            input_to_imager_mapfile = chgcentre_data_mapfile
         else:
-            input_to_imager_mapfiles = input_data_mapfiles
-        actions = [MakeImageIterate(self.parset, dm, p['imagerh'],
-            prefix='highres', band=band) for dm, band in
-            zip(input_to_imager_mapfiles, bands)]
-        highres_image_basenames_mapfiles = self.s_imager.run(actions)
-        basenames = []
-        hosts = []
-        for bm in highres_image_basenames_mapfiles:
-            file_list, host_list = read_mapfile(bm)
-            basenames += file_list
-            hosts += host_list
-        highres_image_basenames_mapfile = self.write_mapfile(basenames,
-        	prefix='highres_basenames', host_list=hosts)
+            input_to_imager_mapfile = input_data_mapfile
+        actions = MakeImageIterate(self.parset, input_to_imager_mapfile, p['imagerh'],
+            prefix='highres')
+        highres_image_basenames_mapfile = self.s_imager.run(action)
 
         self.log.info('Making high-res sky model...')
         action = MakeSkymodelFromModelImage(self.parset,
@@ -104,94 +89,43 @@ class InitSubtract(Operation):
             highres_image_basenames_mapfile, p['imagerh'], prefix='highres')
         self.s_imager.run(action)
 
-        self.log.debug('Dividing datasets into chunks...')
-        chunks_list = []
-        ncpus = max(int(self.parset['cluster_specific']['ncpu'] * len(
-            self.parset['cluster_specific']['node_list']) / len(bands)), 1)
-        for i, band in enumerate(bands):
-            files, _ = read_mapfile(input_data_mapfiles[i])
-            total_time = (band.endtime - band.starttime) / 3600.0 # hours
-            chunk_time = min(np.ceil(total_time/ncpus), 1.0) # max of 1 hour per chunk
-            chunk_block = int(np.ceil(chunk_time * 3600.0 / band.timepersample))
-            self.log.debug('Using {0} time slots ({1:.1f} hr) per chunk for {2}'.format(
-                chunk_block, chunk_time, band.name))
-            chunks_list.append(make_chunks(files[0], chunk_block,
-            	self.parset, 'initsub_chunk', outdir=self.visbasename, clobber=False))
-        chunk_data_mapfiles = []
-        chunk_parmdb_mapfiles = []
-        for i, chunks in enumerate(chunks_list):
-            chunk_data_mapfiles.append(self.write_mapfile([chunk.file for chunk in chunks],
-                prefix='chunks_vis', band=bands[i], host_list=[hosts[i]]))
-            parmdb_file, hosts = read_mapfile(dir_indep_parmdbs_mapfile)
-            chunk_parmdb_mapfiles.append(self.write_mapfile([parmdb_file[i]]*len(chunks),
-                prefix='chunks_parmdb', band=bands[i], host_list=[hosts[i]]))
-
         self.log.info('Subtracting high-res sky model...')
-        actions = [Subtract(self.parset, dm, p['calibh'],
-            None, pm, prefix='highres', band=band) for dm, pm, band in
-            zip(chunk_data_mapfiles, chunk_parmdb_mapfiles, bands)]
-        self.s.run(actions)
-
-        self.log.debug('Updating chunk parents...')
-        for i, chunks in enumerate(chunks_list):
-            for chunk in chunks:
-                chunk.copy_to_parent([p['calibh']['outcol2']])
+        action = Subtract(self.parset, input_data_mapfile, p['calibh'],
+            None, dir_indep_parmdbs_mapfile, prefix='highres', band=band)
+        self.s.run(action)
 
         self.log.info('Averaging...')
         if self.parset['use_chgcentre']:
             self.log.debug('Changing center to zenith...')
-            actions = [ChgCentre(self.parset, dm, {},
-                prefix='lowres', band=band) for dm, band in
-                zip(input_data_mapfiles, bands)]
-            chgcentre_data_mapfiles = self.s.run(actions)
-            input_to_avg_mapfiles = chgcentre_data_mapfiles
+            action = ChgCentre(self.parset, input_data_mapfile, {},
+                prefix='lowres')
+            chgcentre_data_mapfile = self.s.run(action)
+            input_to_avg_mapfile = chgcentre_data_mapfile
         else:
-            input_to_avg_mapfiles = input_data_mapfiles
-        actions = [Average(self.parset, dm, p['avgl'], prefix='highres',
-        	band=band) for dm, band in zip(input_to_avg_mapfiles, bands)]
-        avg_files_mapfiles = self.s.run(actions)
+            input_to_avg_mapfile = input_data_mapfile
+        action = Average(self.parset, input_to_avg_mapfile, p['avgl'],
+            prefix='highres')
+        avg_files_mapfile = self.s.run(action)
 
         self.log.info('Low-res imaging...')
-        actions = [MakeImageIterate(self.parset, dm, p['imagerl'],
-            prefix='lowres', band=band) for dm, band in zip(
-            avg_files_mapfiles, bands)]
-        lowres_image_basenames_mapfiles = self.s_imager.run(actions)
-        basenames = []
-        hosts = []
-        for bm in lowres_image_basenames_mapfiles:
-            file_list, host_list = read_mapfile(bm)
-            basenames += file_list
-            hosts += host_list
-        lowres_image_basenames_mapfile = self.write_mapfile(basenames,
-        	prefix='lowres_basenames', host_list=hosts)
+        action = MakeImageIterate(self.parset, avg_files_mapfile, p['imagerl'],
+            prefix='lowres')
+        lowres_image_basenames_mapfile = self.s_imager.run(action)
 
         self.log.info('Making low-res sky model...')
         action = MakeSkymodelFromModelImage(self.parset, lowres_image_basenames_mapfile,
             p['imagerl'], prefix='lowres')
         lowres_skymodels_mapfile = self.s.run(action)
-        skymodel, hosts = read_mapfile(lowres_skymodels_mapfile)
 
         self.log.debug('FFTing low-res model image...')
-        actions = [FFT(self.parset, dm, bm, p['imagerl'], band=band,
-            prefix='lowres') for dm, bm, band in zip(input_data_mapfiles,
-            lowres_image_basenames_mapfiles, bands)]
-        self.s_imager.run(actions)
-
-        self.log.debug('Updating chunks...')
-        for i, chunks in enumerate(chunks_list):
-            for chunk in chunks:
-                chunk.copy_from_parent(['MODEL_DATA'])
+        action = FFT(self.parset, input_data_mapfile, lowres_image_basenames_mapfile,
+            p['imagerl'], prefix='lowres')
+        self.s_imager.run(action)
 
         self.log.info('Subtracting low-res sky model...')
-        actions = [Subtract(self.parset, dm, p['calibl'], None, pm,
-        	prefix='lowres', band=band) for dm, pm, band in
-        	zip(chunk_data_mapfiles, chunk_parmdb_mapfiles, bands)]
-        self.s.run(actions)
-
-        self.log.debug('Updating chunk parents...')
-        for i, chunks in enumerate(chunks_list):
-            for chunk in chunks:
-                chunk.copy_to_parent([p['calibl']['outcol']])
+        action = Subtract(self.parset, input_data_mapfile, p['calibl'], None,
+            dir_indep_parmdbs_mapfile, prefix='lowres')
+        self.s.run(action)
 
         self.log.info('Merging low- and high-res sky models...')
         action = MergeSkymodels(self.parset, lowres_skymodels_mapfile,
@@ -202,13 +136,13 @@ class InitSubtract(Operation):
             band.skymodel_dirindep = skymodel
 
 
-class ResidualImage(Operation):
+class FieldSub(Operation):
     """
     Operation to mosiac facet images
     """
     def __init__(self, parset, bands, direction=None, reset=False):
-        super(ResidualImage, self).__init__(parset, bands, direction=direction,
-            reset=reset, name='ResidualImage')
+        super(FieldSub, self).__init__(parset, bands, direction=direction,
+            reset=reset, name='FieldSub')
 
 
     def run_steps(self):
@@ -218,7 +152,7 @@ class ResidualImage(Operation):
         from factor.actions.images import MakeImageIterate
         from factor.actions.visibilities import Average, ChgCentre
         from factor.lib.datamap_lib import read_mapfile
-        from factor.operations.hardcoded_param import residual_image as p
+        from factor.operations.hardcoded_param import field_sub as p
 
         bands = self.bands
 
@@ -228,28 +162,46 @@ class ResidualImage(Operation):
 
         # Make initial data maps for the input datasets and their dir-indep
         # instrument parmdbs.
-        input_data_mapfile = self.write_mapfile([band.residual_image for band in bands],
+        shifted_data_mapfile = self.write_mapfile(d.concat_sub_data_file,
+            prefix='shifted', direction=d)
+        dir_dep_parmdbs_mapfile = self.write_mapfile([d.dirdepparmdb]*len(bands),
+            prefix='dir_dep_parmdbs', direction=d)
+        orig_data_mapfile = self.write_mapfile([band.file for band in bands],
         	prefix='input_data')
+        dir_indep_parmdbs_mapfile = self.write_mapfile([band.dirindparmdb for band
+        	in bands], prefix='dir_indep_parmdbs', direction=d)
+        dir_indep_skymodels_mapfile = self.write_mapfile([band.skymodel_dirindep
+        	for band in bands], prefix='dir_indep_skymodels', direction=d)
 
-        self.log.info('Concatenating bands...')
-        action = Concatenate(self.parset, input_data_mapfile, p['concat'],
-            prefix='suball_bands')
-        concat_data_mapfile = self.s.run(action)
+        self.log.info('Phase shifting...')
+        action = PhaseShift(self.parset, shifted_data_mapfile, p['shift'],
+            prefix='facet', direction=d)
+        unshifted_model_data_mapfile = self.s.run(action)
 
-        self.log.info('Imaging...')
-        if self.parset['use_chgcentre']:
-            self.log.debug('Changing center to zenith...')
-            action = ChgCentre(self.parset, concat_data_mapfile, {},
-                prefix='highres')
-            chgcentre_data_mapfile = self.s.run(action)
-            input_to_imager_mapfile = chgcentre_data_mapfile
-        else:
-            input_to_imager_mapfile = concat_data_mapfile
-        action = MakeImageIterate(self.parset, input_to_imager_mapfile, p['imager'],
-            prefix='suball_image')
-        image_basenames_mapfiles = self.s.run(action)
+        self.log.info('Copying model to bands...')
+        mslist = [band.file for band in bands]
+        ms_from_file, _ = read_mapfile(unshifted_model_data_mapfile)
+        copy_column_freq(mslist, ms_from_file[0], p['copy']['incol'],
+            p['copy']['outcol'])
 
-        # TODO: Check images for problems
+        self.log.info('Selecting sources for this direction...')
+        action = MakeFacetSkymodel(self.parset, dir_indep_skymodels_mapfile,
+            {}, d, prefix='cal', cal_only=False)
+        dir_indep_all_skymodels_mapfile = self.s.run(action)
+
+        self.log.info('Adding sources for this direction...')
+        self.parset['use_ftw'] = False
+        if bands[0].has_sub_data_new:
+            p['add']['incol'] += '_NEW'
+        action = Add(self.parset, orig_data_mapfile, p['add_all'],
+            dir_indep_all_skymodels_mapfile, dir_indep_parmdbs_mapfile,
+            prefix='facet_dirindep', direction=d)
+        self.s.run(action)
+
+        self.log.info('Subtracting final model for this direction...')
+        action = Subtract(self.parset, orig_data_mapfile, p['subtract'], None,
+        	dir_dep_parmdbs_mapfile, prefix='field_dirdep', direction=d)
+        self.s.run(action)
 
 
 class MakeMosaic(Operation):

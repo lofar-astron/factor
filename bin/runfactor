@@ -180,9 +180,18 @@ if __name__=='__main__':
 
         # Subtract final model(s) from empty field datasets. These operations
         # must be done in series
-        ops = [FieldSub(parset, bands, d) for d in direction_group]
+        ops = [FieldSub(parset, bands, d) for d in direction_group if d.good]
         for op in ops:
             op.run()
+
+        # Lastly, stop Factor if selfcal for any direction in this group failed
+        for d in direction_group:
+            all_good = True
+            if not d.good:
+                logging.error('Selfcal failed for direction {0}. Please check '
+                    'this direction.'.format(d.name))
+                all_good = False
+
 
     # Make final facet images (from final empty datasets) if desired
     dirs_to_image = [d for d in directions if d.make_final_image]

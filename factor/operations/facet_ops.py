@@ -16,6 +16,8 @@ FacetImage : Operation
     Images the entire facet
 FacetSub : Operation
     Subtracts all facet sources from data and images residuals
+FacetAddAllFinal : Operation
+    Adds all facet sources from final model
 FacetImageFinal : Operation
     Images the entire facet
 
@@ -81,44 +83,48 @@ class FacetAdd(Operation):
         self.parset['use_ftw'] = False
         if bands[0].has_sub_data_new:
             p['add']['incol'] += '_NEW'
-        action = Add(self.parset, subtracted_all_mapfile, p['add1'],
+        action = Add(self.parset, subtracted_all_mapfile, p['add_cal'],
             dir_indep_cal_skymodels_mapfile, dir_indep_parmdbs_mapfile,
             prefix='facet_dirindep', direction=d, index=1)
         self.s.run(action)
-        action = Add(self.parset, subtracted_all_mapfile, p['add2'],
+        action = Add(self.parset, subtracted_all_mapfile, p['add_all'],
             dir_indep_all_skymodels_mapfile, dir_indep_parmdbs_mapfile,
             prefix='facet_dirindep', direction=d, index=2)
         self.s.run(action)
 
         # Phase shift to facet center
         self.log.info('Phase shifting...')
-        action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift1'],
+        action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift_cal'],
             prefix='facet', direction=d)
-        shifted_data_mapfile = self.s.run(action)
-        shifted_data_files, _ = read_mapfile(shifted_data_mapfile)
-        action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift2'],
+        shifted_cal_data_mapfile = self.s.run(action)
+        shifted_cal_data_files, _ = read_mapfile(shifted_cal_data_mapfile)
+        action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift_all'],
+            prefix='facet', direction=d)
+        shifted_all_data_mapfile = self.s.run(action)
+        shifted_all_data_files, _ = read_mapfile(shifted_all_data_mapfile)
+        action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift_sub'],
             prefix='facet', direction=d)
         shifted_sub_data_mapfile = self.s.run(action)
 
         # Concatenate all phase-shifted bands together
         # for use later with full facet imaging / subtraction
         self.log.info('Concatenating bands...')
-        action = Concatenate(self.parset, shifted_sub_data_mapfile, p['concat1'],
+        action = Concatenate(self.parset, shifted_all_data_mapfile, p['concat_all'],
             prefix='facet_bands', direction=d, index=1)
         concat_all_data_mapfile = self.s.run(action)
         concat_all_data_files, _ = read_mapfile(concat_all_data_mapfile)
-        action = Concatenate(self.parset, shifted_sub_data_mapfile, p['concat2'],
+        action = Concatenate(self.parset, shifted_sub_data_mapfile, p['concat_sub'],
             prefix='facet_bands', direction=d, index=2)
         concat_sub_data_mapfile = self.s.run(action)
         concat_sub_data_files, _ = read_mapfile(concat_sub_data_mapfile)
 
-        # Save files to the direction objects
+        # Save files to the direction objects and copy subtract data to concat file
         d.shifted_data_files = {}
         for band, fcal in zip(bands, shifted_data_files):
             d.shifted_data_files[band.name] = fcal
-            d.concat_sub_data_file = concat_all_data_files[0]
+            d.concat_sub_data_file = concat_sub_data_files[0]
             copy_column(d.concat_sub_data_file, p['copy']['incol'], p['copy']['outcol'],
-                ms_from=concat_sub_data_files[0])
+                ms_from=concat_all_data_files[0])
 
 
 class FacetSetup(Operation):
@@ -740,8 +746,17 @@ class FacetImage(Operation):
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.info('Imaging...')
+        if self.parset['use_chgcentre']:
+            self.log.debug('Changing center to zenith...')
+            actions = [ChgCentre(self.parset, dm, {},
+                prefix='facet', direction=d) for d, dm in
+                zip(d_list, avg_data_mapfiles)]
+            chgcentre_data_mapfiles = self.s.run(actions)
+            input_to_imager_mapfiles = chgcentre_data_mapfiles
+        else:
+            input_to_imager_mapfiles = avg_data_mapfiles
         actions = [MakeImageIterate(self.parset, m, p['imager'], prefix='facet_image',
-            direction=d) for d, m in zip(d_list, avg_data_mapfiles)]
+            direction=d) for d, m in zip(d_list, input_to_imager_mapfiles)]
         image_basenames_mapfiles = self.s.run(actions)
 
         self.log.info('FFTing model image...')
@@ -754,11 +769,6 @@ class FacetImage(Operation):
         for d, mf in zip(d_list, image_basenames_mapfiles):
             file, _ = read_mapfile(mf)
             d.skymodel_dirdep = file[0]
-
-        # Make final data maps
-        for d, h in zip(d_list, d_hosts):
-            self.write_mapfile([d.skymodel_dirdep], prefix='final_model',
-                direction=d, host_list=h)
 
 
 class FacetSub(Operation):
@@ -777,74 +787,93 @@ class FacetSub(Operation):
         from factor.actions.calibrations import Subtract
         from factor.actions.visibilities import PhaseShift
         from factor.actions.models import FFT
-        from factor.operations.hardcoded_param import facet_sub_all as p
+        from factor.operations.hardcoded_param import facet_sub as p
         from factor.lib.datamap_lib import read_mapfile
         from factor.lib.operation_lib import copy_column
 
-        d = self.direction
+        d_list = self.direction
+        if type(d_list) is not list:
+            d_list = [d_list]
         bands = self.bands
 
-        # Check state
-        if os.path.exists(self.statebasename+'.done'):
+        # Check state for each direction
+        for i, d in enumerate(d_list):
+            if os.path.exists(self.statebasename[i]+'.done'):
+                all_done = True
+            else:
+                all_done = False
+                break
+        if all_done:
             return
+
+        # Divide up the nodes among the directions
+        node_list = self.parset['cluster_specific']['node_list']
+        if len(d_list) >= len(node_list):
+            for i in range(len(d_list)-len(node_list)):
+                node_list.append(node_list[i])
+            d_hosts = [[n] for n in node_list]
+        else:
+            parts = len(d_list)
+            d_hosts = [node_list[i*len(node_list)//parts:
+                (i+1)*len(node_list)//parts] for i in range(parts)]
 
         # Make initial data maps for the empty datasets, their dir-dep
         # instrument parmdbs, and their dir-dep sky models
-        if self.parset['imager'].lower() != 'wsclean':
-            # Copy the model image for each band to avoid write conflicts
-            dir_dep_model_mapfile = self.copy_model_images(d.skymodel_dirdep,
-                bands, p['fft'], d)
-        else:
-            dir_dep_model_mapfile = self.write_mapfile([d.skymodel_dirdep]*len(bands),
-                prefix='dir_dep_skymodels', direction=d)
-        subtracted_all_mapfile = self.write_mapfile([band.file for band in bands],
-            prefix='subtracted_all', direction=d)
-        shifted_data_mapfile = self.write_mapfile(d.concat_sub_data_files,
-            	prefix='shifted', direction=d)
-        dir_dep_parmdb_mapfile = self.write_mapfile([d.dirdepparmdb]*len(bands),
-            prefix='dir_dep_parmdbs', direction=d)
+        shifted_data_mapfiles = []
+        dir_dep_parmdbs_mapfiles = []
+        dir_indep_skymodels_mapfiles = []
+        dir_dep_model_mapfiles = []
+        for d, h in zip(d_list, d_hosts):
+            shifted_data_mapfiles.append(self.write_mapfile(d.concat_sub_data_files,
+            	prefix='shifted', direction=d, host_list=h))
+            dir_dep_parmdbs_mapfiles.append(self.write_mapfile([d.
+            	dirdepparmdb]*len(bands), prefix='dir_dep_parmdbs', direction=d,
+            	host_list=h))
+            if self.parset['imager'].lower() != 'wsclean':
+                # Copy the model image for each band to avoid write conflicts
+                dir_dep_model_mapfiles.append(self.copy_model_images(d.skymodel_dirdep,
+                    bands, p['fft'], d))
+            else:
+                dir_dep_model_mapfiles.append(self.write_mapfile([d.skymodel_dirdep]*len(bands),
+                    prefix='dir_dep_skymodels', direction=d))
 
-        self.log.info('FFTing model image (final facet model)...')
-        p['imsize'] = d.imsize
-        action = FFT(self.parset, shifted_data_mapfile, dir_dep_model_mapfile,
-            p['fft'], prefix='fft', direction=d)
-        self.s.run(action)
+        self.log.info('Subtracting sources...')
+        actions = [Subtract(self.parset, dm, p['subtract'],
+            model_datamap=None, parmdb_datamap=pm, prefix='facet_dirdep',
+            direction=d) for d, dm, pd, pm in
+            zip(d_list, shifted_data_mapfile, dir_dep_model_mapfile,
+            dir_dep_parmdb_mapfile)]
+        self.s.run(actions)
 
-#         self.log.info('Phase shifting MODEL_DATA...')
-#         p_shift = p['shift']
-#         p_shift['ra'] = bands[0].ra
-#         p_shift['dec'] = bands[0].dec
-#         action = PhaseShift(self.parset, shifted_data_mapfile, p_shift,
-#             prefix='model_shift')
-#         shifted_model_data_mapfile = self.s.run(action)
-#
-#         # Copy unshifted model data to original datasets
-#         shifted_model_data_files, _ = read_mapfile(shifted_model_data_mapfile)
-#         for i, band in enumerate(bands):
-#             copy_column(band.file, 'DATA', 'MODEL_DATA',
-#                 ms_from=shifted_model_data_file[i])
-
-        self.log.info('Subtracting sources for this direction...')
-        dir_dep_model_mapfile = None
-        action = Subtract(self.parset, shifted_data_mapfile, p['subtract'],
-            dir_dep_model_mapfile, dir_dep_parmdb_mapfile,
-            prefix='facet_dirdep', direction=d)
-        self.s.run(action)
+        self.log.info('Phase shifting back to field center...')
+        actions = [Shift(self.parset, m, p['shift'], prefix='facet',
+            direction=d) for d, m in zip(d_list, shifted_data_mapfiles)]
+        unshifted_data_mapfiles = self.s.run(actions)
 
         self.log.info('Averaging...')
-        action = Average(self.parset, subtracted_all_mapfile, p['avg'], prefix='facet')
-        avg_data_mapfile = self.s.run(action)
+        actions = [Average(self.parset, dm, p['avg'], prefix='facet')
+            for d, m in zip(d_list, unshifted_data_mapfiles)]
+        avg_data_mapfiles = self.s.run(actions)
 
-        avg_data_files, _ = read_mapfile(avg_data_mapfile)
-        for band, avg_data_file in zip(bands, avg_data_files):
-            band.has_sub_data_new = True
-            band.residual_file = avg_data_file
+        self.log.info('Imaging...')
+        if self.parset['use_chgcentre']:
+            self.log.debug('Changing center to zenith...')
+            actions = [ChgCentre(self.parset, dm, {},
+                prefix='resid', direction=d) for d, dm in
+                zip(d_list, avg_data_mapfiles)]
+            chgcentre_data_mapfiles = self.s.run(actions)
+            input_to_imager_mapfiles = chgcentre_data_mapfiles
+        else:
+            input_to_imager_mapfiles = avg_data_mapfiles
+        actions = [MakeImageIterate(self.parset, m, p['imager'], prefix='field_image',
+            direction=d) for d, m in zip(d_list, input_to_imager_mapfiles)]
+        image_basenames_mapfiles = self.s.run(actions)
 
-        # Clean up files for this direction:
-        #    - unneeded MS files
-        #    - unneeded images
-#         self.log.info('Cleaning up files for this direction...')
-#         os.system('rm -rf visdata/*{0}*'.format(d.name))
+        self.log.info('Checking residual images...')
+
+        # If not OK, reset pipeline state for this direction and stop Factor
+        # (after all the other directions in the group, if any, have finished).
+        # Set d.good = False and catch this flag later after FieldSub.
 
 
     def copy_model_images(self, modelbasename, bands, p, direction):

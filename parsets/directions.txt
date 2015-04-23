@@ -3,9 +3,9 @@
 # Directions should be sorted in order of reduction (e.g., bright to faint).
 #
 # Columns are defined as follows (in [] are optional parameters with their default values):
-# Name (str), RA (float), DEC (float), [multiscale (bool, default=True)], [solint_amp (int, default=600)], [solint_ph (int, default=5)], [make_final_image (bool, default=True)], [cal_radius (float arcmin, default=3.0)]
+# Name (str), RA (float), DEC (float), [multiscale (bool, default=True)], [solint_amp (int, default=600)], [solint_ph (int, default=5)], [make_final_image (bool, default=True)], [cal_radius (float arcmin, default=3.0)], [clean_reg (string, default='')]
 
-calibrator_1, 111.11, 22.22, , , , , ,
-calibrator_2, 222.22, 33.33, True, 600, 5, False, 4.5
-calibrator_3, 333.33, 44.44, , True, 600, 5, ,
+calibrator_1, 111.11, 22.22, , , , , , ,
+calibrator_2, 222.22, 33.33, True, 600, 5, False, 4.5,
+calibrator_3, 333.33, 44.44, , True, 600, 5, , ,
 
