@@ -6,22 +6,16 @@ they also break up the processing into parallel or serial steps.
 
 Classes
 -------
-FacetAddCal : Operation
-    Adds calibrator source to data
+FacetAdd : Operation
+    Adds facet sources to data
 FacetSetup : Operation
     Sets up the data for selfcal
 FacetSelfcal : Operation
-    Runs selfcal cycle
-FacetAddAll : Operation
-    Adds all facet sources to data
-FacetSetupFull : Operation
-    Sets up the data for full imaging
+    Runs selfcal cycle on facet calibrator
 FacetImage : Operation
     Images the entire facet
-FacetSubAll : Operation
-    Subtracts all facet sources from data
-FacetAddAllFinal : Operation
-    Adds all facet sources to data
+FacetSub : Operation
+    Subtracts all facet sources from data and images residuals
 FacetImageFinal : Operation
     Images the entire facet
 
@@ -31,13 +25,13 @@ from factor.lib.operation import Operation
 from factor.lib.scheduler import Scheduler
 
 
-class FacetAddCal(Operation):
+class FacetAdd(Operation):
     """
     Operation to add calibrator source to data
     """
     def __init__(self, parset, bands, direction=None, reset=False):
-        super(FacetAddCal, self).__init__(parset, bands, direction=direction,
-            reset=reset, name='FacetAddCal')
+        super(FacetAdd, self).__init__(parset, bands, direction=direction,
+            reset=reset, name='FacetAdd')
 
 
     def run_steps(self):
@@ -73,20 +67,27 @@ class FacetAddCal(Operation):
         dir_indep_skymodels_mapfile = self.write_mapfile([band.skymodel_dirindep
         	for band in bands], prefix='dir_indep_skymodels', direction=d)
 
-        # Add calibrators from the dir-indep sky model for this direction to the
+        # Add sources from the dir-indep sky model for this direction to the
         # visibilities
         self.log.info('Selecting sources for this direction...')
         action = MakeFacetSkymodel(self.parset, dir_indep_skymodels_mapfile,
-            p['select'], d, prefix='cal', cal_only=True)
+            {}, d, prefix='cal', cal_only=True, index=1)
         dir_indep_cal_skymodels_mapfile = self.s.run(action)
+        action = MakeFacetSkymodel(self.parset, dir_indep_skymodels_mapfile,
+            {}, d, prefix='cal', cal_only=False, index=2)
+        dir_indep_all_skymodels_mapfile = self.s.run(action)
 
         self.log.info('Adding sources for this direction...')
         self.parset['use_ftw'] = False
         if bands[0].has_sub_data_new:
             p['add']['incol'] += '_NEW'
-        action = Add(self.parset, subtracted_all_mapfile, p['add'],
+        action = Add(self.parset, subtracted_all_mapfile, p['add1'],
             dir_indep_cal_skymodels_mapfile, dir_indep_parmdbs_mapfile,
-            prefix='facet_dirindep', direction=d)
+            prefix='facet_dirindep', direction=d, index=1)
+        self.s.run(action)
+        action = Add(self.parset, subtracted_all_mapfile, p['add2'],
+            dir_indep_all_skymodels_mapfile, dir_indep_parmdbs_mapfile,
+            prefix='facet_dirindep', direction=d, index=2)
         self.s.run(action)
 
         # Phase shift to facet center
@@ -98,18 +99,15 @@ class FacetAddCal(Operation):
             prefix='facet', direction=d)
         shifted_sub_data_mapfile = self.s.run(action)
 
-        # Copy shifted subtracted data to first phase-shifted dataset
-        shifted_facet_data_files, _ = read_mapfile(shifted_data_mapfile)
-        shifted_sub_data_files, _ = read_mapfile(shifted_sub_data_mapfile)
-        for i, band in enumerate(bands):
-            copy_column(shifted_facet_data_files[i], 'DATA', 'SUBTRACTED_DATA',
-                ms_from=shifted_sub_data_files[i])
-
-        # Concatenate SUBTRACTED_DATA_ALL for all phase-shifted bands together
+        # Concatenate all phase-shifted bands together
         # for use later with full facet imaging / subtraction
         self.log.info('Concatenating bands...')
-        action = Concatenate(self.parset, shifted_data_mapfile, p['concat'],
+        action = Concatenate(self.parset, shifted_sub_data_mapfile, p['concat1'],
             prefix='facet_bands', direction=d, index=1)
+        concat_all_data_mapfile = self.s.run(action)
+        concat_all_data_files, _ = read_mapfile(concat_all_data_mapfile)
+        action = Concatenate(self.parset, shifted_sub_data_mapfile, p['concat2'],
+            prefix='facet_bands', direction=d, index=2)
         concat_sub_data_mapfile = self.s.run(action)
         concat_sub_data_files, _ = read_mapfile(concat_sub_data_mapfile)
 
@@ -120,6 +118,8 @@ class FacetAddCal(Operation):
             concat_sub_data_files):
             d.shifted_data_files[band.name] = f
             d.concat_sub_data_files[band.name] = fsub
+            copy_column(fsub, p['copy']['incol'], p['copy']['outcol'],
+                ms_from=concat_sub_data_files[0])
 
 
 class FacetSetup(Operation):
@@ -326,7 +326,7 @@ class FacetSelfcal(Operation):
         chunks_list = []
         for d, m in zip(d_list, facet_data_mapfiles):
             files, _ = read_mapfile(m)
-            chunks_list.append(make_chunks(files[0], d.solint_a*3,
+            chunks_list.append(make_chunks(files[0], d.solint_a,
             	self.parset, 'facet_chunk', direction=d, clobber=True))
         chunk_data_mapfiles = []
         for i, chunks in enumerate(chunks_list):
@@ -459,7 +459,6 @@ class FacetSelfcal(Operation):
         self.log.debug('Merging instrument parmdbs...')
         merged_parmdb_phaseamp_amp1_mapfiles = []
         for i, chunks in enumerate(chunks_list):
-            concat_file, _ = read_mapfile(facet_data_mapfiles[i])
             merged_parmdb_phaseamp_amp1_mapfiles.append(self.write_mapfile(
                 [merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp1 for chunk
                 in chunks], prefix='merged_amps1')], prefix='merged_amps1',
@@ -647,66 +646,6 @@ class FacetSelfcal(Operation):
             d.dirdepparmdb = f[0]
 
 
-class FacetAddAll(Operation):
-    """
-    Operation to add all sources in the facet to data
-    """
-    def __init__(self, parset, bands, direction=None, reset=False,
-        name='FacetAddAll'):
-        super(FacetAddAll, self).__init__(parset, bands, direction=direction,
-            reset=reset, name=name)
-
-
-    def run_steps(self):
-        """
-        Run the steps for this operation
-        """
-        from factor.actions.visibilities import PhaseShift
-        from factor.actions.models import MakeFacetSkymodel
-        from factor.actions.calibrations import Add
-        from factor.operations.hardcoded_param import facet_add_all as p
-        from factor.lib.datamap_lib import read_mapfile
-
-        d = self.direction
-        bands = self.bands
-
-        # Check state
-        if os.path.exists(self.statebasename+'.done'):
-            shifted_data_mapfile = os.path.join(self.parset['dir_working'],
-                'datamaps/FacetAddAll/PhaseShift/{0}/facet_output_{0}.datamap'.
-                format(d.name))
-            d.shifted_data_files, _ = read_mapfile(shifted_data_mapfile)
-            return
-
-        # Make initial data maps for the empty datasets, their dir-indep
-        # instrument parmdbs, and their dir-indep sky models
-        subtracted_all_mapfile = self.write_mapfile([band.file for band in bands],
-            prefix='subtracted_all', direction=d)
-        dir_indep_parmdbs_mapfile = self.write_mapfile([band.dirindparmdb for
-        	band in bands], prefix='dir_indep_parmdbs', direction=d)
-        dir_indep_skymodels_mapfile =self. write_mapfile([band.skymodel_dirindep
-            for band in bands], prefix='dir_indep_skymodels', direction=d)
-
-        self.log.info('Selecting sources for this direction...')
-        action = MakeFacetSkymodel(self.parset, dir_indep_skymodels_mapfile,
-            p['select'], d, prefix='all_final', cal_only=False)
-        dir_indep_all_skymodels_mapfile = self.s.run(action)
-
-        self.log.info('Adding sources for this direction...')
-        self.parset['use_ftw'] = False
-        action = Add(self.parset, subtracted_all_mapfile, p['add'],
-            dir_indep_all_skymodels_mapfile, dir_indep_parmdbs_mapfile,
-            prefix='facet_dirindep', direction=d)
-        self.s.run(action)
-
-        self.log.info('Phase shifting DATA...')
-        action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift'],
-            prefix='facet', direction=d)
-        shifted_data_mapfile = self.s.run(action)
-
-        d.shifted_data_files, _ = read_mapfile(shifted_data_mapfile)
-
-
 class FacetImage(Operation):
     """
     Operation to image the full facet
@@ -782,23 +721,29 @@ class FacetImage(Operation):
         # instrument parmdbs
         shifted_data_mapfiles = []
         dir_dep_parmdbs_mapfiles = []
+        dir_indep_skymodels_mapfiles = []
         for d, h in zip(d_list, d_hosts):
             shifted_data_mapfiles.append(self.write_mapfile(d.concat_sub_data_files,
             	prefix='shifted', direction=d, host_list=h))
             dir_dep_parmdbs_mapfiles.append(self.write_mapfile([d.
             	dirdepparmdb]*len(bands), prefix='dir_dep_parmdbs', direction=d,
             	host_list=h))
+            dir_indep_skymodels_mapfiles.append(self.write_mapfile([band.skymodel_dirindep
+        	    for band in bands], prefix='dir_indep_skymodels', direction=d,
+            	host_list=h))
 
         self.log.info('Selecting all sources for this direction...')
-        action = MakeFacetSkymodel(self.parset, dir_indep_skymodels_mapfile,
-            p['select'], d, prefix='all_final', cal_only=False)
-        dir_indep_all_skymodels_mapfile = self.s.run(action)
+        actions = [MakeFacetSkymodel(self.parset, dm,
+            p['select'], d, prefix='all_final', cal_only=False) for d, dm in
+            zip(d_list, dir_indep_skymodels_mapfiles)]
+        dir_indep_all_skymodels_mapfiles = self.s.run(actions)
 
         self.log.info('Adding sources for this direction...')
         self.parset['use_ftw'] = False
-        action = Add(self.parset, subtracted_all_mapfile, p['add'],
-            dir_indep_all_skymodels_mapfile, dir_indep_parmdbs_mapfile,
-            prefix='facet_dirindep', direction=d)
+        actions = [Add(self.parset, dm, p['add'], mm, pm,
+            prefix='facet_dirindep', direction=d) for d, dm, mm, pm in
+            zip(d_list, shifted_data_mapfiles, dir_indep_all_skymodels_mapfiles,
+            dir_dep_parmdbs_mapfiles)]
         self.s.run(action)
 
         self.log.info('Applying direction-dependent calibration...')

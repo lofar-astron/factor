@@ -64,18 +64,20 @@ init_subtract = {
 }
 
 facet_add_cal = {
-'select' : {},
-'add' : {'incol': 'SUBTRACTED_DATA_ALL',
-         'outcol': 'FACET_DATA',
+'add1' : {'incol': 'SUBTRACTED_DATA_ALL',
+         'outcol': 'FACET_DATA_CAL',
          'flags': '--replace-sourcedb'},
-'shift1' : {'columnname': 'FACET_DATA'}, # outcol is DATA
-'shift2' : {'columnname': 'SUBTRACTED_DATA_ALL'}, # outcol is DATA
+'add2' : {'incol': 'SUBTRACTED_DATA_ALL',
+         'outcol': 'FACET_DATA_ALL',
+         'flags': '--replace-sourcedb'},
+'shift1' : {'columnname': 'FACET_DATA_CAL'}, # outcol is DATA
+'shift2' : {'columnname': 'FACET_DATA_ALL'}, # outcol is DATA
+'shift3' : {'columnname': 'SUBTRACTED_DATA_ALL'}, # outcol is DATA
+'concat1' : {'columnname': 'FACET_DATA_ALL'}, # outcol is DATA
+'concat2' : {'columnname': 'SUBTRACTED_DATA_ALL'}, # outcol is DATA
 'copy' : {'incol': 'DATA',
-          'outcol': 'SUBTRACTED_DATA_ALL'},
-'concat' : {'columnname': 'SUBTRACTED_DATA_ALL'} # outcol is DATA
+          'outcol': 'FACET_DATA_ALL'}
 }
-# Final result is shifted, concatenated, full resolution file, with DATA (cal
-# added) and SUBTRACTED_DATA_ALL
 
 facet_setup = {
 'apply' : {'incol': 'DATA',
@@ -259,11 +261,9 @@ facet_selfcal = {
                 'smoothing_window': 1},
 }
 
-# Input is shifted, concatenated, full resolution file, with DATA (with cal added)
-# and SUBTRACTED_DATA_ALL
 facet_image= {
 'select' : {},
-'add' : {'incol': 'SUBTRACTED_DATA_ALL',
+'add' : {'incol': 'DATA',
          'outcol': 'FACET_DATA',
          'flags': '--replace-sourcedb'},
 'apply_dirdep' : {'incol': 'FACET_DATA',
@@ -292,33 +292,18 @@ facet_image= {
             'use_rms': True,
             'image_final': False,
             'iterate_threshold': True,
-            'n_per_node': 1},
-'select' : {}
+            'n_per_node': 1}
 }
 
 facet_sub_all = {
-'fft' : {'imsize': 1024,
-         'cell': '1.5arcsec',
-         'nterms': 2,
-         'n_per_node': 1},
-'shift' : {'columnname': 'MODEL_DATA'}, # outcol is DATA
-'select' : {},
-'add' : {'incol': 'SUBTRACTED_DATA_ALL',
-         'outcol': 'FACET_DATA',
-         'flags': '--replace-sourcedb'},
 'subtract' : {'incol': 'FACET_DATA',
-              'outcol': 'SUBTRACTED_DATA_ALL_TEMP',
+              'outcol': 'CORRECTED_SUBTRACTED_DATA',
               'flags': '--replace-sourcedb'},
-'avg' : {'columnname': 'CORRECTED_SUBTRACTED_DATA', # outcol is DATA
+'shift' : {'columnname': 'CORRECTED_SUBTRACTED_DATA'}, # outcol is DATA
+'avg' : {'columnname': 'DATA', # outcol is DATA
           'freqstep': 5,
-          'timestep': 2}
-}
-
-residual_image = {
-'concat' : {'columnname': 'DATA'}, # outcol is DATA
-'apply' : {'incol': 'DATA',
-           'outcol': 'CORRECTED_DATA'},
-'imager' : {'niter' : 5000,
+          'timestep': 2},
+'imager' : {'niter' : 10,
              'imsize': 4800,
              'mscale': False,
              'cell': '25arcsec',
@@ -339,18 +324,20 @@ residual_image = {
              'use_rms': False,
              'image_final': False,
              'iterate_threshold': False,
-             'n_per_node': 1},
+             'n_per_node': 1}
 }
 
-facet_add_all_final = {
-'fft' : {'imsize': 1024,
-         'cell': '1.5arcsec',
-         'nterms': 2,
-         'n_per_node': 1},
+field_sub = {
+'shift' : {'columnname': 'MODEL_DATA'}, # outcol is DATA
+'copy' : {'incol': 'DATA',
+           'outcol': 'MODEL_DATA'},
+'select' : {},
 'add' : {'incol': 'SUBTRACTED_DATA_ALL',
          'outcol': 'FACET_DATA',
          'flags': '--replace-sourcedb'},
-'shift' : {'columnname': 'FACET_DATA'} # outcol is DATA
+'subtract' : {'incol': 'FACET_DATA',
+              'outcol': 'SUBTRACTED_DATA_ALL_NEW',
+              'flags': '--replace-sourcedb'},
 }
 
 facet_image_final = {
@@ -363,7 +350,7 @@ facet_image_final = {
 'avg' : {'columnname': 'DATA', # outcol is DATA
          'freqstep': 5,
          'timestep': 3},
-'imager' : {'niter': 5000,
+'imager' : {'niter': 5000, # should fix beam so all facets are the same
             'imsize': 1024,
             'mscale': False,
             'cell': '1.5arcsec',

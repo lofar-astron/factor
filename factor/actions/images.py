@@ -131,7 +131,7 @@ class MakeImage(Action):
 
     def set_imaging_parameters(self):
         """
-        Set various imaging parameters used for both casapy runs
+        Set various imaging parameters
         """
         self.p['cycfactor'] = 3.0
         if self.p['niter'] > 1500:
@@ -497,14 +497,10 @@ class MakeImageIterate(Action):
             if self.p['use_rms'] and i == self.p['ncycles'] - 1:
                 self.p['threshold'] = threshold_5rms
                 self.p['niter'] = 1000000
-#                 if self.op_parset['imager'].lower() == 'casapy':
-#                     imager.timeout = 3600 # one hour for final pass
 
             imager = MakeImage(self.op_parset, vis_datamap, self.p,
             	mask_datamap=mask_datamap, direction=self.direction,
             	prefix=self.prefix, band=self.band, index=i)
-#             if self.op_parset['imager'].lower() == 'casapy':
-#                 imager.timeout = 1800 # half an hour for iterations
             image_basename_mapfile = imager.run()
 
             if i == self.p['ncycles'] - 1:
@@ -531,8 +527,6 @@ class MakeImageIterate(Action):
             imager = MakeImage(self.op_parset, vis_datamap, self.p,
             	mask_datamap=mask_datamap, direction=self.direction,
             	prefix=self.prefix+'_final', band=self.band)
-#             if self.op_parset['imager'].lower() == 'casapy':
-#                 imager.timeout = 7200 # two hours for final pass
             image_basename_mapfile = imager.run()
 
         self.output_datamap = image_basename_mapfile
