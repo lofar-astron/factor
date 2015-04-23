@@ -158,7 +158,7 @@ if __name__=='__main__':
 
         # Add calibrator(s) to empty datasets. These operations
         # must be done in series
-        ops = [FacetAddCal(parset, bands, d) for d in direction_group]
+        ops = [FacetAdd(parset, bands, d) for d in direction_group]
         for op in ops:
             op.run()
 
