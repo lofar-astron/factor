@@ -8,7 +8,7 @@ class Direction(object):
     Generic direction class
     """
     def __init__(self, name, ra, dec, reg, multiscale, solint_a, solint_p,
-        make_final_image, cal_radius):
+        make_final_image, cal_radius, apparent_flux):
         """
         Create Direction object
 
@@ -32,7 +32,9 @@ class Direction(object):
             Make final image of this direction, after all directions have been
             selfcaled?
         cal_radius : float
-            Radius in degrees of calibrator source for this direction
+            Radius in degrees of calibrator source
+        apparent_flux : float
+            Apparent flux in mJy of calibrator source
         """
         self.name = name
         self.ra = ra
@@ -43,4 +45,5 @@ class Direction(object):
         self.solint_p = solint_p
         self.make_final_image = make_final_image
         self.cal_radius_deg = cal_radius / 60.0
+        self.apparent_flux_mjy = apparent_flux
         self.nchannels = 1

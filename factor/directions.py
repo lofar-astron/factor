@@ -33,9 +33,9 @@ def directions_read(directions_file):
 
     log.info("Reading directions file: %s" % (directions_file))
     types = np.dtype({'names': ['name', 'ra', 'dec', 'reg', 'multiscale',
-    	'solint_a', 'solint_p', 'make_final_image', 'cal_radius'],
+    	'solint_a', 'solint_p', 'make_final_image', 'cal_radius', 'apparent_flux'],
     	'formats':['S100', np.float, np.float, 'S100', np.bool, np.int,
-    	np.int, np.bool, np.float]})
+    	np.int, np.bool, np.float, np.float]})
     directions = np.genfromtxt(directions_file, comments='#', delimiter=',',
     	unpack=False, converters={0: lambda x: x.strip(), 3: lambda x:
     	x.strip()}, dtype=types)
@@ -52,6 +52,12 @@ def directions_read(directions_file):
             log.error('DEC %f is wrong for direction: %s. Ignoring direction.'
                 % (direction['dec'], direction['name']))
             continue
+        if (direction['solint_a'] <= 0 or direction['solint_p'] <= 0) and \
+            np.isnan(direction['apparent_flux']):
+            log.error('One of more of the solution intervals is invalid and no '
+                'apparent flux is specified for direction {0}. Ignoring '
+                'direction.'.format(direction['name']))
+            continue
 
         # set defaults
         if direction['solint_a'] <= 0:
@@ -60,6 +66,8 @@ def directions_read(directions_file):
             direction['solint_p'] = 1
         if direction['cal_radius'] <= 0.0 or np.isnan(direction['cal_radius']):
             direction['cal_radius'] = 3.0 # arcmin
+        if np.isnan(direction['apparent_flux']):
+            direction['apparent_flux'] = -1.0 # arcmin
 
         data.append( d(*direction) )
 
