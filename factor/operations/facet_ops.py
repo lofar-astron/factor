@@ -356,7 +356,7 @@ class FacetSelfcal(Operation):
 
         self.log.info('Imaging (facet image #1)...')
         self.log.debug('Merging chunks...')
-        if self.parset['imager'].lower() == 'casapy'
+        if self.parset['imager'].lower() == 'casapy':
             virtual = False
         else:
             virutal = True
