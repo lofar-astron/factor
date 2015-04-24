@@ -54,11 +54,15 @@ class FacetAdd(Operation):
             shifted_data_mapfile = os.path.join(self.parset['dir_working'],
                 'datamaps/FacetAdd/PhaseShift/{0}/facet_output_{0}.datamap'.
                 format(d.name))
-            files, hosts = read_mapfile(shifted_data_mapfile)
+            concat_sub_data_mapfile = os.path.join(self.parset['dir_working'],
+                'datamaps/FacetAdd/Concatenate/{0}/facet_bands_output_{0}-2.datamap'.
+                format(d.name))
+            shifted_files, hosts = read_mapfile(shifted_data_mapfile)
+            concat_files, _ = read_mapfile(concat_sub_data_mapfile)
+            d.concat_sub_data_file = concat_files[0]
             d.shifted_data_files = {}
             for band, f in zip(bands, files):
                 d.shifted_data_files[band.name] = f
-                d.concat_sub_data_file = sf
             return
 
         # Make initial data maps for the empty datasets, their dir-indep
@@ -120,10 +124,10 @@ class FacetAdd(Operation):
         concat_sub_data_files, _ = read_mapfile(concat_sub_data_mapfile)
 
         # Save files to the direction objects and copy subtract data to concat file
+        d.concat_sub_data_file = concat_sub_data_files[0]
         d.shifted_data_files = {}
         for band, fcal in zip(bands, shifted_cal_data_files):
             d.shifted_data_files[band.name] = fcal
-            d.concat_sub_data_file = concat_sub_data_files[0]
             copy_column(d.concat_sub_data_file, p['copy']['incol'], p['copy']['outcol'],
                 ms_from=concat_all_data_files[0])
 
