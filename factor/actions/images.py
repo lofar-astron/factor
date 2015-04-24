@@ -474,6 +474,8 @@ class MakeImageIterate(Action):
                     index=self.index, band=self.band)
             else:
                 self.p['mask_datamap'] = None
+        else:
+            self.p['mask_datamap'] = None
 
 
     def make_pipeline_control_parset(self):
