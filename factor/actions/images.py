@@ -461,6 +461,7 @@ class MakeImageIterate(Action):
         if self.prefix is None:
             self.prefix = 'make_image_iter'
         self.clean = clean
+        self.make_datamaps()
 
 
     def make_datamaps(self):
