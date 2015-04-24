@@ -52,12 +52,13 @@ class FacetAdd(Operation):
 
         if os.path.exists(self.statebasename+'.done'):
             shifted_data_mapfile = os.path.join(self.parset['dir_working'],
-                'datamaps/FacetAddCal/PhaseShift/{0}/facet_output_{0}.datamap'.
+                'datamaps/FacetAdd/PhaseShift/{0}/facet_output_{0}.datamap'.
                 format(d.name))
             files, hosts = read_mapfile(shifted_data_mapfile)
             d.shifted_data_files = {}
             for band, f in zip(bands, files):
                 d.shifted_data_files[band.name] = f
+                d.concat_sub_data_file = sf
             return
 
         # Make initial data maps for the empty datasets, their dir-indep
@@ -95,15 +96,15 @@ class FacetAdd(Operation):
         # Phase shift to facet center
         self.log.info('Phase shifting...')
         action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift_cal'],
-            prefix='facet', direction=d)
+            prefix='facet', direction=d, index=1)
         shifted_cal_data_mapfile = self.s.run(action)
         shifted_cal_data_files, _ = read_mapfile(shifted_cal_data_mapfile)
         action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift_all'],
-            prefix='facet', direction=d)
+            prefix='facet', direction=d, index=2)
         shifted_all_data_mapfile = self.s.run(action)
         shifted_all_data_files, _ = read_mapfile(shifted_all_data_mapfile)
         action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift_sub'],
-            prefix='facet', direction=d)
+            prefix='facet', direction=d, index=3)
         shifted_sub_data_mapfile = self.s.run(action)
 
         # Concatenate all phase-shifted bands together

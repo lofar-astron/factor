@@ -92,13 +92,13 @@ class DPPP(Action):
         """
         from factor.lib.datamap_lib import read_mapfile
 
+        if self.index is not None:
+            indstr = '{0}'.format(self.index)
+        else:
+            indstr = ''
         msnames, hosts = read_mapfile(self.input_datamap)
         if self.name != 'Concatenate':
             self.p['input_datamap'] = self.input_datamap
-            if self.index is not None:
-                indstr = '{0}'.format(self.index)
-            else:
-                indstr = ''
             output_files = [self.working_dir + os.path.splitext(os.path.basename(ms))[0]
                 + '_{0}{1}.ms'.format(self.name.lower(), indstr) for ms in msnames]
         else:
@@ -111,7 +111,7 @@ class DPPP(Action):
                 use_abs_path=False, index=self.index, host_list=hosts)
             ms = msnames[0]
             output_files = [self.working_dir + os.path.splitext(os.path.basename(ms))[0]
-                + '_{0}.ms'.format(self.name.lower())]
+                + '_{0}{1}.ms'.format(self.name.lower(), indstr)]
 
         self.p['output_datamap'] = self.write_mapfile(output_files,
             prefix=self.prefix+'_output', direction=self.direction,
