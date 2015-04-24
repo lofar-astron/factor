@@ -217,19 +217,24 @@ class Action(object):
         if has32:
             with open("{0}.out.log".format(self.logbasename), "wb") as out, \
                 open("{0}.err.log".format(self.logbasename), "wb") as err:
-                p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
                 if self.timeout is not None:
+                    if not os.path.exists(self.completed_file):
+                        p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
+                    else:
+                        p = None
                     while not os.path.exists(self.completed_file):
                         try:
                             p.communicate(timeout=self.timeout)
                         except subprocess.TimeoutExpired:
                             continue
-                    try:
-                        # Give process time to return normally
-                        p.communicate(timeout=self.timeout)
-                    except subprocess.TimeoutExpired:
-                        p.kill()
+                    if p is not None:
+                        try:
+                            # Give process time to return normally
+                            p.communicate(timeout=self.timeout)
+                        except subprocess.TimeoutExpired:
+                            p.kill()
                 else:
+                    p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
                     p.communicate()
         else:
             with open("{0}.out.log".format(self.logbasename), "wb") as out, \
