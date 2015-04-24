@@ -356,8 +356,11 @@ class FacetSelfcal(Operation):
 
         self.log.info('Imaging (facet image #1)...')
         self.log.debug('Merging chunks...')
-        merged_data_mapfiles = self.write_mapfile([merge_chunks(chunks,
-            prefix=None, clobber=True) for chunks in chunks_list])
+        merged_data_mapfiles = []
+        for i, chunks in enumerate(chunks_list):
+            merged_data_mapfiles.append(self.write_mapfile([merge_chunks(chunks,
+            prefix=None, clobber=True) for chunks in chunks_list],
+            direction=d_list[i], host_list=d_hosts[i])))
 
         self.log.debug('Averaging in preparation for imaging...')
         actions = [Average(self.parset, m, p['avg1'], prefix='facet',
@@ -397,8 +400,11 @@ class FacetSelfcal(Operation):
 
         self.log.info('Imaging (facet image #2)...')
         self.log.debug('Merging chunks...')
-        merged_data_mapfiles = self.write_mapfile([merge_chunks(chunks,
-            prefix=None, clobber=True) for chunks in chunks_list])
+        merged_data_mapfiles = []
+        for i, chunks in enumerate(chunks_list):
+            merged_data_mapfiles.append(self.write_mapfile([merge_chunks(chunks,
+            prefix=None, clobber=True) for chunks in chunks_list],
+            direction=d_list[i], host_list=d_hosts[i])))
 
         self.log.debug('Averaging in preparation for imaging...')
         actions = [Average(self.parset, m, p['avg2'], prefix='facet',
@@ -475,8 +481,11 @@ class FacetSelfcal(Operation):
 
         self.log.info('Imaging (facet image #3)...')
         self.log.debug('Merging chunks...')
-        merged_data_mapfiles = self.write_mapfile([merge_chunks(chunks,
-            prefix=None, clobber=True) for chunks in chunks_list])
+        merged_data_mapfiles = []
+        for i, chunks in enumerate(chunks_list):
+            merged_data_mapfiles.append(self.write_mapfile([merge_chunks(chunks,
+            prefix=None, clobber=True) for chunks in chunks_list],
+            direction=d_list[i], host_list=d_hosts[i])))
 
         self.log.debug('Averaging in preparation for imaging...')
         actions = [Average(self.parset, m, p['avg3'], prefix='facet',
@@ -579,8 +588,11 @@ class FacetSelfcal(Operation):
 
         self.log.info('Imaging (facet image #4)...')
         self.log.debug('Merging chunks...')
-        merged_data_mapfiles = self.write_mapfile([merge_chunks(chunks,
-            prefix=None, clobber=True) for chunks in chunks_list])
+        merged_data_mapfiles = []
+        for i, chunks in enumerate(chunks_list):
+            merged_data_mapfiles.append(self.write_mapfile([merge_chunks(chunks,
+            prefix=None, clobber=True) for chunks in chunks_list],
+            direction=d_list[i], host_list=d_hosts[i])))
 
         self.log.debug('Averaging in preparation for imaging...')
         actions = [Average(self.parset, m, p['avg4'], prefix='facet',
