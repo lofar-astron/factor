@@ -8,6 +8,7 @@ import logging
 import socket
 from factor.lib.context import Timer
 from factor.lib.scheduler import Scheduler
+from factor import _logging
 
 class Operation(object):
     """
@@ -41,6 +42,7 @@ class Operation(object):
         self.reset = reset
         self.exit_on_error = True
         self.log = logging.getLogger(self.name)
+        _logging.set_level(self.parset['logging_level')
         self.s = Scheduler(parset['cluster_specific']['ncpu'], name=name,
             op_parset=self.parset)
         self.hostname = socket.gethostname()

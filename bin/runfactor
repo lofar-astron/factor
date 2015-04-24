@@ -43,9 +43,10 @@ if __name__=='__main__':
 
     # Prepare logging
     if options.q:
-        factor._logging.set_level('warning')
+        logging_level = 'warning'
     if options.v:
-        factor._logging.set_level('debug')
+        logging_level = 'debug'
+    factor._logging.set_level(logging_level)
 
     # Prepare parset
     try:
@@ -53,6 +54,7 @@ if __name__=='__main__':
     except:
         parset_file = 'factor.parset'
     parset = factor.parset.parset_read(parset_file)
+    parset['logging_level'] = logging_level
 
     # Prepare vis data
     bands = []
