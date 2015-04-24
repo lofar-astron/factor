@@ -52,7 +52,7 @@ class FacetAdd(Operation):
 
         if os.path.exists(self.statebasename+'.done'):
             shifted_data_mapfile = os.path.join(self.parset['dir_working'],
-                'datamaps/FacetAdd/PhaseShift/{0}/facet_output_{0}.datamap'.
+                'datamaps/FacetAdd/PhaseShift/{0}/facet_output_{0}-1.datamap'.
                 format(d.name))
             concat_sub_data_mapfile = os.path.join(self.parset['dir_working'],
                 'datamaps/FacetAdd/Concatenate/{0}/facet_bands_output_{0}-2.datamap'.
@@ -61,7 +61,7 @@ class FacetAdd(Operation):
             concat_files, _ = read_mapfile(concat_sub_data_mapfile)
             d.concat_sub_data_file = concat_files[0]
             d.shifted_data_files = {}
-            for band, f in zip(bands, files):
+            for band, f in zip(bands, shifted_files):
                 d.shifted_data_files[band.name] = f
             return
 
