@@ -73,8 +73,8 @@ facet_add = {
 'shift_cal' : {'columnname': 'FACET_DATA_CAL'}, # outcol is DATA
 'shift_all' : {'columnname': 'FACET_DATA_ALL'}, # outcol is DATA
 'shift_sub' : {'columnname': 'SUBTRACTED_DATA_ALL'}, # outcol is DATA
-'concat_all' : {'columnname': 'FACET_DATA_ALL'}, # outcol is DATA
-'concat_sub' : {'columnname': 'SUBTRACTED_DATA_ALL'}, # outcol is DATA
+'concat_all' : {'columnname': 'DATA'}, # outcol is DATA
+'concat_sub' : {'columnname': 'DATA'}, # outcol is DATA
 'copy' : {'incol': 'DATA',
           'outcol': 'FACET_DATA_ALL'}
 }
