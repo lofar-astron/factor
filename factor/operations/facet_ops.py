@@ -356,10 +356,14 @@ class FacetSelfcal(Operation):
 
         self.log.info('Imaging (facet image #1)...')
         self.log.debug('Merging chunks...')
+        if self.parset['imager'].lower() == 'casapy'
+            virtual = False
+        else:
+            virutal = True
         merged_data_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             merged_data_mapfiles.append(self.write_mapfile([merge_chunks(chunks,
-            prefix=None, clobber=True) for chunks in chunks_list],
+            prefix=None, clobber=True, virtual=virtual) for chunks in chunks_list],
             direction=d_list[i], host_list=d_hosts[i]))
 
         self.log.debug('Averaging in preparation for imaging...')
@@ -403,7 +407,7 @@ class FacetSelfcal(Operation):
         merged_data_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             merged_data_mapfiles.append(self.write_mapfile([merge_chunks(chunks,
-            prefix=None, clobber=True) for chunks in chunks_list],
+            prefix=None, clobber=True, virtual=virtual) for chunks in chunks_list],
             direction=d_list[i], host_list=d_hosts[i]))
 
         self.log.debug('Averaging in preparation for imaging...')
@@ -484,7 +488,7 @@ class FacetSelfcal(Operation):
         merged_data_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             merged_data_mapfiles.append(self.write_mapfile([merge_chunks(chunks,
-            prefix=None, clobber=True) for chunks in chunks_list],
+            prefix=None, clobber=True, virtual=virtual) for chunks in chunks_list],
             direction=d_list[i], host_list=d_hosts[i]))
 
         self.log.debug('Averaging in preparation for imaging...')
@@ -591,7 +595,7 @@ class FacetSelfcal(Operation):
         merged_data_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             merged_data_mapfiles.append(self.write_mapfile([merge_chunks(chunks,
-            prefix=None, clobber=True) for chunks in chunks_list],
+            prefix=None, clobber=True, virtual=virtual) for chunks in chunks_list],
             direction=d_list[i], host_list=d_hosts[i]))
 
         self.log.debug('Averaging in preparation for imaging...')
