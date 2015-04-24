@@ -218,14 +218,14 @@ def split_ms(msin, msout, start_out, end_out, columns=None, clobber=True):
     t.close()
 
 
-def merge_chunks(chunk_files, prefix=None, virtual=True, clobber=False):
+def merge_chunks(chunks, prefix=None, virtual=True, clobber=False):
     """
     Merges chunks
 
     Parameters
     ----------
-    chunk_files : list
-        List of MS files to merge
+    chunks : list
+        List of Chunk objects to merge
     prefix : str, optional
         String to prepend to output file
     virtual : bool. optional
@@ -242,6 +242,8 @@ def merge_chunks(chunk_files, prefix=None, virtual=True, clobber=False):
         pstr = prefix + '_'
     else:
         pstr = ''
+
+    chunk_files = [chunk.file for chunk in chunks]
     for m in chunk_files:
         if '-chunk_0' in m:
             rstr = pstr + 'allchunks'
