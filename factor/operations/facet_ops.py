@@ -120,7 +120,7 @@ class FacetAdd(Operation):
 
         # Save files to the direction objects and copy subtract data to concat file
         d.shifted_data_files = {}
-        for band, fcal in zip(bands, shifted_data_files):
+        for band, fcal in zip(bands, shifted_cal_data_files):
             d.shifted_data_files[band.name] = fcal
             d.concat_sub_data_file = concat_sub_data_files[0]
             copy_column(d.concat_sub_data_file, p['copy']['incol'], p['copy']['outcol'],
