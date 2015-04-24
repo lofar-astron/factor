@@ -44,8 +44,10 @@ if __name__=='__main__':
     # Prepare logging
     if options.q:
         logging_level = 'warning'
-    if options.v:
+    elif options.v:
         logging_level = 'debug'
+    else:
+        logging_level = 'info'
     factor._logging.set_level(logging_level)
 
     # Prepare parset
