@@ -88,21 +88,21 @@ def copy_model_images(modelbasename, ms_list, nterms=1):
     outmodelbasenames = []
 
     for i, band in enumerate(bands):
-        outmodelbasenames.append(modelbasename + '_band{0}'.format(i))
+        outmodelbasenames.append(modelbasename + '_{0}'.format(i))
         if nterms == 1:
             inmodelimages.append([modelbasename + '.model'])
-            outmodelimages.append([modelbasename + '_band{0}.model'.format(i)])
+            outmodelimages.append([modelbasename + '_{0}.model'.format(i)])
         elif nterms == 2:
             inmodelimages.append([modelbasename + '.model.tt0',
                 modelbasename + '.model.tt1'])
-            outmodelimages.append([modelbasename + '_band{0}.model.tt0'.format(i),
-                modelbasename + '_band{0}.model.tt1'.format(i)])
+            outmodelimages.append([modelbasename + '_{0}.model.tt0'.format(i),
+                modelbasename + '_{0}.model.tt1'.format(i)])
         else:
             inmodelimages.append([modelbasename + '.model.tt0',
                 modelbasename + '.model.tt1', modelbasename + '.model.tt2'])
-            outmodelimages.append([modelbasename + '_band{0}.model.tt0'.format(i),
-                modelbasename + '_band{0}.model.tt1'.format(i),
-                modelbasename + '_band{0}.model.tt2'.format(i)])
+            outmodelimages.append([modelbasename + '_{0}.model.tt0'.format(i),
+                modelbasename + '_{0}.model.tt1'.format(i),
+                modelbasename + '_{0}.model.tt2'.format(i)])
 
     for inmods, outmods in zip(inmodelimages, outmodelimages):
         for inmod, outmod in zip(inmods, outmods):

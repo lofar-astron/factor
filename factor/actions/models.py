@@ -512,7 +512,7 @@ class FFT(Action):
         model_files, hosts = read_mapfile(self.model_datamap)
 
         if len(vis_ms_files) > len(model_files) and \
-            self.parset['imager'].lower() == 'casapy':
+            self.op_parset['imager'].lower() == 'casapy':
             # Copy the model image for each vis file to avoid write conflicts
             model_datamap = self.write_mapfile(copy_model_images(model_files[0],
                 vis_ms_files, self.p['nterms']), prefix=self.prefix+'_models',
