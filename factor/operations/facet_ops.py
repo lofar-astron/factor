@@ -732,7 +732,7 @@ class FacetImage(Operation):
         dir_dep_parmdbs_mapfiles = []
         dir_indep_skymodels_mapfiles = []
         for d, h in zip(d_list, d_hosts):
-            shifted_data_mapfiles.append(self.write_mapfile(d.concat_sub_data_files,
+            shifted_data_mapfiles.append(self.write_mapfile(d.concat_sub_data_file,
             	prefix='shifted', direction=d, host_list=h))
             dir_dep_parmdbs_mapfiles.append(self.write_mapfile([d.
             	dirdepparmdb]*len(bands), prefix='dir_dep_parmdbs', direction=d,
@@ -828,25 +828,17 @@ class FacetSub(Operation):
         dir_indep_skymodels_mapfiles = []
         dir_dep_model_mapfiles = []
         for d, h in zip(d_list, d_hosts):
-            shifted_data_mapfiles.append(self.write_mapfile(d.concat_sub_data_files,
+            shifted_data_mapfiles.append(self.write_mapfile(d.concat_sub_data_file,
             	prefix='shifted', direction=d, host_list=h))
             dir_dep_parmdbs_mapfiles.append(self.write_mapfile([d.
             	dirdepparmdb]*len(bands), prefix='dir_dep_parmdbs', direction=d,
             	host_list=h))
-            if self.parset['imager'].lower() != 'wsclean':
-                # Copy the model image for each band to avoid write conflicts
-                dir_dep_model_mapfiles.append(self.copy_model_images(d.skymodel_dirdep,
-                    bands, p['fft'], d))
-            else:
-                dir_dep_model_mapfiles.append(self.write_mapfile([d.skymodel_dirdep]*len(bands),
-                    prefix='dir_dep_skymodels', direction=d))
 
         self.log.info('Subtracting sources...')
         actions = [Subtract(self.parset, dm, p['subtract'],
-            model_datamap=None, parmdb_datamap=pm, prefix='facet_dirdep',
-            direction=d) for d, dm, pd, pm in
-            zip(d_list, shifted_data_mapfile, dir_dep_model_mapfile,
-            dir_dep_parmdb_mapfile)]
+            model_datamap=None, parmdb_datamap=pd, prefix='facet_dirdep',
+            direction=d) for d, dm, pd in
+            zip(d_list, shifted_data_mapfile, dir_dep_parmdb_mapfile)]
         self.s.run(actions)
 
         self.log.info('Phase shifting back to field center...')
@@ -878,54 +870,6 @@ class FacetSub(Operation):
         # If not OK, reset pipeline state for this direction and stop Factor
         # (after all the other directions in the group, if any, have finished).
         # Set d.good = False and catch this flag later after FieldSub.
-
-
-    def copy_model_images(self, modelbasename, bands, p, direction):
-        """
-        Copies model images and returns the mapfile
-        """
-        inmodelimages = []
-        outmodelimages = []
-        outmodelbasenames = []
-
-        for i, band in enumerate(bands):
-            outmodelbasenames.append(modelbasename + '_band{0}'.format(i))
-            if self.parset['imager'].lower() == 'wsclean':
-                if p['nterms'] == 1:
-                    inmodelimages.append([modelbasename + '.model.fits'])
-                    outmodelimages.append([modelbasename + '_band{0}.model.fits'.format(i)])
-                else:
-                    nfiles = direction.nchannels
-                    inmodelimages.append([modelbasename +
-                        '-{0:04d}-model.fits'.format(j) for j in range(nfiles)])
-                    outmodelimages.append([modelbasename +
-                        '_band{0}-{0:04d}-model.fits'.format(j) for j in range(nfiles)])
-            else:
-                if p['nterms'] == 1:
-                    inmodelimages.append([modelbasename + '.model'])
-                    outmodelimages.append([modelbasename + '_band{0}.model'.format(i)])
-                elif p['nterms'] == 2:
-                    inmodelimages.append([modelbasename + '.model.tt0',
-                        modelbasename + '.model.tt1'])
-                    outmodelimages.append([modelbasename + '_band{0}.model.tt0'.format(i),
-                        modelbasename + '_band{0}.model.tt1'.format(i)])
-                else:
-                    inmodelimages.append([modelbasename + '.model.tt0',
-                        modelbasename + '.model.tt1', modelbasename + '.model.tt2'])
-                    outmodelimages.append([modelbasename + '_band{0}.model.tt0'.format(i),
-                        modelbasename + '_band{0}.model.tt1'.format(i),
-                        modelbasename + '_band{0}.model.tt2'.format(i)])
-
-        for inmods, outmods in zip(inmodelimages, outmodelimages):
-            for inmod, outmod in zip(inmods, outmods):
-                if os.path.exists(outmod):
-                    os.system('rm -rf {0}'.format(outmod))
-                os.system('cp -r {0} {1}'.format(inmod, outmod))
-
-        outdatamap = self.write_mapfile(outmodelbasenames,
-                prefix='dir_dep_skymodels_perband', direction=direction)
-
-        return outdatamap
 
 
 class FacetAddAllFinal(Operation):

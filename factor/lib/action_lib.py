@@ -79,6 +79,40 @@ def make_image_basename(input_datamap, direction=None, band=None, prefix=None):
     return image_basenames
 
 
+def copy_model_images(modelbasename, ms_list, nterms=1):
+"""
+Copies model images and returns list of output basenames
+"""
+inmodelimages = []
+outmodelimages = []
+outmodelbasenames = []
+
+for i, band in enumerate(bands):
+    outmodelbasenames.append(modelbasename + '_band{0}'.format(i))
+    if nterms == 1:
+        inmodelimages.append([modelbasename + '.model'])
+        outmodelimages.append([modelbasename + '_band{0}.model'.format(i)])
+    elif nterms == 2:
+        inmodelimages.append([modelbasename + '.model.tt0',
+            modelbasename + '.model.tt1'])
+        outmodelimages.append([modelbasename + '_band{0}.model.tt0'.format(i),
+            modelbasename + '_band{0}.model.tt1'.format(i)])
+    else:
+        inmodelimages.append([modelbasename + '.model.tt0',
+            modelbasename + '.model.tt1', modelbasename + '.model.tt2'])
+        outmodelimages.append([modelbasename + '_band{0}.model.tt0'.format(i),
+            modelbasename + '_band{0}.model.tt1'.format(i),
+            modelbasename + '_band{0}.model.tt2'.format(i)])
+
+for inmods, outmods in zip(inmodelimages, outmodelimages):
+    for inmod, outmod in zip(inmods, outmods):
+        if os.path.exists(outmod):
+            os.system('rm -rf {0}'.format(outmod))
+        os.system('cp -r {0} {1}'.format(inmod, outmod))
+
+return outmodelbasenames
+
+
 def getOptimumSize(size):
     """
     Gets the nearest optimum image size

@@ -504,8 +504,22 @@ class FFT(Action):
         """
         Makes the required data maps
         """
+        from factor.lib.datamap_lib import read_mapfile
+        from factor.lib.action_lib import copy_model_images
+
         self.p['vis_datamap'] = self.vis_datamap
-        self.p['model_datamap'] = self.model_datamap
+        vis_ms_files, hosts = read_mapfile(self.vis_datamap)
+        model_files, hosts = read_mapfile(self.model_datamap)
+
+        if len(vis_ms_files) > len(model_files) and \
+            self.parset['imager'].lower() == 'casapy':
+            # Copy the model image for each vis file to avoid write conflicts
+            model_datamap = self.write_mapfile(copy_model_images(model_files[0],
+                vis_ms_files, self.p['nterms']), prefix=self.prefix+'_models',
+                direction=self.direction, index=self.index, host_list=hosts)
+        else:
+            model_datamap = self.model_datamap
+        self.p['model_datamap'] = model_datamap
 
 
     def make_pipeline_control_parset(self):
