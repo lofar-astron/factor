@@ -1,6 +1,7 @@
 """
 Some functions called by multiple actions
 """
+import os
 
 
 def make_basename(prefix, direction=None, band=None, index=None):
@@ -52,7 +53,6 @@ def make_image_basename(input_datamap, direction=None, band=None, prefix=None):
     """
     from factor.lib.datamap_lib import read_mapfile
     import re
-    import os
 
     if prefix is None:
         prefix = ''
@@ -82,6 +82,16 @@ def make_image_basename(input_datamap, direction=None, band=None, prefix=None):
 def copy_model_images(modelbasename, ms_list, nterms=1):
     """
     Copies model images and returns list of output basenames
+
+    Parameters
+    ----------
+    modelbasename : str
+        Basename of model image to copy
+    ms_list : list
+        List of ms files for which copies are needed
+    nterm : int, optional
+        Number of terms in model
+
     """
     inmodelimages = []
     outmodelimages = []
