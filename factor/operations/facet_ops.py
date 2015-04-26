@@ -677,7 +677,7 @@ class FacetImage(Operation):
         from factor.actions.visibilities import Average, Concatenate
         from factor.actions.calibrations import Apply
         from factor.actions.images import MakeImageIterate
-        from factor.actions.models import MakeFacetSkymodel, MakeSkymodelFromModelImage
+        from factor.actions.models import MakeFacetSkymodel, MakeSkymodelFromModelImage, FFT
         from factor.lib.operation_lib import copy_column
         from factor.operations.hardcoded_param import facet_image as p
         from factor.lib.datamap_lib import read_mapfile
@@ -791,7 +791,6 @@ class FacetSub(Operation):
         """
         from factor.actions.calibrations import Subtract
         from factor.actions.visibilities import PhaseShift
-        from factor.actions.models import FFT
         from factor.operations.hardcoded_param import facet_sub as p
         from factor.lib.datamap_lib import read_mapfile
         from factor.lib.operation_lib import copy_column
@@ -870,7 +869,8 @@ class FacetSub(Operation):
 
         # If not OK, reset pipeline state for this direction and stop Factor
         # (after all the other directions in the group, if any, have finished).
-        # Set d.good = False and catch this flag later after FieldSub.
+        # Set d.good = False and catch this flag later after FieldSub()
+        # operation
 
 
 class FacetAddAllFinal(Operation):
