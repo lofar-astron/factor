@@ -123,7 +123,7 @@ class FacetAdd(Operation):
         concat_sub_data_mapfile = self.s.run(action)
         concat_sub_data_files, _ = read_mapfile(concat_sub_data_mapfile)
 
-        # Save files to the direction objects and copy subtract data to concat file
+        # Save files to the direction objects and copy data to concat file
         d.concat_sub_data_file = concat_sub_data_files[0]
         d.shifted_data_files = {}
         for band, fcal in zip(bands, shifted_cal_data_files):

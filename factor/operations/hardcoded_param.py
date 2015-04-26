@@ -267,7 +267,6 @@ facet_image= {
 'avg' : {'columnname': 'CORRECTED_DATA', # outcol is DATA
          'freqstep': 5,
          'timestep': 3},
-'concat' : {'columnname': 'DATA'}, # outcol is DATA
 'imager' : {'niter': 5000,
             'imsize': 1024,
             'mscale': False,

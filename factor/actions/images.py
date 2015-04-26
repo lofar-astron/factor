@@ -97,11 +97,13 @@ class MakeImage(Action):
 
         # Set a timeout for casapy runs
         if self.op_parset['imager'].lower() == 'casapy':
+            self.completed_files = []
             self.timeout = 60 # check every 1 minute
             # Define completed file (assumes single image only)
-            self.completed_file = self.imagebasenames[0] + '.done'
+            completed_file = self.imagebasenames[0] + '.done'
             if self.index is not None:
-                self.completed_file += '{0}'.format(self.index)
+                completed_file += '{0}'.format(self.index)
+            self.completed_files.append(completed_file)
 
         # Set up all required files
         self.setup()

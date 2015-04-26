@@ -464,13 +464,6 @@ class FFT(Action):
         if 'wplanes' not in self.p:
             self.setup_wplanes()
 
-        # Set a timeout for casapy runs
-        if self.op_parset['imager'].lower() == 'casapy':
-            self.timeout = 60
-            self.completed_file = self.parsetbasename + '.done'
-            if self.index is not None:
-                self.completed_file += '{0}'.format(self.index)
-
         # Set up all required files
         self.setup()
 
@@ -520,6 +513,16 @@ class FFT(Action):
         else:
             model_datamap = self.model_datamap
         self.p['model_datamap'] = model_datamap
+
+        # Set a timeout for casapy runs
+        if self.op_parset['imager'].lower() == 'casapy':
+            self.completed_files = []
+            self.timeout = 60
+            for model_file in model_files:
+                completed_file = model_file + '.done'
+                if self.index is not None:
+                    completed_file += '{0}'.format(self.index)
+                self.completed_files.append(completed_file)
 
 
     def make_pipeline_control_parset(self):

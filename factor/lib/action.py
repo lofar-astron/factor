@@ -208,6 +208,17 @@ class Action(object):
         self.make_pipeline_config_parset()
 
 
+    def check_done(self):
+        """
+        Checks if casapy process is done
+        """
+        all_done = True
+        for f in self.completed_files:
+            if not os.path.exists(f):
+                all_done = False
+        return all_done
+
+
     def run(self):
         """
         Runs the pipeline
@@ -218,11 +229,11 @@ class Action(object):
             with open("{0}.out.log".format(self.logbasename), "wb") as out, \
                 open("{0}.err.log".format(self.logbasename), "wb") as err:
                 if self.timeout is not None:
-                    if not os.path.exists(self.completed_file):
+                    if not self.check_done:
                         p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
                     else:
                         p = None
-                    while not os.path.exists(self.completed_file):
+                    while not self.check_done:
                         try:
                             p.communicate(timeout=self.timeout)
                         except subprocess.TimeoutExpired:
