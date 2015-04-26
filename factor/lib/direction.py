@@ -20,7 +20,7 @@ class Direction(object):
             RA in degrees of direction center
         dec : float
             Dec in degrees of direction center
-        reg : str
+        clean_reg : str
             CASA region file for clean
         multiscale : bool
             Use multiscale clean?
@@ -39,7 +39,7 @@ class Direction(object):
         self.name = name
         self.ra = ra
         self.dec = dec
-        self.reg = reg
+        self.clean_reg = clean_reg
         self.multiscale = multiscale
         self.solint_a = solint_a
         self.solint_p = solint_p
