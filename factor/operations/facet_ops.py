@@ -825,8 +825,6 @@ class FacetSub(Operation):
         # instrument parmdbs, and their dir-dep sky models
         shifted_data_mapfiles = []
         dir_dep_parmdbs_mapfiles = []
-        dir_indep_skymodels_mapfiles = []
-        dir_dep_model_mapfiles = []
         for d, h in zip(d_list, d_hosts):
             shifted_data_mapfiles.append(self.write_mapfile(d.concat_sub_data_file,
             	prefix='shifted', direction=d, host_list=h))
@@ -838,7 +836,7 @@ class FacetSub(Operation):
         actions = [Subtract(self.parset, dm, p['subtract'],
             model_datamap=None, parmdb_datamap=pd, prefix='facet_dirdep',
             direction=d) for d, dm, pd in
-            zip(d_list, shifted_data_mapfiles, dir_dep_parmdb_mapfiles)]
+            zip(d_list, shifted_data_mapfiles, dir_dep_parmdbs_mapfiles)]
         self.s.run(actions)
 
         self.log.info('Phase shifting back to field center...')
