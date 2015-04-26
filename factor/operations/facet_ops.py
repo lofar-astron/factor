@@ -838,12 +838,14 @@ class FacetSub(Operation):
         actions = [Subtract(self.parset, dm, p['subtract'],
             model_datamap=None, parmdb_datamap=pd, prefix='facet_dirdep',
             direction=d) for d, dm, pd in
-            zip(d_list, shifted_data_mapfile, dir_dep_parmdb_mapfile)]
+            zip(d_list, shifted_data_mapfiles, dir_dep_parmdb_mapfiles)]
         self.s.run(actions)
 
         self.log.info('Phase shifting back to field center...')
+        ra = bands[0].ra
+        dec = bands[0].dec
         actions = [Shift(self.parset, m, p['shift'], prefix='facet',
-            direction=d) for d, m in zip(d_list, shifted_data_mapfiles)]
+            direction=d, ra=ra, dec=dec) for d, m in zip(d_list, shifted_data_mapfiles)]
         unshifted_data_mapfiles = self.s.run(actions)
 
         self.log.info('Averaging...')

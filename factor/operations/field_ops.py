@@ -150,8 +150,9 @@ class FieldSub(Operation):
         Run the steps for this operation
         """
         from factor.actions.images import MakeImageIterate
-        from factor.actions.visibilities import Average, ChgCentre
+        from factor.actions.visibilities import Average, ChgCentre, PhaseShift
         from factor.lib.datamap_lib import read_mapfile
+        from factor.lib.operation_lib import copy_column_freq
         from factor.operations.hardcoded_param import field_sub as p
 
         bands = self.bands
@@ -173,9 +174,11 @@ class FieldSub(Operation):
         dir_indep_skymodels_mapfile = self.write_mapfile([band.skymodel_dirindep
         	for band in bands], prefix='dir_indep_skymodels', direction=d)
 
-        self.log.info('Phase shifting...')
+        self.log.info('Phase shifting back to field center...')
+        ra = bands[0].ra
+        dec = bands[0].dec
         action = PhaseShift(self.parset, shifted_data_mapfile, p['shift'],
-            prefix='facet', direction=d)
+            prefix='facet', direction=d, ra=ra, dec=dec)
         unshifted_model_data_mapfile = self.s.run(action)
 
         self.log.info('Copying model to bands...')

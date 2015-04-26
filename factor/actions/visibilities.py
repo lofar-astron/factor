@@ -155,11 +155,14 @@ class PhaseShift(DPPP):
     """
     Action to phase shift visibilities
     """
-    def __init__(self, op_parset, input_datamap, p, direction, prefix=None,
-        clean=True, index=None):
+    def __init__(self, op_parset, input_datamap, p, direction, ra=None, dec=None,
+        prefix=None, clean=True, index=None):
         super(PhaseShift, self).__init__(op_parset, input_datamap, p, prefix=prefix,
             direction=direction, clean=clean, index=index, name='PhaseShift')
-        if direction is not None:
+        if ra is not None and dec is not None:
+            self.p['ra'] = ra
+            self.p['dec'] = dec
+        elif direction is not None:
             self.p['ra'] = direction.ra
             self.p['dec'] = direction.dec
 
