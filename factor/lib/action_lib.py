@@ -87,7 +87,7 @@ def copy_model_images(modelbasename, ms_list, nterms=1):
     outmodelimages = []
     outmodelbasenames = []
 
-    for i, band in enumerate(bands):
+    for i in range(len(ms_list)):
         outmodelbasenames.append(modelbasename + '_{0}'.format(i))
         if nterms == 1:
             inmodelimages.append([modelbasename + '.model'])
