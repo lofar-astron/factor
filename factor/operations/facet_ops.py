@@ -732,10 +732,11 @@ class FacetImage(Operation):
         dir_dep_parmdbs_mapfiles = []
         dir_indep_skymodels_mapfiles = []
         for d, h in zip(d_list, d_hosts):
-            shifted_data_mapfiles.append(self.write_mapfile(d.concat_sub_data_file,
-            	prefix='shifted', direction=d, host_list=h))
+            shifted_data_mapfiles.append(self.write_mapfile([d.
+                concat_sub_data_file], prefix='shifted', direction=d,
+                host_list=h))
             dir_dep_parmdbs_mapfiles.append(self.write_mapfile([d.
-            	dirdepparmdb]*len(bands), prefix='dir_dep_parmdbs', direction=d,
+            	dirdepparmdb], prefix='dir_dep_parmdbs', direction=d,
             	host_list=h))
 
         self.log.info('Applying direction-dependent calibration...')
