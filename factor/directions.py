@@ -32,7 +32,7 @@ def directions_read(directions_file):
         sys.exit(1)
 
     log.info("Reading directions file: %s" % (directions_file))
-    types = np.dtype({'names': ['name', 'ra', 'dec', 'reg', 'multiscale',
+    types = np.dtype({'names': ['name', 'ra', 'dec', 'clean_reg', 'multiscale',
     	'solint_a', 'solint_p', 'make_final_image', 'cal_radius', 'apparent_flux'],
     	'formats':['S100', np.float, np.float, 'S100', np.bool, np.int,
     	np.int, np.bool, np.float, np.float]})

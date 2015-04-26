@@ -7,7 +7,7 @@ class Direction(object):
     """
     Generic direction class
     """
-    def __init__(self, name, ra, dec, reg, multiscale, solint_a, solint_p,
+    def __init__(self, name, ra, dec, clean_reg, multiscale, solint_a, solint_p,
         make_final_image, cal_radius, apparent_flux):
         """
         Create Direction object
