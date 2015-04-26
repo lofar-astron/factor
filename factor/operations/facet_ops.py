@@ -691,7 +691,7 @@ class FacetImage(Operation):
         for i, d in enumerate(d_list):
             if os.path.exists(self.statebasename[i]+'.done'):
                 model_mapfile = os.path.join(self.parset['dir_working'],
-                'datamaps/FacetImage/{0}/final_model_{0}.datamap'.
+                'datamaps/FacetImage/MakeImage/{0}/facet_image-imager_output_{0}-1.datamap'.
                 format(d.name))
                 file, _ = read_mapfile(model_mapfile)
                 d.skymodel_dirdep = file[0]
