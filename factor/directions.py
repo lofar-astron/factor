@@ -363,6 +363,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False):
 
     # Check for sources near / on facet edges and adjust regions accordingly
     if has_shapely and check_edges:
+        log.info('Adjusting facets to avoid sources...')
         s = lsmtool.load('models/initial.skymodel')
         RA, Dec = s.getPatchPositions(asArray=True)
         sx, sy = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
@@ -398,10 +399,10 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False):
                     p2buf = p2.buffer(pix_radius)
                     if d < 0.0:
                         # If point is outside, difference the polys
-                        p1 = p1.difference(p2buf)
+                        p1 = p1.union(p2buf)
                     else:
                         # If point is inside, union the polys
-                        p1 = p1.union(p2buf)
+                        p1 = p1.difference(p2buf)
                 xyverts = [np.array([xp, yp]) for xp, yp in zip(p1.exterior.coords.xy[0].tolist(),
                     p1.exterior.coords.xy[1].tolist())]
                 thiessen_polys[i] = xyverts
