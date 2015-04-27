@@ -41,8 +41,8 @@ class Operation(object):
         self.direction = direction
         self.reset = reset
         self.exit_on_error = True
-        self.log = logging.getLogger(self.name)
         _logging.set_level(self.parset['logging_level'])
+        self.log = logging.getLogger(self.name)
         self.s = Scheduler(parset['cluster_specific']['ncpu'], name=name,
             op_parset=self.parset)
         self.hostname = socket.gethostname()
