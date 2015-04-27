@@ -320,7 +320,7 @@ facet_sub = {
                 'use_rms': False,
                 'image_final': False,
                 'iterate_threshold': False,
-                'n_per_node': 1}
+                'n_per_node': 1},
 'shift_post' : {'columnname': 'CORRECTED_SUBTRACTED_DATA'}, # outcol is DATA
 'avg_post' : {'columnname': 'DATA', # outcol is DATA
          'uvmmax': 2500.0,
