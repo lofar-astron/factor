@@ -528,7 +528,7 @@ class FFT(Action):
         if self.op_parset['imager'].lower() == 'casapy':
             self.p['completed_datamap'] = self.write_mapfile(self.completed_files,
                 prefix=self.prefix+'_models_completed', index=self.index,
-                direction=self.direction, band=self.band, host_list=vis_hosts)
+                direction=self.direction, band=self.band, host_list=hosts)
 
 
 
