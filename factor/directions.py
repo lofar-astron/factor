@@ -377,7 +377,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False):
             poly = Polygon(polyv[:, 0], polyv[:, 1])
             dists = poly.is_inside(sx, sy)
             for j, dist in enumerate(dists):
-                pix_radius = sizes.tolist()[j] / 0.066667 # size of source in pixels
+                pix_radius = sizes.tolist()[j] * 1.2 / 2.0 / 0.066667 # radius of source in pixels
                 if abs(dist) < pix_radius and j not in ind_near_edge:
                     ind_near_edge.append(j)
         sx = np.array(sx)[ind_near_edge]
@@ -393,7 +393,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False):
                 dist = poly.is_inside(x, y)
                 p1 = shapely.geometry.Polygon(poly_tuple)
 
-                pix_radius = size / 0.066667 # size of source in pixels
+                pix_radius = size * 1.2 / 2.0 / 0.066667 # size of source in pixels
                 if abs(dist) < pix_radius:
                     p2 = shapely.geometry.Point((x, y))
                     p2buf = p2.buffer(pix_radius)
