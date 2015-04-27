@@ -132,7 +132,8 @@ if __name__=='__main__':
         	directions_max_num=parset['direction_specific']['max_num'],
         	interactive=parset['interactive'])
         directions = factor.directions.directions_read(parset['directions_file'])
-    polys, widths = factor.directions.thiessen(directions)
+    polys, widths = factor.directions.thiessen(directions,
+        check_edges=parset['direction_specific']['check_edges'])
     for i, direction in enumerate(directions):
         direction.vertices = polys[i]
         direction.width = widths[i]
