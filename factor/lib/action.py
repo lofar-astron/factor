@@ -229,11 +229,11 @@ class Action(object):
             with open("{0}.out.log".format(self.logbasename), "wb") as out, \
                 open("{0}.err.log".format(self.logbasename), "wb") as err:
                 if self.timeout is not None:
-                    if not self.check_done:
+                    if not self.check_done():
                         p = subprocess.Popen(cmd, shell=True, stdout=out, stderr=err)
                     else:
                         p = None
-                    while not self.check_done:
+                    while not self.check_done():
                         try:
                             p.communicate(timeout=self.timeout)
                         except subprocess.TimeoutExpired:
