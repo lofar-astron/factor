@@ -125,6 +125,11 @@ def parset_read(parset_file):
         parset_dict['direction_specific'] = parset._sections['directions']
     else:
         parset_dict['direction_specific'] = {}
+    if 'check_edges' in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['check_edges'] = parset.getboolean('directions',
+            'check_edges')
+    else:
+        parset_dict['direction_specific']['check_edges'] = False
     if 'flux_min_jy' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['flux_min_jy'] = parset.getfloat('directions',
             'flux_min_jy')

@@ -124,7 +124,8 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     log.info('Found {0} sources through thresholding'.format(
         len(s.getPatchNames())))
 
-    # Filter out sources that lie more than 5 degrees from center
+    # Filter out sources that lie more than 5 degrees from center.
+    # TODO: adjust this for each observation
     log.info('Removing sources beyond the FWHM of the primary beam...')
     dist = s.getDistance(band.ra, band.dec, byPatch=True)
     s.remove(dist > 5.0, aggregate=True) # 5 degree radius
@@ -154,7 +155,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     s.setPatchPositions(method='wmean')
 
     # Filter fainter patches
-    s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='sum', force=True)
+    s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='max', force=True)
     if len(s) == 0:
         log.critical("No sources found that meet the specified min flux criteria.")
         sys.exit(1)
@@ -163,13 +164,13 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
 
     # Trim directions list to get directions_total_num of directions
     if directions_max_num is not None:
-        dir_fluxes = s.getColValues('I', aggregate='sum')
+        dir_fluxes = s.getColValues('I', aggregate='max')
         dir_fluxes_sorted = dir_fluxes.tolist()
         dir_fluxes_sorted.sort(reverse=True)
         cut_jy = dir_fluxes_sorted[-1]
         while len(dir_fluxes_sorted) > directions_max_num:
             cut_jy = dir_fluxes_sorted.pop() + 0.00001
-        s.remove('I < {0} Jy'.format(cut_jy), aggregate='sum')
+        s.remove('I < {0} Jy'.format(cut_jy), aggregate='max')
 
     log.info('Kept {0} directions in total'.format(len(s.getPatchNames())))
 
@@ -305,7 +306,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
     return direction_groups
 
 
-def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
+def thiessen(directions_list, bounds_scale=0.52, check_edges=False):
     """
     Return list of thiessen polygons and their widths in degrees
 
@@ -315,7 +316,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
         List of input directions
     bounds_scale : int, optional
         Scale to use for bounding box
-    check_sources : bool, optional
+    check_edges : bool, optional
         If True, check whether any know source falls on a facet edge. If sources
         are found that do, the facet is adjusted
 
@@ -361,8 +362,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
                       for n in range(len(points) - 32)]
 
     # Check for sources near / on facet edges and adjust regions accordingly
-    has_shapely = False
-    if has_shapely:
+    if has_shapely and check_edges:
         s = lsmtool.load('models/initial.skymodel')
         RA, Dec = s.getPatchPositions(asArray=True)
         sx, sy = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)

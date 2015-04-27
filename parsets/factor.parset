@@ -44,6 +44,11 @@ use_chgcentre = False
 # are selected internally using the flux and size cuts below
 directions_file = /data/directions.txt
 
+# Check whether any sources from the initial subtract sky model fall on facet
+# edges. If any are found, the facet regions are adjusted to avoid them (default
+# is False)
+check_edges = False
+
 # Flux and size cuts for selecting directions internally (min flux, max size
 # of a source, and max separation between sources below which they are grouped
 # into one direction; required if no directions_file is given)
