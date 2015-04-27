@@ -369,43 +369,47 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False):
         sx, sy = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
         sizes = s.getPatchSizes(units='degree')
 
-        # Filter sources to get only those close to a boundary
-        ind_near_edge = []
-        for i, thiessen_poly in enumerate(thiessen_polys):
-            polyv = np.vstack(thiessen_poly)
-            poly_tuple = tuple([(x, y) for x, y in zip(polyv[:, 0], polyv[:, 1])])
-            poly = Polygon(polyv[:, 0], polyv[:, 1])
-            dists = poly.is_inside(sx, sy)
-            for j, dist in enumerate(dists):
-                pix_radius = sizes.tolist()[j] * 1.2 / 2.0 / 0.066667 # radius of source in pixels
-                if abs(dist) < pix_radius and j not in ind_near_edge:
-                    ind_near_edge.append(j)
-        sx = np.array(sx)[ind_near_edge]
-        sy = np.array(sy)[ind_near_edge]
-        sizes = sizes[ind_near_edge]
-
-        # Adjust all facets for each source near a boundary
-        for x, y, size in zip(sx, sy, sizes):
+        # Filter sources to get only those close to a boundary. We need to iterate
+        # until no sources are found
+        while True:
+            ind_near_edge = []
             for i, thiessen_poly in enumerate(thiessen_polys):
                 polyv = np.vstack(thiessen_poly)
-                poly_tuple = tuple([(xp, yp) for xp, yp in zip(polyv[:, 0], polyv[:, 1])])
+                poly_tuple = tuple([(x, y) for x, y in zip(polyv[:, 0], polyv[:, 1])])
                 poly = Polygon(polyv[:, 0], polyv[:, 1])
-                dist = poly.is_inside(x, y)
-                p1 = shapely.geometry.Polygon(poly_tuple)
+                dists = poly.is_inside(sx, sy)
+                for j, dist in enumerate(dists):
+                    pix_radius = sizes.tolist()[j] * 1.2 / 2.0 / 0.066667 # radius of source in pixels
+                    if abs(dist) < pix_radius and j not in ind_near_edge:
+                        ind_near_edge.append(j)
+            if len(ind_near_edge) == 0:
+                break
+            sx = np.array(sx)[ind_near_edge]
+            sy = np.array(sy)[ind_near_edge]
+            sizes = sizes[ind_near_edge]
 
-                pix_radius = size * 1.2 / 2.0 / 0.066667 # size of source in pixels
-                if abs(dist) < pix_radius:
-                    p2 = shapely.geometry.Point((x, y))
-                    p2buf = p2.buffer(pix_radius)
-                    if dist < 0.0:
-                        # If point is outside, difference the polys
-                        p1 = p1.difference(p2buf)
-                    else:
-                        # If point is inside, union the polys
-                        p1 = p1.union(p2buf)
-                xyverts = [np.array([xp, yp]) for xp, yp in zip(p1.exterior.coords.xy[0].tolist(),
-                    p1.exterior.coords.xy[1].tolist())]
-                thiessen_polys[i] = xyverts
+            # Adjust all facets for each source near a boundary
+            for x, y, size in zip(sx, sy, sizes):
+                for i, thiessen_poly in enumerate(thiessen_polys):
+                    polyv = np.vstack(thiessen_poly)
+                    poly_tuple = tuple([(xp, yp) for xp, yp in zip(polyv[:, 0], polyv[:, 1])])
+                    poly = Polygon(polyv[:, 0], polyv[:, 1])
+                    dist = poly.is_inside(x, y)
+                    p1 = shapely.geometry.Polygon(poly_tuple)
+
+                    pix_radius = size * 1.2 / 2.0 / 0.066667 # size of source in pixels
+                    if abs(dist) < pix_radius:
+                        p2 = shapely.geometry.Point((x, y))
+                        p2buf = p2.buffer(pix_radius)
+                        if dist < 0.0:
+                            # If point is outside, difference the polys
+                            p1 = p1.difference(p2buf)
+                        else:
+                            # If point is inside, union the polys
+                            p1 = p1.union(p2buf)
+                    xyverts = [np.array([xp, yp]) for xp, yp in zip(p1.exterior.coords.xy[0].tolist(),
+                        p1.exterior.coords.xy[1].tolist())]
+                    thiessen_polys[i] = xyverts
 
     # Convert from x, y to RA, Dec
     thiessen_polys_deg = []
