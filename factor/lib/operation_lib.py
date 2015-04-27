@@ -372,3 +372,25 @@ def merge_parmdbs(parmdb_p, pre_apply_parmdb, parmdb_a, ms, clobber=True):
 
     return parmdb_out
 
+
+def verify_subtract(image_pre, image_post, res_val):
+    """
+    Check quantities in residual images
+    """
+    import numpy
+    import pyrap.images
+
+    imgpre = pyrap.images.image(image_pre)
+    pixelspre = numpy.copy(imgpre.getdata())
+    maxvalpre = numpy.copy(numpy.max(pixelspre))
+
+    img = pyrap.images.image(image_post)
+    pixels = numpy.copy(img.getdata())
+    maxval = numpy.copy(numpy.max(pixels))
+
+    if (maxval > res_val) or ((maxval*0.95) > maxvalpre) :
+        print 'WARNING RESIDUAL TOO LARGE, STOPPING', maxval, res_val
+        print 'WARNING RESIDUAL TOO LARGE, STOPPING, previous max in image', maxvalpre
+        return False
+    else:
+        return True

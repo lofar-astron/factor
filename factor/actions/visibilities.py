@@ -128,7 +128,10 @@ class DPPP(Action):
             self.p['n_per_node'] = self.max_cpu
         self.p['lofarroot'] = self.op_parset['lofarroot']
 
-        template = env.get_template('{0}.pipeline.parset.tpl'.format(self.name.lower()))
+        if 'uvmmax' in self.p:
+            template = env.get_template('{0}_uvflag.pipeline.parset.tpl'.format(self.name.lower()))
+        else:
+            template = env.get_template('{0}.pipeline.parset.tpl'.format(self.name.lower()))
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)

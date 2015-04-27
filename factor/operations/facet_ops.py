@@ -614,6 +614,9 @@ class FacetSelfcal(Operation):
             direction=d) for d, m in zip(d_list, avg_data_mapfiles)]
         image4_basenames_mapfiles = self.s.run(actions)
 
+        # Check if image rms / ration of max/min is still improving. If so,
+        # continue last selfcal step. If not, stop sefcal
+
         # Check images if interactive=True
         # If not OK: stop and reset state for this direction
         # If OK, continue
@@ -848,35 +851,52 @@ class FacetSub(Operation):
         self.log.info('Phase shifting back to field center...')
         ra = bands[0].ra
         dec = bands[0].dec
-        actions = [Shift(self.parset, m, p['shift'], prefix='facet',
-            direction=d, ra=ra, dec=dec) for d, m in zip(d_list, shifted_data_mapfiles)]
-        unshifted_data_mapfiles = self.s.run(actions)
+        actions = [Shift(self.parset, m, p['shift_pre'], prefix='facet',
+            direction=d, ra=ra, dec=dec, index=1) for d, m in zip(d_list,
+            shifted_data_mapfiles)]
+        unshifted_pre_data_mapfiles = self.s.run(actions)
+        actions = [Shift(self.parset, m, p['shift_post'], prefix='facet',
+            direction=d, ra=ra, dec=dec, index=2) for d, m in zip(d_list,
+            shifted_data_mapfiles)]
+        unshifted_post_data_mapfiles = self.s.run(actions)
 
         self.log.info('Averaging...')
-        actions = [Average(self.parset, dm, p['avg'], prefix='facet')
-            for d, m in zip(d_list, unshifted_data_mapfiles)]
-        avg_data_mapfiles = self.s.run(actions)
+        actions = [Average(self.parset, dm, p['avg_pre'], prefix='facet', index=1)
+            for d, m in zip(d_list, unshifted_pre_data_mapfiles)]
+        avg_pre_data_mapfiles = self.s.run(actions)
+        actions = [Average(self.parset, dm, p['avg_post'], prefix='facet', index=2)
+            for d, m in zip(d_list, unshifted_post_data_mapfiles)]
+        avg_post_data_mapfiles = self.s.run(actions)
 
         self.log.info('Imaging...')
         if self.parset['use_chgcentre']:
             self.log.debug('Changing center to zenith...')
             actions = [ChgCentre(self.parset, dm, {},
-                prefix='resid', direction=d) for d, dm in
+                prefix='resid', direction=d, index=1) for d, dm in
                 zip(d_list, avg_data_mapfiles)]
-            chgcentre_data_mapfiles = self.s.run(actions)
-            input_to_imager_mapfiles = chgcentre_data_mapfiles
+            chgcentre_pre_data_mapfiles = self.s.run(actions)
+            input_to_imager_pre_mapfiles = chgcentre_pre_data_mapfiles
+            actions = [ChgCentre(self.parset, dm, {},
+                prefix='resid', direction=d, index=2) for d, dm in
+                zip(d_list, avg_data_mapfiles)]
+            chgcentre_post_data_mapfiles = self.s.run(actions)
+            input_to_imager_post_mapfiles = chgcentre_post_data_mapfiles
         else:
-            input_to_imager_mapfiles = avg_data_mapfiles
-        actions = [MakeImageIterate(self.parset, m, p['imager'], prefix='field_image',
-            direction=d) for d, m in zip(d_list, input_to_imager_mapfiles)]
-        image_basenames_mapfiles = self.s.run(actions)
+            input_to_imager_pre_mapfiles = avg_pre_data_mapfiles
+            input_to_imager_post_mapfiles = avg_post_data_mapfiles
+        actions = [MakeImage(self.parset, m, p['imager'], prefix='field_image',
+            direction=d, index=1) for d, m in zip(d_list, input_to_imager_pre_mapfiles)]
+        image_pre_basenames_mapfiles = self.s.run(actions)
+        actions = [MakeImage(self.parset, m, p['imager'], prefix='field_image',
+            direction=d, index=2) for d, m in zip(d_list, input_to_imager_post_mapfiles)]
+        image_post_basenames_mapfiles = self.s.run(actions)
 
         self.log.info('Checking residual images...')
-
-        # If not OK, reset pipeline state for this direction and stop Factor
-        # (after all the other directions in the group, if any, have finished).
-        # Set d.good = False and catch this flag later after FieldSub()
-        # operation
+        image_pre_files, _ = read_mapfile(image_pre_basenames_mapfiles)
+        image_post_files, _ = read_mapfile(image_post_basenames_mapfiles)
+        res_val = 0.5
+        for d, impre, impost in zip(d_list, image_pre_files, image_post_files):
+            d.good = verify_subtract(image_pre, image_post, res_val)
 
 
 class FacetAddAllFinal(Operation):
