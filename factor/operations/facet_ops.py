@@ -378,6 +378,8 @@ class FacetSelfcal(Operation):
         image1_basenames_mapfiles = self.s.run(actions)
 
         self.log.info('FFTing model image (facet model #1)...')
+        # Override setting for number of CPUs per node
+        p['imager1']['n_per_node'] = self.parset['cluster_specific']['ncpu']
         actions = [FFT(self.parset, dm, mm, p['imager1'], prefix='fft1',
             direction=d, index=1) for d, dm, mm in zip(d_list,
             chunk_data_mapfiles, image1_basenames_mapfiles)]
@@ -421,6 +423,8 @@ class FacetSelfcal(Operation):
         image2_basenames_mapfiles = self.s.run(actions)
 
         self.log.info('FFTing model image (facet model #2)...')
+        # Override setting for number of CPUs per node
+        p['imager2']['n_per_node'] = self.parset['cluster_specific']['ncpu']
         actions = [FFT(self.parset, dm, mm, p['imager2'], prefix='fft2',
             direction=d, index=2) for d, dm, mm in zip(d_list,
             chunk_data_mapfiles, image2_basenames_mapfiles)]
@@ -502,6 +506,8 @@ class FacetSelfcal(Operation):
         image3_basenames_mapfiles = self.s.run(actions)
 
         self.log.info('FFTing model image (facet model #3)...')
+        # Override setting for number of CPUs per node
+        p['imager3']['n_per_node'] = self.parset['cluster_specific']['ncpu']
         actions = [FFT(self.parset, dm, mm, p['imager3'], prefix='fft3',
             direction=d, index=3) for d, dm, mm in zip(d_list,
             chunk_data_mapfiles, image3_basenames_mapfiles)]
