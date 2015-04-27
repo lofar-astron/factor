@@ -518,11 +518,18 @@ class FFT(Action):
         if self.op_parset['imager'].lower() == 'casapy':
             self.completed_files = []
             self.timeout = 60
-            for model_file in model_files:
-                completed_file = model_file + '.done'
+            for vis_file in vis_ms_files:
+                completed_file = vis_file + '.done'
                 if self.index is not None:
                     completed_file += '{0}'.format(self.index)
                 self.completed_files.append(completed_file)
+
+        # For casapy runs, make datamap for completion files
+        if self.op_parset['imager'].lower() == 'casapy':
+            self.p['completed_datamap'] = self.write_mapfile(self.completed_files,
+                prefix=self.prefix+'_models_completed', index=self.index,
+                direction=self.direction, band=self.band, host_list=vis_hosts)
+
 
 
     def make_pipeline_control_parset(self):

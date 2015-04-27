@@ -3,6 +3,7 @@ import sys
 
 ms = sys.argv[6]
 imageout = sys.argv[7]
+completed_file = sys.argv[8]
 
 mask = {{ mask }}
 scales={{ scales }}
@@ -29,4 +30,4 @@ clean(vis=ms,imagename=imageout,outlierfile="",field="",spw="",selectdata=True,t
       npixels=0,npercycle=100,cyclefactor=cycfactor,cyclespeedup=-1,nterms=nterms,reffreq="",          \
       chaniter=False,flatnoise=True,allowchunk=False)
 
-os.system('touch {{ completed_file }}')
+os.system('touch {0}'.format(completed_file))

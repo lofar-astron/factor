@@ -130,6 +130,12 @@ class MakeImage(Action):
             prefix=self.prefix+'-imager_output', index=self.index,
             direction=self.direction, band=self.band, host_list=vis_hosts)
 
+        # For casapy runs, make datamap for completion files
+        if self.op_parset['imager'].lower() == 'casapy':
+            self.p['completed_datamap'] = self.write_mapfile(self.completed_files,
+                prefix=self.prefix+'-imager_completed', index=self.index,
+                direction=self.direction, band=self.band, host_list=vis_hosts)
+
 
     def set_imaging_parameters(self):
         """
@@ -242,7 +248,6 @@ class MakeImage(Action):
 
         if self.op_parset['imager'].lower() == 'casapy':
             # For casapy only, make a clean script
-            self.p['completed_file'] = os.path.abspath(self.completed_file)
             template = env.get_template('casapy_clean.tpl')
             tmp = template.render(self.p)
             with open(self.script_file, 'w') as f:

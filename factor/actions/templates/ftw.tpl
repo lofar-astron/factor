@@ -13,6 +13,7 @@ ms    = sys.argv[6]
 modimage  = sys.argv[7] + '.model'
 ntermsi   = numpy.int(sys.argv[8])
 wplanes   = numpy.int(sys.argv[9])
+completed_file = sys.argv[8]
 
 if ntermsi == 1:
     mod = [modimage]
@@ -29,5 +30,5 @@ else:
     ft(vis=ms, field="", spw="", model=mod, nterms=ntermsi, reffreq="",
     complist="", incremental=False, usescratch=True, async=False)
 
-os.system('touch {{ completed_file }}')
+os.system('touch {0}'.format(completed_file))
 
