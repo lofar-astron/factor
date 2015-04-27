@@ -9,11 +9,11 @@ os.system('cp {{ task_py_file }} .')
 os.system('buildmytasks')
 execfile('mytasks.py')
 
-ms    = sys.argv[6]
-modimage  = sys.argv[7] + '.model'
-completed_file = sys.argv[8]
-ntermsi   = numpy.int(sys.argv[9])
-wplanes   = numpy.int(sys.argv[10])
+ms    = sys.argv[4]
+modimage  = sys.argv[5] + '.model'
+completed_file = sys.argv[6]
+ntermsi   = numpy.int(sys.argv[7])
+wplanes   = numpy.int(sys.argv[8])
 
 if ntermsi == 1:
     mod = [modimage]

@@ -1,9 +1,9 @@
 import os
 import sys
 
-ms = sys.argv[6]
-imageout = sys.argv[7]
-completed_file = sys.argv[8]
+ms = sys.argv[4]
+imageout = sys.argv[5]
+completed_file = sys.argv[6]
 
 mask = {{ mask }}
 scales={{ scales }}
