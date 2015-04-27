@@ -10,6 +10,8 @@ dpppex.control.opts.outputkey=msout
 dpppex.control.opts.max_per_node={{ n_per_node }}
 
 dpppex.parsetarg.msin.datacolumn={{ columnname }}
+dpppex.parsetarg.msin.autoweight = False
+dpppex.parsetarg.msout.writefullresflag=False
 dpppex.parsetarg.steps=[shift]
 dpppex.parsetarg.shift.type=phaseshifter
 dpppex.parsetarg.shift.phasecenter = [{{ ra }}deg, {{ dec }}deg]
