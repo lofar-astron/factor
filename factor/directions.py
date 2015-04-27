@@ -397,7 +397,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False):
                 if abs(dist) < pix_radius:
                     p2 = shapely.geometry.Point((x, y))
                     p2buf = p2.buffer(pix_radius)
-                    if d < 0.0:
+                    if dist < 0.0:
                         # If point is outside, difference the polys
                         p1 = p1.difference(p2buf)
                     else:
