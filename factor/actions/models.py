@@ -531,7 +531,6 @@ class FFT(Action):
                 direction=self.direction, band=self.band, host_list=hosts)
 
 
-
     def make_pipeline_control_parset(self):
         """
         Writes the pipeline control parset and any script files
@@ -577,7 +576,6 @@ class FFT(Action):
                 f.write(tmp)
 
             template = env.get_template('ftw.tpl')
-            self.p['completed_file'] = os.path.abspath(self.completed_file)
             tmp = template.render(self.p)
             with open(self.script_file, 'w') as f:
                 f.write(tmp)
