@@ -11,9 +11,9 @@ execfile('mytasks.py')
 
 ms    = sys.argv[6]
 modimage  = sys.argv[7] + '.model'
-ntermsi   = numpy.int(sys.argv[8])
-wplanes   = numpy.int(sys.argv[9])
 completed_file = sys.argv[8]
+ntermsi   = numpy.int(sys.argv[9])
+wplanes   = numpy.int(sys.argv[10])
 
 if ntermsi == 1:
     mod = [modimage]
