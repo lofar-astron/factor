@@ -837,8 +837,8 @@ class FacetSub(Operation):
         for d, h in zip(d_list, d_hosts):
             shifted_data_mapfiles.append(self.write_mapfile(d.concat_sub_data_file,
             	prefix='shifted', direction=d, host_list=h))
-            dir_dep_parmdbs_mapfiles.append(self.write_mapfile([d.
-            	dirdepparmdb]*len(bands), prefix='dir_dep_parmdbs', direction=d,
+            dir_dep_parmdbs_mapfiles.append(self.write_mapfile(d.
+            	dirdepparmdb, prefix='dir_dep_parmdbs', direction=d,
             	host_list=h))
 
         self.log.info('Subtracting sources...')
@@ -851,11 +851,11 @@ class FacetSub(Operation):
         self.log.info('Phase shifting back to field center...')
         ra = bands[0].ra
         dec = bands[0].dec
-        actions = [Shift(self.parset, m, p['shift_pre'], prefix='facet',
+        actions = [PhaseShift(self.parset, m, p['shift_pre'], prefix='facet',
             direction=d, ra=ra, dec=dec, index=1) for d, m in zip(d_list,
             shifted_data_mapfiles)]
         unshifted_pre_data_mapfiles = self.s.run(actions)
-        actions = [Shift(self.parset, m, p['shift_post'], prefix='facet',
+        actions = [PhaseShift(self.parset, m, p['shift_post'], prefix='facet',
             direction=d, ra=ra, dec=dec, index=2) for d, m in zip(d_list,
             shifted_data_mapfiles)]
         unshifted_post_data_mapfiles = self.s.run(actions)
