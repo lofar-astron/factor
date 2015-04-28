@@ -371,7 +371,9 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False):
 
         # Filter sources to get only those close to a boundary. We need to iterate
         # until no sources are found
-        while True:
+        niter = 0
+        while niter < 5:
+            niter += 1
             ind_near_edge = []
             for i, thiessen_poly in enumerate(thiessen_polys):
                 polyv = np.vstack(thiessen_poly)
