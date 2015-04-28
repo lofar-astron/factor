@@ -885,10 +885,10 @@ class FacetSub(Operation):
         else:
             input_to_imager_pre_mapfiles = avg_pre_data_mapfiles
             input_to_imager_post_mapfiles = avg_post_data_mapfiles
-        actions = [MakeImage(self.parset, m, p['imager'], prefix='field_image',
+        actions = [MakeImage(self.parset, m, p['imager_pre'], prefix='field_image',
             direction=d, index=1) for d, m in zip(d_list, input_to_imager_pre_mapfiles)]
         image_pre_basenames_mapfiles = self.s.run(actions)
-        actions = [MakeImage(self.parset, m, p['imager'], prefix='field_image',
+        actions = [MakeImage(self.parset, m, p['imager_post'], prefix='field_image',
             direction=d, index=2) for d, m in zip(d_list, input_to_imager_post_mapfiles)]
         image_post_basenames_mapfiles = self.s.run(actions)
 
