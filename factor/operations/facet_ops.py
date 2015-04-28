@@ -520,19 +520,6 @@ class FacetSelfcal(Operation):
             merged_parmdb_phaseamp_amp1_mapfiles)]
         self.s.run(actions)
 
-        self.log.info('Preapplying amplitude solutions...')
-        chunk_parmdb_phaseamp_amp1_mapfiles = []
-        for i, chunks in enumerate(chunks_list):
-            chunk_parmdb_phaseamp_amp1_mapfiles.append(self.write_mapfile(
-                [merged_parmdb_phaseamp_amp1_mapfiles[i]]*len(chunks),
-                prefix='chunk_parmdb_amp1_smoothed', direction=d_list[i],
-                host_list=d_hosts[i]))
-        actions = [Apply(self.parset, dm, p['apply_amp2'],
-            pm, prefix='facet_amp', direction=d, index=3) for d, dm, pm in
-            zip(d_list, chunk_data_mapfiles,
-            chunk_parmdb_phaseamp_amp1_mapfiles)]
-        self.s.run(actions)
-
         self.log.info('Solving for amplitude solutions (#2)...')
         chunk_parmdb_phaseamp_phase2_mapfiles = []
         chunk_parmdb_phaseamp_amp2_mapfiles = []
@@ -568,7 +555,7 @@ class FacetSelfcal(Operation):
             chunk_parmdb_phaseamp_amp2_mapfiles)]
         self.s.run(actions)
 
-        self.log.debug('Merging instrument parmdbs...')
+        self.log.debug('Merging chunk instrument parmdbs...')
         merged_parmdb_phaseamp_amp2_mapfiles = []
         merged_parmdb_phaseamp_phase2_mapfiles = []
         for i, chunks in enumerate(chunks_list):
@@ -642,13 +629,11 @@ class FacetSelfcal(Operation):
         merged_parmdb_final_mapfiles = []
         for i, d in enumerate(d_list):
             phases2_final, _ = read_mapfile(merged_parmdb_phaseamp_phase2_mapfiles[i])
-            smoothed_amps1_final, _ = read_mapfile(merged_parmdb_phaseamp_amp1_mapfiles[i])
             smoothed_amps2_final, _ = read_mapfile(merged_parmdb_phaseamp_amp2_mapfiles[i])
             concat_file, _ = read_mapfile(facet_data_mapfiles[i])
             merged_parmdb_final_mapfiles.append(self.write_mapfile(
-            	[merge_parmdbs(phases2_final[0],
-            	smoothed_amps1_final[0], smoothed_amps2_final[0],
-            	concat_file[0])], prefix='merged_amps_phases_final',
+            	[merge_parmdbs(phases2_final[0], smoothed_amps2_final[0],
+            	concat_file[0], d.solint_p, d.solint_a)], prefix='merged_amps_phases_final',
             	direction=d, host_list=d_hosts[i]))
 
         self.log.info('Smoothing amplitude solutions...')
