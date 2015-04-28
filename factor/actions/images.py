@@ -397,6 +397,47 @@ class MakeMask(Action):
         import pyrap.images as pim
         import numpy as np
 
+        if self.mask_border:
+            output_files = []
+
+            maskfiles, hosts = read_mapfile(self.p['output_datamap'])
+            for maskfile in maskfiles:
+                parts = maskfile.split('.cleanmask')
+                outfile = parts[0] + '.border_cleanmask' + parts[1]
+
+                mask_im = pim.image(maskfile)
+                img_type = mask_im.imagetype()
+                if img_type == 'FITSImage':
+                    mask_im.saveas(outfile+'tmp')
+                    mask_im = pim.image(outfile+'tmp')
+
+                # Find masked regions
+                data = mask_im.getdata()
+                masked_ind = np.where(data[0, 0])
+
+                # Mask pixels along the border
+                sh = np.shape(data)
+                edge = 25
+                data[0:sh[0],0:edge,0,0,0] = 0
+                data[0:edge,0:sh[1],0,0,0] = 0
+                data[0:sh[0],sh[1]-edge:sh[1],0,0,0] = 0
+                data[sh[0]-edge:sh[0],0:sh[1],0,0,0] = 0
+
+                # Save changes
+                output_files.append(outfile)
+                mask_im.putdata(data)
+                if img_type == 'FITSImage':
+                    mask_im.tofits(outfile, overwrite=True)
+                else:
+                    mask_im.saveas(outfile, overwrite=True)
+
+                # Copy log file that holds clipped rms
+                os.system('cp {0} {1}'.format(maskfile+'.log', outfile+'.log'))
+
+            self.p['output_datamap'] = self.write_mapfile(output_files,
+                prefix=self.prefix+'_output', direction=self.direction,
+                index=self.index, band=self.band, host_list=hosts)
+
         if self.direction is not None:
             output_files = []
             RAverts = self.direction.vertices[0]
