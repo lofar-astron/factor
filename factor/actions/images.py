@@ -449,8 +449,8 @@ class MakeMask(Action):
 
             maskfiles, hosts = read_mapfile(self.p['output_datamap'])
             for maskfile in maskfiles:
-                parts = maskfile.split('.cleanmask')
-                outfile = parts[0] + '.facet_cleanmask' + parts[1]
+                parts = maskfile.split('cleanmask')
+                outfile = parts[0] + 'facet_cleanmask' + parts[1]
 
                 mask_im = pim.image(maskfile)
                 img_type = mask_im.imagetype()
