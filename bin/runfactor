@@ -132,8 +132,7 @@ if __name__=='__main__':
         	directions_max_num=parset['direction_specific']['max_num'],
         	interactive=parset['interactive'])
         directions = factor.directions.directions_read(parset['directions_file'])
-    polys_file = factor.directions.directions_read(os.path.join(parset['dir_working'],
-            'factor_facets.pkl'))
+    polys_file = os.path.join(parset['dir_working'], 'factor_facets.pkl')
     if os.path.exists(polys_file):
         with open(polys_file, 'r') as f:
             polys, widths = pickle.load(f)
