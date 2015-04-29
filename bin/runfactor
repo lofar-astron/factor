@@ -140,7 +140,7 @@ if __name__=='__main__':
         polys, widths = factor.directions.thiessen(directions,
             check_edges=parset['direction_specific']['check_edges'])
         with open(polys_file, 'wb') as f:
-            pickle.dump(f, [polys, widths])
+            pickle.dump([polys, widths], f)
 
     for i, direction in enumerate(directions):
         direction.vertices = polys[i]
