@@ -362,7 +362,7 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             avg_files, _ = read_mapfile(avg_data_mapfiles[i])
             merged_data_mapfiles.append(self.write_mapfile([merge_chunks(avg_files,
-            prefix=None, clobber=True, virtual=virtual)], direction=d_list[i],
+            prefix=None, clobber=True)], direction=d_list[i],
             host_list=d_hosts[i]))
 
         self.log.debug('Imaging...')
@@ -377,7 +377,7 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             unavg_files, _ = read_mapfile(chunk_data_mapfiles[i])
             merged_unavg_data_mapfiles.append(self.write_mapfile([merge_chunks(unavg_files,
-            prefix=None, clobber=True, virtual=virtual)], direction=d_list[i],
+            prefix=None, clobber=True)], direction=d_list[i],
             host_list=d_hosts[i]))
         actions = [FFT(self.parset, dm, mm, p['imager1'], prefix='fft1',
             direction=d, index=1) for d, dm, mm in zip(d_list,
@@ -414,7 +414,7 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             avg_files, _ = read_mapfile(avg_data_mapfiles[i])
             merged_data_mapfiles.append(self.write_mapfile([merge_chunks(avg_files,
-            prefix=None, clobber=True, virtual=virtual)], direction=d_list[i],
+            prefix=None, clobber=True)], direction=d_list[i],
             host_list=d_hosts[i]))
 
         self.log.debug('Imaging...')
@@ -496,7 +496,7 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             avg_files, _ = read_mapfile(avg_data_mapfiles[i])
             merged_data_mapfiles.append(self.write_mapfile([merge_chunks(avg_files,
-            prefix=None, clobber=True, virtual=virtual)], direction=d_list[i],
+            prefix=None, clobber=True)], direction=d_list[i],
             host_list=d_hosts[i]))
 
         self.log.debug('Imaging...')
@@ -591,7 +591,7 @@ class FacetSelfcal(Operation):
         for i, chunks in enumerate(chunks_list):
             avg_files, _ = read_mapfile(avg_data_mapfiles[i])
             merged_data_mapfiles.append(self.write_mapfile([merge_chunks(avg_files,
-            prefix=None, clobber=True, virtual=virtual)], direction=d_list[i],
+            prefix=None, clobber=True)], direction=d_list[i],
             host_list=d_hosts[i]))
 
         self.log.debug('Imaging...')
@@ -752,7 +752,7 @@ class FacetImage(Operation):
         for i, mf in enumerate(input_to_imager_mapfiles):
             in_files, _ = read_mapfile(mf)
             merged_data_mapfiles.append(self.write_mapfile([merge_chunks(in_files,
-            prefix=None, clobber=True, virtual=virtual)], direction=d_list[i],
+            prefix=None, clobber=True)], direction=d_list[i],
             host_list=d_hosts[i]))
 
         actions = [MakeImageIterate(self.parset, m, p['imager'], prefix='facet_image',
@@ -764,7 +764,7 @@ class FacetImage(Operation):
         for i, mf in enumerate(shifted_all_data_mapfiles):
             in_files, _ = read_mapfile(mf)
             merged_data_mapfiles.append(self.write_mapfile([merge_chunks(in_files,
-            prefix=None, clobber=True, virtual=virtual)], direction=d_list[i],
+            prefix=None, clobber=True)], direction=d_list[i],
             host_list=d_hosts[i]))
         actions = [FFT(self.parset, dm, mm, p['imager'], prefix='fft',
             direction=d) for d, dm, mm in zip(d_list,
