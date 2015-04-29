@@ -422,10 +422,10 @@ class MakeMask(Action):
                 # Mask pixels along the border
                 sh = np.shape(data)
                 edge = 25
-                data[0:sh[0],0:edge,0,0,0] = 0
-                data[0:edge,0:sh[1],0,0,0] = 0
-                data[0:sh[0],sh[1]-edge:sh[1],0,0,0] = 0
-                data[sh[0]-edge:sh[0],0:sh[1],0,0,0] = 0
+                data[0, 0, 0:sh[2], 0:edge] = 0
+                data[0, 0, 0:edge, 0:sh[3]] = 0
+                data[0, 0, 0:sh[2], sh[3]-edge:sh[3]] = 0
+                data[0, 0, sh[2]-edge:sh[2], 0:sh[3]] = 0
 
                 # Save changes
                 output_files.append(outfile)
