@@ -289,6 +289,10 @@ class MakeMask(Action):
         if self.prefix is None:
             self.prefix = 'make_mask'
         self.clean = clean
+        if 'mask_border' in self.p:
+            self.mask_border = self.p['mask_border']
+        else:
+            self.mask_border = False
         self.image_dir += '{0}/{1}/'.format(self.op_name, self.name)
         if self.direction is not None:
             self.image_dir += '{0}/'.format(self.direction.name)
