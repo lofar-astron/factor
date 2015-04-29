@@ -71,12 +71,12 @@ facet_add = {
          'outcol': 'FACET_DATA_ALL',
          'flags': '--replace-sourcedb'},
 'shift_cal' : {'columnname': 'FACET_DATA_CAL'}, # outcol is DATA
-'shift_all' : {'columnname': 'FACET_DATA_ALL'}, # outcol is DATA
-'shift_sub' : {'columnname': 'SUBTRACTED_DATA_ALL'}, # outcol is DATA
-'concat_all' : {'columnname': 'DATA'}, # outcol is DATA
-'concat_sub' : {'columnname': 'DATA'}, # outcol is DATA
-'copy' : {'incol': 'DATA',
-          'outcol': 'FACET_DATA_ALL'}
+'shift_all' : {'columnname': 'FACET_DATA_ALL'} # outcol is DATA
+# 'shift_sub' : {'columnname': 'SUBTRACTED_DATA_ALL'}, # outcol is DATA
+# 'concat_all' : {'columnname': 'DATA'}, # outcol is DATA
+# 'concat_sub' : {'columnname': 'DATA'}, # outcol is DATA
+# 'copy' : {'incol': 'DATA',
+#           'outcol': 'FACET_DATA_ALL'}
 }
 
 facet_setup = {
@@ -260,7 +260,7 @@ facet_selfcal = {
 }
 
 facet_image= {
-'apply_dirdep' : {'incol': 'FACET_DATA_ALL',
+'apply_dirdep' : {'incol': 'DATA',
                   'outcol': 'CORRECTED_DATA'},
 'avg' : {'columnname': 'CORRECTED_DATA', # outcol is DATA
          'freqstep': 5,
@@ -289,7 +289,7 @@ facet_image= {
 }
 
 facet_sub = {
-'subtract' : {'incol': 'FACET_DATA_ALL',
+'subtract' : {'incol': 'DATA',
               'outcol': 'CORRECTED_SUBTRACTED_DATA',
               'flags': '--replace-sourcedb'},
 'shift_pre' : {'columnname': 'CORRECTED_SUBTRACTED_DATA'}, # outcol is DATA

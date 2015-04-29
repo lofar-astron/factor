@@ -163,9 +163,9 @@ class FieldSub(Operation):
 
         # Make initial data maps for the input datasets and their dir-indep
         # instrument parmdbs.
-        shifted_data_mapfile = self.write_mapfile(d.concat_sub_data_file,
+        shifted_all_data_mapfile = self.write_mapfile(d.shifted_all_data_files,
             prefix='shifted', direction=d)
-        dir_dep_parmdbs_mapfile = self.write_mapfile([d.dirdepparmdb]*len(bands),
+        dir_dep_parmdbs_mapfile = self.write_mapfile(d.dirdepparmdbs,
             prefix='dir_dep_parmdbs', direction=d)
         orig_data_mapfile = self.write_mapfile([band.file for band in bands],
         	prefix='input_data')
@@ -174,18 +174,18 @@ class FieldSub(Operation):
         dir_indep_skymodels_mapfile = self.write_mapfile([band.skymodel_dirindep
         	for band in bands], prefix='dir_indep_skymodels', direction=d)
 
-        self.log.info('Phase shifting back to field center...')
+        self.log.info('Phase shifting model back to field center...')
         ra = bands[0].ra
         dec = bands[0].dec
-        action = PhaseShift(self.parset, shifted_data_mapfile, p['shift'],
+        action = PhaseShift(self.parset, shifted_all_data_mapfile, p['shift'],
             prefix='facet', direction=d, ra=ra, dec=dec)
         unshifted_model_data_mapfile = self.s.run(action)
 
         self.log.info('Copying model to bands...')
-        mslist = [band.file for band in bands]
-        ms_from_file, _ = read_mapfile(unshifted_model_data_mapfile)
-        copy_column_freq(mslist, ms_from_file[0], p['copy']['incol'],
-            p['copy']['outcol'])
+        ms_to_files = [band.file for band in bands]
+        ms_from_files, _ = read_mapfile(unshifted_model_data_mapfile)
+        for ms_to, ms_from in zip(ms_to_files, ms_from_files):
+            copy_column(ms_to, p['copy']['incol'], p['copy']['outcol'], ms_from)
 
         self.log.info('Selecting sources for this direction...')
         action = MakeFacetSkymodel(self.parset, dir_indep_skymodels_mapfile,

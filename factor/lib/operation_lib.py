@@ -270,7 +270,9 @@ def merge_chunks(chunks, prefix=None, virtual=True, clobber=False):
 
 
 def merge_chunk_parmdbs(inparmdbs, prefix='merged', clobber=False):
-    """Merges parmdbs"""
+    """
+    Merges chunk parmdbs into a single parmdb
+    """
     import os
     import lofar.parmdb
     import pyrap.tables as pt
@@ -299,12 +301,37 @@ def merge_chunk_parmdbs(inparmdbs, prefix='merged', clobber=False):
     return outparmdb
 
 
-def merge_parmdbs(parmdb_p, parmdb_a, ms, solint_p, solint_a, clobber=True):
-    """Merges amp+phase parmdbs"""
+def merge_parmdbs(parmdb_p, parmdb_a, parmdb_t, solint_p, solint_a, msfile,
+    prefix=None, clobber=True):
+    """
+    Merges facet selfcal parmdbs into a parmdb for a single band
+
+    Parameters
+    ----------
+    parmdb_p : str
+        File name of CommonScalarPhase and TEC parmdb
+    parmdb_a : str
+        File name of Gain parmdb. The nearset match in frequency to that of the
+        input band will be used
+    parmdb_t : str
+        File name of template parmdb
+    solint_p : int
+        Solution interval for parmdb_p
+    solint_a : int
+        Solution interval for parmdb_a
+    msfile : str
+        File name of band
+    prefix : str
+        Prefix to prepend to output file
+    clobber : bool, optional
+        If True, overwrite existing output file
+
+    """
     import lofar.parmdb
     import pyrap.tables as pt
     import numpy as np
 
+    # Initialize output parmdb
     parmdb_out = parmdb_p.split('phases2')[0] + 'final' + parmdb_p.split('phases2')[1]
     if os.path.exists(parmdb_out):
         if clobber:
@@ -313,60 +340,90 @@ def merge_parmdbs(parmdb_p, parmdb_a, ms, solint_p, solint_a, clobber=True):
             return parmdb_out
     pdb_out = lofar.parmdb.parmdb(parmdb_out, create=True)
 
+    # Open input parmdbs
+    pdb_a = lofar.parmdb.parmdb(parmdb_a)
+    pdb_p = lofar.parmdb.parmdb(parmdb_p)
+    pdb_t = lofar.parmdb.parmdb(parmdb_t)
+
+    # Get solutions
+    parms_a = pdb_a.getValuesGrid("*")
+    parms_p = pdb_p.getValuesGrid("*")
+    parms_t = pdb_t.getValuesGrid("*")
+
+    # Get antenna names
     pol_list = ['0:0', '1:1']
-    gain = 'Gain'
-    anttab = pt.table(ms + '::ANTENNA', ack=False)
+    anttab = pt.table(msfile + '::ANTENNA', ack=False)
     antenna_list = anttab.getcol('NAME')
     anttab.close()
 
-    # Copy over the CommonScalar phases and TEC
-    pdb_p = lofar.parmdb.parmdb(parmdb_p)
-    parms_p = pdb_p.getValuesGrid("*")
-    for parmname in pdb_p.getNames():
-        parms = pdb_p.getValuesGrid(parmname)
-        pdb_out.addValues(parms)
-        pdb_out.flush()
-
-    # Get amplitude solutions
-    pdb_a = lofar.parmdb.parmdb(parmdb_a)
-    parms_a = pdb_a.getValuesGrid("*")
-
-    # Get array sizes and initialize values using first antenna (all
-    # antennas should be the same)
+    # Set time and frequency grid for output parmdb
+    # The time grid can be set to that of parmdb_p (fast phase grid)
+    # The freq grid must be set to that of parmdb_t (template grid)
     parmname = 'TEC:' + antenna_list[0]
-    N_times_p, N_freqs_p = parms_p[parmname]['values'].shape
     times = parms_p[parmname]['times'].copy()
     timewidths = parms_p[parmname]['timewidths'].copy()
+    N_times_p, N_freqs_p = parms_p[parmname]['values'].shape
+
+    if 'Gain' in pdb_t.getNames()[0]:
+        parmname = 'Gain:0:0:Real:' + antenna_list[0]
+    elif 'Phase' in pdb_t.getNames()[0]:
+        parmname = 'Phase:0:0:' + antenna_list[0]
+    freqs = parms_t[parmname]['freqs'].copy()
+    freqwidths = parms_t[parmname]['freqwidths'].copy()
+    N_times_t, N_freqs_t = parms_t[parmname]['values'].shape
+
     parmname = 'Gain:0:0:Real:' + antenna_list[0]
     N_times_a, N_freqs_a = parms_a[parmname]['values'].shape
-    freqs = parms_a[parmname]['freqs'].copy()
-    freqwidths = parms_a[parmname]['freqwidths'].copy()
-    parms = {}
-    v = {}
-    v['times'] = times
-    v['timewidths'] = timewidths
-    v['freqs'] = freqs
-    v['freqwidths'] = freqwidths
+    freqs_a = parms_a[parmname]['freqs'].copy()
+    freq_ind = np.searchsorted(freqs_a, freqs)
 
-    # Copy gains
+    # Initialize parms and values dicts
+    outparms_p = {}
+    v_p = {}
+    v_p['times'] = times
+    v_p['timewidths'] = timewidths
+    v_p['freqs'] = freqs
+    v_p['freqwidths'] = freqwidths
+    outparms_g = {}
+    v_g = {}
+    v_g['times'] = times
+    v_g['timewidths'] = timewidths
+    v_g['freqs'] = freqs
+    v_g['freqwidths'] = freqwidths
+
+    # Copy values
     for pol in pol_list:
         for antenna in antenna_list:
-            real = np.copy(parms_a[gain+':' +pol+':Real:'+antenna]['values'])
-            imag = np.copy(parms_a[gain+':'+pol+':Imag:'+antenna]['values'])
+            # Copy gains
+            v_g['values'] = np.zeros((N_times_p, N_freqs_t), dtype=np.double)
 
-            v['values'] = np.zeros((N_times_p, N_freqs_a), dtype=np.double)
-
-            parmname = gain + ':' + pol + ':Imag:' + antenna
+            parmname = 'Gain:' + pol + ':Imag:' + antenna
+            imag = np.copy(parms_a[parmname]['values'])[:, freq_ind]
             imag_repeat = np.repeat(imag, solint_a/solint_p, axis=0)
-            v['values'] = np.copy(imag_repeat[0:N_times_p])
-            parms[parmname] = v.copy()
+            v_g['values'] = np.copy(imag_repeat[0:N_times_p])
+            outparms_g[parmname] = v_g.copy()
 
-            parmname = gain + ':' + pol + ':Real:' + antenna
+            parmname = 'Gain:' + pol + ':Real:' + antenna
+            real = np.copy(parms_a[parmname]['values'])[:, freq_ind]
             real_repeat = np.repeat(real, solint_a/solint_p, axis=0)
-            v['values'] = np.copy(real_repeat[0:N_times_p])
-            parms[parmname] = v.copy()
+            v_g['values'] = np.copy(real_repeat[0:N_times_p])
+            outparms_g[parmname] = v_g.copy()
 
-    pdb_out.addValues(parms)
+            # Copy CommonScalar phases and TEC
+            v_p['values'] = np.zeros((N_times_p, N_freqs_t), dtype=np.double)
+
+            parmname = 'CommonScalarPhase:' + antenna
+            phase = np.copy(parms_p[parmname]['values'])
+            v_p['values'] = np.copy(phase)
+            outparms_p[parmname] = v_p.copy()
+
+            parmname = 'TEC:' + antenna
+            phase = np.copy(parms_p[parmname]['values'])
+            v_p['values'] = np.copy(phase)
+            outparms_p[parmname] = v_p.copy()
+
+    pdb_out.addValues(outparms_g)
+    pdb_out.addValues(outparms_p)
     pdb_out.flush()
 
     return parmdb_out

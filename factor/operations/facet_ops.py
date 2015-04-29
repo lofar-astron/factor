@@ -51,19 +51,16 @@ class FacetAdd(Operation):
         bands = self.bands
 
         if os.path.exists(self.statebasename+'.done'):
-            shifted_data_mapfile = os.path.join(self.parset['dir_working'],
+            shifted_cal_data_mapfile = os.path.join(self.parset['dir_working'],
                 'datamaps/FacetAdd/PhaseShift/{0}/facet_output_{0}-1.datamap'.
                 format(d.name))
-            concat_sub_data_mapfile = os.path.join(self.parset['dir_working'],
-                'datamaps/FacetAdd/Concatenate/{0}/facet_bands_output_{0}-2.datamap'.
+            shifted_all_data_mapfile = os.path.join(self.parset['dir_working'],
+                'datamaps/FacetAdd/PhaseShift/{0}/facet_output_{0}-2.datamap'.
                 format(d.name))
-            shifted_files, hosts = read_mapfile(shifted_data_mapfile)
-            concat_files, _ = read_mapfile(concat_sub_data_mapfile)
-            d.concat_sub_data_file = concat_files[0]
-            d.shifted_data_files = {}
-            for band, f in zip(bands, shifted_files):
-                d.shifted_data_files[band.name] = f
-            return
+            shifted_cal_data_files, hosts = read_mapfile(shifted_cal_data_mapfile)
+            shifted_all_data_files, hosts = read_mapfile(shifted_all_data_mapfile)
+            d.shifted_cal_data_files = shifted_cal_data_files
+            d.shifted_all_data_files = shifted_all_data_files
 
         # Make initial data maps for the empty datasets, their dir-indep
         # instrument parmdbs, and their dir-indep sky models
@@ -81,7 +78,7 @@ class FacetAdd(Operation):
             {}, d, prefix='cal', cal_only=True, index=1)
         dir_indep_cal_skymodels_mapfile = self.s.run(action)
         action = MakeFacetSkymodel(self.parset, dir_indep_skymodels_mapfile,
-            {}, d, prefix='cal', cal_only=False, index=2)
+            {}, d, prefix='all', cal_only=False, index=2)
         dir_indep_all_skymodels_mapfile = self.s.run(action)
 
         self.log.info('Adding sources for this direction...')
@@ -107,29 +104,30 @@ class FacetAdd(Operation):
             prefix='facet', direction=d, index=2)
         shifted_all_data_mapfile = self.s.run(action)
         shifted_all_data_files, _ = read_mapfile(shifted_all_data_mapfile)
-        action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift_sub'],
-            prefix='facet', direction=d, index=3)
-        shifted_sub_data_mapfile = self.s.run(action)
+#         action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift_sub'],
+#             prefix='facet', direction=d, index=3)
+#         shifted_sub_data_mapfile = self.s.run(action)
 
         # Concatenate all phase-shifted bands together
         # for use later with full facet imaging / subtraction
-        self.log.info('Concatenating bands...')
-        action = Concatenate(self.parset, shifted_all_data_mapfile, p['concat_all'],
-            prefix='facet_bands', direction=d, index=1)
-        concat_all_data_mapfile = self.s.run(action)
-        concat_all_data_files, _ = read_mapfile(concat_all_data_mapfile)
-        action = Concatenate(self.parset, shifted_sub_data_mapfile, p['concat_sub'],
-            prefix='facet_bands', direction=d, index=2)
-        concat_sub_data_mapfile = self.s.run(action)
-        concat_sub_data_files, _ = read_mapfile(concat_sub_data_mapfile)
+#         self.log.info('Concatenating bands...')
+#         action = Concatenate(self.parset, shifted_all_data_mapfile, p['concat_all'],
+#             prefix='facet_bands', direction=d, index=1)
+#         concat_all_data_mapfile = self.s.run(action)
+#         concat_all_data_files, _ = read_mapfile(concat_all_data_mapfile)
+#         action = Concatenate(self.parset, shifted_sub_data_mapfile, p['concat_sub'],
+#             prefix='facet_bands', direction=d, index=2)
+#         concat_sub_data_mapfile = self.s.run(action)
+#         concat_sub_data_files, _ = read_mapfile(concat_sub_data_mapfile)
 
         # Save files to the direction objects and copy data to concat file
-        d.concat_sub_data_file = concat_sub_data_files[0]
-        d.shifted_data_files = {}
-        for band, fcal in zip(bands, shifted_cal_data_files):
-            d.shifted_data_files[band.name] = fcal
-            copy_column(d.concat_sub_data_file, p['copy']['incol'], p['copy']['outcol'],
-                ms_from=concat_all_data_files[0])
+#         d.concat_sub_data_file = concat_sub_data_files[0]
+        d.shifted_cal_data_files = shifted_cal_data_files
+        d.shifted_all_data_files = shifted_all_data_files
+#         for band, fcal in zip(bands, shifted_cal_data_files):
+#             d.shifted_data_files[band.name] = fcal
+#             copy_column(d.concat_sub_data_file, p['copy']['incol'], p['copy']['outcol'],
+#                 ms_from=concat_all_data_files[0])
 
 
 class FacetSetup(Operation):
@@ -163,7 +161,7 @@ class FacetSetup(Operation):
                     'datamaps/FacetSetup/Concatenate/{0}/facet_bands_output_{0}-1.datamap'.
                     format(d.name))
                 file, _ = read_mapfile(concat_data_mapfile)
-                d.concat_file = file[0]
+                d.cal_concat_file = file[0]
                 all_done = True
             else:
                 all_done = False
@@ -182,14 +180,13 @@ class FacetSetup(Operation):
             d_hosts = [node_list[i*len(node_list)//parts:
                 (i+1)*len(node_list)//parts] for i in range(parts)]
 
-        # Make initial data maps for the phase-shifted datasets and their dir-indep
-        # instrument parmdbs
+        # Make initial data maps for the phase-shifted calibrator datasets
+        # and their dir-indep instrument parmdbs
         shifted_data_mapfiles = []
         dir_indep_parmdbs_mapfiles = []
         for d, h in zip(d_list, d_hosts):
-            shifted_data_mapfiles.append(self.write_mapfile([d.
-            	shifted_data_files[band.name] for band in bands], prefix='shifted',
-            	direction=d, host_list=h))
+            shifted_data_mapfiles.append(self.write_mapfile(d.shifted_cal_data_files,
+                prefix='shifted', direction=d, host_list=h))
             dir_indep_parmdbs_mapfiles.append(self.write_mapfile([band.
             	dirindparmdb for band in bands], prefix='dir_indep_parmdbs',
             	direction=d, host_list=h))
@@ -230,8 +227,8 @@ class FacetSetup(Operation):
             d_list):
             concat_data_file, _ = read_mapfile(dm)
             concat_corrdata_file, _ = read_mapfile(cdm)
-            d.concat_file = concat_data_file[0]
-            copy_column(d.concat_file, p['copy']['incol'], p['copy']['outcol'],
+            d.cal_concat_file = concat_data_file[0]
+            copy_column(d.cal_concat_file, p['copy']['incol'], p['copy']['outcol'],
                 ms_from=concat_corrdata_file[0])
 
 
@@ -279,8 +276,8 @@ class FacetSelfcal(Operation):
                 final_parmdb_datamap = os.path.join(self.parset['dir_working'],
                     'datamaps/FacetSelfcal/{0}/merged_amps_phases_final_{0}.datamap'.
                     format(d.name))
-                file, _ = read_mapfile(final_parmdb_datamap)
-                d.dirdepparmdb = file[0]
+                files, _ = read_mapfile(final_parmdb_datamap)
+                d.dirdepparmdbs = files
                 all_done = True
             else:
                 all_done = False
@@ -303,7 +300,7 @@ class FacetSelfcal(Operation):
         facet_data_mapfiles = []
         facet_unavg_data_mapfiles = []
         for d, h in zip(d_list, d_hosts):
-            facet_data_mapfiles.append(self.write_mapfile([d.concat_file],
+            facet_data_mapfiles.append(self.write_mapfile([d.cal_concat_file],
                 prefix='shifted_vis', direction=d, host_list=h))
 
         # Set image sizes
@@ -631,10 +628,11 @@ class FacetSelfcal(Operation):
             phases2_final, _ = read_mapfile(merged_parmdb_phaseamp_phase2_mapfiles[i])
             smoothed_amps2_final, _ = read_mapfile(merged_parmdb_phaseamp_amp2_mapfiles[i])
             concat_file, _ = read_mapfile(facet_data_mapfiles[i])
-            merged_parmdb_final_mapfiles.append(self.write_mapfile(
-            	[merge_parmdbs(phases2_final[0], smoothed_amps2_final[0],
-            	concat_file[0], d.solint_p, d.solint_a)], prefix='merged_amps_phases_final',
-            	direction=d, host_list=d_hosts[i]))
+            merged_files = [merge_parmdbs(phases2_final[0], smoothed_amps2_final[0],
+                band.dirindparmdb, d.solint_p, d.solint_a, band.file,
+                prefix=band.name) for band in bands]
+            merged_parmdb_final_mapfiles.append(self.write_mapfile(merged_files,
+                prefix='merged_amps_phases_final', direction=d, host_list=d_hosts[i]))
 
         self.log.info('Smoothing amplitude solutions...')
         actions = [Smooth(self.parset, dm, p['smooth_amp3'], pm,
@@ -646,7 +644,7 @@ class FacetSelfcal(Operation):
         # Save files to the direction objects
         for d, m in zip(d_list, merged_parmdb_final_mapfiles):
             f, _ = read_mapfile(m)
-            d.dirdepparmdb = f[0]
+            d.dirdepparmdbs = f
 
 
 class FacetImage(Operation):
@@ -681,6 +679,14 @@ class FacetImage(Operation):
             d_list = [d_list]
         bands = self.bands
 
+        # Set image sizes
+        for d in d_list:
+            cell = float(p['imager']['cell'].split('arcsec')[0]) # arcsec per pixel
+            imsize = d.width * 1.1 * 3600.0 / cell # pixels
+            if imsize < 512:
+                imsize = 512
+            d.imsize = imsize
+
         # Check state for each direction
         for i, d in enumerate(d_list):
             if os.path.exists(self.statebasename[i]+'.done'):
@@ -689,25 +695,12 @@ class FacetImage(Operation):
                 format(d.name))
                 file, _ = read_mapfile(model_mapfile)
                 d.skymodel_dirdep = file[0]
-                cell = float(p['imager']['cell'].split('arcsec')[0]) # arcsec per pixel
-                imsize = d.width * 1.1 * 3600.0 / cell # pixels
-                if imsize < 512:
-                    imsize = 512
-                d.imsize = imsize
                 all_done = True
             else:
                 all_done = False
                 break
         if all_done:
             return
-
-        # Set image sizes
-        for d in d_list:
-            cell = float(p['imager']['cell'].split('arcsec')[0]) # arcsec per pixel
-            imsize = d.width * 1.1 * 3600.0 / cell # pixels
-            if imsize < 512:
-                imsize = 512
-            d.imsize = imsize
 
         # Divide up the nodes among the directions
         node_list = self.parset['cluster_specific']['node_list']
@@ -722,26 +715,24 @@ class FacetImage(Operation):
 
         # Make initial data maps for the phase-shifted datasets and their dir-dep
         # instrument parmdbs
-        shifted_data_mapfiles = []
+        shifted_all_data_mapfiles = []
         dir_dep_parmdbs_mapfiles = []
         dir_indep_skymodels_mapfiles = []
         for d, h in zip(d_list, d_hosts):
-            shifted_data_mapfiles.append(self.write_mapfile([d.
-                concat_sub_data_file], prefix='shifted', direction=d,
-                host_list=h))
-            dir_dep_parmdbs_mapfiles.append(self.write_mapfile([d.
-            	dirdepparmdb], prefix='dir_dep_parmdbs', direction=d,
-            	host_list=h))
+            shifted_all_data_mapfiles.append(self.write_mapfile(d.shifted_all_data_files,
+                prefix='shifted', direction=d, host_list=h))
+            dir_dep_parmdbs_mapfiles.append(self.write_mapfile(d.dirdepparmdbs,
+                prefix='dir_dep_parmdbs', direction=d, host_list=h))
 
         self.log.info('Applying direction-dependent calibration...')
         actions = [Apply(self.parset, dm, p['apply_dirdep'],
             pm, prefix='facet_dirdep', direction=d) for d, dm, pm in zip(d_list,
-            shifted_data_mapfiles, dir_dep_parmdbs_mapfiles)]
+            shifted_all_data_mapfiles, dir_dep_parmdbs_mapfiles)]
         self.s.run(actions)
 
         self.log.info('Averaging...')
         actions = [Average(self.parset, m, p['avg'], prefix='facet',
-            direction=d) for d, m in zip(d_list, shifted_data_mapfiles)]
+            direction=d) for d, m in zip(d_list, shifted_all_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.info('Imaging...')
@@ -761,7 +752,7 @@ class FacetImage(Operation):
         self.log.info('FFTing model image...')
         actions = [FFT(self.parset, dm, mm, p['imager'], prefix='fft',
             direction=d) for d, dm, mm in zip(d_list,
-            shifted_data_mapfiles, image_basenames_mapfiles)]
+            shifted_all_data_mapfiles, image_basenames_mapfiles)]
         self.s.run(actions)
 
         # Save image basenames to the direction objects
@@ -821,17 +812,16 @@ class FacetSub(Operation):
         shifted_data_mapfiles = []
         dir_dep_parmdbs_mapfiles = []
         for d, h in zip(d_list, d_hosts):
-            shifted_data_mapfiles.append(self.write_mapfile([d.concat_sub_data_file],
+            shifted_all_data_mapfiles.append(self.write_mapfile(d.shifted_all_data_files,
             	prefix='shifted', direction=d, host_list=h))
-            dir_dep_parmdbs_mapfiles.append(self.write_mapfile([d.
-            	dirdepparmdb], prefix='dir_dep_parmdbs', direction=d,
-            	host_list=h))
+            dir_dep_parmdbs_mapfiles.append(self.write_mapfile(d.dirdepparmdbs,
+                prefix='dir_dep_parmdbs', direction=d, host_list=h))
 
         self.log.info('Subtracting sources...')
         actions = [Subtract(self.parset, dm, p['subtract'],
             model_datamap=None, parmdb_datamap=pd, prefix='facet_dirdep',
             direction=d) for d, dm, pd in
-            zip(d_list, shifted_data_mapfiles, dir_dep_parmdbs_mapfiles)]
+            zip(d_list, shifted_all_data_mapfiles, dir_dep_parmdbs_mapfiles)]
         self.s.run(actions)
 
         self.log.info('Phase shifting back to field center...')
@@ -839,11 +829,11 @@ class FacetSub(Operation):
         dec = bands[0].dec
         actions = [PhaseShift(self.parset, m, p['shift_pre'], prefix='facet',
             direction=d, ra=ra, dec=dec, index=1) for d, m in zip(d_list,
-            shifted_data_mapfiles)]
+            shifted_all_data_mapfiles)]
         unshifted_pre_data_mapfiles = self.s.run(actions)
         actions = [PhaseShift(self.parset, m, p['shift_post'], prefix='facet',
             direction=d, ra=ra, dec=dec, index=2) for d, m in zip(d_list,
-            shifted_data_mapfiles)]
+            shifted_all_data_mapfiles)]
         unshifted_post_data_mapfiles = self.s.run(actions)
 
         self.log.info('Averaging...')
