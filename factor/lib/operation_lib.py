@@ -301,7 +301,7 @@ def merge_chunk_parmdbs(inparmdbs, prefix='merged', clobber=True):
             pdb = lofar.parmdb.parmdb(inparmdb)
             for parmname in pdb.getNames():
                 v = pdb.getValuesGrid(parmname)
-                pdb_concat.addValues(v)
+                pdb_concat.addValues(v.copy())
         pdb_concat.flush()
 
     return outparmdb
