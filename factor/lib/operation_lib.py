@@ -320,8 +320,8 @@ def merge_parmdbs(parmdb_p, parmdb_a, parmdb_t, solint_p, solint_a, msfile,
         Solution interval for parmdb_a
     msfile : str
         File name of band
-    prefix : str
-        Prefix to prepend to output file
+    prefix : str, optional
+        Prefix for name of output file
     clobber : bool, optional
         If True, overwrite existing output file
 
@@ -331,7 +331,10 @@ def merge_parmdbs(parmdb_p, parmdb_a, parmdb_t, solint_p, solint_a, msfile,
     import numpy as np
 
     # Initialize output parmdb
-    parmdb_out = parmdb_p.split('phases2')[0] + 'final' + parmdb_p.split('phases2')[1]
+    if prefix is None:
+        prefix = msfile
+    parmdb_out = '{0}_{1}_final_{2}'.format(prefix, parmdb_p.split('_phases2_')[0],
+        parmdb_p.split('_phases2_')[1])
     if os.path.exists(parmdb_out):
         if clobber:
             os.system('rm -rf {0}'.format(parmdb_out))
