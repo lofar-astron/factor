@@ -271,10 +271,19 @@ def merge_chunks(chunk_files, prefix=None, virtual=True, clobber=False):
 def merge_chunk_parmdbs(inparmdbs, prefix='merged', clobber=False):
     """
     Merges chunk parmdbs into a single parmdb
+
+    Parameters
+    ----------
+    inparmdbs : list
+        List of input parmdb file names
+    prefix : str, optional
+        String to prefix to output parmdb file name
+    clobber : bool, optional
+        If True, overwrite existing output file
+
     """
     import os
     import lofar.parmdb
-    import pyrap.tables as pt
 
     root_dir = inparmdbs[0].split('chunks')[0]
     outparmdb = '{0}/{1}_instrument'.format(root_dir, prefix)
@@ -285,17 +294,15 @@ def merge_chunk_parmdbs(inparmdbs, prefix='merged', clobber=False):
             return outparmdb
 
     os.system('cp -r {0} {1}'.format(inparmdbs[0], outparmdb))
-    pdb_concat = lofar.parmdb.parmdb(outparmdb)
 
-    for parmname in pdb_concat.getNames():
-        pdb_concat.deleteValues(parmname)
-
-    for inparmdb in inparmdbs:
-        pdb = lofar.parmdb.parmdb(inparmdb)
-        for parmname in pdb.getNames():
-            v = pdb.getValuesGrid(parmname)
-            pdb_concat.addValues(v)
-    pdb_concat.flush()
+    if len(inparmdbs) > 1:
+        pdb_concat = lofar.parmdb.parmdb(outparmdb)
+        for inparmdb in inparmdbs[1:]:
+            pdb = lofar.parmdb.parmdb(inparmdb)
+            for parmname in pdb.getNames():
+                v = pdb.getValuesGrid(parmname)
+                pdb_concat.addValues(v)
+        pdb_concat.flush()
 
     return outparmdb
 
@@ -377,10 +384,6 @@ def merge_parmdbs(parmdb_p, parmdb_a, parmdb_t, solint_p, solint_a, msfile,
     N_times_a, N_freqs_a = parms_a[parmname]['values'].shape
     freqs_a = parms_a[parmname]['freqs'].copy()
     freq_ind = np.searchsorted(freqs_a, freqs)
-
-    logging.info('freq of ms: {0}'.format(freqs))
-    logging.info('freqs of amp parmdb: {0}'.format(freqs_a))
-    logging.info('ind: {0}'.format(freqs_ind))
 
     # Initialize parms and values dicts
     outparms_p = {}
