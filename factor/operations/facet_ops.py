@@ -441,7 +441,7 @@ class FacetSelfcal(Operation):
             chunk_parmdb_phaseamp_amp1_mapfiles)]
         self.s.run(actions)
 
-        self.log.debug('Merging instrument parmdbs...')
+        self.log.debug('Merging chunk instrument parmdbs...')
         merged_parmdb_phaseamp_amp1_mapfiles = []
         for i, chunks in enumerate(chunks_list):
             merged_parmdb_phaseamp_amp1_mapfiles.append(self.write_mapfile(
@@ -605,7 +605,6 @@ class FacetSelfcal(Operation):
         for i, d in enumerate(d_list):
             phases2_final, _ = read_mapfile(merged_parmdb_phaseamp_phase2_mapfiles[i])
             smoothed_amps2_final, _ = read_mapfile(merged_parmdb_phaseamp_amp2_mapfiles[i])
-            concat_file, _ = read_mapfile(facet_data_mapfiles[i])
             merged_files = [merge_parmdbs(phases2_final[0], smoothed_amps2_final[0],
                 band.dirindparmdb, d.solint_p, d.solint_a, band.file,
                 prefix=band.name) for band in bands]

@@ -268,7 +268,7 @@ def merge_chunks(chunk_files, prefix=None, virtual=True, clobber=False):
     return msout
 
 
-def merge_chunk_parmdbs(inparmdbs, prefix='merged', clobber=False):
+def merge_chunk_parmdbs(inparmdbs, prefix='merged', clobber=True):
     """
     Merges chunk parmdbs into a single parmdb
 
