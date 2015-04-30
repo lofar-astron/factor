@@ -534,15 +534,14 @@ class FacetSelfcal(Operation):
         merged_parmdb_phaseamp_amp2_mapfiles = []
         merged_parmdb_phaseamp_phase2_mapfiles = []
         for i, chunks in enumerate(chunks_list):
-            concat_file, _ = read_mapfile(facet_data_mapfiles[i])
             merged_parmdb_phaseamp_amp2_mapfiles.append(self.write_mapfile(
             	[merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp2 for
             	chunk in chunks], prefix='merged_amps2')],
             	prefix='merged_amps2', direction=d_list[i], host_list=d_hosts[i]))
             merged_parmdb_phaseamp_phase2_mapfiles.append(self.write_mapfile(
             	[merge_chunk_parmdbs([chunk.parmdb_phaseamp_phase2 for
-            	chunk in chunks], prefix='merged_phases2')], prefix='merged_phases2',
-            	direction=d_list[i], host_list=d_hosts[i]))
+            	chunk in chunks], prefix='merged_phases2')],
+            	prefix='merged_phases2', direction=d_list[i], host_list=d_hosts[i]))
 
         self.log.info('Smoothing amplitude solutions...')
         actions = [Smooth(self.parset, dm, p['smooth_amp2'], pm,
@@ -612,13 +611,6 @@ class FacetSelfcal(Operation):
                 prefix=band.name) for band in bands]
             merged_parmdb_final_mapfiles.append(self.write_mapfile(merged_files,
                 prefix='merged_amps_phases_final', direction=d, host_list=d_hosts[i]))
-
-        self.log.info('Smoothing amplitude solutions...')
-        actions = [Smooth(self.parset, dm, p['smooth_amp3'], pm,
-            prefix='facet_amp', direction=d, index=4)
-            for d, dm, pm in zip(d_list, facet_data_mapfiles,
-            merged_parmdb_final_mapfiles)]
-        self.s.run(actions)
 
         # Save files to the direction objects
         for d, m in zip(d_list, merged_parmdb_final_mapfiles):
