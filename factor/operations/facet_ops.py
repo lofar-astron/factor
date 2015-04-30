@@ -40,12 +40,11 @@ class FacetAdd(Operation):
         """
         Run the steps for this operation
         """
-        from factor.actions.visibilities import PhaseShift, Split, Concatenate
+        from factor.actions.visibilities import PhaseShift
         from factor.actions.models import MakeFacetSkymodel
         from factor.actions.calibrations import Add
         from factor.operations.hardcoded_param import facet_add as p
         from factor.lib.datamap_lib import read_mapfile
-        from factor.lib.operation_lib import copy_column
 
         d = self.direction
         bands = self.bands
@@ -104,30 +103,9 @@ class FacetAdd(Operation):
             prefix='facet', direction=d, index=2)
         shifted_all_data_mapfile = self.s.run(action)
         shifted_all_data_files, _ = read_mapfile(shifted_all_data_mapfile)
-#         action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift_sub'],
-#             prefix='facet', direction=d, index=3)
-#         shifted_sub_data_mapfile = self.s.run(action)
 
-        # Concatenate all phase-shifted bands together
-        # for use later with full facet imaging / subtraction
-#         self.log.info('Concatenating bands...')
-#         action = Concatenate(self.parset, shifted_all_data_mapfile, p['concat_all'],
-#             prefix='facet_bands', direction=d, index=1)
-#         concat_all_data_mapfile = self.s.run(action)
-#         concat_all_data_files, _ = read_mapfile(concat_all_data_mapfile)
-#         action = Concatenate(self.parset, shifted_sub_data_mapfile, p['concat_sub'],
-#             prefix='facet_bands', direction=d, index=2)
-#         concat_sub_data_mapfile = self.s.run(action)
-#         concat_sub_data_files, _ = read_mapfile(concat_sub_data_mapfile)
-
-        # Save files to the direction objects and copy data to concat file
-#         d.concat_sub_data_file = concat_sub_data_files[0]
         d.shifted_cal_data_files = shifted_cal_data_files
         d.shifted_all_data_files = shifted_all_data_files
-#         for band, fcal in zip(bands, shifted_cal_data_files):
-#             d.shifted_data_files[band.name] = fcal
-#             copy_column(d.concat_sub_data_file, p['copy']['incol'], p['copy']['outcol'],
-#                 ms_from=concat_all_data_files[0])
 
 
 class FacetSetup(Operation):
@@ -253,7 +231,7 @@ class FacetSelfcal(Operation):
         from factor.actions.visibilities import Average, Concatenate, PhaseShift
         from factor.actions.calibrations import Apply, Solve
         from factor.actions.images import MakeImageIterate
-        from factor.actions.models import MakeSkymodelFromModelImage, FFT
+        from factor.actions.models import FFT
         from factor.actions.solutions import Smooth, ResetPhases
         from factor.lib.operation_lib import copy_column, make_chunks, \
             merge_chunks, merge_parmdbs, merge_chunk_parmdbs
@@ -667,10 +645,10 @@ class FacetImage(Operation):
         """
         Run the steps for this operation
         """
-        from factor.actions.visibilities import Average, Concatenate
+        from factor.actions.visibilities import Average, Concatenate, ChgCentre
         from factor.actions.calibrations import Apply
         from factor.actions.images import MakeImageIterate
-        from factor.actions.models import MakeFacetSkymodel, MakeSkymodelFromModelImage, FFT
+        from factor.actions.models import FFT
         from factor.lib.operation_lib import copy_column, merge_chunks
         from factor.operations.hardcoded_param import facet_image as p
         from factor.lib.datamap_lib import read_mapfile
@@ -791,7 +769,7 @@ class FacetSub(Operation):
         Run the steps for this operation
         """
         from factor.actions.calibrations import Subtract
-        from factor.actions.visibilities import PhaseShift, Average
+        from factor.actions.visibilities import PhaseShift, Average, ChgCentre
         from factor.actions.images import MakeImage
         from factor.operations.hardcoded_param import facet_sub as p
         from factor.lib.datamap_lib import read_mapfile
