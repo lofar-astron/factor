@@ -378,6 +378,10 @@ def merge_parmdbs(parmdb_p, parmdb_a, parmdb_t, solint_p, solint_a, msfile,
     freqs_a = parms_a[parmname]['freqs'].copy()
     freq_ind = np.searchsorted(freqs_a, freqs)
 
+    logging.info('freq of ms: {0}'.format(freqs))
+    logging.info('freqs of amp parmdb: {0}'.format(freqs_a))
+    logging.info('ind: {0}'.format(freqs_ind))
+
     # Initialize parms and values dicts
     outparms_p = {}
     v_p = {}
@@ -399,13 +403,13 @@ def merge_parmdbs(parmdb_p, parmdb_a, parmdb_t, solint_p, solint_a, msfile,
             v_g['values'] = np.zeros((N_times_p, N_freqs_t), dtype=np.double)
 
             parmname = 'Gain:' + pol + ':Imag:' + antenna
-            imag = np.copy(parms_a[parmname]['values'])[:, freq_ind]
+            imag = np.copy(parms_a[parmname]['values'][:, freq_ind])
             imag_repeat = np.repeat(imag, solint_a/solint_p, axis=0)
             v_g['values'] = np.copy(imag_repeat[0:N_times_p])
             outparms_g[parmname] = v_g.copy()
 
             parmname = 'Gain:' + pol + ':Real:' + antenna
-            real = np.copy(parms_a[parmname]['values'])[:, freq_ind]
+            real = np.copy(parms_a[parmname]['values'][:, freq_ind])
             real_repeat = np.repeat(real, solint_a/solint_p, axis=0)
             v_g['values'] = np.copy(real_repeat[0:N_times_p])
             outparms_g[parmname] = v_g.copy()
