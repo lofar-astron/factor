@@ -444,9 +444,11 @@ class FacetSelfcal(Operation):
         self.log.debug('Merging chunk instrument parmdbs...')
         merged_parmdb_phaseamp_amp1_mapfiles = []
         for i, chunks in enumerate(chunks_list):
+            self.log.debug(print([chunk.parmdb_phaseamp_amp1 for chunk
+                in chunks]))
             merged_parmdb_phaseamp_amp1_mapfiles.append(self.write_mapfile(
                 [merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp1 for chunk
-                in chunks], prefix='merged_amps1')], prefix='merged_amps1',
+                in chunks], prefix='merged_chunks_amps1')], prefix='merged_amps1',
                 direction=d_list[i], host_list=d_hosts[i]))
 
         self.log.info('Smoothing amplitude solutions...')

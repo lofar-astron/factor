@@ -282,9 +282,7 @@ def merge_chunk_parmdbs(inparmdbs, prefix='merged', clobber=True):
         If True, overwrite existing output file
 
     """
-    import os
     import lofar.parmdb
-    import copy
 
     root_dir = inparmdbs[0].split('chunks')[0]
     outparmdb = '{0}/{1}_instrument'.format(root_dir, prefix)
@@ -301,9 +299,9 @@ def merge_chunk_parmdbs(inparmdbs, prefix='merged', clobber=True):
         for inparmdb in inparmdbs[1:]:
             pdb = lofar.parmdb.parmdb(inparmdb)
             for parmname in pdb.getNames():
-                v = copy.deepcopy(pdb.getValuesGrid(parmname))
-                pdb_concat.addValues(v)
-            pdb_concat.flush()
+                v = pdb.getValuesGrid(parmname)
+                pdb_concat.addValues(v.copy())
+        pdb_concat.flush()
 
     return outparmdb
 
