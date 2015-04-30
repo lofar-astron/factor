@@ -62,27 +62,3 @@ class Chunk(object):
         self.parmdb_phaseamp_amp2 = self.parmdb_dir + 'chunk{0}_instrument_phaseamp_amp2'.format(self.index)
 
 
-    def copy_from_parent(self, column_list):
-        """
-        Copy columns from the parent MS file to the chunk file
-
-        The columns in both parent and chunk file will have the same names
-        """
-        from factor.lib.operation_lib import copy_column
-
-        for column in column_list:
-            copy_column(self.file, column, column, ms_from=self.parent_file)
-
-
-    def copy_to_parent(self, column_list):
-        """
-        Copy columns from the chunk file to the parent MS file
-
-        The columns in both parent and chunk file will have the same names
-        """
-        from factor.lib.operation_lib import copy_column
-
-        for column in column_list:
-            copy_column(self.parent_file, column, column, ms_from=self.file)
-
-

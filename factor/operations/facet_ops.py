@@ -488,13 +488,6 @@ class FacetSelfcal(Operation):
             merged_unavg_data_mapfiles, image3_basenames_mapfiles)]
         self.s.run(actions)
 
-        self.log.debug('Resetting phases...')
-        actions = [ResetPhases(self.parset, dm, p['reset_phases'], pm,
-            prefix='facet', direction=d)
-            for d, dm, pm in zip(d_list, facet_data_mapfiles,
-            merged_parmdb_phaseamp_amp1_mapfiles)]
-        self.s.run(actions)
-
         self.log.info('Solving for amplitude solutions (#2)...')
         chunk_parmdb_phaseamp_phase2_mapfiles = []
         chunk_parmdb_phaseamp_amp2_mapfiles = []
