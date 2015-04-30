@@ -671,7 +671,7 @@ class FacetImage(Operation):
         from factor.actions.calibrations import Apply
         from factor.actions.images import MakeImageIterate
         from factor.actions.models import MakeFacetSkymodel, MakeSkymodelFromModelImage, FFT
-        from factor.lib.operation_lib import copy_column
+        from factor.lib.operation_lib import copy_column, merge_chunks
         from factor.operations.hardcoded_param import facet_image as p
         from factor.lib.datamap_lib import read_mapfile
 
