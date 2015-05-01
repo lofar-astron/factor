@@ -72,11 +72,6 @@ facet_add = {
          'flags': '--replace-sourcedb'},
 'shift_cal' : {'columnname': 'FACET_DATA_CAL'}, # outcol is DATA
 'shift_all' : {'columnname': 'FACET_DATA_ALL'} # outcol is DATA
-# 'shift_sub' : {'columnname': 'SUBTRACTED_DATA_ALL'}, # outcol is DATA
-# 'concat_all' : {'columnname': 'DATA'}, # outcol is DATA
-# 'concat_sub' : {'columnname': 'DATA'}, # outcol is DATA
-# 'copy' : {'incol': 'DATA',
-#           'outcol': 'FACET_DATA_ALL'}
 }
 
 facet_setup = {
@@ -272,7 +267,7 @@ facet_image= {
          'timestep': 3},
 'imager' : {'niter': 5000,
             'imsize': 1024,
-            'mscale': False,
+            'mscale': True,
             'cell': '1.5arcsec',
             'uvrange': '>80lambda',
             'minuv': '80',
