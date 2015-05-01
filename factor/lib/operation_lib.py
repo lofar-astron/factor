@@ -345,7 +345,11 @@ def merge_parmdbs(parmdb_p, parmdb_a, parmdb_t, solint_p, solint_a, msfile,
             os.system('rm -rf {0}'.format(parmdb_out))
         else:
             return parmdb_out
-    pdb_out = lofar.parmdb.parmdb(parmdb_out, create=True)
+#     pdb_out = lofar.parmdb.parmdb(parmdb_out, create=True)
+    os.system('cp -r {0} {1}'.format(parmdb_t, parmdb_out))
+    pdb_out = lofar.parmdb.parmdb(parmdb_out)
+    for parmname in pdb_out.getNames():
+        pdb_out.deleteValues(parmname)
 
     # Open input parmdbs
     pdb_a = lofar.parmdb.parmdb(parmdb_a)
