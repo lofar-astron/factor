@@ -440,6 +440,39 @@ def merge_parmdbs(parmdb_p, parmdb_a, parmdb_t, solint_p, solint_a, msfile,
     return parmdb_out
 
 
+def merge_parmdbs_notemplate(parmdb_p, parmdb_a, prefix=None, clobber=True):
+    """Merges amp+phase parmdbs"""
+    import lofar.parmdb
+
+    # Initialize output parmdb
+    if prefix is None:
+        prefix = 'merged'
+    parmdb_out = os.path.join(os.path.dirname(parmdb_p), '{0}_amp_phase_final_instrument'.format(prefix))
+    if os.path.exists(parmdb_out):
+        if clobber:
+            os.system('rm -rf {0}'.format(parmdb_out))
+        else:
+            return parmdb_out
+    pdb_out = lofar.parmdb.parmdb(parmdb_out, create=True)
+
+    # Copy over the CommonScalar phases and TEC
+    pdb_p = lofar.parmdb.parmdb(parmdb_p)
+    for parmname in pdb_p.getNames():
+        parms = pdb_p.getValuesGrid(parmname)
+        pdb_out.addValues(parms)
+
+    # Copy over the Gains
+    pdb_a = lofar.parmdb.parmdb(parmdb_a)
+    for parmname in pdb_a.getNames():
+        parms = pdb_a.getValuesGrid(parmname)
+        pdb_out.addValues(parms)
+
+    # Write values
+    pdb_out.flush()
+
+    return parmdb_out
+
+
 def verify_subtract(image_pre, image_post, res_val):
     """
     Check quantities in residual images

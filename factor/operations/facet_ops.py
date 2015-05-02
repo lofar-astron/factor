@@ -234,7 +234,7 @@ class FacetSelfcal(Operation):
         from factor.actions.models import FFT
         from factor.actions.solutions import Smooth, ResetPhases
         from factor.lib.operation_lib import copy_column, make_chunks, \
-            merge_chunks, merge_parmdbs, merge_chunk_parmdbs
+            merge_chunks, merge_parmdbs, merge_chunk_parmdbs, merge_parmdbs_notemplate
         from factor.operations.hardcoded_param import facet_selfcal as p
         from factor.lib.datamap_lib import read_mapfile
 
@@ -598,16 +598,15 @@ class FacetSelfcal(Operation):
         for i, d in enumerate(d_list):
             phases2_final, _ = read_mapfile(merged_parmdb_phaseamp_phase2_mapfiles[i])
             smoothed_amps2_final, _ = read_mapfile(merged_parmdb_phaseamp_amp2_mapfiles[i])
-            merged_files = [merge_parmdbs(phases2_final[0], smoothed_amps2_final[0],
-                band.dirindparmdb, d.solint_p, d.solint_a, band.file,
-                prefix=band.name) for band in bands]
-            merged_parmdb_final_mapfiles.append(self.write_mapfile(merged_files,
+            merged_file = merge_parmdbs_notemplate(phases2_final[0],
+                smoothed_amps2_final[0])
+            merged_parmdb_final_mapfiles.append(self.write_mapfile([merged_file],
                 prefix='merged_amps_phases_final', direction=d, host_list=d_hosts[i]))
 
         # Save files to the direction objects
         for d, m in zip(d_list, merged_parmdb_final_mapfiles):
             f, _ = read_mapfile(m)
-            d.dirdepparmdbs = f
+            d.dirdepparmdb = f[0]
 
 
 class FacetImage(Operation):
@@ -684,8 +683,8 @@ class FacetImage(Operation):
         for d, h in zip(d_list, d_hosts):
             shifted_all_data_mapfiles.append(self.write_mapfile(d.shifted_all_data_files,
                 prefix='shifted', direction=d, host_list=h))
-            dir_dep_parmdbs_mapfiles.append(self.write_mapfile(d.dirdepparmdbs,
-                prefix='dir_dep_parmdbs', direction=d, host_list=h))
+            dir_dep_parmdbs_mapfiles.append(self.write_mapfile([d.dirdepparmdb]*
+                len(bands), prefix='dir_dep_parmdbs', direction=d, host_list=h))
 
         self.log.info('Applying direction-dependent calibration...')
         actions = [Apply(self.parset, dm, p['apply_dirdep'],
@@ -792,8 +791,8 @@ class FacetSub(Operation):
         for d, h in zip(d_list, d_hosts):
             shifted_all_data_mapfiles.append(self.write_mapfile(d.shifted_all_data_files,
             	prefix='shifted', direction=d, host_list=h))
-            dir_dep_parmdbs_mapfiles.append(self.write_mapfile(d.dirdepparmdbs,
-                prefix='dir_dep_parmdbs', direction=d, host_list=h))
+            dir_dep_parmdbs_mapfiles.append(self.write_mapfile([d.dirdepparmdb]*
+                len(bands), prefix='dir_dep_parmdbs', direction=d, host_list=h))
 
         self.log.info('Subtracting sources...')
         actions = [Subtract(self.parset, dm, p['subtract'],
