@@ -845,11 +845,12 @@ class FacetSub(Operation):
         image_post_basenames_mapfiles = self.s.run(actions)
 
         self.log.info('Checking residual images...')
-        image_pre_files, _ = read_mapfile(image_pre_basenames_mapfiles)
-        image_post_files, _ = read_mapfile(image_post_basenames_mapfiles)
-        res_val = 0.5
-        for d, impre, impost in zip(d_list, image_pre_files, image_post_files):
-            d.good = verify_subtract(image_pre, image_post, res_val)
+        for d, impre_mapfile, impost_mapfile in zip(d_list, image_pre_basenames_mapfiles,
+            image_post_basenames_mapfiles):
+            image_pre_files, _ = read_mapfile(impre_mapfile)
+            image_post_files, _ = read_mapfile(impost_mapfile)
+            res_val = 0.5
+            d.good = verify_subtract(image_pre_files[0], image_post_files[0], res_val)
 
 
 class FacetAddAllFinal(Operation):
