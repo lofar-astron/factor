@@ -5,13 +5,13 @@ import logging
 import os
 
 
-def copy_column(ms_to, inputcol, outputcol, ms_from=None):
+def copy_column(ms, inputcol, outputcol, ms_from=None):
     """
     Copies one column to another
 
     Parameters
     ----------
-    ms_to : str
+    ms : str
         MS file receiving copy
     inputcol : str
         Column name to copy from
@@ -22,55 +22,23 @@ def copy_column(ms_to, inputcol, outputcol, ms_from=None):
 
     """
     import pyrap.tables as pt
-    import numpy as np
 
-    t_to = pt.table(ms_to, readonly=False, ack=False)
-    t0_to = np.min(t_to.getcol('TIME'))
-    t1_to = np.max(t_to.getcol('TIME'))
-
+    t = pt.table(ms, readonly=False, ack=False)
     if ms_from is not None:
-        t_from = pt.table(ms_from, ack=False)
-        if outputcol not in t_to.colnames():
-            cdesc = t_from.getcoldesc(inputcol)
-            cdesc['name'] = outputcol
-            t_to.addcols(cdesc)
-        t0_from = np.min(t_from.getcol('TIME'))
-        t1_from = np.max(t_from.getcol('TIME'))
-
-        if t0_from >= t0_to and t1_from <= t1_to:
-            # From-table is of equal or shorter length
-            tinx_to = t_to.index(['TIME', "ANTENNA1", "ANTENNA2"])
-            rownrs_to = tinx_to.rownrs({'TIME':t0_from, 'ANTENNA1':0, 'ANTENNA2':0},
-                {'TIME':t1_from, 'ANTENNA1':500, 'ANTENNA2':500}, lowerincl=True,
-                upperincl=True)
-            tinx_from = t_from.index(['TIME', "ANTENNA1", "ANTENNA2"])
-            rownrs_from = tinx_from.rownrs({'TIME':t0_from, 'ANTENNA1':0, 'ANTENNA2':0},
-                {'TIME':t1_from, 'ANTENNA1':500, 'ANTENNA2':500}, lowerincl=True,
-                upperincl=True)
-        else:
-            # From-table is longer
-            tinx_to = t_to.index(['TIME', "ANTENNA1", "ANTENNA2"])
-            rownrs_to = tinx_to.rownrs({'TIME':t0_to, 'ANTENNA1':0, 'ANTENNA2':0},
-                {'TIME':t1_to, 'ANTENNA1':500, 'ANTENNA2':500}, lowerincl=True,
-                upperincl=True)
-            tinx_from = t_from.index(['TIME', "ANTENNA1", "ANTENNA2"])
-            rownrs_from = tinx_from.rownrs({'TIME':t0_to, 'ANTENNA1':0, 'ANTENNA2':0},
-                {'TIME':t1_to, 'ANTENNA1':500, 'ANTENNA2':500}, lowerincl=True,
-                upperincl=True)
-
-        data_to = t_to.getcol(outputcol)
-        data_from = t_from.getcol(inputcol)
-        data_to[rownrs_to] = data_from[rownrs_from]
+        tf = pt.table(ms_from, readonly=False, ack=False)
+        data = tf.getcol(inputcol)
+        cd = tf.getcoldesc(inputcol)
     else:
-        data_to = t_to.getcol(inputcol)
-        if outputcol not in t_to.colnames():
-            cdesc = t_to.getcoldesc(inputcol)
-            cdesc['name'] = outputcol
-            t_to.addcols(cdesc)
-
-    # Write the changes
-    t_to.putcol(outputcol, data_to)
-    t_to.close()
+        data = t.getcol(inputcol)
+        cd = t.getcoldesc(inputcol)
+    cd['name'] = outputcol
+    try:
+        t.addcols(cd)
+    except:
+        pass
+    t.putcol(outputcol, data)
+    t.flush()
+    t.close()
 
 
 def copy_column_freq(mslist, ms_from, inputcol, outputcol):
