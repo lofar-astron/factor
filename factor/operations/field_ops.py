@@ -45,7 +45,10 @@ class InitSubtract(Operation):
 
         bands = self.bands
 
-        # Check operation state
+        # Check state
+        if self.check_completed(bands):
+            return
+
         if os.path.exists(self.statebasename+'.done'):
             merged_skymodels_mapfile = os.path.join(self.parset['dir_working'],
                 'datamaps/InitSubtract/MergeSkymodels/merge_output.datamap')
@@ -135,6 +138,9 @@ class InitSubtract(Operation):
         for band, skymodel in zip(bands, skymodels):
             band.skymodel_dirindep = skymodel
 
+        # Save state
+        self.set_completed(bands)
+
 
 class FieldSub(Operation):
     """
@@ -156,9 +162,10 @@ class FieldSub(Operation):
         from factor.operations.hardcoded_param import field_sub as p
 
         bands = self.bands
+        d = self.direction
 
-        # Check operation state
-        if os.path.exists(self.statebasename+'.done'):
+        # Check state
+        if self.check_completed(d):
             return
 
         # Make initial data maps for the input datasets and their dir-indep
@@ -205,6 +212,9 @@ class FieldSub(Operation):
         action = Subtract(self.parset, orig_data_mapfile, p['subtract'], None,
         	dir_dep_parmdbs_mapfile, prefix='field_dirdep', direction=d)
         self.s.run(action)
+
+        # Save state
+        self.set_completed(d)
 
 
 class MakeMosaic(Operation):

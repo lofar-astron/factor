@@ -138,7 +138,6 @@ class Operation(object):
         Finalize the operation
         """
         # Set the operation completion state
-        self.set_state(0)
         if self.direction is None:
             self.log.info('--> Operation %s finished' % self.name)
         else:
@@ -150,59 +149,48 @@ class Operation(object):
                 (self.name, dirstr))
 
 
-    def set_state(self, returncode):
+    def check_completed(self, obj_list):
         """
-        Set success or failure state
+        Checks whether operation has been run successfully before
 
         Parameters
         ----------
-        returncode : int
-            0 = success, 1 = failure
+        obj_list : list
+            Band or Direction objects to check
+
+        Returns
+        -------
+        all_done : bool
+            True if all objects were successfully run
 
         """
-        if type(self.statebasename) is list:
-            for s in self.statebasename:
-                success_file = s + '.done'
-                failure_file = s + '.failed'
-                if returncode == 0:
-                    state_file = success_file
-                    if os.path.exists(failure_file):
-                        os.remove(failure_file)
-                else:
-                    state_file = failure_file
-                    if os.path.exists(success_file):
-                        os.remove(success_file)
-                with open(state_file, 'w') as f:
-                    f.write(' ')
-            if returncode != 0 and self.exit_on_error:
-                import sys
-                sys.exit(1)
-        else:
-            success_file = self.statebasename + '.done'
-            failure_file = self.statebasename + '.failed'
-            if returncode == 0:
-                state_file = success_file
-                if os.path.exists(failure_file):
-                    os.remove(failure_file)
+        if type(obj_list) is not list:
+            obj_list = [obj_list]
+
+        for obj in obj_list:
+            obj.load_state()
+            if self.name in obj.completed_operations:
+                all_done = True
             else:
-                state_file = failure_file
-                if os.path.exists(success_file):
-                    os.remove(success_file)
-            with open(state_file, 'w') as f:
-                f.write(' ')
-            if returncode != 0 and self.exit_on_error:
-                import sys
-                sys.exit(1)
+                all_done = False
+                break
+
+        return all_done
 
 
-    def unset_state(self):
+    def set_completed(self, obj_list):
         """
-        Unset any previous state
-        """
-        success_file = self.statebasename + '.done'
-        failure_file = self.statebasename + '.failed'
-        if os.path.exists(failure_file):
-            os.remove(failure_file)
-        if os.path.exists(success_file):
-            os.remove(success_file)
+        Sets the state for the operation objects
 
+        Parameters
+        ----------
+        obj_list : list
+            Band or Direction objects to check
+
+        """
+        if type(obj_list) is not list:
+            obj_list = [obj_list]
+
+        for obj in obj_list:
+            obj.completed_operations.append(self.name)
+            obj.save_state()

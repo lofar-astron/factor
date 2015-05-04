@@ -46,8 +46,12 @@ class FacetAdd(Operation):
         from factor.operations.hardcoded_param import facet_add as p
         from factor.lib.datamap_lib import read_mapfile
 
-        d = self.direction
         bands = self.bands
+        d = self.direction
+
+        # Check state
+        if self.check_completed(d):
+            return
 
         if os.path.exists(self.statebasename+'.done'):
             shifted_cal_data_mapfile = os.path.join(self.parset['dir_working'],
@@ -60,6 +64,7 @@ class FacetAdd(Operation):
             shifted_all_data_files, hosts = read_mapfile(shifted_all_data_mapfile)
             d.shifted_cal_data_files = shifted_cal_data_files
             d.shifted_all_data_files = shifted_all_data_files
+            return
 
         # Make initial data maps for the empty datasets, their dir-indep
         # instrument parmdbs, and their dir-indep sky models
@@ -106,6 +111,8 @@ class FacetAdd(Operation):
 
         d.shifted_cal_data_files = shifted_cal_data_files
         d.shifted_all_data_files = shifted_all_data_files
+        d.completed_operations.append(self.name)
+        d.save_state()
 
 
 class FacetSetup(Operation):
@@ -127,24 +134,13 @@ class FacetSetup(Operation):
         from factor.operations.hardcoded_param import facet_setup as p
         from factor.lib.datamap_lib import read_mapfile
 
+        bands = self.bands
         d_list = self.direction
         if type(d_list) is not list:
             d_list = [d_list]
-        bands = self.bands
 
-        # Check state for each direction
-        for i, d in enumerate(d_list):
-            if os.path.exists(self.statebasename[i]+'.done'):
-                concat_data_mapfile = os.path.join(self.parset['dir_working'],
-                    'datamaps/FacetSetup/Concatenate/{0}/facet_bands_output_{0}-1.datamap'.
-                    format(d.name))
-                file, _ = read_mapfile(concat_data_mapfile)
-                d.cal_concat_file = file[0]
-                all_done = True
-            else:
-                all_done = False
-                break
-        if all_done:
+        # Check state
+        if self.check_completed(d_list):
             return
 
         # Divide up the nodes among the directions
@@ -209,6 +205,9 @@ class FacetSetup(Operation):
             copy_column(d.cal_concat_file, p['copy']['incol'], p['copy']['outcol'],
                 ms_from=concat_corrdata_file[0])
 
+        # Save state
+        self.set_completed(d_list)
+
 
 class FacetSelfcal(Operation):
     """
@@ -238,30 +237,19 @@ class FacetSelfcal(Operation):
         from factor.operations.hardcoded_param import facet_selfcal as p
         from factor.lib.datamap_lib import read_mapfile
 
+        bands = self.bands
         d_list = self.direction
         if type(d_list) is not list:
             d_list = [d_list]
-        bands = self.bands
+
+        # Check state
+        if self.check_completed(d_list):
+            return
 
         # Set imager. For now, since WSClean does not yet support clean masks
         # with multiscale clean, casapy can be used instead for this operation
         # only
         self.parset['imager'] = self.parset['imager_selfcal']
-
-        # Check state for each direction
-        for i, d in enumerate(d_list):
-            if os.path.exists(self.statebasename[i]+'.done'):
-                final_parmdb_datamap = os.path.join(self.parset['dir_working'],
-                    'datamaps/FacetSelfcal/{0}/merged_amps_phases_final_{0}.datamap'.
-                    format(d.name))
-                files, _ = read_mapfile(final_parmdb_datamap)
-                d.dirdepparmdbs = files
-                all_done = True
-            else:
-                all_done = False
-                break
-        if all_done:
-            return
 
         # Divide up the nodes among the directions
         node_list = self.parset['cluster_specific']['node_list']
@@ -608,6 +596,9 @@ class FacetSelfcal(Operation):
             f, _ = read_mapfile(m)
             d.dirdepparmdb = f[0]
 
+        # Save state
+        self.set_completed(d_list)
+
 
 class FacetImage(Operation):
     """
@@ -636,10 +627,14 @@ class FacetImage(Operation):
         from factor.operations.hardcoded_param import facet_image as p
         from factor.lib.datamap_lib import read_mapfile
 
+        bands = self.bands
         d_list = self.direction
         if type(d_list) is not list:
             d_list = [d_list]
-        bands = self.bands
+
+        # Check state
+        if self.check_completed(d):
+            return
 
         # Set image sizes
         for d in d_list:
@@ -648,21 +643,6 @@ class FacetImage(Operation):
             if imsize < 512:
                 imsize = 512
             d.imsize = imsize
-
-        # Check state for each direction
-        for i, d in enumerate(d_list):
-            if os.path.exists(self.statebasename[i]+'.done'):
-                model_mapfile = os.path.join(self.parset['dir_working'],
-                'datamaps/FacetImage/MakeImage/{0}/facet_image-imager_output_{0}-1.datamap'.
-                format(d.name))
-                file, _ = read_mapfile(model_mapfile)
-                d.skymodel_dirdep = file[0]
-                all_done = True
-            else:
-                all_done = False
-                break
-        if all_done:
-            return
 
         # Divide up the nodes among the directions
         node_list = self.parset['cluster_specific']['node_list']
@@ -737,6 +717,9 @@ class FacetImage(Operation):
             file, _ = read_mapfile(mf)
             d.skymodel_dirdep = file[0]
 
+        # Save state
+        self.set_completed(d_list)
+
 
 class FacetSub(Operation):
     """
@@ -756,21 +739,15 @@ class FacetSub(Operation):
         from factor.actions.images import MakeImage
         from factor.operations.hardcoded_param import facet_sub as p
         from factor.lib.datamap_lib import read_mapfile
-        from factor.lib.operation_lib import copy_column
+        from factor.lib.operation_lib import copy_column, verify_subtract
 
+        bands = self.bands
         d_list = self.direction
         if type(d_list) is not list:
             d_list = [d_list]
-        bands = self.bands
 
-        # Check state for each direction
-        for i, d in enumerate(d_list):
-            if os.path.exists(self.statebasename[i]+'.done'):
-                all_done = True
-            else:
-                all_done = False
-                break
-        if all_done:
+        # Check state
+        if self.check_completed(d):
             return
 
         # Divide up the nodes among the directions
@@ -850,7 +827,10 @@ class FacetSub(Operation):
             image_pre_files, _ = read_mapfile(impre_mapfile)
             image_post_files, _ = read_mapfile(impost_mapfile)
             res_val = 0.5
-            d.good = verify_subtract(image_pre_files[0], image_post_files[0], res_val)
+            d.selfcal_ok = verify_subtract(image_pre_files[0], image_post_files[0], res_val)
+
+        # Save state
+        self.set_completed(d_list)
 
 
 class FacetAddAllFinal(Operation):
@@ -872,15 +852,11 @@ class FacetAddAllFinal(Operation):
         from factor.operations.hardcoded_param import facet_add_all_final as p
         from factor.lib.datamap_lib import read_mapfile
 
-        d = self.direction
         bands = self.bands
+        d = self.direction
 
-        # Check state for each direction
-        if os.path.exists(self.statebasename+'.done'):
-            shifted_data_mapfile = os.path.join(self.parset['dir_working'],
-                'datamaps/FacetAddAllFinal/PhaseShift/{0}/facet_output_{0}.datamap'.
-                format(d.name))
-            d.shifted_data_files, _ = read_mapfile(shifted_data_mapfile)
+        # Check state
+        if self.check_completed(d):
             return
 
         # Make initial data maps for the empty datasets, their dir-indep
@@ -908,8 +884,11 @@ class FacetAddAllFinal(Operation):
             prefix='facet', direction=d)
         shifted_data_mapfile = self.s.run(action)
 
-        # Save files to the band objects
+        # Save files to the direction object
         d.shifted_data_files, _ = read_mapfile(shifted_data_mapfile)
+
+        # Save state
+        self.set_completed(d)
 
 
 def FacetImageFinal(FacetImage):

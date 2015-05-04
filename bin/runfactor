@@ -62,7 +62,7 @@ if __name__=='__main__':
     bands = []
     from factor.lib.band import Band
     for ms in parset['mss']:
-        band = Band(ms)
+        band = Band(ms, parset['dir_working'])
         band.dirindparmdb = os.path.join(band.file, parset['parmdb_name'])
         if not os.path.exists(band.dirindparmdb):
             logging.critical('Direction-independent instument parmdb not found '
@@ -78,10 +78,11 @@ if __name__=='__main__':
     # Check directions. First check for user-supplied file, then for Factor-generated
     # file from a previous run, then for parameters needed to generate it internally
     if 'directions_file' in parset:
-        directions = factor.directions.directions_read(parset['directions_file'])
+        directions = factor.directions.directions_read(parset['directions_file'],
+            parset['dir_working'])
     elif os.path.exists(os.path.join(parset['dir_working'], 'factor_directions.txt')):
         directions = factor.directions.directions_read(os.path.join(parset['dir_working'],
-            'factor_directions.txt'))
+            'factor_directions.txt'), parset['dir_working'])
     else:
         dir_parset = parset['direction_specific']
         if 'flux_min_jy' not in dir_parset or \
@@ -131,7 +132,9 @@ if __name__=='__main__':
         	parset['direction_specific']['separation_max_arcmin'],
         	directions_max_num=parset['direction_specific']['max_num'],
         	interactive=parset['interactive'])
-        directions = factor.directions.directions_read(parset['directions_file'])
+        directions = factor.directions.directions_read(parset['directions_file'],
+            parset['dir_working'])
+
     polys_file = os.path.join(parset['dir_working'], 'regions', 'factor_facets.pkl')
     if os.path.exists(polys_file):
         with open(polys_file, 'r') as f:
@@ -141,7 +144,6 @@ if __name__=='__main__':
             check_edges=parset['direction_specific']['check_edges'])
         with open(polys_file, 'wb') as f:
             pickle.dump([polys, widths], f)
-
     for i, direction in enumerate(directions):
         direction.vertices = polys[i]
         direction.width = widths[i]
@@ -200,11 +202,12 @@ if __name__=='__main__':
         # Lastly, stop Factor if selfcal for any direction in this group failed
         for d in direction_group:
             all_good = True
-            if not d.good:
+            if not d.selfcal_ok:
                 logging.error('Selfcal failed for direction {0}. Please check '
                     'this direction.'.format(d.name))
                 all_good = False
-
+        if not all_good:
+            sys.exit(1)
 
     # Make final facet images (from final empty datasets) if desired
     dirs_to_image = [d for d in directions if d.make_final_image]
