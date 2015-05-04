@@ -4,7 +4,7 @@ Module that holds all direction-related functions
 import os
 import numpy as np
 import logging
-from factor.lib.direction import Direction as d
+from factor.lib.direction import Direction
 import sys
 from scipy.spatial import Delaunay
 
@@ -12,7 +12,7 @@ from scipy.spatial import Delaunay
 log = logging.getLogger('directions')
 
 
-def directions_read(directions_file):
+def directions_read(directions_file, factor_working_dir):
     """
     Read a Factor-formatted directions file and return list of Direction objects
 
@@ -20,37 +20,53 @@ def directions_read(directions_file):
     ----------
     directions_file : str
         Filename of Factor-formated directions file
+    factor_working_dir : str
+        Full path of working directory
 
     Returns
     -------
-    data : list of Direction objects
+    directions : list of Direction objects
         List of Direction objects
 
     """
+    from astropy.coordinates import Angle
+
     if not os.path.isfile(directions_file):
         log.critical("Directions file (%s) not found." % (directions_file))
         sys.exit(1)
 
     log.info("Reading directions file: %s" % (directions_file))
-    types = np.dtype({'names': ['name', 'ra', 'dec', 'clean_reg', 'multiscale',
-    	'solint_a', 'solint_p', 'make_final_image', 'cal_radius', 'apparent_flux'],
-    	'formats':['S100', np.float, np.float, 'S100', np.bool, np.int,
-    	np.int, np.bool, np.float, np.float]})
-    directions = np.genfromtxt(directions_file, comments='#', delimiter=',',
-    	unpack=False, converters={0: lambda x: x.strip(), 3: lambda x:
-    	x.strip()}, dtype=types)
-    # NOTE: undefined int are "-1", undefined bool are "False", undefined float are nan
+    try:
+        types = np.dtype({'names': ['name', 'radec', 'atrous_do', 'mscale_field_do',
+            'cal_imsize', 'solint_p', 'solint_a', 'field_imsize', 'dynamic_range',
+            'region_selfcal', 'region_field', 'peel_skymodel', 'outlier_source',
+            'cal_radius_deg', 'cal_flux_jy'], 'formats':['S255', 'S255', 'S5',
+            'S5', int, int, int, int, 'S2', 'S255', 'S255', 'S255',
+            'S5', float, float]})
+        directions = np.genfromtxt(directions_file, comments='#', dtype=types)
+    except ValueError:
+        types = np.dtype({'names': ['name', 'radec', 'atrous_do', 'mscale_field_do',
+            'cal_imsize', 'solint_p', 'solint_a', 'field_imsize', 'dynamic_range',
+            'region_selfcal', 'region_field', 'peel_skymodel', 'outlier_source'],
+            'formats':['S255', 'S255', 'S5',
+            'S5', int, int, int, int, 'S2', 'S255', 'S255', 'S255',
+            'S5', float, float]})
+        directions = np.genfromtxt(directions_file, comments='#', dtype=types)
 
     data = []
     for direction in directions:
+        RAstr, Decstr = direction['radec'].split(',')
+        ra = Angle(RAstr).to('deg').value
+        dec = Angle(Decstr).to('deg').value
+
         # some checks on values
-        if np.isnan(direction['ra']) or direction['ra'] < 0 or direction['ra'] > 360:
+        if np.isnan(ra) or ra < 0 or ra > 360:
             log.error('RA %f is wrong for direction: %s. Ignoring direction.'
-            	% (direction['ra'], direction['name']))
+            	% (direction['radec'], direction['name']))
             continue
-        if np.isnan(direction['dec']) or direction['dec'] < -90 or direction['dec'] > 90:
+        if np.isnan(dec) or dec < -90 or dec > 90:
             log.error('DEC %f is wrong for direction: %s. Ignoring direction.'
-                % (direction['dec'], direction['name']))
+                % (direction['radec'], direction['name']))
             continue
         if (direction['solint_a'] <= 0 or direction['solint_p'] <= 0) and \
             np.isnan(direction['apparent_flux']):
@@ -64,12 +80,29 @@ def directions_read(directions_file):
             direction['solint_a'] = 60
         if direction['solint_p'] <= 0:
             direction['solint_p'] = 1
-        if direction['cal_radius'] <= 0.0 or np.isnan(direction['cal_radius']):
-            direction['cal_radius'] = 3.0 # arcmin
-        if np.isnan(direction['apparent_flux']):
-            direction['apparent_flux'] = -1.0 # arcmin
+        if 'cal_radius_deg' in direction:
+            if direction['cal_radius_deg'] <= 0.0 or np.isnan(direction['cal_radius_deg']):
+                cal_radius_deg = None
+            else:
+                cal_radius_deg = direction['cal_radius_deg']
+        else:
+            cal_radius_deg = None
+        if 'cal_flux_jy' in direction:
+            if np.isnan(direction['cal_flux_jy']):
+                cal_flux_jy = None
+            else:
+                cal_flux_jy = direction['cal_flux_jy']
+        else:
+            cal_flux_jy = None
 
-        data.append( d(*direction) )
+        data.append( Direction(direction['name'], ra, dec,
+        	bool(direction['atrous_do']), bool(direction['mscale_field_do']),
+        	direction['cal_imsize'], direction['solint_p'],
+        	direction['solint_a'], direction['field_imsize'],
+        	direction['dynamic_range'], direction['region_selfcal'],
+        	direction['region_field'], direction['peel_skymodel'],
+        	direction['outlier_source'], factor_working_dir, False,
+        	cal_radius_deg, cal_flux_jy))
 
     return data
 

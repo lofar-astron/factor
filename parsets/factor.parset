@@ -60,8 +60,9 @@ separation_max_arcmin = 6.0
 # of directions if desired (default = all)
 max_num = 50
 
-# Total number of directions to process (default = all)
+# Total number and/or list of directions to process (default = all)
 ndir = 10
+directions = ['s1', 's2', 's6']
 
 # Grouping of directions into groups that are processed in parallel, defined as
 # grouping:n_total_per_grouping. For example, groupings = 1:5, 4:0 means two

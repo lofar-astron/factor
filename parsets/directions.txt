@@ -2,10 +2,12 @@
 #
 # Directions should be sorted in order of reduction (e.g., bright to faint).
 #
-# Columns are defined as follows (in [] are optional parameters with their default values):
-# Name (str), RA (float), DEC (float), [clean_reg (string, default='')], [multiscale (bool, default=True)], [solint_amp (int, default=600)], [solint_ph (int, default=5)], [make_final_image (bool, default=True)], [cal_radius (float arcmin, default=3.0)], [apparent_flux (float mJy, default=None)]
+# Columns are defined as follows:
+#
+# name position atrous_do mscale_field_do cal_imsize solint_ph solint_amp field_imsize dynamic_range region_selfcal region_field peel_skymodel outlier_source
 
-calibrator_1, 111.11, 22.22, , , , , , , ,
-calibrator_2, 222.22, 33.33, True, 600, 5, False, 4.5, ,
-calibrator_3, 333.33, 44.44, , True, 600, 5, , , ,
+s1  14h41m01.884,+35d30m31.52 False False 512  1 30  5600 LD empty empty    s1.skymodel False
+s2  14h38m29.584,+33d57m37.82 False False 1024 1 30  5600 LD empty empty    empty       False
+s25 14h21m07.482,+35d35m22.87 False False 1280 2 240 5600 LD empty fs25.rgn empty       False
+...
 
