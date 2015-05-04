@@ -33,6 +33,18 @@ class Direction(object):
             Solution interval for phase calibration (# of time slots)
         solint_a : int
             Solution interval for amplitude calibration (# of time slots)
+        field_imsize : int
+            Size of facet image in 1.5 arcsec pixels
+        dynamic_range : bool
+            LD or HD
+        region_selfcal : str
+            Region for clean mask for calibrator selfcal
+        region_field : str
+            Region for clean mask for facet image
+        peel_skymodel : str
+            Sky model for peeling
+        outlier_do : bool
+            If True, peel source without selfcal
         factor_working_dir : str
             Full path of working directory
         make_final_image : bool
@@ -49,7 +61,10 @@ class Direction(object):
         self.atrous_do = atrous_do
         self.mscale_field_do = mscale_field_do
         self.cal_imsize = cal_imsize
-        self.cal_radius_deg = cal_imsize * 1.5 / 3660.0
+        if cal_radius_deg is None:
+            self.cal_radius_deg = cal_imsize * 1.5 / 3660.0
+        else:
+            self.cal_radius_deg = cal_radius_deg
         self.solint_p = solint_p
         self.solint_a = solint_a
         self.field_imsize = field_imsize
@@ -64,7 +79,10 @@ class Direction(object):
             self.peel_skymodel = None
         self.make_final_image = make_final_image
         self.dynamic_range = dynamic_range
-        self.apparent_flux_mjy = cal_flux_jy * 1000.0
+        if cal_flux_jy is not None:
+            self.apparent_flux_mjy = cal_flux_jy * 1000.0
+        else:
+            self.apparent_flux_mjy = None
         self.nchannels = 1
 
         self.completed_operations = []
