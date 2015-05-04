@@ -1,6 +1,7 @@
 """
 Definition of the direction class
 """
+import os
 import logging
 
 class Direction(object):

@@ -1,6 +1,7 @@
 """
 Definition of the band class
 """
+import os
 import logging
 import pyrap.tables as pt
 import numpy as np
