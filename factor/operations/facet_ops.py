@@ -111,8 +111,9 @@ class FacetAdd(Operation):
 
         d.shifted_cal_data_files = shifted_cal_data_files
         d.shifted_all_data_files = shifted_all_data_files
-        d.completed_operations.append(self.name)
-        d.save_state()
+
+        # Save state
+        self.set_completed(d)
 
 
 class FacetSetup(Operation):
