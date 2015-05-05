@@ -521,10 +521,10 @@ class MakeImageIterate(Action):
         Makes the required data maps
         """
         if self.direction is not None:
-            if self.direction.clean_reg != '' and \
+            if self.direction.region_selfcal is not None and \
                 self.op_parset['imager'].lower() == 'casapy':
                 # Use clean region file for first image
-                self.p['mask_datamap'] = self.write_mapfile([self.direction.clean_reg],
+                self.p['mask_datamap'] = self.write_mapfile([self.direction.region_selfcal],
                     prefix=self.prefix+'_input', direction=self.direction,
                     index=self.index, band=self.band)
             else:
