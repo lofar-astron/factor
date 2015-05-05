@@ -213,8 +213,6 @@ facet_selfcal = {
              'iterate_threshold' : True,
              'mask_border': True,
              'n_per_node': 1},
-'reset_phases' : {'solset': 'sol000',
-                  'soltab': 'phase000'},
 'solve_phaseamp2_phaseonly': {'incol': 'DATA',
                               'outcol': 'CORRECTED_DATA_PHASE',
                               'uvrange': 80,
@@ -260,11 +258,11 @@ facet_selfcal = {
 }
 
 facet_image= {
-'apply_dirdep' : {'incol': 'DATA',
-                  'outcol': 'CORRECTED_DATA'},
-'avg' : {'columnname': 'CORRECTED_DATA', # outcol is DATA
+'avg' : {'columnname': 'DATA', # outcol is DATA
          'freqstep': 5,
          'timestep': 3},
+'apply_dirdep' : {'incol': 'DATA',
+                  'outcol': 'CORRECTED_DATA'},
 'imager' : {'niter': 5000,
             'imsize': 1024,
             'mscale': True,

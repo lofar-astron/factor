@@ -666,16 +666,16 @@ class FacetImage(Operation):
             dir_dep_parmdbs_mapfiles.append(self.write_mapfile([d.dirdepparmdb]*
                 len(bands), prefix='dir_dep_parmdbs', direction=d, host_list=h))
 
-        self.log.info('Applying direction-dependent calibration...')
-        actions = [Apply(self.parset, dm, p['apply_dirdep'],
-            pm, prefix='facet_dirdep', direction=d) for d, dm, pm in zip(d_list,
-            shifted_all_data_mapfiles, dir_dep_parmdbs_mapfiles)]
-        self.s.run(actions)
-
         self.log.info('Averaging...')
         actions = [Average(self.parset, m, p['avg'], prefix='facet',
             direction=d) for d, m in zip(d_list, shifted_all_data_mapfiles)]
         avg_data_mapfiles = self.s.run(actions)
+
+        self.log.info('Applying direction-dependent calibration...')
+        actions = [Apply(self.parset, dm, p['apply_dirdep'],
+            pm, prefix='facet_dirdep', direction=d) for d, dm, pm in zip(d_list,
+            avg_data_mapfiles, dir_dep_parmdbs_mapfiles)]
+        self.s.run(actions)
 
         self.log.info('Imaging...')
         if self.parset['use_chgcentre']:
@@ -693,7 +693,7 @@ class FacetImage(Operation):
         for i, mf in enumerate(input_to_imager_mapfiles):
             in_files, _ = read_mapfile(mf)
             merged_data_mapfiles.append(self.write_mapfile([merge_chunks(in_files,
-            prefix=None, clobber=True)], direction=d_list[i],
+            prefix=None, clobber=True)], prefix='imager', direction=d_list[i],
             host_list=d_hosts[i]))
 
         actions = [MakeImageIterate(self.parset, m, p['imager'], prefix='facet_image',
