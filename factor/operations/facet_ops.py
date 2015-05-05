@@ -634,7 +634,7 @@ class FacetImage(Operation):
             d_list = [d_list]
 
         # Check state
-        if self.check_completed(d):
+        if self.check_completed(d_list):
             return
 
         # Set image sizes
@@ -660,7 +660,6 @@ class FacetImage(Operation):
         # instrument parmdbs
         shifted_all_data_mapfiles = []
         dir_dep_parmdbs_mapfiles = []
-        dir_indep_skymodels_mapfiles = []
         for d, h in zip(d_list, d_hosts):
             shifted_all_data_mapfiles.append(self.write_mapfile(d.shifted_all_data_files,
                 prefix='shifted', direction=d, host_list=h))
@@ -748,7 +747,7 @@ class FacetSub(Operation):
             d_list = [d_list]
 
         # Check state
-        if self.check_completed(d):
+        if self.check_completed(d_list):
             return
 
         # Divide up the nodes among the directions
