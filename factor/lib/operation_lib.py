@@ -76,7 +76,7 @@ def copy_column_freq(mslist, ms_from, inputcol, outputcol):
 
 
 def make_chunks(dataset, blockl, op_parset, prefix=None, direction=None,
-    columns=None, outdir=None, clobber=False):
+    outdir=None, clobber=False):
     """
     Split dataset into time chunks of length blockl time slots
 
@@ -92,8 +92,6 @@ def make_chunks(dataset, blockl, op_parset, prefix=None, direction=None,
         A prefix for the name
     direction : Direction object or str, optional
         A direction name
-    columns : str, optional
-        List of column names to chunk. If None, all columns are chunked.
     outdir : str, optional
         Absolute path to output directory. If None, the directory of the
         parent is used
@@ -135,12 +133,12 @@ def make_chunks(dataset, blockl, op_parset, prefix=None, direction=None,
         chunk_obj.start_delay = 0.0
         chunk_list.append(chunk_obj)
         split_ms(dataset, chunk_obj.file, chunk_obj.t0, chunk_obj.t1,
-            columns=columns, clobber=clobber)
+            clobber=clobber)
 
     return chunk_list
 
 
-def split_ms(msin, msout, start_out, end_out, columns=None, clobber=True):
+def split_ms(msin, msout, start_out, end_out, clobber=True):
     """
     Splits an MS between start and end times in hours relative to first time
 
@@ -154,8 +152,6 @@ def split_ms(msin, msout, start_out, end_out, columns=None, clobber=True):
         Start time in hours relative to first time
     end_out : float
         End time in hours relative to first time
-    columns : str, optional
-        List of column names to split. If None, all columns are split.
     clobber : bool, optional
         If True, existing files are overwritten
 
@@ -172,14 +168,8 @@ def split_ms(msin, msout, start_out, end_out, columns=None, clobber=True):
     t = pt.table(msin, ack=False)
     starttime = t[0]['TIME']
 
-    if columns is not None:
-        colnames = ', '.join(columns)
-    else:
-        colnames = ''
-
     t1 = t.query('TIME >= ' + str(starttime+start_out*3600) + ' && '
-      'TIME < ' + str(starttime+end_out*3600), sortlist='TIME,ANTENNA1,ANTENNA2',
-      columns=colnames)
+      'TIME < ' + str(starttime+end_out*3600), sortlist='TIME,ANTENNA1,ANTENNA2')
 
     t1.copy(msout, True)
     t1.close()
