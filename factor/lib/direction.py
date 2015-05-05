@@ -36,7 +36,7 @@ class Direction(object):
         field_imsize : int
             Size of facet image in 1.5 arcsec pixels
         dynamic_range : bool
-            LD or HD
+            LD (low dynamic range) or HD (high dynamic range)
         region_selfcal : str
             Region for clean mask for calibrator selfcal
         region_field : str
@@ -47,12 +47,12 @@ class Direction(object):
             If True, peel source without selfcal
         factor_working_dir : str
             Full path of working directory
-        make_final_image : bool
+        make_final_image : bool, optional
             Make final image of this direction, after all directions have been
             selfcaled?
-        cal_radius_deg : float
+        cal_radius_deg : float, optional
             Radius in degrees of calibrator source
-        cal_flux_jy : float
+        cal_flux_jy : float, optional
             Apparent flux in Jy of calibrator source
         """
         self.name = name
@@ -62,7 +62,7 @@ class Direction(object):
         self.mscale_field_do = mscale_field_do
         self.cal_imsize = cal_imsize
         if cal_radius_deg is None:
-            self.cal_radius_deg = cal_imsize * 1.5 / 3660.0
+            self.cal_radius_deg = cal_imsize * 1.5 / 3600.0
         else:
             self.cal_radius_deg = cal_radius_deg
         self.solint_p = solint_p
