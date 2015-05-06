@@ -258,11 +258,11 @@ facet_selfcal = {
 }
 
 facet_image= {
-'avg' : {'columnname': 'DATA', # outcol is DATA
-         'freqstep': 5,
-         'timestep': 3},
 'apply_dirdep' : {'incol': 'DATA',
                   'outcol': 'CORRECTED_DATA'},
+'avg' : {'columnname': 'CORRECTED_DATA', # outcol is DATA
+         'freqstep': 5,
+         'timestep': 3},
 'imager' : {'niter': 5000,
             'imsize': 1024,
             'mscale': True,
