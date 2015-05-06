@@ -80,19 +80,17 @@ def directions_read(directions_file, factor_working_dir):
             direction['solint_a'] = 60
         if direction['solint_p'] <= 0:
             direction['solint_p'] = 1
-        if 'cal_radius_deg' in direction:
+        if len(direction) > 15:
             if direction['cal_radius_deg'] <= 0.0 or np.isnan(direction['cal_radius_deg']):
                 cal_radius_deg = None
             else:
                 cal_radius_deg = direction['cal_radius_deg']
-        else:
-            cal_radius_deg = None
-        if 'cal_flux_jy' in direction:
             if np.isnan(direction['cal_flux_jy']):
                 cal_flux_jy = None
             else:
                 cal_flux_jy = direction['cal_flux_jy']
         else:
+            cal_radius_deg = None
             cal_flux_jy = None
 
         data.append( Direction(direction['name'], ra, dec,

@@ -264,8 +264,7 @@ def merge_chunk_parmdbs(inparmdbs, prefix='merged', clobber=True):
     return outparmdb
 
 
-def merge_parmdbs(parmdb_p, parmdb_a, parmdb_t, solint_p, solint_a, msfile,
-    prefix=None, clobber=True):
+def merge_parmdbs(parmdb_p, parmdb_a, prefix=None, clobber=True):
     """
     Merges facet selfcal parmdbs into a parmdb for a single band
 
@@ -276,14 +275,6 @@ def merge_parmdbs(parmdb_p, parmdb_a, parmdb_t, solint_p, solint_a, msfile,
     parmdb_a : str
         File name of Gain parmdb. The nearset match in frequency to that of the
         input band will be used
-    parmdb_t : str
-        File name of template parmdb
-    solint_p : int
-        Solution interval for parmdb_p
-    solint_a : int
-        Solution interval for parmdb_a
-    msfile : str
-        File name of band
     prefix : str, optional
         Prefix for name of output file
     clobber : bool, optional
@@ -291,121 +282,12 @@ def merge_parmdbs(parmdb_p, parmdb_a, parmdb_t, solint_p, solint_a, msfile,
 
     """
     import lofar.parmdb
-    import pyrap.tables as pt
-    import numpy as np
-
-    # Initialize output parmdb
-    if prefix is None:
-        prefix = msfile
-    parmdb_out = os.path.join(os.path.dirname(parmdb_p), '{0}_amp_phase_final_instrument'.format(prefix))
-    if os.path.exists(parmdb_out):
-        if clobber:
-            os.system('rm -rf {0}'.format(parmdb_out))
-        else:
-            return parmdb_out
-#     pdb_out = lofar.parmdb.parmdb(parmdb_out, create=True)
-    os.system('cp -r {0} {1}'.format(parmdb_t, parmdb_out))
-    pdb_out = lofar.parmdb.parmdb(parmdb_out)
-    for parmname in pdb_out.getNames():
-        pdb_out.deleteValues(parmname)
-
-    # Open input parmdbs
-    pdb_a = lofar.parmdb.parmdb(parmdb_a)
-    pdb_p = lofar.parmdb.parmdb(parmdb_p)
-    pdb_t = lofar.parmdb.parmdb(parmdb_t)
-
-    # Get solutions
-    parms_a = pdb_a.getValuesGrid("*")
-    parms_p = pdb_p.getValuesGrid("*")
-    parms_t = pdb_t.getValuesGrid("*")
-
-    # Get antenna names
-    pol_list = ['0:0', '1:1']
-    anttab = pt.table(msfile + '::ANTENNA', ack=False)
-    antenna_list = anttab.getcol('NAME')
-    anttab.close()
-
-    # Set time and frequency grid for output parmdb
-    # The time grid can be set to that of parmdb_p (fast phase grid)
-    # The freq grid must be set to that of parmdb_t (template grid)
-    parmname = 'TEC:' + antenna_list[0]
-    times = parms_p[parmname]['times'].copy()
-    timewidths = parms_p[parmname]['timewidths'].copy()
-    N_times_p, N_freqs_p = parms_p[parmname]['values'].shape
-
-    if 'Gain' in pdb_t.getNames()[0]:
-        parmname = 'Gain:0:0:Real:' + antenna_list[0]
-    elif 'Phase' in pdb_t.getNames()[0]:
-        parmname = 'Phase:0:0:' + antenna_list[0]
-    freqs = parms_t[parmname]['freqs'].copy()
-    freqwidths = parms_t[parmname]['freqwidths'].copy()
-    N_times_t, N_freqs_t = parms_t[parmname]['values'].shape
-
-    parmname = 'Gain:0:0:Real:' + antenna_list[0]
-    N_times_a, N_freqs_a = parms_a[parmname]['values'].shape
-    freqs_a = parms_a[parmname]['freqs'].copy()
-    freq_ind = np.searchsorted(freqs_a, freqs)
-
-    # Initialize parms and values dicts
-    outparms_p = {}
-    v_p = {}
-    v_p['times'] = times
-    v_p['timewidths'] = timewidths
-    v_p['freqs'] = freqs
-    v_p['freqwidths'] = freqwidths
-    outparms_g = {}
-    v_g = {}
-    v_g['times'] = times
-    v_g['timewidths'] = timewidths
-    v_g['freqs'] = freqs
-    v_g['freqwidths'] = freqwidths
-
-    # Copy values
-    for pol in pol_list:
-        for antenna in antenna_list:
-            # Copy gains
-            v_g['values'] = np.zeros((N_times_p, N_freqs_t), dtype=np.double)
-
-            parmname = 'Gain:' + pol + ':Imag:' + antenna
-            imag = np.copy(parms_a[parmname]['values'][:, freq_ind])
-            imag_repeat = np.repeat(imag, solint_a/solint_p, axis=0)
-            v_g['values'] = np.copy(imag_repeat[0:N_times_p])
-            outparms_g[parmname] = v_g.copy()
-
-            parmname = 'Gain:' + pol + ':Real:' + antenna
-            real = np.copy(parms_a[parmname]['values'][:, freq_ind])
-            real_repeat = np.repeat(real, solint_a/solint_p, axis=0)
-            v_g['values'] = np.copy(real_repeat[0:N_times_p])
-            outparms_g[parmname] = v_g.copy()
-
-            # Copy CommonScalar phases and TEC
-            v_p['values'] = np.zeros((N_times_p, N_freqs_t), dtype=np.double)
-
-            parmname = 'CommonScalarPhase:' + antenna
-            phase = np.copy(parms_p[parmname]['values'])
-            v_p['values'] = np.copy(phase)
-            outparms_p[parmname] = v_p.copy()
-
-            parmname = 'TEC:' + antenna
-            phase = np.copy(parms_p[parmname]['values'])
-            v_p['values'] = np.copy(phase)
-            outparms_p[parmname] = v_p.copy()
-
-    pdb_out.addValues(outparms_g)
-    pdb_out.addValues(outparms_p)
-    pdb_out.flush()
-
-    return parmdb_out
-
-
-def merge_parmdbs_notemplate(parmdb_p, parmdb_a, prefix=None, clobber=True):
-    """Merges amp+phase parmdbs"""
-    import lofar.parmdb
 
     # Initialize output parmdb
     if prefix is None:
         prefix = 'merged'
-    parmdb_out = os.path.join(os.path.dirname(parmdb_p), '{0}_amp_phase_final_instrument'.format(prefix))
+    parmdb_out = os.path.join(os.path.dirname(parmdb_p),
+        '{0}_amp_phase_final_instrument'.format(prefix))
     if os.path.exists(parmdb_out):
         if clobber:
             os.system('rm -rf {0}'.format(parmdb_out))
@@ -431,24 +313,31 @@ def merge_parmdbs_notemplate(parmdb_p, parmdb_a, prefix=None, clobber=True):
     return parmdb_out
 
 
-def verify_subtract(image_pre, image_post, res_val):
+def verify_subtract(image_pre, image_post, res_val, imager):
     """
     Check quantities in residual images
     """
     import numpy
-    import pyrap.images
+    import pyrap.images as pim
 
-    imgpre = pyrap.images.image(image_pre)
+    if imager.lower() == 'wsclean':
+        image_pre_file = image_pre + '-image.fits'
+    else:
+        # Not implemented yet
+        return True
+
+    imgpre = pim.image(image_pre)
     pixelspre = numpy.copy(imgpre.getdata())
     maxvalpre = numpy.copy(numpy.max(pixelspre))
 
-    img = pyrap.images.image(image_post)
+    img = pim.image(image_post)
     pixels = numpy.copy(img.getdata())
     maxval = numpy.copy(numpy.max(pixels))
 
     if (maxval > res_val) or ((maxval*0.95) > maxvalpre) :
-        print 'WARNING RESIDUAL TOO LARGE, STOPPING', maxval, res_val
-        print 'WARNING RESIDUAL TOO LARGE, STOPPING, previous max in image', maxvalpre
+        logging.info('WARNING RESIDUAL TOO LARGE')
+        logging.info('Max = {0}'.format(maxval))
+        logging.info('Previous max = {0}'.format(maxvalpre))
         return False
     else:
         return True

@@ -71,7 +71,8 @@ facet_add = {
          'outcol': 'FACET_DATA_ALL',
          'flags': '--replace-sourcedb'},
 'shift_cal' : {'columnname': 'FACET_DATA_CAL'}, # outcol is DATA
-'shift_all' : {'columnname': 'FACET_DATA_ALL'} # outcol is DATA
+'shift_all' : {'columnname': 'FACET_DATA_ALL'}, # outcol is DATA
+'shift_all' : {'columnname': 'SUBTRACTED_DATA_ALL'} # outcol is DATA
 }
 
 facet_setup = {
@@ -288,62 +289,38 @@ facet_image= {
 
 facet_sub = {
 'subtract' : {'incol': 'DATA',
-              'outcol': 'CORRECTED_SUBTRACTED_DATA',
-              'flags': '--replace-sourcedb'},
-'shift_pre' : {'columnname': 'CORRECTED_SUBTRACTED_DATA'}, # outcol is DATA
-'avg_pre' : {'columnname': 'DATA', # outcol is DATA
+              'outcol': 'SUBTRACTED_DATA'},
+'apply_pre' : {'incol': 'DATA',
+           'outcol': 'CORRECTED_SUBTRACTED_DATA'},
+'apply_post' : {'incol': 'SUBTRACTED_DATA',
+           'outcol': 'CORRECTED_SUBTRACTED_DATA'},
+'shift' : {'columnname': 'CORRECTED_SUBTRACTED_DATA'}, # outcol is DATA
+'avg' : {'columnname': 'DATA', # outcol is DATA
          'uvmmax': 2500.0,
          'freqstep': 20,
          'timestep': 6},
-'imager_pre' : {'niter' : 10,
-                'imsize': 2048,
-                'mscale': False,
-                'cell': '30arcsec',
-                'uvrange': "0.08~2.5klambda",
-                'minuv': '80',
-                'maxuv': '2500',
-                'wplanes': 700,
-                'gain': 0.1,
-                'mgain': 0.5,
-                'nterms': 1,
-                'ncycles': 1,
-                'threshold': '0mJy',
-                'threshisl': 5,
-                'threshpix': 5,
-                'atrous_do': False,
-                'rmsbox': '(60, 20)',
-                'adaptive_rmsbox': False,
-                'use_rms': False,
-                'image_final': False,
-                'iterate_threshold': False,
-                'n_per_node': 1},
-'shift_post' : {'columnname': 'CORRECTED_SUBTRACTED_DATA'}, # outcol is DATA
-'avg_post' : {'columnname': 'DATA', # outcol is DATA
-         'uvmmax': 2500.0,
-         'freqstep': 20,
-         'timestep': 6},
-'imager_post' : {'niter' : 10,
-                 'imsize': 2048,
-                 'mscale': False,
-                 'cell': '30arcsec',
-                 'uvrange': "0.08~2.5klambda",
-                 'minuv': '80',
-                 'maxuv': '2500',
-                 'wplanes': 700,
-                 'gain': 0.1,
-                 'mgain': 0.5,
-                 'nterms': 1,
-                 'ncycles': 1,
-                 'threshold': '0mJy',
-                 'threshisl': 5,
-                 'threshpix': 5,
-                 'atrous_do': False,
-                 'rmsbox': '(60, 20)',
-                 'adaptive_rmsbox': False,
-                 'use_rms': False,
-                 'image_final': False,
-                 'iterate_threshold': False,
-                 'n_per_node': 1}
+'imager' : {'niter' : 10,
+            'imsize': 2048,
+            'mscale': False,
+            'cell': '30arcsec',
+            'uvrange': "0.08~2.5klambda",
+            'minuv': '80',
+            'maxuv': '2500',
+            'wplanes': 700,
+            'gain': 0.1,
+            'mgain': 0.5,
+            'nterms': 1,
+            'ncycles': 1,
+            'threshold': '0mJy',
+            'threshisl': 5,
+            'threshpix': 5,
+            'atrous_do': False,
+            'rmsbox': '(60, 20)',
+            'adaptive_rmsbox': False,
+            'use_rms': False,
+            'image_final': False,
+            'iterate_threshold': False,
+            'n_per_node': 1}
 }
 
 field_sub = {

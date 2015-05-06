@@ -108,9 +108,14 @@ class FacetAdd(Operation):
             prefix='facet', direction=d, index=2)
         shifted_all_data_mapfile = self.s.run(action)
         shifted_all_data_files, _ = read_mapfile(shifted_all_data_mapfile)
+        action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift_sub'],
+            prefix='facet', direction=d, index=3)
+        shifted_sub_data_mapfile = self.s.run(action)
+        shifted_sub_data_files, _ = read_mapfile(shifted_sub_data_mapfile)
 
         d.shifted_cal_data_files = shifted_cal_data_files
         d.shifted_all_data_files = shifted_all_data_files
+        d.shifted_sub_data_files = shifted_sub_data_files
 
         # Save state
         self.set_completed(d)
@@ -234,7 +239,7 @@ class FacetSelfcal(Operation):
         from factor.actions.models import FFT
         from factor.actions.solutions import Smooth, ResetPhases
         from factor.lib.operation_lib import copy_column, make_chunks, \
-            merge_chunks, merge_parmdbs, merge_chunk_parmdbs, merge_parmdbs_notemplate
+            merge_chunks, merge_parmdbs, merge_chunk_parmdbs
         from factor.operations.hardcoded_param import facet_selfcal as p
         from factor.lib.datamap_lib import read_mapfile
 
@@ -247,9 +252,7 @@ class FacetSelfcal(Operation):
         if self.check_completed(d_list):
             return
 
-        # Set imager. For now, since WSClean does not yet support clean masks
-        # with multiscale clean, casapy can be used instead for this operation
-        # only
+        # Set imager
         self.parset['imager'] = self.parset['imager_selfcal']
 
         # Divide up the nodes among the directions
@@ -587,8 +590,7 @@ class FacetSelfcal(Operation):
         for i, d in enumerate(d_list):
             phases2_final, _ = read_mapfile(merged_parmdb_phaseamp_phase2_mapfiles[i])
             smoothed_amps2_final, _ = read_mapfile(merged_parmdb_phaseamp_amp2_mapfiles[i])
-            merged_file = merge_parmdbs_notemplate(phases2_final[0],
-                smoothed_amps2_final[0])
+            merged_file = merge_parmdbs(phases2_final[0], smoothed_amps2_final[0])
             merged_parmdb_final_mapfiles.append(self.write_mapfile([merged_file],
                 prefix='merged_amps_phases_final', direction=d, host_list=d_hosts[i]))
 
@@ -767,7 +769,9 @@ class FacetSub(Operation):
         dir_dep_parmdbs_mapfiles = []
         for d, h in zip(d_list, d_hosts):
             shifted_all_data_mapfiles.append(self.write_mapfile(d.shifted_all_data_files,
-            	prefix='shifted', direction=d, host_list=h))
+            	prefix='shifted_all', direction=d, host_list=h))
+            shifted_sub_data_mapfiles.append(self.write_mapfile(d.shifted_sub_data_files,
+            	prefix='shifted_sub', direction=d, host_list=h))
             dir_dep_parmdbs_mapfiles.append(self.write_mapfile([d.dirdepparmdb]*
                 len(bands), prefix='dir_dep_parmdbs', direction=d, host_list=h))
 
@@ -778,24 +782,35 @@ class FacetSub(Operation):
             zip(d_list, shifted_all_data_mapfiles, dir_dep_parmdbs_mapfiles)]
         self.s.run(actions)
 
+        # apply direction-independent calibration
+        self.log.info('Applying direction-independent calibration...')
+        actions = [Apply(self.parset, dm, p['apply_pre'],
+            pm, prefix='facet_dirindep', direction=d, index=1) for d, dm, pm in zip(d_list,
+            shifted_sub_data_mapfiles, dir_indep_parmdbs_mapfiles)]
+        self.s.run(actions)
+        actions = [Apply(self.parset, dm, p['apply_post'],
+            pm, prefix='facet_dirindep', direction=d, index=2) for d, dm, pm in zip(d_list,
+            shifted_all_data_mapfiles, dir_indep_parmdbs_mapfiles)]
+        self.s.run(actions)
+
         self.log.info('Phase shifting back to field center...')
         ra = bands[0].ra
         dec = bands[0].dec
-        actions = [PhaseShift(self.parset, m, p['shift_pre'], prefix='facet',
-            direction=d, ra=ra, dec=dec, index=1) for d, m in zip(d_list,
-            shifted_all_data_mapfiles)]
+        actions = [PhaseShift(self.parset, dm, p['shift'], prefix='facet',
+            direction=d, ra=ra, dec=dec, index=1) for d, dm in zip(d_list,
+            shifted_sub_data_mapfiles)]
         unshifted_pre_data_mapfiles = self.s.run(actions)
-        actions = [PhaseShift(self.parset, m, p['shift_post'], prefix='facet',
-            direction=d, ra=ra, dec=dec, index=2) for d, m in zip(d_list,
+        actions = [PhaseShift(self.parset, dm, p['shift'], prefix='facet',
+            direction=d, ra=ra, dec=dec, index=2) for d, dm in zip(d_list,
             shifted_all_data_mapfiles)]
         unshifted_post_data_mapfiles = self.s.run(actions)
 
         self.log.info('Averaging...')
-        actions = [Average(self.parset, dm, p['avg_pre'], prefix='facet', index=1)
-            for d, m in zip(d_list, unshifted_pre_data_mapfiles)]
+        actions = [Average(self.parset, dm, p['avg'], prefix='facet', index=1)
+            for d, dm in zip(d_list, unshifted_pre_data_mapfiles)]
         avg_pre_data_mapfiles = self.s.run(actions)
-        actions = [Average(self.parset, dm, p['avg_post'], prefix='facet', index=2)
-            for d, m in zip(d_list, unshifted_post_data_mapfiles)]
+        actions = [Average(self.parset, dm, p['avg'], prefix='facet', index=2)
+            for d, dm in zip(d_list, unshifted_post_data_mapfiles)]
         avg_post_data_mapfiles = self.s.run(actions)
 
         self.log.info('Imaging...')
@@ -814,11 +829,11 @@ class FacetSub(Operation):
         else:
             input_to_imager_pre_mapfiles = avg_pre_data_mapfiles
             input_to_imager_post_mapfiles = avg_post_data_mapfiles
-        actions = [MakeImage(self.parset, m, p['imager_pre'], prefix='field_image',
-            direction=d, index=1) for d, m in zip(d_list, input_to_imager_pre_mapfiles)]
+        actions = [MakeImage(self.parset, dm, p['imager'], prefix='field_image',
+            direction=d, index=1) for d, dm in zip(d_list, input_to_imager_pre_mapfiles)]
         image_pre_basenames_mapfiles = self.s.run(actions)
-        actions = [MakeImage(self.parset, m, p['imager_post'], prefix='field_image',
-            direction=d, index=2) for d, m in zip(d_list, input_to_imager_post_mapfiles)]
+        actions = [MakeImage(self.parset, dm, p['imager'], prefix='field_image',
+            direction=d, index=2) for d, dm in zip(d_list, input_to_imager_post_mapfiles)]
         image_post_basenames_mapfiles = self.s.run(actions)
 
         self.log.info('Checking residual images...')
@@ -827,7 +842,9 @@ class FacetSub(Operation):
             image_pre_files, _ = read_mapfile(impre_mapfile)
             image_post_files, _ = read_mapfile(impost_mapfile)
             res_val = 0.5
-            d.selfcal_ok = verify_subtract(image_pre_files[0], image_post_files[0], res_val)
+            # Check only lowest-frequency images for now
+            d.selfcal_ok = verify_subtract(image_pre_files[0], image_post_files[0],
+                res_val, self.parset['imager'])
 
         # Save state
         self.set_completed(d_list)
