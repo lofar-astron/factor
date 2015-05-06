@@ -40,6 +40,8 @@ def write_mapfile(data_list, op_name, action_name=None, prefix=None,
     """
     if use_abs_path:
         data_list = [os.path.abspath(f) for f in data_list]
+    if prefix is None:
+        prefix = 'operation'
     basename = make_basename(prefix=prefix, direction=direction, band=band,
         index=index)
     mapfile_dir = os.path.join(working_dir, 'datamaps', op_name)
