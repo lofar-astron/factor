@@ -116,7 +116,7 @@ def make_chunks(dataset, blockl, op_parset, prefix=None, direction=None,
     t.close()
 
     nchunks = int(np.ceil((np.float(nsamples) / np.float(blockl))))
-    tlen = timepersample * np.float(blockl) / 3600. # length of block in hours
+    tlen = timepersample * np.float(blockl) / 3600.0 # length of block in hours
     tobs = timepersample * nsamples / 3600.0 # length of obs in hours
 
     # Set up the chunks
@@ -124,10 +124,10 @@ def make_chunks(dataset, blockl, op_parset, prefix=None, direction=None,
     for c in range(nchunks):
         chunk_obj = Chunk(op_parset, dataset, c, prefix=prefix,
             direction=direction, outdir=outdir)
-        chunk_obj.t0 = tlen * float(chunk_obj.index) # hours
+        chunk_obj.t0 = tlen * np.float(chunk_obj.index) # hours
+        chunk_obj.t1 = chunk_obj.t0 + tlen # hours
         if c == 0:
-            chunk_obj.t0 -= 0.1 # make sure first chunk gets first slot
-        chunk_obj.t1 = np.float(chunk_obj.t0) + tlen # hours
+            chunk_obj.t0 = -0.1 # make sure first chunk gets first slot
         if c == nchunks-1 and chunk_obj.t1 < tobs:
             chunk_obj.t1 = tobs + 0.1 # make sure last chunk gets all that remains
         chunk_obj.start_delay = 0.0
@@ -168,8 +168,8 @@ def split_ms(msin, msout, start_out, end_out, clobber=True):
     t = pt.table(msin, ack=False)
     starttime = t[0]['TIME']
 
-    t1 = t.query('TIME >= ' + str(starttime+start_out*3600) + ' && '
-      'TIME < ' + str(starttime+end_out*3600), sortlist='TIME,ANTENNA1,ANTENNA2')
+    t1 = t.query('TIME >= ' + str(starttime+start_out*3600.0) + ' && '
+      'TIME < ' + str(starttime+end_out*3600.0), sortlist='TIME,ANTENNA1,ANTENNA2')
 
     t1.copy(msout, True)
     t1.close()
@@ -183,7 +183,7 @@ def merge_chunks(chunk_files, prefix=None, virtual=True, clobber=False):
     Parameters
     ----------
     chunk_files : list
-        List of Chunk objects to merge
+        List of files to merge
     prefix : str, optional
         String to prepend to output file
     virtual : bool. optional
@@ -207,7 +207,7 @@ def merge_chunks(chunk_files, prefix=None, virtual=True, clobber=False):
             msout = rstr.join(m.split('chunk_0'))
             break
     if msout is None:
-        msout = chunk_files[0] + '_merged'
+        msout = pstr + chunk_files[0] + '_merged'
 
     if os.path.exists(msout):
         if clobber:
@@ -216,7 +216,7 @@ def merge_chunks(chunk_files, prefix=None, virtual=True, clobber=False):
             return msout
 
     if virtual:
-        # put in order by time
+        # TODO: put in order by time?
         pt.msutil.msconcat(chunk_files, msout)
     else:
         t = pt.table(chunk_files, ack=False)
