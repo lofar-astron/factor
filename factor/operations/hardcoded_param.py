@@ -72,7 +72,7 @@ facet_add = {
          'flags': '--replace-sourcedb'},
 'shift_cal' : {'columnname': 'FACET_DATA_CAL'}, # outcol is DATA
 'shift_all' : {'columnname': 'FACET_DATA_ALL'}, # outcol is DATA
-'shift_all' : {'columnname': 'SUBTRACTED_DATA_ALL'} # outcol is DATA
+'shift_sub' : {'columnname': 'SUBTRACTED_DATA_ALL'} # outcol is DATA
 }
 
 facet_setup = {
