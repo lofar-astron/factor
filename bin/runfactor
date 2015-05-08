@@ -135,6 +135,7 @@ if __name__=='__main__':
         directions = factor.directions.directions_read(parset['directions_file'],
             parset['dir_working'])
 
+    # Load polygons from previous run if possible
     polys_file = os.path.join(parset['dir_working'], 'regions', 'factor_facets.pkl')
     if os.path.exists(polys_file):
         with open(polys_file, 'r') as f:
@@ -144,17 +145,35 @@ if __name__=='__main__':
             check_edges=parset['direction_specific']['check_edges'])
         with open(polys_file, 'wb') as f:
             pickle.dump([polys, widths], f)
+
+    # Store polygons and make CASA regions
     for i, direction in enumerate(directions):
         direction.vertices = polys[i]
         direction.width = widths[i]
         reg_file = os.path.join(parset['dir_working'], 'regions', direction.name+'.reg')
         factor.directions.make_region_file(direction.vertices, reg_file)
         direction.reg = reg_file
-    ds9_reg_file = os.path.join(parset['dir_working'], 'regions', 'factor_directions_ds9.reg')
-    factor.directions.make_ds9_region_file(directions, ds9_reg_file)
+
+    # For WSClean, set number of channels to number of bands
     for direction in directions:
-        # For WSClean, set number of channels to number of bands
         direction.nchannels = len(bands)
+
+    # Make DS9 region files
+    ds9_facet_reg_file = os.path.join(parset['dir_working'], 'regions', 'facets_ds9.reg')
+    factor.directions.make_ds9_region_file(directions, ds9_facet_reg_file)
+    ds9_calimage_reg_file = os.path.join(parset['dir_working'], 'regions', 'calimages_ds9.reg')
+    factor.directions.make_ds9_calimage_file(directions, ds9_calimage_reg_file)
+
+    # Check with user
+    if parset['interactive']:
+        print("Facet and DDE calibrator regions saved. Please check that they are OK.")
+        prompt = "Continue processing (y/n)? "
+        answ = raw_input(prompt)
+        while answ.lower() not in  ['y', 'n', 'yes', 'no']:
+            answ = raw_input(prompt)
+        if answ.lower() in ['n', 'no']:
+            self.log.info('Exiting...')
+            sys.exit()
 
     # Select subset of directions to process
     if 'ndir' in parset['direction_specific']:
@@ -195,7 +214,7 @@ if __name__=='__main__':
 
         # Subtract final model(s) from empty field datasets. These operations
         # must be done in series
-        ops = [FieldSub(parset, bands, d) for d in direction_group if d.good]
+        ops = [FieldSub(parset, bands, d) for d in direction_group if d.selfcal_ok]
         for op in ops:
             op.run()
 
@@ -204,7 +223,8 @@ if __name__=='__main__':
             all_good = True
             if not d.selfcal_ok:
                 logging.error('Selfcal failed for direction {0}. Please check '
-                    'this direction.'.format(d.name))
+                    'the settings for this direction.'.format(d.name))
+                d.reset_state()
                 all_good = False
         if not all_good:
             sys.exit(1)
