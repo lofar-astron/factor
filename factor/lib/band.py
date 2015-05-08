@@ -68,7 +68,7 @@ class Band(object):
 
     def save_state(self):
         """
-        Saves the direction state to a file
+        Saves the state to a file
         """
         import pickle
 
@@ -78,9 +78,18 @@ class Band(object):
 
     def load_state(self):
         """
-        Loads the direction state from a file
+        Loads the state from a file
+
+        Returns
+        -------
+        success : bool
+            True if state was successfully loaded, False if not
         """
         import pickle
 
-        with open(self.save_file, 'r') as f:
-            self.__dict__ = pickle.load(f)
+        try:
+            with open(self.save_file, 'r') as f:
+                self.__dict__ = pickle.load(f)
+            return True
+        except:
+            return False

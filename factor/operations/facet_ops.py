@@ -108,6 +108,8 @@ class FacetAdd(Operation):
             prefix='facet', direction=d, index=2)
         shifted_all_data_mapfile = self.s.run(action)
         shifted_all_data_files, _ = read_mapfile(shifted_all_data_mapfile)
+        if bands[0].has_sub_data_new:
+            p['shift_sub']['columnname'] += '_NEW'
         action = PhaseShift(self.parset, subtracted_all_mapfile, p['shift_sub'],
             prefix='facet', direction=d, index=3)
         shifted_sub_data_mapfile = self.s.run(action)
@@ -268,7 +270,6 @@ class FacetSelfcal(Operation):
 
         # Make initial data maps for the averaged, phase-shifted datasets
         facet_data_mapfiles = []
-        facet_unavg_data_mapfiles = []
         for d, h in zip(d_list, d_hosts):
             facet_data_mapfiles.append(self.write_mapfile([d.cal_concat_file],
                 prefix='shifted_vis', direction=d, host_list=h))
