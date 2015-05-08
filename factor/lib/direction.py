@@ -55,39 +55,51 @@ class Direction(object):
         cal_flux_jy : float, optional
             Apparent flux in Jy of calibrator source
         """
+        from factor.operations.hardcoded_param import facet_selfcal as p
+
         self.name = name
         self.ra = ra
         self.dec = dec
         self.atrous_do = atrous_do
         self.mscale_field_do = mscale_field_do
+
         self.cal_imsize = cal_imsize
         if cal_radius_deg is None:
-            self.cal_radius_deg = cal_imsize * 1.5 / 3600.0
+            cell = float(p['imager0']['cell'].split('arcsec')[0]) # arcsec per pixel
+            self.cal_radius_deg = cal_imsize * cell / 3600.0 / 1.5
         else:
             self.cal_radius_deg = cal_radius_deg
+
         self.solint_p = solint_p
         self.solint_a = solint_a
         self.field_imsize = field_imsize
+        self.dynamic_range = dynamic_range
+
         self.region_selfcal = region_selfcal
         if self.region_selfcal.lower() == 'empty':
             self.region_selfcal = None
+
         self.region_field = region_field
         if self.region_field.lower() == 'empty':
             self.region_field = None
+
         self.peel_skymodel = peel_skymodel
         if self.peel_skymodel.lower() == 'empty':
             self.peel_skymodel = None
+
+        self.outlier_do = outlier_do
         self.make_final_image = make_final_image
-        self.dynamic_range = dynamic_range
         if cal_flux_jy is not None:
             self.apparent_flux_mjy = cal_flux_jy * 1000.0
         else:
             self.apparent_flux_mjy = None
         self.nchannels = 1
 
+        self.working_dir = factor_working_dir
         self.completed_operations = []
-        self.save_file = os.path.join(factor_working_dir, 'state',
+        self.save_file = os.path.join(self.working_dir, 'state',
             self.name+'_save.pkl')
+        self.pipeline_dir = os.path.join(self.working_dir, 'pipeline')
 
 
     def save_state(self):
@@ -117,3 +129,25 @@ class Direction(object):
             return True
         except:
             return False
+
+
+    def reset_state(self):
+        """
+        Resets the direction state to initial state to allow reprocessing
+        """
+        import glob
+
+        operations = ['FacetSelfcal', 'FacetImage', 'FacetSub']
+        for op in operations:
+            # Remove entry in completed_operations
+            self.completed_operations.remove(op)
+
+            # Delete pipeline state
+            action_dirs = glob.glob(os.path.join(self.pipeline_dir, op, '*')
+            for action_dir in action_dirs:
+                facet_dir = os.path.join(action_dir, self.name)
+                if os.path.exists(facet_dir):
+                    os.system('rm -rf {0}'.format(facet_dir))
+
+        self.save_state()
+
