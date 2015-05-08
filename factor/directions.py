@@ -533,7 +533,7 @@ def make_ds9_calimage_file(directions, outputfile):
 
     cell = float(p['imager0']['cell'].split('arcsec')[0]) # arcsec per pixel
     for direction in directions:
-        imsize = d.cal_radius_deg * 1.5 * 3600.0 / cell # pixels
+        imsize = direction.cal_radius_deg * 1.5 * 3600.0 / cell # pixels
         if imsize < 512:
             imsize = 512
         imsize_unmasked = 0.8 * imsize
