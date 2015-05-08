@@ -542,7 +542,7 @@ def make_ds9_calimage_file(directions, outputfile):
         lines.append('box({0}, {1}, {2}", {2}") # text={{{3}}}\n'.
             format(direction.ra, direction.dec, imsize, direction.name))
         lines.append('box({0}, {1}, {2}", {2}") # text={{{3}}}\n'.
-            format(direction.ra, direction.dec, imsize2, direction.name))
+            format(direction.ra, direction.dec, imsize_unmasked, direction.name))
 
     with open(outputfile, 'wb') as f:
         f.writelines(lines)
