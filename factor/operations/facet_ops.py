@@ -777,7 +777,7 @@ class FacetSub(Operation):
             dir_dep_parmdbs_mapfiles.append(self.write_mapfile([d.dirdepparmdb]*
                 len(bands), prefix='dir_dep_parmdbs', direction=d, host_list=h))
             dir_indep_parmdbs_mapfiles.append(self.write_mapfile([band.dirindparmdb
-                for band in bands], prefix='dir_indep_parmdbs', direction=d, host_list=h)
+                for band in bands], prefix='dir_indep_parmdbs', direction=d, host_list=h))
 
         self.log.info('Subtracting sources...')
         actions = [Subtract(self.parset, dm, p['subtract'],
