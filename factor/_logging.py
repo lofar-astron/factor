@@ -40,7 +40,7 @@ def set_level(level):
 def set_log_file(log_file):
     # logging to file (B/W)
     fh = logging.FileHandler(log_file)
-    fh.setLevel(logging.DEBUG) # file always log everything
+    fh.setLevel(logging.DEBUG) # file always logs everything
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     fh.setFormatter(formatter)
     logging.root.addHandler(fh)
