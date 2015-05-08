@@ -767,7 +767,7 @@ class FacetSub(Operation):
         # instrument parmdbs, and their dir-dep sky models
         shifted_all_data_mapfiles = []
         shifted_sub_data_mapfiles = []
-        dir_indep_parmdbs_mapfile = []
+        dir_indep_parmdbs_mapfiles = []
         dir_dep_parmdbs_mapfiles = []
         for d, h in zip(d_list, d_hosts):
             shifted_all_data_mapfiles.append(self.write_mapfile(d.shifted_all_data_files,
