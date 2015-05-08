@@ -736,7 +736,7 @@ class FacetSub(Operation):
         """
         Run the steps for this operation
         """
-        from factor.actions.calibrations import Subtract
+        from factor.actions.calibrations import Subtract, Apply
         from factor.actions.visibilities import PhaseShift, Average, ChgCentre
         from factor.actions.images import MakeImage
         from factor.operations.hardcoded_param import facet_sub as p
