@@ -80,7 +80,7 @@ def directions_read(directions_file, factor_working_dir):
             direction['solint_a'] = 60
         if direction['solint_p'] <= 0:
             direction['solint_p'] = 1
-        if len(direction) > 15:
+        if len(direction) > 13:
             if direction['cal_radius_deg'] <= 0.0 or np.isnan(direction['cal_radius_deg']):
                 cal_radius_deg = None
             else:
@@ -208,16 +208,6 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     # Write the file
     log.info("Writing directions file: %s" % (directions_file))
     s.write(fileName=directions_file, format='factor', sortBy='I', clobber=True)
-    if interactive:
-        print("Plotting directions...")
-        s.plot(labelBy='patch')
-        prompt = "Continue processing (y/n)? "
-        answ = raw_input(prompt)
-        while answ.lower() not in  ['y', 'n', 'yes', 'no']:
-            answ = raw_input(prompt)
-        if answ.lower() in ['n', 'no']:
-            log.info('Exiting...')
-            sys.exit(0)
 
     return directions_file
 
@@ -497,20 +487,16 @@ def make_ds9_region_file(directions, outputfile):
 
     Parameters
     ----------
-    vertices : list
-        List of direction RA and Dec vertices in degrees
+    directions : list
+        List of Direction objects
     outputfile : str
         Name of output region file
 
-    Returns
-    -------
-    region_filename : str
-        Name of region file
     """
     lines = []
     lines.append('# Region file format: DS9 version 4.0\nglobal color=green '
                  'font="helvetica 10 normal" select=1 highlite=1 edit=1 '
-                 'move=1 delete=1 include=1 fixed=0 source\nfk5\n')
+                 'move=1 delete=1 include=1 fixed=0 source=1\nfk5\n')
 
     for direction in directions:
         xylist = []
@@ -521,6 +507,42 @@ def make_ds9_region_file(directions, outputfile):
         lines.append('polygon({0})\n'.format(', '.join(xylist)))
         lines.append('point({0}, {1}) # point=cross width=2 text={{{2}}}\n'.
             format(direction.ra, direction.dec, direction.name))
+
+    with open(outputfile, 'wb') as f:
+        f.writelines(lines)
+
+
+def make_ds9_calimage_file(directions, outputfile):
+    """
+    Make a ds9 image region file for given calibrator size
+
+    Parameters
+    ----------
+    directions : list
+        List of Direction objects
+    outputfile : str
+        Name of output region file
+
+    """
+    from factor.operations.hardcoded_param import facet_selfcal as p
+
+    lines = []
+    lines.append('# Region file format: DS9 version 4.0\nglobal color=yellow '
+                 'font="helvetica 10 normal" select=1 highlite=1 edit=1 '
+                 'move=1 delete=1 include=1 fixed=0 source=1\nfk5\n')
+
+    cell = float(p['imager0']['cell'].split('arcsec')[0]) # arcsec per pixel
+    for direction in directions:
+        imsize = d.cal_radius_deg * 1.5 * 3600.0 / cell # pixels
+        if imsize < 512:
+            imsize = 512
+        imsize_unmasked = 0.8 * imsize
+        RAs = direction.vertices[0]
+        Decs = direction.vertices[1]
+        lines.append('box({0}, {1}, {2}", {2}") # text={{{3}}}\n'.
+            format(direction.ra, direction.dec, imsize, direction.name))
+        lines.append('box({0}, {1}, {2}", {2}") # text={{{3}}}\n'.
+            format(direction.ra, direction.dec, imsize2, direction.name))
 
     with open(outputfile, 'wb') as f:
         f.writelines(lines)
