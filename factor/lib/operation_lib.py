@@ -321,7 +321,8 @@ def verify_subtract(image_pre, image_post, res_val, imager):
     import pyrap.images as pim
 
     if imager.lower() == 'wsclean':
-        image_pre_file = image_pre + '-image.fits'
+        image_pre = image_pre + '-image.fits'
+        image_post = image_post + '-image.fits'
     else:
         # Not implemented yet
         return True
