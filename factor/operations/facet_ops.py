@@ -241,7 +241,7 @@ class FacetSelfcal(Operation):
         from factor.actions.models import FFT
         from factor.actions.solutions import Smooth, ResetPhases
         from factor.lib.operation_lib import copy_column, make_chunks, \
-            merge_chunks, merge_parmdbs, merge_chunk_parmdbs
+            merge_chunks, merge_parmdbs, merge_chunk_parmdbs, check_selfcal
         from factor.operations.hardcoded_param import facet_selfcal as p
         from factor.lib.datamap_lib import read_mapfile
 
@@ -581,7 +581,6 @@ class FacetSelfcal(Operation):
                     d.improving = check_selfcal(image_final_basenames_mapfiles_prev,
                         image_final_basenames_mapfiles, self.p['check_selfcal']['max_rms'],
                         self.p['check_selfcal']['max_ratio'])
-#                 d.improving = False
 
         self.log.info('Merging final instrument parmdbs...')
         merged_parmdb_final_mapfiles = []

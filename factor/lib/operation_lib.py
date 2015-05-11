@@ -264,6 +264,13 @@ def merge_chunk_parmdbs(inparmdbs, prefix='merged', clobber=True):
     return outparmdb
 
 
+def check_selfcal(image prev, image_final, max_rms, max_ratio):
+    """
+    Checks that selfcal is improving
+    """
+    return False
+
+
 def merge_parmdbs(parmdb_p, parmdb_a, prefix=None, clobber=True):
     """
     Merges facet selfcal parmdbs into a parmdb for a single band
