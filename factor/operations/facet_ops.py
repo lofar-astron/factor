@@ -476,8 +476,6 @@ class FacetSelfcal(Operation):
         image_final_basenames_mapfiles = self.s.run(actions)
 
         # Loop over final calibration as long as there is improvement
-        for d in d_list:
-            d.improving = True
         index = 3
         while np.any([d.improving for d in d_list]):
             self.log.info('FFTing model image (facet model #3)...')
@@ -573,14 +571,17 @@ class FacetSelfcal(Operation):
                 direction=d) for d, m in zip(d_list, merged_data_mapfiles) if d.improving]
             image_final_basenames_mapfiles = self.s.run(actions)
 
-            # Check if image rms / ratio of max/min is still improving. If so,
+            # Check if image rms / ratio of max to min are still improving. If so,
             # continue last selfcal step. If not, stop sefcal
             for d, pm, fm in (d_list, image_final_basenames_mapfiles_prev,
                 image_final_basenames_mapfiles):
                 if d.improving:
-                    d.improving = check_selfcal(image_final_basenames_mapfiles_prev,
-                        image_final_basenames_mapfiles, self.p['check_selfcal']['max_rms'],
-                        self.p['check_selfcal']['max_ratio'])
+                    if d.loop_amp_selfcal:
+                        d.improving = check_selfcal(image_final_basenames_mapfiles_prev,
+                            image_final_basenames_mapfiles, self.p['check_selfcal']['rms_threshold'],
+                            self.p['check_selfcal']['ratio_threshold'])
+                    else:
+                        d.improving = False
 
         self.log.info('Merging final instrument parmdbs...')
         merged_parmdb_final_mapfiles = []
@@ -842,10 +843,9 @@ class FacetSub(Operation):
             image_post_basenames_mapfiles):
             image_pre_files, _ = read_mapfile(impre_mapfile)
             image_post_files, _ = read_mapfile(impost_mapfile)
-            res_val = 0.5
             # Check only lowest-frequency images for now
             d.selfcal_ok = verify_subtract(image_pre_files[0], image_post_files[0],
-                res_val, self.parset['imager'])
+                d.max_residual_val, self.parset['imager'])
 
         # Save state
         self.set_completed(d_list)
