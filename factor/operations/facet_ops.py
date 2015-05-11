@@ -476,13 +476,15 @@ class FacetSelfcal(Operation):
         image_final_basenames_mapfiles = self.s.run(actions)
 
         # Loop over final calibration as long as there is improvement
-        improving = True
+        for d in d_list:
+            d.improving = True
         index = 3
-        while improving:
+        while np.any([d.improving for d in d_list]):
             self.log.info('FFTing model image (facet model #3)...')
             actions = [FFT(self.parset, dm, mm, p['imager3'], prefix='fft3',
                 direction=d, index=index) for d, dm, mm in zip(d_list,
-                merged_unavg_data_mapfiles, image_final_basenames_mapfiles)]
+                merged_unavg_data_mapfiles, image_final_basenames_mapfiles)
+                if d.improving]
             self.s.run(actions)
 
             self.log.info('Solving for amplitude solutions (#2)...')
@@ -506,7 +508,7 @@ class FacetSelfcal(Operation):
             actions = [Solve(self.parset, dm, pd, model_datamap=None,
                 parmdb_datamap=pm, prefix='facet_phaseonly', direction=d, index=index)
                 for d, dm, pd, pm in zip(d_list, chunk_data_mapfiles, p_list,
-                chunk_parmdb_phaseamp_phase2_mapfiles)]
+                chunk_parmdb_phaseamp_phase2_mapfiles) if d.improving]
             self.s.run(actions)
             p_list = []
             for d in d_list:
@@ -517,7 +519,7 @@ class FacetSelfcal(Operation):
             actions = [Solve(self.parset, dm, pd, model_datamap=None,
                 parmdb_datamap=pm, prefix='facet_amponly', direction=d, index=index)
                 for d, dm, pd, pm in zip(d_list, chunk_data_mapfiles, p_list,
-                chunk_parmdb_phaseamp_amp2_mapfiles)]
+                chunk_parmdb_phaseamp_amp2_mapfiles) if d.improving]
             self.s.run(actions)
 
             self.log.debug('Merging chunk instrument parmdbs...')
@@ -537,7 +539,7 @@ class FacetSelfcal(Operation):
             actions = [Smooth(self.parset, dm, p['smooth_amp2'], pm,
                 prefix='facet_amp', direction=d, index=index)
                 for d, dm, pm in zip(d_list, facet_data_mapfiles,
-                merged_parmdb_phaseamp_amp2_mapfiles)]
+                merged_parmdb_phaseamp_amp2_mapfiles) if d.improving]
             self.s.run(actions)
 
             index += 1
@@ -546,13 +548,14 @@ class FacetSelfcal(Operation):
             actions = [Apply(self.parset, dm, p['apply_amp3'],
                 pm, prefix='facet_amp', direction=d, index=index) for d, dm, pm in
                 zip(d_list, chunk_data_mapfiles,
-                merged_parmdb_phaseamp_amp2_mapfiles)]
+                merged_parmdb_phaseamp_amp2_mapfiles) if d.improving]
             self.s.run(actions)
 
             self.log.info('Imaging (facet image #4)...')
             self.log.debug('Averaging in preparation for imaging...')
             actions = [Average(self.parset, m, p['avg4'], prefix='facet',
-                direction=d, index=index) for d, m in zip(d_list, chunk_data_mapfiles)]
+                direction=d, index=index) for d, m in zip(d_list, chunk_data_mapfiles)
+                if d.improving]
             avg_data_mapfiles = self.s.run(actions)
 
             self.log.debug('Merging chunks...')
@@ -567,14 +570,18 @@ class FacetSelfcal(Operation):
             image_final_basenames_mapfiles_prev = image_final_basenames_mapfiles
             actions = [MakeImageIterate(self.parset, m, p['imager4'],
                 prefix='facet_selfcal{0}'.format(index),
-                direction=d) for d, m in zip(d_list, merged_data_mapfiles)]
+                direction=d) for d, m in zip(d_list, merged_data_mapfiles) if d.improving]
             image_final_basenames_mapfiles = self.s.run(actions)
 
             # Check if image rms / ratio of max/min is still improving. If so,
             # continue last selfcal step. If not, stop sefcal
-#             improving = check_selfcal(image_final_basenames_mapfiles_prev,
-#                 image_final_basenames_mapfiles, self.p['check_selfcal'])
-            improving = False
+            for d, pm, fm in (d_list, image_final_basenames_mapfiles_prev,
+                image_final_basenames_mapfiles):
+                if d.improving:
+                    d.improving = check_selfcal(image_final_basenames_mapfiles_prev,
+                        image_final_basenames_mapfiles, self.p['check_selfcal']['max_rms'],
+                        self.p['check_selfcal']['max_ratio'])
+#                 d.improving = False
 
         self.log.info('Merging final instrument parmdbs...')
         merged_parmdb_final_mapfiles = []
