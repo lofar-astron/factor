@@ -244,6 +244,7 @@ class FacetSelfcal(Operation):
             merge_chunks, merge_parmdbs, merge_chunk_parmdbs, check_selfcal
         from factor.operations.hardcoded_param import facet_selfcal as p
         from factor.lib.datamap_lib import read_mapfile
+        import numpy as np
 
         bands = self.bands
         d_list = self.direction
