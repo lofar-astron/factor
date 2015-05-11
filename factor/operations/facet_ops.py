@@ -473,118 +473,108 @@ class FacetSelfcal(Operation):
         self.log.debug('Imaging...')
         actions = [MakeImageIterate(self.parset, m, p['imager3'], prefix='facet_selfcal3',
             direction=d) for d, m in zip(d_list, merged_data_mapfiles)]
-        image3_basenames_mapfiles = self.s.run(actions)
+        image_final_basenames_mapfiles = self.s.run(actions)
 
-        self.log.info('FFTing model image (facet model #3)...')
-        actions = [FFT(self.parset, dm, mm, p['imager3'], prefix='fft3',
-            direction=d, index=3) for d, dm, mm in zip(d_list,
-            merged_unavg_data_mapfiles, image3_basenames_mapfiles)]
-        self.s.run(actions)
+        # Loop over final calibration as long as there is improvement
+        improving = True
+        index = 3
+        while improving:
+            self.log.info('FFTing model image (facet model #3)...')
+            actions = [FFT(self.parset, dm, mm, p['imager3'], prefix='fft3',
+                direction=d, index=index) for d, dm, mm in zip(d_list,
+                merged_unavg_data_mapfiles, image_final_basenames_mapfiles)]
+            self.s.run(actions)
 
-        self.log.info('Solving for amplitude solutions (#2)...')
-        chunk_parmdb_phaseamp_phase2_mapfiles = []
-        chunk_parmdb_phaseamp_amp2_mapfiles = []
-        for i, chunks in enumerate(chunks_list):
-            chunk_parmdb_phaseamp_phase2_mapfiles.append(self.write_mapfile(
-                [chunk.parmdb_phaseamp_phase2 for chunk in chunks],
-                prefix='chunk_parmdb_phase2', direction=d_list[i],
-                host_list=d_hosts[i]))
-            chunk_parmdb_phaseamp_amp2_mapfiles.append(self.write_mapfile(
-                [chunk.parmdb_phaseamp_amp2 for chunk in chunks],
-                prefix='chunk_parmdb_amp2', direction=d_list[i],
-                host_list=d_hosts[i]))
+            self.log.info('Solving for amplitude solutions (#2)...')
+            chunk_parmdb_phaseamp_phase2_mapfiles = []
+            chunk_parmdb_phaseamp_amp2_mapfiles = []
+            for i, chunks in enumerate(chunks_list):
+                chunk_parmdb_phaseamp_phase2_mapfiles.append(self.write_mapfile(
+                    [chunk.parmdb_phaseamp_phase2 for chunk in chunks],
+                    prefix='chunk_parmdb_phase2', direction=d_list[i],
+                    host_list=d_hosts[i]))
+                chunk_parmdb_phaseamp_amp2_mapfiles.append(self.write_mapfile(
+                    [chunk.parmdb_phaseamp_amp2 for chunk in chunks],
+                    prefix='chunk_parmdb_amp2', direction=d_list[i],
+                    host_list=d_hosts[i]))
 
-        p_list = []
-        for d in d_list:
-            p_d = p['solve_phaseamp2_phaseonly'].copy()
-            p_d['timestep'] = d.solint_p
-            p_list.append(p_d)
-        actions = [Solve(self.parset, dm, pd, model_datamap=None,
-            parmdb_datamap=pm, prefix='facet_phaseonly', direction=d, index=3)
-            for d, dm, pd, pm in zip(d_list, chunk_data_mapfiles, p_list,
-            chunk_parmdb_phaseamp_phase2_mapfiles)]
-        self.s.run(actions)
-        p_list = []
-        for d in d_list:
-            p_d = p['solve_phaseamp2_amponly'].copy()
-            p_d['timestep'] = d.solint_a
-            p_d['chunksize'] = d.solint_a
-            p_list.append(p_d)
-        actions = [Solve(self.parset, dm, pd, model_datamap=None,
-            parmdb_datamap=pm, prefix='facet_amponly', direction=d, index=3)
-            for d, dm, pd, pm in zip(d_list, chunk_data_mapfiles, p_list,
-            chunk_parmdb_phaseamp_amp2_mapfiles)]
-        self.s.run(actions)
+            p_list = []
+            for d in d_list:
+                p_d = p['solve_phaseamp2_phaseonly'].copy()
+                p_d['timestep'] = d.solint_p
+                p_list.append(p_d)
+            actions = [Solve(self.parset, dm, pd, model_datamap=None,
+                parmdb_datamap=pm, prefix='facet_phaseonly', direction=d, index=index)
+                for d, dm, pd, pm in zip(d_list, chunk_data_mapfiles, p_list,
+                chunk_parmdb_phaseamp_phase2_mapfiles)]
+            self.s.run(actions)
+            p_list = []
+            for d in d_list:
+                p_d = p['solve_phaseamp2_amponly'].copy()
+                p_d['timestep'] = d.solint_a
+                p_d['chunksize'] = d.solint_a
+                p_list.append(p_d)
+            actions = [Solve(self.parset, dm, pd, model_datamap=None,
+                parmdb_datamap=pm, prefix='facet_amponly', direction=d, index=index)
+                for d, dm, pd, pm in zip(d_list, chunk_data_mapfiles, p_list,
+                chunk_parmdb_phaseamp_amp2_mapfiles)]
+            self.s.run(actions)
 
-        self.log.debug('Merging chunk instrument parmdbs...')
-        merged_parmdb_phaseamp_amp2_mapfiles = []
-        merged_parmdb_phaseamp_phase2_mapfiles = []
-        for i, chunks in enumerate(chunks_list):
-            merged_parmdb_phaseamp_amp2_mapfiles.append(self.write_mapfile(
-            	[merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp2 for
-            	chunk in chunks], prefix='merged_amps2')],
-            	prefix='merged_amps2', direction=d_list[i], host_list=d_hosts[i]))
-            merged_parmdb_phaseamp_phase2_mapfiles.append(self.write_mapfile(
-            	[merge_chunk_parmdbs([chunk.parmdb_phaseamp_phase2 for
-            	chunk in chunks], prefix='merged_phases2')],
-            	prefix='merged_phases2', direction=d_list[i], host_list=d_hosts[i]))
+            self.log.debug('Merging chunk instrument parmdbs...')
+            merged_parmdb_phaseamp_amp2_mapfiles = []
+            merged_parmdb_phaseamp_phase2_mapfiles = []
+            for i, chunks in enumerate(chunks_list):
+                merged_parmdb_phaseamp_amp2_mapfiles.append(self.write_mapfile(
+                    [merge_chunk_parmdbs([chunk.parmdb_phaseamp_amp2 for
+                    chunk in chunks], prefix='merged_amps2')],
+                    prefix='merged_amps2', direction=d_list[i], host_list=d_hosts[i]))
+                merged_parmdb_phaseamp_phase2_mapfiles.append(self.write_mapfile(
+                    [merge_chunk_parmdbs([chunk.parmdb_phaseamp_phase2 for
+                    chunk in chunks], prefix='merged_phases2')],
+                    prefix='merged_phases2', direction=d_list[i], host_list=d_hosts[i]))
 
-        self.log.info('Smoothing amplitude solutions...')
-        actions = [Smooth(self.parset, dm, p['smooth_amp2'], pm,
-            prefix='facet_amp', direction=d, index=3)
-            for d, dm, pm in zip(d_list, facet_data_mapfiles,
-            merged_parmdb_phaseamp_amp2_mapfiles)]
-        self.s.run(actions)
+            self.log.info('Smoothing amplitude solutions...')
+            actions = [Smooth(self.parset, dm, p['smooth_amp2'], pm,
+                prefix='facet_amp', direction=d, index=index)
+                for d, dm, pm in zip(d_list, facet_data_mapfiles,
+                merged_parmdb_phaseamp_amp2_mapfiles)]
+            self.s.run(actions)
 
-        self.log.info('Applying amplitude solutions...')
-        actions = [Apply(self.parset, dm, p['apply_amp3'],
-            pm, prefix='facet_amp', direction=d, index=4) for d, dm, pm in
-            zip(d_list, chunk_data_mapfiles,
-            merged_parmdb_phaseamp_amp2_mapfiles)]
-        self.s.run(actions)
+            index += 1
 
-        self.log.info('Imaging (facet image #4)...')
-        self.log.debug('Averaging in preparation for imaging...')
-        actions = [Average(self.parset, m, p['avg4'], prefix='facet',
-            direction=d, index=4) for d, m in zip(d_list, chunk_data_mapfiles)]
-        avg_data_mapfiles = self.s.run(actions)
+            self.log.info('Applying amplitude solutions...')
+            actions = [Apply(self.parset, dm, p['apply_amp3'],
+                pm, prefix='facet_amp', direction=d, index=index) for d, dm, pm in
+                zip(d_list, chunk_data_mapfiles,
+                merged_parmdb_phaseamp_amp2_mapfiles)]
+            self.s.run(actions)
 
-        self.log.debug('Merging chunks...')
-        merged_data_mapfiles = []
-        for i, chunks in enumerate(chunks_list):
-            avg_files, _ = read_mapfile(avg_data_mapfiles[i])
-            merged_data_mapfiles.append(self.write_mapfile([merge_chunks(avg_files,
-            prefix=None, clobber=True)], direction=d_list[i],
-            host_list=d_hosts[i]))
+            self.log.info('Imaging (facet image #4)...')
+            self.log.debug('Averaging in preparation for imaging...')
+            actions = [Average(self.parset, m, p['avg4'], prefix='facet',
+                direction=d, index=index) for d, m in zip(d_list, chunk_data_mapfiles)]
+            avg_data_mapfiles = self.s.run(actions)
 
-        self.log.debug('Imaging...')
-        actions = [MakeImageIterate(self.parset, m, p['imager4'], prefix='facet_selfcal4',
-            direction=d) for d, m in zip(d_list, merged_data_mapfiles)]
-        image4_basenames_mapfiles = self.s.run(actions)
+            self.log.debug('Merging chunks...')
+            merged_data_mapfiles = []
+            for i, chunks in enumerate(chunks_list):
+                avg_files, _ = read_mapfile(avg_data_mapfiles[i])
+                merged_data_mapfiles.append(self.write_mapfile([merge_chunks(avg_files,
+                    prefix=None, clobber=True)], direction=d_list[i],
+                    host_list=d_hosts[i]))
 
-        # Check if image rms / ration of max/min is still improving. If so,
-        # continue last selfcal step. If not, stop sefcal
+            self.log.debug('Imaging...')
+            image_final_basenames_mapfiles_prev = image_final_basenames_mapfiles
+            actions = [MakeImageIterate(self.parset, m, p['imager4'],
+                prefix='facet_selfcal{0}'.format(index),
+                direction=d) for d, m in zip(d_list, merged_data_mapfiles)]
+            image_final_basenames_mapfiles = self.s.run(actions)
 
-        # Check images if interactive=True
-        # If not OK: stop and reset state for this direction
-        # If OK, continue
-        if self.parset['interactive']:
-            import pyrap.images as pim
-            for i, d in enumerate(d_list):
-                self.log.info('Showing selfcal images (initial, 2nd phase-only, '
-                    '2nd phase+amp) for direction {0}...'.format(d.name))
-                image1, _ = read_mapfile(image0_basenames_mapfiles[i])
-                image2, _ = read_mapfile(image2_basenames_mapfiles[i])
-                image3, _ = read_mapfile(image4_basenames_mapfiles[i])
-                im = pim.image([image1[0], image2[0], image3[0]])
-                im.view()
-                prompt = "Continue processing (y/n)? "
-                answ = raw_input(prompt)
-                while answ.lower() not in  ['y', 'n', 'yes', 'no']:
-                    answ = raw_input(prompt)
-                if answ.lower() in ['n', 'no']:
-                    self.log.info('Exiting...')
-                    sys.exit()
+            # Check if image rms / ratio of max/min is still improving. If so,
+            # continue last selfcal step. If not, stop sefcal
+#             improving = check_selfcal(image_final_basenames_mapfiles_prev,
+#                 image_final_basenames_mapfiles, self.p['check_selfcal'])
+            improving = False
 
         self.log.info('Merging final instrument parmdbs...')
         merged_parmdb_final_mapfiles = []
