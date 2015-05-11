@@ -240,8 +240,7 @@ class MakeImage(Action):
             self.p['threshold_jy'] = get_val_from_str(self.p['threshold'], 'Jy')
             if self.p['nterms'] > 1 and self.direction is not None:
                 # nterms > 1 should only be used with a direction
-                self.p['nchannels'] = np.int(np.ceil(np.float(self.direction.nchannels/
-                    np.float(5)))) # hard coded to 5 for now
+                self.p['nchannels'] =self.direction.nchannels
             else:
                 self.p['nchannels'] = 1
         tmp = template.render(self.p)
@@ -316,13 +315,17 @@ class MakeMask(Action):
         Makes the required data maps
         """
         from factor.lib.datamap_lib import read_mapfile
+        import numpy as np
 
         # Input is list of image basenames
         # Output is clean mask files
         imagebasenames, hosts = read_mapfile(self.input_datamap)
         if self.op_parset['imager'].lower() == 'wsclean':
-            if self.p['nterms'] > 1:
-                input_files = [bn+'-MFS-image.fits' for bn in imagebasenames]
+            if self.p['nterms'] > 1 and self.direction is not None:
+                if direction.nchannels > 1:
+                    input_files = [bn+'-MFS-image.fits' for bn in imagebasenames]
+                else:
+                    input_files = [bn+'-image.fits' for bn in imagebasenames]
             else:
                 input_files = [bn+'-image.fits' for bn in imagebasenames]
             output_files = [infile+'.cleanmask.fits' for infile in input_files]
