@@ -75,7 +75,7 @@ class Direction(object):
         self.field_imsize = field_imsize
         self.dynamic_range = dynamic_range
         self.improving = True # Whether selfcal is still improving after first amp cal
-        self.max_residual_val = 0.05 # maximum residual in Jy
+        self.max_residual_val = 0.1 # maximum residual in Jy for facet subtract test
 
         self.region_selfcal = region_selfcal
         if self.region_selfcal.lower() == 'empty':

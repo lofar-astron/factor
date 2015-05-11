@@ -154,7 +154,7 @@ if __name__=='__main__':
         factor.directions.make_region_file(direction.vertices, reg_file)
         direction.reg = reg_file
 
-    # For WSClean, set number of channels to number of bands
+    # For WSClean, set number of bands
     for direction in directions:
         direction.nchannels = len(bands)
 
@@ -166,7 +166,8 @@ if __name__=='__main__':
 
     # Check with user
     if parset['interactive']:
-        print("Facet and DDE calibrator regions saved. Please check that they are OK.")
+        print("Facet and DDE calibrator regions saved. Please check that they "
+            "are OK before continuing.")
         prompt = "Continue processing (y/n)? "
         answ = raw_input(prompt)
         while answ.lower() not in  ['y', 'n', 'yes', 'no']:

@@ -291,12 +291,11 @@ facet_sub = {
 'subtract' : {'incol': 'DATA',
               'outcol': 'SUBTRACTED_DATA'},
 'apply_pre' : {'incol': 'DATA',
-           'outcol': 'CORRECTED_SUBTRACTED_DATA'},
+               'outcol': 'CORRECTED_SUBTRACTED_DATA'},
 'apply_post' : {'incol': 'SUBTRACTED_DATA',
-           'outcol': 'CORRECTED_SUBTRACTED_DATA'},
+                'outcol': 'CORRECTED_SUBTRACTED_DATA'},
 'shift' : {'columnname': 'CORRECTED_SUBTRACTED_DATA'}, # outcol is DATA
 'avg' : {'columnname': 'DATA', # outcol is DATA
-         'uvmmax': 2500.0,
          'freqstep': 20,
          'timestep': 6},
 'imager' : {'niter' : 10,

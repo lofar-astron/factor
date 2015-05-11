@@ -185,7 +185,7 @@ class MakeImage(Action):
             # Let WSClean decide the best value for itself
             self.p['wsclean_wplanes'] = ''
         else:
-            self.p['wsclean_wplanes'] = '-nwlayers, {0},'.format(self.p['wplanes'])
+            self.p['wsclean_wplanes'] = '' #'-nwlayers, {0},'.format(self.p['wplanes'])
 
 
     def make_pipeline_control_parset(self):
@@ -194,6 +194,7 @@ class MakeImage(Action):
         """
         from factor.lib.datamap_lib import read_mapfile
         from factor.lib.action_lib import get_val_from_str
+        import numpy as np
 
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
@@ -239,7 +240,8 @@ class MakeImage(Action):
             self.p['threshold_jy'] = get_val_from_str(self.p['threshold'], 'Jy')
             if self.p['nterms'] > 1 and self.direction is not None:
                 # nterms > 1 should only be used with a direction
-                self.p['nchannels'] = self.direction.nchannels
+                self.p['nchannels'] = np.int(np.ceil(np.float(self.direction.nchannels/
+                    np.float(5)))) # hard coded to 5 for now
             else:
                 self.p['nchannels'] = 1
         tmp = template.render(self.p)
