@@ -478,6 +478,8 @@ class FacetSelfcal(Operation):
 
         # Loop over final calibration as long as there is improvement
         index = 3
+        for d in d_list:
+            d.improving = True
         while np.any([d.improving for d in d_list]):
             self.log.info('FFTing model image (facet model #3)...')
             actions = [FFT(self.parset, dm, mm, p['imager3'], prefix='fft3',
