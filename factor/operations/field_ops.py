@@ -168,7 +168,7 @@ class FieldSub(Operation):
         if self.check_completed(d):
             return
 
-        # Make initial data maps for the input datasets and their dir-indep
+        # Make initial data maps for the input datasets and their
         # instrument parmdbs.
         shifted_all_data_mapfile = self.write_mapfile(d.shifted_all_data_files,
             prefix='shifted', direction=d)
@@ -176,10 +176,6 @@ class FieldSub(Operation):
             prefix='dir_dep_parmdbs', direction=d)
         orig_data_mapfile = self.write_mapfile([band.file for band in bands],
         	prefix='input_data')
-        dir_indep_parmdbs_mapfile = self.write_mapfile([band.dirindparmdb for band
-        	in bands], prefix='dir_indep_parmdbs', direction=d)
-        dir_indep_skymodels_mapfile = self.write_mapfile([band.skymodel_dirindep
-        	for band in bands], prefix='dir_indep_skymodels', direction=d)
 
         self.log.info('Phase shifting model back to field center...')
         ra = bands[0].ra
@@ -193,20 +189,6 @@ class FieldSub(Operation):
         ms_from_files, _ = read_mapfile(unshifted_model_data_mapfile)
         for ms_to, ms_from in zip(ms_to_files, ms_from_files):
             copy_column(ms_to, p['copy']['incol'], p['copy']['outcol'], ms_from)
-
-        self.log.info('Selecting sources for this direction...')
-        action = MakeFacetSkymodel(self.parset, dir_indep_skymodels_mapfile,
-            {}, d, prefix='cal', cal_only=False)
-        dir_indep_all_skymodels_mapfile = self.s.run(action)
-
-        self.log.info('Adding sources for this direction...')
-        self.parset['use_ftw'] = False
-        if bands[0].has_sub_data_new:
-            p['add']['incol'] += '_NEW'
-        action = Add(self.parset, orig_data_mapfile, p['add_all'],
-            dir_indep_all_skymodels_mapfile, dir_indep_parmdbs_mapfile,
-            prefix='facet_dirindep', direction=d)
-        self.s.run(action)
 
         self.log.info('Subtracting final model for this direction...')
         action = Subtract(self.parset, orig_data_mapfile, p['subtract'], None,

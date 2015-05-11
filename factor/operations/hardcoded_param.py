@@ -327,9 +327,6 @@ field_sub = {
 'shift' : {'columnname': 'MODEL_DATA'}, # outcol is DATA
 'copy' : {'incol': 'DATA',
            'outcol': 'MODEL_DATA'},
-'add' : {'incol': 'SUBTRACTED_DATA_ALL',
-         'outcol': 'FACET_DATA_ALL',
-         'flags': '--replace-sourcedb'},
 'subtract' : {'incol': 'FACET_DATA_ALL',
               'outcol': 'SUBTRACTED_DATA_ALL_NEW',
               'flags': '--replace-sourcedb'},
@@ -345,7 +342,7 @@ facet_image_final = {
 'avg' : {'columnname': 'DATA', # outcol is DATA
          'freqstep': 5,
          'timestep': 3},
-'imager' : {'niter': 5000, # should fix beam so all facets are the same
+'imager' : {'niter': 5000, # should fix beam so that all facets are the same
             'imsize': 1024,
             'mscale': False,
             'cell': '1.5arcsec',
