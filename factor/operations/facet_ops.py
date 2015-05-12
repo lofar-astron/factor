@@ -568,7 +568,7 @@ class FacetSelfcal(Operation):
                     host_list=d_hosts[i]))
 
             self.log.debug('Imaging...')
-            image_final_basenames_mapfiles_prev = image_final_basenames_mapfiles
+            image_final_basenames_mapfiles_prev = image_final_basenames_mapfiles[:]
             actions = [MakeImageIterate(self.parset, m, p['imager4'],
                 prefix='facet_selfcal{0}'.format(index),
                 direction=d) for d, m in zip(d_list, merged_data_mapfiles) if d.improving]
@@ -576,12 +576,14 @@ class FacetSelfcal(Operation):
 
             # Check if image rms / ratio of max to min are still improving. If so,
             # continue last selfcal step. If not, stop sefcal
-            for d, pm, fm in (d_list, image_final_basenames_mapfiles_prev,
+            for d, pm, fm in zip(d_list, image_final_basenames_mapfiles_prev,
                 image_final_basenames_mapfiles):
                 if d.improving:
                     if d.loop_amp_selfcal:
-                        d.improving = check_selfcal(image_final_basenames_mapfiles_prev,
-                            image_final_basenames_mapfiles, self.p['check_selfcal']['rms_threshold'],
+                        prev_image, _ = read_mapfile(pm)
+                        new_image, _ = read_mapfile(fm)
+                        d.improving = check_selfcal(prev_image[0], new_image[0],
+                            self.p['check_selfcal']['rms_threshold'],
                             self.p['check_selfcal']['ratio_threshold'])
                     else:
                         d.improving = False
