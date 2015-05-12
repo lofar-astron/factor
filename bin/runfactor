@@ -160,7 +160,6 @@ if __name__=='__main__':
         direction.nbands = len(bands)
         direction.nchannels = np.int(np.ceil(np.float(direction.nbands/
                     np.float(5)))) # for WSClean
-        direction.max_residual_val = 0.1
 
     # Make DS9 region files
     ds9_facet_reg_file = os.path.join(parset['dir_working'], 'regions', 'facets_ds9.reg')
