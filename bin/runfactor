@@ -213,12 +213,12 @@ if __name__=='__main__':
         op.run()
 
         # Subtract model(s) from empty facet datasets and image to check if OK
-        op = FacetSub(parset, bands, direction_group)
+        op = FacetCheck(parset, bands, direction_group)
         op.run()
 
         # Subtract final model(s) from empty field datasets. These operations
         # must be done in series
-        ops = [FieldSub(parset, bands, d) for d in direction_group if d.selfcal_ok]
+        ops = [FacetSub(parset, bands, d) for d in direction_group if d.selfcal_ok]
         for op in ops:
             op.run()
 

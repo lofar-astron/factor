@@ -5,8 +5,6 @@ Classes
 -------
 InitSubtract : Operation
     Images each band at high and low resolution to make and subtract sky models
-FieldSub : Operation
-    Subtracts facet model from data
 MakeMosaic : Operation
     Makes a mosaic from the facet images
 
@@ -140,63 +138,6 @@ class InitSubtract(Operation):
 
         # Save state
         self.set_completed(bands)
-
-
-class FieldSub(Operation):
-    """
-    Operation to mosiac facet images
-    """
-    def __init__(self, parset, bands, direction=None, reset=False):
-        super(FieldSub, self).__init__(parset, bands, direction=direction,
-            reset=reset, name='FieldSub')
-
-
-    def run_steps(self):
-        """
-        Run the steps for this operation
-        """
-        from factor.actions.images import MakeImageIterate
-        from factor.actions.visibilities import Average, ChgCentre, PhaseShift
-        from factor.lib.datamap_lib import read_mapfile
-        from factor.lib.operation_lib import copy_column_freq
-        from factor.operations.hardcoded_param import field_sub as p
-
-        bands = self.bands
-        d = self.direction
-
-        # Check state
-        if self.check_completed(d):
-            return
-
-        # Make initial data maps for the input datasets and their
-        # instrument parmdbs.
-        shifted_all_data_mapfile = self.write_mapfile(d.shifted_all_data_files,
-            prefix='shifted', direction=d)
-        dir_dep_parmdbs_mapfile = self.write_mapfile(d.dirdepparmdbs,
-            prefix='dir_dep_parmdbs', direction=d)
-        orig_data_mapfile = self.write_mapfile([band.file for band in bands],
-        	prefix='input_data')
-
-        self.log.info('Phase shifting model back to field center...')
-        ra = bands[0].ra
-        dec = bands[0].dec
-        action = PhaseShift(self.parset, shifted_all_data_mapfile, p['shift'],
-            prefix='facet', direction=d, ra=ra, dec=dec)
-        unshifted_model_data_mapfile = self.s.run(action)
-
-        self.log.info('Copying model to bands...')
-        ms_to_files = [band.file for band in bands]
-        ms_from_files, _ = read_mapfile(unshifted_model_data_mapfile)
-        for ms_to, ms_from in zip(ms_to_files, ms_from_files):
-            copy_column(ms_to, p['copy']['incol'], p['copy']['outcol'], ms_from)
-
-        self.log.info('Subtracting final model for this direction...')
-        action = Subtract(self.parset, orig_data_mapfile, p['subtract'], None,
-        	dir_dep_parmdbs_mapfile, prefix='field_dirdep', direction=d)
-        self.s.run(action)
-
-        # Save state
-        self.set_completed(d)
 
 
 class MakeMosaic(Operation):
