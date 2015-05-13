@@ -322,7 +322,7 @@ class MakeMask(Action):
         imagebasenames, hosts = read_mapfile(self.input_datamap)
         if self.op_parset['imager'].lower() == 'wsclean':
             if self.p['nterms'] > 1 and self.direction is not None:
-                if direction.nchannels > 1:
+                if self.direction.nchannels > 1:
                     input_files = [bn+'-MFS-image.fits' for bn in imagebasenames]
                 else:
                     input_files = [bn+'-image.fits' for bn in imagebasenames]
