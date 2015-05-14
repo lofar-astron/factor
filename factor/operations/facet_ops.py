@@ -734,8 +734,8 @@ class FacetCheck(Operation):
     Operation to subtract final facet sky model from facet visibilties
     """
     def __init__(self, parset, bands, direction=None, reset=False):
-        super(FacetSub, self).__init__(parset, bands, direction=direction,
-            reset=reset, name='FacetSub')
+        super(FacetCheck, self).__init__(parset, bands, direction=direction,
+            reset=reset, name='FacetCheck')
 
 
     def run_steps(self):
@@ -864,8 +864,8 @@ class FacetSub(Operation):
     Operation to mosiac facet images
     """
     def __init__(self, parset, bands, direction=None, reset=False):
-        super(FieldSub, self).__init__(parset, bands, direction=direction,
-            reset=reset, name='FieldSub')
+        super(FacetSub, self).__init__(parset, bands, direction=direction,
+            reset=reset, name='FacetSub')
 
 
     def run_steps(self):
