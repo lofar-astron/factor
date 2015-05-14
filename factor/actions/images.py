@@ -361,7 +361,7 @@ class MakeMask(Action):
         if 'n_per_node' not in self.p:
             self.p['n_per_node'] = self.max_cpu
 
-        if self.op_parset['imager'].lower() == 'wsclean' and self.p['nterms'] > 1:
+        if self.op_parset['imager'].lower() == 'wsclean' and self.p['nchannels'] > 1:
             # Get beam for WSClean images: since MFS image does not (yet) have
             # the beam in its header, we look in the first channel image instead
             from astropy.io import fits
