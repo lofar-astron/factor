@@ -140,7 +140,7 @@ class Direction(object):
         """
         import glob
 
-        operations = ['FacetSelfcal', 'FacetImage', 'FacetSub']
+        operations = ['FacetSelfcal', 'FacetImage', 'FacetCheck']
         for op in operations:
             # Remove entry in completed_operations
             self.completed_operations.remove(op)

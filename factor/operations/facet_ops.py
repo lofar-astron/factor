@@ -849,6 +849,7 @@ class FacetCheck(Operation):
         self.log.info('Checking residual images...')
         for d, impre_mapfile, impost_mapfile in zip(d_list, image_pre_basenames_mapfiles,
             image_post_basenames_mapfiles):
+            d.max_residual_val = 0.25
             image_pre_files, _ = read_mapfile(impre_mapfile)
             image_post_files, _ = read_mapfile(impost_mapfile)
             # Check only lowest-frequency images for now
