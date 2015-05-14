@@ -580,6 +580,7 @@ class FacetSelfcal(Operation):
             # continue last selfcal step. If not, stop sefcal
             for d, pm, fm in zip(d_list, image_final_basenames_mapfiles_prev,
                 image_final_basenames_mapfiles):
+                d.loop_amp_selfcal = False # not yet implemented!
                 if d.improving:
                     if d.loop_amp_selfcal:
                         prev_image, _ = read_mapfile(pm)

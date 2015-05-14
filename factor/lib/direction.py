@@ -74,6 +74,7 @@ class Direction(object):
         self.solint_a = solint_a
         self.field_imsize = field_imsize
         self.dynamic_range = dynamic_range
+        self.loop_amp_selfcal = False
         self.improving = True # Whether selfcal is still improving after first amp cal
         self.max_residual_val = 0.1 # maximum residual in Jy for facet subtract test
 
