@@ -240,7 +240,7 @@ class MakeImage(Action):
             self.p['threshold_jy'] = get_val_from_str(self.p['threshold'], 'Jy')
             if self.p['nterms'] > 1 and self.direction is not None:
                 # nterms > 1 should only be used with a direction
-                self.p['nchannels'] =self.direction.nchannels
+                self.p['nchannels'] = self.direction.nchannels
             else:
                 self.p['nchannels'] = 1
         tmp = template.render(self.p)
@@ -361,19 +361,22 @@ class MakeMask(Action):
         if 'n_per_node' not in self.p:
             self.p['n_per_node'] = self.max_cpu
 
-        if self.op_parset['imager'].lower() == 'wsclean' and self.p['nchannels'] > 1:
-            # Get beam for WSClean images: since MFS image does not (yet) have
-            # the beam in its header, we look in the first channel image instead
-            from astropy.io import fits
+        if self.op_parset['imager'].lower() == 'wsclean' and self.direction is not None:
+            if self.direction.nchannels > 1:
+                # Get beam for WSClean images: since MFS image does not (yet) have
+                # the beam in its header, we look in the first channel image instead
+                from astropy.io import fits
 
-            image_basenames, _ = read_mapfile(self.input_datamap)
-            for bn in image_basenames:
-                image_file = bn + '-0000-image.fits'
-                fits_file = fits.open(image_file, mode="readonly",
-                    ignore_missing_end=True)
-                hdr = fits_file[0].header
-                self.p['beam'] = '({0}, {1}, {2})'.format(hdr['BMAJ'],
-                    hdr['BMIN'], hdr['BPA'])
+                image_basenames, _ = read_mapfile(self.input_datamap)
+                for bn in image_basenames:
+                    image_file = bn + '-0000-image.fits'
+                    fits_file = fits.open(image_file, mode="readonly",
+                        ignore_missing_end=True)
+                    hdr = fits_file[0].header
+                    self.p['beam'] = '({0}, {1}, {2})'.format(hdr['BMAJ'],
+                        hdr['BMIN'], hdr['BPA'])
+            else:
+                self.p['beam'] = 'None'
         else:
             self.p['beam'] = 'None'
 
