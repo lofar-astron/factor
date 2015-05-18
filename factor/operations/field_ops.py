@@ -11,7 +11,7 @@ MakeMosaic : Operation
 """
 import os
 from factor.lib.operation import Operation
-from factor.lib.scheduler import Scheduler
+from factor.lib.scheduler_mp import Scheduler
 
 
 class InitSubtract(Operation):
