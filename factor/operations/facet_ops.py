@@ -229,7 +229,9 @@ class FacetSelfcal(Operation):
 
         # Set up scheduler (runs at most num_nodes directions in parallel)
         num_nodes = len(self.parset['cluster_specific']['node_list'])
-        self.s = Scheduler(max_threads=num_nodes, name=self.name,
+#         self.s = Scheduler(max_threads=num_nodes, name=self.name,
+#             op_parset=self.parset)
+        self.s = Scheduler(max_procs=num_nodes, name=self.name,
             op_parset=self.parset)
 
 
@@ -620,7 +622,9 @@ class FacetImage(Operation):
 
         # Set up scheduler (runs at most num_nodes directions in parallel)
         num_nodes = len(self.parset['cluster_specific']['node_list'])
-        self.s = Scheduler(max_threads=num_nodes, name=self.name,
+#         self.s = Scheduler(max_threads=num_nodes, name=self.name,
+#             op_parset=self.parset)
+        self.s = Scheduler(max_procs=num_nodes, name=self.name,
             op_parset=self.parset)
 
 
