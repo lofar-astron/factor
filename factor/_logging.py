@@ -43,32 +43,13 @@ def set_level(level):
 
 class Whitelist(logging.Filter):
     """
-    Filter on allowed logger names
+    Filter out any non-Factor loggers
     """
     def filter(self, record):
         if 'factor' in record.name:
             return True
         else:
             return False
-
-
-# class Whitelist(logging.Filter):
-#     """
-#     Filter on allowed logger names
-#     """
-#     def __init__(self, *whitelist):
-#         self.whitelist = [logging.Filter(name) for name in whitelist]
-#
-#     def filter(self, record):
-#         return any(f.filter(record) for f in self.whitelist)
-#
-#
-# class Blacklist(Whitelist):
-#     """
-#     Filter on disallowed logger names
-#     """
-#     def filter(self, record):
-#         return not Whitelist.filter(self, record)
 
 
 def set_log_file(log_file):
@@ -81,14 +62,6 @@ def set_log_file(log_file):
     fh.setFormatter(formatter)
     fh.addFilter(Whitelist())
     logging.root.addHandler(fh)
-
-
-def apply_whitelist():
-    """
-    Apply whitelist filter
-    """
-    for handler in logging.root.handlers:
-        handler.addFilter(Whitelist('factor', 'bar'))
 
 
 # Define and add console handler (in color)
