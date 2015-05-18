@@ -234,6 +234,10 @@ if __name__=='__main__':
         if not all_good:
             sys.exit(1)
 
+        # Clean up files
+        for d in direction_group:
+            d.cleanup()
+
     # Make final facet images (from final empty datasets) if desired
     dirs_to_image = [d for d in directions if d.make_final_image]
     if len(dirs_to_image) > 0:

@@ -103,6 +103,7 @@ class Direction(object):
         self.save_file = os.path.join(self.working_dir, 'state',
             self.name+'_save.pkl')
         self.pipeline_dir = os.path.join(self.working_dir, 'pipeline')
+        self.vis_dir = os.path.join(self.working_dir, 'visdata')
 
 
     def save_state(self):
@@ -153,4 +154,22 @@ class Direction(object):
                     os.system('rm -rf {0}'.format(facet_dir))
 
         self.save_state()
+
+
+    def cleanup(self):
+        """
+        Cleans up unneeded data
+        """
+        import glob
+
+        operations = ['FacetAdd', 'FacetSetup', 'FacetSelfcal', 'FacetImage',
+            'FacetCheck', 'FacetSub']
+        for op in operations:
+            # Delete vis data
+            action_dirs = glob.glob(os.path.join(self.vis_dir, op, '*'))
+            for action_dir in action_dirs:
+                facet_dir = os.path.join(action_dir, self.name)
+                if os.path.exists(facet_dir):
+                    os.system('rm -rf {0}'.format(facet_dir))
+
 
