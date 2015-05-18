@@ -67,17 +67,6 @@ class Scheduler(object):
             pool = multiprocessing.Pool(processes=self.max_procs)
             for act in action_list:
                 pool.apply_async(act.call_generic_pipeline())
-#             if action_list[0].timeout is not None:
-#                 while not all([act.check_done() for act in action_list]):
-#                     try:
-#                         pool.wait(timeout=action_list[0].timeout)
-#                     except multiprocessing.TimeoutError:
-#                         continue
-#                 try:
-#                     # Give process time to return normally
-#                     pool.wait(timeout=action_list[0].timeout)
-#                 except multiprocessing.TimeoutError:
-#                     pool.terminate()
             pool.close()
             pool.join()
 
