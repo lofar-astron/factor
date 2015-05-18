@@ -4,7 +4,7 @@ Definition of the time chunk class
 import logging
 import os
 
-log = logging.getLogger('parset')
+log = logging.getLogger('factor.chunk')
 
 class Chunk(object):
     """

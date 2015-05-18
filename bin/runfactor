@@ -42,7 +42,7 @@ if __name__=='__main__':
         opt.print_help()
         sys.exit()
 
-    # Prepare logging
+    # Prepare logger
     if options.q:
         logging_level = 'warning'
     elif options.v:
@@ -50,6 +50,7 @@ if __name__=='__main__':
     else:
         logging_level = 'info'
     factor._logging.set_level(logging_level)
+    log = logging.getLogger('factor')
 
     # Prepare parset
     try:
@@ -66,7 +67,7 @@ if __name__=='__main__':
         band = Band(ms, parset['dir_working'])
         band.dirindparmdb = os.path.join(band.file, parset['parmdb_name'])
         if not os.path.exists(band.dirindparmdb):
-            logging.critical('Direction-independent instument parmdb not found '
+            log.critical('Direction-independent instument parmdb not found '
                 'for band {0}'.format(band.file))
             sys.exit(1)
         band.skymodel_dirindep = None
@@ -89,7 +90,7 @@ if __name__=='__main__':
         if 'flux_min_jy' not in dir_parset or \
             'size_max_arcmin' not in dir_parset or \
             'separation_max_arcmin' not in dir_parset:
-                logging.critical('If no directions file is specified, you must '
+                log.critical('If no directions file is specified, you must '
                     'give values for flux_min_Jy, size_max_arcmin, and '
                     'separation_max_arcmin')
                 sys.exit(1)
@@ -120,13 +121,13 @@ if __name__=='__main__':
         op = InitSubtract(parset, bands_init_subtract)
         op.run()
     else:
-        logging.info("Sky models found for all MS files. Skipping initial subtraction "
+        log.info("Sky models found for all MS files. Skipping initial subtraction "
             "operation")
 
     # Prepare directions
     if directions is None:
         # Make directions from dir-indep sky models using flux and size parameters
-        logging.info("No directions file given. Selecting directions internally...")
+        log.info("No directions file given. Selecting directions internally...")
         parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(bands,
         	parset['direction_specific']['flux_min_jy'],
         	parset['direction_specific']['size_max_arcmin'],
@@ -191,7 +192,7 @@ if __name__=='__main__':
 
     # Iterate over direction groups
     for direction_group in direction_groups:
-        logging.info('Processing {0} direction(s) in parallel'.format(
+        log.info('Processing {0} direction(s) in parallel'.format(
             len(direction_group)))
 
         # Add calibrator(s) to empty datasets. These operations
@@ -226,7 +227,7 @@ if __name__=='__main__':
         for d in direction_group:
             all_good = True
             if not d.selfcal_ok:
-                logging.error('Selfcal failed for direction {0}. Please check '
+                log.error('Selfcal failed for direction {0}. Please check '
                     'the settings for this direction.'.format(d.name))
                 d.reset_state()
                 all_good = False
@@ -247,6 +248,6 @@ if __name__=='__main__':
         op = MakeMosaic(parset, directions)
         op.run()
 
-    logging.info("Factor has finished :)")
+    log.info("Factor has finished :)")
 
 

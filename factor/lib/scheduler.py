@@ -28,7 +28,7 @@ class Scheduler(object):
         self.max_threads = max_threads
         self.name = name
         self.op_parset = op_parset
-        self.log = logging.getLogger(name)
+        self.log = logging.getLogger('factor.{0}'.format(name))
 
         def worker(queue):
             for cmd in iter(queue.get, None):

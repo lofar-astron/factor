@@ -6,7 +6,7 @@ import logging
 import sys
 
 
-log = logging.getLogger('cluster')
+log = logging.getLogger('factor.cluster')
 
 
 def make_pbs_clusterdesc(node_local_disk='/tmp'):

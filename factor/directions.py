@@ -9,7 +9,7 @@ import sys
 from scipy.spatial import Delaunay
 
 
-log = logging.getLogger('directions')
+log = logging.getLogger('factor.directions')
 
 
 def directions_read(directions_file, factor_working_dir):

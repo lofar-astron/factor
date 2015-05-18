@@ -88,7 +88,7 @@ class Action(object):
             if not os.path.exists(self.pipeline_run_dir):
                 os.makedirs(self.pipeline_run_dir)
 
-            self.log = logging.getLogger('%s::%s' % (self.op_name, self.name))
+            self.log = logging.getLogger('factor.%s::%s' % (self.op_name, self.name))
             self.log_dir = '{0}/logs/{1}/{2}/'.format(factor_working_dir,
                 self.op_name, self.name)
             if self.direction is not None:
@@ -237,7 +237,7 @@ class Action(object):
         if status == 0:
             return self.get_results()
         else:
-            self.log.error('Action did not run successfully. Exiting')
+            self.log.error('Action did not run successfully. Exiting...')
             sys.exit(1)
 
 

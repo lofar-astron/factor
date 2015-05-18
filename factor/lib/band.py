@@ -6,7 +6,7 @@ import logging
 import pyrap.tables as pt
 import numpy as np
 
-log = logging.getLogger('parset')
+log = logging.getLogger('factor.parset')
 
 class Band(object):
     """
