@@ -548,6 +548,66 @@ class MakeImageIterate(Action):
         pass
 
 
+    def call_generic_pipeline(self):
+        """
+        Creates a GenericPipeline object and runs the pipeline
+        """
+        from factor.lib.datamap_lib import read_mapfile
+
+        vis_datamap = self.vis_datamap
+        mask_datamap = self.p['mask_datamap']
+        threshold_5rms = self.p['threshold']
+
+        if self.op_parset['imager'].lower() == 'wsclean':
+            # Can't resume with WSclean, so use all iterations on each
+            # pass
+            self.p['niter'] *= self.p['ncycles']
+            self.p['ncycles'] = 2
+
+        for i in range(self.p['ncycles']):
+            if self.p['use_rms'] and i == self.p['ncycles'] - 1:
+                self.p['threshold'] = threshold_5rms
+                self.p['niter'] = 1000000
+
+            imager = MakeImage(self.op_parset, vis_datamap, self.p,
+            	mask_datamap=mask_datamap, direction=self.direction,
+            	prefix=self.prefix, band=self.band, index=i)
+#             image_basename_mapfile = imager.run()
+            image_basename_mapfile = imager.call_generic_pipeline()
+
+            if i == self.p['ncycles'] - 1:
+                break
+
+            if i > 0 and self.p['iterate_threshold']:
+                # Only iterate the threshold for the first pass
+                self.p['iterate_threshold'] = False
+            masker = MakeMask(self.op_parset, image_basename_mapfile, self.p,
+                prefix=self.prefix, direction=self.direction, band=self.band,
+                index=i)
+#             mask_datamap = masker.run()
+            mask_datamap = masker.call_generic_pipeline()
+
+            mask_file, _ = read_mapfile(mask_datamap)
+            log_file = mask_file[0] + '.log'
+            with open(log_file, 'r') as f:
+                lines = f.readlines()
+                threshold_5rms = lines[0].split(': ')[-1] + 'Jy'
+
+        if self.p['image_final']:
+            if self.p['use_rms']:
+                self.p['threshold'] = threshold_5rms
+                self.p['niter'] = 1000000
+            imager = MakeImage(self.op_parset, vis_datamap, self.p,
+            	mask_datamap=mask_datamap, direction=self.direction,
+            	prefix=self.prefix+'_final', band=self.band)
+#             image_basename_mapfile = imager.run()
+            image_basename_mapfile = imager.call_generic_pipeline()
+
+        self.output_datamap = image_basename_mapfile
+
+        return self.get_results()
+
+
     def run(self):
         """
         Runs the compound action
