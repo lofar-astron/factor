@@ -342,10 +342,10 @@ def verify_subtract(image_pre, image_post, res_val, imager):
     pixels = numpy.copy(img.getdata())
     maxval = numpy.copy(numpy.max(pixels))
 
-    if (maxval > res_val) or ((maxval*0.95) > maxvalpre) :
+    if (maxval > res_val): # or ((maxval*0.95) > maxvalpre) :
         logging.info('WARNING RESIDUAL TOO LARGE')
         logging.info('Max = {0}'.format(maxval))
         logging.info('Previous max = {0}'.format(maxvalpre))
-        return False
+        return False, maxval, maxvalpre
     else:
-        return True
+        return True, maxval, maxvalpre

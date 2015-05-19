@@ -857,8 +857,10 @@ class FacetCheck(Operation):
             image_pre_files, _ = read_mapfile(impre_mapfile)
             image_post_files, _ = read_mapfile(impost_mapfile)
             # Check only lowest-frequency images for now
-            d.selfcal_ok = verify_subtract(image_pre_files[0], image_post_files[0],
+            d.selfcal_ok, maxval, maxvalpre = verify_subtract(image_pre_files[0], image_post_files[0],
                 d.max_residual_val, self.parset['imager'])
+            self.log.info('Current residual: {0} Jy/beam; previous residual: '
+                '{1} Jy/beam'.format(maxval, maxvalpre))
 
         # Save state
         self.set_completed(d_list)
