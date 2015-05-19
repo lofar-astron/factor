@@ -224,17 +224,23 @@ class Action(object):
         Creates a GenericPipeline object and runs the pipeline
         """
         from genericpipeline.bin import genericpipeline as gp
+        from lofarpipe.support.pipelinelogging import getSearchingLogger
         from factor.lib.context import RedirectStdStreams
         import sys
 
 #         with open("{0}.out.log".format(self.logbasename), "wb") as out, \
 #             open("{0}.err.log".format(self.logbasename), "wb") as err:
 #             with RedirectStdStreams(stdout=out, stderr=err):
-        args = [self.pipeline_executable, self.pipeline_parset_file, '-d',
-            '-c', self.pipeline_config_file]
+#        args = [self.pipeline_executable, self.pipeline_parset_file, '-d', '-c', self.pipeline_config_file]
         pipeline = gp.GenericPipeline()
-        pipeline.inputs['args'] = args
-        status = pipeline.go()
+
+        # Define needed attr/methods
+        pipeline.name = os.path.splitext(os.path.basename(self.pipeline_executable))[0]
+        pipeline.logger = getSearchingLogger(pipeline.name)
+        pipeline.inputs['args'] = [self.pipeline_parset_file]
+        pipeline.inputs['config'] = self.pipeline_config_file
+
+        status = pipeline.run(pipeline.name)
 
         if status == 0:
             return self.get_results()
