@@ -227,12 +227,13 @@ class Action(object):
         from factor.lib.context import RedirectStdStreams
         import sys
 
-        sys.argv = [self.pipeline_executable, self.pipeline_parset_file, '-d',
-            '-c', self.pipeline_config_file]
 #         with open("{0}.out.log".format(self.logbasename), "wb") as out, \
 #             open("{0}.err.log".format(self.logbasename), "wb") as err:
 #             with RedirectStdStreams(stdout=out, stderr=err):
-        status = gp.GenericPipeline().main()
+        pipeline = gp.GenericPipeline()
+        sys.argv = [self.pipeline_executable, self.pipeline_parset_file, '-d',
+            '-c', self.pipeline_config_file]
+        status = pipeline.main()
 
         if status == 0:
             return self.get_results()
