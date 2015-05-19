@@ -71,7 +71,7 @@ formatter = logging.Formatter('%(levelname)s - %(name)s - %(message)s')
 ch.setFormatter(formatter)
 ch.emit = add_coloring_to_emit_ansi(ch.emit)
 ch.set_name('console')
-#ch.addFilter(Whitelist())
+ch.addFilter(Whitelist())
 logging.root.addHandler(ch)
 
 # Set root level (the handlers will set their own levels)

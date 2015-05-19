@@ -247,7 +247,10 @@ class MakeFacetSkymodel(Action):
         if 'n_per_node' not in self.p:
             self.p['n_per_node'] = self.max_cpu
         self.p['scriptname'] = os.path.abspath(self.script_file)
-        self.p['cal_only'] = self.cal_only
+        if self.cal_only:
+            self.p['cal_only'] = 1
+        else:
+            self.p['cal_only'] = 0
         self.p['vertices'] = self.direction.vertices
         self.p['ra'] = self.direction.ra
         self.p['dec'] = self.direction.dec

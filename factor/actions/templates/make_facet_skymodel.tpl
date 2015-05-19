@@ -8,7 +8,7 @@ import os
 
 fullskymodel = sys.argv[1]
 outmodel = sys.argv[2]
-cal_only = bool(sys.argv[3])
+cal_only = bool(int(sys.argv[3]))
 vertices = {{ vertices }}
 facet_ra = {{ ra }}
 facet_dec = {{ dec }}
