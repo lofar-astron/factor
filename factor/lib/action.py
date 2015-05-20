@@ -250,6 +250,9 @@ class Action(object):
             self.log.error('Action did not run successfully. Exiting...')
             sys.exit(1)
 
+    def __call__(self):
+        self.call_generic_pipeline()
+
 
     def run(self):
         """
