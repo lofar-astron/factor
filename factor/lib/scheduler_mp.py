@@ -75,7 +75,7 @@ class Scheduler(object):
 
             procs = []
             for act in action_list:
-                procs.append(multiprocessing.Process(target=act.call_generic_pipeline())
+                procs.append(multiprocessing.Process(target=act.call_generic_pipeline()))
             for p in procs:
                 p.start()
             for p in procs:
