@@ -63,9 +63,6 @@ class Scheduler(object):
                     os.system('rsync -az --delete {0}/ {1}:{0}'.format(
                         working_dir, host))
 
-        # Reset task affinity
-        os.system("taskset -p 0xff %d" % os.getpid())
-
         # Run the action(s)
         self.log.debug('Running up to {0} actions in parallel'.format(self.max_procs))
         with Timer(self.log, 'action'):
