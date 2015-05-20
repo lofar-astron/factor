@@ -3,6 +3,7 @@ Module defining the operation scheduler class for multiproccessing
 """
 import logging
 import multiprocessing
+import os
 from factor.lib.context import Timer
 
 class Scheduler(object):
@@ -62,8 +63,11 @@ class Scheduler(object):
                     os.system('rsync -az --delete {0}/ {1}:{0}'.format(
                         working_dir, host))
 
+        # Reset task affinity
+        os.system("taskset -p 0xff %d" % os.getpid())
+
         # Run the action(s)
-        self.log.debug('Running {0} actions in parallel'.format(self.max_procs))
+        self.log.debug('Running up to {0} actions in parallel'.format(self.max_procs))
         with Timer(self.log, 'action'):
             pool = multiprocessing.Pool(processes=self.max_procs)
             for act in action_list:
