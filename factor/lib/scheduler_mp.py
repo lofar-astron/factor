@@ -68,9 +68,17 @@ class Scheduler(object):
         with Timer(self.log, 'action'):
             pool = multiprocessing.Pool(processes=self.max_procs)
             for act in action_list:
-                pool.apply_async(act.call_generic_pipeline())
+                pool.apply_async(act.call_generic_pipeline)
             pool.close()
             pool.join()
+
+#         procs = []
+#         for act in action_list:
+#             procs.append(multiprocessing.Process(target=act.call_generic_pipeline, args=())
+#         for p in procs:
+#             p.start()
+#         for p in procs:
+#             p.join()
 
         # Sync the remote nodes to the local node
         if self.op_parset['cluster_specific']['distribute']:
