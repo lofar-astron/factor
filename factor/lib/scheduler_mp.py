@@ -63,6 +63,7 @@ class Scheduler(object):
                         working_dir, host))
 
         # Run the action(s)
+        self.log.debug('Running {0} actions in parallel'.format(self.max_procs))
         with Timer(self.log, 'action'):
             pool = multiprocessing.Pool(processes=self.max_procs)
             for act in action_list:

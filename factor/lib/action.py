@@ -232,14 +232,16 @@ class Action(object):
 #             open("{0}.err.log".format(self.logbasename), "wb") as err:
 #             with RedirectStdStreams(stdout=out, stderr=err):
 #        args = [self.pipeline_executable, self.pipeline_parset_file, '-d', '-c', self.pipeline_config_file]
+        # Initalize pipeline object
         pipeline = gp.GenericPipeline()
 
-        # Define needed attr/methods
+        # Add needed attr/methods
         pipeline.name = os.path.splitext(os.path.basename(self.pipeline_executable))[0]
         pipeline.logger = getSearchingLogger(pipeline.name)
         pipeline.inputs['args'] = [self.pipeline_parset_file]
         pipeline.inputs['config'] = self.pipeline_config_file
 
+        # Run the pipeline
         status = pipeline.run(pipeline.name)
 
         if status == 0:
