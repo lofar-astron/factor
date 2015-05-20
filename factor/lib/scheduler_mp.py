@@ -6,6 +6,31 @@ import multiprocessing
 import os
 from factor.lib.context import Timer
 
+
+def call_generic_pipeline(executable, parset, config):
+    """
+    Creates a GenericPipeline object and runs the pipeline
+    """
+    from genericpipeline.bin import genericpipeline as gp
+    from lofarpipe.support.pipelinelogging import getSearchingLogger
+    from factor.lib.context import RedirectStdStreams
+    import sys
+
+    # Initalize pipeline object
+    pipeline = gp.GenericPipeline()
+
+    # Add needed attr/methods
+    pipeline.name = os.path.splitext(os.path.basename(executable))[0]
+    pipeline.logger = getSearchingLogger(pipeline.name)
+    pipeline.inputs['args'] = [parset]
+    pipeline.inputs['config'] = config
+
+    # Run the pipeline
+    status = pipeline.run(pipeline.name)
+
+    return status
+
+
 class Scheduler(object):
     """
     The scheduler runs all jobs sent to it in parallel
@@ -68,7 +93,8 @@ class Scheduler(object):
         with Timer(self.log, 'action'):
             pool = multiprocessing.Pool(processes=self.max_procs)
             for act in action_list:
-                pool.apply_async(act.call_generic_pipeline)
+                pool.apply_async(call_generic_pipeline, (act.pipeline_executable,
+                    act.pipeline_parset_file, act.pipeline_config_file))
             pool.close()
             pool.join()
 
@@ -97,3 +123,5 @@ class Scheduler(object):
             results = results[0]
 
         return results
+
+
