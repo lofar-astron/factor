@@ -712,7 +712,7 @@ def image_with_mask(op, imager_parset, prefix, input_mapfiles, directions=None,
             imager_parset['iterate_threshold'] = False
         actions = [MakeMask(op.parset, bm, imager_parset,
             prefix=prefix, direction=d, index=i) for d, dm in
-            zip(d_list, image_basename_mapfiles)]
+            zip(directions, image_basename_mapfiles)]
         mask_mapfiles = op.s.run(actions)
 
         threshold_5rms = []
