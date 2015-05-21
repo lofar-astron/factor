@@ -301,7 +301,7 @@ class FacetSelfcal(Operation):
 #         image0_basenames_mapfiles = self.s.run(actions)
 
         image0_basenames_mapfiles = image_with_mask(self, p['imager0'],
-            'facet_selfcal0', d_list, avg_data_mapfiles)
+            'facet_selfcal0', avg_data_mapfiles, directions=d_list)
 #         for i in range(p['imager0']['ncycles']):
 #             if p['imager0']['use_rms'] and i == p['imager0']['ncycles'] - 1:
 #                 p['imager0']['threshold'] = threshold_5rms
