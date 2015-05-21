@@ -102,6 +102,7 @@ class Scheduler(object):
 
         # Run the action(s)
         with Timer(self.log, 'action'):
+            nprocs = min(self.max_procs, len(action_list))
             pool = multiprocessing.Pool(processes=self.max_procs)
             for act in action_list:
                 pool.apply_async(call_generic_pipeline, (act.pipeline_executable,
