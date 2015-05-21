@@ -7,7 +7,7 @@ import os
 from factor.lib.context import Timer
 
 
-def call_generic_pipeline(executable, parset, config):
+def call_generic_pipeline(executable, parset, config, logbasename):
     """
     Creates a GenericPipeline object and runs the pipeline
 
@@ -35,7 +35,10 @@ def call_generic_pipeline(executable, parset, config):
     pipeline.inputs['config'] = config
 
     # Run the pipeline
-    status = pipeline.run(pipeline.name)
+    with open("{0}.out.log".format(logbasename), "wb") as out, \
+        open("{0}.err.log".format(logbasename), "wb") as err:
+        with RedirectStdStreams(stdout=out, stderr=err):
+            status = pipeline.run(pipeline.name)
 
     return status
 
@@ -102,7 +105,8 @@ class Scheduler(object):
             pool = multiprocessing.Pool(processes=self.max_procs)
             for act in action_list:
                 pool.apply_async(call_generic_pipeline, (act.pipeline_executable,
-                    act.pipeline_parset_file, act.pipeline_config_file))
+                    act.pipeline_parset_file, act.pipeline_config_file,
+                    act.logbasename))
             pool.close()
             pool.join()
 
