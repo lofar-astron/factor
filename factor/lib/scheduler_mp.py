@@ -7,6 +7,30 @@ import os
 from factor.lib.context import Timer
 
 
+def call_generic_pipeline(executable, parset, config):
+    """
+    Creates a GenericPipeline object and runs the pipeline
+    """
+    from genericpipeline.bin import genericpipeline as gp
+    from lofarpipe.support.pipelinelogging import getSearchingLogger
+    from factor.lib.context import RedirectStdStreams
+    import sys
+
+    # Initalize pipeline object
+    pipeline = gp.GenericPipeline()
+
+    # Add needed attr/methods
+    pipeline.name = os.path.splitext(os.path.basename(executable))[0]
+    pipeline.logger = getSearchingLogger(pipeline.name)
+    pipeline.inputs['args'] = [parset]
+    pipeline.inputs['config'] = config
+
+    # Run the pipeline
+    status = pipeline.run(pipeline.name)
+
+    return status
+
+
 class Scheduler(object):
     """
     The scheduler runs all jobs sent to it in parallel
@@ -67,19 +91,12 @@ class Scheduler(object):
         # Run the action(s)
         self.log.debug('Running up to {0} actions in parallel'.format(self.max_procs))
         with Timer(self.log, 'action'):
-#             pool = multiprocessing.Pool(processes=self.max_procs)
-#             for act in action_list:
-#                 pool.apply_async(act.call_generic_pipeline)
-#             pool.close()
-#             pool.join()
-
-            procs = []
+            pool = multiprocessing.Pool(processes=self.max_procs)
             for act in action_list:
-                procs.append(multiprocessing.Process(target=act.call_generic_pipeline()))
-            for p in procs:
-                p.start()
-            for p in procs:
-                p.join()
+                pool.apply_async(call_generic_pipeline, (act.pipeline_executable,
+                    act.pipeline_parset_file, act.pipeline_config_file))
+            pool.close()
+            pool.join()
 
         # Sync the remote nodes to the local node
         if self.op_parset['cluster_specific']['distribute']:

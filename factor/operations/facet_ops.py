@@ -241,11 +241,12 @@ class FacetSelfcal(Operation):
         """
         from factor.actions.visibilities import Average, Concatenate, PhaseShift
         from factor.actions.calibrations import Apply, Solve
-        from factor.actions.images import MakeImageIterate
+        from factor.actions.images import MakeImage, MakeMask
         from factor.actions.models import FFT
         from factor.actions.solutions import Smooth, ResetPhases
         from factor.lib.operation_lib import copy_column, make_chunks, \
-            merge_chunks, merge_parmdbs, merge_chunk_parmdbs, check_selfcal
+            merge_chunks, merge_parmdbs, merge_chunk_parmdbs, check_selfcal, \
+            image_with_mask
         from factor.operations.hardcoded_param import facet_selfcal as p
         from factor.lib.datamap_lib import read_mapfile
         import numpy as np
@@ -294,10 +295,41 @@ class FacetSelfcal(Operation):
         avg_data_mapfiles = self.s.run(actions)
 
         self.log.debug('Imaging...')
-        actions = [MakeImageIterate(self.parset, dm, p['imager0'],
-        	prefix='facet_selfcal0', direction=d) for d, dm in zip(d_list,
-        	avg_data_mapfiles)]
-        image0_basenames_mapfiles = self.s.run(actions)
+#         actions = [MakeImageIterate(self.parset, dm, p['imager0'],
+#         	prefix='facet_selfcal0', direction=d) for d, dm in zip(d_list,
+#         	avg_data_mapfiles)]
+#         image0_basenames_mapfiles = self.s.run(actions)
+
+        image0_basenames_mapfiles = image_with_mask(self, p['imager0'],
+            'facet_selfcal0', d_list, avg_data_mapfiles)
+#         for i in range(p['imager0']['ncycles']):
+#             if p['imager0']['use_rms'] and i == p['imager0']['ncycles'] - 1:
+#                 p['imager0']['threshold'] = threshold_5rms
+#                 p['imager0']['niter'] = 1000000
+#
+#             actions = [MakeImage(self.parset, dm, p['imager0'],
+#             	prefix='facet_selfcal0', direction=d, index=i) for d, dm in
+#             	zip(d_list, avg_data_mapfiles)]
+#             image_basename_mapfiles = self.s.run(actions)
+#
+#             if i == p['imager0']['ncycles'] - 1:
+#                 break
+#
+#             if i > 0 and p['imager0']['iterate_threshold']:
+#                 # Only iterate the threshold for the first pass
+#                 p['imager0']['iterate_threshold'] = False
+#             actions = [MakeMask(self.parset, bm, p['imager0'],
+#             	prefix='facet_selfcal0', direction=d, index=i) for d, dm in
+#             	zip(d_list, image_basename_mapfiles)]
+#             mask_mapfiles = self.s.run(actions)
+#
+#             threshold_5rms = []
+#             for mm in mask_mapfiles:
+#                 mask_file, _ = read_mapfile(mm)
+#                 log_file = mask_file[0] + '.log'
+#                 with open(log_file, 'r') as f:
+#                     lines = f.readlines()
+#                     threshold_5rms.append(lines[0].split(': ')[-1] + 'Jy')
 
         self.log.info('FFTing model image (facet model #0)...')
         actions = [FFT(self.parset, dm, mm, p['imager0'], prefix='fft0',
