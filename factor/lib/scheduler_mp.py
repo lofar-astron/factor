@@ -10,6 +10,15 @@ from factor.lib.context import Timer
 def call_generic_pipeline(executable, parset, config):
     """
     Creates a GenericPipeline object and runs the pipeline
+
+    Parameters
+    ----------
+    executable : str
+        Name of pipeline executable
+    parset : str
+        Name of pipeline parset file
+    config : str
+        Name of pipeline config file
     """
     from genericpipeline.bin import genericpipeline as gp
     from lofarpipe.support.pipelinelogging import getSearchingLogger
@@ -89,7 +98,6 @@ class Scheduler(object):
                         working_dir, host))
 
         # Run the action(s)
-        self.log.debug('Running up to {0} actions in parallel'.format(self.max_procs))
         with Timer(self.log, 'action'):
             pool = multiprocessing.Pool(processes=self.max_procs)
             for act in action_list:

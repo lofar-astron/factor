@@ -671,6 +671,7 @@ def image_with_mask(op, imager_parset, prefix, input_mapfiles, directions=None,
     Helper function to run imaging with masking
     """
     from factor.actions.images import MakeImage, MakeMask
+    from factor.lib.datamap_lib import read_mapfile
 
     mask_datamaps = []
     if directions is not None:
