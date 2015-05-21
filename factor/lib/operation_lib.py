@@ -349,39 +349,3 @@ def verify_subtract(image_pre, image_post, res_val, imager):
         return False, maxval, maxvalpre
     else:
         return True, maxval, maxvalpre
-
-
-def image_with_mask(op, imager_parset, prefix, d_list, input_mapfiles):
-    """
-    Helper function to run imaging with masking
-    """
-    for i in range(p['imager0']['ncycles']):
-        if p['imager0']['use_rms'] and i == p['imager0']['ncycles'] - 1:
-            p['imager0']['threshold'] = threshold_5rms
-            p['imager0']['niter'] = 1000000
-
-        actions = [MakeImage(self.parset, dm, p['imager0'],
-            prefix='facet_selfcal0', direction=d, index=i) for d, dm in
-            zip(d_list, avg_data_mapfiles)]
-        image_basename_mapfiles = self.s.run(actions)
-
-        if i == p['imager0']['ncycles'] - 1:
-            break
-
-        if i > 0 and p['imager0']['iterate_threshold']:
-            # Only iterate the threshold for the first pass
-            p['imager0']['iterate_threshold'] = False
-        actions = [MakeMask(self.parset, bm, p['imager0'],
-            prefix='facet_selfcal0', direction=d, index=i) for d, dm in
-            zip(d_list, image_basename_mapfiles)]
-        mask_mapfiles = self.s.run(actions)
-
-        threshold_5rms = []
-        for mm in mask_mapfiles:
-            mask_file, _ = read_mapfile(mm)
-            log_file = mask_file[0] + '.log'
-            with open(log_file, 'r') as f:
-                lines = f.readlines()
-                threshold_5rms.append(lines[0].split(': ')[-1] + 'Jy')
-
-    return image_basename_mapfiles

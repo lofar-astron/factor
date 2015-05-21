@@ -241,7 +241,7 @@ class FacetSelfcal(Operation):
         """
         from factor.actions.visibilities import Average, Concatenate, PhaseShift
         from factor.actions.calibrations import Apply, Solve
-        from factor.actions.images import MakeImage, MakeMask
+        from factor.actions.images import MakeImage, MakeMask, MakeImageIterate
         from factor.actions.models import FFT
         from factor.actions.solutions import Smooth, ResetPhases
         from factor.lib.operation_lib import copy_column, make_chunks, \

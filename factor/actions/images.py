@@ -665,4 +665,64 @@ class MakeImageIterate(Action):
         return self.get_results()
 
 
+def image_with_mask(op, imager_parset, prefix, input_mapfiles, directions=None,
+    bands=None):
+    """
+    Helper function to run imaging with masking
+    """
+    from factor.actions.images import MakeImage, MakeMask
+
+    mask_datamaps = []
+    if directions is not None:
+        for direction in directions:
+            if direction.region_selfcal is not None and \
+                op.parset['imager'].lower() == 'casapy':
+                # Use clean region file for first image
+                mask_datamaps.append(op.write_mapfile([direction.region_selfcal],
+                    prefix=prefix+'_input', direction=direction,
+                    index=index))
+            else:
+                mask_datamaps.append(None)
+    else:
+        mask_datamaps = [None] * len(input_mapfiles)
+    threshold_5rms = [imager_parset['threshold']] * len(input_mapfiles)
+
+    if directions is None:
+        directions = [None] * len(input_mapfiles)
+    if bands is None:
+        bands = [None] * len(input_mapfiles)
+    imager_parsets = [imager_parset.copy()] * len(input_mapfiles)
+
+    for i in range(imager_parset['ncycles']):
+        if imager_parset['use_rms'] and i == imager_parset['ncycles'] - 1:
+            for j, thresh in enumerate(threshold_5rms):
+                imager_parsets[j]['threshold'] = thresh
+                imager_parset[j]['niter'] = 1000000
+
+        actions = [MakeImage(op.parset, dm, p, mask_datamap=mm,
+            prefix=prefix, direction=d, index=i) for d, dm, mm, p in
+            zip(directions, input_mapfiles, mask_datamaps, imager_parsets)]
+        image_basename_mapfiles = op.s.run(actions)
+
+        if i == imager_parset['ncycles'] - 1:
+            break
+
+        if i > 0 and imager_parset['iterate_threshold']:
+            # Only iterate the threshold for the first pass
+            imager_parset['iterate_threshold'] = False
+        actions = [MakeMask(op.parset, bm, imager_parset,
+            prefix=prefix, direction=d, index=i) for d, dm in
+            zip(d_list, image_basename_mapfiles)]
+        mask_mapfiles = op.s.run(actions)
+
+        threshold_5rms = []
+        for mm in mask_mapfiles:
+            mask_file, _ = read_mapfile(mm)
+            log_file = mask_file[0] + '.log'
+            with open(log_file, 'r') as f:
+                lines = f.readlines()
+                threshold_5rms.append(lines[0].split(': ')[-1] + 'Jy')
+
+    return image_basename_mapfiles
+
 
