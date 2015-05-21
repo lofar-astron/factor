@@ -186,7 +186,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     s.setPatchPositions(method='wmean')
 
     # Filter fainter patches
-    s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='max', force=True)
+    s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='sum', force=True)
     if len(s) == 0:
         log.critical("No sources found that meet the specified min flux criteria.")
         sys.exit(1)
@@ -195,13 +195,13 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
 
     # Trim directions list to get directions_total_num of directions
     if directions_max_num is not None:
-        dir_fluxes = s.getColValues('I', aggregate='max')
+        dir_fluxes = s.getColValues('I', aggregate='sum')
         dir_fluxes_sorted = dir_fluxes.tolist()
         dir_fluxes_sorted.sort(reverse=True)
         cut_jy = dir_fluxes_sorted[-1]
         while len(dir_fluxes_sorted) > directions_max_num:
             cut_jy = dir_fluxes_sorted.pop() + 0.00001
-        s.remove('I < {0} Jy'.format(cut_jy), aggregate='max')
+        s.remove('I < {0} Jy'.format(cut_jy), aggregate='sum')
 
     log.info('Kept {0} directions in total'.format(len(s.getPatchNames())))
 
