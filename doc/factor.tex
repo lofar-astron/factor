@@ -86,21 +86,22 @@ dir_working = /data/wdir
 # please keep a copy of these data elsewhere
 dir_ms = /data/bands
 
-# Parmdb name for dir-indep. selfcal solutions (stored inside the input
-# band measurement sets, so path should be relative to those). Default is
-# instrument
+# Parmdb name for dir-indep. selfcal solutions (default = instrument). The
+# parmdb is assumed to be stored inside the input band measurement sets, so path
+# should be relative to those).
 parmdb_name = instrument_ap_smoothed
 
 # Make final mosaic (default = True)
 make_mosaic = False
 
-# Use interactive mode (default = False)
+# Use interactive mode (default = False). In interactive mode, Factor will ask
+# for the user to verify directions, etc.
 interactive = False
 
-# Choose imager to use (one of awimager, casapy, wsclean; default = awimager)
-imager = awimager
-imagerroot = /lofar/build/gnu_opt/installed
-imager_selfcal = awimager
+# Choose imager to use: one of awimager, casapy, wsclean (default = awimager)
+imager = wsclean
+imagerroot = /path/to/wsclean
+imager_selfcal = casapy
 
 
 [directions]
@@ -108,18 +109,22 @@ imager_selfcal = awimager
 # are selected internally using the flux and size cuts below
 directions_file = /data/directions.txt
 
-# Flux and size cuts for selecting directions internally (min flux, max size
+# Flux and size cuts for selecting directions internally: min flux, max size
 # of a source, and max separation between sources below which they are grouped
-# into one direction) (required if no directions_file is given)
+# into one direction (required if no directions_file is given)
 flux_min_Jy = 0.1
 size_max_arcmin = 3.0
 separation_max_arcmin = 6.0
+
+# The edges of facets can be adjusted to avoid sources found in the initial
+# subtract operation (default = False)
+check_edges = True
 
 # The number of internally derived directions can be limited to a maximum number
 # of directions if desired (default = all)
 max_num = 50
 
-# Total number of directions to process (default = all)
+# Total number of directions to process in this run (default = all)
 ndir = 10
 
 # Grouping of directions into groups that are processed in parallel, defined as
