@@ -698,7 +698,7 @@ def image_with_mask(op, imager_parset, prefix, input_mapfiles, directions=None,
         if imager_parset['use_rms'] and i == imager_parset['ncycles'] - 1:
             for j, thresh in enumerate(threshold_5rms):
                 imager_parsets[j]['threshold'] = thresh
-                imager_parset[j]['niter'] = 1000000
+                imager_parsets[j]['niter'] = 1000000
 
         actions = [MakeImage(op.parset, dm, p, mask_datamap=mm,
             prefix=prefix, direction=d, index=i) for d, dm, mm, p in
