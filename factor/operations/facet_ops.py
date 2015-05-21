@@ -229,8 +229,6 @@ class FacetSelfcal(Operation):
 
         # Set up scheduler (runs at most num_nodes directions in parallel)
         num_nodes = len(self.parset['cluster_specific']['node_list'])
-#         self.s = Scheduler(max_threads=num_nodes, name=self.name,
-#             op_parset=self.parset)
         self.s = Scheduler(max_procs=num_nodes, name=self.name,
             op_parset=self.parset)
 
@@ -241,8 +239,7 @@ class FacetSelfcal(Operation):
         """
         from factor.actions.visibilities import Average, Concatenate, PhaseShift
         from factor.actions.calibrations import Apply, Solve
-        from factor.actions.images import MakeImage, MakeMask, MakeImageIterate, \
-            image_with_mask
+        from factor.actions.images import MakeImage, MakeMask, image_with_mask
         from factor.actions.models import FFT
         from factor.actions.solutions import Smooth, ResetPhases
         from factor.lib.operation_lib import copy_column, make_chunks, \
@@ -341,10 +338,8 @@ class FacetSelfcal(Operation):
             host_list=d_hosts[i]))
 
         self.log.debug('Imaging...')
-        actions = [MakeImageIterate(self.parset, m, p['imager1'],
-            prefix='facet_selfcal1', direction=d) for d, m in zip(d_list,
-            merged_data_mapfiles)]
-        image1_basenames_mapfiles = self.s.run(actions)
+        image1_basenames_mapfiles = image_with_mask(self, p['imager1'],
+            'facet_selfcal1', merged_data_mapfiles, directions=d_list)
 
         self.log.info('FFTing model image (facet model #1)...')
         self.log.debug('Merging unaverged chunks...')
@@ -393,9 +388,8 @@ class FacetSelfcal(Operation):
             host_list=d_hosts[i]))
 
         self.log.debug('Imaging...')
-        actions = [MakeImageIterate(self.parset, m, p['imager2'], prefix='facet_selfcal2',
-            direction=d) for d, m in zip(d_list, merged_data_mapfiles)]
-        image2_basenames_mapfiles = self.s.run(actions)
+        image2_basenames_mapfiles = image_with_mask(self, p['imager2'],
+            'facet_selfcal2', merged_data_mapfiles, directions=d_list)
 
         self.log.info('FFTing model image (facet model #2)...')
         actions = [FFT(self.parset, dm, mm, p['imager2'], prefix='fft2',
@@ -475,9 +469,8 @@ class FacetSelfcal(Operation):
             host_list=d_hosts[i]))
 
         self.log.debug('Imaging...')
-        actions = [MakeImageIterate(self.parset, m, p['imager3'], prefix='facet_selfcal3',
-            direction=d) for d, m in zip(d_list, merged_data_mapfiles)]
-        image_final_basenames_mapfiles = self.s.run(actions)
+        image_final_basenames_mapfiles = image_with_mask(self, p['imager3'],
+            'facet_selfcal3', merged_data_mapfiles, directions=d_list)
 
         # Loop over final calibration as long as there is improvement
         index = 3
@@ -572,10 +565,16 @@ class FacetSelfcal(Operation):
 
             self.log.debug('Imaging...')
             image_final_basenames_mapfiles_prev = image_final_basenames_mapfiles[:]
-            actions = [MakeImageIterate(self.parset, m, p['imager4'],
-                prefix='facet_selfcal{0}'.format(index),
-                direction=d) for d, m in zip(d_list, merged_data_mapfiles) if d.improving]
-            image_final_basenames_mapfiles = self.s.run(actions)
+            d_list_impr = []
+            merged_data_mapfiles_impr = []
+            for d, m in zip(d_list, merged_data_mapfiles):
+                if d.improving:
+                    d_list_impr.append(d)
+                    merged_data_mapfiles_impr.append(m)
+            if len(d_list_impr) > 0:
+                image_final_basenames_mapfiles = image_with_mask(self, p['imager4'],
+                    'facet_selfcal{0}'.format(index), merged_data_mapfiles_impr,
+                    directions=d_list_impr)
 
             # Check if image rms / ratio of max to min are still improving. If so,
             # continue last selfcal step. If not, stop sefcal
@@ -621,8 +620,6 @@ class FacetImage(Operation):
 
         # Set up scheduler (runs at most num_nodes directions in parallel)
         num_nodes = len(self.parset['cluster_specific']['node_list'])
-#         self.s = Scheduler(max_threads=num_nodes, name=self.name,
-#             op_parset=self.parset)
         self.s = Scheduler(max_procs=num_nodes, name=self.name,
             op_parset=self.parset)
 
@@ -633,7 +630,7 @@ class FacetImage(Operation):
         """
         from factor.actions.visibilities import Average, Concatenate, ChgCentre
         from factor.actions.calibrations import Apply
-        from factor.actions.images import MakeImageIterate
+        from factor.actions.images import image_with_mask
         from factor.actions.models import FFT
         from factor.lib.operation_lib import copy_column, merge_chunks
         from factor.operations.hardcoded_param import facet_image as p
@@ -707,9 +704,8 @@ class FacetImage(Operation):
             prefix=None, clobber=True)], prefix='imager', direction=d_list[i],
             host_list=d_hosts[i]))
 
-        actions = [MakeImageIterate(self.parset, m, p['imager'], prefix='facet_image',
-            direction=d) for d, m in zip(d_list, merged_data_mapfiles)]
-        image_basenames_mapfiles = self.s.run(actions)
+        image_basenames_mapfiles = image_with_mask(self, p['imager'],
+            'facet_image', merged_data_mapfiles, directions=d_list)
 
         self.log.info('FFTing model image...')
         merged_data_mapfiles = []
@@ -878,8 +874,7 @@ class FacetSub(Operation):
         """
         Run the steps for this operation
         """
-        from factor.actions.images import MakeImageIterate
-        from factor.actions.visibilities import Average, ChgCentre, PhaseShift
+        from factor.actions.visibilities import PhaseShift
         from factor.actions.calibrations import Subtract
         from factor.lib.datamap_lib import read_mapfile
         from factor.lib.operation_lib import copy_column

@@ -32,7 +32,7 @@ class InitSubtract(Operation):
         """
         Run the steps for this operation
         """
-        from factor.actions.images import MakeImageIterate
+        from factor.actions.images import image_with_mask
         from factor.actions.models import MakeSkymodelFromModelImage, MergeSkymodels, FFT
         from factor.actions.calibrations import Subtract
         from factor.actions.visibilities import Average, ChgCentre
@@ -76,9 +76,8 @@ class InitSubtract(Operation):
             input_to_imager_mapfile = chgcentre_data_mapfile
         else:
             input_to_imager_mapfile = input_data_mapfile
-        action = MakeImageIterate(self.parset, input_to_imager_mapfile, p['imagerh'],
-            prefix='highres')
-        highres_image_basenames_mapfile = self.s_imager.run(action)
+        highres_image_basenames_mapfile = image_with_mask(self, p['imagerh'],
+            'highres', [input_to_imager_mapfile])
 
         self.log.info('Making high-res sky model...')
         action = MakeSkymodelFromModelImage(self.parset,
@@ -109,9 +108,8 @@ class InitSubtract(Operation):
         avg_files_mapfile = self.s.run(action)
 
         self.log.info('Low-res imaging...')
-        action = MakeImageIterate(self.parset, avg_files_mapfile, p['imagerl'],
-            prefix='lowres')
-        lowres_image_basenames_mapfile = self.s_imager.run(action)
+        lowres_image_basenames_mapfile = image_with_mask(self, p['imagerl'],
+            'lowres', [avg_files_mapfile])
 
         self.log.info('Making low-res sky model...')
         action = MakeSkymodelFromModelImage(self.parset, lowres_image_basenames_mapfile,
