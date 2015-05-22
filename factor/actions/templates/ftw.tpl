@@ -9,33 +9,11 @@ os.system('cp {{ task_py_file }} .')
 os.system('buildmytasks')
 execfile('mytasks.py')
 
-ms    = sys.argv[6]
-modimage  = sys.argv[7] + '.model'
-ntermsi   = numpy.int(sys.argv[8])
-imsizep   = numpy.int(sys.argv[9])
-
-wplanes   = 1
-
-if imsizep > 512:
-    wplanes = 64
-
-if imsizep > 799:
-    wplanes = 96
-
-if imsizep > 1023:
-    wplanes = 128
-
-if imsizep > 1599:
-    wplanes = 256
-
-if imsizep > 2047:
-    wplanes = 384
-
-if imsizep > 3000:
-    wplanes = 448
-
-if imsizep > 4095:
-    wplanes = 512
+ms    = sys.argv[4]
+modimage  = sys.argv[5] + '.model'
+completed_file = sys.argv[6]
+ntermsi   = numpy.int(sys.argv[7])
+wplanes   = numpy.int(sys.argv[8])
 
 if ntermsi == 1:
     mod = [modimage]
@@ -51,4 +29,6 @@ if wplanes > 1:
 else:
     ft(vis=ms, field="", spw="", model=mod, nterms=ntermsi, reffreq="",
     complist="", incremental=False, usescratch=True, async=False)
+
+os.system('touch {0}'.format(completed_file))
 

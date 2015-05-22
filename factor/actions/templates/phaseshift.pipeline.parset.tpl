@@ -7,9 +7,11 @@ dpppex.control.opts.inputkey=msin
 dpppex.control.opts.executable={{ lofarroot }}/bin/NDPPP
 dpppex.control.opts.mapfile_out={{ output_datamap }}
 dpppex.control.opts.outputkey=msout
-dpppex.control.opts.max_per_node={{ ncpu }}
+dpppex.control.opts.max_per_node={{ n_per_node }}
 
 dpppex.parsetarg.msin.datacolumn={{ columnname }}
+dpppex.parsetarg.msin.autoweight = False
+dpppex.parsetarg.msout.writefullresflag=False
 dpppex.parsetarg.steps=[shift]
 dpppex.parsetarg.shift.type=phaseshifter
 dpppex.parsetarg.shift.phasecenter = [{{ ra }}deg, {{ dec }}deg]

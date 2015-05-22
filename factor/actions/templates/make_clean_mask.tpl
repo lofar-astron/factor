@@ -3,42 +3,51 @@ import numpy
 import sys
 
 image_name = sys.argv[1]
-mask_name  = image_name.split('.image')[0] + '.cleanmask'
+mask_name  = sys.argv[2]
 atrous_do = {{ atrous_do}}
 threshisl = {{ threshisl }}
 threshpix = {{ threshpix }}
 rmsbox = {{ rmsbox }}
 iterate_threshold = {{ iterate_threshold }}
 adaptive_rmsbox = {{ adaptive_rmsbox }}
+<<<<<<< HEAD
+=======
+beam = {{ beam }}
+img_format = '{{ format }}'
+>>>>>>> awimager
 
 if atrous_do:
    threshisl = 4.0
 
 if iterate_threshold:
     # Start with high threshold and lower it until we get at least one island
-    threshpix_orig = threshpix
-    threshisl_orig = threshisl
     nisl = 0
-    threspix = 25
-    thresisl = 15
+    threshpix = 25
+    threshisl = 15
     while nisl == 0:
         img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
             thresh_pix=numpy.float(threshpix), thresh_isl=numpy.float(threshisl),
+<<<<<<< HEAD
             atrous_do=atrous_do, ini_method='curvature',
+=======
+            atrous_do=atrous_do, ini_method='curvature', beam=beam,
+>>>>>>> awimager
             adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=20, quiet=True)
         nisl = img.nisl
         threshpix /= 1.2
         threshisl /= 1.2
-    threshpix = threshpix_orig
-    threshisl = threshisl_orig
 else:
     img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
         thresh_pix=numpy.float(threshpix), thresh_isl=numpy.float(threshisl),
+<<<<<<< HEAD
         atrous_do=atrous_do, ini_method='curvature',
+=======
+        atrous_do=atrous_do, ini_method='curvature', beam=beam,
+>>>>>>> awimager
         adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=20, quiet=True)
 
 img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
-    img_format='casa', clobber=True)
+    img_format=img_format, clobber=True)
 
 log_file = mask_name + '.log'
 with open(log_file, 'wb') as f:

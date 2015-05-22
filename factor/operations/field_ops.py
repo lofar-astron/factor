@@ -11,7 +11,7 @@ MakeMosaic : Operation
 """
 import os
 from factor.lib.operation import Operation
-from factor.lib.scheduler import Scheduler
+from factor.lib.scheduler_mp import Scheduler
 
 
 class InitSubtract(Operation):
@@ -24,7 +24,7 @@ class InitSubtract(Operation):
 
         # Set up imager scheduler (runs at most num_nodes imagers in parallel)
         num_nodes = len(self.parset['cluster_specific']['node_list'])
-        self.s_imager = Scheduler(max_threads=num_nodes, name=self.name,
+        self.s = Scheduler(max_procs=num_nodes, name=self.name,
             op_parset=self.parset)
 
 
@@ -32,112 +32,108 @@ class InitSubtract(Operation):
         """
         Run the steps for this operation
         """
-        from factor.actions.images import MakeImageIterate
+        from factor.actions.images import image_with_mask
         from factor.actions.models import MakeSkymodelFromModelImage, MergeSkymodels, FFT
         from factor.actions.calibrations import Subtract
-        from factor.actions.visibilities import Average, Split
+        from factor.actions.visibilities import Average, ChgCentre
         from factor.lib.datamap_lib import read_mapfile
         from factor.operations.hardcoded_param import init_subtract as p
+        from factor.lib.operation_lib import make_chunks, merge_chunks
+        import numpy as np
 
         bands = self.bands
 
-        # Check operation state
+        # Check state
+        if self.check_completed(bands):
+            return
+
         if os.path.exists(self.statebasename+'.done'):
             merged_skymodels_mapfile = os.path.join(self.parset['dir_working'],
                 'datamaps/InitSubtract/MergeSkymodels/merge_output.datamap')
             skymodels, _ = read_mapfile(merged_skymodels_mapfile)
             for band, skymodel in zip(bands, skymodels):
                 band.skymodel_dirindep = skymodel
+            input_data_mapfile = os.path.join(self.parset['dir_working'],
+                'datamaps/InitSubtract/input_data.datamap')
+            files, _ = read_mapfile(input_data_mapfile)
+            for band, f in zip(bands, files):
+                band.file = f
             return
 
         # Make initial data maps for the input datasets and their dir-indep
         # instrument parmdbs.
         input_data_mapfile = self.write_mapfile([band.file for band in bands],
         	prefix='input_data')
-        vis_mapfiles = []
-        files, hosts = read_mapfile(input_data_mapfile)
-        for f, h, b in zip(files, hosts, bands):
-            vis_mapfiles.append(self.write_mapfile([f],
-        	prefix='input_data_vis', host_list=[h], band=b, index=1))
         dir_indep_parmdbs_mapfile = self.write_mapfile([band.dirindparmdb for band
         	in bands], prefix='dir_indep_parmdbs')
 
-        self.log.info('Spliting off corrected data...')
-        actions = [Split(self.parset, dm, p['split'],
-            prefix='highres', band=band) for dm, band in zip(vis_mapfiles, bands)]
-        split_files_mapfiles= self.s.run(actions)
-
         self.log.info('High-res imaging...')
-        actions = [MakeImageIterate(self.parset, dm, p['imagerh'],
-            prefix='highres', band=band) for dm, band in
-            zip(split_files_mapfiles, bands)]
-        highres_image_basenames_mapfiles = self.s_imager.run(actions)
-        basenames = []
-        hosts = []
-        for bm in highres_image_basenames_mapfiles:
-            file_list, host_list = read_mapfile(bm)
-            basenames += file_list
-            hosts += host_list
-        highres_image_basenames_mapfile = self.write_mapfile(basenames,
-        	prefix='highres_basenames', host_list=hosts)
-
-        if self.parset['use_ftw']:
-            self.log.debug('FFTing high-res model image...')
-            p['modelh']['imsize'] = p['imagerh']['imsize']
-            action = FFT(self.parset, input_data_mapfile,
-                highres_image_basenames_mapfile, p['modelh'], prefix='highres')
-            self.s.run(action)
-            highres_skymodels_mapfile = None
+        if self.parset['use_chgcentre']:
+            self.log.debug('Changing center to zenith...')
+            action = ChgCentre(self.parset, input_data_mapfile, {},
+                prefix='highres', band=band)
+            chgcentre_data_mapfile = self.s.run(action)
+            input_to_imager_mapfile = chgcentre_data_mapfile
+        else:
+            input_to_imager_mapfile = input_data_mapfile
+        highres_image_basenames_mapfile = image_with_mask(self, p['imagerh'],
+            'highres', [input_to_imager_mapfile])
 
         self.log.info('Making high-res sky model...')
         action = MakeSkymodelFromModelImage(self.parset,
-            highres_image_basenames_mapfile, p['modelh'], prefix='highres')
+            highres_image_basenames_mapfile, p['imagerh'], prefix='highres')
         highres_skymodels_mapfile = self.s.run(action)
+
+        self.log.debug('FFTing high-res model image...')
+        action = FFT(self.parset, input_data_mapfile,
+            highres_image_basenames_mapfile, p['imagerh'], prefix='highres')
+        self.s_imager.run(action)
 
         self.log.info('Subtracting high-res sky model...')
         if self.parset['use_ftw']:
             highres_skymodels_mapfile = None
         action = Subtract(self.parset, input_data_mapfile, p['calibh'],
-            model_datamap=highres_skymodels_mapfile,
-            parmdb_datamap=dir_indep_parmdbs_mapfile, prefix='highres')
+            None, dir_indep_parmdbs_mapfile, prefix='highres', band=band)
         self.s.run(action)
 
         self.log.info('Averaging...')
-        actions = [Average(self.parset, dm, p['avgl'],
-            prefix='highres', band=band) for dm, band in zip(vis_mapfiles, bands)]
-        avg_files_mapfiles = self.s.run(actions)
+        if self.parset['use_chgcentre']:
+            self.log.debug('Changing center to zenith...')
+            action = ChgCentre(self.parset, input_data_mapfile, {},
+                prefix='lowres')
+            chgcentre_data_mapfile = self.s.run(action)
+            input_to_avg_mapfile = chgcentre_data_mapfile
+        else:
+            input_to_avg_mapfile = input_data_mapfile
+        action = Average(self.parset, input_to_avg_mapfile, p['avgl'],
+            prefix='highres')
+        avg_files_mapfile = self.s.run(action)
 
         self.log.info('Low-res imaging...')
-        actions = [MakeImageIterate(self.parset, dm, p['imagerl'],
-            prefix='lowres', band=band) for dm, band in zip(avg_files_mapfiles, bands)]
-        lowres_image_basenames_mapfiles = self.s_imager.run(actions)
-        basenames = []
-        hosts = []
-        for bm in lowres_image_basenames_mapfiles:
-            file_list, host_list = read_mapfile(bm)
-            basenames += file_list
-            hosts += host_list
-        lowres_image_basenames_mapfile = self.write_mapfile(basenames,
-        	prefix='lowres_basenames', host_list=hosts)
-
-        if self.parset['use_ftw']:
-            self.log.debug('FFTing low-res model image...')
-            p['modell']['imsize'] = p['imagerl']['imsize']
-            action = FFT(self.parset, input_data_mapfile,
-                lowres_image_basenames_mapfile, p['modell'], prefix='lowres')
-            self.s.run(action)
+        lowres_image_basenames_mapfile = image_with_mask(self, p['imagerl'],
+            'lowres', [avg_files_mapfile])
 
         self.log.info('Making low-res sky model...')
         action = MakeSkymodelFromModelImage(self.parset, lowres_image_basenames_mapfile,
-            p['modell'], prefix='lowres')
+            p['imagerl'], prefix='lowres')
         lowres_skymodels_mapfile = self.s.run(action)
 
+        self.log.debug('FFTing low-res model image...')
+        action = FFT(self.parset, input_data_mapfile, lowres_image_basenames_mapfile,
+            p['imagerl'], prefix='lowres')
+        self.s_imager.run(action)
+
         self.log.info('Subtracting low-res sky model...')
+<<<<<<< HEAD
         if self.parset['use_ftw']:
             lowres_skymodels_mapfile = None
         action = Subtract(self.parset, input_data_mapfile, p['calibl'],
             model_datamap=lowres_skymodels_mapfile,
             parmdb_datamap=dir_indep_parmdbs_mapfile, prefix='lowres')
+=======
+        action = Subtract(self.parset, input_data_mapfile, p['calibl'], None,
+            dir_indep_parmdbs_mapfile, prefix='lowres')
+>>>>>>> awimager
         self.s.run(action)
 
         self.log.info('Merging low- and high-res sky models...')
@@ -147,6 +143,9 @@ class InitSubtract(Operation):
         skymodels, _ = read_mapfile(merged_skymodels_mapfile)
         for band, skymodel in zip(bands, skymodels):
             band.skymodel_dirindep = skymodel
+
+        # Save state
+        self.set_completed(bands)
 
 
 class MakeMosaic(Operation):

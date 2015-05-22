@@ -4,15 +4,15 @@ Module that holds all direction-related functions
 import os
 import numpy as np
 import logging
-from factor.lib.direction import Direction as d
+from factor.lib.direction import Direction
 import sys
 from scipy.spatial import Delaunay
 
 
-log = logging.getLogger('directions')
+log = logging.getLogger('factor.directions')
 
 
-def directions_read(directions_file):
+def directions_read(directions_file, factor_working_dir):
     """
     Read a Factor-formatted directions file and return list of Direction objects
 
@@ -20,37 +20,59 @@ def directions_read(directions_file):
     ----------
     directions_file : str
         Filename of Factor-formated directions file
+    factor_working_dir : str
+        Full path of working directory
 
     Returns
     -------
-    data : list of Direction objects
+    directions : list of Direction objects
         List of Direction objects
 
     """
+    from astropy.coordinates import Angle
+
     if not os.path.isfile(directions_file):
         log.critical("Directions file (%s) not found." % (directions_file))
         sys.exit(1)
 
     log.info("Reading directions file: %s" % (directions_file))
-    types = np.dtype({'names': ['name', 'ra', 'dec', 'reg', 'multiscale',
-    	'solint_a', 'solint_p', 'make_final_image', 'cal_radius'],
-    	'formats':['S100', np.float, np.float, 'S100', np.bool, np.int,
-    	np.int, np.bool, np.float]})
-    directions = np.genfromtxt(directions_file, comments='#', delimiter=',',
-    	unpack=False, converters={0: lambda x: x.strip(), 3: lambda x:
-    	x.strip()}, dtype=types)
-    # NOTE: undefined int are "-1", undefined bool are "False", undefined float are nan
+    try:
+        types = np.dtype({'names': ['name', 'radec', 'atrous_do', 'mscale_field_do',
+            'cal_imsize', 'solint_p', 'solint_a', 'field_imsize', 'dynamic_range',
+            'region_selfcal', 'region_field', 'peel_skymodel', 'outlier_source',
+            'cal_radius_deg', 'cal_flux_jy'], 'formats':['S255', 'S255', 'S5',
+            'S5', int, int, int, int, 'S2', 'S255', 'S255', 'S255',
+            'S5', float, float]})
+        directions = np.genfromtxt(directions_file, comments='#', dtype=types)
+    except ValueError:
+        types = np.dtype({'names': ['name', 'radec', 'atrous_do', 'mscale_field_do',
+            'cal_imsize', 'solint_p', 'solint_a', 'field_imsize', 'dynamic_range',
+            'region_selfcal', 'region_field', 'peel_skymodel', 'outlier_source'],
+            'formats':['S255', 'S255', 'S5',
+            'S5', int, int, int, int, 'S2', 'S255', 'S255', 'S255',
+            'S5', float, float]})
+        directions = np.genfromtxt(directions_file, comments='#', dtype=types)
 
     data = []
     for direction in directions:
+        RAstr, Decstr = direction['radec'].split(',')
+        ra = Angle(RAstr).to('deg').value
+        dec = Angle(Decstr).to('deg').value
+
         # some checks on values
-        if np.isnan(direction['ra']) or direction['ra'] < 0 or direction['ra'] > 360:
+        if np.isnan(ra) or ra < 0 or ra > 360:
             log.error('RA %f is wrong for direction: %s. Ignoring direction.'
-            	% (direction['ra'], direction['name']))
+            	% (direction['radec'], direction['name']))
             continue
-        if np.isnan(direction['dec']) or direction['dec'] < -90 or direction['dec'] > 90:
+        if np.isnan(dec) or dec < -90 or dec > 90:
             log.error('DEC %f is wrong for direction: %s. Ignoring direction.'
-                % (direction['dec'], direction['name']))
+                % (direction['radec'], direction['name']))
+            continue
+        if (direction['solint_a'] <= 0 or direction['solint_p'] <= 0) and \
+            np.isnan(direction['apparent_flux']):
+            log.error('One of more of the solution intervals is invalid and no '
+                'apparent flux is specified for direction {0}. Ignoring '
+                'direction.'.format(direction['name']))
             continue
 
         # set defaults
@@ -58,10 +80,27 @@ def directions_read(directions_file):
             direction['solint_a'] = 60
         if direction['solint_p'] <= 0:
             direction['solint_p'] = 1
-        if direction['cal_radius'] <= 0.0 or np.isnan(direction['cal_radius']):
-            direction['cal_radius'] = 3.0 # arcmin
+        if len(direction) > 13:
+            if direction['cal_radius_deg'] <= 0.0 or np.isnan(direction['cal_radius_deg']):
+                cal_radius_deg = None
+            else:
+                cal_radius_deg = direction['cal_radius_deg']
+            if np.isnan(direction['cal_flux_jy']):
+                cal_flux_jy = None
+            else:
+                cal_flux_jy = direction['cal_flux_jy']
+        else:
+            cal_radius_deg = None
+            cal_flux_jy = None
 
-        data.append( d(*direction) )
+        data.append( Direction(direction['name'], ra, dec,
+        	bool(direction['atrous_do']), bool(direction['mscale_field_do']),
+        	direction['cal_imsize'], direction['solint_p'],
+        	direction['solint_a'], direction['field_imsize'],
+        	direction['dynamic_range'], direction['region_selfcal'],
+        	direction['region_field'], direction['peel_skymodel'],
+        	direction['outlier_source'], factor_working_dir, False,
+        	cal_radius_deg, cal_flux_jy))
 
     return data
 
@@ -116,13 +155,14 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     log.info('Found {0} sources through thresholding'.format(
         len(s.getPatchNames())))
 
-    # Filter out sources that lie more than 5 degrees from center
+    # Filter out sources that lie more than 5 degrees from center.
+    # TODO: adjust this for each observation
     log.info('Removing sources beyond the FWHM of the primary beam...')
     dist = s.getDistance(band.ra, band.dec, byPatch=True)
     s.remove(dist > 5.0, aggregate=True) # 5 degree radius
 
     # Save this sky model for later checks of sources falling on facet edges
-    s.write(fileName='factor_inital.skymodel', clobber=True)
+    s.write(fileName='models/initial.skymodel', clobber=True)
 
     # Filter larger patches
     sizes = s.getPatchSizes(units='arcmin', weight=True)
@@ -143,7 +183,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
         if len(nearby[0]) > 1:
             patches = s.getPatchNames()[nearby]
             s.merge(patches.tolist())
-    s.setPatchPositions(method='mid')
+    s.setPatchPositions(method='wmean')
 
     # Filter fainter patches
     s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='sum', force=True)
@@ -168,16 +208,6 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     # Write the file
     log.info("Writing directions file: %s" % (directions_file))
     s.write(fileName=directions_file, format='factor', sortBy='I', clobber=True)
-    if interactive:
-        print("Plotting directions...")
-        s.plot(labelBy='patch')
-        prompt = "Continue processing (y/n)? "
-        answ = raw_input(prompt)
-        while answ.lower() not in  ['y', 'n', 'yes', 'no']:
-            answ = raw_input(prompt)
-        if answ.lower() in ['n', 'no']:
-            log.info('Exiting...')
-            sys.exit(0)
 
     return directions_file
 
@@ -297,7 +327,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
     return direction_groups
 
 
-def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
+def thiessen(directions_list, bounds_scale=0.52, check_edges=False):
     """
     Return list of thiessen polygons and their widths in degrees
 
@@ -307,6 +337,9 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
         List of input directions
     bounds_scale : int, optional
         Scale to use for bounding box
+    check_edges : bool, optional
+        If True, check whether any know source falls on a facet edge. If sources
+        are found that do, the facet is adjusted
 
     Returns
     -------
@@ -314,12 +347,18 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
         List of polygon RA and Dec vertices in degrees
     width_deg : list
         List of polygon bounding box width in degrees
-    check_sources : bool, optional
-        If True, check whether any know source falls on a facet edge. If sources
-        are found that do, the facet is adjusted
 
     """
     import lsmtool
+    try:
+        import shapely.geometry
+        from shapely.ops import cascaded_union
+        has_shapely = True
+    except ImportError:
+        log.warn('Shapely could not be imported. Facet polygons will not be '
+            'adjusted to avoid known sources.')
+        has_shapely = False
+    from itertools import combinations
 
     points, midRA, midDec = getxy(directions_list)
     points = points.T
@@ -336,30 +375,64 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
     scale_offsets = radius * np.array(offsets)
     outer_box = means + scale_offsets
 
-    if check_sources:
-        s = lsmtool.load('factor_inital.skymodel')
-        source_points = radec2xy(x, y, refRA=midRA, refDec=midDec)
-        source_points = source_points.T
+    points = np.vstack([points, outer_box])
+    tri = Delaunay(points)
+    circumcenters = np.array([_circumcenter(tri.points[t])
+                              for t in tri.vertices])
+    thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
+                      for n in range(len(points) - 32)]
 
-        source_on_edge = True
-        points = np.vstack([points, outer_box])
-        while source_on_edge:
-            tri = Delaunay(points)
-            circumcenters = np.array([_circumcenter(tri.points[t])
-                                      for t in tri.vertices])
-            thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
-                              for n in range(len(points) - 32)]
+    # Check for sources near / on facet edges and adjust regions accordingly
+    if has_shapely and check_edges:
+        log.info('Adjusting facets to avoid sources...')
+        s = lsmtool.load('models/initial.skymodel')
+        RA, Dec = s.getPatchPositions(asArray=True)
+        sx, sy = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
+        sizes = s.getPatchSizes(units='degree')
 
-            # Check if any known sources fall on a facet edge
-            source_on_edge, points = adjust_points(points, source_points,
-                thiessen_polys)
-    else:
-        points = np.vstack([points, outer_box])
-        tri = Delaunay(points)
-        circumcenters = np.array([_circumcenter(tri.points[t])
-                                  for t in tri.vertices])
-        thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
-                          for n in range(len(points) - 32)]
+        # Filter sources to get only those close to a boundary. We need to iterate
+        # until no sources are found
+        niter = 0
+        while niter < 5:
+            niter += 1
+            ind_near_edge = []
+            for i, thiessen_poly in enumerate(thiessen_polys):
+                polyv = np.vstack(thiessen_poly)
+                poly_tuple = tuple([(x, y) for x, y in zip(polyv[:, 0], polyv[:, 1])])
+                poly = Polygon(polyv[:, 0], polyv[:, 1])
+                dists = poly.is_inside(sx, sy)
+                for j, dist in enumerate(dists):
+                    pix_radius = sizes.tolist()[j] * 1.2 / 2.0 / 0.066667 # radius of source in pixels
+                    if abs(dist) < pix_radius and j not in ind_near_edge:
+                        ind_near_edge.append(j)
+            if len(ind_near_edge) == 0:
+                break
+            sx = np.array(sx)[ind_near_edge]
+            sy = np.array(sy)[ind_near_edge]
+            sizes = sizes[ind_near_edge]
+
+            # Adjust all facets for each source near a boundary
+            for x, y, size in zip(sx, sy, sizes):
+                for i, thiessen_poly in enumerate(thiessen_polys):
+                    polyv = np.vstack(thiessen_poly)
+                    poly_tuple = tuple([(xp, yp) for xp, yp in zip(polyv[:, 0], polyv[:, 1])])
+                    poly = Polygon(polyv[:, 0], polyv[:, 1])
+                    dist = poly.is_inside(x, y)
+                    p1 = shapely.geometry.Polygon(poly_tuple)
+
+                    pix_radius = size * 1.2 / 2.0 / 0.066667 # size of source in pixels
+                    if abs(dist) < pix_radius:
+                        p2 = shapely.geometry.Point((x, y))
+                        p2buf = p2.buffer(pix_radius)
+                        if dist < 0.0:
+                            # If point is outside, difference the polys
+                            p1 = p1.difference(p2buf)
+                        else:
+                            # If point is inside, union the polys
+                            p1 = p1.union(p2buf)
+                    xyverts = [np.array([xp, yp]) for xp, yp in zip(p1.exterior.coords.xy[0].tolist(),
+                        p1.exterior.coords.xy[1].tolist())]
+                    thiessen_polys[i] = xyverts
 
     # Convert from x, y to RA, Dec
     thiessen_polys_deg = []
@@ -378,13 +451,6 @@ def thiessen(directions_list, bounds_scale=0.52, check_sources=False):
         width_deg.append(hyp_deg.value)
 
     return thiessen_polys_deg, width_deg
-
-
-def adjust_points(points, source_points, polys):
-    """
-    Adjust points to avoid known sources
-    """
-    pass
 
 
 def make_region_file(vertices, outputfile):
@@ -421,20 +487,16 @@ def make_ds9_region_file(directions, outputfile):
 
     Parameters
     ----------
-    vertices : list
-        List of direction RA and Dec vertices in degrees
+    directions : list
+        List of Direction objects
     outputfile : str
         Name of output region file
 
-    Returns
-    -------
-    region_filename : str
-        Name of region file
     """
     lines = []
     lines.append('# Region file format: DS9 version 4.0\nglobal color=green '
                  'font="helvetica 10 normal" select=1 highlite=1 edit=1 '
-                 'move=1 delete=1 include=1 fixed=0 source\nfk5\n')
+                 'move=1 delete=1 include=1 fixed=0 source=1\nfk5\n')
 
     for direction in directions:
         xylist = []
@@ -445,6 +507,42 @@ def make_ds9_region_file(directions, outputfile):
         lines.append('polygon({0})\n'.format(', '.join(xylist)))
         lines.append('point({0}, {1}) # point=cross width=2 text={{{2}}}\n'.
             format(direction.ra, direction.dec, direction.name))
+
+    with open(outputfile, 'wb') as f:
+        f.writelines(lines)
+
+
+def make_ds9_calimage_file(directions, outputfile):
+    """
+    Make a ds9 image region file for given calibrator size
+
+    Parameters
+    ----------
+    directions : list
+        List of Direction objects
+    outputfile : str
+        Name of output region file
+
+    """
+    from factor.operations.hardcoded_param import facet_selfcal as p
+
+    lines = []
+    lines.append('# Region file format: DS9 version 4.0\nglobal color=yellow '
+                 'font="helvetica 10 normal" select=1 highlite=1 edit=1 '
+                 'move=1 delete=1 include=1 fixed=0 source=1\nfk5\n')
+
+    cell = float(p['imager0']['cell'].split('arcsec')[0]) # arcsec per pixel
+    for direction in directions:
+        imsize = direction.cal_radius_deg * 1.5 * 3600.0 / cell # pixels
+        if imsize < 512:
+            imsize = 512
+        imsize_unmasked = 0.8 * imsize
+        RAs = direction.vertices[0]
+        Decs = direction.vertices[1]
+        lines.append('box({0}, {1}, {2}", {2}") # text={{{3}}}\n'.
+            format(direction.ra, direction.dec, imsize, direction.name))
+        lines.append('box({0}, {1}, {2}", {2}")\n'.
+            format(direction.ra, direction.dec, imsize_unmasked))
 
     with open(outputfile, 'wb') as f:
         f.writelines(lines)
@@ -782,3 +880,169 @@ def calculateSeparation(ra1, dec1, ra2, dec2):
 
     return coord1.separation(coord2)
 
+
+# The following taken from
+# http://code.activestate.com/recipes/578381-a-point-in-polygon-program-sw-sloan-algorithm/
+def _det(xvert, yvert):
+    '''Compute twice the area of the triangle defined by points with using
+    determinant formula.
+
+    Input parameters:
+
+    xvert -- A vector of nodal x-coords (array-like).
+    yvert -- A vector of nodal y-coords (array-like).
+
+    Output parameters:
+
+    Twice the area of the triangle defined by the points.
+
+    Notes:
+
+    _det is positive if points define polygon in anticlockwise order.
+    _det is negative if points define polygon in clockwise order.
+    _det is zero if at least two of the points are concident or if
+        all points are collinear.
+
+    '''
+    xvert = np.asfarray(xvert)
+    yvert = np.asfarray(yvert)
+    x_prev = np.concatenate(([xvert[-1]], xvert[:-1]))
+    y_prev = np.concatenate(([yvert[-1]], yvert[:-1]))
+    return np.sum(yvert * x_prev - xvert * y_prev, axis=0)
+
+
+class Polygon:
+    '''Polygon object.
+
+    Input parameters:
+
+    x -- A sequence of nodal x-coords.
+    y -- A sequence of nodal y-coords.
+
+    '''
+
+    def __init__(self, x, y):
+        if len(x) != len(y):
+            raise IndexError('x and y must be equally sized.')
+        self.x = np.asfarray(x)
+        self.y = np.asfarray(y)
+        # Closes the polygon if were open
+        x1, y1 = x[0], y[0]
+        xn, yn = x[-1], y[-1]
+        if x1 != xn or y1 != yn:
+            self.x = np.concatenate((self.x, [x1]))
+            self.y = np.concatenate((self.y, [y1]))
+        # Anti-clockwise coordinates
+        if _det(self.x, self.y) < 0:
+            self.x = self.x[::-1]
+            self.y = self.y[::-1]
+
+    def is_inside(self, xpoint, ypoint, smalld=1e-12):
+        '''Check if point is inside a general polygon.
+
+        Input parameters:
+
+        xpoint -- The x-coord of the point to be tested.
+        ypoint -- The y-coords of the point to be tested.
+        smalld -- A small float number.
+
+        xpoint and ypoint could be scalars or array-like sequences.
+
+        Output parameters:
+
+        mindst -- The distance from the point to the nearest point of the
+                  polygon.
+                  If mindst < 0 then point is outside the polygon.
+                  If mindst = 0 then point in on a side of the polygon.
+                  If mindst > 0 then point is inside the polygon.
+
+        Notes:
+
+        An improved version of the algorithm of Nordbeck and Rydstedt.
+
+        REF: SLOAN, S.W. (1985): A point-in-polygon program. Adv. Eng.
+             Software, Vol 7, No. 1, pp 45-47.
+
+        '''
+        xpoint = np.asfarray(xpoint)
+        ypoint = np.asfarray(ypoint)
+        # Scalar to array
+        if xpoint.shape is tuple():
+            xpoint = np.array([xpoint], dtype=float)
+            ypoint = np.array([ypoint], dtype=float)
+            scalar = True
+        else:
+            scalar = False
+        # Check consistency
+        if xpoint.shape != ypoint.shape:
+            raise IndexError('x and y has different shapes')
+        # If snear = True: Dist to nearest side < nearest vertex
+        # If snear = False: Dist to nearest vertex < nearest side
+        snear = np.ma.masked_all(xpoint.shape, dtype=bool)
+        # Initialize arrays
+        mindst = np.ones_like(xpoint, dtype=float) * np.inf
+        j = np.ma.masked_all(xpoint.shape, dtype=int)
+        x = self.x
+        y = self.y
+        n = len(x) - 1  # Number of sides/vertices defining the polygon
+        # Loop over each side defining polygon
+        for i in range(n):
+            d = np.ones_like(xpoint, dtype=float) * np.inf
+            # Start of side has coords (x1, y1)
+            # End of side has coords (x2, y2)
+            # Point has coords (xpoint, ypoint)
+            x1 = x[i]
+            y1 = y[i]
+            x21 = x[i + 1] - x1
+            y21 = y[i + 1] - y1
+            x1p = x1 - xpoint
+            y1p = y1 - ypoint
+            # Points on infinite line defined by
+            #     x = x1 + t * (x1 - x2)
+            #     y = y1 + t * (y1 - y2)
+            # where
+            #     t = 0    at (x1, y1)
+            #     t = 1    at (x2, y2)
+            # Find where normal passing through (xpoint, ypoint) intersects
+            # infinite line
+            t = -(x1p * x21 + y1p * y21) / (x21 ** 2 + y21 ** 2)
+            tlt0 = t < 0
+            tle1 = (0 <= t) & (t <= 1)
+            # Normal intersects side
+            d[tle1] = ((x1p[tle1] + t[tle1] * x21) ** 2 +
+                       (y1p[tle1] + t[tle1] * y21) ** 2)
+            # Normal does not intersects side
+            # Point is closest to vertex (x1, y1)
+            # Compute square of distance to this vertex
+            d[tlt0] = x1p[tlt0] ** 2 + y1p[tlt0] ** 2
+            # Store distances
+            mask = d < mindst
+            mindst[mask] = d[mask]
+            j[mask] = i
+            # Point is closer to (x1, y1) than any other vertex or side
+            snear[mask & tlt0] = False
+            # Point is closer to this side than to any other side or vertex
+            snear[mask & tle1] = True
+        if np.ma.count(snear) != snear.size:
+            raise IndexError('Error computing distances')
+        mindst **= 0.5
+        # Point is closer to its nearest vertex than its nearest side, check if
+        # nearest vertex is concave.
+        # If the nearest vertex is concave then point is inside the polygon,
+        # else the point is outside the polygon.
+        jo = j.copy()
+        jo[j == 0] -= 1
+        area = _det([x[j + 1], x[j], x[jo - 1]], [y[j + 1], y[j], y[jo - 1]])
+        mindst[~snear] = np.copysign(mindst, area)[~snear]
+        # Point is closer to its nearest side than to its nearest vertex, check
+        # if point is to left or right of this side.
+        # If point is to left of side it is inside polygon, else point is
+        # outside polygon.
+        area = _det([x[j], x[j + 1], xpoint], [y[j], y[j + 1], ypoint])
+        mindst[snear] = np.copysign(mindst, area)[snear]
+        # Point is on side of polygon
+        mindst[np.fabs(mindst) < smalld] = 0
+        # If input values were scalar then the output should be too
+        if scalar:
+            mindst = float(mindst)
+        return mindst

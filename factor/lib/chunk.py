@@ -4,13 +4,14 @@ Definition of the time chunk class
 import logging
 import os
 
-log = logging.getLogger('parset')
+log = logging.getLogger('factor.chunk')
 
 class Chunk(object):
     """
     The Chunk object contains parameters needed for each time chunk (MS)
     """
-    def __init__(self, op_parset, MSfile, index, prefix=None, direction=None):
+    def __init__(self, op_parset, MSfile, index, prefix=None, direction=None,
+        outdir=None):
         """
         Create Chunk object
 
@@ -26,12 +27,20 @@ class Chunk(object):
             Prefix to use for names
         direction : Direction object, optional
             Direction for this chunk
+        outdir : str, optional
+            Absolute path to output directory. If None, the directory of the
+            parent is used
 
         """
         self.parent_file = MSfile
         self.index = index
         self.direction = direction
-        self.file = '{0}-chunk_{1}.ms'.format(os.path.splitext(MSfile)[0], index)
+        if outdir is None:
+            self.file = '{0}-chunk_{1}.ms'.format(os.path.splitext(MSfile)[0],
+                index)
+        else:
+            self.file = os.path.join(outdir, '{0}-chunk_{1}.ms'.format(
+                os.path.splitext(os.path.basename(MSfile))[0], index))
         self.msname = self.file.split('/')[-1]
         self.name = 'chunk_{0}'.format(index)
 
@@ -51,3 +60,5 @@ class Chunk(object):
         self.parmdb_phaseamp_phase2 = self.parmdb_dir + 'chunk{0}_instrument_phaseamp_phase2'.format(self.index)
         self.parmdb_phaseamp_amp1 = self.parmdb_dir + 'chunk{0}_instrument_phaseamp_amp1'.format(self.index)
         self.parmdb_phaseamp_amp2 = self.parmdb_dir + 'chunk{0}_instrument_phaseamp_amp2'.format(self.index)
+
+

@@ -48,7 +48,7 @@ class BBS(Action):
     """
     def __init__(self, op_parset, vis_datamap, p, model_datamap=None,
         parmdb_datamap=None, prefix=None, direction=None, clean=True,
-        index=None, name='BBS'):
+        index=None, band=None, name='BBS'):
         """
         Create action and run pipeline
 
@@ -68,6 +68,8 @@ class BBS(Action):
             Prefix to use for run
         direction : Direction object, optional
             Direction for this action
+        band : Band object, optional
+            Band for this action
         clean : bool, optional
             Remove unneeded files?
         index : int, optional
@@ -75,7 +77,7 @@ class BBS(Action):
 
         """
         super(BBS, self).__init__(op_parset, name, prefix=prefix,
-            direction=direction, index=index)
+            direction=direction, index=index, band=band)
 
         # Store input parameters
         self.vis_datamap = vis_datamap
@@ -88,11 +90,15 @@ class BBS(Action):
         self.working_dir = self.vis_dir + '{0}/{1}/'.format(self.op_name, self.name)
         if self.direction is not None:
             self.working_dir += '{0}/'.format(self.direction.name)
+        if self.band is not None:
+            self.working_dir += '{0}/'.format(self.band.name)
         if not os.path.exists(self.working_dir):
             os.makedirs(self.working_dir)
         self.model_dir += '{0}/{1}/'.format(self.op_name, self.name)
         if self.direction is not None:
             self.model_dir += '{0}/'.format(self.direction.name)
+        if self.band is not None:
+            self.model_dir += '{0}/'.format(self.band.name)
         if not os.path.exists(self.model_dir):
             os.makedirs(self.model_dir)
 
@@ -156,6 +162,8 @@ class BBS(Action):
         """
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
+        if 'n_per_node' not in self.p:
+            self.p['n_per_node'] = self.max_cpu
         self.p['outputdir'] = self.working_dir
         self.p['lofarroot'] = self.op_parset['lofarroot']
         self.p['parset'] = self.parset_file
@@ -226,7 +234,7 @@ class DPPP(Action):
 
     """
     def __init__(self, op_parset, input_datamap, p, prefix=None, direction=None,
-        clean=True, index=None, name='DPPP'):
+        clean=True, index=None, band=None, name='DPPP'):
         """
         Create action and run pipeline
 
@@ -256,11 +264,11 @@ class Add(BBS):
     Action to add sources
     """
     def __init__(self, op_parset, vis_datamap, p, model_datamap,
-        parmdb_datamap, prefix=None, direction=None, clean=True,
+        parmdb_datamap, prefix=None, direction=None, band=None, clean=True,
         index=None):
         super(Add, self).__init__(op_parset, vis_datamap, p,
             model_datamap=model_datamap, parmdb_datamap=parmdb_datamap,
-            prefix=prefix, direction=direction, clean=clean, index=index,
+            prefix=prefix, direction=direction, band=band, clean=clean, index=index,
             name='Add')
 
         # Deal with empty sky models: (Note: if a facet sky model has no sources, we need
@@ -285,10 +293,10 @@ class Apply(BBS):
     Action to apply solutions
     """
     def __init__(self, op_parset, vis_datamap, p, parmdb_datamap, prefix=None,
-        direction=None, clean=True, index=None):
+        direction=None, band=None, clean=True, index=None):
         super(Apply, self).__init__(op_parset, vis_datamap, p,
         	parmdb_datamap=parmdb_datamap, prefix=prefix,
-        	direction=direction, clean=clean, index=index, name='Apply')
+        	direction=direction, band=band, clean=clean, index=index, name='Apply')
 
 
 class Solve(BBS):
@@ -296,11 +304,11 @@ class Solve(BBS):
     Action to solve for solutions
     """
     def __init__(self, op_parset, vis_datamap, p, model_datamap=None,
-        parmdb_datamap=None, prefix=None, direction=None, clean=True,
+        parmdb_datamap=None, prefix=None, direction=None, band=None, clean=True,
         index=None):
         super(Solve, self).__init__(op_parset, vis_datamap, p,
             model_datamap=model_datamap, parmdb_datamap=parmdb_datamap,
-            prefix=prefix, direction=direction, clean=clean, index=index,
+            prefix=prefix, direction=direction, band=band, clean=clean, index=index,
             name='Solve')
 
 
@@ -309,9 +317,9 @@ class Subtract(BBS):
     Action to subtract sources
     """
     def __init__(self, op_parset, vis_datamap, p, model_datamap,
-        parmdb_datamap, prefix=None, direction=None, clean=True,
+        parmdb_datamap, prefix=None, direction=None, band=None, clean=True,
         index=None):
         super(Subtract, self).__init__(op_parset, vis_datamap, p,
             model_datamap=model_datamap, parmdb_datamap=parmdb_datamap,
-            prefix=prefix, direction=direction, clean=clean, index=index,
+            prefix=prefix, direction=direction, band=band, clean=clean, index=index,
             name='Subtract')

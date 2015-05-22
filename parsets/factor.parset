@@ -7,19 +7,20 @@
 lofarroot = /lofar/build/gnu_opt/installed
 lofarpythonpath = /lofar/build/gnu_opt/installed/lib/python2.7/dist-packages
 
-# Full path to Generic Pipeline root directory
+# Full path to Generic Pipeline root directory (required)
 piperoot = /path/to/genericpipe/dir
 
-# Full path to working dir - other paths are relative to this
+# Full path to working dir - other paths are relative to this (required)
 dir_working = /data/wdir
 
 # Full path to directory containing selfcaled bands, will be scanned for all .MS
-# and .ms files
+# and .ms files (required). Note that these files will be modified by Factor, so
+# please keep a copy of these data elsewhere
 dir_ms = /data/bands
 
 # Parmdb name for dir-indep. selfcal solutions (stored inside the input
-# band measurement sets, so path should be relative to those). Default is
-# instrument
+# band measurement sets, so path should be relative to those; default =
+# instrument)
 parmdb_name = instrument_ap_smoothed
 
 # Make final mosaic (default = True)
@@ -28,8 +29,14 @@ make_mosaic = False
 # Use interactive mode (default = False)
 interactive = False
 
-# Use FT / FTW for all operations except initial subtraction (default = True)
-use_ftw = True
+# Choose imager to use (one of awimager, casapy, wsclean; default = awimager)
+imager = awimager
+imager_selfcal = awimager
+imagerroot = /lofar/build/gnu_opt/installed
+
+# Use chgcenter to minimize number of w planes (WSClean imager only;
+# default = False)
+use_chgcentre = False
 
 
 [directions]
@@ -37,15 +44,20 @@ use_ftw = True
 # are selected internally using the flux and size cuts below
 directions_file = /data/directions.txt
 
+# Check whether any sources from the initial subtract sky model fall on facet
+# edges. If any are found, the facet regions are adjusted to avoid them (default
+# is False)
+check_edges = False
+
 # Flux and size cuts for selecting directions internally (min flux, max size
 # of a source, and max separation between sources below which they are grouped
-# into one direction).
+# into one direction; required if no directions_file is given)
 flux_min_Jy = 0.1
 size_max_arcmin = 3.0
 separation_max_arcmin = 6.0
 
 # The number of internally derived directions can be limited to a maximum number
-# of directions if desired
+# of directions if desired (default = all)
 max_num = 50
 
 # Total number of directions to process (default = all)
@@ -75,7 +87,7 @@ distribute = False
 ncpu = 6
 
 
-# MS-specific parameters
+# MS-specific parameters (optional)
 [ms1.ms]
 init_skymodel = /data/ms1.sky
 param1 = 123

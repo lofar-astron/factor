@@ -14,10 +14,12 @@ should run the following commands before using Factor:
 
 Beyond the standard LOFAR software packages, Factor requires the following:
 
-* [CASA][http://casa.nrao.org/]
-* [LSMTool][https://github.com/darafferty/LSMTool/]
+* [CASA][http://casa.nrao.org]
+* [WSClean][http://sourceforge.net/p/wsclean/wiki/Home]
+* [LSMTool][https://github.com/darafferty/LSMTool]
 * [LoSoTo][https://github.com/revotek/losoto]
-* [jinja2][http://jinja.pocoo.org/docs/dev/]
+* [jinja2][http://jinja.pocoo.org/docs/dev]
+* [Shapely][https://github.com/Toblerity/Shapely]
 
 Usage
 -----

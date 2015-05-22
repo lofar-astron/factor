@@ -119,6 +119,8 @@ class Losoto(Action):
 
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
+        if 'n_per_node' not in self.p:
+            self.p['n_per_node'] = self.max_cpu
         self.p['lofarroot'] = self.op_parset['lofarroot']
         self.p['parset'] = self.parset_file
 

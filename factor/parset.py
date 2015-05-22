@@ -8,7 +8,7 @@ import logging
 import ConfigParser
 from factor._logging import set_log_file
 
-log = logging.getLogger('parset')
+log = logging.getLogger('factor.parset')
 
 
 def parset_read(parset_file):
@@ -57,7 +57,7 @@ def parset_read(parset_file):
                 "Please specify it in the parset")
             sys.exit(1)
 
-    # set-up the working dir (other paths are relative to this)
+    # Set-up the working dir (other paths are relative to this)
     if not os.path.isdir(parset_dict['dir_working']):
         os.mkdir(parset_dict['dir_working'])
     try:
@@ -72,7 +72,7 @@ def parset_read(parset_file):
     set_log_file(parset_dict['dir_working']+'/factor.log')
     log.info("Working directory is {0}".format(parset_dict['dir_working']))
 
-    # get all the MS in the directory
+    # Get all the MS files in the input directory
     parset_dict['mss'] = glob.glob(parset_dict['dir_ms']+'/*[MS|ms]')
     if len(parset_dict['mss']) == 0:
         log.error('No MS files found in {0}!'.format(parset_dict['dir_ms']))
@@ -86,25 +86,50 @@ def parset_read(parset_file):
     # Some check on types and defaults
     if 'interactive' in parset_dict:
         parset_dict['interactive'] = parset.getboolean('global', 'interactive')
-        log.debug("Using interactive mode")
     else:
         parset_dict['interactive'] = False
     if 'make_mosaic' in parset_dict:
         parset_dict['make_mosaic'] = parset.getboolean('global', 'make_mosaic')
-        log.debug("Making final mosaic")
     else:
         parset_dict['make_mosaic'] = False
-    if 'use_ftw' in parset_dict:
-        parset_dict['use_ftw'] = parset.getboolean('global', 'use_ftw')
-        log.debug("Using FT / FTW")
+    if 'use_chgcentre' in parset_dict:
+        parset_dict['use_chgcentre'] = parset.getboolean('global', 'use_chgcentre')
     else:
-        parset_dict['use_ftw'] = True
+        parset_dict['use_chgcentre'] = False
+    if 'imager' not in parset_dict:
+        parset_dict['imager'] = 'wsclean'
+    if parset_dict['imager'].lower() not in ['awimager', 'casapy', 'wsclean']:
+        log.error('Imager "{0}" not understood'.format(parset_dict['imager']))
+        sys.exit(1)
+    else:
+        log.debug("Using {0} for imaging".format(parset_dict['imager'].lower()))
+    if parset_dict['imager'].lower() == 'awimager':
+        log.error('Sorry, the AWimager is not currently supported')
+        sys.exit(1)
+    if 'imager_selfcal' not in parset_dict:
+        parset_dict['imager_selfcal'] = parset_dict['imager']
+    if parset_dict['imager_selfcal'].lower() not in ['awimager', 'casapy', 'wsclean']:
+        log.error('Imager "{0}" not understood'.format(parset_dict['imager_selfcal']))
+        sys.exit(1)
+    else:
+        log.debug("Using {0} for selfcal imaging".format(parset_dict['imager_selfcal'].lower()))
+    if parset_dict['imager_selfcal'].lower() == 'awimager':
+        log.error('Sorry, the AWimager is not currently supported')
+        sys.exit(1)
+    if 'imagerroot' not in parset_dict:
+        parset_dict['imagerroot'] = parset_dict['lofarroot']
+    parset_dict['use_ftw'] = True
 
-    # Handle direction parameters
+    # Handle directions-related parameters
     if 'directions' in parset._sections.keys():
         parset_dict['direction_specific'] = parset._sections['directions']
     else:
         parset_dict['direction_specific'] = {}
+    if 'check_edges' in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['check_edges'] = parset.getboolean('directions',
+            'check_edges')
+    else:
+        parset_dict['direction_specific']['check_edges'] = False
     if 'flux_min_jy' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['flux_min_jy'] = parset.getfloat('directions',
             'flux_min_jy')
@@ -135,6 +160,7 @@ def parset_read(parset_file):
         log.debug("Using the following groupings for directions: {0}".format(groupings))
     else:
         parset_dict['direction_specific']['one_at_a_time'] = True
+        parset_dict['direction_specific']['groupings'] = None
     if 'ndir' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['ndir'] = parset.getint('directions', 'ndir')
         log.debug("Processing up to %s directions in total" % (parset_dict['direction_specific']['ndir']))
@@ -142,18 +168,19 @@ def parset_read(parset_file):
         parset_dict['direction_specific']['groupings'] = {'1': 0}
         parset_dict['direction_specific']['ndir'] = -1
 
-    # Handle cluster parameters
+    # Handle cluster-related parameters
     if 'cluster' in parset._sections.keys():
         parset_dict['cluster_specific'] = parset._sections['cluster']
     else:
         parset_dict['cluster_specific'] = {}
     if 'ncpu' in parset_dict['cluster_specific']:
         parset_dict['cluster_specific']['ncpu'] = parset.getint('cluster', 'ncpu')
-        log.debug("Using up to %s CPUs per node" % (parset_dict['cluster_specific']['ncpu']))
     else:
-        parset_dict['cluster_specific']['ncpu'] = 1
+        import multiprocessing
+        parset_dict['cluster_specific']['ncpu'] = multiprocessing.cpu_count()
+    log.debug("Using up to %s CPU(s) per node" % (parset_dict['cluster_specific']['ncpu']))
     if 'clusterdesc_file' not in parset_dict['cluster_specific']:
-        parset_dict['cluster_specific']['clusterdesc_file'] = parset_dict['cluster_specific']['lofarroot'] + '/share/local.clusterdesc'
+        parset_dict['cluster_specific']['clusterdesc_file'] = parset_dict['lofarroot'] + '/share/local.clusterdesc'
         parset_dict['cluster_specific']['node_list'] = ['localhost']
     if 'distribute' in parset_dict['cluster_specific']:
         parset_dict['cluster_specific']['distribute'] = parset.getboolean('cluster', 'distribute')

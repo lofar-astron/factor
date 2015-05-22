@@ -1,6 +1,7 @@
 """
 Some functions called by multiple actions
 """
+import os
 
 
 def make_basename(prefix, direction=None, band=None, index=None):
@@ -52,7 +53,6 @@ def make_image_basename(input_datamap, direction=None, band=None, prefix=None):
     """
     from factor.lib.datamap_lib import read_mapfile
     import re
-    import os
 
     if prefix is None:
         prefix = ''
@@ -77,6 +77,50 @@ def make_image_basename(input_datamap, direction=None, band=None, prefix=None):
         image_basenames.append('%s%s%s%s' % (prefix, re.sub(r'.MS|.ms', '', msbase), dirtxt, bandtxt))
 
     return image_basenames
+
+
+def copy_model_images(modelbasename, ms_list, nterms=1):
+    """
+    Copies model images and returns list of output basenames
+
+    Parameters
+    ----------
+    modelbasename : str
+        Basename of model image to copy
+    ms_list : list
+        List of ms files for which copies are needed
+    nterm : int, optional
+        Number of terms in model
+
+    """
+    inmodelimages = []
+    outmodelimages = []
+    outmodelbasenames = []
+
+    for i in range(len(ms_list)):
+        outmodelbasenames.append(modelbasename + '_{0}'.format(i))
+        if nterms == 1:
+            inmodelimages.append([modelbasename + '.model'])
+            outmodelimages.append([modelbasename + '_{0}.model'.format(i)])
+        elif nterms == 2:
+            inmodelimages.append([modelbasename + '.model.tt0',
+                modelbasename + '.model.tt1'])
+            outmodelimages.append([modelbasename + '_{0}.model.tt0'.format(i),
+                modelbasename + '_{0}.model.tt1'.format(i)])
+        else:
+            inmodelimages.append([modelbasename + '.model.tt0',
+                modelbasename + '.model.tt1', modelbasename + '.model.tt2'])
+            outmodelimages.append([modelbasename + '_{0}.model.tt0'.format(i),
+                modelbasename + '_{0}.model.tt1'.format(i),
+                modelbasename + '_{0}.model.tt2'.format(i)])
+
+    for inmods, outmods in zip(inmodelimages, outmodelimages):
+        for inmod, outmod in zip(inmods, outmods):
+            if os.path.exists(outmod):
+                os.system('rm -rf {0}'.format(outmod))
+            os.system('cp -r {0} {1}'.format(inmod, outmod))
+
+    return outmodelbasenames
 
 
 def getOptimumSize(size):
@@ -139,3 +183,58 @@ def getOptimumSize(size):
         if ((numpy.max(prime_factors(k)) < 8)):
             return k
     return newlarge
+
+
+def convert_fits_to_image(fitsimage, force_stokes_I=True):
+    """
+    Convert a fits image to a CASA image
+
+    For WSClean 1.7, use force_stokes_I = True to overide incorrect Stokes
+    keyword in model image headers. The restfreq is also set to avoid
+    problems with casapy2bbs.py
+    """
+    import pyrap.images as pim
+    import pyrap.tables as pt
+    import numpy as np
+
+    outfilename = fitsimage.split('.fits')[0] + '.image'
+    casaimage = pim.image(fitsimage)
+    casaimage.saveas(outfilename, overwrite=True)
+
+    if force_stokes_I:
+        coords = casaimage.coordinates().dict()
+        coords['stokes1']['stokes'] = ['I']
+        freq = coords['spectral2']['wcs']['crval']
+        coords['spectral2']['restfreqs'] = np.array([freq])
+        outtable = pt.table(outfilename, readonly=False, ack=False)
+        outtable.putkeywords({'coords': coords})
+        outtable.done()
+
+    return outfilename
+
+
+def get_val_from_str(val_str, retunits):
+    """
+    Convert a string with optional units to value in units of retunits
+
+    If a string does not have any units, it's assumed to be in units of retunits
+    """
+    from itertools import groupby
+    from astropy import units as u
+
+    parts = [''.join(g).strip() for _, g in groupby(val_str, str.isalpha)]
+    val = float(parts[0])
+    if len(parts) > 1:
+        if type(parts[1]) is str:
+            if parts[1].lower() == 'e':
+                # Check if number uses exponential notation (e.g., 1e8)
+                parts = [parts[0] + parts[1] + parts[2]] + parts[3:]
+            units = parts[1]
+        else:
+            units = None
+    if units is None:
+        units = retunits
+
+    q = u.Quantity(val, units).to(retunits)
+
+    return q.value

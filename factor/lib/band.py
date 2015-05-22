@@ -1,17 +1,18 @@
 """
 Definition of the band class
 """
+import os
 import logging
 import pyrap.tables as pt
 import numpy as np
 
-log = logging.getLogger('parset')
+log = logging.getLogger('factor.parset')
 
 class Band(object):
     """
     The Band object contains parameters needed for each band (MS)
     """
-    def __init__(self, MSfile):
+    def __init__(self, MSfile, factor_working_dir):
         """
         Create Band object
 
@@ -19,6 +20,8 @@ class Band(object):
         ----------
         MSfile : str
             Filename of MS
+        factor_working_dir : str
+            Full path of working directory
 
         """
         self.file = MSfile
@@ -48,3 +51,45 @@ class Band(object):
             self.has_sub_data = True
         else:
             self.has_sub_data = False
+        self.has_sub_data_new = False
+        self.starttime = tab[0]['TIME']
+        self.endtime = tab[-1]['TIME']
+        for t2 in tab.iter(["ANTENNA1","ANTENNA2"]):
+            if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
+                self.timepersample = t2[1]['TIME'] - t2[0]['TIME']
+                self.nsamples = t2.nrows()
+                break
+        tab.close()
+
+        self.completed_operations = []
+        self.save_file = os.path.join(factor_working_dir, 'state',
+            self.name+'_save.pkl')
+
+
+    def save_state(self):
+        """
+        Saves the state to a file
+        """
+        import pickle
+
+        with open(self.save_file, 'wb') as f:
+            pickle.dump(self.__dict__, f)
+
+
+    def load_state(self):
+        """
+        Loads the state from a file
+
+        Returns
+        -------
+        success : bool
+            True if state was successfully loaded, False if not
+        """
+        import pickle
+
+        try:
+            with open(self.save_file, 'r') as f:
+                self.__dict__ = pickle.load(f)
+            return True
+        except:
+            return False

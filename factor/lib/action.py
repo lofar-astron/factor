@@ -88,7 +88,7 @@ class Action(object):
             if not os.path.exists(self.pipeline_run_dir):
                 os.makedirs(self.pipeline_run_dir)
 
-            self.log = logging.getLogger('%s::%s' % (self.op_name, self.name))
+            self.log = logging.getLogger('factor.%s::%s' % (self.op_name, self.name))
             self.log_dir = '{0}/logs/{1}/{2}/'.format(factor_working_dir,
                 self.op_name, self.name)
             if self.direction is not None:
@@ -186,7 +186,7 @@ class Action(object):
         if os.path.basename(self.op_parset['cluster_specific']['clusterdesc']) == 'local.clusterdesc':
             self.op_parset['remote'] = '[remote]\n'\
                 + 'method = local\n'\
-                + 'max_per_node = {0}\n'.format(self.op_parset['ncpu'])
+                + 'max_per_node = {0}\n'.format(self.op_parset['cluster_specific']['ncpu'])
         else:
             self.op_parset['remote'] = ''
         self.op_parset['clusterdesc'] = os.path.join(self.op_parset['dir_working'],
@@ -208,10 +208,11 @@ class Action(object):
         self.make_pipeline_config_parset()
 
 
-    def run(self):
+    def check_done(self):
         """
-        Runs the pipeline
+        Checks if casapy process is done
         """
+<<<<<<< HEAD
         cmd = 'ulimit -n 2048; python {0} {1} -d -c {2}'.format(self.pipeline_executable,
             self.pipeline_parset_file, self.pipeline_config_file)
         if has32:
@@ -237,6 +238,13 @@ class Action(object):
                 p.communicate()
 
         return self.get_results()
+=======
+        all_done = True
+        for f in self.completed_files:
+            if not os.path.exists(f):
+                all_done = False
+        return all_done
+>>>>>>> awimager
 
 
     def get_results(self):
