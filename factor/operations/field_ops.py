@@ -24,7 +24,7 @@ class InitSubtract(Operation):
 
         # Set up imager scheduler (runs at most num_nodes imagers in parallel)
         num_nodes = len(self.parset['cluster_specific']['node_list'])
-        self.s_imager = Scheduler(max_threads=num_nodes, name=self.name,
+        self.s = Scheduler(max_procs=num_nodes, name=self.name,
             op_parset=self.parset)
 
 
