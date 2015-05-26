@@ -94,11 +94,23 @@ class MakeSkymodelFromModelImage(Action):
         Makes the required data maps
         """
         from factor.lib.datamap_lib import read_mapfile
+        from factor.lib.action_lib import convert_fits_to_image
 
         # Input is list of image basenames
         # Output is sky model files
         imagebasenames, hosts = read_mapfile(self.input_datamap)
-        input_files = [bn+'.model' for bn in imagebasenames]
+
+        if self.op_parset['imager'].lower() == 'wsclean':
+            # Convert WSClean model fits images to casapy images
+            if self.p['nterms'] > 1:
+                input_fits_files = [bn+'-MFS-model.fits' for bn in imagebasenames]
+            else:
+                input_fits_files = [bn+'-model.fits' for bn in imagebasenames]
+            input_files = []
+            for f in input_fits_files:
+                input_files.append(convert_fits_to_image(f))
+        else:
+            input_files = [bn+'.model' for bn in imagebasenames]
         output_files = [bn+'.skymodel' for bn in self.modelbasenames]
 
         self.p['input_datamap'] = self.write_mapfile(input_files,
@@ -116,6 +128,8 @@ class MakeSkymodelFromModelImage(Action):
         """
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
+        if 'n_per_node' not in self.p:
+            self.p['n_per_node'] = self.max_cpu
 
         self.p['scriptname'] = os.path.abspath(self.script_file)
         self.p['outputdir'] = os.path.abspath(self.working_dir)
@@ -230,8 +244,13 @@ class MakeFacetSkymodel(Action):
         """
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
+        if 'n_per_node' not in self.p:
+            self.p['n_per_node'] = self.max_cpu
         self.p['scriptname'] = os.path.abspath(self.script_file)
-        self.p['cal_only'] = self.cal_only
+        if self.cal_only:
+            self.p['cal_only'] = 1
+        else:
+            self.p['cal_only'] = 0
         self.p['vertices'] = self.direction.vertices
         self.p['ra'] = self.direction.ra
         self.p['dec'] = self.direction.dec
@@ -355,6 +374,8 @@ class MergeSkymodels(Action):
         """
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
+        if 'n_per_node' not in self.p:
+            self.p['n_per_node'] = self.max_cpu
         self.p['mergescriptname'] = os.path.abspath(self.script_file)
 
         template = env.get_template('merge_skymodels.pipeline.parset.tpl')
@@ -392,7 +413,7 @@ class FFT(Action):
 
     """
     def __init__(self, op_parset, vis_datamap, model_basenames_datamap, p, prefix=None,
-    	direction=None, clean=True, index=None):
+    	direction=None, band=None, clean=True, index=None):
         """
         Create action and run pipeline
 
@@ -410,6 +431,8 @@ class FFT(Action):
             Prefix to use for model names
         direction : Direction object, optional
             Direction for this model
+        band : Band object, optional
+            Band for this model
         clean : bool, optional
             Remove unneeded files?
         index : int, optional
@@ -417,7 +440,7 @@ class FFT(Action):
 
         """
         super(FFT, self).__init__(op_parset, 'FFT', prefix=prefix,
-        	direction=direction, index=index)
+        	direction=direction, band=band, index=index)
 
         # Store input parameters
         self.vis_datamap = vis_datamap
@@ -430,6 +453,8 @@ class FFT(Action):
         if self.direction is not None:
             self.working_dir += '{0}/'.format(self.direction.name)
             self.p['imsize'] = getOptimumSize(int(self.direction.imsize))
+        if self.band is not None:
+            self.working_dir += '{0}/'.format(self.band.name)
         if not os.path.exists(self.working_dir):
             os.makedirs(self.working_dir)
 
@@ -438,48 +463,125 @@ class FFT(Action):
         self.task_xml_file = os.path.join(self.parset_dir, 'ftw.xml')
         self.task_py_file = os.path.join(self.parset_dir, 'task_ftw.py')
 
+        # Set up wplanes
+        if 'wplanes' not in self.p:
+            self.setup_wplanes()
+
         # Set up all required files
         self.setup()
+
+
+    def setup_wplanes(self):
+        """
+        Set up wplanes from imsize, assuming 1.5" cellsize
+        """
+        imsizep = self.p['imsize']
+
+        wplanes = 1
+        if imsizep > 512:
+            wplanes = 64
+        if imsizep > 799:
+            wplanes = 96
+        if imsizep > 1023:
+            wplanes = 128
+        if imsizep > 1599:
+            wplanes = 256
+        if imsizep > 2047:
+            wplanes = 384
+        if imsizep > 3000:
+            wplanes = 448
+        if imsizep > 4095:
+            wplanes = 512
+
+        self.p['wplanes'] = wplanes
 
 
     def make_datamaps(self):
         """
         Makes the required data maps
         """
+        from factor.lib.datamap_lib import read_mapfile
+        from factor.lib.action_lib import copy_model_images
+
         self.p['vis_datamap'] = self.vis_datamap
-        self.p['model_datamap'] = self.model_datamap
+        vis_ms_files, hosts = read_mapfile(self.vis_datamap)
+        model_files, hosts = read_mapfile(self.model_datamap)
+
+        if len(vis_ms_files) > len(model_files) and \
+            self.op_parset['imager'].lower() == 'casapy':
+            # Copy the model image for each vis file to avoid write conflicts
+            model_datamap = self.write_mapfile(copy_model_images(model_files[0],
+                vis_ms_files, self.p['nterms']), prefix=self.prefix+'_models',
+                direction=self.direction, index=self.index, host_list=hosts)
+        else:
+            model_datamap = self.model_datamap
+        self.p['model_datamap'] = model_datamap
+
+        # Set a timeout for casapy runs
+        if self.op_parset['imager'].lower() == 'casapy':
+            self.completed_files = []
+            self.timeout = 60
+            for vis_file in vis_ms_files:
+                completed_file = vis_file + '.done'
+                if self.index is not None:
+                    completed_file += '{0}'.format(self.index)
+                self.completed_files.append(completed_file)
+
+        # For casapy runs, make datamap for completion files
+        if self.op_parset['imager'].lower() == 'casapy':
+            self.p['completed_datamap'] = self.write_mapfile(self.completed_files,
+                prefix=self.prefix+'_models_completed', index=self.index,
+                direction=self.direction, band=self.band, host_list=hosts)
 
 
     def make_pipeline_control_parset(self):
         """
         Writes the pipeline control parset and any script files
         """
+        from factor.lib.action_lib import get_val_from_str
+
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
-
+        if 'n_per_node' not in self.p:
+            self.p['n_per_node'] = self.max_cpu
         self.p['scriptname'] = os.path.abspath(self.script_file)
-        template = env.get_template('fft.pipeline.parset.tpl')
+        self.p['imagerroot'] = self.op_parset['imagerroot']
+
+        if self.op_parset['imager'].lower() == 'awimager':
+            template = env.get_template('fft_awimager.pipeline.parset.tpl')
+        elif self.op_parset['imager'].lower() == 'casapy':
+            template = env.get_template('fft_casapy.pipeline.parset.tpl')
+        elif self.op_parset['imager'].lower() == 'wsclean':
+            template = env.get_template('fft_wsclean.pipeline.parset.tpl')
+            if self.p['nterms'] > 1 and self.direction is not None:
+                # nterms > 1 should only be used with a direction
+                self.p['nchannels'] = self.direction.nchannels
+            else:
+                self.p['nchannels'] = 1
+            self.p['cell_deg'] = get_val_from_str(self.p['cell'], 'deg')
+
         tmp = template.render(self.p)
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
 
-        # Make ftw.xml and task_ftw.py files needed for custom task in casapy
-        self.p['task_xml_file'] = self.task_xml_file
-        template = env.get_template('ftw.xml.tpl')
-        tmp = template.render(self.p)
-        with open(self.task_xml_file, 'w') as f:
-            f.write(tmp)
+        if self.op_parset['imager'].lower() == 'casapy':
+            # Make ftw.xml and task_ftw.py files needed for custom task in casapy
+            self.p['task_xml_file'] = self.task_xml_file
+            template = env.get_template('ftw.xml.tpl')
+            tmp = template.render(self.p)
+            with open(self.task_xml_file, 'w') as f:
+                f.write(tmp)
 
-        self.p['task_py_file'] = self.task_py_file
-        template = env.get_template('task_ftw.tpl')
-        tmp = template.render(self.p)
-        with open(self.task_py_file, 'w') as f:
-            f.write(tmp)
+            self.p['task_py_file'] = self.task_py_file
+            template = env.get_template('task_ftw.tpl')
+            tmp = template.render(self.p)
+            with open(self.task_py_file, 'w') as f:
+                f.write(tmp)
 
-        template = env.get_template('ftw.tpl')
-        tmp = template.render(self.p)
-        with open(self.script_file, 'w') as f:
-            f.write(tmp)
+            template = env.get_template('ftw.tpl')
+            tmp = template.render(self.p)
+            with open(self.script_file, 'w') as f:
+                f.write(tmp)
 
 
     def get_results(self):
