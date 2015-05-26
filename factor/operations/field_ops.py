@@ -124,16 +124,8 @@ class InitSubtract(Operation):
         self.s_imager.run(action)
 
         self.log.info('Subtracting low-res sky model...')
-<<<<<<< HEAD
-        if self.parset['use_ftw']:
-            lowres_skymodels_mapfile = None
-        action = Subtract(self.parset, input_data_mapfile, p['calibl'],
-            model_datamap=lowres_skymodels_mapfile,
-            parmdb_datamap=dir_indep_parmdbs_mapfile, prefix='lowres')
-=======
         action = Subtract(self.parset, input_data_mapfile, p['calibl'], None,
             dir_indep_parmdbs_mapfile, prefix='lowres')
->>>>>>> awimager
         self.s.run(action)
 
         self.log.info('Merging low- and high-res sky models...')

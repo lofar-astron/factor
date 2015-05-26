@@ -22,12 +22,6 @@ init_subtract = {
              'atrous_do': False,
              'rmsbox': '(60, 20)',
              'adaptive_rmsbox': False,
-<<<<<<< HEAD
-             'threshold': '0mJy',
-             'nterms': 1,
-             'ncycles': 4,
-=======
->>>>>>> awimager
              'use_rms': False,
              'image_final': False,
              'iterate_threshold': False,
@@ -57,12 +51,6 @@ init_subtract = {
              'atrous_do': False,
              'rmsbox': '(60, 20)',
              'adaptive_rmsbox': False,
-<<<<<<< HEAD
-             'threshold': '0mJy',
-             'nterms': 1,
-             'ncycles': 4,
-=======
->>>>>>> awimager
              'use_rms': False,
              'image_final': False,
              'iterate_threshold': False,

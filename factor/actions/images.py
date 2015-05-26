@@ -515,65 +515,6 @@ def image_with_mask(op, imager_parset, prefix, input_mapfiles, directions=None,
     """
     Helper function to run imaging with masking
     """
-<<<<<<< HEAD
-    def __init__(self, op_parset, vis_datamap, p, prefix=None,
-        direction=None, band=None, clean=True, index=None):
-        super(MakeImageIterate, self).__init__(op_parset, 'MakeImageIterate',
-        	prefix=prefix, direction=direction, band=band, index=index,
-        	set_up=False)
-
-        self.vis_datamap = vis_datamap
-        self.p = p.copy()
-        if self.prefix is None:
-            self.prefix = 'make_image_iter'
-        self.clean = clean
-
-
-    def make_datamaps(self):
-        """
-        Makes the required data maps
-        """
-        pass
-
-
-    def make_pipeline_control_parset(self):
-        """
-        Writes the pipeline control parset and any script files
-        """
-        pass
-
-
-    def run(self):
-        """
-        Runs the compound action
-        """
-        from factor.lib.datamap_lib import read_mapfile
-
-        vis_datamap = self.vis_datamap
-        mask_datamap = None
-        threshold_5rms = self.p['threshold']
-        self.p['timeout'] = 3600
-        for i in range(self.p['ncycles']):
-            if self.p['use_rms'] and i == self.p['ncycles'] - 1:
-                self.p['threshold'] = threshold_5rms
-                self.p['niter'] = 1000000
-                self.p['timeout'] = 7200
-
-            imager = MakeImage(self.op_parset, vis_datamap, self.p,
-            	mask_datamap=mask_datamap, direction=self.direction,
-            	prefix=self.prefix, band=self.band, index=i)
-            image_basename_mapfile = imager.run()
-
-            if i > 0 and self.p['iterate_threshold']:
-                # Only iterate the threshold for the first pass
-                self.p['iterate_threshold'] = False
-            masker = MakeMask(self.op_parset, image_basename_mapfile, self.p,
-                prefix=self.prefix, direction=self.direction, band=self.band,
-                index=i)
-            mask_datamap = masker.run()
-
-            mask_file, _ = read_mapfile(mask_datamap)
-=======
     from factor.actions.images import MakeImage, MakeMask
     from factor.lib.datamap_lib import read_mapfile
 
@@ -623,7 +564,6 @@ def image_with_mask(op, imager_parset, prefix, input_mapfiles, directions=None,
         threshold_5rms = []
         for mm in mask_mapfiles:
             mask_file, _ = read_mapfile(mm)
->>>>>>> awimager
             log_file = mask_file[0] + '.log'
             with open(log_file, 'r') as f:
                 lines = f.readlines()
