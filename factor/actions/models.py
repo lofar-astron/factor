@@ -460,6 +460,7 @@ class FFT(Action):
 
         # Define script and task files
         self.script_file = self.parsetbasename + 'ftw.py'
+        self.pad_script_file = self.parsetbasename + 'pad_fits_image.py'
         self.task_xml_file = os.path.join(self.parset_dir, 'ftw.xml')
         self.task_py_file = os.path.join(self.parset_dir, 'task_ftw.py')
 
@@ -506,6 +507,12 @@ class FFT(Action):
         self.p['vis_datamap'] = self.vis_datamap
         vis_ms_files, hosts = read_mapfile(self.vis_datamap)
         model_files, hosts = read_mapfile(self.model_datamap)
+        if self.op_parset['imager'].lower() == 'wsclean':
+            padded_model_files = [f.split('.fits')[0] + '_padded.fits']
+            padded_model_datamap = self.write_mapfile(padded_model_files,
+            	prefix=self.prefix+'_padded_models', direction=self.direction,
+            	index=self.index, host_list=hosts)
+            self.p['padded_model_datamap'] = padded_model_datamap
 
         if len(vis_ms_files) > len(model_files) and \
             self.op_parset['imager'].lower() == 'casapy':
@@ -539,12 +546,14 @@ class FFT(Action):
         Writes the pipeline control parset and any script files
         """
         from factor.lib.action_lib import get_val_from_str
+        import stat
 
         if 'ncpu' not in self.p:
             self.p['ncpu'] = self.max_cpu
         if 'n_per_node' not in self.p:
             self.p['n_per_node'] = self.max_cpu
         self.p['scriptname'] = os.path.abspath(self.script_file)
+        self.p['padscriptname'] = os.path.abspath(self.pad_script_file)
         self.p['imagerroot'] = self.op_parset['imagerroot']
 
         if self.op_parset['imager'].lower() == 'awimager':
@@ -582,6 +591,13 @@ class FFT(Action):
             tmp = template.render(self.p)
             with open(self.script_file, 'w') as f:
                 f.write(tmp)
+        else:
+            template = env.get_template('pad_fits_image.tpl')
+            tmp = template.render(self.p)
+            with open(self.pad_script_file, 'w') as f:
+                f.write(tmp)
+            st = os.stat(self.pad_script_file)
+            os.chmod(self.pad_script_file, st.st_mode | stat.S_IEXEC)
 
 
     def get_results(self):
