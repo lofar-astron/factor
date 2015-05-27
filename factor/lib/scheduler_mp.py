@@ -4,6 +4,7 @@ Module defining the operation scheduler class for multiproccessing
 import logging
 import multiprocessing
 import os
+import sys
 from factor.lib.context import Timer
 
 
@@ -101,15 +102,20 @@ class Scheduler(object):
                         working_dir, host))
 
         # Run the action(s)
+        return_codes = []
         with Timer(self.log, 'action'):
             nprocs = min(self.max_procs, len(action_list))
             pool = multiprocessing.Pool(processes=self.max_procs)
             for act in action_list:
-                pool.apply_async(call_generic_pipeline, (act.pipeline_executable,
+                result = pool.apply_async(call_generic_pipeline, (act.pipeline_executable,
                     act.pipeline_parset_file, act.pipeline_config_file,
                     act.logbasename))
+                return_codes.append(result)
             pool.close()
             pool.join()
+        if any([r.get() for r in return_codes]):
+            self.log.error('One or more actions failed. Exiting...')
+            sys.exit(1)
 
         # Sync the remote nodes to the local node
         if self.op_parset['cluster_specific']['distribute']:
