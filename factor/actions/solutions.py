@@ -83,15 +83,6 @@ class Losoto(Action):
         self.parset_file = self.parsetbasename + '.parset'
         self.templatename = '{0}_{1}.parset.tpl'.format(prefix, self.name.lower())
 
-        # Copy parmdbs to instrument directory inside MS files
-        from factor.lib.datamap_lib import read_mapfile
-        parmdb_names, hosts = read_mapfile(self.parmdb_datamap)
-        ms_names, hosts = read_mapfile(self.vis_datamap)
-        for pn, mn in zip(parmdb_names, ms_names):
-            if os.path.exists('{0}/instrument'.format(mn)):
-                os.system('rm -rf {0}/instrument'.format(mn))
-            os.system('cp -r {0} {1}/instrument'.format(pn, mn))
-
         # Set up all required files
         self.setup()
 
@@ -134,6 +125,16 @@ class Losoto(Action):
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
 
+        template = env.get_template('losoto_finalize.tpl')
+        tmp = template.render(self.p)
+        with open(self.pipeline_parset_file, 'w') as f:
+            f.write(tmp)
+
+        template = env.get_template('losoto_prepare.tpl')
+        tmp = template.render(self.p)
+        with open(self.pipeline_parset_file, 'w') as f:
+            f.write(tmp)
+
         template = env.get_template(self.templatename)
         tmp = template.render(self.p)
         with open(self.parset_file, 'w') as f:
@@ -144,16 +145,6 @@ class Losoto(Action):
         """
         Return results
         """
-        from factor.lib.datamap_lib import read_mapfile
-
-        # Copy parmdbs from instrument directory inside MS files to final files
-        parmdb_names, hosts = read_mapfile(self.parmdb_datamap)
-        ms_names, hosts = read_mapfile(self.vis_datamap)
-        for pn, mn in zip(parmdb_names, ms_names):
-            if os.path.exists(pn):
-                os.system('rm -rf {0}'.format(pn))
-            os.system('cp -r {0}/{1}_instrument {2}'.format(mn, self.p['solset'], pn))
-
         return self.parmdb_datamap
 
 
