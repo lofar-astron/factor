@@ -135,5 +135,5 @@ class Scheduler(object):
                 sys.exit(1)
 
             # Save state
-            for op in operations:
+            for op in operations_to_run:
                 op.set_completed()
