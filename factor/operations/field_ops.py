@@ -29,7 +29,8 @@ class InitSubtract(Operation):
                            'skymodel_dir': self.factor_skymodel_dir,
                            'mapfile_dir': self.mapfile_dir,
                            'pipeline_dir': self.factor_pipeline_dir,
-                           'dir_indep_parmdb_name': parset['parmdb_name']}
+                           'dir_indep_parmdb_name': parset['parmdb_name'],
+                           'host': parset['cluster_specific']['node_list']}
 
         # Add info to direction object
         merged_skymodel_datamap = os.path.join(self.mapfile_dir,
