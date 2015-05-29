@@ -66,8 +66,9 @@ class Operation(object):
         self.logbasename = os.path.join(self.log_dir, '{0}_{1}'.format(
             self.name, self.direction.name))
 
-        self.factor_parset_dir = os.path.join(DIR, '..', 'parsets')
-        self.factor_skymodel_dir = os.path.join(DIR, '..', 'skymodels')
+        self.factor_root_dir = os.path.join(DIR, '..')
+        self.factor_parset_dir = os.path.join(self.factor_root_dir, 'parsets')
+        self.factor_skymodel_dir = os.path.join(self.factor_root_dir, 'skymodels')
         self.pipeline_parset_template = env_parset.get_template('{0}_pipeline.parset'.
             format(self.name))
         self.pipeline_parset_file = os.path.join(self.pipeline_run_dir,
@@ -75,6 +76,12 @@ class Operation(object):
         self.pipeline_config_template = env_config.get_template('pipeline.cfg')
         self.pipeline_config_file = os.path.join(self.pipeline_run_dir,
             'pipeline.cfg')
+
+        self.cfg_dict = {'lofarroot': parset['lofarroot'],
+                         'pythonpath': parset['lofarpythonpath'],
+                         'factorroot': self.factor_root_dir,
+                         'working_dir': self.factor_working_dir,
+                         'runtime_dir': self.pipeline_run_dir}
 
 
     def write_mapfile(self, data_list, prefix=None, direction=None, band=None,
@@ -118,7 +125,7 @@ class Operation(object):
         tmp = self.pipeline_parset_template.render(self.parms_dict)
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
-        tmp = self.pipeline_config_template.render(self.parms_dict)
+        tmp = self.pipeline_config_template.render(self.cfg_dict)
         with open(self.pipeline_config_file, 'w') as f:
             f.write(tmp)
 

@@ -4,6 +4,7 @@ Module defining the operation scheduler class for multiproccessing
 import logging
 import multiprocessing
 import os
+import sys
 from factor.lib.context import Timer
 
 
