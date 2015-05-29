@@ -116,10 +116,10 @@ class Operation(object):
         """
 
         tmp = self.pipeline_parset_template.render(self.parms_dict)
-        with open(self.pipeline_parset, 'w') as f:
+        with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
         tmp = self.pipeline_config_template.render(self.parms_dict)
-        with open(self.pipeline_config, 'w') as f:
+        with open(self.pipeline_config_file, 'w') as f:
             f.write(tmp)
 
 
