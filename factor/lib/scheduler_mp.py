@@ -125,7 +125,7 @@ class Scheduler(object):
                     pool.apply_async(call_generic_pipeline, (op.name,
                     	op.direction.name, op.pipeline_parset_file,
                     	op.pipeline_config_file, op.logbasename),
-                    	callback=result_callback)
+                    	callback=self.result_callback)
                 pool.close()
                 pool.join()
 
