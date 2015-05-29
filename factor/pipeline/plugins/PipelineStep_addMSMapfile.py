@@ -26,7 +26,7 @@ def plugin_main(args, **kwargs):
 
     """
     folder = kwargs['folder']
-    hosts = kwargs['hosts']
+    hosts = eval(kwargs['hosts'])
     mapfile_dir = kwargs['mapfile_dir']
     filename = kwargs['filename']
 

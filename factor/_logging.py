@@ -46,7 +46,7 @@ class Whitelist(logging.Filter):
     Filter out any non-Factor loggers
     """
     def filter(self, record):
-        if 'factor' in record.name:
+        if 'factor' in record.name and 'executable_' not in record.name:
             return True
         else:
             return False
