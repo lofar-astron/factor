@@ -46,20 +46,20 @@ class Operation(object):
         self.hostname = socket.gethostname()
 
         self.factor_working_dir = parset['dir_working']
-        self.statebasename = '{0}/state/{1}-{2}'.format(factor_working_dir,
+        self.statebasename = '{0}/state/{1}-{2}'.format(self.factor_working_dir,
             self.name, self.direction.name)
 
-        self.mapfile_dir = '{0}/datamaps/{1}/{2}'.format(factor_working_dir,
+        self.mapfile_dir = '{0}/datamaps/{1}/{2}'.format(self.factor_working_dir,
             self.name, self.direction.name)
         if not os.path.exists(self.mapfile_dir):
             os.makedirs(self.mapfile_dir)
 
-        self.pipeline_run_dir = '{0}/pipeline/{1}/{2}'.format(factor_working_dir,
+        self.pipeline_run_dir = '{0}/pipeline/{1}/{2}'.format(self.factor_working_dir,
             self.name, self.direction.name)
         if not os.path.exists(self.pipeline_run_dir):
             os.makedirs(self.pipeline_run_dir)
 
-        self.log_dir = '{0}/logs/{1}/{2}/'.format(factor_working_dir,
+        self.log_dir = '{0}/logs/{1}/{2}/'.format(self.factor_working_dir,
             self.name, self.direction.name)
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
