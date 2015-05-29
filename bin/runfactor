@@ -28,15 +28,18 @@ import factor.parset
 import factor.cluster
 from factor.operations.field_ops import *
 from factor.operations.facet_ops import *
+from factor.lib.scheduler_mp import Scheduler
+from factor.lib.direction import Direction
 
 
 if __name__=='__main__':
     import optparse
-    opt = optparse.OptionParser(usage='%prog [-v|-q] parset [default: factor.parset]',
+    parser = optparse.OptionParser(usage='%prog [-v|-q] parset [default: factor.parset]',
             version='%%prog %s' % (factor._version.__version__))
-    opt.add_option('-q', help='enable quiet mode', action='store_true', default=False)
-    opt.add_option('-v', help='enable verbose mode', action='store_true', default=False)
-    (options, args) = opt.parse_args()
+    parser.add_option('-d', help='enable dry-run mode', action='store_true', default=False)
+    parser.add_option('-q', help='enable quiet mode', action='store_true', default=False)
+    parser.add_option('-v', help='enable verbose mode', action='store_true', default=False)
+    (options, args) = parser.parse_args()
 
     if len(args) not in [0, 1]:
         opt.print_help()
@@ -97,6 +100,10 @@ if __name__=='__main__':
         else:
             directions = None
 
+    # Make direction object for the field
+    field = Direction('field', bands[0].ra, bands[0].dec,
+        factor_working_dir=parset['dir_working'])
+
     # Get clusterdesc and nodes
     cluster_parset = parset['cluster_specific']
     if 'clusterdesc_file' not in cluster_parset:
@@ -110,6 +117,10 @@ if __name__=='__main__':
         parset['cluster_specific']['node_list'] = factor.cluster.get_compute_nodes(
             parset['cluster_specific']['clusterdesc'])
 
+    # Set up scheduler for operations (pipeline runs)
+    scheduler = Scheduler(max_procs=len(parset['cluster_specific']['node_list']),
+        dryrun=options.d)
+
     # Run initial sky model generation and create empty datasets. First check that
     # this operation is needed (only needed if band lacks an initial skymodel or
     # the SUBTRACTED_DATA_ALL column).
@@ -118,8 +129,8 @@ if __name__=='__main__':
         if band.skymodel_dirindep is None or not band.has_sub_data:
             bands_init_subtract.append(band)
     if len(bands_init_subtract) > 0:
-        op = InitSubtract(parset, bands_init_subtract)
-        op.run()
+        op = InitSubtract(parset, bands_init_subtract, field)
+        scheduler.run(op)
     else:
         log.info("Sky models found for all MS files. Skipping initial subtraction "
             "operation")
@@ -152,7 +163,7 @@ if __name__=='__main__':
     for i, direction in enumerate(directions):
         direction.vertices = polys[i]
         direction.width = widths[i]
-        reg_file = os.path.join(parset['dir_working'], 'regions', direction.name+'.reg')
+        reg_file = os.path.join(parset['dir_working'], 'regions', direction.name+'.rgn')
         factor.directions.make_region_file(direction.vertices, reg_file)
         direction.reg = reg_file
 
@@ -160,7 +171,7 @@ if __name__=='__main__':
     for direction in directions:
         direction.nbands = len(bands)
         direction.nchannels = np.int(np.ceil(np.float(direction.nbands/
-                    np.float(5)))) # for WSClean
+                    np.float(5))))
 
     # Make DS9 region files
     ds9_facet_reg_file = os.path.join(parset['dir_working'], 'regions', 'facets_ds9.reg')
@@ -192,36 +203,36 @@ if __name__=='__main__':
 
     # Iterate over direction groups
     for direction_group in direction_groups:
-        log.info('Processing {0} direction(s) in parallel'.format(
+        log.info('Processing {0} direction(s) in parallel in this group'.format(
             len(direction_group)))
 
         # Add calibrator(s) to empty datasets. These operations
         # must be done in series
         ops = [FacetAdd(parset, bands, d) for d in direction_group]
         for op in ops:
-            op.run()
+            scheduler.run(op)
 
         # Setup up facet(s) for selfcal of calibrator
-        op = FacetSetup(parset, bands, direction_group)
-        op.run()
+        ops = [FacetSetup(parset, bands, d) for d in direction_group]
+        scheduler.run(ops)
 
         # Do selfcal on calibrator only
-        op = FacetSelfcal(parset, bands, direction_group)
-        op.run()
+        ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
+        scheduler.run(ops)
 
         # Make image of all sources in the facet(s) and get final model(s)
-        op = FacetImage(parset, bands, direction_group)
-        op.run()
+        ops = [FacetImage(parset, bands, d) for d in direction_group]
+        scheduler.run(ops)
 
         # Subtract model(s) from empty facet datasets and image to check if OK
-        op = FacetCheck(parset, bands, direction_group)
-        op.run()
+        ops = [FacetCheck(parset, bands, d) for d in direction_group]
+        scheduler.run(ops)
 
         # Subtract final model(s) from empty field datasets. These operations
         # must be done in series
         ops = [FacetSub(parset, bands, d) for d in direction_group if d.selfcal_ok]
         for op in ops:
-            op.run()
+            scheduler.run(op)
 
         # Lastly, stop Factor if selfcal for any direction in this group failed
         for d in direction_group:
@@ -243,14 +254,14 @@ if __name__=='__main__':
     if len(dirs_to_image) > 0:
         ops = [FacetAddAllFinal(parset, bands, d) for d in dirs_to_image]
         for op in ops:
-            op.run()
-        op = FacetImageFinal(parset, bands, dirs_to_image)
-        op.run()
+            scheduler.run(op)
+        ops = [FacetImageFinal(parset, bands, d) for d in dirs_to_image]
+        scheduler.run(ops)
 
     # Mosaic the final facet images together
     if parset['make_mosaic']:
         op = MakeMosaic(parset, directions)
-        op.run()
+        scheduler.run(op)
 
     log.info("Factor has finished :)")
 

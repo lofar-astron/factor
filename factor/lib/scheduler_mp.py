@@ -7,18 +7,23 @@ import os
 from factor.lib.context import Timer
 
 
-def call_generic_pipeline(executable, parset, config, logbasename):
+def call_generic_pipeline(op_name, direction_name, parset, config, logbasename):
     """
     Creates a GenericPipeline object and runs the pipeline
 
     Parameters
     ----------
-    executable : str
-        Name of pipeline executable
+    op_name : str
+        Name of operation
+    direction_name : str
+        Name of direction
     parset : str
         Name of pipeline parset file
     config : str
         Name of pipeline config file
+    logbasename : str
+        Log file base name
+
     """
     from genericpipeline.bin import genericpipeline as gp
     from lofarpipe.support.pipelinelogging import getSearchingLogger
@@ -29,7 +34,7 @@ def call_generic_pipeline(executable, parset, config, logbasename):
     pipeline = gp.GenericPipeline()
 
     # Add needed attr/methods
-    pipeline.name = os.path.splitext(os.path.basename(executable))[0]
+    pipeline.name = 'factorpipeline'
     pipeline.logger = getSearchingLogger(pipeline.name)
     pipeline.inputs['args'] = [parset]
     pipeline.inputs['config'] = config
@@ -40,14 +45,14 @@ def call_generic_pipeline(executable, parset, config, logbasename):
         with RedirectStdStreams(stdout=out, stderr=err):
             status = pipeline.run(pipeline.name)
 
-    return status
+    return (op_name, direction_name, status)
 
 
 class Scheduler(object):
     """
     The scheduler runs all jobs sent to it in parallel
     """
-    def __init__(self, max_procs=1, name='', op_parset=None):
+    def __init__(self, max_procs=1, name='', op_parset=None, dryrun=False):
         """
         Create Scheduler object
 
@@ -59,25 +64,40 @@ class Scheduler(object):
             Name of the scheduler
         op_parset : dict, optional
             Dict of operation parameters
+        dryrun : bool, optional
+            If True, the pipelines are not run
 
         """
         self.max_procs = max_procs
         self.name = name
         self.op_parset = op_parset
+        self.dryrun = dryrun
         self.log = logging.getLogger('factor.{0}'.format(name))
+        self.success = True
 
 
-    def run(self, action_list):
+    def result_callback(self, result):
         """
-        Runs a list of actions in parallel
+        Callback function for apply_async result
+        """
+        op_name, direction_name, status = result
 
-        If a distributed file system is used, all non-localhost files are
-        synchronized with the distributed versions
+        if status == 0:
+            self.log.info('--> Operation {0} completed successfully (direction: {1})'.format(op.name,
+                            op.direction.name))
+        else:
+            self.log.info('--> Operation {0} failed (direction: {1})'.format(op.name,
+                            op.direction.name))
+            self.success = False
+
+
+    def run(self, operation_list):
+        """
+        Runs a list of operations in parallel
 
         Parameters
         ----------
-        action_list : Action or list of Actions
-            Single action or list of actions to run
+        operation_list : Operation or list of Operations
 
         Returns
         -------
@@ -87,44 +107,35 @@ class Scheduler(object):
         """
         if type(action_list) != list:
             single = True
-            action_list = [action_list]
+            operation_list = [operation_list]
         else:
             single = False
 
-        # Sync the local node to the remote nodes
-        if self.op_parset['cluster_specific']['distribute']:
-            host_list = self.op_parset['cluster_specific']['node_list']
-            working_dir = self.op_parset['dir_working']
-            for host in host_list:
-                if host != self.hostname:
-                    os.system('rsync -az --delete {0}/ {1}:{0}'.format(
-                        working_dir, host))
+        # Check state of each operation
+        operations_to_run = [op for op in operation_list if not op.check_completed()]:
 
-        # Run the action(s)
-        with Timer(self.log, 'action'):
-            nprocs = min(self.max_procs, len(action_list))
-            pool = multiprocessing.Pool(processes=self.max_procs)
-            for act in action_list:
-                pool.apply_async(call_generic_pipeline, (act.pipeline_executable,
-                    act.pipeline_parset_file, act.pipeline_config_file,
-                    act.logbasename))
-            pool.close()
-            pool.join()
+        # Set up the operation(s)
+        for op in operations_to_run:
+             op.setup()
 
-        # Sync the remote nodes to the local node
-        if self.op_parset['cluster_specific']['distribute']:
-            host_list = self.op_parset['cluster_specific']['node_list']
-            working_dir = self.op_parset['dir_working']
-            for host in host_list:
-                if host != self.hostname:
-                    os.system('rsync -az --delete {1}:{0}/ {0}'.format(
-                        working_dir, host))
+        # Run the operation(s)
+        if not self.dryrun:
+            with Timer(self.log, 'operation'):
+                pool = multiprocessing.Pool(processes=self.max_procs)
+                for op in operations_to_run:
+                    self.log.info('<-- Operation {0} started (direction: {1})'.
+                        format(op.name, op.direction.name))
+                    pool.apply_async(call_generic_pipeline, (op.name,
+                    	op.direction.name, op.pipeline_parset_file,
+                    	op.pipeline_config_file, op.logbasename),
+                    	callback=result_callback)
+                pool.close()
+                pool.join()
 
-        # Get results
-        results = []
-        for action in action_list:
-            results.append(action.get_results())
-        if single:
-            results = results[0]
+            if not self.success:
+                self.log.error('One or more operations failed. Exiting...')
+                sys.exit(1)
 
-        return results
+            # Save state
+            for op in operations:
+                op.set_completed()

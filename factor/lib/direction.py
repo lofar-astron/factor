@@ -8,9 +8,9 @@ class Direction(object):
     """
     Generic direction class
     """
-    def __init__(self, name, ra, dec, atrous_do, mscale_field_do, cal_imsize,
-        solint_p, solint_a, field_imsize, dynamic_range, region_selfcal,
-        region_field, peel_skymodel, outlier_do, factor_working_dir,
+    def __init__(self, name, ra, dec, atrous_do=False, mscale_field_do=False, cal_imsize=0,
+        solint_p=0, solint_a=0, field_imsize=0, dynamic_range='LD', region_selfcal='',
+        region_field='', peel_skymodel='', outlier_do=False, factor_working_dir='',
         make_final_image=False, cal_radius_deg=None, cal_flux_jy=None):
         """
         Create Direction object
@@ -35,7 +35,7 @@ class Direction(object):
             Solution interval for amplitude calibration (# of time slots)
         field_imsize : int
             Size of facet image in 1.5 arcsec pixels
-        dynamic_range : bool
+        dynamic_range : str
             LD (low dynamic range) or HD (high dynamic range)
         region_selfcal : str
             Region for clean mask for calibrator selfcal

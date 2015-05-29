@@ -9,15 +9,19 @@ import socket
 from factor.lib.context import Timer
 from factor.lib.scheduler_mp import Scheduler
 from factor import _logging
+from jinja2 import Environment, FileSystemLoader
+
+DIR = os.path.dirname(os.path.abspath(__file__))
+env_parset = Environment(loader=FileSystemLoader(os.path.join(DIR, '..', 'pipeline',
+    'parsets')))
+env_config = Environment(loader=FileSystemLoader(os.path.join(DIR, '..', 'pipeline')))
+
 
 class Operation(object):
     """
     Generic operation class.
-
-    All operations should be in a separate module. Every module must have a
-    class called in the same way of the module which inherits from this class.
     """
-    def __init__(self, parset, bands, direction=None, reset=False, name=None):
+    def __init__(self, parset, bands, direction, name=None):
         """
         Create Operation object
 
@@ -27,60 +31,51 @@ class Operation(object):
             Parset of operation
         bands : list of Band objects
             Bands for this operation
-        direction : Direction object, optional
+        direction : Direction object
             Direction for this operation
-        reset : bool, optional
-            If True, reset the state of this operation
         name : str, optional
             Name of the action
         """
         self.parset = parset.copy()
         self.bands = bands
-        self.name = name
+        self.name = name.lower()
         self.parset['op_name'] = name
         self.direction = direction
-        self.reset = reset
-        self.exit_on_error = True
         _logging.set_level(self.parset['logging_level'])
         self.log = logging.getLogger('factor.{0}'.format(self.name))
-        self.s = Scheduler(parset['cluster_specific']['ncpu'], name=name,
-            op_parset=self.parset)
         self.hostname = socket.gethostname()
 
-        factor_working_dir = parset['dir_working']
-        if self.direction is not None:
-            if type(self.direction) is list:
-                self.statebasename = []
-                for d in self.direction:
-                    self.statebasename.append('{0}/state/{1}-{2}'.format(
-                        factor_working_dir, self.name, d.name))
-            else:
-                self.statebasename = '{0}/state/{1}-{2}'.format(factor_working_dir,
-                    self.name, self.direction.name)
-        else:
-            self.statebasename = '{0}/state/{1}'.format(factor_working_dir,
-                self.name)
-        self.mapbasename = '{0}/datamaps/{1}/'.format(factor_working_dir, self.name)
-        if not os.path.exists(self.mapbasename):
-            os.makedirs(self.mapbasename)
-        self.visbasename = '{0}/visdata/{1}/'.format(factor_working_dir, self.name)
-        if not os.path.exists(self.visbasename):
-            os.makedirs(self.visbasename)
+        self.factor_working_dir = parset['dir_working']
+        self.statebasename = '{0}/state/{1}-{2}'.format(factor_working_dir,
+            self.name, self.direction.name)
 
+        self.mapfile_dir = '{0}/datamaps/{1}/{2}'.format(factor_working_dir,
+            self.name, self.direction.name)
+        if not os.path.exists(self.mapfile_dir):
+            os.makedirs(self.mapfile_dir)
 
-    def setup(self):
-        """
-        Set up the operation
-        """
-        if self.direction is None:
-            self.log.info('<-- Operation %s started' % self.name)
-        else:
-            if type(self.direction) is list:
-                dirstr = ', '.join([d.name for d in self.direction])
-            else:
-                dirstr = self.direction.name
-            self.log.info('<-- Operation %s started (direction(s): %s)' %
-                (self.name, dirstr))
+        self.pipeline_run_dir = '{0}/pipeline/{1}/{2}'.format(factor_working_dir,
+            self.name, self.direction.name)
+        if not os.path.exists(self.pipeline_run_dir):
+            os.makedirs(self.pipeline_run_dir)
+
+        self.log_dir = '{0}/logs/{1}/{2}/'.format(factor_working_dir,
+            self.name, self.direction.name)
+        if not os.path.exists(self.log_dir):
+            os.makedirs(self.log_dir)
+        self.logbasename = os.path.join(self.log_dir, '{0}_{1}'.format(
+            self.name, self.direction.name))
+
+        self.factor_parset_dir = os.path.join(DIR, '..', 'parsets')
+        self.factor_skymodel_dir = os.path.join(DIR, '..', 'skymodels')
+        self.pipeline_parset_template = env_parset.get_template('{0}_pipeline.parset'.
+            format(self.name))
+        self.pipeline_parset_file = os.path.join(self.pipeline_run_dir,
+            'pipeline.parset')
+        self.pipeline_config_template = env_config.get_template('{0}_pipeline.cfg'.
+            format(self.name))
+        self.pipeline_config_file = os.path.join(self.pipeline_run_dir,
+            'pipeline.cfg')
 
 
     def write_mapfile(self, data_list, prefix=None, direction=None, band=None,
@@ -116,47 +111,29 @@ class Operation(object):
         return mapfile
 
 
-    def run_steps(self):
+    def setup(self):
         """
-        Define the operation's steps
+        Set up this operation
         """
-        raise(NotImplementedError)
 
-
-    def run(self):
-        """
-        Run the operation
-        """
-        with Timer(self.log, 'operation'):
-            self.setup()
-            self.run_steps()
-            self.finalize()
+        tmp = self.pipeline_parset_template.render(self.parms_dict)
+        with open(self.pipeline_parset, 'w') as f:
+            f.write(tmp)
+        tmp = self.pipeline_config_template.render(self.parms_dict)
+        with open(self.pipeline_config, 'w') as f:
+            f.write(tmp)
 
 
     def finalize(self):
         """
-        Finalize the operation
+        Finalize this operation
         """
-        # Set the operation completion state
-        if self.direction is None:
-            self.log.info('--> Operation %s finished' % self.name)
-        else:
-            if type(self.direction) is list:
-                dirstr = ', '.join([d.name for d in self.direction])
-            else:
-                dirstr = self.direction.name
-            self.log.info('--> Operation %s finished (direction(s): %s)' %
-                (self.name, dirstr))
+        pass
 
 
-    def check_completed(self, obj_list):
+    def check_completed(self):
         """
         Checks whether operation has been run successfully before
-
-        Parameters
-        ----------
-        obj_list : list
-            Band or Direction objects to check
 
         Returns
         -------
@@ -164,33 +141,18 @@ class Operation(object):
             True if all objects were successfully run
 
         """
-        if type(obj_list) is not list:
-            obj_list = [obj_list]
-
-        for obj in obj_list:
-            obj.load_state()
-            if self.name in obj.completed_operations:
-                all_done = True
-            else:
-                all_done = False
-                break
+        self.direction.load_state()
+        if self.name in self.direction.completed_operations:
+            all_done = True
+        else:
+            all_done = False
 
         return all_done
 
 
-    def set_completed(self, obj_list):
+    def set_completed(self):
         """
-        Sets the state for the operation objects
-
-        Parameters
-        ----------
-        obj_list : list
-            Band or Direction objects to check
-
+        Sets the state for the operation objects (bands or directions)
         """
-        if type(obj_list) is not list:
-            obj_list = [obj_list]
-
-        for obj in obj_list:
-            obj.completed_operations.append(self.name)
-            obj.save_state()
+        self.direction.completed_operations.append(self.name)
+        self.direction.save_state()
