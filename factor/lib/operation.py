@@ -10,6 +10,7 @@ from factor.lib.context import Timer
 from factor.lib.scheduler_mp import Scheduler
 from factor import _logging
 from jinja2 import Environment, FileSystemLoader
+from distutils import spawn
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 env_parset = Environment(loader=FileSystemLoader(os.path.join(DIR, '..', 'pipeline',
@@ -84,7 +85,8 @@ class Operation(object):
                          'factorroot': self.factor_root_dir,
                          'genericpiperoot': parset['piperoot'],
                          'working_dir': self.factor_working_dir,
-                         'runtime_dir': self.pipeline_run_dir}
+                         'runtime_dir': self.pipeline_run_dir,
+                         'wsclean_dir': spawn.find_executable('wsclean')}
 
 
     def write_mapfile(self, data_list, prefix=None, direction=None, band=None,
