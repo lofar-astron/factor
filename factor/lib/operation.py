@@ -86,7 +86,7 @@ class Operation(object):
                          'genericpiperoot': parset['piperoot'],
                          'working_dir': self.factor_working_dir,
                          'runtime_dir': self.pipeline_run_dir,
-                         'wsclean_dir': spawn.find_executable('wsclean')}
+                         'wsclean_executable': spawn.find_executable('wsclean')}
 
 
     def write_mapfile(self, data_list, prefix=None, direction=None, band=None,
