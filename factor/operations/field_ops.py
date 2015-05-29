@@ -28,6 +28,7 @@ class InitSubtract(Operation):
                            'parset_dir': self.factor_parset_dir,
                            'skymodel_dir': self.factor_skymodel_dir,
                            'mapfile_dir': self.mapfile_dir,
+                           'pipeline_dir': self.factor_pipeline_dir,
                            'dir_indep_parmdb_name': parset['parmdb_name']}
 
         # Add info to direction object

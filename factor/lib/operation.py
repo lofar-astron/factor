@@ -67,6 +67,7 @@ class Operation(object):
             self.name, self.direction.name))
 
         self.factor_root_dir = os.path.join(DIR, '..')
+        self.factor_pipeline_dir = os.path.join(self.factor_root_dir, 'pipeline')
         self.factor_parset_dir = os.path.join(self.factor_root_dir, 'parsets')
         self.factor_skymodel_dir = os.path.join(self.factor_root_dir, 'skymodels')
         self.pipeline_parset_template = env_parset.get_template('{0}_pipeline.parset'.
