@@ -105,11 +105,8 @@ class Scheduler(object):
             Single result or list of results returned by the actions
 
         """
-        if type(action_list) != list:
-            single = True
+        if type(operation_list) != list:
             operation_list = [operation_list]
-        else:
-            single = False
 
         # Check state of each operation
         operations_to_run = [op for op in operation_list if not op.check_completed()]
