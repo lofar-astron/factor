@@ -82,7 +82,7 @@ class Operation(object):
         self.cfg_dict = {'lofarroot': parset['lofarroot'],
                          'pythonpath': parset['lofarpythonpath'],
                          'factorroot': self.factor_root_dir,
-                         'genericpiperoot': self.piperoot,
+                         'genericpiperoot': parset['piperoot'],
                          'working_dir': self.factor_working_dir,
                          'runtime_dir': self.pipeline_run_dir}
 
