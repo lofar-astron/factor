@@ -44,6 +44,7 @@ class Operation(object):
         _logging.set_level(self.parset['logging_level'])
         self.log = logging.getLogger('factor.{0}'.format(self.name))
         self.hostname = socket.gethostname()
+        self.node_list = parset['cluster_specific']['node_list']
 
         self.factor_working_dir = parset['dir_working']
         self.statebasename = '{0}/state/{1}-{2}'.format(self.factor_working_dir,

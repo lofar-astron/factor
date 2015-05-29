@@ -31,7 +31,7 @@ def plugin_main(args, **kwargs):
     filename = kwargs['filename']
 
     map = DataMap([])
-    measurements = glob.glob(parset_dict['dir_ms']+'/*[MS|ms]')
+    measurements = glob.glob(os.path.join(folder, '*[MS|ms]'))
     measurements.sort()
 
     for i in range(len(measurements)-len(hosts)):
