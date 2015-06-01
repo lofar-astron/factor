@@ -38,6 +38,8 @@ class FacetAdd(Operation):
             reset=reset, name='FacetAdd')
 
         # Define parameters needed for this operation
+        self.direction.merged_skymodels = [item.file for item in
+            DataMap.load(self.direction.merged_skymodel_datamap)]
         self.parms_dict = {'input_dir': parset['dir_ms'],
                            'npix_high': self.direction.imsize_high_res,
                            'npix_low': self.direction.imsize_low_res,
