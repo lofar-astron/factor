@@ -52,7 +52,7 @@ class FacetAdd(Operation):
 
 
     def finalize(self):
-         """
+        """
         Finalize this operation
         """
         # Add output datamaps to direction object
@@ -87,7 +87,7 @@ class FacetSetup(Operation):
 
 
     def finalize(self):
-         """
+        """
         Finalize this operation
         """
         # Add output datamap to direction object
@@ -116,7 +116,7 @@ class FacetSelfcal(Operation):
 
 
     def finalize(self):
-         """
+        """
         Finalize this operation
         """
         # Add output datamap to direction object
