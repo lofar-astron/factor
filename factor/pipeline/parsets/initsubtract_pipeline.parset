@@ -36,7 +36,7 @@ mask_high.control.outputkey                =   outfile
 mask_high.argument.flags                   =   [wsclean_high1.output.wsclean_high1-image.fits.mapfile,outfile]
 mask_high.argument.threshisl               =   4
 mask_high.argument.threshpix               =   2.5
-mask_high.argument.rmsbox                  =   60 20
+mask_high.argument.rmsbox                  =   (60, 20)
 mask_high.argument.img_format              =   fits
 
 find_threshold_high.control.type           =   find_threshold
@@ -122,7 +122,7 @@ mask_low.control.outputkey                 =   outfile
 mask_low.argument.flags                    =   [wsclean_low1.output.wsclean_low1-image.fits.mapfile,outfile]
 mask_low.argument.threshisl                =   5
 mask_low.argument.threshpix                =   5
-mask_low.argument.rmsbox                   =   60 20
+mask_low.argument.rmsbox                   =   (60, 20)
 mask_low.argument.img_format               =   fits
 
 find_threshold_low.control.type            =   find_threshold

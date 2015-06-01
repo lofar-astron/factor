@@ -58,7 +58,7 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--atrous_do', help='use wavelet fitting', type=bool, default=False)
     parser.add_argument('-i', '--threshisl', help='', type=float, default=3.0)
     parser.add_argument('-p', '--threshpix', help='', type=float, default=5.0)
-    parser.add_argument('-r', '--rmsbox', help='rms box width and step (e.g., "(60 20)")',
+    parser.add_argument('-r', '--rmsbox', help='rms box width and step (e.g., "(60, 20)")',
         type=str, default='(60, 20)')
     parser.add_argument('-t', '--iterate_threshold', help='iteratively decrease threshold until at least '
         'one island is found', type=bool, default=False)
