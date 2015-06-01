@@ -34,7 +34,7 @@ class InitSubtract(Operation):
 
 
     def finalize(self):
-         """
+        """
         Finalize this operation
         """
         # Add skymodels to band objects
