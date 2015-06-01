@@ -11,6 +11,7 @@ from factor.lib.scheduler_mp import Scheduler
 from factor import _logging
 from jinja2 import Environment, FileSystemLoader
 from distutils import spawn
+from lofarpipe.support.utilities import create_directory
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 env_parset = Environment(loader=FileSystemLoader(os.path.join(DIR, '..', 'pipeline',
@@ -47,27 +48,26 @@ class Operation(object):
         self.hostname = socket.gethostname()
         self.node_list = parset['cluster_specific']['node_list']
 
+        # Below are paths for output directories
         self.factor_working_dir = parset['dir_working']
         self.statebasename = '{0}/state/{1}-{2}'.format(self.factor_working_dir,
             self.name, self.direction.name)
-
         self.mapfile_dir = '{0}/datamaps/{1}/{2}'.format(self.factor_working_dir,
             self.name, self.direction.name)
-        if not os.path.exists(self.mapfile_dir):
-            os.makedirs(self.mapfile_dir)
-
-        self.pipeline_run_dir = '{0}/pipeline/{1}/{2}'.format(self.factor_working_dir,
-            self.name, self.direction.name)
-        if not os.path.exists(self.pipeline_run_dir):
-            os.makedirs(self.pipeline_run_dir)
-
+        create_directory(self.mapfile_dir)
+        self.pipeline_runtime_dir = os.path.join(self.factor_working_dir, 'results',
+            self.name, self.direction.name, 'runtime')
+        create_directory(self.pipeline_runtime_dir)
+        self.pipeline_working_dir = os.path.join(self.factor_working_dir, 'results',
+            self.name, self.direction.name, 'products')
+        create_directory(self.pipeline_working_dir)
         self.log_dir = '{0}/logs/{1}/{2}/'.format(self.factor_working_dir,
             self.name, self.direction.name)
-        if not os.path.exists(self.log_dir):
-            os.makedirs(self.log_dir)
+        create_directory(self.log_dir)
         self.logbasename = os.path.join(self.log_dir, '{0}_{1}'.format(
             self.name, self.direction.name))
 
+        # Below are paths for scripts, etc. in the Factor install directory
         self.factor_root_dir = os.path.join(DIR, '..')
         self.factor_pipeline_dir = os.path.join(self.factor_root_dir, 'pipeline')
         self.factor_parset_dir = os.path.join(self.factor_root_dir, 'parsets')
@@ -80,12 +80,14 @@ class Operation(object):
         self.pipeline_config_file = os.path.join(self.pipeline_run_dir,
             'pipeline.cfg')
 
+        # Define parameters needed for the pipeline config. Parameters needed
+        # for the pipeline parset are defined in the subclasses in parms_dict
         self.cfg_dict = {'lofarroot': parset['lofarroot'],
                          'pythonpath': parset['lofarpythonpath'],
                          'factorroot': self.factor_root_dir,
                          'genericpiperoot': parset['piperoot'],
-                         'working_dir': self.factor_working_dir,
-                         'runtime_dir': self.pipeline_run_dir,
+                         'pipeline_working_dir': self.pipeline_working_dir,
+                         'pipeline_runtime_dir': self.pipeline_runtime_dir,
                          'wsclean_executable': spawn.find_executable('wsclean')}
 
 

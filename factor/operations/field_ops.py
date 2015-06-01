@@ -11,7 +11,7 @@ MakeMosaic : Operation
 """
 import os
 from factor.lib.operation import Operation
-
+from lofarpipe.support.data_map import DataMap
 
 class InitSubtract(Operation):
     """
@@ -23,19 +23,21 @@ class InitSubtract(Operation):
 
         # Define parameters needed for this operation
         self.parms_dict = {'input_dir': parset['dir_ms'],
-                           'npix_high': direction.imsize_high_res,
-                           'npix_low': direction.imsize_low_res,
+                           'npix_high': self.direction.imsize_high_res,
+                           'npix_low': self.direction.imsize_low_res,
                            'parset_dir': self.factor_parset_dir,
                            'skymodel_dir': self.factor_skymodel_dir,
                            'mapfile_dir': self.mapfile_dir,
                            'pipeline_dir': self.factor_pipeline_dir,
                            'dir_indep_parmdb_name': parset['parmdb_name'],
-                           'host': self.node_list}
+                           'hosts': self.node_list}
 
         # Add info to direction object
         merged_skymodel_datamap = os.path.join(self.mapfile_dir,
             'merged_skymodels.datamap')
         self.direction.merged_skymodel_datamap = merged_skymodel_datamap
+        self.direction.merged_skymodels = [item.file for item in
+            DataMap.load(merged_skymodel_datamap)]
 
 
 class MakeMosaic(Operation):

@@ -208,6 +208,19 @@ if __name__=='__main__':
         log.info('Processing {0} direction(s) in parallel in this group'.format(
             len(direction_group)))
 
+        # Divide up the nodes among the directions
+        node_list = parset['cluster_specific']['node_list']
+        if len(direction_group) >= len(node_list):
+            for i in range(len(direction_group)-len(node_list)):
+                node_list.append(node_list[i])
+            hosts = [[n] for n in node_list]
+        else:
+            parts = len(direction_group)
+            hosts = [node_list[i*len(node_list)//parts:
+                (i+1)*len(node_list)//parts] for i in range(parts)]
+        for d, h in zip(direction_group, hosts):
+            d.hosts = h
+
         # Add calibrator(s) to empty datasets. These operations
         # must be done in series
         ops = [FacetAdd(parset, bands, d) for d in direction_group]

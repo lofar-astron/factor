@@ -12,8 +12,8 @@ def plugin_main(args, **kwargs):
     ----------
     folder : str
         Directory containing MS files
-    hosts : list
-        List of hosts/nodes
+    hosts : str
+        List of hosts/nodes as a string (e.g., '[host1, host2]'
     mapfile_dir : str
         Output directory for mapfile
     filename: str
