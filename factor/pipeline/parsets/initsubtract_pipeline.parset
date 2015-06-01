@@ -125,16 +125,12 @@ mask_low.argument.threshpix                =   5
 mask_low.argument.rmsbox                   =   (60, 20)
 mask_low.argument.img_format               =   fits
 
-find_threshold_low.control.type            =   find_threshold
-find_threshold_low.argument.flags          =   wsclean_low1.output.wsclean_low1-image.fits.mapfile
-find_threshold_low.argument.threshold      =   0.0
-
 wsclean_low2.control.type                  =   wsclean
 wsclean_low2.argument.flags                =   [-no-update-model-required,average.output.mapfile]
 wsclean_low2.argument.fitsmask             =   mask_low.output.mapfile
 wsclean_low2.argument.size                 =   {{ npix_low }} {{ npix_low }}
 wsclean_low2.argument.niter                =   10000
-wsclean_low2.argument.threshold            =   find_threshold_low.output.threshold.mapfile
+wsclean_low2.argument.threshold            =   mask_low.output.threshold.mapfile
 wsclean_low2.argument.pol                  =   I
 wsclean_low2.argument.weight               =   briggs -0.5
 wsclean_low2.argument.mgain                =   0.5

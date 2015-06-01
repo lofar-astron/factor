@@ -11,7 +11,19 @@ import sys
 
 def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, rmsbox=None,
          iterate_threshold=False, adaptive_rmsbox=False, img_format=None):
+    """
+    Run PyBDSM to make an island clean mask
 
+    Parameters
+    ----------
+    TODO
+
+    Returns
+    -------
+    result : dict
+        Dict with 5-sigma threshold
+
+    """
     if atrous_do:
         threshisl = 4.0
 
@@ -44,9 +56,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
                      img_format=img_format, clobber=True)
 
-    log_file = mask_name + '.log'
-    with open(log_file, 'wb') as f:
-        f.write('# 5-sigma clipped rms (Jy/beam): {0}'.format(5.0 * img.clipped_rms))
+    return {'threshold_5sig': 5.0 * img.clipped_rms}
 
 
 if __name__ == '__main__':
