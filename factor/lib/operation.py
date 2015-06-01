@@ -72,12 +72,14 @@ class Operation(object):
         self.factor_pipeline_dir = os.path.join(self.factor_root_dir, 'pipeline')
         self.factor_parset_dir = os.path.join(self.factor_root_dir, 'parsets')
         self.factor_skymodel_dir = os.path.join(self.factor_root_dir, 'skymodels')
+
+        # Below are the templates and output paths for the pipeline parset and config files
         self.pipeline_parset_template = env_parset.get_template('{0}_pipeline.parset'.
             format(self.name))
-        self.pipeline_parset_file = os.path.join(self.pipeline_run_dir,
+        self.pipeline_parset_file = os.path.join(self.pipeline_runtime_dir,
             'pipeline.parset')
         self.pipeline_config_template = env_config.get_template('pipeline.cfg')
-        self.pipeline_config_file = os.path.join(self.pipeline_run_dir,
+        self.pipeline_config_file = os.path.join(self.pipeline_runtime_dir,
             'pipeline.cfg')
 
         # Define parameters needed for the pipeline config. Parameters needed
