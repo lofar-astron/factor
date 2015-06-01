@@ -35,10 +35,11 @@ def call_generic_pipeline(op_name, direction_name, parset, config, logbasename):
     pipeline = gp.GenericPipeline()
 
     # Add needed attr/methods
-    pipeline.name = 'factorpipeline'
+    pipeline.name = 'factor.{0}'.format(op_name) #'factorpipeline'
     pipeline.logger = getSearchingLogger(pipeline.name)
     pipeline.inputs['args'] = [parset]
     pipeline.inputs['config'] = config
+    pipeline.inputs['job_name'] = direction_name
 
     # Run the pipeline
     with open("{0}.out.log".format(logbasename), "wb") as out, \
@@ -53,7 +54,7 @@ class Scheduler(object):
     """
     The scheduler runs all jobs sent to it in parallel
     """
-    def __init__(self, max_procs=1, name='', op_parset=None, dryrun=False):
+    def __init__(self, max_procs=1, name='main', op_parset=None, dryrun=False):
         """
         Create Scheduler object
 

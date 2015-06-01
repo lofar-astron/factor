@@ -51,15 +51,15 @@ class Operation(object):
         # Below are paths for output directories
         self.factor_working_dir = parset['dir_working']
         self.statebasename = '{0}/state/{1}-{2}'.format(self.factor_working_dir,
-            self.name, self.direction.name)
+            sself.name, self.direction.name)
         self.mapfile_dir = '{0}/datamaps/{1}/{2}'.format(self.factor_working_dir,
             self.name, self.direction.name)
         create_directory(self.mapfile_dir)
         self.pipeline_runtime_dir = os.path.join(self.factor_working_dir, 'results',
-            self.name, self.direction.name, 'runtime')
+            self.name)#, self.direction.name, 'runtime')
         create_directory(self.pipeline_runtime_dir)
         self.pipeline_working_dir = os.path.join(self.factor_working_dir, 'results',
-            self.name, self.direction.name, 'products')
+            self.name)#, self.direction.name, 'products')
         create_directory(self.pipeline_working_dir)
         self.log_dir = '{0}/logs/{1}/{2}/'.format(self.factor_working_dir,
             self.name, self.direction.name)

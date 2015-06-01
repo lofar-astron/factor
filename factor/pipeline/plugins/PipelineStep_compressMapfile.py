@@ -5,7 +5,7 @@ from lofarpipe.support.data_map import DataProduct
 
 def plugin_main(args, **kwargs):
     """
-    Makes a mapfile of by compressing input mapfile items into one item
+    Makes a mapfile by compressing input mapfile items into one item
 
     Parameters
     ----------

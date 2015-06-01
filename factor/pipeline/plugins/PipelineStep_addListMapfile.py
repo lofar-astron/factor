@@ -1,50 +1,49 @@
 import os
-import glob
 from lofarpipe.support.data_map import DataMap
 from lofarpipe.support.data_map import DataProduct
 
 
 def plugin_main(args, **kwargs):
     """
-    Makes a mapfile for MS files in a folder
+    Makes a mapfile for files given as a list or string
 
     Parameters
     ----------
-    folder : str
-        Directory containing MS files
+    files : list or str
+        List of files. May be given as a list of strings or as a string (e.g.,
+        '[s1.skymodel, s2.skymodel]'
     hosts : list or str
         List of hosts/nodes. May be given as a list or as a string (e.g.,
         '[host1, host2]'
     mapfile_dir : str
-        Output directory for mapfile
+        Directory for output mapfile
     filename: str
-        Name of mapfile
+        Name of output mapfile
 
     Returns
     -------
     result : dict
-        New parmdb datamap filename
+        Output datamap filename
 
     """
-    folder = kwargs['folder']
+    if type(files) is str:
+        files = kwargs['files'].strip('[]').split(',')
+        files = [f.strip() for f in files]
     if type(hosts) is str:
         hosts = kwargs['hosts'].strip('[]').split(',')
         hosts = [h.strip() for h in hosts]
     mapfile_dir = kwargs['mapfile_dir']
     filename = kwargs['filename']
 
-    map = DataMap([])
-    measurements = glob.glob(os.path.join(folder, '*[MS|ms]'))
-    measurements.sort()
-
-    for i in range(len(measurements)-len(hosts)):
+    for i in range(len(files)-len(hosts)):
         hosts.append(hosts[i])
 
-    for ms, host in zip(measurements, hosts):
-        map.data.append(DataProduct(host, os.path.join(folder, ms), False))
+    map_out = DataMap([])
+    for h, f in zip(hosts, files):
+        map_out.data.append(DataProduct(h, f, False))
 
     fileid = os.path.join(mapfile_dir, filename)
-    map.save(fileid)
+    map_out.save(fileid)
     result = {'mapfile': fileid}
 
     return result

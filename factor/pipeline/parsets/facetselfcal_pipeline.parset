@@ -128,6 +128,16 @@ casa_ft0.parsetarg.ft.nterms           =   2
 casa_ft0.parsetarg.ft.incremental      =   False
 casa_ft0.parsetarg.ft.usescratch       =   True
 
+make_chunks.control.type                      =   chunk_by_time
+make_chunks.argument.flags                    =   [{{ shifted_cal_concat_datamap }}]
+make_chunks.argument.width                    =   {{ chunk_width }}
+
+create_chunks_map.control.kind          =   plugin
+create_chunks_map.control.type          =   addListMapfile
+create_chunks_map.control.hosts         =   {{ hosts }}
+create_chunks_map.control.files         =   make_chunks.output.files.mapfile
+create_chunks_map.control.mapfile_dir   =   {{ mapfile_dir }}
+create_chunks_map.control.filename      =   chunks.mapfile
 
 
 

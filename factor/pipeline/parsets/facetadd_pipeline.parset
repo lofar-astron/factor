@@ -17,9 +17,9 @@ create_parmdb_map.control.mapfile_dir           =   {{ mapfile_dir }}
 create_parmdb_map.control.filename              =   dir_indep_instrument_parmdbs.mapfile
 
 create_full_skymodel_map.control.kind           =   plugin
-create_full_skymodel_map.control.type           =   addSkyModelMapfile
-create_full_skymodel_map.control.skymodels      =   {{ skymodels }}
-create_full_skymodel_map.control.mapfile_in     =   create_ms_map.output.mapfile
+create_full_skymodel_map.control.type           =   addListMapfile
+create_full_skymodel_map.control.hosts          =   {{ hosts }}
+create_full_skymodel_map.control.files          =   {{ skymodels }}
 create_full_skymodel_map.control.mapfile_dir    =   {{ mapfile_dir }}
 create_full_skymodel_map.control.filename       =   full_skymodels.mapfile
 
