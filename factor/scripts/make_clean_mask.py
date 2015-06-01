@@ -15,6 +15,9 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     if atrous_do:
         threshisl = 4.0
 
+    if rmsbox is not None:
+        rmsbox = eval(rmsbox)
+
     if iterate_threshold:
         # Start with high threshold and lower it until we get at least one island
         threshpix_orig = threshpix
@@ -55,8 +58,8 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--atrous_do', help='use wavelet fitting', type=bool, default=False)
     parser.add_argument('-i', '--threshisl', help='', type=float, default=3.0)
     parser.add_argument('-p', '--threshpix', help='', type=float, default=5.0)
-    parser.add_argument('-r', '--rmsbox', help='rms box width and step (e.g., 60 20)',
-        nargs=2, type=int, default=(60, 20))
+    parser.add_argument('-r', '--rmsbox', help='rms box width and step (e.g., "(60 20)")',
+        type=str, default='(60, 20)')
     parser.add_argument('-t', '--iterate_threshold', help='iteratively decrease threshold until at least '
         'one island is found', type=bool, default=False)
     parser.add_argument('-o', '--adaptive_rmsbox', help='use an adaptive rms box', type=bool, default=False)

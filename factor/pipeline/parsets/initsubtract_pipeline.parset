@@ -159,7 +159,7 @@ casa_to_bbs_low.control.arguments          =   [inputmodel, outfile]
 create_model_low_map.control.kind          =   plugin
 create_model_low_map.control.type          =   trimMapfile
 create_model_low_map.control.mapfile_in    =   wsclean_low2.output.wsclean_low2-model.fits.mapfile
-create_model_low_map.control.trim          =   -model.fits
+create_model_low_map.control.trim_str      =   -model.fits
 
 wsclean_ft_low.control.type                =   wsclean
 wsclean_ft_low.argument.flags              =   [-predict,create_ms_map.output.mapfile]

@@ -6,7 +6,7 @@ Classes
 InitSubtract : Operation
     Images each band at high and low resolution to make and subtract sky models
 MakeMosaic : Operation
-    Makes a mosaic from the facet images
+    Makes a mosaic of the field from the facet images
 
 """
 import os
@@ -32,10 +32,18 @@ class InitSubtract(Operation):
                            'dir_indep_parmdb_name': parset['parmdb_name'],
                            'hosts': self.node_list}
 
-        # Add info to direction object
+
+    def finalize(self):
+         """
+        Finalize this operation
+        """
+        # Add skymodels to band objects
         merged_skymodel_datamap = os.path.join(self.mapfile_dir,
             'merged_skymodels.datamap')
-        self.direction.merged_skymodel_datamap = merged_skymodel_datamap
+        skymodels = [item.file for item in
+            DataMap.load(self.direction.merged_skymodel_datamap)]
+        for band, skymodel in zip(self.bands, skymodels):
+            band.skymodel_dirindep = skymodel
 
 
 class MakeMosaic(Operation):

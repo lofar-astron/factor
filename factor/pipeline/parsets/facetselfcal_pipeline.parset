@@ -1,0 +1,133 @@
+pipeline.steps = [average0, casa_image01, mask01, casa_image02, mask02, find_threshold0, casa_image03]
+
+pipeline.pluginpath                             =   {{ pipeline_dir }}/plugins
+
+average0.control.type                       =   dppp
+average0.control.opts.mapfile_in            =   {{ shifted_cal_concat_datamap }}
+average0.control.opts.inputkey              =   msin
+average0.parsetarg.msin.datacolumn          =   CORRECTED_SUBTRACTED_DATA
+average0.parsetarg.msout.writefullresflag   =   False
+average0.parsetarg.steps                    =   [avg]
+average0.parsetarg.avg.type                 =   squash
+average0.parsetarg.avg.freqstep             =   1
+average0.parsetarg.avg.timestep             =   12
+
+casa_image01.control.kind                  =   recipe
+casa_image01.control.type                  =   casa
+casa_image01.control.opts.mapfile_in       =   average0.output.mapfile
+casa_image01.control.opts.inputkey         =   clean.vis
+casa_image01.control.opts.outputkey        =   clean.imagename
+casa_image01.control.opts.arguments        =   [--nologger,-c]
+casa_image01.parsetarg.clean.gridmode      =   'widefield'
+casa_image01.parsetarg.clean.wprojplanes   =   {{ wprojplanes }}
+casa_image01.parsetarg.clean.selectdata    =   True
+casa_image01.parsetarg.clean.uvrange       =   '>80lambda'
+casa_image01.parsetarg.clean.mode          =   'mfs'
+casa_image01.parsetarg.clean.nterms        =   2
+casa_image01.parsetarg.clean.niter         =   500
+casa_image01.parsetarg.clean.gain          =   0.01
+casa_image01.parsetarg.clean.threshold     =   '0mJy'
+casa_image01.parsetarg.clean.psfmode       =   'clark'
+casa_image01.parsetarg.clean.interactive   =   False
+casa_image01.parsetarg.clean.imsize        =   [{{ imsize }}, {{ imsize }}]
+casa_image01.parsetarg.clean.cell          =   [{{ cellsize }}, {{ cellsize }}]
+casa_image01.parsetarg.clean.weighting     =   'briggs'
+casa_image01.parsetarg.clean.robust        =   -0.25
+casa_image01.parsetarg.clean.uvtaper       =   False
+casa_image01.parsetarg.clean.pbcor         =   False
+casa_image01.parsetarg.clean.minpb         =   0.2
+casa_image01.parsetarg.clean.multiscale    =   [0, 3, 7, 25, 60, 150]
+
+mask01.control.type                        =   make_clean_mask
+mask01.control.outputkey                 =   outfile
+mask01.argument.flags                    =   [casa_image01.output.casa_image01.image.tt0.fits.mapfile,outfile]
+mask01.argument.threshpix                =   10
+mask01.argument.threshisl                =   6
+mask01.argument.iterate_threshold        =   True
+mask01.argument.atrous_do                =   True
+mask01.argument.rmsbox                   =   50 20
+mask01.argument.img_format               =   casa
+
+casa_image02.control.kind                  =   recipe
+casa_image02.control.type                  =   casa
+casa_image02.control.opts.mapfiles_in      =   [average0.output.mapfile,mask01.output.mapfile]
+casa_image02.control.opts.inputkeys        =   [clean.vis,clean.mask]
+casa_image02.control.opts.outputkey        =   clean.imagename
+casa_image02.control.opts.arguments        =   [--nologger,-c]
+casa_image02.parsetarg.clean.gridmode      =   'widefield'
+casa_image02.parsetarg.clean.wprojplanes   =   {{ wprojplanes }}
+casa_image02.parsetarg.clean.selectdata    =   True
+casa_image02.parsetarg.clean.uvrange       =   '>80lambda'
+casa_image02.parsetarg.clean.mode          =   'mfs'
+casa_image02.parsetarg.clean.nterms        =   2
+casa_image02.parsetarg.clean.niter         =   500
+casa_image02.parsetarg.clean.gain          =   0.01
+casa_image02.parsetarg.clean.threshold     =   '0mJy'
+casa_image02.parsetarg.clean.psfmode       =   'clark'
+casa_image02.parsetarg.clean.interactive   =   False
+casa_image02.parsetarg.clean.imsize        =   [{{ imsize }}, {{ imsize }}]
+casa_image02.parsetarg.clean.cell          =   [{{ cellsize }}, {{ cellsize }}]
+casa_image02.parsetarg.clean.weighting     =   'briggs'
+casa_image02.parsetarg.clean.robust        =   -0.25
+casa_image02.parsetarg.clean.uvtaper       =   False
+casa_image02.parsetarg.clean.pbcor         =   False
+casa_image02.parsetarg.clean.minpb         =   0.2
+casa_image02.parsetarg.clean.multiscale    =   [0, 3, 7, 25, 60, 150]
+
+mask02.control.type                      =   make_clean_mask
+mask02.control.outputkey                 =   outfile
+mask02.argument.flags                    =   [casa_image02.output.casa_image02.image.tt0.mapfile,outfile]
+mask02.argument.threshpix                =   10
+mask02.argument.threshisl                =   6
+mask02.argument.iterate_threshold        =   True
+mask02.argument.atrous_do                =   True
+mask02.argument.rmsbox                   =   50 20
+mask02.argument.img_format               =   casa
+
+find_threshold0.control.type            =   find_threshold
+find_threshold0.argument.flags          =   casa_image02.output.casa_image02.image.tt0.mapfile
+find_threshold0.argument.threshold      =   0.0
+
+casa_image03.control.kind                  =   recipe
+casa_image03.control.type                  =   casa
+casa_image03.control.opts.mapfiles_in      =   [average0.output.mapfile,mask02.output.mapfile]
+casa_image03.control.opts.inputkeys        =   [clean.vis,clean.mask]
+casa_image03.control.opts.outputkey        =   clean.imagename
+casa_image03.control.opts.arguments        =   [--nologger,-c]
+casa_image03.parsetarg.clean.gridmode      =   'widefield'
+casa_image03.parsetarg.clean.wprojplanes   =   {{ wprojplanes }}
+casa_image03.parsetarg.clean.selectdata    =   True
+casa_image03.parsetarg.clean.uvrange       =   '>80lambda'
+casa_image03.parsetarg.clean.mode          =   'mfs'
+casa_image03.parsetarg.clean.nterms        =   2
+casa_image03.parsetarg.clean.niter         =   1000000
+casa_image03.parsetarg.clean.gain          =   0.01
+casa_image03.parsetarg.clean.threshold     =   find_threshold0.output.threshold.mapfile
+casa_image03.parsetarg.clean.psfmode       =   'clark'
+casa_image03.parsetarg.clean.interactive   =   False
+casa_image03.parsetarg.clean.imsize        =   [{{ imsize }}, {{ imsize }}]
+casa_image03.parsetarg.clean.cell          =   [{{ cellsize }}, {{ cellsize }}]
+casa_image03.parsetarg.clean.weighting     =   'briggs'
+casa_image03.parsetarg.clean.robust        =   -0.25
+casa_image03.parsetarg.clean.uvtaper       =   False
+casa_image03.parsetarg.clean.pbcor         =   False
+casa_image03.parsetarg.clean.minpb         =   0.2
+casa_image03.parsetarg.clean.multiscale    =   [0, 3, 7, 25, 60, 150]
+
+create_model0_map.control.kind          =   plugin
+create_model0_map.control.type          =   combineMapfiles
+create_model0_map.control.mapfiles_in   =   [casa_image03.output.casa_image03.model.tt0.mapfile,casa_image03.output.casa_image03.model.tt1.mapfile]
+create_model0_map.control.list_of_str   =   True
+
+casa_ft0.control.kind                  =   recipe
+casa_ft0.control.type                  =   casa
+casa_ft0.control.opts.mapfiles_in      =   [{{ shifted_cal_concat_datamap }},create_model0_map.output.mapfile]
+casa_ft0.control.opts.inputkeys        =   [ft.vis,ft.model]
+casa_ft0.control.opts.arguments        =   [--nologger,-c]
+casa_ft0.parsetarg.ft.nterms           =   2
+casa_ft0.parsetarg.ft.incremental      =   False
+casa_ft0.parsetarg.ft.usescratch       =   True
+
+
+
+

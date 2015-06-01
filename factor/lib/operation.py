@@ -83,7 +83,8 @@ class Operation(object):
             'pipeline.cfg')
 
         # Define parameters needed for the pipeline config. Parameters needed
-        # for the pipeline parset are defined in the subclasses in parms_dict
+        # for the pipeline parset should be defined in the subclasses in
+        # self.parms_dict
         self.cfg_dict = {'lofarroot': parset['lofarroot'],
                          'pythonpath': parset['lofarpythonpath'],
                          'factorroot': self.factor_root_dir,
@@ -93,44 +94,12 @@ class Operation(object):
                          'wsclean_executable': spawn.find_executable('wsclean')}
 
 
-    def write_mapfile(self, data_list, prefix=None, direction=None, band=None,
-        index=None, host_list=None):
-        """
-        Write an operation datamap.
-
-        Parameters
-        ----------
-        data_list : list of str
-            List of files for datamap
-        prefix : str, optional
-            A prefix for the name
-        direction : Direction object, optional
-            A direction
-        band : Band object, optional
-            A band
-        index : int, optional
-            An index for the datamap
-        host_list : list of str, optional
-            List of hosts for datamap
-
-        """
-        from factor.lib.datamap_lib import write_mapfile
-
-        if host_list is None:
-            host_list = self.parset['cluster_specific']['node_list']
-
-        mapfile = write_mapfile(data_list, self.name, prefix=prefix,
-                direction=direction, band=band, index=index, host_list=host_list,
-                working_dir=self.parset['dir_working'])
-
-        return mapfile
-
-
     def setup(self):
         """
         Set up this operation
-        """
 
+        This involves just filling the pipeline config and parset templates
+        """
         tmp = self.pipeline_parset_template.render(self.parms_dict)
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
@@ -142,6 +111,8 @@ class Operation(object):
     def finalize(self):
         """
         Finalize this operation
+
+        This should be defined in the subclasses if needed
         """
         pass
 
@@ -167,7 +138,7 @@ class Operation(object):
 
     def set_completed(self):
         """
-        Sets the state for the operation objects (bands or directions)
+        Sets the state for the operation
         """
         self.direction.completed_operations.append(self.name)
         self.direction.save_state()

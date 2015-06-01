@@ -38,8 +38,7 @@ class FacetAdd(Operation):
             reset=reset, name='FacetAdd')
 
         # Define parameters needed for this operation
-        self.direction.merged_skymodels = [item.file for item in
-            DataMap.load(self.direction.merged_skymodel_datamap)]
+        skymodels = [band.skymodel_dirindep for band in self.bands]
         self.parms_dict = {'input_dir': parset['dir_ms'],
                            'npix_high': self.direction.imsize_high_res,
                            'npix_low': self.direction.imsize_low_res,
@@ -48,10 +47,15 @@ class FacetAdd(Operation):
                            'mapfile_dir': self.mapfile_dir,
                            'pipeline_dir': self.factor_pipeline_dir,
                            'dir_indep_parmdb_name': parset['parmdb_name'],
-                           'skymodels': self.direction.merged_skymodels,
+                           'skymodels': skymodels,
                            'hosts': self.node_list}
 
-        # Add info to direction object
+
+    def finalize(self):
+         """
+        Finalize this operation
+        """
+        # Add output datamaps to direction object
         self.direction.shifted_all_bands_datamap = os.path.join(self.mapfile_dir,
             'shifted_all_bands.datamap')
         self.direction.shifted_cal_bands_datamap = os.path.join(self.mapfile_dir,
@@ -70,17 +74,6 @@ class FacetSetup(Operation):
         super(FacetSetup, self).__init__(parset, bands, direction=direction,
             reset=reset, name='FacetSetup')
 
-
-    def run_steps(self):
-        """
-        Run the steps for this operation
-        """
-        from factor.actions.visibilities import Average, Concatenate
-        from factor.actions.calibrations import Apply
-        from factor.lib.operation_lib import copy_column
-        from factor.operations.hardcoded_param import facet_setup as p
-        from factor.lib.datamap_lib import read_mapfile
-
         # Define parameters needed for this operation
         self.parms_dict = {'input_dir': parset['dir_ms'],
                            'npix_high': self.direction.imsize_high_res,
@@ -90,10 +83,14 @@ class FacetSetup(Operation):
                            'mapfile_dir': self.mapfile_dir,
                            'pipeline_dir': self.factor_pipeline_dir,
                            'dir_indep_parmdbs_datamap': self.direction.dir_indep_parmdbs_datamap,
-                           'skymodels': self.direction.merged_skymodels,
                            'hosts': self.direction.hosts}
 
-        # Add info to direction object
+
+    def finalize(self):
+         """
+        Finalize this operation
+        """
+        # Add output datamap to direction object
         self.direction.shifted_cal_concat_datamap = os.path.join(self.mapfile_dir,
             'shifted_cal_concat_bands.datamap')
 
@@ -106,10 +103,25 @@ class FacetSelfcal(Operation):
         super(FacetSelfcal, self).__init__(parset, bands, direction=direction,
             reset=reset, name='FacetSelfcal')
 
-        # Set up scheduler (runs at most num_nodes directions in parallel)
-        num_nodes = len(self.parset['cluster_specific']['node_list'])
-        self.s = Scheduler(max_procs=num_nodes, name=self.name,
-            op_parset=self.parset)
+        # Define parameters needed for this operation
+        self.parms_dict = {'input_dir': parset['dir_ms'],
+                           'npix_high': self.direction.imsize_high_res,
+                           'npix_low': self.direction.imsize_low_res,
+                           'parset_dir': self.factor_parset_dir,
+                           'skymodel_dir': self.factor_skymodel_dir,
+                           'mapfile_dir': self.mapfile_dir,
+                           'pipeline_dir': self.factor_pipeline_dir,
+                           'shifted_cal_concat_datamap': self.direction.shifted_cal_concat_datamap,
+                           'hosts': self.direction.hosts}
+
+
+    def finalize(self):
+         """
+        Finalize this operation
+        """
+        # Add output datamap to direction object
+        self.direction.shifted_cal_concat_datamap = os.path.join(self.mapfile_dir,
+            'shifted_cal_concat_bands.datamap')
 
 
     def run_steps(self):
