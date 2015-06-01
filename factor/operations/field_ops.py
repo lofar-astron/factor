@@ -36,8 +36,6 @@ class InitSubtract(Operation):
         merged_skymodel_datamap = os.path.join(self.mapfile_dir,
             'merged_skymodels.datamap')
         self.direction.merged_skymodel_datamap = merged_skymodel_datamap
-        self.direction.merged_skymodels = [item.file for item in
-            DataMap.load(merged_skymodel_datamap)]
 
 
 class MakeMosaic(Operation):
