@@ -162,7 +162,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     s.remove(dist > 5.0, aggregate=True) # 5 degree radius
 
     # Save this sky model for later checks of sources falling on facet edges
-    s.write(fileName='models/initial.skymodel', clobber=True)
+    s.write(fileName='results/initial.skymodel', clobber=True)
 
     # Filter larger patches
     sizes = s.getPatchSizes(units='arcmin', weight=True)
@@ -385,7 +385,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False):
     # Check for sources near / on facet edges and adjust regions accordingly
     if has_shapely and check_edges:
         log.info('Adjusting facets to avoid sources...')
-        s = lsmtool.load('models/initial.skymodel')
+        s = lsmtool.load('results/initial.skymodel')
         RA, Dec = s.getPatchPositions(asArray=True)
         sx, sy = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
         sizes = s.getPatchSizes(units='degree')
