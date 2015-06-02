@@ -51,7 +51,7 @@ class Operation(object):
         # Below are paths for output directories
         self.factor_working_dir = parset['dir_working']
         self.statebasename = '{0}/state/{1}-{2}'.format(self.factor_working_dir,
-            sself.name, self.direction.name)
+            self.name, self.direction.name)
         self.mapfile_dir = '{0}/datamaps/{1}/{2}'.format(self.factor_working_dir,
             self.name, self.direction.name)
         create_directory(self.mapfile_dir)
