@@ -136,6 +136,6 @@ class Scheduler(object):
                 sys.exit(1)
 
         # Finalize the operations
-        for op in operations:
+        for op in operation_list:
             op.finalize()
             op.set_completed()
