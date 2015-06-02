@@ -135,7 +135,7 @@ class Scheduler(object):
                 self.log.error('One or more operations failed. Exiting...')
                 sys.exit(1)
 
-            # Finalize the operation
-            for op in operations_to_run:
-                op.finalize()
-                op.set_completed()
+        # Finalize the operations
+        for op in operations:
+            op.finalize()
+            op.set_completed()

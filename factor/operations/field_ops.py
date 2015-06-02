@@ -41,9 +41,7 @@ class InitSubtract(Operation):
         merged_skymodel_datamap = os.path.join(self.mapfile_dir,
             'merged_skymodels.datamap')
         datamap = DataMap.load(merged_skymodel_datamap)
-        self.log.info('Datamap file: {0}'.format(merged_skymodel_datamap))
         for band, item in zip(self.bands, datamap):
-            self.log.info('Skymodel file: {0}'.format(item.file))
             band.skymodel_dirindep = item.file
 
 
