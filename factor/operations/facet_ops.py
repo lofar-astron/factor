@@ -48,7 +48,7 @@ class FacetAdd(Operation):
                            'skymodels': skymodels,
                            'facet_ra': self.direction.ra,
                            'facet_dec': self.direction.dec,
-                           'facet_state_file': self.direction.save_file,
+                           'vertices_file': self.direction.save_file,
                            'hosts': self.node_list}
 
 
