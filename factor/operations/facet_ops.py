@@ -48,6 +48,7 @@ class FacetAdd(Operation):
                            'skymodels': skymodels,
                            'facet_ra': self.direction.ra,
                            'facet_dec': self.direction.dec,
+                           'cal_radius_deg': self.direction.cal_radius_deg,
                            'facet_state_file': self.direction.save_file,
                            'hosts': self.node_list}
 
