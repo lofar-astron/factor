@@ -44,15 +44,10 @@ def main(fullskymodel, outmodel, vertices_file, cal_only=False, facet_ra=0.0,
 
     if cal_only:
         # Get calibrator sources
-        dist = s.getDistance(facet_ra, facet_dec)
+        dist = s.getDistance(float(facet_ra), float(facet_dec))
         print(dist)
-        print(facet_ra)
-        print(facet_dec)
-        print(midRA)
-        print(midDec)
-        print(cal_radius_deg)
         print(dist < cal_radius_deg)
-        s.select(dist < cal_radius_deg)
+        s.select(dist < float(cal_radius_deg))
 
     if len(s) == 0:
         print('No sources found for this facet')
