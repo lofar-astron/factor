@@ -71,8 +71,10 @@ casa_to_bbs_high.control.arguments         =   [inputmodel, outfile]
 
 create_model_high_map.control.kind         =   plugin
 create_model_high_map.control.type         =   trimMapfile
-create_model_high_map.control.mapfile_in   =   wsclean_high2.output.wsclean_high2-model.fits.mapfile
+create_model_high_map.control.mapfile      =   wsclean_high2.output.wsclean_high2-model.fits.mapfile
 create_model_high_map.control.trim_str     =   -model.fits
+create_model_high_map.control.mapfile_dir  =   {{ mapfile_dir }}
+create_model_high_map.control.filename     =   model_high_rootnames.mapfile
 
 wsclean_ft_high.control.type               =   wsclean
 wsclean_ft_high.argument.flags             =   [-predict,create_ms_map.output.mapfile]
@@ -158,6 +160,8 @@ create_model_low_map.control.kind          =   plugin
 create_model_low_map.control.type          =   trimMapfile
 create_model_low_map.control.mapfile_in    =   wsclean_low2.output.wsclean_low2-model.fits.mapfile
 create_model_low_map.control.trim_str      =   -model.fits
+create_model_low_map.control.mapfile_dir   =   {{ mapfile_dir }}
+create_model_low_map.control.filename      =   model_low_rootnames.mapfile
 
 wsclean_ft_low.control.type                =   wsclean
 wsclean_ft_low.argument.flags              =   [-predict,create_ms_map.output.mapfile]
