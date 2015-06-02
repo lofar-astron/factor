@@ -25,14 +25,14 @@ create_full_skymodels_map.control.filename       =   full_skymodels.mapfile
 
 make_facet_skymodels_all.control.type            =   make_facet_skymodel
 make_facet_skymodels_all.control.outputkey       =   outfile
-make_facet_skymodels_all.argument.flags          =   [create_full_skymodel_map.output.mapfile,outfile,{{ facet_state_file}}]
+make_facet_skymodels_all.argument.flags          =   [create_full_skymodels_map.output.mapfile,outfile,{{ facet_state_file }}]
 make_facet_skymodels_all.argument.cal_only       =   False
 make_facet_skymodels_all.argument.facet_ra       =   {{ facet_ra }}
 make_facet_skymodels_all.argument.facet_dec      =   {{ facet_dec }}
 
 make_facet_skymodels_cal.control.type            =   make_facet_skymodel
 make_facet_skymodels_cal.control.outputkey       =   outfile
-make_facet_skymodels_cal.argument.flags          =   [create_full_skymodel_map.output.mapfile,outfile,{{ facet_state_file}}]
+make_facet_skymodels_cal.argument.flags          =   [create_full_skymodels_map.output.mapfile,outfile,{{ facet_state_file }}]
 make_facet_skymodels_cal.argument.cal_only       =   True
 make_facet_skymodels_cal.argument.facet_ra       =   {{ facet_ra }}
 make_facet_skymodels_cal.argument.facet_dec      =   {{ facet_dec }}
@@ -44,12 +44,12 @@ copy_parmdb.control.ms_mapfile                   =   create_ms_map.output.mapfil
 copy_parmdb.control.parmdb_mapfile               =   create_parmdb_map.output.map
 
 add_all_facet_sources.control.type               =   calibrate-stand-alone
-add_all_facet_sources.control.mapfiles_in        =   [create_ms_map.output.mapfile,make_facet_skymodel_all.output.mapfile]
+add_all_facet_sources.control.mapfiles_in        =   [create_ms_map.output.mapfile,make_facet_skymodels_all.output.mapfile]
 add_all_facet_sources.control.inputkeys          =   [inputms, skymodel]
 add_all_facet_sources.control.arguments          =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirindep_add_all.parset,skymodel]
 
 add_cal_facet_sources.control.type               =   calibrate-stand-alone
-add_cal_facet_sources.control.mapfiles_in        =   [create_ms_map.output.mapfile,make_facet_skymodel_cal.output.mapfile]
+add_cal_facet_sources.control.mapfiles_in        =   [create_ms_map.output.mapfile,make_facet_skymodels_cal.output.mapfile]
 add_cal_facet_sources.control.inputkeys          =   [inputms, skymodel]
 add_cal_facet_sources.control.arguments          =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirindep_add_cal.parset,skymodel]
 
