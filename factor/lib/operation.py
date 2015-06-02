@@ -50,20 +50,30 @@ class Operation(object):
 
         # Below are paths for output directories
         self.factor_working_dir = parset['dir_working']
+        # Name of state file
         self.statebasename = '{0}/state/{1}-{2}'.format(self.factor_working_dir,
             self.name, self.direction.name)
+        # Directory that holds important mapfiles in a convenient place
         self.mapfile_dir = '{0}/datamaps/{1}/{2}'.format(self.factor_working_dir,
             self.name, self.direction.name)
         create_directory(self.mapfile_dir)
+        # Pipeline runtime dir (pipeline makes subdir here with name of direction)
         self.pipeline_runtime_dir = os.path.join(self.factor_working_dir, 'results',
-            self.name)#, self.direction.name, 'runtime')
+            self.name)
         create_directory(self.pipeline_runtime_dir)
+        # Directory that holds parset and config files
+        self.pipeline_parset_dir = os.path.join(self.pipeline_runtime_dir,
+            self.direction.name)
+        create_directory(self.pipeline_parset_dir)
+        # Pipeline working dir (pipeline makes subdir here with name of direction)
         self.pipeline_working_dir = os.path.join(self.factor_working_dir, 'results',
-            self.name)#, self.direction.name, 'products')
+            self.name)
         create_directory(self.pipeline_working_dir)
+        # Directory that holds logs in a convenient place
         self.log_dir = '{0}/logs/{1}/{2}/'.format(self.factor_working_dir,
             self.name, self.direction.name)
         create_directory(self.log_dir)
+        # Log name used for logs in log_dir
         self.logbasename = os.path.join(self.log_dir, '{0}_{1}'.format(
             self.name, self.direction.name))
 
@@ -73,13 +83,14 @@ class Operation(object):
         self.factor_parset_dir = os.path.join(self.factor_root_dir, 'parsets')
         self.factor_skymodel_dir = os.path.join(self.factor_root_dir, 'skymodels')
 
-        # Below are the templates and output paths for the pipeline parset and config files
+        # Below are the templates and output paths for the pipeline parset and
+        # config files
         self.pipeline_parset_template = env_parset.get_template('{0}_pipeline.parset'.
             format(self.name))
-        self.pipeline_parset_file = os.path.join(self.pipeline_runtime_dir,
+        self.pipeline_parset_file = os.path.join(self.pipeline_parset_dir,
             'pipeline.parset')
         self.pipeline_config_template = env_config.get_template('pipeline.cfg')
-        self.pipeline_config_file = os.path.join(self.pipeline_runtime_dir,
+        self.pipeline_config_file = os.path.join(self.pipeline_parset_dir,
             'pipeline.cfg')
 
         # Define parameters needed for the pipeline config. Parameters needed

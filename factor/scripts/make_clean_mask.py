@@ -7,6 +7,7 @@ from argparse import RawTextHelpFormatter
 from lofar import bdsm
 import numpy
 import sys
+import os
 
 
 def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, rmsbox=None,
@@ -53,6 +54,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                                  atrous_do=atrous_do, ini_method='curvature',
                                  adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=20, quiet=True)
 
+    if not mask_name.lower().endswith('.fits') and img_format == 'fits':
+        mask_name += '.fits'
     img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
                      img_format=img_format, clobber=True)
 

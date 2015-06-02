@@ -5,7 +5,7 @@ from lofarpipe.support.data_map import DataProduct
 
 def plugin_main(args, **kwargs):
     """
-    Makes a mapfile for files given as a list or string
+    Makes a mapfile for list of files
 
     Parameters
     ----------
