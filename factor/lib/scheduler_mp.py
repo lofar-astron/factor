@@ -35,13 +35,13 @@ def call_generic_pipeline(op_name, direction_name, parset, config, logbasename):
     pipeline = gp.GenericPipeline()
 
     # Add needed attr/methods
-    pipeline.name = 'factor.{0}'.format(op_name) #'factorpipeline'
-    pipeline.logger = getSearchingLogger(op_name)
+    pipeline.name = '{0}_{1}'.format(op_name, direction_name)
+    pipeline.logger = getSearchingLogger(pipeline.name)
     pipeline.inputs['args'] = [parset]
     pipeline.inputs['config'] = config
     pipeline.inputs['job_name'] = direction_name
 
-    # Run the pipeline
+    # Run the pipeline, redirecting screen output to log files
     with open("{0}.out.log".format(logbasename), "wb") as out, \
         open("{0}.err.log".format(logbasename), "wb") as err:
         with RedirectStdStreams(stdout=out, stderr=err):
