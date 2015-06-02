@@ -34,14 +34,12 @@ class FacetAdd(Operation):
     Operation to add calibrator source to data
     """
     def __init__(self, parset, bands, direction=None, reset=False):
-        super(FacetAdd, self).__init__(parset, bands, direction=direction,
+        super(FacetAdd, self).__init__(parset, bands, direction,
             name='FacetAdd')
 
         # Define parameters needed for this operation
         skymodels = [band.skymodel_dirindep for band in self.bands]
         self.parms_dict = {'input_dir': parset['dir_ms'],
-                           'npix_high': self.direction.imsize_high_res,
-                           'npix_low': self.direction.imsize_low_res,
                            'parset_dir': self.factor_parset_dir,
                            'skymodel_dir': self.factor_skymodel_dir,
                            'mapfile_dir': self.mapfile_dir,
@@ -71,13 +69,11 @@ class FacetSetup(Operation):
     Operation to set up data for selfcal
     """
     def __init__(self, parset, bands, direction=None, reset=False):
-        super(FacetSetup, self).__init__(parset, bands, direction=direction,
+        super(FacetSetup, self).__init__(parset, bands, direction,
             name='FacetSetup')
 
         # Define parameters needed for this operation
         self.parms_dict = {'input_dir': parset['dir_ms'],
-                           'npix_high': self.direction.imsize_high_res,
-                           'npix_low': self.direction.imsize_low_res,
                            'parset_dir': self.factor_parset_dir,
                            'skymodel_dir': self.factor_skymodel_dir,
                            'mapfile_dir': self.mapfile_dir,
@@ -100,13 +96,11 @@ class FacetSelfcal(Operation):
     Operation to selfcal one or more directions
     """
     def __init__(self, parset, bands, direction=None, reset=False):
-        super(FacetSelfcal, self).__init__(parset, bands, direction=direction,
+        super(FacetSelfcal, self).__init__(parset, bands, direction,
             name='FacetSelfcal')
 
         # Define parameters needed for this operation
         self.parms_dict = {'input_dir': parset['dir_ms'],
-                           'npix_high': self.direction.imsize_high_res,
-                           'npix_low': self.direction.imsize_low_res,
                            'parset_dir': self.factor_parset_dir,
                            'skymodel_dir': self.factor_skymodel_dir,
                            'mapfile_dir': self.mapfile_dir,
