@@ -17,7 +17,9 @@ create_parmdb_map.control.mapfile_dir      =   {{ mapfile_dir }}
 create_parmdb_map.control.filename         =   dir_indep_instrument_parmdbs.mapfile
 
 wsclean_high1.control.type                 =   wsclean
-wsclean_high1.argument.flags               =   [-no-update-model-required,create_ms_map.output.mapfile]
+wsclean_high1.control.mapfile_in           =   create_ms_map.output.mapfile
+wsclean_high1.control.inputkey             =   msfile
+wsclean_high1.argument.flags               =   [-no-update-model-required,msfile]
 wsclean_high1.argument.size                =   {{ npix_high }} {{ npix_high }}
 wsclean_high1.argument.niter               =   400
 wsclean_high1.argument.threshold           =   0.0
@@ -40,7 +42,7 @@ mask_high.argument.rmsbox                  =   (60, 20)
 mask_high.argument.img_format              =   fits
 
 wsclean_high2.control.type                 =   wsclean
-wsclean_high2.control.mapfiles_in     =   [create_ms_map.output.mapfile,mask_high.output.mapfile]
+wsclean_high2.control.mapfiles_in          =   [create_ms_map.output.mapfile,mask_high.output.mapfile]
 wsclean_high2.control.inputkeys            =   [msfile,fitsmask]
 wsclean_high2.argument.flags               =   [-no-update-model-required, msfile]
 wsclean_high2.argument.size                =   {{ npix_high }} {{ npix_high }}
@@ -100,7 +102,9 @@ average.parsetarg.avg.freqstep             =   5
 average.parsetarg.avg.timestep             =   2
 
 wsclean_low1.control.type                  =   wsclean
-wsclean_low1.argument.flags                =   [-no-update-model-required,average.output.mapfile]
+wsclean_low1.control.mapfile_in            =   average.output.mapfile
+wsclean_low1.control.inputkey              =   msfile
+wsclean_low1.argument.flags                =   [-no-update-model-required,msfile]
 wsclean_low1.argument.size                 =   {{ npix_low }} {{ npix_low }}
 wsclean_low1.argument.niter                =   100
 wsclean_low1.argument.threshold            =   0.0
@@ -122,8 +126,10 @@ mask_low.argument.threshpix                =   5
 mask_low.argument.rmsbox                   =   (60, 20)
 mask_low.argument.img_format               =   fits
 
-wsclean_low2.control.type                  =   wsclean_with_mask
-wsclean_low2.argument.flags                =   [-no-update-model-required,average.output.mapfile]
+wsclean_low2.control.type                  =   wsclean
+wsclean_low2.control.mapfiles_in           =   [average.output.mapfile,mask_low.output.mapfile]
+wsclean_low2.control.inputkeys             =   [msfile,fitsmask]
+wsclean_low2.argument.flags                =   [-no-update-model-required, msfile]
 wsclean_low2.argument.size                 =   {{ npix_low }} {{ npix_low }}
 wsclean_low2.argument.niter                =   100
 wsclean_low2.argument.threshold            =   mask_low.output.threshold.mapfile

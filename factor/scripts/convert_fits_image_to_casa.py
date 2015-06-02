@@ -13,11 +13,11 @@ import pyrap.tables as pt
 import numpy as np
 
 
-def main(fitsimage, outfilename, force_stokes_I=False):
+def main(fitsimage, outfilename, force_stokes_i=False):
     casaimage = pim.image(fitsimage)
     casaimage.saveas(outfilename, overwrite=True)
 
-    if options.f:
+    if force_stokes_i:
         coords = casaimage.coordinates().dict()
         coords['stokes1']['stokes'] = ['I']
         freq = coords['spectral2']['wcs']['crval']
