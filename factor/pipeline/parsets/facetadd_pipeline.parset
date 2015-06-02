@@ -23,20 +23,20 @@ create_full_skymodel_map.control.files          =   {{ skymodels }}
 create_full_skymodel_map.control.mapfile_dir    =   {{ mapfile_dir }}
 create_full_skymodel_map.control.filename       =   full_skymodels.mapfile
 
-make_facet_skymodel_all.control.type            =   make_facet_skymodel
-make_facet_skymodel_all.control.outputkey       =   outfile
-make_facet_skymodel_all.argument.flags          =   [create_full_skymodel_map.output.mapfile,outfile,{{ facet_vertices_file}}]
-make_facet_skymodel_all.argument.cal_only       =   False
-make_facet_skymodel_all.argument.facet_ra       =   {{ facet_ra }}
-make_facet_skymodel_all.argument.facet_dec      =   {{ facet_dec }}
+make_facet_skymodels_all.control.type            =   make_facet_skymodel
+make_facet_skymodels_all.control.outputkey       =   outfile
+make_facet_skymodels_all.argument.flags          =   [create_full_skymodel_map.output.mapfile,outfile,{{ facet_vertices_file}}]
+make_facet_skymodels_all.argument.cal_only       =   False
+make_facet_skymodels_all.argument.facet_ra       =   {{ facet_ra }}
+make_facet_skymodels_all.argument.facet_dec      =   {{ facet_dec }}
 
-make_facet_skymodel_cal.control.type            =   make_facet_skymodel
-make_facet_skymodel_cal.control.outputkey       =   outfile
-make_facet_skymodel_cal.argument.flags          =   [create_full_skymodel_map.output.mapfile,outfile,{{ facet_vertices_file}}]
-make_facet_skymodel_cal.argument.cal_only       =   True
-make_facet_skymodel_cal.argument.facet_ra       =   {{ facet_ra }}
-make_facet_skymodel_cal.argument.facet_dec      =   {{ facet_dec }}
-make_facet_skymodel_cal.argument.cal_radius_deg = {{ cal_radius_deg }}
+make_facet_skymodels_cal.control.type            =   make_facet_skymodel
+make_facet_skymodels_cal.control.outputkey       =   outfile
+make_facet_skymodels_cal.argument.flags          =   [create_full_skymodel_map.output.mapfile,outfile,{{ facet_vertices_file}}]
+make_facet_skymodels_cal.argument.cal_only       =   True
+make_facet_skymodels_cal.argument.facet_ra       =   {{ facet_ra }}
+make_facet_skymodels_cal.argument.facet_dec      =   {{ facet_dec }}
+make_facet_skymodels_cal.argument.cal_radius_deg = {{ cal_radius_deg }}
 
 copy_parmdb.control.kind                        =   plugin
 copy_parmdb.control.type                        =   copyParmdbtoMS
