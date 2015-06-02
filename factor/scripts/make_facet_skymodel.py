@@ -22,7 +22,8 @@ def read_vertices(filename):
     return direction_dict['vertices']
 
 
-def main(fullskymodel, outmodel, vertices_file, cal_only=False, facet_ra=0.0, facet_dec=0.0, cal_radius_deg=0.0):
+def main(fullskymodel, outmodel, vertices_file, cal_only=False, facet_ra=0.0,
+    facet_dec=0.0, cal_radius_deg=0.0):
 
     s = lsmtool.load(fullskymodel)
     vertices = read_vertices(vertices_file)
@@ -39,10 +40,10 @@ def main(fullskymodel, outmodel, vertices_file, cal_only=False, facet_ra=0.0, fa
 
     if len(s) == 0:
         print('No sources found for this facet')
-#         return
+        return
 
     if cal_only:
-        # Get calibrator model
+        # Get calibrator sources
         dist = s.getDistance(facet_ra, facet_dec)
         print(dist)
         print(facet_ra)
