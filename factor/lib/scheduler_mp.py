@@ -54,7 +54,7 @@ class Scheduler(object):
     """
     The scheduler runs all jobs sent to it in parallel
     """
-    def __init__(self, max_procs=1, name='main', op_parset=None, dryrun=False):
+    def __init__(self, max_procs=1, name='scheduler', op_parset=None, dryrun=False):
         """
         Create Scheduler object
 

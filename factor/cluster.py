@@ -4,6 +4,7 @@ Module that holds all cluster-related functions
 import os
 import logging
 import sys
+import factor._logging
 
 
 log = logging.getLogger('factor.cluster')

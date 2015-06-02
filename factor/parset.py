@@ -106,7 +106,7 @@ def parset_read(parset_file):
         log.error('Sorry, the AWimager is not currently supported')
         sys.exit(1)
     if 'imager_selfcal' not in parset_dict:
-        parset_dict['imager_selfcal'] = parset_dict['imager']
+        parset_dict['imager_selfcal'] = 'casapy'
     if parset_dict['imager_selfcal'].lower() not in ['awimager', 'casapy', 'wsclean']:
         log.error('Imager "{0}" not understood'.format(parset_dict['imager_selfcal']))
         sys.exit(1)
