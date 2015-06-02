@@ -86,12 +86,12 @@ wsclean_ft_high.argument.mem               =   90
 copy_parmdb_high.control.kind              =   plugin
 copy_parmdb_high.control.type              =   copyParmdbtoMS
 copy_parmdb_high.control.ms_mapfile        =   create_ms_map.output.mapfile
-copy_parmdb_high.control.parmdb_mapfile    =   create_parmdb_map.output.map
+copy_parmdb_high.control.parmdb_mapfile    =   create_parmdb_map.output.mapfile
 
 subtract_high.control.type                 =   calibrate-stand-alone
 subtract_high.control.mapfile_in           =   create_ms_map.output.mapfile
 subtract_high.control.inputkey             =   inputms
-subtract_high.control.arguments            =   [--replace-sourcedb,inputms,{{ parset_dir }}/subtract_highres.parset,{{ skymodel_dir }}/empty.skymodel]
+subtract_high.control.arguments            =   [--replace-sourcedb,inputms,{{ parset_dir }}/field_subtract_highres.parset,{{ skymodel_dir }}/empty.skymodel]
 
 average.control.type                       =   dppp
 average.control.mapfile_in                 =   create_ms_map.output.mapfile
@@ -173,7 +173,7 @@ wsclean_ft_low.argument.mem                =   90
 subtract_low.control.type                  =   calibrate-stand-alone
 subtract_low.control.mapfile_in            =   create_ms_map.output.mapfile
 subtract_low.control.inputkey              =   inputms
-subtract_low.control.arguments             =   [--replace-sourcedb,inputms,{{ parset_dir }}/subtract_lowres.parset,{{ skymodel_dir }}/empty.skymodel]
+subtract_low.control.arguments             =   [--replace-sourcedb,inputms,{{ parset_dir }}/field_subtract_lowres.parset,{{ skymodel_dir }}/empty.skymodel]
 
 merge.control.type                         =   merge_skymodels
 merge.control.outputkey                    =   outfile

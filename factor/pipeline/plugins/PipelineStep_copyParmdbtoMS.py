@@ -19,8 +19,8 @@ def plugin_main(args, **kwargs):
 
     """
     result = {}
-    ms_datamap = kwargs[ms_mapfile]
-    parmdb_datamap = kwargs[parmdb_mapfile]
+    ms_datamap = kwargs['ms_mapfile']
+    parmdb_datamap = kwargs['parmdb_mapfile']
     for ms, parmdb in zip(ms_datamap, parmdb_datamap):
         from_file = parmdb.file
         to_file = os.path.join(ms.file, 'instrument')
