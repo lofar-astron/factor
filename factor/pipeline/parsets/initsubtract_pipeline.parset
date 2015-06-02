@@ -181,6 +181,6 @@ merge.argument.flags                       =   [casa_to_bbs_low.output.mapfile,c
 
 copy_final_model_map.control.kind          =   plugin
 copy_final_model_map.control.type          =   copyMapfile
-copy_final_model_map.control.map_to_copy   =   merge.output.mapfile
+copy_final_model_map.control.mapfile       =   merge.output.mapfile
 copy_final_model_map.control.folder        =   {{ mapfile_dir }}
 copy_final_model_map.control.filename      =   merged_skymodels.datamap
