@@ -26,10 +26,10 @@ def plugin_main(args, **kwargs):
         Output datamap filename
 
     """
-    if type(files) is str:
+    if type(kwargs['files']) is str:
         files = kwargs['files'].strip('[]').split(',')
         files = [f.strip() for f in files]
-    if type(hosts) is str:
+    if type(kwargs['hosts']) is str:
         hosts = kwargs['hosts'].strip('[]').split(',')
         hosts = [h.strip() for h in hosts]
     mapfile_dir = kwargs['mapfile_dir']

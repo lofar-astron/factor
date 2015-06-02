@@ -12,7 +12,8 @@ def plugin_main(args, **kwargs):
     mapfile : str
         Filename of datamap to copy
     hosts : str
-        List of hosts/nodes as a string (e.g., '[host1, host2]'
+        List of hosts/nodes. May be given as a list or as a string as a string
+        (e.g., '[host1, host2]'
     mapfile_dir : str
         Directory for output mapfile
     filename: str
@@ -26,8 +27,9 @@ def plugin_main(args, **kwargs):
     """
     mapfile = kwargs['mapfile']
     if 'hosts' in kwargs:
-        hosts = kwargs['hosts'].strip('[]').split(',')
-        hosts = [h.strip() for h in hosts]
+        if type(kwargs['hosts']) is str:
+            hosts = kwargs['hosts'].strip('[]').split(',')
+            hosts = [h.strip() for h in hosts]
         for i in range(len(datamap)-len(hosts)):
             hosts.append(hosts[i])
     else:

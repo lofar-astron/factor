@@ -9,8 +9,9 @@ def plugin_main(args, **kwargs):
 
     Parameters
     ----------
-    mapfiles_in : str
-        List of filenames of datamaps as a string
+    mapfiles_in : list or str
+        List of filenames of datamaps. May be given as a list or as a string (e.g.,
+        '[datamap1, datamap2]'
     list_of_str : bool
         If True, combined item will be a list of strings (e.g., "['file1',
         'file2']"). Mainly used for casapy calls
@@ -25,8 +26,9 @@ def plugin_main(args, **kwargs):
         New parmdb datamap filename
 
     """
-    mapfiles_in = kwargs['mapfiles_in'].strip('[]').split(',')
-    mapfiles_in = [m.strip() for m in mapfiles_in]
+    if type(kwargs['mapfiles_in']) is str:
+        mapfiles_in = kwargs['mapfiles_in'].strip('[]').split(',')
+        mapfiles_in = [m.strip() for m in mapfiles_in]
     num_mapfiles = len(mapfiles_in)
     mapfile_dir = kwargs['mapfile_dir']
     filename = kwargs['filename']

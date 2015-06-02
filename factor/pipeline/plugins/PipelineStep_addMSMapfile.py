@@ -27,7 +27,7 @@ def plugin_main(args, **kwargs):
 
     """
     folder = kwargs['folder']
-    if type(hosts) is str:
+    if type(kwargs['hosts']) is str:
         hosts = kwargs['hosts'].strip('[]').split(',')
         hosts = [h.strip() for h in hosts]
     mapfile_dir = kwargs['mapfile_dir']
