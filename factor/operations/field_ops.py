@@ -40,9 +40,9 @@ class InitSubtract(Operation):
         # Add skymodels to band objects
         merged_skymodel_datamap = os.path.join(self.mapfile_dir,
             'merged_skymodels.datamap')
-        skymodels = [item.file for item in DataMap.load(merged_skymodel_datamap)]
-        for band, skymodel in zip(self.bands, skymodels):
-            band.skymodel_dirindep = skymodel
+        datamap = DataMap.load(merged_skymodel_datamap)
+        for band, item in zip(self.bands, datamap):
+            band.skymodel_dirindep = item.file
 
 
 class MakeMosaic(Operation):
