@@ -16,8 +16,8 @@ def plugin_main(args, **kwargs):
     ms_mapfile = kwargs['ms_mapfile']
     parmdb_mapfile = kwargs['parmdb_mapfile']
 
-    ms_datamap = DataMap.load(mapfile)
-    parmdb_datamap = DataMap.load(mapfile)
+    ms_datamap = DataMap.load(ms_mapfile)
+    parmdb_datamap = DataMap.load(parmdb_mapfile)
 
     for ms, parmdb in zip(ms_datamap, parmdb_datamap):
         from_file = parmdb.file
