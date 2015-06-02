@@ -46,6 +46,9 @@ class FacetAdd(Operation):
                            'pipeline_dir': self.factor_pipeline_dir,
                            'dir_indep_parmdb_name': parset['parmdb_name'],
                            'skymodels': skymodels,
+                           'facet_ra': self.direction.ra,
+                           'facet_dec': self.direction.dec,
+                           'facet_state_file': self.direction.save_file,
                            'hosts': self.node_list}
 
 

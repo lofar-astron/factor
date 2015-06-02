@@ -1,27 +1,27 @@
-pipeline.steps = [create_ms_map, create_parmdb_map, create_full_skymodel_map, make_facet_skymodels_all, make_facet_skymodels_cal, copy_parmdb, add_all_facet_sources, add_cal_facet_sources, shift_all, shift_cal, shift_empty, copy_all_map, copy_cal_map, copy_empty_map]
+pipeline.steps = [create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_facet_skymodels_cal, copy_parmdb, add_all_facet_sources, add_cal_facet_sources, shift_all, shift_cal, shift_empty, copy_all_map, copy_cal_map, copy_empty_map]
 
-pipeline.pluginpath                             =   {{ pipeline_dir }}/plugins
+pipeline.pluginpath                              =   {{ pipeline_dir }}/plugins
 
-create_ms_map.control.kind                      =   plugin
-create_ms_map.control.type                      =   addMSMapfile
-create_ms_map.control.hosts                     =   {{ hosts }}
-create_ms_map.control.folder                    =   {{ input_dir }}
-create_ms_map.control.mapfile_dir               =   {{ mapfile_dir }}
-create_ms_map.control.filename                  =   input_bands.mapfile
+create_ms_map.control.kind                       =   plugin
+create_ms_map.control.type                       =   addMSMapfile
+create_ms_map.control.hosts                      =   {{ hosts }}
+create_ms_map.control.folder                     =   {{ input_dir }}
+create_ms_map.control.mapfile_dir                =   {{ mapfile_dir }}
+create_ms_map.control.filename                   =   input_bands.mapfile
 
-create_parmdb_map.control.kind                  =   plugin
-create_parmdb_map.control.type                  =   addParmdbMapfile
-create_parmdb_map.control.mapfile_in            =   create_ms_map.output.mapfile
-create_parmdb_map.control.parmdb_name           =   {{ dir_indep_parmdb_name }}
-create_parmdb_map.control.mapfile_dir           =   {{ mapfile_dir }}
-create_parmdb_map.control.filename              =   dir_indep_instrument_parmdbs.mapfile
+create_parmdb_map.control.kind                   =   plugin
+create_parmdb_map.control.type                   =   addParmdbMapfile
+create_parmdb_map.control.mapfile_in             =   create_ms_map.output.mapfile
+create_parmdb_map.control.parmdb_name            =   {{ dir_indep_parmdb_name }}
+create_parmdb_map.control.mapfile_dir            =   {{ mapfile_dir }}
+create_parmdb_map.control.filename               =   dir_indep_instrument_parmdbs.mapfile
 
-create_full_skymodel_map.control.kind           =   plugin
-create_full_skymodel_map.control.type           =   addListMapfile
-create_full_skymodel_map.control.hosts          =   {{ hosts }}
-create_full_skymodel_map.control.files          =   {{ skymodels }}
-create_full_skymodel_map.control.mapfile_dir    =   {{ mapfile_dir }}
-create_full_skymodel_map.control.filename       =   full_skymodels.mapfile
+create_full_skymodels_map.control.kind           =   plugin
+create_full_skymodels_map.control.type           =   addListMapfile
+create_full_skymodels_map.control.hosts          =   {{ hosts }}
+create_full_skymodels_map.control.files          =   {{ skymodels }}
+create_full_skymodels_map.control.mapfile_dir    =   {{ mapfile_dir }}
+create_full_skymodels_map.control.filename       =   full_skymodels.mapfile
 
 make_facet_skymodels_all.control.type            =   make_facet_skymodel
 make_facet_skymodels_all.control.outputkey       =   outfile
@@ -36,67 +36,67 @@ make_facet_skymodels_cal.argument.flags          =   [create_full_skymodel_map.o
 make_facet_skymodels_cal.argument.cal_only       =   True
 make_facet_skymodels_cal.argument.facet_ra       =   {{ facet_ra }}
 make_facet_skymodels_cal.argument.facet_dec      =   {{ facet_dec }}
-make_facet_skymodels_cal.argument.cal_radius_deg = {{ cal_radius_deg }}
+make_facet_skymodels_cal.argument.cal_radius_deg =   {{ cal_radius_deg }}
 
-copy_parmdb.control.kind                        =   plugin
-copy_parmdb.control.type                        =   copyParmdbtoMS
-copy_parmdb.control.ms_mapfile                  =   create_ms_map.output.mapfile
-copy_parmdb.control.parmdb_mapfile              =   create_parmdb_map.output.map
+copy_parmdb.control.kind                         =   plugin
+copy_parmdb.control.type                         =   copyParmdbtoMS
+copy_parmdb.control.ms_mapfile                   =   create_ms_map.output.mapfile
+copy_parmdb.control.parmdb_mapfile               =   create_parmdb_map.output.map
 
-add_all_facet_sources.control.type              =   calibrate-stand-alone
-add_all_facet_sources.control.mapfiles_in       =   [create_ms_map.output.mapfile,make_facet_skymodel_all.output.mapfile]
-add_all_facet_sources.control.inputkeys         =   [inputms, skymodel]
-add_all_facet_sources.control.arguments         =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirindep_add_all.parset,skymodel]
+add_all_facet_sources.control.type               =   calibrate-stand-alone
+add_all_facet_sources.control.mapfiles_in        =   [create_ms_map.output.mapfile,make_facet_skymodel_all.output.mapfile]
+add_all_facet_sources.control.inputkeys          =   [inputms, skymodel]
+add_all_facet_sources.control.arguments          =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirindep_add_all.parset,skymodel]
 
-add_cal_facet_sources.control.type              =   calibrate-stand-alone
-add_cal_facet_sources.control.mapfiles_in       =   [create_ms_map.output.mapfile,make_facet_skymodel_cal.output.mapfile]
-add_cal_facet_sources.control.inputkeys         =   [inputms, skymodel]
-add_cal_facet_sources.control.arguments         =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirindep_add_cal.parset,skymodel]
+add_cal_facet_sources.control.type               =   calibrate-stand-alone
+add_cal_facet_sources.control.mapfiles_in        =   [create_ms_map.output.mapfile,make_facet_skymodel_cal.output.mapfile]
+add_cal_facet_sources.control.inputkeys          =   [inputms, skymodel]
+add_cal_facet_sources.control.arguments          =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirindep_add_cal.parset,skymodel]
 
-shift_all.control.type                          =   dppp
-shift_all.control.opts.mapfile_in               =   create_ms_map.output.mapfile
-shift_all.control.opts.inputkey                 =   msin
-shift_all.parsetarg.msin.datacolumn             =   FACET_DATA_ALL
-shift_all.parsetarg.msout.writefullresflag      =   False
-shift_all.parsetarg.steps                       =   [shift]
-shift_all.parsetarg.shift.type                  =   phaseshifter
-shift_all.parsetarg.shift.phasecenter           =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+shift_all.control.type                           =   dppp
+shift_all.control.opts.mapfile_in                =   create_ms_map.output.mapfile
+shift_all.control.opts.inputkey                  =   msin
+shift_all.parsetarg.msin.datacolumn              =   FACET_DATA_ALL
+shift_all.parsetarg.msout.writefullresflag       =   False
+shift_all.parsetarg.steps                        =   [shift]
+shift_all.parsetarg.shift.type                   =   phaseshifter
+shift_all.parsetarg.shift.phasecenter            =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
 
-shift_cal.control.type                          =   dppp
-shift_cal.control.opts.mapfile_in               =   create_ms_map.output.mapfile
-shift_cal.control.opts.inputkey                 =   msin
-shift_cal.parsetarg.msin.datacolumn             =   FACET_DATA_CAL
-shift_cal.parsetarg.msout.writefullresflag      =   False
-shift_cal.parsetarg.steps                       =   [shift]
-shift_cal.parsetarg.shift.type                  =   phaseshifter
-shift_cal.parsetarg.shift.phasecenter           =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+shift_cal.control.type                           =   dppp
+shift_cal.control.opts.mapfile_in                =   create_ms_map.output.mapfile
+shift_cal.control.opts.inputkey                  =   msin
+shift_cal.parsetarg.msin.datacolumn              =   FACET_DATA_CAL
+shift_cal.parsetarg.msout.writefullresflag       =   False
+shift_cal.parsetarg.steps                        =   [shift]
+shift_cal.parsetarg.shift.type                   =   phaseshifter
+shift_cal.parsetarg.shift.phasecenter            =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
 
-shift_empty.control.type                        =   dppp
-shift_empty.control.opts.mapfile_in             =   create_ms_map.output.mapfile
-shift_empty.control.opts.inputkey               =   msin
-shift_empty.parsetarg.msin.datacolumn           =   SUBTRACTED_DATA_ALL
-shift_empty.parsetarg.msout.writefullresflag    =   False
-shift_empty.parsetarg.steps                     =   [shift]
-shift_empty.parsetarg.shift.type                =   phaseshifter
-shift_empty.parsetarg.shift.phasecenter         =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+shift_empty.control.type                         =   dppp
+shift_empty.control.opts.mapfile_in              =   create_ms_map.output.mapfile
+shift_empty.control.opts.inputkey                =   msin
+shift_empty.parsetarg.msin.datacolumn            =   SUBTRACTED_DATA_ALL
+shift_empty.parsetarg.msout.writefullresflag     =   False
+shift_empty.parsetarg.steps                      =   [shift]
+shift_empty.parsetarg.shift.type                 =   phaseshifter
+shift_empty.parsetarg.shift.phasecenter          =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
 
-copy_all_map.control.kind                       =   plugin
-copy_all_map.control.type                       =   copyMapfile
-copy_all_map.control.map_to_copy                =   shift_all.output.mapfile
-copy_all_map.control.folder                     =   {{ mapfile_dir }}
-copy_all_map.control.filename                   =   shifted_all_bands.datamap
+copy_all_map.control.kind                        =   plugin
+copy_all_map.control.type                        =   copyMapfile
+copy_all_map.control.map_to_copy                 =   shift_all.output.mapfile
+copy_all_map.control.folder                      =   {{ mapfile_dir }}
+copy_all_map.control.filename                    =   shifted_all_bands.datamap
 
-copy_cal_map.control.kind                       =   plugin
-copy_cal_map.control.type                       =   copyMapfile
-copy_cal_map.control.map_to_copy                =   shift_cal.output.mapfile
-copy_cal_map.control.folder                     =   {{ mapfile_dir }}
-copy_cal_map.control.filename                   =   shifted_cal_bands.datamap
+copy_cal_map.control.kind                        =   plugin
+copy_cal_map.control.type                        =   copyMapfile
+copy_cal_map.control.map_to_copy                 =   shift_cal.output.mapfile
+copy_cal_map.control.folder                      =   {{ mapfile_dir }}
+copy_cal_map.control.filename                    =   shifted_cal_bands.datamap
 
-copy_empty_map.control.kind                     =   plugin
-copy_empty_map.control.type                     =   copyMapfile
-copy_empty_map.control.map_to_copy              =   shift_empty.output.mapfile
-copy_empty_map.control.folder                   =   {{ mapfile_dir }}
-copy_empty_map.control.filename                 =   shifted_empty_bands.datamap
+copy_empty_map.control.kind                      =   plugin
+copy_empty_map.control.type                      =   copyMapfile
+copy_empty_map.control.map_to_copy               =   shift_empty.output.mapfile
+copy_empty_map.control.folder                    =   {{ mapfile_dir }}
+copy_empty_map.control.filename                  =   shifted_empty_bands.datamap
 
 copy_parmdb_map.control.kind                     =   plugin
 copy_parmdb_map.control.type                     =   copyMapfile

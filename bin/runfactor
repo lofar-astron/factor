@@ -193,6 +193,10 @@ if __name__=='__main__':
             self.log.info('Exiting...')
             sys.exit()
 
+    # Save direction state
+    for direction in directions:
+        direction.save_state()
+
     # Select subset of directions to process
     if 'ndir' in parset['direction_specific']:
         if parset['direction_specific']['ndir'] > 0 and \
