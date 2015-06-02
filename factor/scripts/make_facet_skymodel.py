@@ -27,20 +27,26 @@ def main(fullskymodel, outmodel, vertices_file, cal_only=False, facet_ra=0.0, fa
     s = lsmtool.load(fullskymodel)
     vertices = read_vertices(vertices_file)
 
+    # Get all facet sources
+    x, y, midRA, midDec = s._getXY()
+    xv, yv = radec2xy(vertices[0], vertices[1], midRA, midDec)
+    xyvertices = array([[xp, yp] for xp, yp in zip(xv, yv)])
+    bbPath = mplPath.Path(xyvertices)
+    inside = zeros(len(s), dtype=bool)
+    for i in range(len(s)):
+        inside[i] = bbPath.contains_point((x[i], y[i]))
+    s.select(inside, force=True)
+
+    if len(s) == 0:
+        print('No sources found for this facet')
+#         return
+
     if cal_only:
         # Get calibrator model
         dist = s.getDistance(facet_ra, facet_dec)
+        print(dist)
+        print(cal_radius_deg)
         s.select(dist < cal_radius_deg)
-    else:
-        # Get all facet sources
-        x, y, midRA, midDec = s._getXY()
-        xv, yv = radec2xy(vertices[0], vertices[1], midRA, midDec)
-        xyvertices = array([[xp, yp] for xp, yp in zip(xv, yv)])
-        bbPath = mplPath.Path(xyvertices)
-        inside = zeros(len(s), dtype=bool)
-        for i in range(len(s)):
-            inside[i] = bbPath.contains_point((x[i], y[i]))
-        s.select(inside, force=True)
 
     if len(s) == 0:
         print('No sources found for this facet')
@@ -62,5 +68,5 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    main(args.fullskymodel, args.outmodel, args.vertices_file, args.cal_only,
-        args.facet_ra, args.facet_dec, args.cal_radius_deg)
+    main(args.fullskymodel, args.outmodel, args.vertices_file, cal_only=args.cal_only,
+        facet_ra=args.facet_ra, facet_dec=args.facet_dec, cal_radius_deg=args.cal_radius_deg)
