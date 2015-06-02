@@ -143,7 +143,7 @@ wsclean_low2.argument.cleanborder          =   0
 wsclean_low2.argument.minuv-l              =   80
 wsclean_low2.argument.maxuv-l              =   2000
 wsclean_low2.argument.scale                =   0.00694
-wsclean_low1.argument.mem                  =   90
+wsclean_low2.argument.mem                  =   90
 
 fits_to_image_low.control.type             =   convert_fits_image_to_casa
 fits_to_image_low.control.outputkey        =   outfile
