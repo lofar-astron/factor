@@ -143,6 +143,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     ds9_directions_file = 'factor_directions_ds9.reg'
 
     # Load sky model and filter it
+    log.info('Skymodel: {0}'.format(band.skymodel_dirindep))
     s = lsmtool.load(band.skymodel_dirindep)
 
     # Group to clean components by thresholding after convolving model with
