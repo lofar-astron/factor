@@ -134,7 +134,7 @@ wsclean_low2.control.inputkeys             =   [msfile,fitsmask]
 wsclean_low2.argument.flags                =   [-no-update-model-required, msfile]
 wsclean_low2.argument.size                 =   {{ npix_low }} {{ npix_low }}
 wsclean_low2.argument.niter                =   100
-wsclean_low2.argument.threshold            =   mask_low.output.threshold.mapfile
+wsclean_low2.argument.threshold            =   mask_low.output.threshold_5sig.mapfile
 wsclean_low2.argument.pol                  =   I
 wsclean_low2.argument.weight               =   briggs -0.5
 wsclean_low2.argument.mgain                =   0.5
@@ -163,7 +163,7 @@ create_model_low_map.control.trim          =   -model.fits
 create_model_low_map.control.mapfile_dir   =   {{ mapfile_dir }}
 create_model_low_map.control.filename      =   model_low_rootnames.mapfile
 
-wsclean_ft_low.control.type                =   wsclean
+wsclean_ft_low.control.type                =   wsclean_ft
 wsclean_ft_low.argument.flags              =   [-predict,create_ms_map.output.mapfile]
 wsclean_ft_low.argument.name               =   create_model_low_map.output.mapfile
 wsclean_ft_low.argument.size               =   {{ npix_low }} {{ npix_low }}
