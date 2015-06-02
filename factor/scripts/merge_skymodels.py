@@ -13,7 +13,7 @@ def main(inmodel1, inmodel2, outmodel, match_by='name', radius=0.0, keep='all'):
     s1 = lsmtool.load(inmodel1)
     s2 = lsmtool.load(inmodel2)
 
-    s1.concatenate(s2, matchBy=match_by, radius=radius, keep=keep,
+    s1.concatenate(s2, matchBy=match_by, radius=float(radius), keep=keep,
         inheritPatches=True)
     s1.group('every')
     s1.write(fileName=outmodel, clobber=True)

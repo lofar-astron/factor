@@ -31,6 +31,24 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     if rmsbox is not None:
         rmsbox = eval(rmsbox)
 
+    if type(atrous_do) is str:
+        if atrous_do.lower() == 'true':
+            atrous_do = True
+        else:
+            atrous_do = False
+
+    if type(iterate_threshold) is str:
+        if iterate_threshold.lower() == 'true':
+            iterate_threshold = True
+        else:
+            iterate_threshold = False
+
+    if type(adaptive_rmsbox) is str:
+        if adaptive_rmsbox.lower() == 'true':
+            adaptive_rmsbox = True
+        else:
+            adaptive_rmsbox = False
+
     if iterate_threshold:
         # Start with high threshold and lower it until we get at least one island
         threshpix_orig = threshpix

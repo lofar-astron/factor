@@ -17,6 +17,12 @@ def main(fitsimage, outfilename, force_stokes_i=False):
     casaimage = pim.image(fitsimage)
     casaimage.saveas(outfilename, overwrite=True)
 
+    if type(force_stokes_i) is str:
+        if force_stokes_i.lower() == 'true':
+            force_stokes_i = True
+        else:
+            force_stokes_i = False
+
     if force_stokes_i:
         coords = casaimage.coordinates().dict()
         coords['stokes1']['stokes'] = ['I']

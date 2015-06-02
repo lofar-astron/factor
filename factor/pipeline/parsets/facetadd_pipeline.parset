@@ -45,12 +45,12 @@ copy_parmdb.control.parmdb_mapfile               =   create_parmdb_map.output.ma
 
 add_all_facet_sources.control.type               =   calibrate-stand-alone
 add_all_facet_sources.control.mapfiles_in        =   [create_ms_map.output.mapfile,make_facet_skymodels_all.output.mapfile]
-add_all_facet_sources.control.inputkeys          =   [inputms, skymodel]
+add_all_facet_sources.control.inputkeys          =   [inputms,skymodel]
 add_all_facet_sources.control.arguments          =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirindep_add_all.parset,skymodel]
 
 add_cal_facet_sources.control.type               =   calibrate-stand-alone
 add_cal_facet_sources.control.mapfiles_in        =   [create_ms_map.output.mapfile,make_facet_skymodels_cal.output.mapfile]
-add_cal_facet_sources.control.inputkeys          =   [inputms, skymodel]
+add_cal_facet_sources.control.inputkeys          =   [inputms,skymodel]
 add_cal_facet_sources.control.arguments          =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirindep_add_cal.parset,skymodel]
 
 shift_all.control.type                           =   dppp
@@ -82,24 +82,24 @@ shift_empty.parsetarg.shift.phasecenter          =   [{{ facet_ra }}deg, {{ face
 
 copy_all_map.control.kind                        =   plugin
 copy_all_map.control.type                        =   copyMapfile
-copy_all_map.control.map_to_copy                 =   shift_all.output.mapfile
-copy_all_map.control.folder                      =   {{ mapfile_dir }}
+copy_all_map.control.mapfile                     =   shift_all.output.mapfile
+copy_all_map.control.mapfile_dir                 =   {{ mapfile_dir }}
 copy_all_map.control.filename                    =   shifted_all_bands.datamap
 
 copy_cal_map.control.kind                        =   plugin
 copy_cal_map.control.type                        =   copyMapfile
-copy_cal_map.control.map_to_copy                 =   shift_cal.output.mapfile
-copy_cal_map.control.folder                      =   {{ mapfile_dir }}
+copy_cal_map.control.mapfile                     =   shift_cal.output.mapfile
+copy_cal_map.control.mapfile_dir                 =   {{ mapfile_dir }}
 copy_cal_map.control.filename                    =   shifted_cal_bands.datamap
 
 copy_empty_map.control.kind                      =   plugin
 copy_empty_map.control.type                      =   copyMapfile
-copy_empty_map.control.map_to_copy               =   shift_empty.output.mapfile
-copy_empty_map.control.folder                    =   {{ mapfile_dir }}
+copy_empty_map.control.mapfile                   =   shift_empty.output.mapfile
+copy_empty_map.control.mapfile_dir               =   {{ mapfile_dir }}
 copy_empty_map.control.filename                  =   shifted_empty_bands.datamap
 
 copy_parmdb_map.control.kind                     =   plugin
 copy_parmdb_map.control.type                     =   copyMapfile
-copy_parmdb_map.control.map_to_copy              =   create_parmdb_map.output.mapfile
-copy_parmdb_map.control.folder                   =   {{ mapfile_dir }}
+copy_parmdb_map.control.mapfile                  =   create_parmdb_map.output.mapfile
+copy_parmdb_map.control.mapfile_dir              =   {{ mapfile_dir }}
 copy_parmdb_map.control.filename                 =   dir_indep_parmdbs.datamap

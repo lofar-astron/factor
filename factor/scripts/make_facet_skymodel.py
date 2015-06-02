@@ -25,6 +25,12 @@ def read_vertices(filename):
 def main(fullskymodel, outmodel, vertices_file, cal_only=False, facet_ra=0.0,
     facet_dec=0.0, cal_radius_deg=0.0):
 
+    if type(cal_only) is str:
+        if cal_only.lower() == 'true':
+            cal_only = True
+        else:
+            cal_only = False
+
     s = lsmtool.load(fullskymodel)
     vertices = read_vertices(vertices_file)
 

@@ -23,6 +23,13 @@ def main(dataset, blockl, clobber=True):
         If True, existing files are overwritten
 
     """
+    if type(clobber) is str:
+        if clobber.lower() == 'true':
+            clobber = True
+        else:
+            clobber = False
+
+    blockl = int(blockl)
     if blockl < 1:
         blockl = 1
 
