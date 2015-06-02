@@ -35,7 +35,7 @@ class FacetAdd(Operation):
     """
     def __init__(self, parset, bands, direction=None, reset=False):
         super(FacetAdd, self).__init__(parset, bands, direction=direction,
-            reset=reset, name='FacetAdd')
+            name='FacetAdd')
 
         # Define parameters needed for this operation
         skymodels = [band.skymodel_dirindep for band in self.bands]
@@ -72,7 +72,7 @@ class FacetSetup(Operation):
     """
     def __init__(self, parset, bands, direction=None, reset=False):
         super(FacetSetup, self).__init__(parset, bands, direction=direction,
-            reset=reset, name='FacetSetup')
+            name='FacetSetup')
 
         # Define parameters needed for this operation
         self.parms_dict = {'input_dir': parset['dir_ms'],
@@ -101,7 +101,7 @@ class FacetSelfcal(Operation):
     """
     def __init__(self, parset, bands, direction=None, reset=False):
         super(FacetSelfcal, self).__init__(parset, bands, direction=direction,
-            reset=reset, name='FacetSelfcal')
+            name='FacetSelfcal')
 
         # Define parameters needed for this operation
         self.parms_dict = {'input_dir': parset['dir_ms'],
