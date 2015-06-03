@@ -79,9 +79,10 @@ mask02.control.outputkey                    =   outfile
 mask02.argument.flags                       =   [casa_image02.output.casa_image02.image.tt0.mapfile,outfile]
 mask02.argument.threshpix                   =   10
 mask02.argument.threshisl                   =   6
-mask01.argument.atrous_do                   =   True
+mask02.argument.atrous_do                   =   True
 mask02.argument.rmsbox                      =   (50,20)
 mask02.argument.img_format                  =   casa
+mask02.argument.threshold_format            =   str_with_units
 
 casa_image03.control.kind                   =   recipe
 casa_image03.control.type                   =   casa

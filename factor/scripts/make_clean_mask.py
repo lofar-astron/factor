@@ -11,7 +11,8 @@ import os
 
 
 def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, rmsbox=None,
-         iterate_threshold=False, adaptive_rmsbox=False, img_format='fits'):
+         iterate_threshold=False, adaptive_rmsbox=False, img_format='fits',
+         threshold_format='float'):
     """
     Run PyBDSM to make an island clean mask
 
@@ -75,7 +76,10 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
                      img_format=img_format, clobber=True)
 
-    return {'threshold_5sig': 5.0 * img.clipped_rms}
+    if threshold_format == 'float':
+        return {'threshold_5sig': 5.0 * img.clipped_rms}
+    elif threshold_format == 'str_with_units':
+        return {'threshold_5sig': '{0}Jy'.format(5.0 * img.clipped_rms)}
 
 
 if __name__ == '__main__':
@@ -93,8 +97,10 @@ if __name__ == '__main__':
         'one island is found', type=bool, default=False)
     parser.add_argument('-o', '--adaptive_rmsbox', help='use an adaptive rms box', type=bool, default=False)
     parser.add_argument('-f', '--img_format', help='format of output mask', type=str, default='casa')
+    parser.add_argument('-d', '--threshold_format', help='format of return value', type=str, default='float')
 
     args = parser.parse_args()
     main(args.image_name, args.mask_name, atrous_do=args.atrous_do,
          threshisl=args.threshisl, threshpix=args.threshpix, rmsbox=args.rmsbox, iterate_threshold=args.iterate_threshold,
-         adaptive_rmsbox=args.adaptive_rmsbox, img_format=args.img_format)
+         adaptive_rmsbox=args.adaptive_rmsbox, img_format=args.img_format,
+         threshold_format=args.threshold_format)
