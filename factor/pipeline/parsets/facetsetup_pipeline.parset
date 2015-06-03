@@ -10,7 +10,7 @@ copy_parmdb.control.parmdb_mapfile             =   {{ dir_indep_parmdbs_datamap 
 apply_dir_indep.control.type                   =   calibrate-stand-alone
 apply_dir_indep.control.mapfile_in             =   {{ shifted_cal_bands_datamap }}
 apply_dir_indep.control.inputkey               =   inputms
-apply_dir_indep.control.arguments              =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirindep_apply_cal.parset]
+apply_dir_indep.control.arguments              =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirindep_apply_cal.parset,{{ skymodel_dir }}/empty.skymodel]
 
 average1.control.type                          =   dppp
 average1.control.opts.mapfile_in               =   {{ shifted_cal_bands_datamap }}
