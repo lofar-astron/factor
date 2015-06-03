@@ -82,7 +82,7 @@ class FacetSetup(Operation):
                            'skymodel_dir': self.factor_skymodel_dir,
                            'mapfile_dir': self.mapfile_dir,
                            'pipeline_dir': self.factor_pipeline_dir,
-                           'shifted_cal_bands_datamap': self.shifted_cal_bands_datamap,
+                           'shifted_cal_bands_datamap': self.direction.shifted_cal_bands_datamap,
                            'dir_indep_parmdbs_datamap': self.direction.dir_indep_parmdbs_datamap,
                            'hosts': self.direction.hosts}
 
