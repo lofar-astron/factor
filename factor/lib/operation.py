@@ -102,6 +102,7 @@ class Operation(object):
                          'genericpiperoot': parset['piperoot'],
                          'pipeline_working_dir': self.pipeline_working_dir,
                          'pipeline_runtime_dir': self.pipeline_runtime_dir,
+                         'casa_executable': spawn.find_executable('casa'),
                          'wsclean_executable': spawn.find_executable('wsclean')}
 
 
