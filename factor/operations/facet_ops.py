@@ -114,6 +114,8 @@ class FacetSelfcal(Operation):
                            'wplanes': self.direction.wplanes,
                            'imsize': self.direction.cal_imsize,
                            'chunk_width': self.direction.solint_a*2.0,
+                           'solint_p': self.direction.solint_p,
+                           'solint_a': self.direction.solint_a,
                            'hosts': self.direction.hosts}
 
 

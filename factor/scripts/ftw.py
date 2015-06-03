@@ -3,7 +3,7 @@ Script to perform FT (to be run only by casapy)
 
 The assumed call is:
 
-casapy --nologger -c ftw.py inputms modelimg nterms wplanes
+casapy --nologger -c ftw.py inputms modelimg nterms wplanes task_xml_file task_py_file
 
 where:
 
@@ -16,6 +16,10 @@ modelimg : str
     .tt0, .tt1, etc.)
 nterms : int
 wplanes : int
+task_xml_file : str
+    Full path to the ftw.xml file
+task_py_file : str
+    Full path to the task_ftw.py file
 
 """
 import os
@@ -24,8 +28,8 @@ import numpy
 import time
 
 # Set up custom ftw task
-os.system('cp {{ task_xml_file }} .')
-os.system('cp {{ task_py_file }} .')
+os.system('cp {0} .'.format(sys.argv[8]))
+os.system('cp {0} .'.format(sys.argv[9]))
 os.system('buildmytasks')
 execfile('mytasks.py')
 

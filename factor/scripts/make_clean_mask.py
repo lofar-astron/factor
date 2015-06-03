@@ -11,7 +11,7 @@ import os
 
 
 def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, rmsbox=None,
-         iterate_threshold=False, adaptive_rmsbox=False, img_format=None):
+         iterate_threshold=False, adaptive_rmsbox=False, img_format='fits'):
     """
     Run PyBDSM to make an island clean mask
 

@@ -45,7 +45,7 @@ mask01.argument.threshpix                   =   10
 mask01.argument.threshisl                   =   6
 mask01.argument.iterate_threshold           =   True
 mask01.argument.atrous_do                   =   True
-mask01.argument.rmsbox                      =   50 20
+mask01.argument.rmsbox                      =   (50, 20)
 mask01.argument.img_format                  =   casa
 
 casa_image02.control.kind                   =   recipe
@@ -79,9 +79,8 @@ mask02.control.outputkey                    =   outfile
 mask02.argument.flags                       =   [casa_image02.output.casa_image02.image.tt0.mapfile,outfile]
 mask02.argument.threshpix                   =   10
 mask02.argument.threshisl                   =   6
-mask02.argument.iterate_threshold           =   True
-mask02.argument.atrous_do                   =   True
-mask02.argument.rmsbox                      =   50 20
+mask01.argument.atrous_do                   =   True
+mask02.argument.rmsbox                      =   (50, 20)
 mask02.argument.img_format                  =   casa
 
 casa_image03.control.kind                   =   recipe
@@ -121,7 +120,7 @@ casa_ft0.control.kind                       =   recipe
 casa_ft0.control.type                       =   casa
 casa_ft0.control.opts.mapfiles_in           =   [{{ shifted_cal_concat_datamap }},create_model0_map.output.mapfile]
 casa_ft0.control.opts.inputkeys             =   [inputms,modelimg]
-casa_ft0.control.opts.arguments             =   [--nologger,-c,%(factorroot)s/scripts/ftw.py,inputms,modelimg,2,{{ wplanes }}]
+casa_ft0.control.opts.arguments             =   [--nologger,-c,%(factorroot)s/scripts/ftw.py,inputms,modelimg,2,{{ wplanes }},%(factorroot)s/scripts/ftw.xml,%(factorroot)s/scripts/task_ftw.py]
 
 make_chunks.control.type                    =   chunk_by_time
 make_chunks.argument.flags                  =   [{{ shifted_cal_concat_datamap }}]
@@ -141,5 +140,5 @@ solve_phaseonly1.control.arguments                       =   [--replace-sourcedb
 solve_phaseonly1.control.args_format                     =   bbs
 solve_phaseonly1.control.parset                          =   {{ parset_dir }}/subtract_lowres.parset
 solve_phaseonly1.control.parsetasfile                    =   True
-solve_phaseonly1.argument.Step.solve.Solve.CellSize.Time =   {{ timestep }}
+solve_phaseonly1.argument.Step.solve.Solve.CellSize.Time =   {{ solint_p }}
 
