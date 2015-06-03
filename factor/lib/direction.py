@@ -98,6 +98,23 @@ class Direction(object):
             self.apparent_flux_mjy = None
         self.nchannels = 1
 
+        # Set number of wplanes for casapy imaging
+        self.wplanes = 1
+        if self.cal_imsize > 512:
+            self.wplanes = 64
+        if self.cal_imsize > 799:
+            self.wplanes = 96
+        if self.cal_imsize > 1023:
+            self.wplanes = 128
+        if self.cal_imsize > 1599:
+            self.wplanes = 256
+        if self.cal_imsize > 2047:
+            self.wplanes = 384
+        if self.cal_imsize > 3000:
+            self.wplanes = 448
+        if self.cal_imsize > 4095:
+            self.wplanes = 512
+
         self.working_dir = factor_working_dir
         self.completed_operations = []
         self.save_file = os.path.join(self.working_dir, 'state',

@@ -91,7 +91,7 @@ casa_image03.control.opts.inputkeys        =   [clean.vis,clean.mask]
 casa_image03.control.opts.outputkey        =   clean.imagename
 casa_image03.control.opts.arguments        =   [--nologger,-c]
 casa_image03.argument.clean.gridmode       =   'widefield'
-casa_image03.argument.clean.wprojplanes    =   {{ wprojplanes }}
+casa_image03.argument.clean.wprojplanes    =   {{ wplanes }}
 casa_image03.argument.clean.selectdata     =   True
 casa_image03.argument.clean.uvrange        =   '>80lambda'
 casa_image03.argument.clean.mode           =   'mfs'
@@ -111,18 +111,17 @@ casa_image03.argument.clean.minpb          =   0.2
 casa_image03.argument.clean.multiscale     =   [0, 3, 7, 25, 60, 150]
 
 create_model0_map.control.kind          =   plugin
-create_model0_map.control.type          =   combineMapfiles
-create_model0_map.control.mapfiles_in   =   [casa_image03.output.casa_image03.model.tt0.mapfile,casa_image03.output.casa_image03.model.tt1.mapfile]
-create_model0_map.control.list_of_str   =   True
+create_model0_map.control.type          =   trimMapfile
+create_model0_map.control.mapfile       =   casa_image03.output.casa_image03.model.tt0.mapfile
+create_model0_map.control.trim          =   .model.tt0
+create_model0_map.control.mapfile_dir   =   {{ mapfile_dir }}
+create_model0_map.control.filename      =   model0_rootnames.datamap
 
 casa_ft0.control.kind                  =   recipe
 casa_ft0.control.type                  =   casa
 casa_ft0.control.opts.mapfiles_in      =   [{{ shifted_cal_concat_datamap }},create_model0_map.output.mapfile]
-casa_ft0.control.opts.inputkeys        =   [ft.vis,ft.model]
-casa_ft0.control.opts.arguments        =   [--nologger,-c]
-casa_ft0.argument.ft.nterms           =   2
-casa_ft0.argument.ft.incremental      =   False
-casa_ft0.argument.ft.usescratch       =   True
+casa_ft0.control.opts.inputkeys        =   [inputms,modelimg]
+casa_ft0.control.opts.arguments        =   [--nologger,-c,%(factorroot)s/scripts/ftw.py,inputms,modelimg,2,{{ wplanes }}]
 
 make_chunks.control.type                      =   chunk_by_time
 make_chunks.argument.flags                    =   [{{ shifted_cal_concat_datamap }}]

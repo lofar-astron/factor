@@ -30,6 +30,7 @@ def plugin_main(args, **kwargs):
         mapfiles_in = kwargs['mapfiles_in'].strip('[]').split(',')
         mapfiles_in = [m.strip() for m in mapfiles_in]
     num_mapfiles = len(mapfiles_in)
+    list_of_str = bool(kwargs['list_of_str'])
     mapfile_dir = kwargs['mapfile_dir']
     filename = kwargs['filename']
 

@@ -111,7 +111,7 @@ class FacetSelfcal(Operation):
                            'mapfile_dir': self.mapfile_dir,
                            'pipeline_dir': self.factor_pipeline_dir,
                            'shifted_cal_concat_datamap': self.direction.shifted_cal_concat_datamap,
-                           'wprojplanes': self.direction.wprojplanes,
+                           'wplanes': self.direction.wplanes,
                            'imsize': self.direction.cal_imsize,
                            'cellsize': self.direction.cellsize,
                            'chunk_width': self.direction.solint_a*2.0,
