@@ -93,7 +93,7 @@ class FacetSetup(Operation):
         """
         # Add output datamap to direction object
         self.direction.shifted_cal_concat_datamap = os.path.join(self.mapfile_dir,
-            'shifted_cal_concat_bands.datamap')
+            'shifted_cal_concat.datamap')
 
 
 class FacetSelfcal(Operation):
