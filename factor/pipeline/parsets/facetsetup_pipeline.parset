@@ -1,26 +1,19 @@
-pipeline.steps = [create_ms_map, copy_parmdb, apply_dir_indep, average1, average2, create_compressed_mapfile1, create_compressed_mapfile2, concat1, concat2, copy_column, copy_data_map]
+pipeline.steps = [copy_parmdb, apply_dir_indep, average1, average2, create_compressed_mapfile1, create_compressed_mapfile2, concat1, concat2, copy_column, copy_concat_map]
 
 pipeline.pluginpath                            =   {{ pipeline_dir }}/plugins
 
-create_ms_map.control.kind                     =   plugin
-create_ms_map.control.type                     =   copyMapfile
-create_ms_map.control.map_to_copy              =   concat1.output.mapfile
-create_ms_map.control.hosts                    =   {{ hosts }}
-create_ms_map.control.folder                   =   {{ mapfile_dir }}
-create_ms_map.control.filename                 =   shifted_cal_concat.datamap
-
 copy_parmdb.control.kind                       =   plugin
 copy_parmdb.control.type                       =   copyParmdbtoMS
-copy_parmdb.control.ms_mapfile                 =   create_ms_map.output.mapfile
+copy_parmdb.control.ms_mapfile                 =   {{ shifted_cal_bands_datamap }}
 copy_parmdb.control.parmdb_mapfile             =   {{ dir_indep_parmdbs_datamap }}
 
 apply_dir_indep.control.type                   =   calibrate-stand-alone
-apply_dir_indep.control.mapfile_in             =   create_ms_map.output.mapfile
+apply_dir_indep.control.mapfile_in             =   {{ shifted_cal_bands_datamap }}
 apply_dir_indep.control.inputkey               =   inputms
 apply_dir_indep.control.arguments              =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirindep_apply_cal.parset]
 
 average1.control.type                          =   dppp
-average1.control.opts.mapfile_in               =   create_ms_map.output.mapfile
+average1.control.opts.mapfile_in               =   {{ shifted_cal_bands_datamap }}
 average1.control.opts.inputkey                 =   msin
 average1.parsetarg.msin.datacolumn             =   DATA
 average1.parsetarg.msout.writefullresflag      =   False
@@ -30,7 +23,7 @@ average1.parsetarg.avg.freqstep                =   20
 average1.parsetarg.avg.timestep                =   1
 
 average2.control.type                          =   dppp
-average2.control.opts.mapfile_in               =   create_ms_map.output.mapfile
+average2.control.opts.mapfile_in               =   {{ shifted_cal_bands_datamap }}
 average2.control.opts.inputkey                 =   msin
 average2.parsetarg.msin.datacolumn             =   CORRECTED_DATA
 average2.parsetarg.msout.writefullresflag      =   False
