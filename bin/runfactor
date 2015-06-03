@@ -224,6 +224,7 @@ if __name__=='__main__':
                 (i+1)*len(node_list)//parts] for i in range(parts)]
         for d, h in zip(direction_group, hosts):
             d.hosts = h
+            d.save_state()
 
         # Add calibrator(s) to empty datasets. These operations
         # must be done in series
