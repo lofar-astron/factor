@@ -65,6 +65,6 @@ copy_column.argument.column_to                 =   CORRECTED_DATA
 
 copy_concat_map.control.kind                   =   plugin
 copy_concat_map.control.type                   =   copyMapfile
-copy_concat_map.control.map_to_copy            =   concat1.output.mapfile
-copy_concat_map.control.folder                 =   {{ mapfile_dir }}
+copy_concat_map.control.mapfile                =   concat1.output.mapfile
+copy_concat_map.control.mapfile_dir            =   {{ mapfile_dir }}
 copy_concat_map.control.filename               =   shifted_cal_concat.datamap
