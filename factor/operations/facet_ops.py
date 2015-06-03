@@ -65,7 +65,7 @@ class FacetAdd(Operation):
         self.direction.shifted_empty_bands_datamap = os.path.join(self.mapfile_dir,
             'shifted_all_bands.datamap')
         self.direction.dir_indep_parmdbs_datamap = os.path.join(self.mapfile_dir,
-            'dir_indep_parmdbs.datamap')
+            'dir_indep_instrument_parmdbs.datamap')
 
 
 class FacetSetup(Operation):

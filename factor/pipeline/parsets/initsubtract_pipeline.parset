@@ -7,14 +7,14 @@ create_ms_map.control.type                 =   addMSMapfile
 create_ms_map.control.hosts                =   {{ hosts }}
 create_ms_map.control.folder               =   {{ input_dir }}
 create_ms_map.control.mapfile_dir          =   {{ mapfile_dir }}
-create_ms_map.control.filename             =   input_bands.mapfile
+create_ms_map.control.filename             =   input_bands.datamap
 
 create_parmdb_map.control.kind             =   plugin
 create_parmdb_map.control.type             =   addParmdbMapfile
 create_parmdb_map.control.mapfile_in       =   create_ms_map.output.mapfile
 create_parmdb_map.control.parmdb_name      =   {{ dir_indep_parmdb_name }}
 create_parmdb_map.control.mapfile_dir      =   {{ mapfile_dir }}
-create_parmdb_map.control.filename         =   dir_indep_instrument_parmdbs.mapfile
+create_parmdb_map.control.filename         =   dir_indep_instrument_parmdbs.datamap
 
 wsclean_high1.control.type                 =   wsclean
 wsclean_high1.control.mapfile_in           =   create_ms_map.output.mapfile
@@ -74,7 +74,7 @@ create_model_high_map.control.type         =   trimMapfile
 create_model_high_map.control.mapfile      =   wsclean_high2.output.wsclean_high2-model.fits.mapfile
 create_model_high_map.control.trim         =   -model.fits
 create_model_high_map.control.mapfile_dir  =   {{ mapfile_dir }}
-create_model_high_map.control.filename     =   model_high_rootnames.mapfile
+create_model_high_map.control.filename     =   model_high_rootnames.datamap
 
 wsclean_ft_high.control.type               =   wsclean_ft
 wsclean_ft_high.argument.flags             =   [-predict,create_ms_map.output.mapfile]
@@ -161,7 +161,7 @@ create_model_low_map.control.type          =   trimMapfile
 create_model_low_map.control.mapfile       =   wsclean_low2.output.wsclean_low2-model.fits.mapfile
 create_model_low_map.control.trim          =   -model.fits
 create_model_low_map.control.mapfile_dir   =   {{ mapfile_dir }}
-create_model_low_map.control.filename      =   model_low_rootnames.mapfile
+create_model_low_map.control.filename      =   model_low_rootnames.datamap
 
 wsclean_ft_low.control.type                =   wsclean_ft
 wsclean_ft_low.argument.flags              =   [-predict,create_ms_map.output.mapfile]
