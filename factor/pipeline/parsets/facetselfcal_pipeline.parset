@@ -1,4 +1,4 @@
-pipeline.steps = [average0, casa_image01, mask01, casa_image02, mask02, find_threshold0, casa_image03]
+pipeline.steps = [average0, casa_image01, mask01, casa_image02, mask02, casa_image03, create_model0_map, casa_ft0, make_chunks, create_chunks_map, solve_phaseonly1]
 
 pipeline.pluginpath                         =   {{ pipeline_dir }}/plugins
 
@@ -45,7 +45,7 @@ mask01.argument.threshpix                   =   10
 mask01.argument.threshisl                   =   6
 mask01.argument.iterate_threshold           =   True
 mask01.argument.atrous_do                   =   True
-mask01.argument.rmsbox                      =   (50, 20)
+mask01.argument.rmsbox                      =   (50,20)
 mask01.argument.img_format                  =   casa
 
 casa_image02.control.kind                   =   recipe
@@ -80,7 +80,7 @@ mask02.argument.flags                       =   [casa_image02.output.casa_image0
 mask02.argument.threshpix                   =   10
 mask02.argument.threshisl                   =   6
 mask01.argument.atrous_do                   =   True
-mask02.argument.rmsbox                      =   (50, 20)
+mask02.argument.rmsbox                      =   (50,20)
 mask02.argument.img_format                  =   casa
 
 casa_image03.control.kind                   =   recipe
