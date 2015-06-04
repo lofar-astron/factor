@@ -79,7 +79,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     if threshold_format == 'float':
         return {'threshold_5sig': 5.0 * img.clipped_rms}
     elif threshold_format == 'str_with_units':
-        return {'threshold_5sig': "'{0}Jy'".format(5.0 * img.clipped_rms)}
+        return {'threshold_5sig': '"{0}Jy"'.format(5.0 * img.clipped_rms)}
 
 
 if __name__ == '__main__':
