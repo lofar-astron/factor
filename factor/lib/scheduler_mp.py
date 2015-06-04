@@ -67,7 +67,8 @@ class Scheduler(object):
         op_parset : dict, optional
             Dict of operation parameters
         dryrun : bool, optional
-            If True, the pipelines are not run
+            If True, the pipelines are not run, but all parsets and config files
+            are made as normal
 
         """
         self.max_procs = max_procs
@@ -97,14 +98,16 @@ class Scheduler(object):
         """
         Runs a list of operations in parallel
 
+        Each operation is checked for whether it was already successfully
+        completed, and, if so, it will not be scheduled. However, the finalize()
+        method will be called for all operations, whether or not they were
+        scheduled. This is to ensure proper handling of direction object
+        attributes.
+
         Parameters
         ----------
-        operation_list : Operation or list of Operations
-
-        Returns
-        -------
-        results : Datamap or list of Datamaps
-            Single result or list of results returned by the actions
+        operation_list : Operation instance or list of Operation instances
+            List of operations to process
 
         """
         if type(operation_list) != list:
@@ -118,7 +121,7 @@ class Scheduler(object):
              op.setup()
 
         # Run the operation(s)
-        if not self.dryrun:
+        if not self.dryrun and len(operations_to_run) > 0:
             with Timer(self.log, 'operation'):
                 pool = multiprocessing.Pool(processes=self.max_procs)
                 for op in operations_to_run:
