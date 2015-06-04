@@ -80,6 +80,7 @@ class Operation(object):
         # Below are paths for scripts, etc. in the Factor install directory
         self.factor_root_dir = os.path.split(DIR)[0]
         self.factor_pipeline_dir = os.path.join(self.factor_root_dir, 'pipeline')
+        self.factor_script_dir = os.path.join(self.factor_root_dir, 'scripts')
         self.factor_parset_dir = os.path.join(self.factor_root_dir, 'parsets')
         self.factor_skymodel_dir = os.path.join(self.factor_root_dir, 'skymodels')
 

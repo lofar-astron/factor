@@ -110,6 +110,7 @@ class FacetSelfcal(Operation):
                            'skymodel_dir': self.factor_skymodel_dir,
                            'mapfile_dir': self.mapfile_dir,
                            'pipeline_dir': self.factor_pipeline_dir,
+                           'script_dir': self.factor_script_dir,
                            'shifted_cal_concat_datamap': self.direction.shifted_cal_concat_datamap,
                            'wplanes': self.direction.wplanes,
                            'imsize': self.direction.cal_imsize,

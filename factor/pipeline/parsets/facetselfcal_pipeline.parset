@@ -121,7 +121,7 @@ casa_ft0.control.kind                       =   recipe
 casa_ft0.control.type                       =   casa
 casa_ft0.control.opts.mapfiles_in           =   [{{ shifted_cal_concat_datamap }},create_model0_map.output.mapfile]
 casa_ft0.control.opts.inputkeys             =   [inputms,modelimg]
-casa_ft0.control.opts.arguments             =   [--nologger,-c,%(factorroot)s/scripts/ftw.py,inputms,modelimg,2,{{ wplanes }},%(factorroot)s/scripts/ftw.xml,%(factorroot)s/scripts/task_ftw.py]
+casa_ft0.control.opts.arguments             =   [--nologger,-c,{{ script_dir }}/scripts/ftw.py,inputms,modelimg,2,{{ wplanes }},{{ script_dir }}/scripts/ftw.xml,{{ script_dir }}/scripts/task_ftw.py]
 
 make_chunks.control.type                    =   chunk_by_time
 make_chunks.argument.flags                  =   [{{ shifted_cal_concat_datamap }}]
