@@ -34,8 +34,10 @@ wsclean_high1.argument.scale               =   0.00208
 wsclean_high1.argument.mem                 =   90
 
 mask_high.control.type                     =   make_clean_mask
-mask_high.control.outputkey                =   outfile
-mask_high.argument.flags                   =   [wsclean_high1.output.wsclean_high1-image.fits.mapfile,outfile]
+mask_high.control.mapfile_in               =   wsclean_high1.output.wsclean_high1-image.fits.mapfile
+mask_high.control.inputkey                 =   imagefile
+mask_high.control.outputkey                =   maskfile
+mask_high.argument.flags                   =   [imagefile,maskfile]
 mask_high.argument.threshisl               =   4
 mask_high.argument.threshpix               =   2.5
 mask_high.argument.rmsbox                  =   (60,20)
@@ -59,15 +61,17 @@ wsclean_high2.argument.scale               =   0.00208
 wsclean_high2.argument.mem                 =   90
 
 fits_to_image_high.control.type            =   convert_fits_image_to_casa
-fits_to_image_high.control.outputkey       =   outfile
-fits_to_image_high.argument.flags          =   [wsclean_high2.output.wsclean_high2-model.fits.mapfile,outfile]
+fits_to_image_high.control.mapfile_in      =   wsclean_high2.output.wsclean_high2-model.fits.mapfile
+fits_to_image_high.control.inputkey        =   fitsfile
+fits_to_image_high.control.outputkey       =   imagefile
+fits_to_image_high.argument.flags          =   [fitsfile,imagefile]
 fits_to_image_high.argument.force_stokes_i =   True
 
 casa_to_bbs_high.control.type              =   casapy2bbs
 casa_to_bbs_high.control.mapfile_in        =   fits_to_image_high.output.mapfile
 casa_to_bbs_high.control.inputkey          =   inputmodel
 casa_to_bbs_high.control.outputkey         =   outfile
-casa_to_bbs_high.control.arguments         =   [inputmodel, outfile]
+casa_to_bbs_high.control.arguments         =   [inputmodel,outfile]
 
 create_model_high_map.control.kind         =   plugin
 create_model_high_map.control.type         =   trimMapfile
@@ -121,8 +125,10 @@ wsclean_low1.argument.scale                =   0.00694
 wsclean_low1.argument.mem                  =   90
 
 mask_low.control.type                      =   make_clean_mask
-mask_low.control.outputkey                 =   outfile
-mask_low.argument.flags                    =   [wsclean_low1.output.wsclean_low1-image.fits.mapfile,outfile]
+mask_low.control.mapfile_in                =   wsclean_low1.output.wsclean_low1-image.fits.mapfile
+mask_low.control.inputkey                  =   imagefile
+mask_low.control.outputkey                 =   maskfile
+mask_low.argument.flags                    =   [imagefile,maskfile]
 mask_low.argument.threshisl                =   5
 mask_low.argument.threshpix                =   5
 mask_low.argument.rmsbox                   =   (60,20)
@@ -146,15 +152,17 @@ wsclean_low2.argument.scale                =   0.00694
 wsclean_low2.argument.mem                  =   90
 
 fits_to_image_low.control.type             =   convert_fits_image_to_casa
-fits_to_image_low.control.outputkey        =   outfile
-fits_to_image_low.argument.flags           =   [wsclean_low2.output.wsclean_low2-model.fits.mapfile,outfile]
+fits_to_image_low.control.mapfile_in       =   wsclean_low2.output.wsclean_low2-model.fits.mapfile
+fits_to_image_low.control.inputkey         =   fitsfile
+fits_to_image_low.control.outputkey        =   imagefile
+fits_to_image_low.argument.flags           =   [fitsfile,imagefile]
 fits_to_image_low.argument.force_stokes_i  =   True
 
 casa_to_bbs_low.control.type               =   casapy2bbs
 casa_to_bbs_low.control.mapfile_in         =   fits_to_image_low.output.mapfile
 casa_to_bbs_low.control.inputkey           =   inputmodel
 casa_to_bbs_low.control.outputkey          =   outfile
-casa_to_bbs_low.control.arguments          =   [inputmodel, outfile]
+casa_to_bbs_low.control.arguments          =   [inputmodel,outfile]
 
 create_model_low_map.control.kind          =   plugin
 create_model_low_map.control.type          =   trimMapfile
@@ -176,8 +184,10 @@ subtract_low.control.inputkey              =   inputms
 subtract_low.control.arguments             =   [--replace-sourcedb,inputms,{{ parset_dir }}/field_subtract_lowres.parset,{{ skymodel_dir }}/empty.skymodel]
 
 merge.control.type                         =   merge_skymodels
-merge.control.outputkey                    =   outfile
-merge.argument.flags                       =   [casa_to_bbs_low.output.mapfile,casa_to_bbs_high.output.mapfile,outfile]
+merge.control.mapfiles_in                  =   [casa_to_bbs_low.output.mapfile,casa_to_bbs_high.output.mapfile]
+merge.control.inputkeys                    =   [modellow,modelhigh]
+merge.control.outputkey                    =   modelmerged
+merge.argument.flags                       =   [modellow,modelhigh,modelmerged]
 
 copy_final_model_map.control.kind          =   plugin
 copy_final_model_map.control.type          =   copyMapfile

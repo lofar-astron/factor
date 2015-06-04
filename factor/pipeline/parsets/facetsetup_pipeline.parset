@@ -59,9 +59,9 @@ concat2.parsetarg.msout.writefullresflag       =   False
 concat2.parsetarg.steps                        =   []
 
 copy_column.control.type                       =   copy_column
-copy_column.argument.flags                     =   [concat2.output.mapfile,concat1.output.mapfile]
-copy_column.argument.column_from               =   DATA
-copy_column.argument.column_to                 =   CORRECTED_DATA
+copy_column.control.mapfiles_in                =   [concat2.output.mapfile,concat1.output.mapfile]
+copy_column.control.inputkeys                  =   [corrdatafile, datafile]
+copy_column.argument.flags                     =   [corrdatafile, datafile, DATA, CORRECTED_DATA]
 
 copy_concat_map.control.kind                   =   plugin
 copy_concat_map.control.type                   =   copyMapfile

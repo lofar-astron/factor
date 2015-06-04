@@ -24,15 +24,19 @@ create_full_skymodels_map.control.mapfile_dir    =   {{ mapfile_dir }}
 create_full_skymodels_map.control.filename       =   full_skymodels.datamap
 
 make_facet_skymodels_all.control.type            =   make_facet_skymodel
+make_facet_skymodels_all.control.mapfile_in      =   create_full_skymodels_map.output.mapfile
+make_facet_skymodels_all.control.inputkey        =   fullmodelfile
 make_facet_skymodels_all.control.outputkey       =   outfile
-make_facet_skymodels_all.argument.flags          =   [create_full_skymodels_map.output.mapfile,outfile,{{ facet_state_file }}]
+make_facet_skymodels_all.argument.flags          =   [fullmodelfile,outfile,{{ facet_state_file }}]
 make_facet_skymodels_all.argument.cal_only       =   False
 make_facet_skymodels_all.argument.facet_ra       =   {{ facet_ra }}
 make_facet_skymodels_all.argument.facet_dec      =   {{ facet_dec }}
 
 make_facet_skymodels_cal.control.type            =   make_facet_skymodel
+make_facet_skymodels_cal.control.mapfile_in      =   create_full_skymodels_map.output.mapfile
+make_facet_skymodels_cal.control.inputkey        =   fullmodelfile
 make_facet_skymodels_cal.control.outputkey       =   outfile
-make_facet_skymodels_cal.argument.flags          =   [create_full_skymodels_map.output.mapfile,outfile,{{ facet_state_file }}]
+make_facet_skymodels_cal.argument.flags          =   [fullmodelfile,outfile,{{ facet_state_file }}]
 make_facet_skymodels_cal.argument.cal_only       =   True
 make_facet_skymodels_cal.argument.facet_ra       =   {{ facet_ra }}
 make_facet_skymodels_cal.argument.facet_dec      =   {{ facet_dec }}
