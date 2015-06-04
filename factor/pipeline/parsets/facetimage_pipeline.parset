@@ -1,11 +1,115 @@
-pipeline.steps = [create_ms_map]
+pipeline.steps = [copy_parmdb, apply_dir_dep, average, create_compressed_mapfile1, concat_averaged, wsclean1, mask, wsclean2, create_model_map, create_compressed_mapfile2, concat_unaveraged, wsclean_ft, copy_final_image_map]
 
-pipeline.pluginpath                              =   {{ pipeline_dir }}/plugins
+pipeline.pluginpath                            =   {{ pipeline_dir }}/plugins
 
-create_ms_map.control.kind                       =   plugin
-create_ms_map.control.type                       =   addMSMapfile
-create_ms_map.control.hosts                      =   {{ hosts }}
-create_ms_map.control.folder                     =   {{ input_dir }}
-create_ms_map.control.mapfile_dir                =   {{ mapfile_dir }}
-create_ms_map.control.filename                   =   input_bands.datamap
+copy_parmdb.control.kind                       =   plugin
+copy_parmdb.control.type                       =   copyParmdbtoMS
+copy_parmdb.control.ms_mapfile                 =   {{ shifted_all_bands_datamap }}
+copy_parmdb.control.parmdb_mapfile             =   {{ dir_dep_parmdbs_datamap }}
+
+apply_dir_dep.control.type                     =   calibrate-stand-alone
+apply_dir_dep.control.mapfile_in               =   {{ shifted_all_bands_datamap }}
+apply_dir_dep.control.inputkey                 =   inputms
+apply_dir_dep.control.arguments                =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirdep_apply_cal.parset,{{ skymodel_dir }}/empty.skymodel]
+
+average.control.type                           =   dppp
+average.control.opts.mapfile_in                =   {{ shifted_all_bands_datamap }}
+average.control.opts.inputkey                  =   msin
+average.parsetarg.msin.datacolumn              =   CORRECTED_DATA
+average.parsetarg.msout.writefullresflag       =   False
+average.parsetarg.steps                        =   [avg]
+average.parsetarg.avg.type                     =   squash
+average.parsetarg.avg.freqstep                 =   20
+average.parsetarg.avg.timestep                 =   1
+
+create_compressed_mapfile1.control.kind        =   plugin
+create_compressed_mapfile1.control.type        =   compressMapfile
+create_compressed_mapfile1.control.mapfile_in  =   average.output.mapfile
+create_compressed_mapfile1.control.mapfile_dir =   {{ mapfile_dir }}
+create_compressed_mapfile1.control.filename    =   concat1_input.mapfile
+
+concat_averaged.control.type                   =   virtual_concat
+concat_averaged.control.mapfile_in             =   create_compressed_mapfile1.output
+concat_averaged.control.inputkey               =   msfiles
+concat_averaged.control.outputkey              =   msconcat
+concat_averaged.argument.flags                 =   [msfiles,msconcat]
+
+wsclean1.control.type                          =   wsclean
+wsclean1.control.mapfile_in                    =   concat_averaged.output.mapfile
+wsclean1.control.inputkey                      =   msfile
+wsclean1.argument.flags                        =   [-no-update-model-required,msfile]
+wsclean1.argument.size                         =   {{ npix }} {{ npix }}
+wsclean1.argument.niter                        =   100
+wsclean1.argument.threshold                    =   0.0
+wsclean1.argument.pol                          =   I
+wsclean1.argument.weight                       =   briggs -0.5
+wsclean1.argument.mgain                        =   0.5
+wsclean1.argument.gain                         =   0.1
+wsclean1.argument.cleanborder                  =   0
+wsclean1.argument.minuv-l                      =   80
+wsclean1.argument.maxuv-l                      =   2000
+wsclean1.argument.scale                        =   0.00694
+wsclean1.argument.mem                          =   90
+
+mask.control.type                              =   make_clean_mask
+mask.control.mapfile_in                        =   wsclean1.output.wsclean1-image.fits.mapfile
+mask.control.inputkey                          =   imagefile
+mask.control.outputkey                         =   maskfile
+mask.argument.flags                            =   [imagefile,maskfile]
+mask.argument.threshisl                        =   5
+mask.argument.threshpix                        =   5
+mask.argument.rmsbox                           =   (60,20)
+mask.argument.img_format                       =   fits
+
+wsclean2.control.type                          =   wsclean
+wsclean2.control.mapfiles_in                   =   [concat_averaged.output.mapfile,mask.output.mapfile]
+wsclean2.control.inputkeys                     =   [msfile,fitsmask]
+wsclean2.argument.flags                        =   [-no-update-model-required,msfile]
+wsclean2.argument.size                         =   {{ npix }} {{ npix }}
+wsclean2.argument.niter                        =   100
+wsclean2.argument.threshold                    =   mask.output.threshold_5sig.mapfile
+wsclean2.argument.pol                          =   I
+wsclean2.argument.weight                       =   briggs -0.5
+wsclean2.argument.mgain                        =   0.5
+wsclean2.argument.gain                         =   0.1
+wsclean2.argument.cleanborder                  =   0
+wsclean2.argument.minuv-l                      =   80
+wsclean2.argument.maxuv-l                      =   2000
+wsclean2.argument.scale                        =   0.00694
+wsclean2.argument.mem                          =   90
+
+create_model_map.control.kind                  =   plugin
+create_model_map.control.type                  =   trimMapfile
+create_model_map.control.mapfile_in            =   wsclean2.output.wsclean2-model.fits.mapfile
+create_model_map.control.trim                  =   -model.fits
+create_model_map.control.mapfile_dir           =   {{ mapfile_dir }}
+create_model_map.control.filename              =   model_rootnames.datamap
+
+create_compressed_mapfile2.control.kind        =   plugin
+create_compressed_mapfile2.control.type        =   compressMapfile
+create_compressed_mapfile2.control.mapfile_in  =   {{ shifted_all_bands_datamap }}
+create_compressed_mapfile2.control.mapfile_dir =   {{ mapfile_dir }}
+create_compressed_mapfile2.control.filename    =   concat2_input.mapfile
+
+concat_unaveraged.control.type                 =   virtual_concat
+concat_unaveraged.control.mapfile_in           =   create_compressed_mapfile2.output
+concat_unaveraged.control.inputkey             =   msfiles
+concat_unaveraged.control.outputkey            =   msconcat
+concat_unaveraged.argument.flags               =   [msfiles,msconcat]
+
+wsclean_ft.control.type                        =   wsclean_ft
+wsclean_ft.control.mapfile_in                  =   concat_unaveraged.output.mapfile
+wsclean_ft.control.inputkey                    =   msfile
+wsclean_ft.argument.flags                      =   [-predict,msfile]
+wsclean_ft.argument.name                       =   create_model_map.output.mapfile
+wsclean_ft.argument.size                       =   {{ npix }} {{ npix }}
+wsclean_ft.argument.scale                      =   0.00694
+wsclean_ft.argument.mem                        =   90
+
+copy_final_image_map.control.kind              =   plugin
+copy_final_image_map.control.type              =   copyMapfile
+copy_final_image_map.control.mapfile_in        =   wsclean2.output.wsclean2-image.fits.mapfile
+copy_final_image_map.control.mapfile_dir       =   {{ mapfile_dir }}
+copy_final_image_map.control.filename          =   facet_full_image.datamap
+
 

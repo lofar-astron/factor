@@ -6,6 +6,7 @@ import multiprocessing
 import os
 import sys
 from factor.lib.context import Timer
+import factor._logging
 
 
 def call_generic_pipeline(op_name, direction_name, parset, config, logbasename):

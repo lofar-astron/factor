@@ -26,7 +26,7 @@ FacetImageFinal : Operation
 """
 import os
 from factor.lib.operation import Operation
-from factor.lib.scheduler_mp import Scheduler
+from lofarpipe.support.data_map import DataMap
 
 
 class FacetAdd(Operation):
@@ -125,8 +125,8 @@ class FacetSelfcal(Operation):
         Finalize this operation
         """
         # Add output datamap to direction object
-        self.direction.shifted_cal_concat_datamap = os.path.join(self.mapfile_dir,
-            'shifted_cal_concat_bands.datamap')
+        self.direction.dir_dep_parmdbs_datamap = os.path.join(self.mapfile_dir,
+            'dir_dep_parmdbs.datamap')
 
 
     def run_steps(self):
@@ -520,13 +520,9 @@ class FacetImage(Operation):
                            'skymodel_dir': self.factor_skymodel_dir,
                            'mapfile_dir': self.mapfile_dir,
                            'pipeline_dir': self.factor_pipeline_dir,
-                           'dir_indep_parmdb_name': parset['parmdb_name'],
-                           'skymodels': skymodels,
-                           'facet_ra': self.direction.ra,
-                           'facet_dec': self.direction.dec,
-                           'cal_radius_deg': self.direction.cal_radius_deg,
-                           'facet_state_file': self.direction.save_file,
-                           'hosts': self.node_list}
+                           'shifted_all_bands_datamap': self.direction.shifted_all_bands_datamap,
+                           'dir_dep_parmdbs_datamap': self.direction.dir_dep_parmdbs_datamap,
+                           'hosts': self.direction.hosts}
 
 
     def finalize(self):

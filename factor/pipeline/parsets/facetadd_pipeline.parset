@@ -86,18 +86,18 @@ shift_empty.parsetarg.shift.phasecenter          =   [{{ facet_ra }}deg, {{ face
 
 copy_all_map.control.kind                        =   plugin
 copy_all_map.control.type                        =   copyMapfile
-copy_all_map.control.mapfile                     =   shift_all.output.mapfile
+copy_all_map.control.mapfile_in                  =   shift_all.output.mapfile
 copy_all_map.control.mapfile_dir                 =   {{ mapfile_dir }}
 copy_all_map.control.filename                    =   shifted_all_bands.datamap
 
 copy_cal_map.control.kind                        =   plugin
 copy_cal_map.control.type                        =   copyMapfile
-copy_cal_map.control.mapfile                     =   shift_cal.output.mapfile
+copy_cal_map.control.mapfile_in                  =   shift_cal.output.mapfile
 copy_cal_map.control.mapfile_dir                 =   {{ mapfile_dir }}
 copy_cal_map.control.filename                    =   shifted_cal_bands.datamap
 
 copy_empty_map.control.kind                      =   plugin
 copy_empty_map.control.type                      =   copyMapfile
-copy_empty_map.control.mapfile                   =   shift_empty.output.mapfile
+copy_empty_map.control.mapfile_in                =   shift_empty.output.mapfile
 copy_empty_map.control.mapfile_dir               =   {{ mapfile_dir }}
 copy_empty_map.control.filename                  =   shifted_empty_bands.datamap

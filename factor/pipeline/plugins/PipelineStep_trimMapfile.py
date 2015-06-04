@@ -9,7 +9,7 @@ def plugin_main(args, **kwargs):
 
     Parameters
     ----------
-    mapfile : str
+    mapfile_in : str
         Filename of datamap to trim
     trim_str : str
         String to remove
@@ -24,13 +24,13 @@ def plugin_main(args, **kwargs):
         New datamap filename
 
     """
-    mapfile = kwargs['mapfile']
+    mapfile_in = kwargs['mapfile_in']
     trim_str = kwargs['trim']
     mapfile_dir = kwargs['mapfile_dir']
     filename = kwargs['filename']
 
     map = DataMap([])
-    datamap = DataMap.load(mapfile)
+    datamap = DataMap.load(mapfile_in)
 
     for i, item in enumerate(datamap):
         map.data.append(DataProduct(item.host, item.file.replace(trim_str, ''),

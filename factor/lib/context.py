@@ -1,14 +1,14 @@
 """
-Definition of context managers (with statements) used for actions and operations
+Definition of context managers
 """
 import time
 import logging
 
 class Timer(object):
     """
-    Context manager used to time actions and operations
+    Context manager used to time operations
     """
-    def __init__(self, log=None, type='action'):
+    def __init__(self, log=None, type='operation'):
         """
         Create object
 
