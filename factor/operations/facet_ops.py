@@ -514,10 +514,27 @@ class FacetImage(Operation):
         super(FacetImage, self).__init__(parset, bands, direction=direction,
             reset=reset, name=name)
 
-        # Set up scheduler (runs at most num_nodes directions in parallel)
-        num_nodes = len(self.parset['cluster_specific']['node_list'])
-        self.s = Scheduler(max_procs=num_nodes, name=self.name,
-            op_parset=self.parset)
+        # Define parameters needed for this operation
+        self.parms_dict = {'input_dir': parset['dir_ms'],
+                           'parset_dir': self.factor_parset_dir,
+                           'skymodel_dir': self.factor_skymodel_dir,
+                           'mapfile_dir': self.mapfile_dir,
+                           'pipeline_dir': self.factor_pipeline_dir,
+                           'dir_indep_parmdb_name': parset['parmdb_name'],
+                           'skymodels': skymodels,
+                           'facet_ra': self.direction.ra,
+                           'facet_dec': self.direction.dec,
+                           'cal_radius_deg': self.direction.cal_radius_deg,
+                           'facet_state_file': self.direction.save_file,
+                           'hosts': self.node_list}
+
+
+    def finalize(self):
+        """
+        Finalize this operation
+        """
+        # Add output datamaps to direction object
+        pass
 
 
     def run_steps(self):

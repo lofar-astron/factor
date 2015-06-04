@@ -1,0 +1,11 @@
+pipeline.steps = [create_ms_map]
+
+pipeline.pluginpath                              =   {{ pipeline_dir }}/plugins
+
+create_ms_map.control.kind                       =   plugin
+create_ms_map.control.type                       =   addMSMapfile
+create_ms_map.control.hosts                      =   {{ hosts }}
+create_ms_map.control.folder                     =   {{ input_dir }}
+create_ms_map.control.mapfile_dir                =   {{ mapfile_dir }}
+create_ms_map.control.filename                   =   input_bands.datamap
+
