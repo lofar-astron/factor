@@ -14,7 +14,7 @@ task_xml_file : full path to the ftw.xml file
 task_py_file : full path to the task_ftw.py file
 
 Note that the script is wrapped in a try/except block to ensure that casapy
-returns a proper return code and that we need to use os._exit(), not sys.exit()
+returns a proper return code. Also, we need to use os._exit(), not sys.exit()
 or exit().
 
 """
