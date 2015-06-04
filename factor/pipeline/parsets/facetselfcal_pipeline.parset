@@ -86,8 +86,8 @@ mask02.argument.threshold_format            =   str_with_units
 
 casa_image03.control.kind                   =   recipe
 casa_image03.control.type                   =   casa
-casa_image03.control.opts.mapfiles_in       =   [average0.output.mapfile,mask02.output.mapfile]
-casa_image03.control.opts.inputkeys         =   [clean.vis,clean.mask]
+casa_image03.control.opts.mapfiles_in       =   [average0.output.mapfile,mask02.output.mapfile,mask02.output.threshold_5sig.mapfile]
+casa_image03.control.opts.inputkeys         =   [clean.vis,clean.mask,clean.threshold]
 casa_image03.control.opts.outputkey         =   clean.imagename
 casa_image03.control.opts.arguments         =   [--nologger,-c]
 casa_image03.argument.clean.gridmode        =   'widefield'
@@ -98,7 +98,6 @@ casa_image03.argument.clean.mode            =   'mfs'
 casa_image03.argument.clean.nterms          =   2
 casa_image03.argument.clean.niter           =   1000000
 casa_image03.argument.clean.gain            =   0.01
-casa_image03.argument.clean.threshold       =   mask02.output.threshold_5sig.mapfile
 casa_image03.argument.clean.psfmode         =   'clark'
 casa_image03.argument.clean.interactive     =   False
 casa_image03.argument.clean.imsize          =   [{{ imsize }}, {{ imsize }}]
@@ -121,7 +120,7 @@ casa_ft0.control.kind                       =   recipe
 casa_ft0.control.type                       =   casa
 casa_ft0.control.opts.mapfiles_in           =   [{{ shifted_cal_concat_datamap }},create_model0_map.output.mapfile]
 casa_ft0.control.opts.inputkeys             =   [inputms,modelimg]
-casa_ft0.control.opts.arguments             =   [--nologger,-c,{{ script_dir }}/scripts/ftw.py,inputms,modelimg,2,{{ wplanes }},{{ script_dir }}/scripts/ftw.xml,{{ script_dir }}/scripts/task_ftw.py]
+casa_ft0.control.opts.arguments             =   [--nologger,-c,{{ script_dir }}/ftw.py,inputms,modelimg,2,{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
 make_chunks.control.type                    =   chunk_by_time
 make_chunks.argument.flags                  =   [{{ shifted_cal_concat_datamap }}]
