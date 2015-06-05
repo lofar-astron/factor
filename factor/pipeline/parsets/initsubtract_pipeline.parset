@@ -75,7 +75,7 @@ casa_to_bbs_high.control.arguments         =   [inputmodel,outfile]
 
 create_model_high_map.control.kind         =   plugin
 create_model_high_map.control.type         =   trimMapfile
-create_model_high_map.control.mapfile      =   wsclean_high2.output.wsclean_high2-model.fits.mapfile
+create_model_high_map.control.mapfile_in   =   wsclean_high2.output.wsclean_high2-model.fits.mapfile
 create_model_high_map.control.trim         =   -model.fits
 create_model_high_map.control.mapfile_dir  =   {{ mapfile_dir }}
 create_model_high_map.control.filename     =   model_high_rootnames.datamap
