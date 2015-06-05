@@ -256,7 +256,7 @@ if __name__=='__main__':
         # selfcal check. Also, after this operation is complete for any
         # direction, set flag to indicate all subsequent directions should use
         # new subtracted data column
-        direction_group_ok = [d in direction_group if d.selfcal_ok]
+        direction_group_ok = [d for d in direction_group if d.selfcal_ok]
         if first_pass:
             if len(direction_group_ok) > 0:
                 # Only use new data if at least one direction is OK
