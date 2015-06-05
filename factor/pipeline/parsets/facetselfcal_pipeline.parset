@@ -1,4 +1,4 @@
-pipeline.steps = [average0, casa_image01, mask01, casa_image02, create_model0_map, casa_ft0, make_chunks, create_chunks_map, solve_phaseonly1]
+pipeline.steps = [average0, casa_image01, mask0, casa_image02, create_model0_map, casa_ft0, make_chunks, create_chunks_map, solve_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, mask1, casa_image12, create_model1_map, casa_ft1, solve_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, solve_ampphase12]
 
 pipeline.pluginpath                         =   {{ pipeline_dir }}/plugins
 
