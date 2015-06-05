@@ -7,6 +7,7 @@ from argparse import RawTextHelpFormatter
 import pyrap.tables as pt
 import numpy as np
 import sys
+import os
 
 
 def main(dataset, blockl, clobber=True):
@@ -79,9 +80,6 @@ def split_ms(msin, msout, start_out, end_out, clobber=True):
         If True, existing files are overwritten
 
     """
-    import pyrap.tables as pt
-    import os
-
     if os.path.exists(msout):
         if clobber:
             os.system('rm -rf {0}'.format(msout))
