@@ -105,7 +105,7 @@ solve_phaseonly1.control.mapfile_in                      =   create_chunks_map.o
 solve_phaseonly1.control.inputkey                        =   inputms
 solve_phaseonly1.control.arguments                       =   [--replace-sourcedb,inputms,{{ skymodel_dir }}/empty.skymodel]
 solve_phaseonly1.control.args_format                     =   bbs
-solve_phaseonly1.control.parset                          =   {{ parset_dir }}/facet_phaseonly.parset
+solve_phaseonly1.control.parset                          =   {{ parset_dir }}/facet_dirdep_phaseonly_solve.parset
 solve_phaseonly1.control.parsetasfile                    =   True
 solve_phaseonly1.argument.Step.solve.Solve.CellSize.Time =   {{ solint_p }}
 
@@ -212,7 +212,7 @@ solve_phaseonly2.control.mapfile_in                      =   create_chunks_map.o
 solve_phaseonly2.control.inputkey                        =   inputms
 solve_phaseonly2.control.arguments                       =   [--replace-sourcedb,inputms,{{ skymodel_dir }}/empty.skymodel]
 solve_phaseonly2.control.args_format                     =   bbs
-solve_phaseonly2.control.parset                          =   {{ parset_dir }}/facet_phaseonly.parset
+solve_phaseonly2.control.parset                          =   {{ parset_dir }}/facet_dirdep_phaseonly_solve.parset
 solve_phaseonly2.control.parsetasfile                    =   True
 solve_phaseonly2.argument.Step.solve.Solve.CellSize.Time =   {{ solint_p }}
 
@@ -319,7 +319,7 @@ solve_ampphase11.control.mapfile_in                      =   create_chunks_map.o
 solve_ampphase11.control.inputkey                        =   inputms
 solve_ampphase11.control.arguments                       =   [--replace-sourcedb,inputms,{{ skymodel_dir }}/empty.skymodel]
 solve_ampphase11.control.args_format                     =   bbs
-solve_ampphase11.control.parset                          =   {{ parset_dir }}/facet_phaseonly.parset
+solve_ampphase11.control.parset                          =   {{ parset_dir }}/facet_dirdep_phaseonly_solve.parset
 solve_ampphase11.control.parsetasfile                    =   True
 solve_ampphase11.argument.Step.solve.Solve.CellSize.Time =   {{ solint_p }}
 
@@ -328,7 +328,7 @@ solve_ampphase12.control.mapfile_in                      =   create_chunks_map.o
 solve_ampphase12.control.inputkey                        =   inputms
 solve_ampphase12.control.arguments                       =   [--replace-sourcedb,inputms,{{ skymodel_dir }}/empty.skymodel]
 solve_ampphase12.control.args_format                     =   bbs
-solve_ampphase12.control.parset                          =   {{ parset_dir }}/facet_amponly.parset
+solve_ampphase12.control.parset                          =   {{ parset_dir }}/facet_dirdep_amponly_solve.parset
 solve_ampphase12.control.parsetasfile                    =   True
 solve_ampphase12.argument.Strategy.ChunkSize             =   {{ solint_a }}
 solve_ampphase12.argument.Step.solve.Solve.CellSize.Time =   {{ solint_a }}
