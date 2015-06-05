@@ -1,0 +1,4 @@
+pipeline.steps = []
+
+pipeline.pluginpath                            =   {{ pipeline_dir }}/plugins
+

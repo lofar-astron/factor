@@ -58,6 +58,8 @@ class FacetAdd(Operation):
         Finalize this operation
         """
         # Add output datamaps to direction object
+        self.direction.input_bands_datamap = os.path.join(self.mapfile_dir,
+            'input_bands.datamap.datamap')
         self.direction.shifted_all_bands_datamap = os.path.join(self.mapfile_dir,
             'shifted_all_bands.datamap')
         self.direction.shifted_cal_bands_datamap = os.path.join(self.mapfile_dir,
@@ -778,6 +780,35 @@ class FacetSub(Operation):
         super(FacetSub, self).__init__(parset, bands, direction=direction,
             reset=reset, name='FacetSub')
 
+        # Define parameters needed for this operation
+        self.parms_dict = {'input_dir': parset['dir_ms'],
+                           'parset_dir': self.factor_parset_dir,
+                           'skymodel_dir': self.factor_skymodel_dir,
+                           'mapfile_dir': self.mapfile_dir,
+                           'pipeline_dir': self.factor_pipeline_dir,
+                           'shifted_all_bands_datamap': self.direction.shifted_all_bands_datamap,
+                           'dir_dep_parmdbs_datamap': self.direction.dir_dep_parmdbs_datamap,
+                           'input_bands_datamap': self.direction.input_bands_datamap,
+                           'field_ra': self.direction.field_ra,
+                           'field_dec': self.direction.field_dec,
+                           'hosts': self.direction.hosts}
+
+
+    def finalize(self):
+        """
+        Finalize this operation
+        """
+        # Add output datamaps to direction object
+        self.direction.input_bands_datamap = os.path.join(self.mapfile_dir,
+            'input_bands.datamap.datamap')
+        self.direction.shifted_all_bands_datamap = os.path.join(self.mapfile_dir,
+            'shifted_all_bands.datamap')
+        self.direction.shifted_cal_bands_datamap = os.path.join(self.mapfile_dir,
+            'shifted_all_bands.datamap')
+        self.direction.shifted_empty_bands_datamap = os.path.join(self.mapfile_dir,
+            'shifted_all_bands.datamap')
+        self.direction.dir_indep_parmdbs_datamap = os.path.join(self.mapfile_dir,
+            'dir_indep_instrument_parmdbs.datamap')
 
     def run_steps(self):
         """

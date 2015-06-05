@@ -161,7 +161,7 @@ if __name__=='__main__':
         with open(polys_file, 'wb') as f:
             pickle.dump([polys, widths], f)
 
-    # Store polygons and make CASA regions
+    # Set various direction attributes
     for i, direction in enumerate(directions):
         direction.vertices = polys[i]
         direction.width = widths[i]
@@ -169,13 +169,19 @@ if __name__=='__main__':
         factor.directions.make_region_file(direction.vertices, reg_file)
         direction.reg = reg_file
 
-    # For WSClean, set number of bands
-    for direction in directions:
+        # For WSClean, set number of bands
         direction.nbands = len(bands)
         direction.nchannels = np.int(np.ceil(np.float(direction.nbands/
                     np.float(5))))
 
-    # Make DS9 region files
+        # Set field center
+        direction.field_ra = field.ra
+        direction.field_dec = field.dec
+
+        # Save direction state
+        direction.save_state()
+
+    # Make DS9 region files so user can see facets, etc.
     ds9_facet_reg_file = os.path.join(parset['dir_working'], 'regions', 'facets_ds9.reg')
     factor.directions.make_ds9_region_file(directions, ds9_facet_reg_file)
     ds9_calimage_reg_file = os.path.join(parset['dir_working'], 'regions', 'calimages_ds9.reg')
@@ -192,10 +198,6 @@ if __name__=='__main__':
         if answ.lower() in ['n', 'no']:
             self.log.info('Exiting...')
             sys.exit()
-
-    # Save direction state
-    for direction in directions:
-        direction.save_state()
 
     # Select subset of directions to process
     if 'ndir' in parset['direction_specific']:

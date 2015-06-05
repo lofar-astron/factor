@@ -1,0 +1,33 @@
+pipeline.steps = [shift_to_field, create_compressed_mapfile, copy_column, copy_parmdb, subtract]
+
+pipeline.pluginpath                             =   {{ pipeline_dir }}/plugins
+
+shift_to_field.control.type                     =   dppp
+shift_to_field.control.opts.mapfile_in          =   {{ shifted_all_bands_datamap }}
+shift_to_field.control.opts.inputkey            =   msin
+shift_to_field.parsetarg.msin.datacolumn        =   MODEL_DATA
+shift_to_field.parsetarg.msout.writefullresflag =   False
+shift_to_field.parsetarg.steps                  =   [shift]
+shift_to_field.parsetarg.shift.type             =   phaseshifter
+shift_to_field.parsetarg.shift.phasecenter      =   [{{ field_ra }}deg, {{ field_dec }}deg]
+
+create_compressed_mapfile.control.kind          =   plugin
+create_compressed_mapfile.control.type          =   compressMapfile
+create_compressed_mapfile.control.mapfile_in    =   {{ input_bands_datamap }}
+create_compressed_mapfile.control.mapfile_dir   =   {{ mapfile_dir }}
+create_compressed_mapfile.control.filename      =   concat_input.mapfile
+
+copy_column.control.type                        =   copy_column
+copy_column.control.mapfiles_in                 =   [shift_to_field.output.mapfile,create_compressed_mapfile.output.mapfile]
+copy_column.control.inputkeys                   =   [corrdatafile, datafile]
+copy_column.argument.flags                      =   [corrdatafile, datafile, DATA, MODEL_DATA]
+
+copy_parmdb.control.kind                        =   plugin
+copy_parmdb.control.type                        =   copyParmdbtoMS
+copy_parmdb.control.ms_mapfile                  =   {{ shifted_all_bands_datamap }}
+copy_parmdb.control.parmdb_mapfile              =   {{ dir_dep_parmdbs_datamap }}
+
+subtract.control.type                           =   calibrate-stand-alone
+subtract.control.mapfile_in                     =   {{ input_bands_datamap }}
+subtract.control.inputkey                       =   inputms
+subtract.control.arguments                      =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirdep_subtract.parset,{{ skymodel_dir }}/empty.skymodel]
