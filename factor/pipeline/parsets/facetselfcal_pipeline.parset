@@ -77,7 +77,7 @@ casa_image02.argument.clean.multiscale      =   [0, 3, 7, 25, 60, 150]
 
 create_model0_map.control.kind              =   plugin
 create_model0_map.control.type              =   trimMapfile
-create_model0_map.control.mapfile_in        =   casa_image02.output.casa_image03.model.tt0.mapfile
+create_model0_map.control.mapfile_in        =   casa_image02.output.casa_image02.model.tt0.mapfile
 create_model0_map.control.trim              =   .model.tt0
 create_model0_map.control.mapfile_dir       =   {{ mapfile_dir }}
 create_model0_map.control.filename          =   model0_rootnames.datamap
