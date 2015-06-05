@@ -251,10 +251,15 @@ if __name__=='__main__':
         scheduler.run(ops)
 
         # Subtract final model(s) from empty field datasets. These operations
-        # must be done in series
+        # must be done in series and only on the directions that passed the
+        # selfcal check
         ops = [FacetSub(parset, bands, d) for d in direction_group if d.selfcal_ok]
         for op in ops:
             scheduler.run(op)
+            # After any direction is complete, set flag to indicate all subsequent
+            # directions should use new subtracted data column
+            for d in directions:
+                d.use_new_sub_data = True
 
         # Lastly, stop Factor if selfcal for any direction in this group failed
         for d in direction_group:
@@ -264,6 +269,8 @@ if __name__=='__main__':
                     'the settings for this direction.'.format(d.name))
                 d.reset_state()
                 all_good = False
+            else:
+                d.save_state()
         if not all_good:
             sys.exit(1)
 

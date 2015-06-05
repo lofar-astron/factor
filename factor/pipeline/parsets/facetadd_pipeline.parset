@@ -50,12 +50,12 @@ copy_parmdb.control.parmdb_mapfile               =   create_parmdb_map.output.ma
 add_all_facet_sources.control.type               =   calibrate-stand-alone
 add_all_facet_sources.control.mapfiles_in        =   [create_ms_map.output.mapfile,make_facet_skymodels_all.output.mapfile]
 add_all_facet_sources.control.inputkeys          =   [inputms,skymodel]
-add_all_facet_sources.control.arguments          =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirindep_add_all.parset,skymodel]
+add_all_facet_sources.control.arguments          =   [--replace-sourcedb,inputms,{{ parset_dir }}/{{ add_all_parset }},skymodel]
 
 add_cal_facet_sources.control.type               =   calibrate-stand-alone
 add_cal_facet_sources.control.mapfiles_in        =   [create_ms_map.output.mapfile,make_facet_skymodels_cal.output.mapfile]
 add_cal_facet_sources.control.inputkeys          =   [inputms,skymodel]
-add_cal_facet_sources.control.arguments          =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirindep_add_cal.parset,skymodel]
+add_cal_facet_sources.control.arguments          =   [--replace-sourcedb,inputms,{{ parset_dir }}/{{ add_cal_parset }},skymodel]
 
 shift_all.control.type                           =   dppp
 shift_all.control.opts.mapfile_in                =   create_ms_map.output.mapfile

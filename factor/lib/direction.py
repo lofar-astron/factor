@@ -115,6 +115,9 @@ class Direction(object):
         if self.cal_imsize > 4095:
             self.wplanes = 512
 
+        # Set flag that tells with subtracted data column to use
+        self.use_new_sub_data = False
+
         self.working_dir = factor_working_dir
         self.completed_operations = []
         self.save_file = os.path.join(self.working_dir, 'state',

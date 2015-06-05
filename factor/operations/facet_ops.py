@@ -39,11 +39,19 @@ class FacetAdd(Operation):
 
         # Define parameters needed for this operation
         skymodels = [band.skymodel_dirindep for band in self.bands]
+        if self.direction.use_new_sub_data:
+            add_all_parset = 'facet_dirindep_add_all_new.parset'
+            add_cal_parset = 'facet_dirindep_add_cal_new.parset'
+        else:
+            add_all_parset = 'facet_dirindep_add_all.parset'
+            add_cal_parset = 'facet_dirindep_add_cal.parset'
         self.parms_dict = {'input_dir': parset['dir_ms'],
                            'parset_dir': self.factor_parset_dir,
                            'skymodel_dir': self.factor_skymodel_dir,
                            'mapfile_dir': self.mapfile_dir,
                            'pipeline_dir': self.factor_pipeline_dir,
+                           'add_all_parset': add_all_parset,
+                           'add_cal_parset': add_cal_parset,
                            'dir_indep_parmdb_name': parset['parmdb_name'],
                            'skymodels': skymodels,
                            'facet_ra': self.direction.ra,
@@ -798,17 +806,8 @@ class FacetSub(Operation):
         """
         Finalize this operation
         """
-        # Add output datamaps to direction object
-        self.direction.input_bands_datamap = os.path.join(self.mapfile_dir,
-            'input_bands.datamap.datamap')
-        self.direction.shifted_all_bands_datamap = os.path.join(self.mapfile_dir,
-            'shifted_all_bands.datamap')
-        self.direction.shifted_cal_bands_datamap = os.path.join(self.mapfile_dir,
-            'shifted_all_bands.datamap')
-        self.direction.shifted_empty_bands_datamap = os.path.join(self.mapfile_dir,
-            'shifted_all_bands.datamap')
-        self.direction.dir_indep_parmdbs_datamap = os.path.join(self.mapfile_dir,
-            'dir_indep_instrument_parmdbs.datamap')
+        pass
+
 
     def run_steps(self):
         """
