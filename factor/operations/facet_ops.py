@@ -124,7 +124,7 @@ class FacetSelfcal(Operation):
                            'shifted_cal_concat_datamap': self.direction.shifted_cal_concat_datamap,
                            'wplanes': self.direction.wplanes,
                            'imsize': self.direction.cal_imsize,
-                           'chunk_width': self.direction.solint_a*2.0,
+                           'chunk_width': self.direction.solint_a*2,
                            'solint_p': self.direction.solint_p,
                            'solint_a': self.direction.solint_a,
                            'hosts': self.direction.hosts}
