@@ -50,7 +50,7 @@ def main(dataset, blockl, clobber=True):
     files = []
     for c in range(nchunks):
         chunk_file = '{0}_chunk{1}.ms'.format(os.path.splitext(dataset)[0], c)
-        files.append(chunk_files)
+        files.append(chunk_file)
         t0 = tlen * np.float(c) # hours
         t1 = t0 + tlen # hours
         if c == 0:
