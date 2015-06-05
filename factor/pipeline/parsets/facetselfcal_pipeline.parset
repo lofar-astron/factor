@@ -323,6 +323,13 @@ solve_ampphase11.control.parset                          =   {{ parset_dir }}/fa
 solve_ampphase11.control.parsetasfile                    =   True
 solve_ampphase11.argument.Step.solve.Solve.CellSize.Time =   {{ solint_p }}
 
+copy_parmdb_from_chunks11.control.kind        =   plugin
+copy_parmdb_from_chunks11.control.type        =   copyParmdbfromMS
+copy_parmdb_from_chunks11.control.ms_mapfile  =   create_chunks_map.output.mapfile
+copy_parmdb_from_chunks11.control.parmdb_name =   instrument
+copy_parmdb_from_chunks11.control.mapfile_dir =   {{ mapfile_dir }}
+copy_parmdb_from_chunks11.control.filename    =   chunk_parmdb_phaseamp_phase1.mapfile
+
 solve_ampphase12.control.kind                            =   recipe
 solve_ampphase12.control.mapfile_in                      =   create_chunks_map.output.mapfile
 solve_ampphase12.control.inputkey                        =   inputms
@@ -333,4 +340,22 @@ solve_ampphase12.control.parsetasfile                    =   True
 solve_ampphase12.argument.Strategy.ChunkSize             =   {{ solint_a }}
 solve_ampphase12.argument.Step.solve.Solve.CellSize.Time =   {{ solint_a }}
 
+copy_parmdb_from_chunks12.control.kind        =   plugin
+copy_parmdb_from_chunks12.control.type        =   copyParmdbfromMS
+copy_parmdb_from_chunks12.control.ms_mapfile  =   create_chunks_map.output.mapfile
+copy_parmdb_from_chunks12.control.parmdb_name =   instrument
+copy_parmdb_from_chunks12.control.mapfile_dir =   {{ mapfile_dir }}
+copy_parmdb_from_chunks12.control.filename    =   chunk_parmdb_phaseamp_amp1.mapfile
+
+create_compressed_mapfile3.control.kind        =   plugin
+create_compressed_mapfile3.control.type        =   compressMapfile
+create_compressed_mapfile3.control.mapfile_in  =   copy_parmdb_from_chunks12.output.mapfile
+create_compressed_mapfile3.control.mapfile_dir =   {{ mapfile_dir }}
+create_compressed_mapfile3.control.filename    =   merge_amp_parmdbs1_input.mapfile
+
+merge_amp_parmdbs1.control.type                         =   merge_parmdbs_in_time
+merge_amp_parmdbs1.control.mapfile_in                   =   create_compressed_mapfile3.output.mapfile
+merge_amp_parmdbs1.control.inputkey                     =   inparmdbs
+merge_amp_parmdbs1.control.outputkey                    =   outparmdb
+merge_amp_parmdbs1.argument.flags                       =   [inparmdbs,outparmdb]
 
