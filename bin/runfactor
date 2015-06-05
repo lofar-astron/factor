@@ -210,6 +210,7 @@ if __name__=='__main__':
         n_per_grouping=parset['direction_specific']['groupings'])
 
     # Iterate over direction groups
+    first_pass = True
     for direction_group in direction_groups:
         log.info('Processing {0} direction(s) in parallel in this group'.format(
             len(direction_group)))
@@ -252,14 +253,24 @@ if __name__=='__main__':
 
         # Subtract final model(s) from empty field datasets. These operations
         # must be done in series and only on the directions that passed the
-        # selfcal check
+        # selfcal check. Also, after this operation is complete for any
+        # direction, set flag to indicate all subsequent directions should use
+        # new subtracted data column
+        direction_group_ok = [d in direction_group if d.selfcal_ok]
+        if first_pass:
+            if len(direction_group_ok) > 0:
+                # Only use new data if at least one direction is OK
+                for i, d in enumerate(directions):
+                    # Set flag for *all* directions except first one
+                    if i > 0:
+                        d.use_new_sub_data = True
+                first_pass = False
+        else:
+            for d in direction_group_ok:
+                d.use_new_sub_data = True
         ops = [FacetSub(parset, bands, d) for d in direction_group if d.selfcal_ok]
         for op in ops:
             scheduler.run(op)
-            # After any direction is complete, set flag to indicate all subsequent
-            # directions should use new subtracted data column
-            for d in directions:
-                d.use_new_sub_data = True
 
         # Lastly, stop Factor if selfcal for any direction in this group failed
         for d in direction_group:

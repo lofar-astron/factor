@@ -287,7 +287,7 @@ facet_image= {
             'n_per_node': 1}
 }
 
-facet_sub = {
+facet_check = {
 'subtract' : {'incol': 'DATA',
               'outcol': 'SUBTRACTED_DATA'},
 'apply_pre' : {'incol': 'DATA',
@@ -322,7 +322,7 @@ facet_sub = {
             'n_per_node': 1}
 }
 
-field_sub = {
+facet_sub = {
 'shift' : {'columnname': 'MODEL_DATA'}, # outcol is DATA
 'copy' : {'incol': 'DATA',
            'outcol': 'MODEL_DATA'},

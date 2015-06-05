@@ -92,7 +92,7 @@ create_compressed_mapfile2.control.mapfile_dir =   {{ mapfile_dir }}
 create_compressed_mapfile2.control.filename    =   concat2_input.mapfile
 
 concat_unaveraged.control.type                 =   virtual_concat
-concat_unaveraged.control.mapfile_in           =   create_compressed_mapfile2.output
+concat_unaveraged.control.mapfile_in           =   create_compressed_mapfile2.output.mapfile
 concat_unaveraged.control.inputkey             =   msfiles
 concat_unaveraged.control.outputkey            =   msconcat
 concat_unaveraged.argument.flags               =   [msfiles,msconcat]
@@ -109,6 +109,4 @@ copy_final_image_map.control.kind              =   plugin
 copy_final_image_map.control.type              =   copyMapfile
 copy_final_image_map.control.mapfile_in        =   wsclean2.output.wsclean2-image.fits.mapfile
 copy_final_image_map.control.mapfile_dir       =   {{ mapfile_dir }}
-copy_final_image_map.control.filename          =   facet_full_image.datamap
-
-
+copy_final_image_map.control.filename          =   facet_image.datamap

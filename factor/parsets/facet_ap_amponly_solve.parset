@@ -1,5 +1,5 @@
-Strategy.InputColumn = DATA
-Strategy.ChunkSize   = 50
+Strategy.InputColumn = CORRECTED_DATA_PHASE
+Strategy.ChunkSize   = 200
 Strategy.UseSolver   = F
 Strategy.Steps       = [solve]
 

@@ -539,8 +539,9 @@ class FacetImage(Operation):
         """
         Finalize this operation
         """
-        # Add output datamaps to direction object
-        pass
+        # Add output datamap to direction object
+        self.direction.facet_image_mapfile = os.path.join(self.mapfile_dir,
+            'facet_image.datamap')
 
 
     def run_steps(self):
@@ -655,6 +656,30 @@ class FacetCheck(Operation):
         super(FacetCheck, self).__init__(parset, bands, direction=direction,
             reset=reset, name='FacetCheck')
 
+        # Define parameters needed for this operation
+        self.parms_dict = {'input_dir': parset['dir_ms'],
+                           'parset_dir': self.factor_parset_dir,
+                           'skymodel_dir': self.factor_skymodel_dir,
+                           'mapfile_dir': self.mapfile_dir,
+                           'pipeline_dir': self.factor_pipeline_dir,
+                           'shifted_all_bands_datamap': self.direction.shifted_all_bands_datamap,
+                           'shifted_empty_bands_datamap': self.direction.shifted_empty_bands_datamap,
+                           'dir_indep_parmdbs_datamap': self.direction.dir_indep_parmdbs_datamap,
+                           'dir_dep_parmdbs_datamap': self.direction.dir_dep_parmdbs_datamap,
+                           'field_ra': self.direction.field_ra,
+                           'field_dec': self.direction.field_dec,
+                           'hosts': self.direction.hosts}
+
+
+    def finalize(self):
+        """
+        Finalize this operation
+        """
+        # Add check flag to direction object
+        ok_datamap = DataMap.load(os.path.join(self.mapfile_dir,
+            'verify_subtract.datamap'))
+        self.direction.selfcal_ok = ok_datamap[0].item
+
 
     def run_steps(self):
         """
@@ -663,7 +688,7 @@ class FacetCheck(Operation):
         from factor.actions.calibrations import Subtract, Apply
         from factor.actions.visibilities import PhaseShift, Average, ChgCentre
         from factor.actions.images import MakeImage
-        from factor.operations.hardcoded_param import facet_sub as p
+        from factor.operations.hardcoded_param import facet_check as p
         from factor.lib.datamap_lib import read_mapfile
         from factor.lib.operation_lib import copy_column, verify_subtract
 
