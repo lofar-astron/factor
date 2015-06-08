@@ -354,17 +354,17 @@ import_amp1.control.type                                   =   h5parm_importer
 import_amp1.control.opts.mapfile_in                        =   {{ shifted_cal_concat_datamap }}
 import_amp1.control.opts.inputkey                          =   inputms
 import_amp1.control.opts.outputkey                         =   h5parm
-import_amp1.control.opts.arguments                         =   [h5parm, inputms, -i, instrument]
+import_amp1.control.opts.arguments                         =   [h5parm,inputms,-i,instrument]
 
 smooth_amp1.control.type                                   =   losoto
 smooth_amp1.control.opts.mapfile_in                        =   import_amp1.output.mapfile
 smooth_amp1.control.opts.inputkey                          =   h5parm
-smooth_amp1.control.opts.arguments                         =   [h5parm, {{ parset_dir }}/facet_amp_smooth.parset]
+smooth_amp1.control.opts.arguments                         =   [h5parm,{{ parset_dir }}/facet_amp_smooth.parset]
 
 export_amp1.control.type                                   =   h5parm_exporter
-export_amp1.control.opts.mapfiles_in                       =   [{{ shifted_cal_concat_datamap }}, import_amp1.output.mapfile]
-export_amp1.control.opts.inputkeys                         =   [inputms, h5parm]
-export_amp1.control.opts.arguments                         =   [h5parm, inputms, -i, instrument, -c]
+export_amp1.control.opts.mapfiles_in                       =   [{{ shifted_cal_concat_datamap }},import_amp1.output.mapfile]
+export_amp1.control.opts.inputkeys                         =   [inputms,h5parm]
+export_amp1.control.opts.arguments                         =   [h5parm,inputms,-i,instrument,-c]
 
 copy_parmdb_smoothed_amp1.control.kind                     =   plugin
 copy_parmdb_smoothed_amp1.control.type                     =   copyParmdbfromMS
@@ -522,17 +522,17 @@ import_amp2.control.type                                   =   h5parm_importer
 import_amp2.control.opts.mapfile_in                        =   {{ shifted_cal_concat_datamap }}
 import_amp2.control.opts.inputkey                          =   inputms
 import_amp2.control.opts.outputkey                         =   h5parm
-import_amp2.control.opts.arguments                         =   [h5parm, inputms, -i, instrument]
+import_amp2.control.opts.arguments                         =   [h5parm,inputms,-i,instrument]
 
 smooth_amp2.control.type                                   =   losoto
 smooth_amp2.control.opts.mapfile_in                        =   import_amp2.output.mapfile
 smooth_amp2.control.opts.inputkey                          =   h5parm
-smooth_amp2.control.opts.arguments                         =   [h5parm, {{ parset_dir }}/facet_amp_smooth.parset]
+smooth_amp2.control.opts.arguments                         =   [h5parm,{{ parset_dir }}/facet_amp_smooth.parset]
 
 export_amp2.control.type                                   =   h5parm_exporter
 export_amp2.control.opts.mapfiles_in                       =   [{{ shifted_cal_concat_datamap }}, import_amp1.output.mapfile]
-export_amp2.control.opts.inputkeys                         =   [inputms, h5parm]
-export_amp2.control.opts.arguments                         =   [h5parm, inputms, -i, instrument, -c]
+export_amp2.control.opts.inputkeys                         =   [inputms,h5parm]
+export_amp2.control.opts.arguments                         =   [h5parm,inputms,-i,instrument,-c]
 
 copy_parmdb_smoothed_amp2.control.kind                     =   plugin
 copy_parmdb_smoothed_amp2.control.type                     =   copyParmdbfromMS
