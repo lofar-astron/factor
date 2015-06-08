@@ -1,4 +1,4 @@
-Strategy.InputColumn = CORRECTED_DATA_PHASE
+Strategy.InputColumn = CORRECTED_DATA
 Strategy.ChunkSize   = 200
 Strategy.UseSolver   = F
 Strategy.Steps       = [correct]
