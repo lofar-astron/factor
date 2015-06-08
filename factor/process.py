@@ -1,7 +1,6 @@
 """
-Module that holds the process function called by runfactor
+Module that holds the process run() function called by runfactor
 """
-
 import sys
 import os
 import numpy as np
