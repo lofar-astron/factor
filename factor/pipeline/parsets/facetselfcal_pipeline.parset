@@ -509,7 +509,7 @@ solve_ampphase22.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_a }}
 
 merge_amp_parmdbs2.control.type                            =   merge_parmdbs_in_time
 merge_amp_parmdbs2.control.mapfile_in                      =   create_chunks_compressed_mapfile.output.mapfile
-merge_amp_parmdbs2.control.inputkey                        =   inparmdbs
+merge_amp_parmdbs2.control.inputkey                        =   mslist
 merge_amp_parmdbs2.control.outputkey                       =   outparmdb
 merge_amp_parmdbs2.argument.flags                          =   [mslist,instrument,outparmdb]
 
