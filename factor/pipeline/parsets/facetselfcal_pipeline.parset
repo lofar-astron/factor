@@ -522,7 +522,7 @@ merge_amp_parmdbs2.argument.flags                          =   [mslist,instrumen
 copy_parmdb_amp2.control.kind                              =   plugin
 copy_parmdb_amp2.control.type                              =   copyParmdbtoMS
 copy_parmdb_amp2.control.ms_mapfile                        =   {{ shifted_cal_concat_datamap }}
-copy_parmdb_amp2.control.parmdb_mapfile                    =   copy_amp2_map.output.mapfile
+copy_parmdb_amp2.control.parmdb_mapfile                    =   merge_amp_parmdbs2.output.mapfile
 
 import_amp2.control.type                                   =   h5parm_importer
 import_amp2.control.opts.mapfile_in                        =   {{ shifted_cal_concat_datamap }}
@@ -536,7 +536,7 @@ smooth_amp2.control.opts.inputkey                          =   h5parm
 smooth_amp2.control.opts.arguments                         =   [h5parm,{{ parset_dir }}/facet_amp_smooth.parset]
 
 export_amp2.control.type                                   =   h5parm_exporter
-export_amp2.control.opts.mapfiles_in                       =   [{{ shifted_cal_concat_datamap }},import_amp1.output.mapfile]
+export_amp2.control.opts.mapfiles_in                       =   [{{ shifted_cal_concat_datamap }},import_amp2.output.mapfile]
 export_amp2.control.opts.inputkeys                         =   [inputms,h5parm]
 export_amp2.control.opts.arguments                         =   [h5parm,inputms,-i,instrument,-c]
 
