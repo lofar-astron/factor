@@ -27,6 +27,12 @@ def plugin_main(args, **kwargs):
 
     """
     if type(kwargs['files']) is str:
+        try:
+            # Check if input is mapfile containing list as a string
+            map_in = DataMap.load(kwargs['files'])
+            files = map_in[0].file
+        except:
+            pass
         files = kwargs['files'].strip('[]').split(',')
         files = [f.strip() for f in files]
     if type(kwargs['hosts']) is str:

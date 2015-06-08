@@ -59,7 +59,7 @@ def main(dataset, blockl, clobber=True):
             t1 = tobs + 0.1 # make sure last chunk gets all that remains
         split_ms(dataset, chunk_file, t0, t1, clobber=clobber)
 
-    return {'files': files}
+    return {'files': '[{0}]'.format(','.join(files))}
 
 
 def split_ms(msin, msout, start_out, end_out, clobber=True):
