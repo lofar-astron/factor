@@ -201,9 +201,21 @@ create_model1_map.control.trim                             =   .model.tt0
 create_model1_map.control.mapfile_dir                      =   {{ mapfile_dir }}
 create_model1_map.control.filename                         =   model1_rootnames.datamap
 
+create_chunks_compressed_mapfile.control.kind              =   plugin
+create_chunks_compressed_mapfile.control.type              =   compressMapfile
+create_chunks_compressed_mapfile.control.mapfile_in        =   create_chunks_map.output.mapfile
+create_chunks_compressed_mapfile.control.mapfile_dir       =   {{ mapfile_dir }}
+create_chunks_compressed_mapfile.control.filename          =   chunks_compressed.mapfile
+
+concat_chunks.control.type                                 =   virtual_concat
+concat_chunks.control.mapfile_in                           =   create_chunks_compressed_mapfile.output.mapfile
+concat_chunks.control.inputkey                             =   msfiles
+concat_chunks.control.outputkey                            =   msconcat
+concat_chunks.argument.flags                               =   [msfiles,msconcat]
+
 casa_ft1.control.kind                                      =   recipe
 casa_ft1.control.type                                      =   casa
-casa_ft1.control.opts.mapfiles_in                          =   [{{ shifted_cal_concat_datamap }},create_model1_map.output.mapfile]
+casa_ft1.control.opts.mapfiles_in                          =   [concat_chunks.output.mapfile,create_model1_map.output.mapfile]
 casa_ft1.control.opts.inputkeys                            =   [inputms,modelimg]
 casa_ft1.control.opts.arguments                            =   [--nologger,-c,{{ script_dir }}/ftw.py,inputms,modelimg,2,{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
@@ -310,7 +322,7 @@ create_model2_map.control.filename                         =   model1_rootnames.
 
 casa_ft2.control.kind                                      =   recipe
 casa_ft2.control.type                                      =   casa
-casa_ft2.control.opts.mapfiles_in                          =   [{{ shifted_cal_concat_datamap }},create_model2_map.output.mapfile]
+casa_ft2.control.opts.mapfiles_in                          =   [concat_chunks.output.mapfile,create_model2_map.output.mapfile]
 casa_ft2.control.opts.inputkeys                            =   [inputms,modelimg]
 casa_ft2.control.opts.arguments                            =   [--nologger,-c,{{ script_dir }}/ftw.py,inputms,modelimg,2,{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
@@ -332,12 +344,6 @@ solve_ampphase12.control.parset                            =   {{ parset_dir }}/
 solve_ampphase12.control.parsetasfile                      =   True
 solve_ampphase12.argument.Strategy.ChunkSize               =   {{ solint_a }}
 solve_ampphase12.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_a }}
-
-create_chunks_compressed_mapfile.control.kind              =   plugin
-create_chunks_compressed_mapfile.control.type              =   compressMapfile
-create_chunks_compressed_mapfile.control.mapfile_in        =   create_chunks_map.output.mapfile
-create_chunks_compressed_mapfile.control.mapfile_dir       =   {{ mapfile_dir }}
-create_chunks_compressed_mapfile.control.filename          =   chunks_compressed.mapfile
 
 merge_amp_parmdbs1.control.type                            =   merge_parmdbs_in_time
 merge_amp_parmdbs1.control.mapfile_in                      =   create_chunks_compressed_mapfile.output.mapfile
@@ -478,7 +484,7 @@ create_model3_map.control.filename                         =   model1_rootnames.
 
 casa_ft3.contr0l.kind                                      =   recipe
 casa_ft3.control.type                                      =   casa
-casa_ft3.control.opts.mapfiles_in                          =   [{{ shifted_cal_concat_datamap }},create_model3_map.output.mapfile]
+casa_ft3.control.opts.mapfiles_in                          =   [concat_chunks.output.mapfile,create_model3_map.output.mapfile]
 casa_ft3.control.opts.inputkeys                            =   [inputms,modelimg]
 casa_ft3.control.opts.arguments                            =   [--nologger,-c,{{ script_dir }}/ftw.py,inputms,modelimg,2,{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
