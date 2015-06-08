@@ -145,11 +145,9 @@ class Operation(object):
         """
         self.direction.load_state()
         if self.name in self.direction.completed_operations:
-            all_done = True
+            return True
         else:
-            all_done = False
-
-        return all_done
+            return False
 
 
     def set_completed(self):
