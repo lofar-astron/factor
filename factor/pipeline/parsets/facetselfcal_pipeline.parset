@@ -376,7 +376,7 @@ copy_parmdb_smoothed_amp1.control.filename                 =   parmdb_phaseamp_a
 
 copy_parmdb_smoothed_amp1_to_chunks.control.kind           =   plugin
 copy_parmdb_smoothed_amp1_to_chunks.control.type           =   copyParmdbtoMS
-copy_parmdb_smoothed_amp1_to_chunks.control.ms_mapfile     =   create_ms_map.output.mapfile
+copy_parmdb_smoothed_amp1_to_chunks.control.ms_mapfile     =   create_chunks_map.output.mapfile
 copy_parmdb_smoothed_amp1_to_chunks.control.parmdb_mapfile =   copy_parmdb_smoothed_amp1.output.mapfile
 
 apply_amp1.control.type                                    =   calibrate-stand-alone
@@ -544,8 +544,8 @@ copy_parmdb_smoothed_amp2.control.filename                 =   parmdb_phaseamp_a
 
 copy_parmdb_smoothed_amp2_to_chunks.control.kind           =   plugin
 copy_parmdb_smoothed_amp2_to_chunks.control.type           =   copyParmdbtoMS
-copy_parmdb_smoothed_amp2_to_chunks.control.ms_mapfile     =   create_ms_map.output.mapfile
-copy_parmdb_smoothed_amp2_to_chunks.control.parmdb_mapfile =   create_parmdb_map.output.mapfile
+copy_parmdb_smoothed_amp2_to_chunks.control.ms_mapfile     =   create_chunks_map.output.mapfile
+copy_parmdb_smoothed_amp2_to_chunks.control.parmdb_mapfile =   copy_parmdb_smoothed_amp2.output.mapfile
 
 apply_amp2.control.type                                    =   calibrate-stand-alone
 apply_amp2.control.mapfile_in                              =   create_chunks_map.output.mapfile
