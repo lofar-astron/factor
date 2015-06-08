@@ -29,7 +29,7 @@ create_compressed_mapfile1.control.mapfile_dir =   {{ mapfile_dir }}
 create_compressed_mapfile1.control.filename    =   concat1_input.mapfile
 
 concat_averaged.control.type                   =   virtual_concat
-concat_averaged.control.mapfile_in             =   create_compressed_mapfile1.output
+concat_averaged.control.mapfile_in             =   create_compressed_mapfile1.output.mapfile
 concat_averaged.control.inputkey               =   msfiles
 concat_averaged.control.outputkey              =   msconcat
 concat_averaged.argument.flags                 =   [msfiles,msconcat]
