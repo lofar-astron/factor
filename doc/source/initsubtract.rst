@@ -1,5 +1,5 @@
-InitSubtract
-============
+Initial Subtract Operation
+==========================
 
 This operation images each band at high and low resolution to make and subtract
 sky models.
