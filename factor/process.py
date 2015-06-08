@@ -17,7 +17,7 @@ from factor.lib.scheduler_mp import Scheduler
 from factor.lib.direction import Direction
 
 
-def process(parset_file, logging_level='info', dry_run=False):
+def run(parset_file, logging_level='info', dry_run=False):
     """
     Processes a dataset
 

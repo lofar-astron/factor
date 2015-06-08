@@ -17,10 +17,10 @@
 #
 # The code is based on an original idea of Reinout van Weeren
 import factor
+import optparse
 
 
-if __name__=='__main__':
-    import optparse
+if __name__ == '__main__':
     parser = optparse.OptionParser(usage='%prog [-v|-q] parset [default: factor.parset]',
             version='%%prog %s' % (factor._version.__version__))
     parser.add_option('-d', help='enable dry-run mode', action='store_true', default=False)
@@ -47,4 +47,4 @@ if __name__=='__main__':
         parset_file = 'factor.parset'
 
     # Process the field
-    factor.process(parset_file, logging_level=logging_level, dry_run=options.d)
+    factor.process.run(parset_file, logging_level=logging_level, dry_run=options.d)
