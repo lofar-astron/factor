@@ -218,7 +218,7 @@ class FacetSub(Operation):
                            'mapfile_dir': self.mapfile_dir,
                            'pipeline_dir': self.factor_pipeline_dir,
                            'shifted_all_bands_datamap': self.direction.shifted_all_bands_datamap,
-                           'dir_dep_parmdbs_datamap': self.direction.dir_dep_parmdbs_datamap,
+                           'dir_dep_parmdb_datamap': self.direction.dir_dep_parmdb_datamap,
                            'input_bands_datamap': self.direction.input_bands_datamap,
                            'field_ra': self.direction.field_ra,
                            'field_dec': self.direction.field_dec,
