@@ -25,7 +25,7 @@ copy_column.argument.flags                      =   [corrdatafile, datafile, DAT
 copy_parmdb.control.kind                        =   plugin
 copy_parmdb.control.type                        =   copyParmdbtoMS
 copy_parmdb.control.ms_mapfile                  =   {{ shifted_all_bands_datamap }}
-copy_parmdb.control.parmdb_mapfile              =   {{ dir_dep_parmdbs_datamap }}
+copy_parmdb.control.parmdb_mapfile              =   {{ dir_dep_parmdb_datamap }}
 
 subtract.control.type                           =   calibrate-stand-alone
 subtract.control.mapfile_in                     =   {{ input_bands_datamap }}

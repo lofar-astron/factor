@@ -154,7 +154,7 @@ class FacetImage(Operation):
                            'mapfile_dir': self.mapfile_dir,
                            'pipeline_dir': self.factor_pipeline_dir,
                            'shifted_all_bands_datamap': self.direction.shifted_all_bands_datamap,
-                           'dir_dep_parmdbs_datamap': self.direction.dir_dep_parmdbs_datamap,
+                           'dir_dep_parmdb_datamap': self.direction.dir_dep_parmdb_datamap,
                            'hosts': self.direction.hosts}
 
 
@@ -184,7 +184,7 @@ class FacetCheck(Operation):
                            'shifted_all_bands_datamap': self.direction.shifted_all_bands_datamap,
                            'shifted_empty_bands_datamap': self.direction.shifted_empty_bands_datamap,
                            'dir_indep_parmdbs_datamap': self.direction.dir_indep_parmdbs_datamap,
-                           'dir_dep_parmdbs_datamap': self.direction.dir_dep_parmdb_datamap,
+                           'dir_dep_parmdb_datamap': self.direction.dir_dep_parmdb_datamap,
                            'field_ra': self.direction.field_ra,
                            'field_dec': self.direction.field_dec,
                            'hosts': self.direction.hosts}

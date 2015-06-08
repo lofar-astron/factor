@@ -5,7 +5,7 @@ pipeline.pluginpath                            =   {{ pipeline_dir }}/plugins
 copy_parmdb.control.kind                       =   plugin
 copy_parmdb.control.type                       =   copyParmdbtoMS
 copy_parmdb.control.ms_mapfile                 =   {{ shifted_all_bands_datamap }}
-copy_parmdb.control.parmdb_mapfile             =   {{ dir_dep_parmdbs_datamap }}
+copy_parmdb.control.parmdb_mapfile             =   {{ dir_dep_parmdb_datamap }}
 
 apply_dir_dep.control.type                     =   calibrate-stand-alone
 apply_dir_dep.control.mapfile_in               =   {{ shifted_all_bands_datamap }}
