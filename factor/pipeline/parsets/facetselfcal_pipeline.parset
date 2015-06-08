@@ -93,15 +93,8 @@ make_chunks.control.mapfile_in              =   {{ shifted_cal_concat_datamap }}
 make_chunks.control.inputkey                =   msfile
 make_chunks.argument.flags                  =   [msfile, {{ chunk_width }}]
 
-create_chunks_map.control.kind              =   plugin
-create_chunks_map.control.type              =   addListMapfile
-create_chunks_map.control.hosts             =   {{ hosts }}
-create_chunks_map.control.files             =   make_chunks.output.files.mapfile
-create_chunks_map.control.mapfile_dir       =   {{ mapfile_dir }}
-create_chunks_map.control.filename          =   chunks.mapfile
-
 solve_phaseonly1.control.type                            =   calibrate-stand-alone
-solve_phaseonly1.control.mapfile_in                      =   create_chunks_map.output.mapfile
+solve_phaseonly1.control.mapfile_in                      =   make_chunks.output.files.mapfile
 solve_phaseonly1.control.inputkey                        =   inputms
 solve_phaseonly1.control.arguments                       =   [-f,inputms,{{ skymodel_dir }}/empty.skymodel]
 solve_phaseonly1.control.args_format                     =   bbs2
@@ -110,7 +103,7 @@ solve_phaseonly1.control.parsetasfile                    =   True
 solve_phaseonly1.argument.Step.solve.Solve.CellSize.Time =   {{ solint_p }}
 
 average1.control.type                       =   dppp
-average1.control.opts.mapfile_in            =   create_chunks_map.output.mapfile
+average1.control.opts.mapfile_in            =   make_chunks.output.files.mapfile
 average1.control.opts.inputkey              =   msin
 average1.argument.msin.datacolumn           =   CORRECTED_DATA
 average1.argument.msout.writefullresflag    =   False
@@ -208,7 +201,7 @@ casa_ft1.control.opts.inputkeys             =   [inputms,modelimg]
 casa_ft1.control.opts.arguments             =   [--nologger,-c,{{ script_dir }}/ftw.py,inputms,modelimg,2,{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
 solve_phaseonly2.control.type                            =   calibrate-stand-alone
-solve_phaseonly2.control.mapfile_in                      =   create_chunks_map.output.mapfile
+solve_phaseonly2.control.mapfile_in                      =   make_chunks.output.files.mapfile
 solve_phaseonly2.control.inputkey                        =   inputms
 solve_phaseonly2.control.arguments                       =   [-f,inputms,{{ skymodel_dir }}/empty.skymodel]
 solve_phaseonly2.control.args_format                     =   bbs2
@@ -217,7 +210,7 @@ solve_phaseonly2.control.parsetasfile                    =   True
 solve_phaseonly2.argument.Step.solve.Solve.CellSize.Time =   {{ solint_p }}
 
 average2.control.type                       =   dppp
-average2.control.opts.mapfile_in            =   create_chunks_map.output.mapfile
+average2.control.opts.mapfile_in            =   make_chunks.output.files.mapfile
 average2.control.opts.inputkey              =   msin
 average2.argument.msin.datacolumn           =   CORRECTED_DATA
 average2.argument.msout.writefullresflag    =   False
@@ -315,7 +308,7 @@ casa_ft2.control.opts.inputkeys             =   [inputms,modelimg]
 casa_ft2.control.opts.arguments             =   [--nologger,-c,{{ script_dir }}/ftw.py,inputms,modelimg,2,{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
 solve_ampphase11.control.type                            =   calibrate-stand-alone
-solve_ampphase11.control.mapfile_in                      =   create_chunks_map.output.mapfile
+solve_ampphase11.control.mapfile_in                      =   make_chunks.output.files.mapfile
 solve_ampphase11.control.inputkey                        =   inputms
 solve_ampphase11.control.arguments                       =   [-f,inputms,{{ skymodel_dir }}/empty.skymodel]
 solve_ampphase11.control.args_format                     =   bbs2
@@ -324,7 +317,7 @@ solve_ampphase11.control.parsetasfile                    =   True
 solve_ampphase11.argument.Step.solve.Solve.CellSize.Time =   {{ solint_p }}
 
 solve_ampphase12.control.kind                            =   recipe
-solve_ampphase12.control.mapfile_in                      =   create_chunks_map.output.mapfile
+solve_ampphase12.control.mapfile_in                      =   make_chunks.output.files.mapfile
 solve_ampphase12.control.inputkey                        =   inputms
 solve_ampphase12.control.arguments                       =   [-f,inputms,{{ skymodel_dir }}/empty.skymodel]
 solve_ampphase12.control.args_format                     =   bbs2
@@ -335,7 +328,7 @@ solve_ampphase12.argument.Step.solve.Solve.CellSize.Time =   {{ solint_a }}
 
 create_chunks_compressed_mapfile.control.kind        =   plugin
 create_chunks_compressed_mapfile.control.type        =   compressMapfile
-create_chunks_compressed_mapfile.control.mapfile_in  =   create_chunks_map.output.mapfile
+create_chunks_compressed_mapfile.control.mapfile_in  =   make_chunks.output.files.mapfile
 create_chunks_compressed_mapfile.control.mapfile_dir =   {{ mapfile_dir }}
 create_chunks_compressed_mapfile.control.filename    =   chunks_compressed.mapfile
 
@@ -368,7 +361,7 @@ export_amp1.control.opts.arguments           =   [h5parm, inputms, -i, instrumen
 
 copy_parmdb_smoothed_amp1.control.kind        =   plugin
 copy_parmdb_smoothed_amp1.control.type        =   copyParmdbfromMS
-copy_parmdb_smoothed_amp1.control.ms_mapfile  =   create_chunks_map.output.mapfile
+copy_parmdb_smoothed_amp1.control.ms_mapfile  =   {{ shifted_cal_concat_datamap }}
 copy_parmdb_smoothed_amp1.control.parmdb_name =   sol000_instrument
 copy_parmdb_smoothed_amp1.control.suffix      =   _amp1_smoothed
 copy_parmdb_smoothed_amp1.control.mapfile_dir =   {{ mapfile_dir }}
@@ -380,12 +373,12 @@ copy_parmdb_smoothed_amp1_to_chunks.control.ms_mapfile        =   create_ms_map.
 copy_parmdb_smoothed_amp1_to_chunks.control.parmdb_mapfile    =   copy_parmdb_smoothed_amp1.output.mapfile
 
 apply_amp1.control.type                 =   calibrate-stand-alone
-apply_amp1.control.mapfile_in           =   create_chunks_map.output.mapfile
+apply_amp1.control.mapfile_in           =   make_chunks.output.files.mapfile
 apply_amp1.control.inputkey             =   inputms
 apply_amp1.control.arguments            =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirdep_amponly_apply.parset,{{ skymodel_dir }}/empty.skymodel]
 
 average3.control.type                       =   dppp
-average3.control.opts.mapfile_in            =   create_chunks_map.output.mapfile
+average3.control.opts.mapfile_in            =   make_chunks.output.files.mapfile
 average3.control.opts.inputkey              =   msin
 average3.argument.msin.datacolumn           =   CORRECTED_DATA
 average3.argument.msout.writefullresflag    =   False
@@ -483,7 +476,7 @@ casa_ft3.control.opts.inputkeys             =   [inputms,modelimg]
 casa_ft3.control.opts.arguments             =   [--nologger,-c,{{ script_dir }}/ftw.py,inputms,modelimg,2,{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
 solve_ampphase21.control.type                            =   calibrate-stand-alone
-solve_ampphase21.control.mapfile_in                      =   create_chunks_map.output.mapfile
+solve_ampphase21.control.mapfile_in                      =   make_chunks.output.files.mapfile
 solve_ampphase21.control.inputkey                        =   inputms
 solve_ampphase21.control.arguments                       =   [-f,inputms,{{ skymodel_dir }}/empty.skymodel]
 solve_ampphase21.control.args_format                     =   bbs2
@@ -498,7 +491,7 @@ merge_phase_parmdbs.control.outputkey                    =   outparmdb
 merge_phase_parmdbs.argument.flags                       =   [mslist,instrument,outparmdb]
 
 solve_ampphase22.control.kind                            =   recipe
-solve_ampphase22.control.mapfile_in                      =   create_chunks_map.output.mapfile
+solve_ampphase22.control.mapfile_in                      =   make_chunks.output.files.mapfile
 solve_ampphase22.control.inputkey                        =   inputms
 solve_ampphase22.control.arguments                       =   [-f,inputms,{{ skymodel_dir }}/empty.skymodel]
 solve_ampphase22.control.args_format                     =   bbs2
@@ -536,7 +529,7 @@ export_amp2.control.opts.arguments           =   [h5parm, inputms, -i, instrumen
 
 copy_parmdb_smoothed_amp2.control.kind        =   plugin
 copy_parmdb_smoothed_amp2.control.type        =   copyParmdbfromMS
-copy_parmdb_smoothed_amp2.control.ms_mapfile  =   create_chunks_map.output.mapfile
+copy_parmdb_smoothed_amp2.control.ms_mapfile  =   {{ shifted_cal_concat_datamap }}
 copy_parmdb_smoothed_amp2.control.parmdb_name =   sol000_instrument
 copy_parmdb_smoothed_amp2.control.suffix      =   _amp2_smoothed
 copy_parmdb_smoothed_amp2.control.mapfile_dir =   {{ mapfile_dir }}
@@ -548,12 +541,12 @@ copy_parmdb_smoothed_amp2_to_chunks.control.ms_mapfile        =   create_ms_map.
 copy_parmdb_smoothed_amp2_to_chunks.control.parmdb_mapfile    =   create_parmdb_map.output.mapfile
 
 apply_amp2.control.type                 =   calibrate-stand-alone
-apply_amp2.control.mapfile_in           =   create_chunks_map.output.mapfile
+apply_amp2.control.mapfile_in           =   make_chunks.output.files.mapfile
 apply_amp2.control.inputkey             =   inputms
 apply_amp2.control.arguments            =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirdep_amponly_apply.parset,{{ skymodel_dir }}/empty.skymodel]
 
 average4.control.type                       =   dppp
-average4.control.opts.mapfile_in            =   create_chunks_map.output.mapfile
+average4.control.opts.mapfile_in            =   make_chunks.output.files.mapfile
 average4.control.opts.inputkey              =   msin
 average4.argument.msin.datacolumn           =   CORRECTED_DATA
 average4.argument.msout.writefullresflag    =   False
