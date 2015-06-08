@@ -9,23 +9,35 @@ import lofar.parmdb
 import sys
 
 
-def main(inparmdbs, outparmdb, clobber=True):
+def main(input_mslist, parmdb_name, outparmdb, clobber=True):
     """
     Merges parmdbs in time into a single parmdb
 
+    The parmdbs are assumed to be located in the input MS with name
+    parmdb_name
+
     Parameters
     ----------
-    inparmdbs : list
-        List of input parmdb file names
+    input_mslist : list
+        List of input MS file names
+    parmdb_name : str
+        Name of parmdb (relative to MS files)
     outparmdb : str
         Name of output merged parmdb
     clobber : bool, optional
         If True, overwrite existing output file
 
     """
-    if type(inparmdbs) is str:
-        inparmdbs = inparmdbs.strip('[]').split(',')
-        inparmdbs = [f.strip() for f in inparmdbs]
+    if type(input_mslist) is str:
+        input_mslist = input_mslist.strip('[]').split(',')
+        input_mslist = [f.strip() for f in input_mslist]
+    inpardbs = [os.path.join(ms, parmdb_name) for ms in input_mslist]
+
+    if type(clobber) is str:
+        if clobber.lower() == 'true':
+            clobber = True
+        else:
+            clobber = False
 
     if os.path.exists(outparmdb):
         if clobber:

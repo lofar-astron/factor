@@ -11,6 +11,8 @@ def plugin_main(args, **kwargs):
         Filename of MS datamap
     parmdb_name : str
         Name of parmdb files inside the MS files
+    suffix : str
+        Suffix to append to intput parmdb name to get output name
     mapfile_dir : str
         Directory for output mapfile
     filename: str

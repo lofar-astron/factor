@@ -3,7 +3,9 @@ from lofarpipe.support.data_map import DataMap
 
 def plugin_main(args, **kwargs):
     """
-    Copies parmdb to MS/instrument
+    Copies a single parmdb to MS/instrument
+
+    A single parmdb can be copied to multiple MS files
 
     Parameters
     ----------
@@ -18,10 +20,10 @@ def plugin_main(args, **kwargs):
 
     ms_datamap = DataMap.load(ms_mapfile)
     parmdb_datamap = DataMap.load(parmdb_mapfile)
+    parmdb_file = parmdb_datamap[0].file
 
-    for ms, parmdb in zip(ms_datamap, parmdb_datamap):
-        from_file = parmdb.file
+    for ms in ms_datamap:
         to_file = os.path.join(ms.file, 'instrument')
         if os.path.exists(to_file):
             os.system('rm -rf {0}'.format(to_file))
-        os.system('cp -r {0} {1}'.format(from_file, to_file))
+        os.system('cp -r {0} {1}'.format(parmdb_file, to_file))

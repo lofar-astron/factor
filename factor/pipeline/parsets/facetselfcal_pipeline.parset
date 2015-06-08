@@ -314,7 +314,7 @@ casa_ft2.control.opts.mapfiles_in           =   [{{ shifted_cal_concat_datamap }
 casa_ft2.control.opts.inputkeys             =   [inputms,modelimg]
 casa_ft2.control.opts.arguments             =   [--nologger,-c,{{ script_dir }}/ftw.py,inputms,modelimg,2,{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
-solve_ampphase11.control.kind                            =   recipe
+solve_ampphase11.control.type                            =   calibrate-stand-alone
 solve_ampphase11.control.mapfile_in                      =   create_chunks_map.output.mapfile
 solve_ampphase11.control.inputkey                        =   inputms
 solve_ampphase11.control.arguments                       =   [-f,inputms,{{ skymodel_dir }}/empty.skymodel]
@@ -322,13 +322,6 @@ solve_ampphase11.control.args_format                     =   bbs2
 solve_ampphase11.control.parset                          =   {{ parset_dir }}/facet_dirdep_phaseonly_solve.parset
 solve_ampphase11.control.parsetasfile                    =   True
 solve_ampphase11.argument.Step.solve.Solve.CellSize.Time =   {{ solint_p }}
-
-copy_parmdb_from_chunks11.control.kind        =   plugin
-copy_parmdb_from_chunks11.control.type        =   copyParmdbfromMS
-copy_parmdb_from_chunks11.control.ms_mapfile  =   create_chunks_map.output.mapfile
-copy_parmdb_from_chunks11.control.parmdb_name =   instrument
-copy_parmdb_from_chunks11.control.mapfile_dir =   {{ mapfile_dir }}
-copy_parmdb_from_chunks11.control.filename    =   chunk_parmdb_phaseamp_phase1.mapfile
 
 solve_ampphase12.control.kind                            =   recipe
 solve_ampphase12.control.mapfile_in                      =   create_chunks_map.output.mapfile
@@ -340,24 +333,318 @@ solve_ampphase12.control.parsetasfile                    =   True
 solve_ampphase12.argument.Strategy.ChunkSize             =   {{ solint_a }}
 solve_ampphase12.argument.Step.solve.Solve.CellSize.Time =   {{ solint_a }}
 
-copy_parmdb_from_chunks12.control.kind        =   plugin
-copy_parmdb_from_chunks12.control.type        =   copyParmdbfromMS
-copy_parmdb_from_chunks12.control.ms_mapfile  =   create_chunks_map.output.mapfile
-copy_parmdb_from_chunks12.control.parmdb_name =   instrument
-copy_parmdb_from_chunks12.control.mapfile_dir =   {{ mapfile_dir }}
-copy_parmdb_from_chunks12.control.filename    =   chunk_parmdb_phaseamp_amp1.mapfile
+create_chunks_compressed_mapfile.control.kind        =   plugin
+create_chunks_compressed_mapfile.control.type        =   compressMapfile
+create_chunks_compressed_mapfile.control.mapfile_in  =   create_chunks_map.output.mapfile
+create_chunks_compressed_mapfile.control.mapfile_dir =   {{ mapfile_dir }}
+create_chunks_compressed_mapfile.control.filename    =   chunks_compressed.mapfile
+
+merge_amp_parmdbs1.control.type                         =   merge_parmdbs_in_time
+merge_amp_parmdbs1.control.mapfile_in                   =   create_chunks_compressed_mapfile.output.mapfile
+merge_amp_parmdbs1.control.inputkey                     =   mslist
+merge_amp_parmdbs1.control.outputkey                    =   outparmdb
+merge_amp_parmdbs1.argument.flags                       =   [mslist,instrument,outparmdb]
+
+copy_parmdb_amp1.control.kind              =   plugin
+copy_parmdb_amp1.control.type              =   copyParmdbtoMS
+copy_parmdb_amp1.control.ms_mapfile        =   {{ shifted_cal_concat_datamap }}
+copy_parmdb_amp1.control.parmdb_mapfile    =   merge_amp_parmdbs1.output.mapfile
+
+import_amp1.control.type                   =   h5parm_importer
+import_amp1.control.opts.mapfile_in        =   {{ shifted_cal_concat_datamap }}
+import_amp1.control.opts.inputkey          =   inputms
+import_amp1.control.opts.outputkey         =   h5parm
+import_amp1.control.opts.arguments         =   [h5parm, inputms, -i, instrument]
+
+smooth_amp1.control.type                     =   smooth_amps
+smooth_amp1.control.opts.mapfile_in          =   import_amp1.output.mapfile
+smooth_amp1.control.opts.inputkey            =   h5parm
+smooth_amp1.control.opts.arguments           =   [h5parm, {{ parset_dir }}/facet_amp_smooth.parset]
+
+export_amp1.control.type                     =   h5parm_exporter
+export_amp1.control.opts.mapfiles_in         =   [{{ shifted_cal_concat_datamap }}, import_amp1.output.mapfile]
+export_amp1.control.opts.inputkeys           =   [inputms, h5parm]
+export_amp1.control.opts.arguments           =   [h5parm, inputms, -i, instrument, -c]
+
+copy_parmdb_smoothed_amp1.control.kind        =   plugin
+copy_parmdb_smoothed_amp1.control.type        =   copyParmdbfromMS
+copy_parmdb_smoothed_amp1.control.ms_mapfile  =   create_chunks_map.output.mapfile
+copy_parmdb_smoothed_amp1.control.parmdb_name =   sol000_instrument
+copy_parmdb_smoothed_amp1.control.suffix      =   _amp1_smoothed
+copy_parmdb_smoothed_amp1.control.mapfile_dir =   {{ mapfile_dir }}
+copy_parmdb_smoothed_amp1.control.filename    =   parmdb_phaseamp_amp1_smoothed.mapfile
+
+copy_parmdb_smoothed_amp1_to_chunks.control.kind              =   plugin
+copy_parmdb_smoothed_amp1_to_chunks.control.type              =   copyParmdbtoMS
+copy_parmdb_smoothed_amp1_to_chunks.control.ms_mapfile        =   create_ms_map.output.mapfile
+copy_parmdb_smoothed_amp1_to_chunks.control.parmdb_mapfile    =   copy_parmdb_smoothed_amp1.output.mapfile
+
+apply_amp1.control.type                 =   calibrate-stand-alone
+apply_amp1.control.mapfile_in           =   create_chunks_map.output.mapfile
+apply_amp1.control.inputkey             =   inputms
+apply_amp1.control.arguments            =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirdep_amponly_apply.parset,{{ skymodel_dir }}/empty.skymodel]
+
+average3.control.type                       =   dppp
+average3.control.opts.mapfile_in            =   create_chunks_map.output.mapfile
+average3.control.opts.inputkey              =   msin
+average3.argument.msin.datacolumn           =   CORRECTED_DATA
+average3.argument.msout.writefullresflag    =   False
+average3.argument.steps                     =   [avg]
+average3.argument.avg.type                  =   squash
+average3.argument.avg.freqstep              =   1
+average3.argument.avg.timestep              =   12
 
 create_compressed_mapfile3.control.kind        =   plugin
 create_compressed_mapfile3.control.type        =   compressMapfile
-create_compressed_mapfile3.control.mapfile_in  =   copy_parmdb_from_chunks12.output.mapfile
+create_compressed_mapfile3.control.mapfile_in  =   average3.output.mapfile
 create_compressed_mapfile3.control.mapfile_dir =   {{ mapfile_dir }}
-create_compressed_mapfile3.control.filename    =   merge_amp_parmdbs1_input.mapfile
+create_compressed_mapfile3.control.filename    =   concat3_input.mapfile
 
-merge_amp_parmdbs1.control.type                         =   merge_parmdbs_in_time
-merge_amp_parmdbs1.control.mapfile_in                   =   create_compressed_mapfile3.output.mapfile
-merge_amp_parmdbs1.control.inputkey                     =   inparmdbs
-merge_amp_parmdbs1.control.outputkey                    =   outparmdb
-merge_amp_parmdbs1.argument.flags                       =   [inparmdbs,outparmdb]
+concat3.control.type                 =   virtual_concat
+concat3.control.mapfile_in           =   create_compressed_mapfile3.output.mapfile
+concat3.control.inputkey             =   msfiles
+concat3.control.outputkey            =   msconcat
+concat3.argument.flags               =   [msfiles,msconcat]
 
+casa_image31.control.kind                   =   recipe
+casa_image31.control.type                   =   casa
+casa_image31.control.opts.mapfile_in        =   concat3.output.mapfile
+casa_image31.control.opts.inputkey          =   clean.vis
+casa_image31.control.opts.outputkey         =   clean.imagename
+casa_image31.control.opts.arguments         =   [--nologger,-c]
+casa_image31.argument.clean.gridmode        =   'widefield'
+casa_image31.argument.clean.wprojplanes     =   {{ wplanes }}
+casa_image31.argument.clean.selectdata      =   True
+casa_image31.argument.clean.uvrange         =   '>80lambda'
+casa_image31.argument.clean.mode            =   'mfs'
+casa_image31.argument.clean.nterms          =   2
+casa_image31.argument.clean.niter           =   1000
+casa_image31.argument.clean.gain            =   0.01
+casa_image31.argument.clean.threshold       =   '0mJy'
+casa_image31.argument.clean.psfmode         =   'clark'
+casa_image31.argument.clean.interactive     =   False
+casa_image31.argument.clean.imsize          =   [{{ imsize }}, {{ imsize }}]
+casa_image31.argument.clean.cell            =   ['1.5arcsec', '1.5arcsec']
+casa_image31.argument.clean.weighting       =   'briggs'
+casa_image31.argument.clean.robust          =   -0.25
+casa_image31.argument.clean.uvtaper         =   False
+casa_image31.argument.clean.pbcor           =   False
+casa_image31.argument.clean.minpb           =   0.2
+casa_image31.argument.clean.multiscale      =   [0, 3, 7, 25, 60, 150]
 
+mask3.control.type                         =   make_clean_mask
+mask3.control.mapfile_in                   =   casa_image31.output.casa_image31.image.tt0.mapfile
+mask3.control.inputkey                     =   imagefile
+mask3.control.outputkey                    =   maskfile
+mask3.argument.flags                       =   [imagefile,maskfile]
+mask3.argument.threshpix                   =   10
+mask3.argument.threshisl                   =   6
+mask3.argument.atrous_do                   =   True
+mask3.argument.rmsbox                      =   (50,20)
+mask3.argument.img_format                  =   casa
+mask3.argument.threshold_format            =   str_with_units
 
+casa_image32.control.kind                   =   recipe
+casa_image32.control.type                   =   casa
+casa_image32.control.opts.mapfiles_in       =   [concat3.output.mapfile,mask3.output.mapfile,mask3.output.threshold_5sig.mapfile]
+casa_image32.control.opts.inputkeys         =   [clean.vis,clean.mask,clean.threshold]
+casa_image32.control.opts.outputkey         =   clean.imagename
+casa_image32.control.opts.arguments         =   [--nologger,-c]
+casa_image32.argument.clean.gridmode        =   'widefield'
+casa_image32.argument.clean.wprojplanes     =   {{ wplanes }}
+casa_image32.argument.clean.selectdata      =   True
+casa_image32.argument.clean.uvrange         =   '>80lambda'
+casa_image32.argument.clean.mode            =   'mfs'
+casa_image32.argument.clean.nterms          =   2
+casa_image32.argument.clean.niter           =   1000000
+casa_image32.argument.clean.gain            =   0.01
+casa_image32.argument.clean.psfmode         =   'clark'
+casa_image32.argument.clean.interactive     =   False
+casa_image32.argument.clean.imsize          =   [{{ imsize }}, {{ imsize }}]
+casa_image32.argument.clean.cell            =   ['1.5arcsec', '1.5arcsec']
+casa_image32.argument.clean.weighting       =   'briggs'
+casa_image32.argument.clean.robust          =   -0.25
+casa_image32.argument.clean.uvtaper         =   False
+casa_image32.argument.clean.pbcor           =   False
+casa_image32.argument.clean.minpb           =   0.2
+casa_image32.argument.clean.multiscale      =   [0, 3, 7, 25, 60, 150]
+
+create_model3_map.control.kind              =   plugin
+create_model3_map.control.type              =   trimMapfile
+create_model3_map.control.mapfile_in        =   casa_image32.output.casa_image32.model.tt0.mapfile
+create_model3_map.control.trim              =   .model.tt0
+create_model3_map.control.mapfile_dir       =   {{ mapfile_dir }}
+create_model3_map.control.filename          =   model1_rootnames.datamap
+
+casa_ft3.contr0l.kind                       =   recipe
+casa_ft3.control.type                       =   casa
+casa_ft3.control.opts.mapfiles_in           =   [{{ shifted_cal_concat_datamap }},create_model3_map.output.mapfile]
+casa_ft3.control.opts.inputkeys             =   [inputms,modelimg]
+casa_ft3.control.opts.arguments             =   [--nologger,-c,{{ script_dir }}/ftw.py,inputms,modelimg,2,{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
+
+solve_ampphase21.control.type                            =   calibrate-stand-alone
+solve_ampphase21.control.mapfile_in                      =   create_chunks_map.output.mapfile
+solve_ampphase21.control.inputkey                        =   inputms
+solve_ampphase21.control.arguments                       =   [-f,inputms,{{ skymodel_dir }}/empty.skymodel]
+solve_ampphase21.control.args_format                     =   bbs2
+solve_ampphase21.control.parset                          =   {{ parset_dir }}/facet_dirdep_phaseonly_solve.parset
+solve_ampphase21.control.parsetasfile                    =   True
+solve_ampphase21.argument.Step.solve.Solve.CellSize.Time =   {{ solint_p }}
+
+merge_phase_parmdbs.control.type                         =   merge_parmdbs_in_time
+merge_phase_parmdbs.control.mapfile_in                   =   create_chunks_compressed_mapfile.output.mapfile
+merge_phase_parmdbs.control.inputkey                     =   mslist
+merge_phase_parmdbs.control.outputkey                    =   outparmdb
+merge_phase_parmdbs.argument.flags                       =   [mslist,instrument,outparmdb]
+
+solve_ampphase22.control.kind                            =   recipe
+solve_ampphase22.control.mapfile_in                      =   create_chunks_map.output.mapfile
+solve_ampphase22.control.inputkey                        =   inputms
+solve_ampphase22.control.arguments                       =   [-f,inputms,{{ skymodel_dir }}/empty.skymodel]
+solve_ampphase22.control.args_format                     =   bbs2
+solve_ampphase22.control.parset                          =   {{ parset_dir }}/facet_dirdep_amponly_solve.parset
+solve_ampphase22.control.parsetasfile                    =   True
+solve_ampphase22.argument.Strategy.ChunkSize             =   {{ solint_a }}
+solve_ampphase22.argument.Step.solve.Solve.CellSize.Time =   {{ solint_a }}
+
+merge_amp_parmdbs2.control.type                         =   merge_parmdbs_in_time
+merge_amp_parmdbs2.control.mapfile_in                   =   create_chunks_compressed_mapfile.output.mapfile
+merge_amp_parmdbs2.control.inputkey                     =   inparmdbs
+merge_amp_parmdbs2.control.outputkey                    =   outparmdb
+merge_amp_parmdbs2.argument.flags                       =   [mslist,instrument,outparmdb]
+
+copy_parmdb_amp2.control.kind              =   plugin
+copy_parmdb_amp2.control.type              =   copyParmdbtoMS
+copy_parmdb_amp2.control.ms_mapfile        =   {{ shifted_cal_concat_datamap }}
+copy_parmdb_amp2.control.parmdb_mapfile    =   copy_amp2_map.output.mapfile
+
+import_amp2.control.type                   =   h5parm_importer
+import_amp2.control.opts.mapfile_in        =   {{ shifted_cal_concat_datamap }}
+import_amp2.control.opts.inputkey          =   inputms
+import_amp2.control.opts.outputkey         =   h5parm
+import_amp2.control.opts.arguments         =   [h5parm, inputms, -i, instrument]
+
+smooth_amp2.control.type                     =   smooth_amps
+smooth_amp2.control.opts.mapfile_in          =   import_amp2.output.mapfile
+smooth_amp2.control.opts.inputkey            =   h5parm
+smooth_amp2.control.opts.arguments           =   [h5parm, {{ parset_dir }}/facet_amp_smooth.parset]
+
+export_amp2.control.type                     =   h5parm_exporter
+export_amp2.control.opts.mapfiles_in         =   [{{ shifted_cal_concat_datamap }}, import_amp1.output.mapfile]
+export_amp2.control.opts.inputkeys           =   [inputms, h5parm]
+export_amp2.control.opts.arguments           =   [h5parm, inputms, -i, instrument, -c]
+
+copy_parmdb_smoothed_amp2.control.kind        =   plugin
+copy_parmdb_smoothed_amp2.control.type        =   copyParmdbfromMS
+copy_parmdb_smoothed_amp2.control.ms_mapfile  =   create_chunks_map.output.mapfile
+copy_parmdb_smoothed_amp2.control.parmdb_name =   sol000_instrument
+copy_parmdb_smoothed_amp2.control.suffix      =   _amp2_smoothed
+copy_parmdb_smoothed_amp2.control.mapfile_dir =   {{ mapfile_dir }}
+copy_parmdb_smoothed_amp2.control.filename    =   parmdb_phaseamp_amp2_smoothed.mapfile
+
+copy_parmdb_smoothed_amp2_to_chunks.control.kind              =   plugin
+copy_parmdb_smoothed_amp2_to_chunks.control.type              =   copyParmdbtoMS
+copy_parmdb_smoothed_amp2_to_chunks.control.ms_mapfile        =   create_ms_map.output.mapfile
+copy_parmdb_smoothed_amp2_to_chunks.control.parmdb_mapfile    =   create_parmdb_map.output.mapfile
+
+apply_amp2.control.type                 =   calibrate-stand-alone
+apply_amp2.control.mapfile_in           =   create_chunks_map.output.mapfile
+apply_amp2.control.inputkey             =   inputms
+apply_amp2.control.arguments            =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirdep_amponly_apply.parset,{{ skymodel_dir }}/empty.skymodel]
+
+average4.control.type                       =   dppp
+average4.control.opts.mapfile_in            =   create_chunks_map.output.mapfile
+average4.control.opts.inputkey              =   msin
+average4.argument.msin.datacolumn           =   CORRECTED_DATA
+average4.argument.msout.writefullresflag    =   False
+average4.argument.steps                     =   [avg]
+average4.argument.avg.type                  =   squash
+average4.argument.avg.freqstep              =   1
+average4.argument.avg.timestep              =   12
+
+create_compressed_mapfile4.control.kind        =   plugin
+create_compressed_mapfile4.control.type        =   compressMapfile
+create_compressed_mapfile4.control.mapfile_in  =   average4.output.mapfile
+create_compressed_mapfile4.control.mapfile_dir =   {{ mapfile_dir }}
+create_compressed_mapfile4.control.filename    =   concat4_input.mapfile
+
+concat4.control.type                 =   virtual_concat
+concat4.control.mapfile_in           =   create_compressed_mapfile4.output.mapfile
+concat4.control.inputkey             =   msfiles
+concat4.control.outputkey            =   msconcat
+concat4.argument.flags               =   [msfiles,msconcat]
+
+casa_image41.control.kind                   =   recipe
+casa_image41.control.type                   =   casa
+casa_image41.control.opts.mapfile_in        =   concat4.output.mapfile
+casa_image41.control.opts.inputkey          =   clean.vis
+casa_image41.control.opts.outputkey         =   clean.imagename
+casa_image41.control.opts.arguments         =   [--nologger,-c]
+casa_image41.argument.clean.gridmode        =   'widefield'
+casa_image41.argument.clean.wprojplanes     =   {{ wplanes }}
+casa_image41.argument.clean.selectdata      =   True
+casa_image41.argument.clean.uvrange         =   '>80lambda'
+casa_image41.argument.clean.mode            =   'mfs'
+casa_image41.argument.clean.nterms          =   2
+casa_image41.argument.clean.niter           =   1000
+casa_image41.argument.clean.gain            =   0.01
+casa_image41.argument.clean.threshold       =   '0mJy'
+casa_image41.argument.clean.psfmode         =   'clark'
+casa_image41.argument.clean.interactive     =   False
+casa_image41.argument.clean.imsize          =   [{{ imsize }}, {{ imsize }}]
+casa_image41.argument.clean.cell            =   ['1.5arcsec', '1.5arcsec']
+casa_image41.argument.clean.weighting       =   'briggs'
+casa_image41.argument.clean.robust          =   -0.25
+casa_image41.argument.clean.uvtaper         =   False
+casa_image41.argument.clean.pbcor           =   False
+casa_image41.argument.clean.minpb           =   0.2
+casa_image41.argument.clean.multiscale      =   [0, 3, 7, 25, 60, 150]
+
+mask4.control.type                         =   make_clean_mask
+mask4.control.mapfile_in                   =   casa_image41.output.casa_image41.image.tt0.mapfile
+mask4.control.inputkey                     =   imagefile
+mask4.control.outputkey                    =   maskfile
+mask4.argument.flags                       =   [imagefile,maskfile]
+mask4.argument.threshpix                   =   10
+mask4.argument.threshisl                   =   6
+mask4.argument.atrous_do                   =   True
+mask4.argument.rmsbox                      =   (50,20)
+mask4.argument.img_format                  =   casa
+mask4.argument.threshold_format            =   str_with_units
+
+casa_image42.control.kind                   =   recipe
+casa_image42.control.type                   =   casa
+casa_image42.control.opts.mapfiles_in       =   [concat4.output.mapfile,mask4.output.mapfile,mask4.output.threshold_5sig.mapfile]
+casa_image42.control.opts.inputkeys         =   [clean.vis,clean.mask,clean.threshold]
+casa_image42.control.opts.outputkey         =   clean.imagename
+casa_image42.control.opts.arguments         =   [--nologger,-c]
+casa_image42.argument.clean.gridmode        =   'widefield'
+casa_image42.argument.clean.wprojplanes     =   {{ wplanes }}
+casa_image42.argument.clean.selectdata      =   True
+casa_image42.argument.clean.uvrange         =   '>80lambda'
+casa_image42.argument.clean.mode            =   'mfs'
+casa_image42.argument.clean.nterms          =   2
+casa_image42.argument.clean.niter           =   1000000
+casa_image42.argument.clean.gain            =   0.01
+casa_image42.argument.clean.psfmode         =   'clark'
+casa_image42.argument.clean.interactive     =   False
+casa_image42.argument.clean.imsize          =   [{{ imsize }}, {{ imsize }}]
+casa_image42.argument.clean.cell            =   ['1.5arcsec', '1.5arcsec']
+casa_image42.argument.clean.weighting       =   'briggs'
+casa_image42.argument.clean.robust          =   -0.25
+casa_image42.argument.clean.uvtaper         =   False
+casa_image42.argument.clean.pbcor           =   False
+casa_image42.argument.clean.minpb           =   0.2
+casa_image42.argument.clean.multiscale      =   [0, 3, 7, 25, 60, 150]
+
+merge_selfcal_parmdbs.control.type                 =   virtual_concat
+merge_selfcal_parmdbs.control.mapfiles_in          =   [merge_phase_parmdbs.output.mapfile, copy_parmdb_smoothed_amp2.output.mapfile]
+merge_selfcal_parmdbs.control.inputkeys            =   [parmdb_p,parmdb_a]
+merge_selfcal_parmdbs.control.outputkey            =   parmdb_out
+merge_selfcal_parmdbs.argument.flags               =   [parmdb_p,parmdb_a,parmdb_out]
+
+copy_final_model_map.control.kind          =   plugin
+copy_final_model_map.control.type          =   copyMapfile
+copy_final_model_map.control.mapfile_in    =   merge_selfcal_parmdbs.output.mapfile
+copy_final_model_map.control.mapfile_dir   =   {{ mapfile_dir }}
+copy_final_model_map.control.filename      =   dir_dep_parmdb.datamap
