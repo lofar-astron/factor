@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # The code is based on an original idea of Reinout van Weeren
-from factor import process
+import factor
 
 
 if __name__=='__main__':
@@ -47,4 +47,4 @@ if __name__=='__main__':
         parset_file = 'factor.parset'
 
     # Process the field
-    process(parset_file, logging_level=logging_level, dry_run=options.d)
+    factor.process(parset_file, logging_level=logging_level, dry_run=options.d)
