@@ -54,8 +54,6 @@ def main(parmdb_p, parmdb_a, parmdb_out, clobber=True):
     # Write values
     pdb_out.flush()
 
-    return parmdb_out
-
 
 if __name__ == '__main__':
     descriptiontext = "Merge parmdbs in time.\n"
