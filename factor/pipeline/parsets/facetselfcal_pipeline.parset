@@ -530,7 +530,7 @@ smooth_amp2.control.opts.inputkey                          =   h5parm
 smooth_amp2.control.opts.arguments                         =   [h5parm,{{ parset_dir }}/facet_amp_smooth.parset]
 
 export_amp2.control.type                                   =   h5parm_exporter
-export_amp2.control.opts.mapfiles_in                       =   [{{ shifted_cal_concat_datamap }}, import_amp1.output.mapfile]
+export_amp2.control.opts.mapfiles_in                       =   [{{ shifted_cal_concat_datamap }},import_amp1.output.mapfile]
 export_amp2.control.opts.inputkeys                         =   [inputms,h5parm]
 export_amp2.control.opts.arguments                         =   [h5parm,inputms,-i,instrument,-c]
 
@@ -638,7 +638,7 @@ casa_image42.argument.clean.minpb                          =   0.2
 casa_image42.argument.clean.multiscale                     =   [0, 3, 7, 25, 60, 150]
 
 merge_selfcal_parmdbs.control.type                         =   merge_parmdbs_selfcal
-merge_selfcal_parmdbs.control.mapfiles_in                  =   [merge_phase_parmdbs.output.mapfile, merge_selfcal_parmdbs.output.mapfile]
+merge_selfcal_parmdbs.control.mapfiles_in                  =   [merge_phase_parmdbs.output.mapfile,merge_selfcal_parmdbs.output.mapfile]
 merge_selfcal_parmdbs.control.inputkeys                    =   [parmdb_p,parmdb_a]
 merge_selfcal_parmdbs.control.outputkey                    =   parmdb_out
 merge_selfcal_parmdbs.argument.flags                       =   [parmdb_p,parmdb_a,parmdb_out]
