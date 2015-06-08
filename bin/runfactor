@@ -260,6 +260,7 @@ if __name__=='__main__':
             # For dryrun, skip check
             for d in direction_group:
                 d.selfcal_ok = True
+                d.save_state()
         direction_group_ok = [d for d in direction_group if d.selfcal_ok]
         if first_pass:
             if len(direction_group_ok) > 0:
