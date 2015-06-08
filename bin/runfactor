@@ -21,16 +21,18 @@ import optparse
 
 
 if __name__ == '__main__':
-    parser = optparse.OptionParser(usage='%prog [-v|-q] parset [default: factor.parset]',
+    parser = optparse.OptionParser(usage='%prog [-v|-q] parset',
             version='%%prog %s' % (factor._version.__version__))
     parser.add_option('-d', help='enable dry-run mode', action='store_true', default=False)
     parser.add_option('-q', help='enable quiet mode', action='store_true', default=False)
     parser.add_option('-v', help='enable verbose mode', action='store_true', default=False)
     (options, args) = parser.parse_args()
 
-    if len(args) not in [0, 1]:
-        opt.print_help()
+    if len(args) != 1:
+        parser.print_help()
         sys.exit()
+
+    parset_file = args[0]
 
     # Prepare logger
     if options.q:
@@ -39,12 +41,6 @@ if __name__ == '__main__':
         logging_level = 'debug'
     else:
         logging_level = 'info'
-
-    # Prepare parset
-    try:
-        parset_file = args[0]
-    except:
-        parset_file = 'factor.parset'
 
     # Process the field
     factor.process.run(parset_file, logging_level=logging_level, dry_run=options.d)
