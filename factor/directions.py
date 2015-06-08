@@ -524,14 +524,12 @@ def make_ds9_calimage_file(directions, outputfile):
         Name of output region file
 
     """
-    from factor.operations.hardcoded_param import facet_selfcal as p
-
     lines = []
     lines.append('# Region file format: DS9 version 4.0\nglobal color=yellow '
                  'font="helvetica 10 normal" select=1 highlite=1 edit=1 '
                  'move=1 delete=1 include=1 fixed=0 source=1\nfk5\n')
 
-    cell = float(p['imager0']['cell'].split('arcsec')[0]) # arcsec per pixel
+    cell = 1.5 # arcsec per pixel
     for direction in directions:
         imsize = direction.cal_radius_deg * 1.5 * 3600.0 / cell # pixels
         if imsize < 512:
