@@ -26,6 +26,7 @@ def plugin_main(args, **kwargs):
     """
     ms_mapfile = kwargs['ms_mapfile']
     parmdb_name = kwargs['parmdb_name']
+    suffix = kwargs['suffix']
     mapfile_dir = kwargs['mapfile_dir']
     filename = kwargs['filename']
 
