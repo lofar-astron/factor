@@ -33,7 +33,7 @@ class FacetAdd(Operation):
     """
     Operation to add calibrator source to data
     """
-    def __init__(self, parset, bands, direction=None, reset=False):
+    def __init__(self, parset, bands, direction):
         super(FacetAdd, self).__init__(parset, bands, direction,
             name='FacetAdd')
 
@@ -82,7 +82,7 @@ class FacetSetup(Operation):
     """
     Operation to set up data for selfcal
     """
-    def __init__(self, parset, bands, direction=None, reset=False):
+    def __init__(self, parset, bands, direction):
         super(FacetSetup, self).__init__(parset, bands, direction,
             name='FacetSetup')
 
@@ -110,7 +110,7 @@ class FacetSelfcal(Operation):
     """
     Operation to selfcal one or more directions
     """
-    def __init__(self, parset, bands, direction=None, reset=False):
+    def __init__(self, parset, bands, direction):
         super(FacetSelfcal, self).__init__(parset, bands, direction,
             name='FacetSelfcal')
 
@@ -143,10 +143,9 @@ class FacetImage(Operation):
     """
     Operation to image the full facet
     """
-    def __init__(self, parset, bands, direction=None, reset=False,
-        name='FacetImage'):
-        super(FacetImage, self).__init__(parset, bands, direction=direction,
-            reset=reset, name=name)
+    def __init__(self, parset, bands, direction, name='FacetImage'):
+        super(FacetImage, self).__init__(parset, bands, direction,
+            name=name)
 
         # Define parameters needed for this operation
         self.parms_dict = {'input_dir': parset['dir_ms'],
@@ -172,9 +171,9 @@ class FacetCheck(Operation):
     """
     Operation to subtract final facet sky model from facet visibilties
     """
-    def __init__(self, parset, bands, direction=None, reset=False):
-        super(FacetCheck, self).__init__(parset, bands, direction=direction,
-            reset=reset, name='FacetCheck')
+    def __init__(self, parset, bands, direction):
+        super(FacetCheck, self).__init__(parset, bands, direction,
+            name='FacetCheck')
 
         # Define parameters needed for this operation
         self.parms_dict = {'input_dir': parset['dir_ms'],
@@ -205,9 +204,9 @@ class FacetSub(Operation):
     """
     Operation to mosiac facet images
     """
-    def __init__(self, parset, bands, direction=None, reset=False):
-        super(FacetSub, self).__init__(parset, bands, direction=direction,
-            reset=reset, name='FacetSub')
+    def __init__(self, parset, bands, direction):
+        super(FacetSub, self).__init__(parset, bands, direction,
+            name='FacetSub')
 
         # Define parameters needed for this operation
         self.parms_dict = {'input_dir': parset['dir_ms'],
@@ -234,16 +233,16 @@ class FacetAddAllFinal(Operation):
     """
     Operation to add all sources in the facet to data (final)
     """
-    def __init__(self, parset, bands, direction=None, reset=False):
-        super(FacetAddAllFinal, self).__init__(parset, bands, direction=direction,
-            reset=reset, name=name)
+    def __init__(self, parset, bands, direction):
+        super(FacetAddAllFinal, self).__init__(parset, bands, direction,
+            name=name)
 
 
 def FacetImageFinal(FacetImage):
     """
     Operation to make final facet image
     """
-    def __init__(self, parset, bands, direction=None, reset=False):
-        super(FacetImageFinal, self).__init__(parset, bands, direction=direction,
-            reset=reset, name='FacetImageFinal')
+    def __init__(self, parset, bands, direction):
+        super(FacetImageFinal, self).__init__(parset, bands, direction,
+            name='FacetImageFinal')
 
