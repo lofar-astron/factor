@@ -43,7 +43,7 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
         if clobber:
             os.system('rm -rf {0}'.format(outparmdb))
         else:
-            return outparmdb
+            return
     os.system('cp -r {0} {1}'.format(inparmdbs[0], outparmdb))
 
     if len(inparmdbs) > 1:
@@ -60,9 +60,10 @@ if __name__ == '__main__':
     descriptiontext = "Merge parmdbs in time.\n"
 
     parser = argparse.ArgumentParser(description=descriptiontext, formatter_class=RawTextHelpFormatter)
-    parser.add_argument('inparmdbs', help='list of parmdbs to merge')
+    parser.add_argument('mslist', help='list of ms with parmdbs to merge')
+    parser.add_argument('parmdb_name', help='name of parmdbs to merge')
     parser.add_argument('outparmdb', help='output parmdb')
     parser.add_argument('-c', '--clobber', help='clobber existing file?', type=bool, default=True)
 
     args = parser.parse_args()
-    main(args.inparmdbs, args.outparmdb, clobber=args.clobber)
+    main(args.mslist, args.parmdb_name, args.outparmdb, clobber=args.clobber)
