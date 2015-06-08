@@ -10,7 +10,8 @@ def plugin_main(args, **kwargs):
     Parameters
     ----------
     files : list or str
-        List of files. May be given as a list of strings or as a string (e.g.,
+        List of files or mapfile with such a list as the only entry. May be
+        given as a list of strings or as a string (e.g.,
         '[s1.skymodel, s2.skymodel]'
     hosts : list or str
         List of hosts/nodes. May be given as a list or as a string (e.g.,
