@@ -94,7 +94,7 @@ def run(parset_file, logging_level='info', dry_run=False):
 
     # Set up scheduler for operations (pipeline runs)
     scheduler = Scheduler(max_procs=len(parset['cluster_specific']['node_list']),
-        dryrun=options.d)
+        dryrun=dry_run)
 
     # Run initial sky model generation and create empty datasets. First check that
     # this operation is needed (only needed if band lacks an initial skymodel or
@@ -229,7 +229,7 @@ def run(parset_file, logging_level='info', dry_run=False):
         # selfcal check. Also, after this operation is complete for any
         # direction, set flag to indicate all subsequent directions should use
         # new subtracted data column
-        if options.d:
+        if dry_run:
             # For dryrun, skip check
             for d in direction_group:
                 d.selfcal_ok = True
