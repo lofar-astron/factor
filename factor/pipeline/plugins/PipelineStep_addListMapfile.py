@@ -33,8 +33,8 @@ def plugin_main(args, **kwargs):
             map_in = DataMap.load(kwargs['files'])
             files = map_in[0].file
         except:
-            pass
-        files = kwargs['files'].strip('[]').split(',')
+            files = kwargs['files']
+        files = files.strip('[]').split(',')
         files = [f.strip() for f in files]
     if type(kwargs['hosts']) is str:
         hosts = kwargs['hosts'].strip('[]').split(',')
