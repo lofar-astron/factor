@@ -31,7 +31,7 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
     if type(input_mslist) is str:
         input_mslist = input_mslist.strip('[]').split(',')
         input_mslist = [f.strip() for f in input_mslist]
-    inpardbs = [os.path.join(ms, parmdb_name) for ms in input_mslist]
+    inparmdbs = [os.path.join(ms, parmdb_name) for ms in input_mslist]
 
     if type(clobber) is str:
         if clobber.lower() == 'true':
