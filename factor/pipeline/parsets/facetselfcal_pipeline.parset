@@ -644,7 +644,7 @@ casa_image42.argument.clean.minpb                          =   0.2
 casa_image42.argument.clean.multiscale                     =   [0, 3, 7, 25, 60, 150]
 
 merge_selfcal_parmdbs.control.type                         =   merge_parmdbs_selfcal
-merge_selfcal_parmdbs.control.mapfiles_in                  =   [merge_phase_parmdbs.output.mapfile,merge_selfcal_parmdbs.output.mapfile]
+merge_selfcal_parmdbs.control.mapfiles_in                  =   [merge_phase_parmdbs.output.mapfile,copy_parmdb_smoothed_amp2.output.mapfile]
 merge_selfcal_parmdbs.control.inputkeys                    =   [parmdb_p,parmdb_a]
 merge_selfcal_parmdbs.control.outputkey                    =   parmdb_out
 merge_selfcal_parmdbs.argument.flags                       =   [parmdb_p,parmdb_a,parmdb_out]
