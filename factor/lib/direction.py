@@ -55,8 +55,6 @@ class Direction(object):
         cal_flux_jy : float, optional
             Apparent flux in Jy of calibrator source
         """
-        from factor.operations.hardcoded_param import facet_selfcal as p
-
         self.name = name
         self.ra = ra
         self.dec = dec
@@ -65,7 +63,7 @@ class Direction(object):
 
         self.cal_imsize = cal_imsize
         if cal_radius_deg is None:
-            cell = float(p['imager0']['cell'].split('arcsec')[0]) # arcsec per pixel
+            cell = 1.5 # arcsec per pixel
             self.cal_radius_deg = cal_imsize * cell / 3600.0 / 1.5
         else:
             self.cal_radius_deg = cal_radius_deg
