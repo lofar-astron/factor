@@ -14,7 +14,6 @@ Step.solve.Model.CommonScalarPhase.Enable   = T
 Step.solve.Operation                        = SOLVE
 Step.solve.Solve.Parms                      = ["CommonScalarPhase:*", "TEC:*"]
 Step.solve.Solve.CellSize.Freq              = 0
-Step.solve.Solve.CellSize.Time              = 1
 Step.solve.Solve.CellChunkSize              = 120
 Step.solve.Solve.PropagateSolutions         = T
 Step.solve.Solve.Options.MaxIter            = 100
