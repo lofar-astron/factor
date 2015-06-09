@@ -73,7 +73,7 @@ class Direction(object):
         self.facet_imsize = field_imsize
         self.dynamic_range = dynamic_range
         self.loop_amp_selfcal = False
-        self.improving = True # Whether selfcal is still improving after first amp cal
+        self.selfcal_ok = True # Whether selfcal is still improving after first amp cal
         self.max_residual_val = 0.5 # maximum residual in Jy for facet subtract test
 
         self.region_selfcal = region_selfcal
