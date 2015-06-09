@@ -61,7 +61,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
                                      thresh_pix=numpy.float(threshpix), thresh_isl=numpy.float(threshisl),
                                      atrous_do=atrous_do, ini_method='curvature',
-                                     adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=20, quiet=True)
+                                     adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150, rms_box_bright=(35,7), rms_map=True, quiet=True)
             nisl = img.nisl
             threshpix /= 1.2
             threshisl /= 1.2
@@ -71,7 +71,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
                                  thresh_pix=numpy.float(threshpix), thresh_isl=numpy.float(threshisl),
                                  atrous_do=atrous_do, ini_method='curvature',
-                                 adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=20, quiet=True)
+                                 adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150, rms_box_bright=(35,7), rms_map=True, quiet=True)
 
     img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
                      img_format=img_format, clobber=True)
