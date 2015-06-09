@@ -19,8 +19,8 @@ average.parsetarg.msin.datacolumn              =   CORRECTED_DATA
 average.parsetarg.msout.writefullresflag       =   False
 average.parsetarg.steps                        =   [avg]
 average.parsetarg.avg.type                     =   squash
-average.parsetarg.avg.freqstep                 =   20
-average.parsetarg.avg.timestep                 =   1
+average.parsetarg.avg.freqstep                 =   5
+average.parsetarg.avg.timestep                 =   3
 
 create_compressed_mapfile1.control.kind        =   plugin
 create_compressed_mapfile1.control.type        =   compressMapfile
@@ -39,7 +39,7 @@ wsclean1.control.mapfile_in                    =   concat_averaged.output.mapfil
 wsclean1.control.inputkey                      =   msfile
 wsclean1.argument.flags                        =   [-no-update-model-required,msfile]
 wsclean1.argument.size                         =   {{ npix }} {{ npix }}
-wsclean1.argument.niter                        =   10000
+wsclean1.argument.niter                        =   15000
 wsclean1.argument.threshold                    =   0.0
 wsclean1.argument.pol                          =   I
 wsclean1.argument.weight                       =   briggs -0.5
@@ -47,7 +47,7 @@ wsclean1.argument.mgain                        =   0.5
 wsclean1.argument.gain                         =   0.1
 wsclean1.argument.cleanborder                  =   0
 wsclean1.argument.minuv-l                      =   80
-wsclean1.argument.maxuv-l                      =   2000
+wsclean1.argument.maxuv-l                      =   1000000
 wsclean1.argument.scale                        =   0.000417
 wsclean1.argument.mem                          =   90
 
@@ -59,6 +59,7 @@ mask.argument.flags                            =   [imagefile,maskfile]
 mask.argument.threshisl                        =   5
 mask.argument.threshpix                        =   5
 mask.argument.rmsbox                           =   (60,20)
+mask.argument.adaptive_rmsbox                  =   True
 mask.argument.img_format                       =   fits
 
 wsclean2.control.type                          =   wsclean
@@ -102,7 +103,7 @@ wsclean_ft.control.mapfiles_in                 =   [concat_unaveraged.output.map
 wsclean_ft.control.inputkeys                   =   [msfile,name]
 wsclean_ft.argument.flags                      =   [-predict,msfile]
 wsclean_ft.argument.size                       =   {{ npix }} {{ npix }}
-wsclean_ft.argument.scale                      =   0.00694
+wsclean_ft.argument.scale                      =   0.000417
 wsclean_ft.argument.mem                        =   90
 
 copy_final_image_map.control.kind              =   plugin
