@@ -55,7 +55,7 @@ class Scheduler(object):
     """
     The scheduler runs all jobs sent to it in parallel
     """
-    def __init__(self, max_procs=1, name='scheduler', op_parset=None, dryrun=False):
+    def __init__(self, max_procs=1, name='scheduler', op_parset=None, dry_run=False):
         """
         Create Scheduler object
 
@@ -67,7 +67,7 @@ class Scheduler(object):
             Name of the scheduler
         op_parset : dict, optional
             Dict of operation parameters
-        dryrun : bool, optional
+        dry_run : bool, optional
             If True, the pipelines are not run, but all parsets and config files
             are made as normal
 
@@ -75,7 +75,7 @@ class Scheduler(object):
         self.max_procs = max_procs
         self.name = name
         self.op_parset = op_parset
-        self.dryrun = dryrun
+        self.dry_run = dry_run
         self.log = logging.getLogger('factor.{0}'.format(name))
         self.success = True
 
@@ -122,7 +122,7 @@ class Scheduler(object):
              op.setup()
 
         # Run the operation(s)
-        if not self.dryrun and len(operations_to_run) > 0:
+        if not self.dry_run and len(operations_to_run) > 0:
             with Timer(self.log, 'operation'):
                 pool = multiprocessing.Pool(processes=self.max_procs)
                 for op in operations_to_run:
