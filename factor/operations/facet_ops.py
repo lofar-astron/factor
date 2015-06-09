@@ -155,6 +155,7 @@ class FacetImage(Operation):
                            'pipeline_dir': self.factor_pipeline_dir,
                            'shifted_all_bands_datamap': self.direction.shifted_all_bands_datamap,
                            'dir_dep_parmdb_datamap': self.direction.dir_dep_parmdb_datamap,
+                           'npix': self.direction.facet_imsize,
                            'hosts': self.direction.hosts}
 
 
