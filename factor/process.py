@@ -208,20 +208,8 @@ def run(parset_file, logging_level='info', dry_run=False):
         for op in ops:
             scheduler.run(op)
 
-        # Setup up facet(s) for selfcal of calibrator
-        ops = [FacetSetup(parset, bands, d) for d in direction_group]
-        scheduler.run(ops)
-
         # Do selfcal on calibrator only
         ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
-        scheduler.run(ops)
-
-        # Make image of all sources in the facet(s) and get final model(s)
-        ops = [FacetImage(parset, bands, d) for d in direction_group]
-        scheduler.run(ops)
-
-        # Subtract model(s) from empty facet datasets and image to check if OK
-        ops = [FacetCheck(parset, bands, d) for d in direction_group]
         scheduler.run(ops)
 
         # Subtract final model(s) from empty field datasets. These operations
