@@ -127,6 +127,7 @@ def run(parset_file, logging_level='info', dry_run=False):
     if os.path.exists(polys_file):
         with open(polys_file, 'r') as f:
             polys, widths = pickle.load(f)
+            widths = [w[0] for w in widths]
     else:
         polys, widths = factor.directions.thiessen(directions,
             check_edges=parset['direction_specific']['check_edges'])
@@ -144,8 +145,7 @@ def run(parset_file, logging_level='info', dry_run=False):
 
         # For WSClean, set number of bands
         direction.nbands = len(bands)
-        direction.nchannels = np.int(np.ceil(np.float(direction.nbands/
-                    np.float(5))))
+        direction.nchannels = np.int(np.ceil(np.float(direction.nbands/np.float(5))))
 
         # Set field center
         direction.field_ra = field.ra
