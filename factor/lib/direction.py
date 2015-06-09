@@ -159,7 +159,7 @@ class Direction(object):
         """
         import glob
 
-        operations = ['FacetSelfcal', 'FacetImage', 'FacetCheck']
+        operations = ['FacetSelfcal']
         for op in operations:
             # Remove entry in completed_operations
             self.completed_operations.remove(op)
@@ -180,8 +180,7 @@ class Direction(object):
         """
         import glob
 
-        operations = ['FacetAdd', 'FacetSetup', 'FacetSelfcal', 'FacetImage',
-            'FacetCheck', 'FacetSub']
+        operations = ['FacetAdd', 'FacetSelfcal', 'FacetSub']
         for op in operations:
             # Delete vis data
             action_dirs = glob.glob(os.path.join(self.vis_dir, op, '*'))
