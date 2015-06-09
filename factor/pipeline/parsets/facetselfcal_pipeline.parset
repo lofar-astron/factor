@@ -65,7 +65,7 @@ copy_column.control.inputkeys                              =   [corrdatafile, da
 copy_column.argument.flags                                 =   [corrdatafile, datafile, DATA, CORRECTED_DATA]
 
 average0.control.type                                      =   dppp
-average0.control.mapfile_in                                =   {{ shifted_cal_concat_datamap }}
+average0.control.mapfile_in                                =   concat_data.output.mapfile
 average0.control.inputkey                                  =   msin
 average0.argument.msin.datacolumn                          =   CORRECTED_DATA
 average0.argument.msout.writefullresflag                   =   False
@@ -168,12 +168,12 @@ create_model0_map.control.mapfile_dir                      =   {{ mapfile_dir }}
 create_model0_map.control.filename                         =   model0_rootnames.datamap
 
 casa_ft0.control.type                                      =   casa
-casa_ft0.control.mapfiles_in                               =   [{{ shifted_cal_concat_datamap }},create_model0_map.output.mapfile]
+casa_ft0.control.mapfiles_in                               =   [concat_data.output.mapfile,create_model0_map.output.mapfile]
 casa_ft0.control.inputkeys                                 =   [inputms,modelimg]
 casa_ft0.control.arguments                                 =   [--nologger,-c,{{ script_dir }}/ftw.py,inputms,modelimg,2,{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
 make_chunks.control.type                                   =   chunk_by_time
-make_chunks.control.mapfile_in                             =   {{ shifted_cal_concat_datamap }}
+make_chunks.control.mapfile_in                             =   concat_data.output.mapfile
 make_chunks.control.inputkey                               =   msfile
 make_chunks.argument.flags                                 =   [msfile, {{ chunk_width }}]
 
@@ -481,11 +481,11 @@ merge_amp_parmdbs1.argument.flags                          =   [mslist,instrumen
 
 copy_parmdb_amp1.control.kind                              =   plugin
 copy_parmdb_amp1.control.type                              =   copyParmdbtoMS
-copy_parmdb_amp1.control.ms_mapfile                        =   {{ shifted_cal_concat_datamap }}
+copy_parmdb_amp1.control.ms_mapfile                        =   concat_data.output.mapfile
 copy_parmdb_amp1.control.parmdb_mapfile                    =   merge_amp_parmdbs1.output.mapfile
 
 import_amp1.control.type                                   =   h5parm_importer
-import_amp1.control.mapfile_in                             =   {{ shifted_cal_concat_datamap }}
+import_amp1.control.mapfile_in                             =   concat_data.output.mapfile
 import_amp1.control.inputkey                               =   inputms
 import_amp1.control.outputkey                              =   h5parm
 import_amp1.control.arguments                              =   [h5parm,inputms,-i,instrument]
@@ -496,13 +496,13 @@ smooth_amp1.control.inputkey                               =   h5parm
 smooth_amp1.control.arguments                              =   [h5parm,{{ parset_dir }}/facet_amp_smooth.parset]
 
 export_amp1.control.type                                   =   h5parm_exporter
-export_amp1.control.mapfiles_in                            =   [{{ shifted_cal_concat_datamap }},import_amp1.output.mapfile]
+export_amp1.control.mapfiles_in                            =   [concat_data.output.mapfile,import_amp1.output.mapfile]
 export_amp1.control.inputkeys                              =   [inputms,h5parm]
 export_amp1.control.arguments                              =   [h5parm,inputms,-i,instrument,-c]
 
 copy_parmdb_smoothed_amp1.control.kind                     =   plugin
 copy_parmdb_smoothed_amp1.control.type                     =   copyParmdbfromMS
-copy_parmdb_smoothed_amp1.control.ms_mapfile               =   {{ shifted_cal_concat_datamap }}
+copy_parmdb_smoothed_amp1.control.ms_mapfile               =   concat_data.output.mapfile
 copy_parmdb_smoothed_amp1.control.parmdb_name              =   sol000_instrument
 copy_parmdb_smoothed_amp1.control.suffix                   =   _amp1_smoothed
 copy_parmdb_smoothed_amp1.control.mapfile_dir              =   {{ mapfile_dir }}
@@ -671,11 +671,11 @@ merge_amp_parmdbs2.argument.flags                          =   [mslist,instrumen
 
 copy_parmdb_amp2.control.kind                              =   plugin
 copy_parmdb_amp2.control.type                              =   copyParmdbtoMS
-copy_parmdb_amp2.control.ms_mapfile                        =   {{ shifted_cal_concat_datamap }}
+copy_parmdb_amp2.control.ms_mapfile                        =   concat_data.output.mapfile
 copy_parmdb_amp2.control.parmdb_mapfile                    =   merge_amp_parmdbs2.output.mapfile
 
 import_amp2.control.type                                   =   h5parm_importer
-import_amp2.control.mapfile_in                             =   {{ shifted_cal_concat_datamap }}
+import_amp2.control.mapfile_in                             =   concat_data.output.mapfile
 import_amp2.control.inputkey                               =   inputms
 import_amp2.control.outputkey                              =   h5parm
 import_amp2.control.arguments                              =   [h5parm,inputms,-i,instrument]
@@ -692,7 +692,7 @@ export_amp2.control.arguments                              =   [h5parm,inputms,-
 
 copy_parmdb_smoothed_amp2.control.kind                     =   plugin
 copy_parmdb_smoothed_amp2.control.type                     =   copyParmdbfromMS
-copy_parmdb_smoothed_amp2.control.ms_mapfile               =   {{ shifted_cal_concat_datamap }}
+copy_parmdb_smoothed_amp2.control.ms_mapfile               =   concat_data.output.mapfile
 copy_parmdb_smoothed_amp2.control.parmdb_name              =   sol000_instrument
 copy_parmdb_smoothed_amp2.control.suffix                   =   _amp2_smoothed
 copy_parmdb_smoothed_amp2.control.mapfile_dir              =   {{ mapfile_dir }}
