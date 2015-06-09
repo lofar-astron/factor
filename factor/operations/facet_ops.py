@@ -93,6 +93,7 @@ class FacetSelfcal(Operation):
                            'dir_indep_parmdbs_datamap': self.direction.dir_indep_parmdbs_datamap,
                            'field_ra': self.direction.field_ra,
                            'field_dec': self.direction.field_dec,
+                           'wplanes': self.direction.wplanes,
                            'facet_imsize': self.direction.facet_imsize,
                            'cal_wplanes': self.direction.wplanes,
                            'cal_imsize': self.direction.cal_imsize,
