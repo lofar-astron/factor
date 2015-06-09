@@ -142,4 +142,5 @@ class Scheduler(object):
         # Finalize the operations
         for op in operation_list:
             op.finalize()
-            op.set_completed()
+            if not self.dry_run:
+                op.set_completed()
