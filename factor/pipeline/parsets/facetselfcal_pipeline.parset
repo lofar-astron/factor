@@ -852,6 +852,7 @@ mask5.argument.threshpix                                   =   5
 mask5.argument.rmsbox                                      =   (60,20)
 mask5.argument.adaptive_rmsbox                             =   True
 mask5.argument.img_format                                  =   fits
+mask5.argument.trim_by                                     =   0
 
 wsclean2.control.type                                      =   wsclean
 wsclean2.control.mapfiles_in                               =   [concat_averaged.output.mapfile,mask5.output.mapfile]
@@ -979,6 +980,7 @@ mask_pre.argument.threshisl                                =   5
 mask_pre.argument.threshpix                                =   5
 mask_pre.argument.rmsbox                                   =   (60,20)
 mask_pre.argument.img_format                               =   fits
+mask_pre.argument.trim_by                                  =   0
 
 wsclean_pre2.control.type                                  =   wsclean
 wsclean_pre2.control.mapfiles_in                           =   [average_pre.output.mapfile,mask_pre.output.mapfile]
@@ -1023,6 +1025,7 @@ mask_post.argument.threshisl                               =   5
 mask_post.argument.threshpix                               =   5
 mask_post.argument.rmsbox                                  =   (60,20)
 mask_post.argument.img_format                              =   fits
+mask_post.argument.trim_by                                 =   0
 
 wsclean_post2.control.type                                 =   wsclean
 wsclean_post2.control.mapfiles_in                          =   [average_post.output.mapfile,mask_post.output.mapfile]
