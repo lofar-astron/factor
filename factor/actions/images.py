@@ -145,9 +145,9 @@ class MakeImage(Action):
         """
         Set various imaging parameters
         """
-        self.p['cycfactor'] = 3.0
+        self.p['cycfactor'] = 2.5
         if self.p['niter'] > 1500:
-            self.p['cycfactor'] = 4.0
+            self.p['cycfactor'] = 3.0
         self.p['scales'] = []
         if self.p['mscale']:
             self.p['nscales'] = 6
