@@ -100,6 +100,7 @@ class FacetSelfcal(Operation):
                            'chunk_width': self.direction.solint_a*2,
                            'solint_p': self.direction.solint_p,
                            'solint_a': self.direction.solint_a,
+                           'facet_state_file': self.direction.save_file,
                            'hosts': self.direction.hosts}
 
 

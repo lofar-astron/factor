@@ -5,14 +5,24 @@ Script to make a clean mask from an image
 import argparse
 from argparse import RawTextHelpFormatter
 from lofar import bdsm
-import numpy
+import numpy as np
 import sys
 import os
+from factor.directions import Polygon
+
+
+def read_vertices(filename):
+    """
+    Returns facet vertices
+    """
+    with open(filename, 'r') as f:
+        direction_dict = pickle.load(f)
+    return direction_dict['vertices']
 
 
 def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, rmsbox=None,
          iterate_threshold=False, adaptive_rmsbox=False, img_format='fits',
-         threshold_format='float', trim_by=25, input_mask=None):
+         threshold_format='float', trim_by=25, vertices_file=None):
     """
     Run PyBDSM to make an island clean mask
 
@@ -52,6 +62,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
 
     if int(trim_by) > 0:
         # Trim image border by trim_by pixels
+        casaimage = pim.image(fitsimage)
+        imsize = casaimage.info()['coordinates']['direction0']['_axes_sizes'][0]
         trim_box = (int(trim_by), imsize-int(trim_by), int(trim_by), imsize-int(trim_by))
     else:
         trim_box = None
@@ -65,7 +77,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         threshisl = 15
         while nisl == 0:
             img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
-                                     thresh_pix=numpy.float(threshpix), thresh_isl=numpy.float(threshisl),
+                                     thresh_pix=np.float(threshpix), thresh_isl=np.float(threshisl),
                                      atrous_do=atrous_do, ini_method='curvature', thresh='hard',
                                      adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150, rms_box_bright=(35,7), rms_map=True, quiet=True, trim_box=trim_box)
             nisl = img.nisl
@@ -75,12 +87,45 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         threshisl = threshisl_orig
     else:
         img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
-                                 thresh_pix=numpy.float(threshpix), thresh_isl=numpy.float(threshisl),
+                                 thresh_pix=np.float(threshpix), thresh_isl=np.float(threshisl),
                                  atrous_do=atrous_do, ini_method='curvature', thresh='hard',
                                  adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150, rms_box_bright=(35,7), rms_map=True, quiet=True, trim_box=trim_box)
 
     img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
                      img_format=img_format, clobber=True, pad_image=True)
+
+    if vertices_file is not None:
+        # Modify the clean mask to exclude regions outside of the input_maks
+        mask_im = pim.image(mask_name)
+        vertices = read_vertices(vertices_file)
+        RAverts = vertices[0]
+        Decverts = vertices[1]
+        xvert = []
+        yvert = []
+        for RAvert, Decvert in zip(RAverts, Decverts):
+            pixels = mask_im.topixel([0, 1, Decvert*np.pi/180.0,
+                RAvert*np.pi/180.0])
+            xvert.append(pixels[2]) # x -> Dec
+            yvert.append(pixels[3]) # y -> RA
+        poly = Polygon(xvert, yvert)
+
+        # Find masked regions
+        data = mask_im.getdata()
+        masked_ind = np.where(data[0, 0])
+
+        # Find distance to nearest poly edge and unmask those that
+        # are outside the facet (dist < 0)
+        dist = poly.is_inside(masked_ind[0], masked_ind[1])
+        outside_ind = np.where(dist < 0.0)
+        if len(outside_ind[0]) > 0:
+            data[0, 0, masked_ind[0][outside_ind], [masked_ind[1][outside_ind]]] = 0
+
+            # Save changes
+            mask_im.putdata(data)
+            if img_format == 'fits':
+                mask_im.tofits(mask_name, overwrite=True)
+            else:
+                mask_im.saveas(mask_name, overwrite=True)
 
     if threshold_format == 'float':
         return {'threshold_5sig': 5.0 * img.clipped_rms}
@@ -106,9 +151,13 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--adaptive_rmsbox', help='use an adaptive rms box', type=bool, default=False)
     parser.add_argument('-f', '--img_format', help='format of output mask', type=str, default='casa')
     parser.add_argument('-d', '--threshold_format', help='format of return value', type=str, default='float')
+    parser.add_argument('-b', '--trim_by', help='Trim masked region by this number of pixels', type=int, default=25)
+    parser.add_argument('-v', '--vertices_file', help='file containing facet polygon vertices', type=str, default=None)
 
     args = parser.parse_args()
     main(args.image_name, args.mask_name, atrous_do=args.atrous_do,
-         threshisl=args.threshisl, threshpix=args.threshpix, rmsbox=args.rmsbox, iterate_threshold=args.iterate_threshold,
+         threshisl=args.threshisl, threshpix=args.threshpix, rmsbox=args.rmsbox,
+         iterate_threshold=args.iterate_threshold,
          adaptive_rmsbox=args.adaptive_rmsbox, img_format=args.img_format,
-         threshold_format=args.threshold_format)
+         threshold_format=args.threshold_format, trim_by=args.trim_by,
+         vertices_file=args.vertices_file)

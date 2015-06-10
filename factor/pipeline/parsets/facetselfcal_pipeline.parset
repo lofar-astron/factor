@@ -853,6 +853,7 @@ mask5.argument.rmsbox                                      =   (60,20)
 mask5.argument.adaptive_rmsbox                             =   True
 mask5.argument.img_format                                  =   fits
 mask5.argument.trim_by                                     =   0
+mask5.argument.vertices_file                               =   {{ facet_state_file }}
 
 wsclean2.control.type                                      =   wsclean
 wsclean2.control.mapfiles_in                               =   [concat_averaged.output.mapfile,mask5.output.mapfile]
