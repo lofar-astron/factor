@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Script to merge parmdbs in time
+Script to merge selfcal parmdbs
 """
 import argparse
 from argparse import RawTextHelpFormatter

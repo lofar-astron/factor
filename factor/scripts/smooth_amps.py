@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 """
-Script to copy a column between MS files
+Script to smooth amplitude solutions
 """
 import argparse
 from argparse import RawTextHelpFormatter

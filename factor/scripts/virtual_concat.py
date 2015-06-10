@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Script to merge two sky models
+Script to perform a virtual concatenation
 """
 import argparse
 from argparse import RawTextHelpFormatter
