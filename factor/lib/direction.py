@@ -70,7 +70,7 @@ class Direction(object):
 
         self.solint_p = solint_p
         self.solint_a = solint_a
-        self.facet_imsize = field_imsize
+        self.facet_imsize = field_imsize * 1.15
         self.dynamic_range = dynamic_range
         self.loop_amp_selfcal = False
         self.selfcal_ok = True # Whether selfcal is still improving after first amp cal
