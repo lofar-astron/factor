@@ -25,9 +25,9 @@ def main(image_pre, image_post, res_val):
         logging.info('WARNING RESIDUAL TOO LARGE')
         logging.info('Max = {0}'.format(maxval))
         logging.info('Previous max = {0}'.format(maxvalpre))
-        return {'ok': False, 'maxval': maxval, 'maxvalpre': maxvalpre}
+        return {'break': False, 'maxval': maxval, 'maxvalpre': maxvalpre}
     else:
-        return {'ok': True, 'maxval': maxval, 'maxvalpre': maxvalpre}
+        return {'break': True, 'maxval': maxval, 'maxvalpre': maxvalpre}
 
 
 if __name__ == '__main__':

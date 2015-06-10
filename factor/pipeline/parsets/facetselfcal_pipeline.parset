@@ -11,7 +11,7 @@ copy_parmdb1.control.parmdb_mapfile                        =   {{ dir_indep_parm
 apply_dir_indep.control.type                               =   calibrate-stand-alone
 apply_dir_indep.control.mapfile_in                         =   {{ shifted_cal_bands_datamap }}
 apply_dir_indep.control.inputkey                           =   inputms
-apply_dir_indep.control.arguments                          =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirindep_apply_cal.parset,{{ skymodel_dir }}/empty.skymodel]
+apply_dir_indep.control.arguments                          =   [inputms,{{ parset_dir }}/facet_dirindep_apply.parset,{{ skymodel_dir }}/empty.skymodel]
 
 average_data.control.type                                  =   dppp
 average_data.control.mapfile_in                            =   {{ shifted_cal_bands_datamap }}
@@ -64,6 +64,8 @@ copy_column.control.mapfiles_in                            =   [concat_corr.outp
 copy_column.control.inputkeys                              =   [corrdatafile, datafile]
 copy_column.argument.flags                                 =   [corrdatafile, datafile, DATA, CORRECTED_DATA]
 
+# Start loop here
+
 average0.control.type                                      =   dppp
 average0.control.mapfile_in                                =   concat_data.output.mapfile
 average0.control.inputkey                                  =   msin
@@ -109,6 +111,7 @@ casa_image01.argument.clean.cyclespeedup                   =   -1
 casa_image01.argument.clean.chaniter                       =   False
 casa_image01.argument.clean.flatnoise                      =   True
 casa_image01.argument.clean.allowchunk                     =   False
+casa_image01.argument.clean.aterm                          =   False
 
 mask0.control.type                                         =   make_clean_mask
 mask0.control.mapfile_in                                   =   casa_image01.output.casa_image01.image.tt0.mapfile
@@ -1076,7 +1079,7 @@ wsclean_post2.argument.maxuv-l                             =   2500
 wsclean_post2.argument.scale                               =   0.00833
 wsclean_post2.argument.mem                                 =   90
 
-verify_subtract.control.type                               =   make_clean_mask
+verify_subtract.control.type                               =   verify_subtract
 verify_subtract.control.mapfiles_in                        =   [wsclean_pre2.output.wsclean_pre2-image.fits.mapfile, wsclean_post2.output.wsclean_post2-image.fits.mapfile]
 verify_subtract.control.inputkey                           =   imagefile
 verify_subtract.control.outputkey                          =   maskfile
