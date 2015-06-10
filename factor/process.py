@@ -147,7 +147,7 @@ def run(parset_file, logging_level='info', dry_run=False):
         factor.directions.make_region_file(direction.vertices, reg_file)
         direction.reg = reg_file
 
-        # For WSClean, set number of bands
+        # Set number of bands and channels
         direction.nbands = len(bands)
         direction.nchannels = np.int(np.ceil(np.float(direction.nbands/np.float(5))))
 

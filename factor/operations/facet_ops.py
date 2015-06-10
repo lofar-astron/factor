@@ -97,6 +97,7 @@ class FacetSelfcal(Operation):
                            'facet_imsize': self.direction.facet_imsize,
                            'cal_wplanes': self.direction.wplanes,
                            'cal_imsize': self.direction.cal_imsize,
+                           'nterms': self.direction.nchannels,
                            'chunk_width': self.direction.solint_a*2,
                            'solint_p': self.direction.solint_p,
                            'solint_a': self.direction.solint_a,
