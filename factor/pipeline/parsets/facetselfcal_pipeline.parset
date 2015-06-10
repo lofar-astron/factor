@@ -686,7 +686,7 @@ smooth_amp2.control.inputkey                               =   h5parm
 smooth_amp2.control.arguments                              =   [h5parm,{{ parset_dir }}/facet_amp_smooth.parset]
 
 export_amp2.control.type                                   =   h5parm_exporter
-export_amp2.control.mapfiles_in                            =   [{{ shifted_cal_concat_datamap }},import_amp2.output.mapfile]
+export_amp2.control.mapfiles_in                            =   [concat_data.output.mapfile,import_amp2.output.mapfile]
 export_amp2.control.inputkeys                              =   [inputms,h5parm]
 export_amp2.control.arguments                              =   [h5parm,inputms,-i,instrument,-c]
 
