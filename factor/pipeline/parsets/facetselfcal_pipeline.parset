@@ -111,8 +111,15 @@ casa_image01.argument.clean.chaniter                       =   False
 casa_image01.argument.clean.flatnoise                      =   True
 casa_image01.argument.clean.allowchunk                     =   False
 
+adjust_casa_mapfile0.control.kind                          =   plugin
+adjust_casa_mapfile0.control.type                          =   appendMapfile
+adjust_casa_mapfile0.control.mapfile_in                    =   casa_image01.output.casa_image01.image.mapfile
+adjust_casa_mapfile0.control.append                        =   {{ casa_suffix }}
+adjust_casa_mapfile0.control.mapfile_dir                   =   {{ mapfile_dir }}
+adjust_casa_mapfile0.control.filename                      =   mask0_input.mapfile
+
 mask0.control.type                                         =   make_clean_mask
-mask0.control.mapfile_in                                   =   casa_image01.output.casa_image01.image.tt0.mapfile
+mask0.control.mapfile_in                                   =   adjust_casa_mapfile0.output.mapfile
 mask0.control.inputkey                                     =   imagefile
 mask0.control.outputkey                                    =   maskfile
 mask0.argument.flags                                       =   [imagefile,maskfile]
@@ -163,8 +170,8 @@ casa_image02.argument.clean.allowchunk                     =   False
 
 create_model0_map.control.kind                             =   plugin
 create_model0_map.control.type                             =   trimMapfile
-create_model0_map.control.mapfile_in                       =   casa_image02.output.casa_image02.model.tt0.mapfile
-create_model0_map.control.trim                             =   .model.tt0
+create_model0_map.control.mapfile_in                       =   adjust_casa_mapfile0.output.mapfile
+create_model0_map.control.trim                             =   .model
 create_model0_map.control.mapfile_dir                      =   {{ mapfile_dir }}
 create_model0_map.control.filename                         =   model0_rootnames.datamap
 
@@ -252,8 +259,15 @@ casa_image11.argument.clean.chaniter                       =   False
 casa_image11.argument.clean.flatnoise                      =   True
 casa_image11.argument.clean.allowchunk                     =   False
 
+adjust_casa_mapfile1.control.kind                          =   plugin
+adjust_casa_mapfile1.control.type                          =   appendMapfile
+adjust_casa_mapfile1.control.mapfile_in                    =   casa_image11.output.casa_image11.image.mapfile
+adjust_casa_mapfile1.control.append                        =   {{ casa_suffix }}
+adjust_casa_mapfile1.control.mapfile_dir                   =   {{ mapfile_dir }}
+adjust_casa_mapfile1.control.filename                      =   mask1_input.mapfile
+
 mask1.control.type                                         =   make_clean_mask
-mask1.control.mapfile_in                                   =   casa_image11.output.casa_image11.image.tt0.mapfile
+mask1.control.mapfile_in                                   =   adjust_casa_mapfile1.output.mapfile
 mask1.control.inputkey                                     =   imagefile
 mask1.control.outputkey                                    =   maskfile
 mask1.argument.flags                                       =   [imagefile,maskfile]
@@ -304,8 +318,8 @@ casa_image12.argument.clean.allowchunk                     =   False
 
 create_model1_map.control.kind                             =   plugin
 create_model1_map.control.type                             =   trimMapfile
-create_model1_map.control.mapfile_in                       =   casa_image12.output.casa_image12.model.tt0.mapfile
-create_model1_map.control.trim                             =   .model.tt0
+create_model1_map.control.mapfile_in                       =   casa_image12.output.casa_image12.model.mapfile
+create_model1_map.control.trim                             =   .model
 create_model1_map.control.mapfile_dir                      =   {{ mapfile_dir }}
 create_model1_map.control.filename                         =   model1_rootnames.datamap
 
@@ -393,8 +407,15 @@ casa_image21.argument.clean.chaniter                       =   False
 casa_image21.argument.clean.flatnoise                      =   True
 casa_image21.argument.clean.allowchunk                     =   False
 
+adjust_casa_mapfile2.control.kind                          =   plugin
+adjust_casa_mapfile2.control.type                          =   appendMapfile
+adjust_casa_mapfile2.control.mapfile_in                    =   casa_image21.output.casa_image21.image.mapfile
+adjust_casa_mapfile2.control.append                        =   {{ casa_suffix }}
+adjust_casa_mapfile2.control.mapfile_dir                   =   {{ mapfile_dir }}
+adjust_casa_mapfile2.control.filename                      =   mask2_input.mapfile
+
 mask2.control.type                                         =   make_clean_mask
-mask2.control.mapfile_in                                   =   casa_image21.output.casa_image21.image.tt0.mapfile
+mask2.control.mapfile_in                                   =   adjust_casa_mapfile2.output.mapfile
 mask2.control.inputkey                                     =   imagefile
 mask2.control.outputkey                                    =   maskfile
 mask2.argument.flags                                       =   [imagefile,maskfile]
@@ -445,8 +466,8 @@ casa_image22.argument.clean.allowchunk                     =   False
 
 create_model2_map.control.kind                             =   plugin
 create_model2_map.control.type                             =   trimMapfile
-create_model2_map.control.mapfile_in                       =   casa_image22.output.casa_image22.model.tt0.mapfile
-create_model2_map.control.trim                             =   .model.tt0
+create_model2_map.control.mapfile_in                       =   casa_image22.output.casa_image22.model.mapfile
+create_model2_map.control.trim                             =   .model
 create_model2_map.control.mapfile_dir                      =   {{ mapfile_dir }}
 create_model2_map.control.filename                         =   model1_rootnames.datamap
 
@@ -559,8 +580,15 @@ casa_image31.argument.clean.chaniter                       =   False
 casa_image31.argument.clean.flatnoise                      =   True
 casa_image31.argument.clean.allowchunk                     =   False
 
+adjust_casa_mapfile3.control.kind                          =   plugin
+adjust_casa_mapfile3.control.type                          =   appendMapfile
+adjust_casa_mapfile3.control.mapfile_in                    =   casa_image31.output.casa_image31.image.mapfile
+adjust_casa_mapfile3.control.append                        =   {{ casa_suffix }}
+adjust_casa_mapfile3.control.mapfile_dir                   =   {{ mapfile_dir }}
+adjust_casa_mapfile3.control.filename                      =   mask3_input.mapfile
+
 mask3.control.type                                         =   make_clean_mask
-mask3.control.mapfile_in                                   =   casa_image31.output.casa_image31.image.tt0.mapfile
+mask3.control.mapfile_in                                   =   adjust_casa_mapfile3.output.mapfile
 mask3.control.inputkey                                     =   imagefile
 mask3.control.outputkey                                    =   maskfile
 mask3.argument.flags                                       =   [imagefile,maskfile]
@@ -611,8 +639,8 @@ casa_image32.argument.clean.allowchunk                     =   False
 
 create_model3_map.control.kind                             =   plugin
 create_model3_map.control.type                             =   trimMapfile
-create_model3_map.control.mapfile_in                       =   casa_image32.output.casa_image32.model.tt0.mapfile
-create_model3_map.control.trim                             =   .model.tt0
+create_model3_map.control.mapfile_in                       =   casa_image32.output.casa_image32.model.mapfile
+create_model3_map.control.trim                             =   .model
 create_model3_map.control.mapfile_dir                      =   {{ mapfile_dir }}
 create_model3_map.control.filename                         =   model1_rootnames.datamap
 
@@ -731,8 +759,15 @@ casa_image41.argument.clean.chaniter                       =   False
 casa_image41.argument.clean.flatnoise                      =   True
 casa_image41.argument.clean.allowchunk                     =   False
 
+adjust_casa_mapfile4.control.kind                          =   plugin
+adjust_casa_mapfile4.control.type                          =   appendMapfile
+adjust_casa_mapfile4.control.mapfile_in                    =   casa_image41.output.casa_image41.image.mapfile
+adjust_casa_mapfile4.control.append                        =   {{ casa_suffix }}
+adjust_casa_mapfile4.control.mapfile_dir                   =   {{ mapfile_dir }}
+adjust_casa_mapfile4.control.filename                      =   mask4_input.mapfile
+
 mask4.control.type                                         =   make_clean_mask
-mask4.control.mapfile_in                                   =   casa_image41.output.casa_image41.image.tt0.mapfile
+mask4.control.mapfile_in                                   =   adjust_casa_mapfile4.output.mapfile
 mask4.control.inputkey                                     =   imagefile
 mask4.control.outputkey                                    =   maskfile
 mask4.argument.flags                                       =   [imagefile,maskfile]

@@ -81,6 +81,10 @@ class FacetSelfcal(Operation):
             name='FacetSelfcal')
 
         # Define parameters needed for this operation
+        if self.direction.nchannels > 1:
+            casa_suffix = '.tt0'
+        else:
+            casa_suffix = None
         self.parms_dict = {'input_dir': parset['dir_ms'],
                            'parset_dir': self.factor_parset_dir,
                            'skymodel_dir': self.factor_skymodel_dir,
@@ -94,6 +98,7 @@ class FacetSelfcal(Operation):
                            'field_ra': self.direction.field_ra,
                            'field_dec': self.direction.field_dec,
                            'wplanes': self.direction.wplanes,
+                           'casa_suffix': casa_suffix,
                            'facet_imsize': self.direction.facet_imsize,
                            'cal_wplanes': self.direction.wplanes,
                            'cal_imsize': self.direction.cal_imsize,

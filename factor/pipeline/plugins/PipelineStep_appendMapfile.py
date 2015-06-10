@@ -5,15 +5,13 @@ from lofarpipe.support.data_map import DataProduct
 
 def plugin_main(args, **kwargs):
     """
-    Trims a string from filenames in a mapfile
-
-    Note that everything from the matching string to the end is trimmed.
+    Appends a string to filenames in a mapfile
 
     Parameters
     ----------
     mapfile_in : str
         Filename of datamap to trim
-    trim_str : str
+    append_str : str
         String to remove
     mapfile_dir : str
         Directory for output mapfile
@@ -27,7 +25,9 @@ def plugin_main(args, **kwargs):
 
     """
     mapfile_in = kwargs['mapfile_in']
-    trim_str = kwargs['trim']
+    append_str = kwargs['append']
+    if append_str == 'None':
+        append_str = ''
     mapfile_dir = kwargs['mapfile_dir']
     filename = kwargs['filename']
 
@@ -35,8 +35,7 @@ def plugin_main(args, **kwargs):
     datamap = DataMap.load(mapfile_in)
 
     for i, item in enumerate(datamap):
-        map.data.append(DataProduct(item.host, item.file[:item.file.index(trim_str)],
-            item.skip))
+        map.data.append(DataProduct(item.host, item.file+append_str, item.skip))
 
     fileid = os.path.join(mapfile_dir, filename)
     map.save(fileid)
