@@ -170,7 +170,7 @@ casa_image02.argument.clean.allowchunk                     =   False
 
 create_model0_map.control.kind                             =   plugin
 create_model0_map.control.type                             =   trimMapfile
-create_model0_map.control.mapfile_in                       =   adjust_casa_mapfile0.output.mapfile
+create_model0_map.control.mapfile_in                       =   casa_image01.output.casa_image01.model.mapfile
 create_model0_map.control.trim                             =   .model
 create_model0_map.control.mapfile_dir                      =   {{ mapfile_dir }}
 create_model0_map.control.filename                         =   model0_rootnames.datamap
