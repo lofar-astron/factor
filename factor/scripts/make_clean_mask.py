@@ -63,7 +63,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
 
     if int(trim_by) > 0:
         # Trim image border by trim_by pixels
-        casaimage = pim.image(fitsimage)
+        casaimage = pim.image(image_name)
         imsize = casaimage.info()['coordinates']['direction0']['_axes_sizes'][0]
         trim_box = (int(trim_by), imsize-int(trim_by), int(trim_by), imsize-int(trim_by))
     else:
