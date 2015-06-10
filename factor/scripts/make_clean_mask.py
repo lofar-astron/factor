@@ -5,6 +5,7 @@ Script to make a clean mask from an image
 import argparse
 from argparse import RawTextHelpFormatter
 from lofar import bdsm
+import pyrap.images as pim
 import numpy as np
 import sys
 import os
