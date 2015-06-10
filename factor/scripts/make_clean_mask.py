@@ -12,7 +12,7 @@ import os
 
 def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, rmsbox=None,
          iterate_threshold=False, adaptive_rmsbox=False, img_format='fits',
-         threshold_format='float'):
+         threshold_format='float', trim_by=25, input_mask=None):
     """
     Run PyBDSM to make an island clean mask
 
@@ -50,6 +50,12 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         else:
             adaptive_rmsbox = False
 
+    if int(trim_by) > 0:
+        # Trim image border by trim_by pixels
+        trim_box = (int(trim_by), imsize-int(trim_by), int(trim_by), imsize-int(trim_by))
+    else:
+        trim_box = None
+
     if iterate_threshold:
         # Start with high threshold and lower it until we get at least one island
         threshpix_orig = threshpix
@@ -61,7 +67,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
                                      thresh_pix=numpy.float(threshpix), thresh_isl=numpy.float(threshisl),
                                      atrous_do=atrous_do, ini_method='curvature', thresh='hard',
-                                     adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150, rms_box_bright=(35,7), rms_map=True, quiet=True)
+                                     adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150, rms_box_bright=(35,7), rms_map=True, quiet=True, trim_box=trim_box)
             nisl = img.nisl
             threshpix /= 1.2
             threshisl /= 1.2
@@ -71,10 +77,10 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
                                  thresh_pix=numpy.float(threshpix), thresh_isl=numpy.float(threshisl),
                                  atrous_do=atrous_do, ini_method='curvature', thresh='hard',
-                                 adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150, rms_box_bright=(35,7), rms_map=True, quiet=True)
+                                 adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150, rms_box_bright=(35,7), rms_map=True, quiet=True, trim_box=trim_box)
 
     img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
-                     img_format=img_format, clobber=True)
+                     img_format=img_format, clobber=True, pad_image=True)
 
     if threshold_format == 'float':
         return {'threshold_5sig': 5.0 * img.clipped_rms}
