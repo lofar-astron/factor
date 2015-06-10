@@ -138,7 +138,11 @@ def run(parset_file, logging_level='info', dry_run=False):
     for i, direction in enumerate(directions):
         direction.vertices = polys[i]
         direction.width = widths[i]
+
+        # Set facet image size with 20% padding to avoid aliasing issues with ft
         direction.facet_imsize = direction.width * 3600.0 / 1.5 * 1.2
+
+        # Make CASA region files for use during clean
         reg_file = os.path.join(parset['dir_working'], 'regions', direction.name+'.rgn')
         factor.directions.make_region_file(direction.vertices, reg_file)
         direction.reg = reg_file
