@@ -879,6 +879,7 @@ wsclean1.argument.minuv-l                                  =   80
 wsclean1.argument.maxuv-l                                  =   1000000
 wsclean1.argument.scale                                    =   0.000417
 wsclean1.argument.mem                                      =   90
+wsclean1.argument.j                                        =   {{ max_cpus_per_node }}
 
 mask5.control.type                                         =   make_clean_mask
 mask5.control.mapfile_in                                   =   wsclean1.output.wsclean1-image.fits.mapfile
@@ -909,6 +910,7 @@ wsclean2.argument.minuv-l                                  =   80
 wsclean2.argument.maxuv-l                                  =   2000
 wsclean2.argument.scale                                    =   0.000417
 wsclean2.argument.mem                                      =   90
+wsclean2.argument.j                                        =   {{ max_cpus_per_node }}
 
 create_model4_map.control.kind                             =   plugin
 create_model4_map.control.type                             =   trimMapfile
@@ -936,6 +938,7 @@ wsclean_ft.argument.flags                                  =   [-predict,msfile]
 wsclean_ft.argument.size                                   =   {{ facet_imsize }} {{ facet_imsize }}
 wsclean_ft.argument.scale                                  =   0.000417
 wsclean_ft.argument.mem                                    =   90
+wsclean_ft.argument.j                                      =   {{ max_cpus_per_node }}
 
 copy_final_image_map.control.kind                          =   plugin
 copy_final_image_map.control.type                          =   copyMapfile
@@ -1009,6 +1012,7 @@ wsclean_pre1.argument.minuv-l                              =   80
 wsclean_pre1.argument.maxuv-l                              =   2500
 wsclean_pre1.argument.scale                                =   0.00833
 wsclean_pre1.argument.mem                                  =   90
+wsclean_pre1.argument.j                                    =   {{ max_cpus_per_node }}
 
 mask_pre.control.type                                      =   make_clean_mask
 mask_pre.control.mapfile_in                                =   wsclean_pre1.output.wsclean_pre1-image.fits.mapfile
@@ -1037,6 +1041,7 @@ wsclean_pre2.argument.minuv-l                              =   80
 wsclean_pre2.argument.maxuv-l                              =   2500
 wsclean_pre2.argument.scale                                =   0.00833
 wsclean_pre2.argument.mem                                  =   90
+wsclean_pre2.argument.j                                    =   {{ max_cpus_per_node }}
 
 wsclean_post1.control.type                                 =   wsclean
 wsclean_post1.control.mapfile_in                           =   average_post.output.mapfile
@@ -1054,6 +1059,7 @@ wsclean_post1.argument.minuv-l                             =   80
 wsclean_post1.argument.maxuv-l                             =   2500
 wsclean_post1.argument.scale                               =   0.00833
 wsclean_post1.argument.mem                                 =   90
+wsclean_post1.argument.j                                   =   {{ max_cpus_per_node }}
 
 mask_post.control.type                                     =   make_clean_mask
 mask_post.control.mapfile_in                               =   wsclean_post1.output.wsclean_post1-image.fits.mapfile
@@ -1082,6 +1088,7 @@ wsclean_post2.argument.minuv-l                             =   80
 wsclean_post2.argument.maxuv-l                             =   2500
 wsclean_post2.argument.scale                               =   0.00833
 wsclean_post2.argument.mem                                 =   90
+wsclean_post2.argument.j                                   =   {{ max_cpus_per_node }}
 
 verify_subtract.control.type                               =   verify_subtract
 verify_subtract.control.mapfiles_in                        =   [wsclean_pre2.output.wsclean_pre2-image.fits.mapfile, wsclean_post2.output.wsclean_post2-image.fits.mapfile]

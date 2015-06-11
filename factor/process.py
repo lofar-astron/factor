@@ -158,7 +158,7 @@ def run(parset_file, logging_level='info', dry_run=False):
         # Save direction state
         direction.save_state()
 
-    # Make DS9 region files so user can see facets, etc.
+    # Make DS9 region files so user can check the facets, etc.
     ds9_facet_reg_file = os.path.join(parset['dir_working'], 'regions', 'facets_ds9.reg')
     factor.directions.make_ds9_region_file(directions, ds9_facet_reg_file)
     ds9_calimage_reg_file = os.path.join(parset['dir_working'], 'regions', 'calimages_ds9.reg')

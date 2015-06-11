@@ -6,7 +6,7 @@ import argparse
 from argparse import RawTextHelpFormatter
 import os
 import lofar.parmdb
-import sys
+import shutil
 
 
 def main(parmdb_p, parmdb_a, parmdb_out, clobber=True):
@@ -34,9 +34,9 @@ def main(parmdb_p, parmdb_a, parmdb_out, clobber=True):
 
     if os.path.exists(parmdb_out):
         if clobber:
-            os.system('rm -rf {0}'.format(parmdb_out))
+            shutil.rmtree(parmdb_out)
         else:
-            return parmdb_out
+            return
     pdb_out = lofar.parmdb.parmdb(parmdb_out, create=True)
 
     # Copy over the CommonScalar phases and TEC

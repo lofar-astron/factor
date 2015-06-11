@@ -6,35 +6,11 @@ import argparse
 from argparse import RawTextHelpFormatter
 import pyrap.tables as pt
 import numpy
-import sys
 import os
 import lofar.parmdb
 import math
-import scipy
 import scipy.signal
-
-
-def median_smooth(ampl, half_window):
-
-    ampl_tot_copy = numpy.copy(ampl)
-    ndata = len(ampl)
-    flags = numpy.zeros(ndata, dtype=bool)
-    sol = numpy.zeros(ndata + 2 * half_window)
-    sol[half_window:half_window + ndata] = ampl
-
-    for i in range(0, half_window):
-
-        # Mirror at left edge.
-        idx = min(ndata - 1, half_window - i)
-        sol[i] = ampl[idx]
-
-        # Mirror at right edge
-        idx = max(0, ndata - 2 - i)
-        sol[ndata + half_window + i] = ampl[idx]
-
-    median_array = scipy.signal.medfilt(sol, half_window * 2. - 1)
-    ampl_tot_copy = median_array[half_window:ndata + half_window]
-    return ampl_tot_copy
+import shutil
 
 
 def median_window_filter(ampl, half_window, threshold):
@@ -140,7 +116,7 @@ def main(msname, instrument_name, instrument_name_smoothed):
             parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, 0] = numpy.copy(real*norm_factor)
 
     if os.path.exists(instrument_name_smoothed):
-        os.system('rm -rf {0}'.format(instrument_name_smoothed))
+        shutil.rmtree(instrument_name_smoothed)
     pdbnew = lofar.parmdb.parmdb(instrument_name_smoothed, create=True)
     pdbnew.addValues(parms)
     pdbnew.flush()

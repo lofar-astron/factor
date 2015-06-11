@@ -47,6 +47,7 @@ class Operation(object):
         self.log = logging.getLogger('factor.{0}'.format(self.name))
         self.hostname = socket.gethostname()
         self.node_list = parset['cluster_specific']['node_list']
+        self.max_cpus_per_node = parset['cluster_specific']['ncpu']
 
         # Below are paths for output directories
         self.factor_working_dir = parset['dir_working']

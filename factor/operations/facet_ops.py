@@ -52,7 +52,8 @@ class FacetAdd(Operation):
                            'facet_dec': self.direction.dec,
                            'cal_radius_deg': self.direction.cal_radius_deg,
                            'facet_state_file': self.direction.save_file,
-                           'hosts': self.node_list}
+                           'hosts': self.node_list,
+                           'max_cpus_per_node': self.max_cpus_per_node}
 
 
     def finalize(self):
@@ -103,11 +104,12 @@ class FacetSelfcal(Operation):
                            'cal_wplanes': self.direction.wplanes,
                            'cal_imsize': self.direction.cal_imsize,
                            'nterms': self.direction.nchannels,
-                           'chunk_width': self.direction.solint_a*2,
+                           'chunk_width': (self.direction.solint_a-1)*2,
                            'solint_p': self.direction.solint_p,
                            'solint_a': self.direction.solint_a,
                            'facet_state_file': self.direction.save_file,
-                           'hosts': self.direction.hosts}
+                           'hosts': self.direction.hosts,
+                           'max_cpus_per_node': self.max_cpus_per_node}
 
 
     def finalize(self):

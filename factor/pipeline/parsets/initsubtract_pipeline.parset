@@ -42,6 +42,7 @@ wsclean_high1.argument.minuv-l             =   80
 wsclean_high1.argument.maxuv-l             =   7000
 wsclean_high1.argument.scale               =   0.00208
 wsclean_high1.argument.mem                 =   90
+wsclean_high1.argument.j                   =   {{ max_cpus_per_node }}
 
 mask_high.control.type                     =   make_clean_mask
 mask_high.control.mapfile_in               =   wsclean_high1.output.wsclean_high1-image.fits.mapfile
@@ -69,6 +70,7 @@ wsclean_high2.argument.minuv-l             =   80
 wsclean_high2.argument.maxuv-l             =   7000
 wsclean_high2.argument.scale               =   0.00208
 wsclean_high2.argument.mem                 =   90
+wsclean_high2.argument.j                   =   {{ max_cpus_per_node }}
 
 remove_copy_ms_map.control.kind            =   plugin
 remove_copy_ms_map.control.type            =   copyFiles
@@ -101,6 +103,7 @@ wsclean_ft_high.argument.flags             =   [-predict,msfile]
 wsclean_ft_high.argument.size              =   {{ npix_high }} {{ npix_high }}
 wsclean_ft_high.argument.scale             =   0.00208
 wsclean_ft_high.argument.mem               =   90
+wsclean_ft_low.argument.j                  =   {{ max_cpus_per_node }}
 
 subtract_high.control.type                 =   calibrate-stand-alone_new
 subtract_high.argument.observation         =   create_ms_map.output.mapfile
@@ -146,6 +149,7 @@ wsclean_low1.argument.minuv-l              =   80
 wsclean_low1.argument.maxuv-l              =   2000
 wsclean_low1.argument.scale                =   0.00694
 wsclean_low1.argument.mem                  =   90
+wsclean_low1.argument.j                    =   {{ max_cpus_per_node }}
 
 mask_low.control.type                      =   make_clean_mask
 mask_low.control.mapfile_in                =   wsclean_low1.output.wsclean_low1-image.fits.mapfile
@@ -172,6 +176,7 @@ wsclean_low2.argument.minuv-l              =   80
 wsclean_low2.argument.maxuv-l              =   2000
 wsclean_low2.argument.scale                =   0.00694
 wsclean_low2.argument.mem                  =   90
+wsclean_low2.argument.j                    =   {{ max_cpus_per_node }}
 
 remove_copy_avg_map.control.kind           =   plugin
 remove_copy_avg_map.control.type           =   copyFiles
@@ -205,6 +210,7 @@ wsclean_ft_low.argument.name               =   create_model_low_map.output.mapfi
 wsclean_ft_low.argument.size               =   {{ npix_low }} {{ npix_low }}
 wsclean_ft_low.argument.scale              =   0.00694
 wsclean_ft_low.argument.mem                =   90
+wsclean_ft_low.argument.j                  =   {{ max_cpus_per_node }}
 
 subtract_low.control.type                  =   calibrate-stand-alone_new
 subtract_low.argument.observation          =   create_ms_map.output.mapfile
