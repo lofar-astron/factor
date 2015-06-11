@@ -24,7 +24,7 @@ def read_vertices(filename):
 
 def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, rmsbox=None,
          iterate_threshold=False, adaptive_rmsbox=False, img_format='fits',
-         threshold_format='float', trim_by=25, vertices_file=None):
+         threshold_format='float', trim_by=25, vertices_file=None, atrous_jmax=6):
     """
     Run PyBDSM to make an island clean mask
 
@@ -63,6 +63,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             adaptive_rmsbox = False
 
     trim_by = int(trim_by)
+    atrous_jmax = int(atrous_jmax)
 
     if iterate_threshold:
         # Start with high threshold and lower it until we get at least one island
@@ -76,7 +77,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                                      thresh_pix=np.float(threshpix), thresh_isl=np.float(threshisl),
                                      atrous_do=atrous_do, ini_method='curvature', thresh='hard',
                                      adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150,
-                                     rms_box_bright=(35,7), rms_map=True, quiet=True)
+                                     rms_box_bright=(35,7), rms_map=True, quiet=True,
+                                     atrous_jmax=atrous_jmax)
             nisl = img.nisl
             threshpix /= 1.2
             threshisl /= 1.2
@@ -87,7 +89,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                                  thresh_pix=np.float(threshpix), thresh_isl=np.float(threshisl),
                                  atrous_do=atrous_do, ini_method='curvature', thresh='hard',
                                  adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150,
-                                 rms_box_bright=(35,7), rms_map=True, quiet=True)
+                                 rms_box_bright=(35,7), rms_map=True, quiet=True,
+                                 atrous_jmax=atrous_jmax)
 
     img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
                      img_format=img_format, clobber=True)
@@ -170,6 +173,7 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--threshold_format', help='format of return value', type=str, default='float')
     parser.add_argument('-b', '--trim_by', help='Trim masked region by this number of pixels', type=int, default=25)
     parser.add_argument('-v', '--vertices_file', help='file containing facet polygon vertices', type=str, default=None)
+    parser.add_argument('-j', '--atrous_jmax', help='Max wavelet scale', type=int, default=3)
 
     args = parser.parse_args()
     main(args.image_name, args.mask_name, atrous_do=args.atrous_do,
@@ -177,4 +181,4 @@ if __name__ == '__main__':
          iterate_threshold=args.iterate_threshold,
          adaptive_rmsbox=args.adaptive_rmsbox, img_format=args.img_format,
          threshold_format=args.threshold_format, trim_by=args.trim_by,
-         vertices_file=args.vertices_file)
+         vertices_file=args.vertices_file, atrous_jmax=args.atrous_jmax)

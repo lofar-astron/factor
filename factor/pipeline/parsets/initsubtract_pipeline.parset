@@ -54,6 +54,7 @@ mask_high.argument.threshpix               =   5.0
 mask_high.argument.atrous_do               =   True
 mask_high.argument.rmsbox                  =   (60,20)
 mask_high.argument.img_format              =   fits
+mask_high.argument.atrous_jmax             =   3
 mask_high.argument.trim_by                 =   0
 
 wsclean_high2.control.type                 =   wsclean
@@ -161,6 +162,7 @@ mask_low.argument.threshpix                =   5
 mask_low.argument.rmsbox                   =   (60,20)
 mask_low.argument.img_format               =   fits
 mask_low.argument.trim_by                  =   0
+mask_low.argument.atrous_jmax              =   3
 
 wsclean_low2.control.type                  =   wsclean
 wsclean_low2.control.mapfiles_in           =   [chgcentre_low.output.mapfile,mask_low.output.mapfile]
