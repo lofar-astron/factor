@@ -20,9 +20,12 @@ def plugin_main(args, **kwargs):
 
     ms_datamap = DataMap.load(ms_mapfile)
     parmdb_datamap = DataMap.load(parmdb_mapfile)
-    parmdb_file = parmdb_datamap[0].file
+    if len(parmdb_datamap) == 1:
+        parmdb_files = [parmdb_datamap[0].file] * len(ms_datamap)
+    else:
+        parmdb_files = [item.file for item in parmdb_datamap]
 
-    for ms in ms_datamap:
+    for ms, parmdb_file in zip(ms_datamap, parmdb_files):
         to_file = os.path.join(ms.file, 'instrument')
         if os.path.exists(to_file):
             os.system('rm -rf {0}'.format(to_file))
