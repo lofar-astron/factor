@@ -6,6 +6,7 @@ import argparse
 from argparse import RawTextHelpFormatter
 from lofar import bdsm
 import pyrap.images as pim
+import pickle
 import numpy as np
 import sys
 import os
