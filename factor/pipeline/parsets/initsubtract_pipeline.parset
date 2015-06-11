@@ -1,4 +1,4 @@
-pipeline.steps = [create_ms_map, create_parmdb_map, wsclean_high1, mask_high, wsclean_high2, fits_to_image_high, casa_to_bbs_high, create_model_high_map, wsclean_ft_high, copy_parmdb_high, subtract_high, average, wsclean_low1, mask_low, wsclean_low2, fits_to_image_low, casa_to_bbs_low, create_model_low_map, wsclean_ft_low, subtract_low, merge, copy_final_model_map]
+pipeline.steps = [create_ms_map, create_parmdb_map, wsclean_high1, mask_high, wsclean_high2, fits_to_image_high, casa_to_bbs_high, create_model_high_map, wsclean_ft_high, subtract_high, average, wsclean_low1, mask_low, wsclean_low2, fits_to_image_low, casa_to_bbs_low, create_model_low_map, wsclean_ft_low, subtract_low, merge, copy_final_model_map]
 
 pipeline.pluginpath                        =   {{ pipeline_dir }}/plugins
 
@@ -86,15 +86,13 @@ wsclean_ft_high.argument.size              =   {{ npix_high }} {{ npix_high }}
 wsclean_ft_high.argument.scale             =   0.00208
 wsclean_ft_high.argument.mem               =   90
 
-copy_parmdb_high.control.kind              =   plugin
-copy_parmdb_high.control.type              =   copyParmdbtoMS
-copy_parmdb_high.control.ms_mapfile        =   create_ms_map.output.mapfile
-copy_parmdb_high.control.parmdb_mapfile    =   create_parmdb_map.output.mapfile
-
-subtract_high.control.type                 =   calibrate-stand-alone
-subtract_high.control.mapfile_in           =   create_ms_map.output.mapfile
-subtract_high.control.inputkey             =   inputms
-subtract_high.control.arguments            =   [--replace-sourcedb,inputms,{{ parset_dir }}/field_subtract_highres.parset,{{ skymodel_dir }}/empty.skymodel]
+subtract_high.control.type                 =   calibrate-stand-alone_new
+subtract_high.argument.observation         =   create_ms_map.output.mapfile
+subtract_high.argument.parset              =   {{ parset_dir }}/field_subtract_highres.parset
+subtract_high.argument.catalog             =   {{ skymodel_dir }}/empty.skymodel
+subtract_high.argument.parmdb              =   create_parmdb_map.output.mapfile
+subtract_high.argument.replace-sourcedb    =   True
+subtract_high.argument.replace-parmdb      =   True
 
 average.control.type                       =   dppp
 average.control.mapfile_in                 =   create_ms_map.output.mapfile
@@ -176,10 +174,12 @@ wsclean_ft_low.argument.size               =   {{ npix_low }} {{ npix_low }}
 wsclean_ft_low.argument.scale              =   0.00694
 wsclean_ft_low.argument.mem                =   90
 
-subtract_low.control.type                  =   calibrate-stand-alone
-subtract_low.control.mapfile_in            =   create_ms_map.output.mapfile
-subtract_low.control.inputkey              =   inputms
-subtract_low.control.arguments             =   [--replace-sourcedb,inputms,{{ parset_dir }}/field_subtract_lowres.parset,{{ skymodel_dir }}/empty.skymodel]
+subtract_low.control.type                  =   calibrate-stand-alone_new
+subtract_low.argument.observation          =   create_ms_map.output.mapfile
+subtract_low.argument.parset               =   {{ parset_dir }}/field_subtract_lowres.parset
+subtract_low.argument.catalog              =   {{ skymodel_dir }}/empty.skymodel
+subtract_low.argument.parmdb               =   create_parmdb_map.output.mapfile
+subtract_low.argument.force                =   True
 
 merge.control.type                         =   merge_skymodels
 merge.control.mapfiles_in                  =   [casa_to_bbs_low.output.mapfile,casa_to_bbs_high.output.mapfile]

@@ -51,11 +51,25 @@ add_all_facet_sources.control.type               =   calibrate-stand-alone
 add_all_facet_sources.control.mapfiles_in        =   [create_ms_map.output.mapfile,make_facet_skymodels_all.output.mapfile]
 add_all_facet_sources.control.inputkeys          =   [inputms,skymodel]
 add_all_facet_sources.control.arguments          =   [--replace-sourcedb,inputms,{{ parset_dir }}/{{ add_all_parset }},skymodel]
+# add_all_facet_sources.control.type                 =   calibrate-stand-alone_new
+# add_all_facet_sources.argument.observation         =   create_ms_map.output.mapfile
+# add_all_facet_sources.argument.parset              =   {{ parset_dir }}/{{ add_all_parset }}
+# add_all_facet_sources.argument.catalog             =   make_facet_skymodels_all.output.mapfile
+# add_all_facet_sources.argument.parmdb              =   create_parmdb_map.output.mapfile
+# add_all_facet_sources.argument.replace-sourcedb    =   True
+# add_all_facet_sources.argument.replace-parmdb      =   True
 
 add_cal_facet_sources.control.type               =   calibrate-stand-alone
 add_cal_facet_sources.control.mapfiles_in        =   [create_ms_map.output.mapfile,make_facet_skymodels_cal.output.mapfile]
 add_cal_facet_sources.control.inputkeys          =   [inputms,skymodel]
 add_cal_facet_sources.control.arguments          =   [--replace-sourcedb,inputms,{{ parset_dir }}/{{ add_cal_parset }},skymodel]
+# add_cal_facet_sources.control.type                 =   calibrate-stand-alone_new
+# add_cal_facet_sources.argument.observation         =   create_ms_map.output.mapfile
+# add_cal_facet_sources.argument.parset              =   {{ parset_dir }}/{{ add_all_parset }}
+# add_cal_facet_sources.argument.catalog             =   make_facet_skymodels_cal.output.mapfile
+# add_cal_facet_sources.argument.parmdb              =   create_parmdb_map.output.mapfile
+# add_cal_facet_sources.argument.replace-sourcedb    =   True
+# add_cal_facet_sources.argument.replace-parmdb      =   True
 
 shift_all.control.type                           =   dppp
 shift_all.control.opts.mapfile_in                =   create_ms_map.output.mapfile
