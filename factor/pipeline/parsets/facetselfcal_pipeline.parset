@@ -63,7 +63,10 @@ copy_column.control.mapfiles_in                            =   [concat_corr.outp
 copy_column.control.inputkeys                              =   [corrdatafile, datafile]
 copy_column.argument.flags                                 =   [corrdatafile, datafile, DATA, CORRECTED_DATA]
 
-# Start loop here
+# loop_facet_selfcal.control.kind                            =   loop
+# loop_facet_selfcal.control.type                            =   conditional
+# loop_facet_selfcal.control.loopcount                       =   2
+# loop_facet_selfcal.control.loopsteps                       =   [average0]
 
 average0.control.type                                      =   dppp
 average0.control.mapfile_in                                =   concat_data.output.mapfile
@@ -895,7 +898,7 @@ wsclean2.control.mapfiles_in                               =   [concat_averaged.
 wsclean2.control.inputkeys                                 =   [msfile,fitsmask]
 wsclean2.argument.flags                                    =   [-no-update-model-required,msfile]
 wsclean2.argument.size                                     =   {{ facet_imsize }} {{ facet_imsize }}
-wsclean2.argument.niter                                    =   1000000
+wsclean2.argument.niter                                    =   15000
 wsclean2.argument.threshold                                =   mask5.output.threshold_5sig.mapfile
 wsclean2.argument.pol                                      =   I
 wsclean2.argument.weight                                   =   briggs -0.5
