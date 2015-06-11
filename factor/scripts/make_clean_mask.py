@@ -95,7 +95,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     if vertices_file is not None or trim_by > 0:
         # Modify the clean mask to exclude regions outside of the polygon and
         # trim edges
-        mask_tmp_name = mask_name + '.tmp'
+        mask_tmp_name = mask_name + '.tmp1'
         if os.path.exists(mask_tmp_name):
             os.system('rm -rf {0}'.format(mask_tmp_name))
         os.system('cp -r {0} {1}'.format(mask_name, mask_tmp_name))
@@ -103,8 +103,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         mask_im = pim.image(mask_tmp_name)
         img_type = mask_im.imagetype()
         if img_type == 'FITSImage':
-            mask_im.saveas(mask_name+'.tmp')
-            mask_im = pim.image(mask_name+'.tmp')
+            mask_im.saveas(mask_name+'.tmp2')
+            mask_im = pim.image(mask_name+'.tmp2')
         data = mask_im.getdata()
 
         if vertices_file is not None:
