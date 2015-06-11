@@ -1,4 +1,4 @@
-pipeline.steps = [create_ms_map, create_parmdb_map, make_copy_ms_map, chgcentre_high, wsclean_high1, mask_high, wsclean_high2, fits_to_image_high, casa_to_bbs_high, create_model_high_map, wsclean_ft_high, subtract_high, average, make_copy_avg_map, chgcentre_low, wsclean_low1, mask_low, wsclean_low2, fits_to_image_low, casa_to_bbs_low, create_model_low_map, wsclean_ft_low, subtract_low, merge, copy_final_model_map]
+pipeline.steps = [create_ms_map, create_parmdb_map, make_copy_ms_map, chgcentre_high, wsclean_high1, mask_high, wsclean_high2, remove_copy_ms_map, fits_to_image_high, casa_to_bbs_high, create_model_high_map, wsclean_ft_high, subtract_high, average, make_copy_avg_map, chgcentre_low, wsclean_low1, mask_low, wsclean_low2, remove_copy_avg_map, fits_to_image_low, casa_to_bbs_low, create_model_low_map, wsclean_ft_low, subtract_low, merge, copy_final_model_map]
 
 pipeline.pluginpath                        =   {{ pipeline_dir }}/plugins
 
