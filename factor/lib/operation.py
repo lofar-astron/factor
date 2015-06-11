@@ -105,6 +105,7 @@ class Operation(object):
                          'pipeline_runtime_dir': self.pipeline_runtime_dir,
                          'casa_executable': spawn.find_executable('casa'),
                          'wsclean_executable': spawn.find_executable('wsclean'),
+                         'chgcentre_executable': spawn.find_executable('chgcentre'),
                          'losoto_executable': spawn.find_executable('losoto.py'),
                          'H5parm_importer_executable': spawn.find_executable('H5parm_importer.py'),
                          'H5parm_exporter_executable': spawn.find_executable('H5parm_exporter.py')}
