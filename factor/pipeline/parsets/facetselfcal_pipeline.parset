@@ -934,7 +934,7 @@ concat_unaveraged.control.outputkey                        =   msconcat
 concat_unaveraged.argument.flags                           =   [msfiles,msconcat]
 
 wsclean_ft.control.type                                    =   wsclean_ft
-wsclean_ft.control.mapfiles_in                             =   [concat_unaveraged.output.mapfile,create_model_map.output.mapfile]
+wsclean_ft.control.mapfiles_in                             =   [concat_unaveraged.output.mapfile,create_model4_map.output.mapfile]
 wsclean_ft.control.inputkeys                               =   [msfile,name]
 wsclean_ft.argument.flags                                  =   [-predict,msfile]
 wsclean_ft.argument.size                                   =   {{ facet_imsize }} {{ facet_imsize }}
