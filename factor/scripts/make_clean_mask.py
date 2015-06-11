@@ -102,7 +102,13 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         if os.path.exists(mask_tmp_name):
             os.system('rm -rf {0}'.format(mask_tmp_name))
         os.system('cp -r {0} {1}'.format(mask_name, mask_tmp_name))
+
         mask_im = pim.image(mask_tmp_name)
+        img_type = mask_im.imagetype()
+        if img_type == 'FITSImage':
+            mask_im.saveas(mask_name+'.tmp')
+            mask_im = pim.image(mask_name+'.tmp')
+
         vertices = read_vertices(vertices_file)
         RAverts = vertices[0]
         Decverts = vertices[1]
