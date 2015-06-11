@@ -98,7 +98,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
 
     if vertices_file is not None:
         # Modify the clean mask to exclude regions outside of the input_maks
-        mask_im = pim.image(mask_name)
+        mask_tmp_name = mask_name + '.tmp'
+        mask_im = pim.image(mask_tmp_name)
         vertices = read_vertices(vertices_file)
         RAverts = vertices[0]
         Decverts = vertices[1]
