@@ -83,8 +83,10 @@ class FacetSelfcal(Operation):
 
         # Define parameters needed for this operation
         if self.direction.nchannels > 1:
+            nterms = 2
             casa_suffix = '.tt0'
         else:
+            nterms = 1
             casa_suffix = None
         self.parms_dict = {'input_dir': parset['dir_ms'],
                            'parset_dir': self.factor_parset_dir,
@@ -103,7 +105,8 @@ class FacetSelfcal(Operation):
                            'facet_imsize': self.direction.facet_imsize,
                            'cal_wplanes': self.direction.wplanes,
                            'cal_imsize': self.direction.cal_imsize,
-                           'nterms': self.direction.nchannels,
+                           'nterms': nterms,
+                           'nchannels': self.direction.nchannels,
                            'chunk_width': (self.direction.solint_a-1)*2,
                            'solint_p': self.direction.solint_p,
                            'solint_a': self.direction.solint_a,
