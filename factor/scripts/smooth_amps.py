@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 """
-Script to smooth amplitude solutions
+Script to smooth and normalize amplitude solutions
 """
 import argparse
 from argparse import RawTextHelpFormatter
@@ -101,6 +101,7 @@ def main(msname, instrument_name, instrument_name_smoothed):
     anttab.close()
     window = 4
 
+    # Smooth
     for pol in pol_list:
         for antenna in antenna_list:
             real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, 0])
@@ -121,13 +122,32 @@ def main(msname, instrument_name, instrument_name_smoothed):
             parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, 0] = amp*numpy.cos(phase)
             parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, 0] = amp*numpy.sin(phase)
 
+    # Normalize
+    amplist = []
+    for pol in pol_list:
+        for antenna in antenna_list:
+            real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, 0])
+            imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, 0])
+            amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
+            amplist.append(amp)
+    norm_factor = 1./(numpy.mean(amplist))
+
+    for pol in pol_list:
+        for antenna in antenna_list:
+            real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, 0])
+            imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, 0])
+            parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, 0] = numpy.copy(imag*norm_factor)
+            parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, 0] = numpy.copy(real*norm_factor)
+
+    if os.path.exists(instrument_name_smoothed):
+        os.system('rm -rf {0}'.format(instrument_name_smoothed))
     pdbnew = lofar.parmdb.parmdb(instrument_name_smoothed, create=True)
     pdbnew.addValues(parms)
     pdbnew.flush()
 
 
 if __name__ == '__main__':
-    descriptiontext = "Smooth amplitude solutions.\n"
+    descriptiontext = "Smooth and normalize amplitude solutions.\n"
 
     parser = argparse.ArgumentParser(description=descriptiontext, formatter_class=RawTextHelpFormatter)
     parser.add_argument('msname', help='name of the MS file to get antenna names')
