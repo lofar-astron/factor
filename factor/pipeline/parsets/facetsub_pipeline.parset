@@ -24,10 +24,17 @@ copy_column.argument.flags                      =   [corrdatafile, datafile, DAT
 
 copy_parmdb.control.kind                        =   plugin
 copy_parmdb.control.type                        =   copyParmdbtoMS
-copy_parmdb.control.ms_mapfile                  =   {{ shifted_all_bands_datamap }}
+copy_parmdb.control.ms_mapfile                  =   {{ input_bands_datamap }}
 copy_parmdb.control.parmdb_mapfile              =   {{ dir_dep_parmdb_datamap }}
 
 subtract.control.type                           =   calibrate-stand-alone
 subtract.control.mapfile_in                     =   {{ input_bands_datamap }}
 subtract.control.inputkey                       =   inputms
 subtract.control.arguments                      =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirdep_subtract.parset,{{ skymodel_dir }}/empty.skymodel]
+# subtract.control.type                 =   calibrate-stand-alone_new
+# subtract.argument.observation         =   {{ input_bands_datamap }}
+# subtract.argument.parset              =   {{ parset_dir }}/facet_dirdep_subtract.parset
+# subtract.argument.catalog             =   {{ skymodel_dir }}/empty.skymodel
+# subtract.argument.parmdb              =   {{ dir_dep_parmdb_datamap }}
+# subtract.argument.replace-sourcedb    =   True
+# subtract.argument.replace-parmdb      =   True
