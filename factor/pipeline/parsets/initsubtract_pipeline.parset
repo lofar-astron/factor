@@ -26,7 +26,7 @@ make_copy_ms_map.control.filename          =   copy_data.datamap
 chgcentre_high.control.type                =   chgcentre
 chgcentre_high.control.mapfile_in          =   make_copy_ms_map.output.mapfile
 chgcentre_high.control.inputkey            =   inputms
-chgcentre_high.argument                    =   [-zenith, -shiftback, inputms]
+chgcentre_high.argument.flags              =   [-zenith, -shiftback, inputms]
 
 wsclean_high1.control.type                 =   wsclean
 wsclean_high1.control.mapfile_in           =   chgcentre_high.output.mapfile
@@ -69,6 +69,10 @@ wsclean_high2.argument.minuv-l             =   80
 wsclean_high2.argument.maxuv-l             =   7000
 wsclean_high2.argument.scale               =   0.00208
 wsclean_high2.argument.mem                 =   90
+
+remove_copy_ms_map.control.kind            =   plugin
+remove_copy_ms_map.control.type            =   copyFiles
+remove_copy_ms_map.control.mapfile_in      =   chgcentre_high.output.mapfile
 
 fits_to_image_high.control.type            =   convert_fits_image_to_casa
 fits_to_image_high.control.mapfile_in      =   wsclean_high2.output.wsclean_high2-model.fits.mapfile
@@ -126,7 +130,7 @@ make_copy_avg_map.control.filename         =   copy_averaged_data.datamap
 chgcentre_low.control.type                 =   chgcentre
 chgcentre_low.control.mapfile_in           =   make_copy_avg_map.output.mapfile
 chgcentre_low.control.inputkey             =   inputms
-chgcentre_low.argument                     =   [-zenith, -shiftback, inputms]
+chgcentre_low.argument.flags               =   [-zenith, -shiftback, inputms]
 
 wsclean_low1.control.type                  =   wsclean
 wsclean_low1.control.mapfile_in            =   chgcentre_low.output.mapfile
@@ -168,6 +172,10 @@ wsclean_low2.argument.minuv-l              =   80
 wsclean_low2.argument.maxuv-l              =   2000
 wsclean_low2.argument.scale                =   0.00694
 wsclean_low2.argument.mem                  =   90
+
+remove_copy_avg_map.control.kind           =   plugin
+remove_copy_avg_map.control.type           =   copyFiles
+remove_copy_avg_map.control.mapfile_in     =   chgcentre_low.output.mapfile
 
 fits_to_image_low.control.type             =   convert_fits_image_to_casa
 fits_to_image_low.control.mapfile_in       =   wsclean_low2.output.wsclean_low2-model.fits.mapfile

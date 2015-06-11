@@ -5,7 +5,7 @@ from lofarpipe.support.data_map import DataProduct
 
 def plugin_main(args, **kwargs):
     """
-    Copies a files in a mapfile
+    Copies files in a mapfile
 
     Parameters
     ----------
