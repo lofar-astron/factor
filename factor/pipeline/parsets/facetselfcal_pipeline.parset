@@ -956,7 +956,7 @@ copy_parmdb_dirdep.control.parmdb_mapfile                  =   merge_selfcal_par
 subtract.control.type                                      =   calibrate-stand-alone
 subtract.control.mapfile_in                                =   {{ shifted_all_bands_datamap }}
 subtract.control.inputkey                                  =   inputms
-subtract.control.arguments                                 =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirdep_subtract.parset,{{ skymodel_dir }}/empty.skymodel]
+subtract.control.arguments                                 =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirdep_subtract_check.parset,{{ skymodel_dir }}/empty.skymodel]
 
 copy_parmdb_dirindep1.control.kind                         =   plugin
 copy_parmdb_dirindep1.control.type                         =   copyParmdbtoMS
