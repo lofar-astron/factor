@@ -723,7 +723,7 @@ concat4.control.inputkey                                   =   msfiles
 concat4.control.outputkey                                  =   msconcat
 concat4.argument.flags                                     =   [msfiles,msconcat]
 
-casa_image41.control.type                                  =   casa
+casa_image41.control.type                                  =   casa_clean
 casa_image41.control.mapfile_in                            =   concat4.output.mapfile
 casa_image41.control.inputkey                              =   clean.vis
 casa_image41.control.outputkey                             =   clean.imagename
@@ -778,7 +778,7 @@ mask4.argument.rmsbox                                      =   (80,20)
 mask4.argument.img_format                                  =   casa
 mask4.argument.threshold_format                            =   str_with_units
 
-casa_image42.control.type                                  =   casa
+casa_image42.control.type                                  =   casa_clean
 # casa_image42.control.mapfiles_in                           =   [concat4.output.mapfile,mask4.output.mapfile,mask4.output.threshold_5sig.mapfile]
 # casa_image42.control.inputkeys                             =   [clean.vis,clean.mask,clean.threshold]
 casa_image42.control.mapfiles_in                           =   [concat4.output.mapfile,mask4.output.mapfile]
