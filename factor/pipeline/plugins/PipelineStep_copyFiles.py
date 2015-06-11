@@ -5,7 +5,7 @@ from lofarpipe.support.data_map import DataProduct
 
 def plugin_main(args, **kwargs):
     """
-    Copies files in a mapfile
+    Copies files in a mapfile. Existing files are not overwritten
 
     Parameters
     ----------
@@ -34,9 +34,8 @@ def plugin_main(args, **kwargs):
 
     for i, item in enumerate(datamap):
         new_file = os.path.join(os.path.dirname(item.file), prefix+os.path.basename(item.file))
-        if os.path.exists(new_file):
-            os.system('rm -rf {0}'.format(new_file))
-        os.system('cp -r {0} {1}'.format(item.file, new_file))
+        if not os.path.exists(new_file):
+            os.system('cp -r {0} {1}'.format(item.file, new_file))
 
         map.data.append(DataProduct(item.host, new_file, item.skip))
 
