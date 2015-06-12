@@ -969,17 +969,17 @@ copy_parmdb_dirindep2.control.ms_mapfile                   =   {{ shifted_empty_
 copy_parmdb_dirindep2.control.parmdb_mapfile               =   {{ dir_indep_parmdbs_datamap }}
 
 apply_dir_indep_pre.control.type                           =   calibrate-stand-alone
-apply_dir_indep_pre.control.mapfile_in                     =   {{ shifted_all_bands_datamap }}
+apply_dir_indep_pre.control.mapfile_in                     =   {{ shifted_empty_bands_datamap }}
 apply_dir_indep_pre.control.inputkey                       =   inputms
 apply_dir_indep_pre.control.arguments                      =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirindep_apply_pre.parset,{{ skymodel_dir }}/empty.skymodel]
 
 apply_dir_indep_post.control.type                          =   calibrate-stand-alone
-apply_dir_indep_post.control.mapfile_in                    =   {{ shifted_empty_bands_datamap }}
+apply_dir_indep_post.control.mapfile_in                    =   {{ shifted_all_bands_datamap }}
 apply_dir_indep_post.control.inputkey                      =   inputms
 apply_dir_indep_post.control.arguments                     =   [--replace-sourcedb,inputms,{{ parset_dir }}/facet_dirindep_apply_post.parset,{{ skymodel_dir }}/empty.skymodel]
 
 average_pre.control.type                                   =   dppp
-average_pre.control.mapfile_in                             =   {{ shifted_all_bands_datamap }}
+average_pre.control.mapfile_in                             =   {{ shifted_empty_bands_datamap }}
 average_pre.control.inputkey                               =   msin
 average_pre.parsetarg.msin.datacolumn                      =   CORRECTED_SUBTRACTED_DATA
 average_pre.parsetarg.msout.writefullresflag               =   False
@@ -989,7 +989,7 @@ average_pre.parsetarg.avg.freqstep                         =   20
 average_pre.parsetarg.avg.timestep                         =   6
 
 average_post.control.type                                  =   dppp
-average_post.control.mapfile_in                            =   {{ shifted_empty_bands_datamap }}
+average_post.control.mapfile_in                            =   {{ shifted_all_bands_datamap }}
 average_post.control.inputkey                              =   msin
 average_post.parsetarg.msin.datacolumn                     =   CORRECTED_SUBTRACTED_DATA
 average_post.parsetarg.msout.writefullresflag              =   False
