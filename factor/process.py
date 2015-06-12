@@ -72,7 +72,6 @@ def run(parset_file, logging_level='info', dry_run=False):
     # Make direction object for the field
     field = Direction('field', bands[0].ra, bands[0].dec,
         factor_working_dir=parset['dir_working'])
-    field.setup()
     field.imsize_high_res = 6144 # TODO: calculate image size for each field
     field.imsize_low_res = 4800 # TODO: calculate image size for each field
 
