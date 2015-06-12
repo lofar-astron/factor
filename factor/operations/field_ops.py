@@ -30,7 +30,8 @@ class InitSubtract(Operation):
                            'mapfile_dir': self.mapfile_dir,
                            'pipeline_dir': self.factor_pipeline_dir,
                            'dir_indep_parmdb_name': parset['parmdb_name'],
-                           'hosts': self.node_list}
+                           'hosts': self.node_list,
+                           'max_cpus_per_node': self.max_cpus_per_node}
 
 
     def finalize(self):
