@@ -1,16 +1,14 @@
-pipeline.steps = [copy_parmdb1, apply_dir_indep, average_data, average_corr, create_compressed_mapfile_data, create_compressed_mapfile_corr, concat_data, concat_corr, copy_column, average0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, make_chunks, create_chunks_map, solve_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, create_chunks_compressed_mapfile, concat_chunks, casa_ft1, solve_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, solve_ampphase12, merge_amp_parmdbs1, copy_parmdb_amp1, smooth_amp1, copy_parmdb_smoothed_amp1_to_chunks, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, create_model3_map, casa_ft3, solve_ampphase21, merge_phase_parmdbs, solve_ampphase22, merge_amp_parmdbs2, copy_parmdb_amp2, smooth_amp2, copy_parmdb_smoothed_amp2_to_chunks, apply_amp2, average4, create_compressed_mapfile4, concat4, casa_image41, adjust_casa_mapfile4, mask4, casa_image42, merge_selfcal_parmdbs, copy_final_model_map, copy_parmdb2, apply_dir_dep, average5, create_compressed_mapfile5, concat_averaged, wsclean1, mask5, wsclean2, create_model4_map, create_compressed_mapfile6, concat_unaveraged, wsclean_ft, copy_final_image_map, copy_parmdb_dirdep, subtract, copy_parmdb_dirindep1, copy_parmdb_dirindep2, apply_dir_indep_pre, apply_dir_indep_post, average_pre, average_post, wsclean_pre1, mask_pre, wsclean_pre2, wsclean_post1, mask_post, wsclean_post2, verify_subtract, copy_verify_subtract]
+pipeline.steps = [apply_dir_indep, average_data, average_corr, create_compressed_mapfile_data, create_compressed_mapfile_corr, concat_data, concat_corr, copy_column, average0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, make_chunks, create_chunks_map, solve_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, create_chunks_compressed_mapfile, concat_chunks, casa_ft1, solve_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, solve_ampphase12, merge_amp_parmdbs1, copy_parmdb_amp1, smooth_amp1, copy_parmdb_smoothed_amp1_to_chunks, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, create_model3_map, casa_ft3, solve_ampphase21, merge_phase_parmdbs, solve_ampphase22, merge_amp_parmdbs2, copy_parmdb_amp2, smooth_amp2, copy_parmdb_smoothed_amp2_to_chunks, apply_amp2, average4, create_compressed_mapfile4, concat4, casa_image41, adjust_casa_mapfile4, mask4, casa_image42, merge_selfcal_parmdbs, copy_final_model_map, copy_parmdb2, apply_dir_dep, average5, create_compressed_mapfile5, concat_averaged, wsclean1, mask5, wsclean2, create_model4_map, create_compressed_mapfile6, concat_unaveraged, wsclean_ft, copy_final_image_map, copy_parmdb_dirdep, subtract, copy_parmdb_dirindep1, copy_parmdb_dirindep2, apply_dir_indep_pre, apply_dir_indep_post, average_pre, average_post, wsclean_pre1, mask_pre, wsclean_pre2, wsclean_post1, mask_post, wsclean_post2, verify_subtract, copy_verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
-copy_parmdb1.control.kind                                  =   plugin
-copy_parmdb1.control.type                                  =   copyParmdbtoMS
-copy_parmdb1.control.ms_mapfile                            =   {{ shifted_cal_bands_datamap }}
-copy_parmdb1.control.parmdb_mapfile                        =   {{ dir_indep_parmdbs_datamap }}
-
-apply_dir_indep.control.type                               =   calibrate-stand-alone
-apply_dir_indep.control.mapfile_in                         =   {{ shifted_cal_bands_datamap }}
-apply_dir_indep.control.inputkey                           =   inputms
-apply_dir_indep.control.arguments                          =   [inputms,{{ parset_dir }}/facet_dirindep_apply.parset,{{ skymodel_dir }}/empty.skymodel]
+apply_dir_indep.control.type                               =   calibrate-stand-alone_new
+apply_dir_indep.argument.observation                       =   {{ shifted_cal_bands_datamap }}
+apply_dir_indep.argument.parset                            =   {{ parset_dir }}//facet_dirindep_apply.parset
+apply_dir_indep.argument.catalog                           =   {{ skymodel_dir }}/empty.skymodel
+apply_dir_indep.argument.parmdb                            =   {{ dir_indep_parmdbs_datamap }}
+apply_dir_indep.argument.replace-sourcedb                  =   True
+apply_dir_indep.argument.replace-parmdb                    =   True
 
 average_data.control.type                                  =   dppp
 average_data.control.mapfile_in                            =   {{ shifted_cal_bands_datamap }}
@@ -195,14 +193,23 @@ create_chunks_map.control.hosts                            =   {{ hosts }}
 create_chunks_map.control.mapfile_dir                      =   {{ mapfile_dir }}
 create_chunks_map.control.filename                         =   chunk_files.datamap
 
-solve_phaseonly1.control.type                              =   calibrate-stand-alone
-solve_phaseonly1.control.mapfile_in                        =   create_chunks_map.output.mapfile
-solve_phaseonly1.control.inputkey                          =   inputms
-solve_phaseonly1.control.arguments                         =   [-f,inputms,{{ skymodel_dir }}/empty.skymodel]
-solve_phaseonly1.control.args_format                       =   bbs2
-solve_phaseonly1.control.parset                            =   {{ parset_dir }}/facet_dirdep_phaseonly_solve.parset
-solve_phaseonly1.control.parsetasfile                      =   True
-solve_phaseonly1.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
+# solve_phaseonly1.control.type                              =   calibrate-stand-alone
+# solve_phaseonly1.control.mapfile_in                        =   create_chunks_map.output.mapfile
+# solve_phaseonly1.control.inputkey                          =   inputms
+# solve_phaseonly1.control.arguments                         =   [-f,inputms,{{ skymodel_dir }}/empty.skymodel]
+# solve_phaseonly1.control.args_format                       =   bbs2
+# solve_phaseonly1.control.parset                            =   {{ parset_dir }}/facet_dirdep_phaseonly_solve.parset
+# solve_phaseonly1.control.parsetasfile                      =   True
+# solve_phaseonly1.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
+
+solve_phaseonly1.control.type                               =   calibrate-stand-alone_new
+solve_phaseonly1.argument.observation                       =   create_chunks_map.output.mapfile
+solve_phaseonly1.argument.parset                            =   {{ parset_dir }}//facet_dirdep_phaseonly_solve.parset
+solve_phaseonly1.argument.catalog                           =   {{ skymodel_dir }}/empty.skymodel
+solve_phaseonly1.argument.parmdb                            =   {{ dir_indep_parmdbs_datamap }}
+solve_phaseonly1.argument.replace-sourcedb                  =   True
+solve_phaseonly1.argument.replace-parmdb                    =   True
+solve_phaseonly1.argument.Step.solve.Solve.CellSize.Time    =   {{ solint_p }}
 
 average1.control.type                                      =   dppp
 average1.control.mapfile_in                                =   create_chunks_map.output.mapfile
