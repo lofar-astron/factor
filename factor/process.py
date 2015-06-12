@@ -52,32 +52,6 @@ def run(parset_file, logging_level='info', dry_run=False):
                 band.skymodel_dirindep = parset['ms_specific'][msbase]['init_skymodel']
         bands.append(band)
 
-    # Check directions. First check for user-supplied file, then for Factor-generated
-    # file from a previous run, then for parameters needed to generate it internally
-    if 'directions_file' in parset:
-        directions = factor.directions.directions_read(parset['directions_file'],
-            parset['dir_working'])
-    elif os.path.exists(os.path.join(parset['dir_working'], 'factor_directions.txt')):
-        directions = factor.directions.directions_read(os.path.join(parset['dir_working'],
-            'factor_directions.txt'), parset['dir_working'])
-    else:
-        dir_parset = parset['direction_specific']
-        if 'flux_min_jy' not in dir_parset or \
-            'size_max_arcmin' not in dir_parset or \
-            'separation_max_arcmin' not in dir_parset:
-                log.critical('If no directions file is specified, you must '
-                    'give values for flux_min_Jy, size_max_arcmin, and '
-                    'separation_max_arcmin')
-                sys.exit(1)
-        else:
-            directions = None
-
-    # Make direction object for the field
-    field = Direction('field', bands[0].ra, bands[0].dec,
-        factor_working_dir=parset['dir_working'])
-    field.imsize_high_res = 6250 # TODO: calculate image size for each field
-    field.imsize_low_res = 4800 # TODO: calculate image size for each field
-
     # Get clusterdesc and nodes
     cluster_parset = parset['cluster_specific']
     if 'clusterdesc_file' not in cluster_parset:
@@ -95,6 +69,13 @@ def run(parset_file, logging_level='info', dry_run=False):
     scheduler = Scheduler(max_procs=len(parset['cluster_specific']['node_list']),
         dry_run=dry_run)
 
+    # Make direction object for the field
+    field = Direction('field', bands[0].ra, bands[0].dec,
+        factor_working_dir=parset['dir_working'])
+    field.setup()
+    field.imsize_high_res = 6144 # TODO: calculate image size for each field
+    field.imsize_low_res = 4800 # TODO: calculate image size for each field
+
     # Run initial sky model generation and create empty datasets. First check that
     # this operation is needed (only needed if band lacks an initial skymodel or
     # the SUBTRACTED_DATA_ALL column).
@@ -109,18 +90,34 @@ def run(parset_file, logging_level='info', dry_run=False):
         log.info("Sky models found for all MS files. Skipping initial subtraction "
             "operation")
 
-    # Prepare directions
-    if directions is None:
-        # Make directions from dir-indep sky models using flux and size parameters
-        log.info("No directions file given. Selecting directions internally...")
-        parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(bands,
-        	parset['direction_specific']['flux_min_jy'],
-        	parset['direction_specific']['size_max_arcmin'],
-        	parset['direction_specific']['separation_max_arcmin'],
-        	directions_max_num=parset['direction_specific']['max_num'],
-        	interactive=parset['interactive'])
+    # Define directions. First check for user-supplied file, then for Factor-generated
+    # file from a previous run, then for parameters needed to generate it internally
+    if 'directions_file' in parset:
         directions = factor.directions.directions_read(parset['directions_file'],
             parset['dir_working'])
+    elif os.path.exists(os.path.join(parset['dir_working'], 'factor_directions.txt')):
+        directions = factor.directions.directions_read(os.path.join(parset['dir_working'],
+            'factor_directions.txt'), parset['dir_working'])
+    else:
+        dir_parset = parset['direction_specific']
+        if 'flux_min_jy' not in dir_parset or \
+            'size_max_arcmin' not in dir_parset or \
+            'separation_max_arcmin' not in dir_parset:
+                log.critical('If no directions file is specified, you must '
+                    'give values for flux_min_Jy, size_max_arcmin, and '
+                    'separation_max_arcmin')
+                sys.exit(1)
+        else:
+            # Make directions from dir-indep sky models using flux and size parameters
+            log.info("No directions file given. Selecting directions internally...")
+            parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(bands,
+                parset['direction_specific']['flux_min_jy'],
+                parset['direction_specific']['size_max_arcmin'],
+                parset['direction_specific']['separation_max_arcmin'],
+                directions_max_num=parset['direction_specific']['max_num'],
+                interactive=parset['interactive'])
+            directions = factor.directions.directions_read(parset['directions_file'],
+                parset['dir_working'])
 
     # Load polygons from previous run if possible
     polys_file = os.path.join(parset['dir_working'], 'regions', 'factor_facets.pkl')
@@ -139,8 +136,11 @@ def run(parset_file, logging_level='info', dry_run=False):
         direction.vertices = polys[i]
         direction.width = widths[i]
 
-        # Set facet image size with 20% padding to avoid aliasing issues with ft
-        direction.facet_imsize = direction.width * 3600.0 / 1.5 * 1.2
+        # Set image sizes
+        direction.facet_imsize = getOptimumSize(direction.width * 3600.0 / 1.5
+            * 1.15) # full facet has 15% padding to avoid aliasing issues with ft
+        direction.cal_imsize = getOptimumSize(direction.cal_radius_deg * 3600.0
+            / 1.5 * 1.5) # cal size has 50% padding
 
         # Make CASA region files for use during clean
         reg_file = os.path.join(parset['dir_working'], 'regions', direction.name+'.rgn')
@@ -276,3 +276,63 @@ def run(parset_file, logging_level='info', dry_run=False):
     log.info("Factor has finished :)")
 
 
+def getOptimumSize(size):
+    """
+    Gets the nearest optimum image size
+
+    Taken from the casa source code (cleanhelper.py)
+
+    Parameters
+    ----------
+    size : int
+        Target image size in pixels
+
+    Returns
+    -------
+    optimum_size : int
+        Optimum image size nearest to target size
+
+    """
+    import numpy
+
+    def prime_factors(n, douniq=True):
+        """ Return the prime factors of the given number. """
+        factors = []
+        lastresult = n
+        sqlast=int(numpy.sqrt(n))+1
+        if n == 1:
+            return [1]
+        c=2
+        while 1:
+             if (lastresult == 1) or (c > sqlast):
+                 break
+             sqlast=int(numpy.sqrt(lastresult))+1
+             while 1:
+                 if(c > sqlast):
+                     c=lastresult
+                     break
+                 if lastresult % c == 0:
+                     break
+                 c += 1
+
+             factors.append(c)
+             lastresult /= c
+
+        if (factors==[]): factors=[n]
+        return  numpy.unique(factors).tolist() if douniq else factors
+
+    n = int(size)
+    if (n%2 != 0):
+        n+=1
+    fac=prime_factors(n, False)
+    for k in range(len(fac)):
+        if (fac[k] > 7):
+            val=fac[k]
+            while (numpy.max(prime_factors(val)) > 7):
+                val +=1
+            fac[k]=val
+    newlarge=numpy.product(fac)
+    for k in range(n, newlarge, 2):
+        if ((numpy.max(prime_factors(k)) < 8)):
+            return k
+    return newlarge

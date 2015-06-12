@@ -188,5 +188,3 @@ class Direction(object):
                 facet_dir = os.path.join(action_dir, self.name)
                 if os.path.exists(facet_dir):
                     os.system('rm -rf {0}'.format(facet_dir))
-
-

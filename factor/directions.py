@@ -531,9 +531,7 @@ def make_ds9_calimage_file(directions, outputfile):
 
     cell = 1.5 # arcsec per pixel
     for direction in directions:
-        imsize = direction.cal_radius_deg * 1.5 * 3600.0 / cell # pixels
-        if imsize < 512:
-            imsize = 512
+        imsize = direction.cal_imsize
         imsize_unmasked = 0.8 * imsize
         RAs = direction.vertices[0]
         Decs = direction.vertices[1]
