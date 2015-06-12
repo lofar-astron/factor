@@ -104,6 +104,7 @@ class Operation(object):
                          'genericpiperoot': parset['piperoot'],
                          'pipeline_working_dir': self.pipeline_working_dir,
                          'pipeline_runtime_dir': self.pipeline_runtime_dir,
+                         'max_cpus_per_node': self.max_cpus_per_node,
                          'casa_executable': spawn.find_executable('casa'),
                          'wsclean_executable': spawn.find_executable('wsclean'),
                          'chgcentre_executable': spawn.find_executable('chgcentre'),
