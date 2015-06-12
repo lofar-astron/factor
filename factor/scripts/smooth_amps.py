@@ -88,11 +88,11 @@ def main(msname, instrument_name, instrument_name_smoothed):
             window_window = numpy.int(len(amp)/3.)
 
             amp = numpy.log10(amp)
-            amp = median_window_filter(amp,window,6)
-            amp = median_window_filter(amp,window,6)
-            amp = median_window_filter(amp,7,6)
-            amp = median_window_filter(amp,4,6)
-            amp = median_window_filter(amp,3,6)
+            amp = median_window_filter(amp, window, 6)
+            amp = median_window_filter(amp, window, 6)
+            amp = median_window_filter(amp, 7, 6)
+            amp = median_window_filter(amp, 4, 6)
+            amp = median_window_filter(amp, 3, 6)
             amp = 10**amp
 
             parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, 0] = amp*numpy.cos(phase)
