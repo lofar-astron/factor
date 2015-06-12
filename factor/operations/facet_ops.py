@@ -34,18 +34,15 @@ class FacetAdd(Operation):
         # Define parameters needed for this operation
         skymodels = [band.skymodel_dirindep for band in self.bands]
         if self.direction.use_new_sub_data:
-            add_all_parset = 'facet_dirindep_add_all_new.parset'
-            add_cal_parset = 'facet_dirindep_add_cal_new.parset'
+            subtracted_data_column = 'SUBTRACTED_DATA_ALL'
         else:
-            add_all_parset = 'facet_dirindep_add_all.parset'
-            add_cal_parset = 'facet_dirindep_add_cal.parset'
+            subtracted_data_column = 'SUBTRACTED_DATA_ALL_NEW'
         self.parms_dict = {'input_dir': parset['dir_ms'],
                            'parset_dir': self.factor_parset_dir,
                            'skymodel_dir': self.factor_skymodel_dir,
                            'mapfile_dir': self.mapfile_dir,
                            'pipeline_dir': self.factor_pipeline_dir,
-                           'add_all_parset': add_all_parset,
-                           'add_cal_parset': add_cal_parset,
+                           'subtracted_data_column': subtracted_data_column,
                            'dir_indep_parmdb_name': parset['parmdb_name'],
                            'skymodels': skymodels,
                            'facet_ra': self.direction.ra,
