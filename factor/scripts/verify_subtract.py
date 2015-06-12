@@ -14,17 +14,14 @@ def main(image_pre, image_post, res_val):
     Check quantities in residual images
     """
     imgpre = pim.image(image_pre)
-    pixelspre = numpy.copy(imgpre.getdata())
-    maxvalpre = numpy.copy(numpy.max(pixelspre))
+    maxvalpre = numpy.max(imgpre.getdata())
+    imgpost = pim.image(image_post)
+    maxvalpost = numpy.max(imgpost.getdata())
 
-    img = pim.image(image_post)
-    pixels = numpy.copy(img.getdata())
-    maxval = numpy.copy(numpy.max(pixels))
-
-    if (maxval > res_val): # or ((maxval*0.95) > maxvalpre) :
-        return {'break': False, 'maxval': maxval, 'maxvalpre': maxvalpre}
+    if (maxvalpost > res_val): # or ((maxvalpost*0.95) > maxvalpre) :
+        return {'break': False, 'maxval': maxvalpost, 'maxvalpre': maxvalpre}
     else:
-        return {'break': True, 'maxval': maxval, 'maxvalpre': maxvalpre}
+        return {'break': True, 'maxval': maxvalpost, 'maxvalpre': maxvalpre}
 
 
 if __name__ == '__main__':
