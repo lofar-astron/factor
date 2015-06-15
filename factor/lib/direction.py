@@ -185,7 +185,10 @@ class Direction(object):
         from lofarpipe.support.data_map import DataMap
 
         for mapfile in self.cleanup_mapfiles:
-            datamap = DataMap.load(mapfile)
-            for item in datamap:
-                if os.path.exists(item.file):
-                    os.system('rm -rf {0}'.format(item.file))
+            try:
+                datamap = DataMap.load(mapfile)
+                for item in datamap:
+                    if os.path.exists(item.file):
+                        os.system('rm -rf {0}'.format(item.file))
+            except IOError:
+                pass
