@@ -18,8 +18,8 @@ update_shifted_empty_hosts.control.mapfile_in              =   {{ shifted_empty_
 update_shifted_empty_hosts.control.hosts                   =   {{ hosts }}
 
 apply_dir_indep.control.type                               =   calibrate-stand-alone_new
-apply_dir_indep.control.mapfiles_in                        =   [{{ shifted_cal_bands_datamap }}, {{ dir_indep_parmdbs_datamap }}]
-apply_dir_indep.control.inputkeys                          =   [inputms, inputparmdb]
+apply_dir_indep.control.mapfiles_in                        =   [{{ shifted_cal_bands_datamap }},{{ dir_indep_parmdbs_datamap }}]
+apply_dir_indep.control.inputkeys                          =   [inputms,inputparmdb]
 apply_dir_indep.argument.observation                       =   inputms
 apply_dir_indep.argument.parset                            =   {{ parset_dir }}//facet_dirindep_apply.parset
 apply_dir_indep.argument.catalog                           =   {{ skymodel_dir }}/empty.skymodel
@@ -75,8 +75,8 @@ concat_corr.argument.steps                                 =   []
 
 copy_column.control.type                                   =   copy_column
 copy_column.control.mapfiles_in                            =   [concat_corr.output.mapfile,concat_data.output.mapfile]
-copy_column.control.inputkeys                              =   [corrdatafile, datafile]
-copy_column.argument.flags                                 =   [corrdatafile, datafile, DATA, CORRECTED_DATA]
+copy_column.control.inputkeys                              =   [corrdatafile,datafile]
+copy_column.argument.flags                                 =   [corrdatafile,datafile,DATA,CORRECTED_DATA]
 
 # loop_facet_selfcal.control.kind                            =   loop
 # loop_facet_selfcal.control.type                            =   conditional
@@ -201,7 +201,7 @@ casa_ft0.control.arguments                                 =   [--nologger,--nog
 make_chunks.control.type                                   =   chunk_by_time
 make_chunks.control.mapfile_in                             =   concat_data.output.mapfile
 make_chunks.control.inputkey                               =   msfile
-make_chunks.argument.flags                                 =   [msfile, {{ chunk_width }}]
+make_chunks.argument.flags                                 =   [msfile,{{ chunk_width }}]
 
 create_chunks_map.control.kind                             =   plugin
 create_chunks_map.control.type                             =   addListMapfile
@@ -210,13 +210,13 @@ create_chunks_map.control.hosts                            =   {{ hosts }}
 create_chunks_map.control.mapfile_dir                      =   {{ mapfile_dir }}
 create_chunks_map.control.filename                         =   chunk_files.datamap
 
-solve_phaseonly1.control.type                               =   calibrate-stand-alone_new
-solve_phaseonly1.argument.observation                       =   create_chunks_map.output.mapfile
-solve_phaseonly1.argument.parset                            =   {{ parset_dir }}//facet_dirdep_phaseonly_solve.parset
-solve_phaseonly1.argument.catalog                           =   {{ skymodel_dir }}/empty.skymodel
-solve_phaseonly1.argument.replace-sourcedb                  =   True
-solve_phaseonly1.argument.replace-parmdb                    =   True
-solve_phaseonly1.argument.Step.solve.Solve.CellSize.Time    =   {{ solint_p }}
+solve_phaseonly1.control.type                              =   calibrate-stand-alone_new
+solve_phaseonly1.argument.observation                      =   create_chunks_map.output.mapfile
+solve_phaseonly1.argument.parset                           =   {{ parset_dir }}//facet_dirdep_phaseonly_solve.parset
+solve_phaseonly1.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
+solve_phaseonly1.argument.replace-sourcedb                 =   True
+solve_phaseonly1.argument.replace-parmdb                   =   True
+solve_phaseonly1.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
 
 average1.control.type                                      =   dppp
 average1.control.mapfile_in                                =   create_chunks_map.output.mapfile
@@ -357,13 +357,13 @@ casa_ft1.control.mapfiles_in                               =   [concat_chunks.ou
 casa_ft1.control.inputkeys                                 =   [inputms,modelimg]
 casa_ft1.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/ftw.py,inputms,modelimg,{{ nterms }},{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
-solve_phaseonly2.control.type                               =   calibrate-stand-alone_new
-solve_phaseonly2.argument.observation                       =   create_chunks_map.output.mapfile
-solve_phaseonly2.argument.parset                            =   {{ parset_dir }}//facet_dirdep_phaseonly_solve.parset
-solve_phaseonly2.argument.catalog                           =   {{ skymodel_dir }}/empty.skymodel
-solve_phaseonly2.argument.replace-sourcedb                  =   True
-solve_phaseonly2.argument.replace-parmdb                    =   True
-solve_phaseonly2.argument.Step.solve.Solve.CellSize.Time    =   {{ solint_p }}
+solve_phaseonly2.control.type                              =   calibrate-stand-alone_new
+solve_phaseonly2.argument.observation                      =   create_chunks_map.output.mapfile
+solve_phaseonly2.argument.parset                           =   {{ parset_dir }}//facet_dirdep_phaseonly_solve.parset
+solve_phaseonly2.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
+solve_phaseonly2.argument.replace-sourcedb                 =   True
+solve_phaseonly2.argument.replace-parmdb                   =   True
+solve_phaseonly2.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
 
 average2.control.type                                      =   dppp
 average2.control.mapfile_in                                =   create_chunks_map.output.mapfile
@@ -530,7 +530,7 @@ expand_smoothed_amp1_parmdb_map.control.filename           =   expand_amp1_smoot
 
 apply_amp1.control.type                                    =   calibrate-stand-alone_new
 apply_amp1.control.mapfiles_in                             =   [create_chunks_map.output.mapfile,expand_smoothed_amp1_parmdb_map.output.mapfile]
-apply_amp1.control.inputkeys                               =   [inputms, inputparmdb]
+apply_amp1.control.inputkeys                               =   [inputms,inputparmdb]
 apply_amp1.argument.observation                            =   inputms
 apply_amp1.argument.parset                                 =   {{ parset_dir }}//facet_dirdep_amponly_apply.parset
 apply_amp1.argument.catalog                                =   {{ skymodel_dir }}/empty.skymodel
@@ -709,7 +709,7 @@ expand_smoothed_amp2_parmdb_map.control.filename           =   expand_amp2_smoot
 
 apply_amp2.control.type                                    =   calibrate-stand-alone_new
 apply_amp2.control.mapfiles_in                             =   [create_chunks_map.output.mapfile,expand_smoothed_amp2_parmdb_map.output.mapfile]
-apply_amp2.control.inputkeys                               =   [inputms, inputparmdb]
+apply_amp2.control.inputkeys                               =   [inputms,inputparmdb]
 apply_amp2.argument.observation                            =   inputms
 apply_amp2.argument.parset                                 =   {{ parset_dir }}//facet_dirdep_amponly_apply.parset
 apply_amp2.argument.catalog                                =   {{ skymodel_dir }}/empty.skymodel
@@ -853,7 +853,7 @@ expand_merged_parmdb_map.control.filename                  =   expand_merged_par
 
 apply_dir_dep.control.type                                 =   calibrate-stand-alone_new
 apply_dir_dep.control.mapfiles_in                          =   [{{ shifted_all_bands_datamap }},expand_merged_parmdb_map.output.mapfile]
-apply_dir_dep.control.inputkeys                            =   [inputms, inputparmdb]
+apply_dir_dep.control.inputkeys                            =   [inputms,inputparmdb]
 apply_dir_dep.argument.observation                         =   inputms
 apply_dir_dep.argument.parset                              =   {{ parset_dir }}//facet_dirdep_apply.parset
 apply_dir_dep.argument.catalog                             =   {{ skymodel_dir }}/empty.skymodel
@@ -970,7 +970,7 @@ copy_final_image_map.control.filename                      =   facet_image.datam
 
 subtract.control.type                                      =   calibrate-stand-alone_new
 subtract.control.mapfiles_in                               =   [{{ shifted_all_bands_datamap }},expand_merged_parmdb_map.output.mapfile]
-subtract.control.inputkeys                                 =   [inputms, inputparmdb]
+subtract.control.inputkeys                                 =   [inputms,inputparmdb]
 subtract.argument.observation                              =   inputms
 subtract.argument.parset                                   =   {{ parset_dir }}//facet_dirdep_subtract_check.parset
 subtract.argument.catalog                                  =   {{ skymodel_dir }}/empty.skymodel
@@ -979,8 +979,8 @@ subtract.argument.replace-sourcedb                         =   True
 subtract.argument.replace-parmdb                           =   True
 
 apply_dir_indep_pre.control.type                           =   calibrate-stand-alone_new
-apply_dir_indep_pre.control.mapfiles_in                    =   [{{ shifted_empty_bands_datamap }}, {{ dir_indep_parmdbs_datamap }}]
-apply_dir_indep_pre.control.inputkeys                      =   [inputms, inputparmdb]
+apply_dir_indep_pre.control.mapfiles_in                    =   [{{ shifted_empty_bands_datamap }},{{ dir_indep_parmdbs_datamap }}]
+apply_dir_indep_pre.control.inputkeys                      =   [inputms,inputparmdb]
 apply_dir_indep_pre.argument.observation                   =   inputms
 apply_dir_indep_pre.argument.parset                        =   {{ parset_dir }}//facet_dirindep_apply_pre.parset
 apply_dir_indep_pre.argument.catalog                       =   {{ skymodel_dir }}/empty.skymodel
@@ -989,8 +989,8 @@ apply_dir_indep_pre.argument.replace-sourcedb              =   True
 apply_dir_indep_pre.argument.replace-parmdb                =   True
 
 apply_dir_indep_post.control.type                          =   calibrate-stand-alone_new
-apply_dir_indep_post.control.mapfiles_in                   =   [{{ shifted_all_bands_datamap }}, {{ dir_indep_parmdbs_datamap }}]
-apply_dir_indep_post.control.inputkeys                     =   [inputms, inputparmdb]
+apply_dir_indep_post.control.mapfiles_in                   =   [{{ shifted_all_bands_datamap }},{{ dir_indep_parmdbs_datamap }}]
+apply_dir_indep_post.control.inputkeys                     =   [inputms,inputparmdb]
 apply_dir_indep_post.argument.observation                  =   inputms
 apply_dir_indep_post.argument.parset                       =   {{ parset_dir }}//facet_dirindep_apply_post.parset
 apply_dir_indep_post.argument.catalog                      =   {{ skymodel_dir }}/empty.skymodel

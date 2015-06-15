@@ -26,7 +26,7 @@ create_parmdb_map.control.filename         =   dir_indep_instrument_parmdbs.data
 # chgcentre_high.control.type                =   chgcentre
 # chgcentre_high.control.mapfile_in          =   make_copy_ms_map.output.mapfile
 # chgcentre_high.control.inputkey            =   inputms
-# chgcentre_high.argument.flags              =   [-zenith, -shiftback, inputms]
+# chgcentre_high.argument.flags              =   [-zenith,-shiftback,inputms]
 
 wsclean_high1.control.type                 =   wsclean
 wsclean_high1.control.mapfile_in           =   create_ms_map.output.mapfile
@@ -60,7 +60,7 @@ mask_high.argument.trim_by                 =   0
 wsclean_high2.control.type                 =   wsclean
 wsclean_high2.control.mapfiles_in          =   [create_ms_map.output.mapfile,mask_high.output.mapfile]
 wsclean_high2.control.inputkeys            =   [msfile,fitsmask]
-wsclean_high2.argument.flags               =   [-no-update-model-required, msfile]
+wsclean_high2.argument.flags               =   [-no-update-model-required,msfile]
 wsclean_high2.argument.size                =   {{ npix_high }} {{ npix_high }}
 wsclean_high2.argument.niter               =   40000
 wsclean_high2.argument.threshold           =   mask_high.output.threshold_5sig.mapfile
@@ -134,7 +134,7 @@ average.parsetarg.avg.timestep             =   2
 # chgcentre_low.control.type                 =   chgcentre
 # chgcentre_low.control.mapfile_in           =   make_copy_avg_map.output.mapfile
 # chgcentre_low.control.inputkey             =   inputms
-# chgcentre_low.argument.flags               =   [-zenith, -shiftback, inputms]
+# chgcentre_low.argument.flags               =   [-zenith,-shiftback,inputms]
 
 wsclean_low1.control.type                  =   wsclean
 wsclean_low1.control.mapfile_in            =   average.output.mapfile
