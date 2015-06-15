@@ -1054,8 +1054,7 @@ wsclean_post.argument.j                                    =   {{ max_cpus_per_n
 
 verify_subtract.control.type                               =   verify_subtract
 verify_subtract.control.mapfiles_in                        =   [wsclean_pre.output.wsclean_pre-image.fits.mapfile,wsclean_post.output.wsclean_post-image.fits.mapfile]
-verify_subtract.control.inputkey                           =   imagefile
-verify_subtract.control.outputkey                          =   maskfile
+verify_subtract.control.inputkeys                          =   [image_pre,image_post]
 verify_subtract.argument.flags                             =   [image_pre,image_post,0.75]
 
 copy_verify_subtract_map.control.kind                      =   plugin
