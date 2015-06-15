@@ -58,12 +58,19 @@ def find_executables(parset):
     """
     from distutils import spawn
 
-    executables = ['casa_executable', 'wsclean_executable', 'losoto_executable',
-        'H5parm_importer_executable', 'H5parm_exporter_executable']# 'chgcentre_executable']
-    for executable in executables:
-        path = spawn.find_executable(executable)
+    executables = {'casa_executable': ['casa', 'casapy'],
+                   'wsclean_executable': ['wsclean'],
+#                    'chgcentre_executable': ['chgcentre'],
+                   'losoto_executable': ['losoto.py'],
+                   'H5parm_importer_executable': ['H5parm_importer.py'],
+                   'H5parm_exporter_executable': ['H5parm_exporter.py']}
+    for key, names in executables.iteritems():
+        for name in names
+            path = spawn.find_executable(executable)
+            if path is not None:
+                parset[executable] = path
+                break
         if path is None:
             log.error('The path to the {0} executable could not be determined. '
                 'Please make sure it is in your PATH.'.format(executable.strip('_executable')))
             sys.exit(1)
-        parset[executable] = path
