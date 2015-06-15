@@ -50,11 +50,11 @@ class Operation(object):
 
         # Below are paths for output directories
         self.factor_working_dir = parset['dir_working']
-        # Name of state file
-        self.statebasename = '{0}/state/{1}-{2}'.format(self.factor_working_dir,
-            self.name, self.direction.name)
+        # Base name of state file
+        self.statebasename = os.path.join(self.factor_working_dir,
+            'state', '{0}-{1}'.format(self.name, self.direction.name))
         # Directory that holds important mapfiles in a convenient place
-        self.mapfile_dir = '{0}/datamaps/{1}/{2}'.format(self.factor_working_dir,
+        self.mapfile_dir = os.path.join(self.factor_working_dir, 'datamaps',
             self.name, self.direction.name)
         create_directory(self.mapfile_dir)
         # Pipeline runtime dir (pipeline makes subdir here with name of direction)
@@ -70,8 +70,7 @@ class Operation(object):
             self.name)
         create_directory(self.pipeline_working_dir)
         # Directory that holds logs in a convenient place
-        self.log_dir = '{0}/logs/{1}/{2}/'.format(self.factor_working_dir,
-            self.name, self.direction.name)
+        self.log_dir = os.path.join((self.factor_working_dir, 'logs', self.name)
         create_directory(self.log_dir)
         # Log name used for logs in log_dir
         self.logbasename = os.path.join(self.log_dir, '{0}_{1}'.format(
