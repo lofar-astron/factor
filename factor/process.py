@@ -96,7 +96,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     if len(bands_init_subtract) > 0:
         op = InitSubtract(parset, bands_init_subtract, field)
         scheduler.run(op)
-#         field.cleanup()
+        field.cleanup()
     else:
         log.info("Sky models found for all MS files. Skipping initial subtraction "
             "operation")
@@ -239,7 +239,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         # must be done in series and only on the directions that passed the
         # selfcal check. Also, after this operation is complete for any
         # direction, set flag to indicate all subsequent directions should use
-        # new subtracted data column
+        # the new subtracted-data column
         if dry_run:
             # For dryrun, skip check
             for d in direction_group:

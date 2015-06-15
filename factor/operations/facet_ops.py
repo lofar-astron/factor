@@ -123,14 +123,16 @@ class FacetSelfcal(Operation):
         Finalize this operation
         """
         # Add output datamap to direction object
-        self.direction.shifted_cal_concat_datamap = os.path.join(self.mapfile_dir,
-            'shifted_cal_concat.datamap')
         self.direction.dir_dep_parmdb_datamap = os.path.join(self.mapfile_dir,
             'dir_dep_parmdb.datamap')
         self.direction.facet_image_mapfile = os.path.join(self.mapfile_dir,
             'facet_image.datamap')
-        self.direction.cleanup_mapfiles.extend([self.direction.shifted_cal_concat_datamap,
-            os.path.join(self.mapfile_dir, 'chunk_files.datamap')])
+        self.direction.cleanup_mapfiles.extend([os.path.join(self.mapfile_dir,
+            'chunk_files.datamap'), os.path.join(self.mapfile_dir,
+            'concat1_input.mapfile'), os.path.join(self.mapfile_dir,
+            'concat2_input.mapfile'), os.path.join(self.mapfile_dir,
+            'concat3_input.mapfile'), os.path.join(self.mapfile_dir,
+            'concat4_input.mapfile')])
 
         try:
             ok_datamap = DataMap.load(os.path.join(self.mapfile_dir,
