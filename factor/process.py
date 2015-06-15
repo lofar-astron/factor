@@ -75,14 +75,16 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     # Make direction object for the field
     field = Direction('field', bands[0].ra, bands[0].dec,
         factor_working_dir=parset['dir_working'])
-    if not test_run:
-        # TODO: calculate image size for each field
-        field.imsize_high_res = getOptimumSize(6144)
-        field.imsize_low_res = getOptimumSize(4800)
-    else:
-        field.imsize_high_res = getOptimumSize(128)
-        field.imsize_low_res = getOptimumSize(128)
-    field.save_state()
+    exists = field.load_state()
+    if not exists:
+        if not test_run:
+            # TODO: calculate image size for each field
+            field.imsize_high_res = getOptimumSize(6144)
+            field.imsize_low_res = getOptimumSize(4800)
+        else:
+            field.imsize_high_res = getOptimumSize(128)
+            field.imsize_low_res = getOptimumSize(128)
+        field.save_state()
 
     # Run initial sky model generation and create empty datasets. First check that
     # this operation is needed (only needed if band lacks an initial skymodel or
