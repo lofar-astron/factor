@@ -25,6 +25,7 @@ if __name__ == '__main__':
     parser = optparse.OptionParser(usage='%prog [-v|-q] parset',
             version='%%prog %s' % (version))
     parser.add_option('-d', help='enable dry-run mode', action='store_true', default=False)
+    parser.add_option('-t', help='enable test mode', action='store_true', default=False)
     parser.add_option('-q', help='enable quiet mode', action='store_true', default=False)
     parser.add_option('-v', help='enable verbose mode', action='store_true', default=False)
     (options, args) = parser.parse_args()

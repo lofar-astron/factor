@@ -71,9 +71,9 @@ class FacetAdd(Operation):
             'shifted_empty_bands.datamap')
         self.direction.dir_indep_parmdbs_datamap = os.path.join(self.mapfile_dir,
             'dir_indep_instrument_parmdbs.datamap')
-        self.cleanup_mapfiles.append(self.direction.shifted_all_bands_datamap,
+        self.direction.cleanup_mapfiles.extend([self.direction.shifted_all_bands_datamap,
             self.direction.shifted_cal_bands_datamap,
-            self.direction.shifted_empty_bands_datamap)
+            self.direction.shifted_empty_bands_datamap])
 
 
 class FacetSelfcal(Operation):
@@ -129,9 +129,8 @@ class FacetSelfcal(Operation):
             'dir_dep_parmdb.datamap')
         self.direction.facet_image_mapfile = os.path.join(self.mapfile_dir,
             'facet_image.datamap')
-        self.cleanup_mapfiles.append(self.direction.shifted_cal_concat_datamap)
-        self.cleanup_mapfiles.append(os.path.join(self.mapfile_dir,
-            'chunk_files.datamap'))
+        self.direction.cleanup_mapfiles.extend([self.direction.shifted_cal_concat_datamap,
+            os.path.join(self.mapfile_dir, 'chunk_files.datamap')])
 
         try:
             ok_datamap = DataMap.load(os.path.join(self.mapfile_dir,
@@ -167,7 +166,7 @@ class FacetSub(Operation):
         """
         Finalize this operation
         """
-        self.cleanup_mapfiles.append(os.path.join(self.mapfile_dir,
+        self.direction.cleanup_mapfiles.append(os.path.join(self.mapfile_dir,
             'shifted_models.datamap'))
 
 

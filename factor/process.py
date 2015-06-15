@@ -16,7 +16,7 @@ from factor.lib.scheduler_mp import Scheduler
 from factor.lib.direction import Direction
 
 
-def run(parset_file, logging_level='info', dry_run=False):
+def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     """
     Processes a dataset
 
@@ -28,6 +28,8 @@ def run(parset_file, logging_level='info', dry_run=False):
         One of 'degug', 'info', 'warning'
     dry_run : bool, optional
         If True, do not run pipelines
+    test_run : bool, optional
+        If True, use test settings
     """
     factor._logging.set_level(logging_level)
     log = logging.getLogger('factor')
@@ -86,6 +88,7 @@ def run(parset_file, logging_level='info', dry_run=False):
     if len(bands_init_subtract) > 0:
         op = InitSubtract(parset, bands_init_subtract, field)
         scheduler.run(op)
+        field.cleanup()
     else:
         log.info("Sky models found for all MS files. Skipping initial subtraction "
             "operation")
