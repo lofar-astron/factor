@@ -82,6 +82,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     else:
         field.imsize_high_res = getOptimumSize(128)
         field.imsize_low_res = getOptimumSize(128)
+    field.save_state()
 
     # Run initial sky model generation and create empty datasets. First check that
     # this operation is needed (only needed if band lacks an initial skymodel or
