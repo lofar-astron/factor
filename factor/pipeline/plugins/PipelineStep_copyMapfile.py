@@ -37,8 +37,10 @@ def plugin_main(args, **kwargs):
 
     map_out = DataMap([])
     map_in = DataMap.load(mapfile_in)
-    for i in range(len(map_in)-len(hosts)):
-        hosts.append(hosts[i])
+
+    if hosts is not None:
+        for i in range(len(map_in)-len(hosts)):
+            hosts.append(hosts[i])
 
     for i, item in enumerate(map_in):
         if hosts is None:
