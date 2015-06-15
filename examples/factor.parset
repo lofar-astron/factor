@@ -8,7 +8,7 @@ lofarroot = /lofar/build/gnu_opt/installed
 lofarpythonpath = /lofar/build/gnu_opt/installed/lib/python2.7/dist-packages
 
 # Full path to Generic Pipeline root directory (required)
-piperoot = /path/to/genericpipe/dir
+piperoot = /path/to/genericpipeline
 
 # Full path to working dir - other paths are relative to this (required)
 dir_working = /data/wdir
@@ -26,10 +26,12 @@ parmdb_name = instrument_ap_smoothed
 # Make final mosaic (default = True)
 make_mosaic = False
 
-# Use interactive mode (default = False)
+# Use interactive mode (default = False). Factor will ask for confirmation
+# of internally derived DDE calibrators and facets
 interactive = False
 
-# Use chgcenter to minimize number of w planes (default = False)
+# Use chgcenter to minimize number of w planes (default = False). Note that a
+# copy of the full dataset will be made (as chgcentre modifies the data)
 use_chgcentre = False
 
 
@@ -72,10 +74,6 @@ groupings = 1:5, 4:0
 # PBS / torque reserved nodes. If not given, the clusterdesc file for a single
 # (i.e., local) node is used
 clusterdesc_file = PBS
-
-# Set distribute to True if the cluster has a distributed file system. Set to
-# False if the cluster has a shared file system (the default)
-distribute = False
 
 # Maximum number of CPUs per node to use (default = all)
 ncpu = 6

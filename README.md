@@ -30,7 +30,8 @@ defines the parameters of the run. E.g.:
     $ factor factor.parset
 
 The parset defines the data and working directories, all options, etc. For
-details, please see the [example parset](parsets/factor.parset).
+details, please see the full documentation and the examples in the examples
+directory.
 
 Input data
 ----------
@@ -39,4 +40,4 @@ Currently, only HBA data are supported. The input MS files should be
 concatenated bands of 10 subbands. They should have clock offsets removed, the
 beam at the phase center applied (to DATA and CORRECTED\_DATA columns), and be
 calibrated to 25 arcsec resolution (in the CORRECTED\_DATA column). All MS files
-should be placed in a single directory.
+should be placed together in a single directory.

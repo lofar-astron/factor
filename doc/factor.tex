@@ -39,6 +39,7 @@ users on CEP2 and CEP3 should run the following commands:
 \begin{verbatim}
 use Lofar
 source ~rafferty/init_factor
+use Casa
 use Pythonlibs
 \end{verbatim}
 
@@ -49,7 +50,7 @@ use Pythonlibs
 Factor is run from the command-line with the {\tt runfactor} executable as
 follows:
 \begin{verbatim}
-Usage: runfactor [-v|-q] parset
+Usage: runfactor [-v|-q|-d] <parset>
 
 Options:
   --version   show program's version number and exit
@@ -77,7 +78,7 @@ lofarroot = /lofar/build/gnu_opt/installed
 lofarpythonpath = /lofar/build/gnu_opt/installed/lib/python2.7/dist-packages
 
 # Full path to Generic Pipeline root directory (required)
-piperoot = /path/to/genericpipe/dir
+piperoot = /path/to/genericpipeline
 
 # Full path to working dir - other paths are relative to this (required)
 dir_working = /data/wdir
@@ -87,22 +88,21 @@ dir_working = /data/wdir
 # please keep a copy of these data elsewhere
 dir_ms = /data/bands
 
-# Parmdb name for dir-indep. selfcal solutions (default = instrument). The
-# parmdb is assumed to be stored inside the input band measurement sets, so path
-# should be relative to those).
+# Parmdb name for dir-indep. selfcal solutions (stored inside the input
+# band measurement sets, so path should be relative to those; default =
+# instrument)
 parmdb_name = instrument_ap_smoothed
 
 # Make final mosaic (default = True)
 make_mosaic = False
 
-# Use interactive mode (default = False). In interactive mode, Factor will ask
-# for the user to verify directions, etc.
+# Use interactive mode (default = False). Factor will ask for confirmation
+# of internally derived DDE calibrators and facets
 interactive = False
 
-# Choose imager to use: one of awimager, casapy, wsclean (default = awimager)
-imager = wsclean
-imagerroot = /path/to/wsclean
-imager_selfcal = casapy
+# Use chgcenter to minimize number of w planes (default = False). Note that a
+# copy of the full dataset will be made (as chgcentre modifies the data)
+use_chgcentre = False
 
 
 [directions]
@@ -110,22 +110,23 @@ imager_selfcal = casapy
 # are selected internally using the flux and size cuts below
 directions_file = /data/directions.txt
 
-# Flux and size cuts for selecting directions internally: min flux, max size
+# Check whether any sources from the initial subtract sky model fall on facet
+# edges. If any are found, the facet regions are adjusted to avoid them (default
+# is False)
+check_edges = False
+
+# Flux and size cuts for selecting directions internally (min flux, max size
 # of a source, and max separation between sources below which they are grouped
-# into one direction (required if no directions_file is given)
+# into one direction; required if no directions_file is given)
 flux_min_Jy = 0.1
 size_max_arcmin = 3.0
 separation_max_arcmin = 6.0
-
-# The edges of facets can be adjusted to avoid sources found in the initial
-# subtract operation (default = False)
-check_edges = True
 
 # The number of internally derived directions can be limited to a maximum number
 # of directions if desired (default = all)
 max_num = 50
 
-# Total number of directions to process in this run (default = all)
+# Total number of directions to process (default = all)
 ndir = 10
 
 # Grouping of directions into groups that are processed in parallel, defined as
@@ -143,10 +144,6 @@ groupings = 1:5, 4:0
 # PBS / torque reserved nodes. If not given, the clusterdesc file for a single
 # (i.e., local) node is used
 clusterdesc_file = PBS
-
-# Set distribute to True if the cluster has a distributed file system. Set to
-# False if the cluster has a shared file system (the default)
-distribute = False
 
 # Maximum number of CPUs per node to use (default = all)
 ncpu = 6
@@ -190,14 +187,13 @@ follows:
 #
 # Directions should be sorted in order of reduction (e.g., bright to faint).
 #
-# Columns are defined as follows (in [] are optional parameters with their default values):
-# Name (str), RA (float), DEC (float), [regionfile (str, default='')],
-# [multiscale (bool, default=False)], [solint_amp (int, default=600)],
-# [solint_ph (int, default=5)], [make_final_image (bool, default=True)],
-# [cal_radius (float arcmin, default=3.0)]
-calibrator_1, 111.11, 22.22, , , , , ,
-calibrator_2, 222.22, 33.33, reg/cal2.reg, True, 600, 5, False, 4.5
-calibrator_3, 333.33, 44.44, , True, 600, 5, ,
+# name position atrous_do mscale_field_do cal_imsize solint_ph solint_amp
+# field_imsize dynamic_range region_selfcal region_field peel_skymodel
+# outlier_source
+
+s1  14h41m01.884,+35d30m31.52 False False 512  1 30  5600 LD empty empty    s1.skymodel True
+s2  14h38m29.584,+33d57m37.82 False False 1024 1 30  5600 LD empty empty    empty       False
+s25 14h21m07.482,+35d35m22.87 False False 1280 2 240 5600 LD empty s25.rgn  empty       False
 \end{verbatim}
 This file should be specified in the parset file as the {\tt directions\_file}
 parameter.
@@ -243,9 +239,10 @@ layout (distributed vs. shared file system) and scheduling system (if any), as
 described in the following sections.
 
 \subsubsection{Cluster without a scheduler}
-For use on a cluster that does not use a scheduler to assign nodes to the user, such as CEP2 and CEP3,
-you must provide a LOFAR pipeline cluster description file that tells Factor which nodes are
-available. An example of such a file is shown below.
+For use on a cluster that does not use a scheduler to assign nodes to the user,
+such as CEP2 and CEP3, you must provide a LOFAR pipeline cluster description
+file that tells Factor which nodes are available. An example of such a file is
+shown below.
 
 \begin{verbatim}
 ClusterName = MyCEP3
@@ -276,11 +273,12 @@ runfactor factor.parset
 Factor works by default on a compute cluster with a shared file system.
 
 \subsubsection{Cluster with a distributed file system}
-For use on a cluster with a distributed file system (such as CEP2 and CEP3), set
-{\tt distribute = True}. Factor will then synchronize files between the
-available nodes. Note that all data will be mirrored on each node, so one must
-ensure that all nodes have sufficient disk space. Additionally, the local disk
-must have the same name on each node.
+Factor does not yet work with a distributed file system (such as CEP2 and CEP3),
+%For use on a cluster with a distributed file system (such as CEP2 and CEP3), set
+%{\tt distribute = True}. Factor will then synchronize files between the
+%available nodes. Note that all data will be mirrored on each node, so one must
+%ensure that all nodes have sufficient disk space. Additionally, the local disk
+%must have the same name on each node.
 
 
 %-----------------------------------------------------------
@@ -307,44 +305,80 @@ one).
 
 Factor is structured based on operations and actions. An operation is composed
 of a sequence of actions. For example, the initial subtraction operation
-(denoted InitSubtract) performs the following actions: image at high resolution,
+(denoted {\tt initsubtract}) performs the following actions: image at high resolution,
 make a sky model, subtract the sky model, average, image and low resolution,
 make another sky model, and finally subtract the second sky model. Operations
 divide the reduction into logical groupings of actions as follows.
 
 \begin{description}
-\item[InitSubtract] Performs the initial imaging and subtraction of sources to
+\item[{\tt initsubtract}] Performs the initial imaging and subtraction of sources to
 create ``source-free'' datasets. This operation may be skipped if sky models are
 specified for each band in the parset and the {\tt SUBTRACTED\_DATA\_ALL} column
 is present in all the bands.
-\item[FacetAddCal] For each direction, the calibrator source is added to the
+\item[{\tt facetadd}] For each direction, the facet sources are added to the
 ``source-free'' datasets. The data are then phase shifted to the appropriate
 coordinates.
-\item[FacetSetup] The direction-independent calibration is applied, and the
-bands are concatenated and averaged.
-\item[FacetSelfcal] Selfcalibration is performed on one or more directions,
-using two rounds of phase-only calibration followed by two rounds of fast-phase
-and slow-amplitude calibration.
-\item[FacetAddAll] For each direction, all sources in the facet are added to the
-``source-free'' datasets. The data are then phase shifted to the appropriate
-coordinates.
-\item[FacetImage] The direction-dependent calibration is applied, and the
-bands are concatenated and averaged. The entire facet is then imaged, producing
-a final model of the facet sources.
-\item[FacetSubAll] The final model is subtracted, producing improved
+\item[{\tt facetselcal}] The direction-independent calibration is applied, and
+the bands are concatenated and averaged. Selfcalibration is then performed on
+one or more directions, using two rounds of phase-only calibration followed by
+two rounds of fast-phase and slow-amplitude calibration. For each direction, all
+sources in the facet are added to the ``source-free'' datasets. The data are
+then phase shifted to the appropriate coordinates. The direction-dependent
+calibration is applied, and the bands are concatenated and averaged. The entire
+facet is then imaged, producing a final model of the facet sources.
+\item[{\tt facetsub}] The final model is subtracted, producing improved
 ``source-free'' datasets.
 \end{description}
 
-The facet operations are repeated for each direction. Some operations, such as
-the FacetSelfcal operation, can run on multiple directions simultaneously. After
-each action finishes, the saved state is updated, allowing for resumption
-of steps at the granularity of the actions in a given operation.
+The facet operations are repeated for each direction. The facetselfcal operation
+can run on multiple directions simultaneously. After each action finishes, the
+saved state is updated, allowing for resumption of steps at the granularity of
+the actions in a given operation.
 
-The results of the processing are stored in subdirectories in the working
-directory by type (e.g. {\tt images} and {\tt logs}). Inside these
-subdirectories, results are organized by operation, action, band, and/or
-direction. For example, for a direction named ``dir1'', the images produced
-during self calibration are stored in {{\tt images/FacetSelfcal/MakeImage/dir1/}.
+The results of the processing are stored in the {\tt results} directory in the
+working directory by type. Inside these subdirectories, results are organized by
+operation and dirrection. For example, for a direction named ``dir1'', the
+results produced during self calibration are stored in {{\tt
+results/facetselfcal/dir1/}.
 
+
+\subsection{Quick-start}
+\label{factor:quick-start}
+Below is a quick-start quide to a typical run.
+
+\begin{enumerate}
+\item Collect input bands in a single directory. The MS names can be anything
+but must end in ``.MS'' or ``.ms'':
+\begin{verbatim}
+[/data/factor_input]$ ls
+band1.MS         band2.ms         A.MS         b.ms
+\end{verbatim}
+\item Edit the example parset above to fit your reduction and computing
+resource. For example, the parset for a single machine could be:
+\begin{verbatim}
+[/data]$ more factor.parset
+[global]
+dir_working = /data/factor_output
+dir_ms = /data/factor_input
+piperoot = /software/local/genericpipeline
+parmdb_name = instrument_ap_smoothed
+iteractive = True
+
+[directions]
+flux_min_jy = 0.1
+size_max_arcmin = 3.0
+separation_max_arcmin = 7.5
+max_num = 100
+groupings = 1:1, 4:0
+check_edges = True
+
+[cluster]
+ncpu = 5
+\end{verbatim}
+\item Run the reduction:
+\begin{verbatim}
+[/data]$ runfactor factor.parset
+\end{verbatim}
+\end{enumerate}
 
 \end{document}
