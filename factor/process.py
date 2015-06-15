@@ -96,7 +96,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     if len(bands_init_subtract) > 0:
         op = InitSubtract(parset, bands_init_subtract, field)
         scheduler.run(op)
-        field.cleanup()
+#         field.cleanup()
     else:
         log.info("Sky models found for all MS files. Skipping initial subtraction "
             "operation")
