@@ -65,7 +65,7 @@ def find_executables(parset):
                    'H5parm_importer_executable': ['H5parm_importer.py'],
                    'H5parm_exporter_executable': ['H5parm_exporter.py']}
     for key, names in executables.iteritems():
-        for name in names
+        for name in names:
             path = spawn.find_executable(executable)
             if path is not None:
                 parset[executable] = path
