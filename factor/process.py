@@ -75,8 +75,13 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     # Make direction object for the field
     field = Direction('field', bands[0].ra, bands[0].dec,
         factor_working_dir=parset['dir_working'])
-    field.imsize_high_res = 6144 # TODO: calculate image size for each field
-    field.imsize_low_res = 4800 # TODO: calculate image size for each field
+    if not test_run:
+        # TODO: calculate image size for each field
+        field.imsize_high_res = getOptimumSize(6144)
+        field.imsize_low_res = getOptimumSize(4800)
+    else:
+        field.imsize_high_res = getOptimumSize(128)
+        field.imsize_low_res = getOptimumSize(128)
 
     # Run initial sky model generation and create empty datasets. First check that
     # this operation is needed (only needed if band lacks an initial skymodel or
@@ -137,15 +142,21 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     # Set various direction attributes
     for i, direction in enumerate(directions):
         exists = direction.load_state()
+        direction.cleanup_mapfiles = []
+        direction.save_state()
         if not exists:
             direction.vertices = polys[i]
             direction.width = widths[i]
 
             # Set image sizes
-            direction.facet_imsize = getOptimumSize(direction.width * 3600.0 / 1.5
-                * 1.15) # full facet has 15% padding to avoid aliasing issues with ft
-            direction.cal_imsize = getOptimumSize(direction.cal_radius_deg * 3600.0
-                / 1.5 * 1.5) # cal size has 50% padding
+            if not test_run:
+                direction.facet_imsize = getOptimumSize(direction.width * 3600.0 / 1.5
+                    * 1.15) # full facet has 15% padding to avoid aliasing issues with ft
+                direction.cal_imsize = getOptimumSize(direction.cal_radius_deg * 3600.0
+                    / 1.5 * 1.5) # cal size has 50% padding
+            else:
+                direction.facet_imsize = getOptimumSize(128)
+                direction.cal_imsize = getOptimumSize(128)
 
             # Make CASA region files for use during clean
             reg_file = os.path.join(parset['dir_working'], 'regions', direction.name+'.rgn')
