@@ -45,4 +45,5 @@ if __name__ == '__main__':
         logging_level = 'info'
 
     # Process the field
-    process.run(parset_file, logging_level=logging_level, dry_run=options.d)
+    process.run(parset_file, logging_level=logging_level, dry_run=options.d,
+        test_run=options.t)
