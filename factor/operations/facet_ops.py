@@ -62,7 +62,7 @@ class FacetAdd(Operation):
         """
         # Add output datamaps to direction object
         self.direction.input_bands_datamap = os.path.join(self.mapfile_dir,
-            'input_bands.datamap.datamap')
+            'input_bands.datamap')
         self.direction.shifted_all_bands_datamap = os.path.join(self.mapfile_dir,
             'shifted_all_bands.datamap')
         self.direction.shifted_cal_bands_datamap = os.path.join(self.mapfile_dir,
