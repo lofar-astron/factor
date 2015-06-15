@@ -70,7 +70,7 @@ class Operation(object):
             self.name)
         create_directory(self.pipeline_working_dir)
         # Directory that holds logs in a convenient place
-        self.log_dir = os.path.join((self.factor_working_dir, 'logs', self.name)
+        self.log_dir = os.path.join(self.factor_working_dir, 'logs', self.name)
         create_directory(self.log_dir)
         # Log name used for logs in log_dir
         self.logbasename = os.path.join(self.log_dir, '{0}_{1}'.format(
