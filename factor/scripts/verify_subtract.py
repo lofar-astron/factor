@@ -19,9 +19,9 @@ def main(image_pre, image_post, res_val):
     maxvalpost = numpy.max(imgpost.getdata())
 
     if (maxvalpost > res_val): # or ((maxvalpost*0.95) > maxvalpre) :
-        return {'break': False, 'maxval': maxvalpost, 'maxvalpre': maxvalpre}
+        return {'break': False, 'maxvalpost': maxvalpost, 'maxvalpre': maxvalpre}
     else:
-        return {'break': True, 'maxval': maxvalpost, 'maxvalpre': maxvalpre}
+        return {'break': True, 'maxvalpost': maxvalpost, 'maxvalpre': maxvalpre}
 
 
 if __name__ == '__main__':
