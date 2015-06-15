@@ -24,9 +24,11 @@ expand_parmdb_map.control.mapfile_dir           =   {{ mapfile_dir }}
 expand_parmdb_map.control.filename              =   subtract_parmdbs.mapfile
 
 subtract.control.type                           =   calibrate-stand-alone_new
-subtract.argument.observation                   =   {{ input_bands_datamap }}
+subtract.control.mapfiles_in                    =   [{{ input_bands_datamap }},expand_parmdb_map.output.mapfile]
+subtract.control.inputkeys                      =   [inputms,inputparmdb]
+subtract.argument.observation                   =   inputms
 subtract.argument.parset                        =   {{ parset_dir }}//facet_dirdep_subtract.parset
 subtract.argument.catalog                       =   {{ skymodel_dir }}/empty.skymodel
-subtract.argument.parmdb                        =   expand_parmdb_map.output.mapfile
+subtract.argument.parmdb                        =   inputparmdb
 subtract.argument.replace-sourcedb              =   True
 subtract.argument.replace-parmdb                =   True
