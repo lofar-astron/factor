@@ -1,4 +1,4 @@
-pipeline.steps = [shift_to_field, create_compressed_mapfile, copy_column, subtract]
+pipeline.steps = [shift_to_field, subtract]
 
 pipeline.pluginpath                             =   {{ pipeline_dir }}/plugins
 
@@ -19,8 +19,8 @@ create_compressed_mapfile.control.filename      =   concat_input.mapfile
 
 copy_column.control.type                        =   copy_column
 copy_column.control.mapfiles_in                 =   [shift_to_field.output.mapfile,create_compressed_mapfile.output.mapfile]
-copy_column.control.inputkeys                   =   [corrdatafile, datafile]
-copy_column.argument.flags                      =   [corrdatafile, datafile, DATA, MODEL_DATA]
+copy_column.control.inputkeys                   =   [shiftedfile, datafile]
+copy_column.argument.flags                      =   [shiftedfile, datafile, DATA, MODEL_DATA]
 
 subtract.control.type                           =   calibrate-stand-alone_new
 subtract.argument.observation                   =   {{ input_bands_datamap }}
