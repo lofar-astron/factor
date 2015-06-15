@@ -21,7 +21,7 @@ expand_parmdb_map.control.type                  =   expandMapfile
 expand_parmdb_map.control.mapfile_in            =   {{ dir_dep_parmdb_datamap }}
 expand_parmdb_map.control.mapfile_to_match      =   {{ input_bands_datamap }}
 expand_parmdb_map.control.mapfile_dir           =   {{ mapfile_dir }}
-expand_parmdb_map.control.filename              =   subtract_parmdbs.mapfile
+expand_parmdb_map.control.filename              =   subtract_parmdbs.datamap
 
 subtract.control.type                           =   calibrate-stand-alone_new
 subtract.control.mapfiles_in                    =   [{{ input_bands_datamap }},expand_parmdb_map.output.mapfile]

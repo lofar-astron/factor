@@ -236,7 +236,7 @@ create_compressed_mapfile1.control.kind                    =   plugin
 create_compressed_mapfile1.control.type                    =   compressMapfile
 create_compressed_mapfile1.control.mapfile_in              =   average1.output.mapfile
 create_compressed_mapfile1.control.mapfile_dir             =   {{ mapfile_dir }}
-create_compressed_mapfile1.control.filename                =   concat1_input.mapfile
+create_compressed_mapfile1.control.filename                =   concat1_input.datamap
 
 concat1.control.type                                       =   virtual_concat
 concat1.control.mapfile_in                                 =   create_compressed_mapfile1.output.mapfile
@@ -285,7 +285,7 @@ adjust_casa_mapfile1.control.type                          =   appendMapfile
 adjust_casa_mapfile1.control.mapfile_in                    =   casa_image11.output.casa_image11.image.mapfile
 adjust_casa_mapfile1.control.append                        =   {{ casa_suffix }}
 adjust_casa_mapfile1.control.mapfile_dir                   =   {{ mapfile_dir }}
-adjust_casa_mapfile1.control.filename                      =   mask1_input.mapfile
+adjust_casa_mapfile1.control.filename                      =   mask1_input.datamap
 
 mask1.control.type                                         =   make_clean_mask
 mask1.control.mapfile_in                                   =   adjust_casa_mapfile1.output.mapfile
@@ -348,7 +348,7 @@ create_chunks_compressed_mapfile.control.kind              =   plugin
 create_chunks_compressed_mapfile.control.type              =   compressMapfile
 create_chunks_compressed_mapfile.control.mapfile_in        =   create_chunks_map.output.mapfile
 create_chunks_compressed_mapfile.control.mapfile_dir       =   {{ mapfile_dir }}
-create_chunks_compressed_mapfile.control.filename          =   chunks_compressed.mapfile
+create_chunks_compressed_mapfile.control.filename          =   chunks_compressed.datamap
 
 concat_chunks.control.type                                 =   virtual_concat
 concat_chunks.control.mapfile_in                           =   create_chunks_compressed_mapfile.output.mapfile
@@ -384,7 +384,7 @@ create_compressed_mapfile2.control.kind                    =   plugin
 create_compressed_mapfile2.control.type                    =   compressMapfile
 create_compressed_mapfile2.control.mapfile_in              =   average2.output.mapfile
 create_compressed_mapfile2.control.mapfile_dir             =   {{ mapfile_dir }}
-create_compressed_mapfile2.control.filename                =   concat2_input.mapfile
+create_compressed_mapfile2.control.filename                =   concat2_input.datamap
 
 concat2.control.type                                       =   virtual_concat
 concat2.control.mapfile_in                                 =   create_compressed_mapfile2.output.mapfile
@@ -433,7 +433,7 @@ adjust_casa_mapfile2.control.type                          =   appendMapfile
 adjust_casa_mapfile2.control.mapfile_in                    =   casa_image21.output.casa_image21.image.mapfile
 adjust_casa_mapfile2.control.append                        =   {{ casa_suffix }}
 adjust_casa_mapfile2.control.mapfile_dir                   =   {{ mapfile_dir }}
-adjust_casa_mapfile2.control.filename                      =   mask2_input.mapfile
+adjust_casa_mapfile2.control.filename                      =   mask2_input.datamap
 
 mask2.control.type                                         =   make_clean_mask
 mask2.control.mapfile_in                                   =   adjust_casa_mapfile2.output.mapfile
@@ -557,7 +557,7 @@ create_compressed_mapfile3.control.kind                    =   plugin
 create_compressed_mapfile3.control.type                    =   compressMapfile
 create_compressed_mapfile3.control.mapfile_in              =   average3.output.mapfile
 create_compressed_mapfile3.control.mapfile_dir             =   {{ mapfile_dir }}
-create_compressed_mapfile3.control.filename                =   concat3_input.mapfile
+create_compressed_mapfile3.control.filename                =   concat3_input.datamap
 
 concat3.control.type                                       =   virtual_concat
 concat3.control.mapfile_in                                 =   create_compressed_mapfile3.output.mapfile
@@ -606,7 +606,7 @@ adjust_casa_mapfile3.control.type                          =   appendMapfile
 adjust_casa_mapfile3.control.mapfile_in                    =   casa_image31.output.casa_image31.image.mapfile
 adjust_casa_mapfile3.control.append                        =   {{ casa_suffix }}
 adjust_casa_mapfile3.control.mapfile_dir                   =   {{ mapfile_dir }}
-adjust_casa_mapfile3.control.filename                      =   mask3_input.mapfile
+adjust_casa_mapfile3.control.filename                      =   mask3_input.datamap
 
 mask3.control.type                                         =   make_clean_mask
 mask3.control.mapfile_in                                   =   adjust_casa_mapfile3.output.mapfile
@@ -736,7 +736,7 @@ create_compressed_mapfile4.control.kind                    =   plugin
 create_compressed_mapfile4.control.type                    =   compressMapfile
 create_compressed_mapfile4.control.mapfile_in              =   average4.output.mapfile
 create_compressed_mapfile4.control.mapfile_dir             =   {{ mapfile_dir }}
-create_compressed_mapfile4.control.filename                =   concat4_input.mapfile
+create_compressed_mapfile4.control.filename                =   concat4_input.datamap
 
 concat4.control.type                                       =   virtual_concat
 concat4.control.mapfile_in                                 =   create_compressed_mapfile4.output.mapfile
@@ -785,7 +785,7 @@ adjust_casa_mapfile4.control.type                          =   appendMapfile
 adjust_casa_mapfile4.control.mapfile_in                    =   casa_image41.output.casa_image41.image.mapfile
 adjust_casa_mapfile4.control.append                        =   {{ casa_suffix }}
 adjust_casa_mapfile4.control.mapfile_dir                   =   {{ mapfile_dir }}
-adjust_casa_mapfile4.control.filename                      =   mask4_input.mapfile
+adjust_casa_mapfile4.control.filename                      =   mask4_input.datamap
 
 mask4.control.type                                         =   make_clean_mask
 mask4.control.mapfile_in                                   =   adjust_casa_mapfile4.output.mapfile
@@ -873,7 +873,7 @@ create_compressed_mapfile5.control.kind                    =   plugin
 create_compressed_mapfile5.control.type                    =   compressMapfile
 create_compressed_mapfile5.control.mapfile_in              =   average5.output.mapfile
 create_compressed_mapfile5.control.mapfile_dir             =   {{ mapfile_dir }}
-create_compressed_mapfile5.control.filename                =   concat_averaged_input.mapfile
+create_compressed_mapfile5.control.filename                =   concat_averaged_input.datamap
 
 concat_averaged.control.type                               =   virtual_concat
 concat_averaged.control.mapfile_in                         =   create_compressed_mapfile5.output.mapfile
@@ -943,7 +943,7 @@ create_compressed_mapfile6.control.kind                    =   plugin
 create_compressed_mapfile6.control.type                    =   compressMapfile
 create_compressed_mapfile6.control.mapfile_in              =   {{ shifted_all_bands_datamap }}
 create_compressed_mapfile6.control.mapfile_dir             =   {{ mapfile_dir }}
-create_compressed_mapfile6.control.filename                =   concat_unaveraged_input.mapfile
+create_compressed_mapfile6.control.filename                =   concat_unaveraged_input.datamap
 
 concat_unaveraged.control.type                             =   virtual_concat
 concat_unaveraged.control.mapfile_in                       =   create_compressed_mapfile6.output.mapfile

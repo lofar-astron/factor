@@ -129,10 +129,10 @@ class FacetSelfcal(Operation):
             'facet_image.datamap')
         self.direction.cleanup_mapfiles.extend([os.path.join(self.mapfile_dir,
             'chunk_files.datamap'), os.path.join(self.mapfile_dir,
-            'concat1_input.mapfile'), os.path.join(self.mapfile_dir,
-            'concat2_input.mapfile'), os.path.join(self.mapfile_dir,
-            'concat3_input.mapfile'), os.path.join(self.mapfile_dir,
-            'concat4_input.mapfile')])
+            'concat1_input.datamap'), os.path.join(self.mapfile_dir,
+            'concat2_input.datamap'), os.path.join(self.mapfile_dir,
+            'concat3_input.datamap'), os.path.join(self.mapfile_dir,
+            'concat4_input.datamap')])
 
         try:
             ok_datamap = DataMap.load(os.path.join(self.mapfile_dir,
