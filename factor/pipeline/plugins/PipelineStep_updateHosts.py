@@ -25,10 +25,11 @@ def plugin_main(args, **kwargs):
     if type(kwargs['hosts']) is str:
         hosts = kwargs['hosts'].strip('[]').split(',')
         hosts = [h.strip() for h in hosts]
-    for i in range(len(datamap)-len(hosts)):
-        hosts.append(hosts[i])
 
     map = DataMap.load(mapfile_in)
+    for i in range(len(map)-len(hosts)):
+        hosts.append(hosts[i])
+
     for item, host in zip(map, hosts):
         item.host = host
 
