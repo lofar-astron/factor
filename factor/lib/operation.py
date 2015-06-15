@@ -109,7 +109,7 @@ class Operation(object):
 #                          'chgcentre_executable': parset['chgcentre_executable'],
                          'losoto_executable': parset['losoto_executable'],
                          'H5parm_importer_executable': parset['H5parm_importer_executable'],
-                         'H5parm_exporter_executable': sparset['H5parm_exporter_executable']}
+                         'H5parm_exporter_executable': parset['H5parm_exporter_executable']}
 
         # Add cluster-related info
         if os.path.basename(self.parset['cluster_specific']['clusterdesc']) == 'local.clusterdesc':
