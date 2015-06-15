@@ -33,7 +33,7 @@ def plugin_main(args, **kwargs):
     mapfile_dir = kwargs['mapfile_dir']
     filename = kwargs['filename']
 
-    map = DataMap([])
+    map_out = DataMap([])
     measurements = glob.glob(os.path.join(folder, '*[MS|ms]'))
     measurements.sort()
 
@@ -41,10 +41,10 @@ def plugin_main(args, **kwargs):
         hosts.append(hosts[i])
 
     for ms, host in zip(measurements, hosts):
-        map.data.append(DataProduct(host, os.path.join(folder, ms), False))
+        map_out.data.append(DataProduct(host, os.path.join(folder, ms), False))
 
     fileid = os.path.join(mapfile_dir, filename)
-    map.save(fileid)
+    map_out.save(fileid)
     result = {'mapfile': fileid}
 
     return result

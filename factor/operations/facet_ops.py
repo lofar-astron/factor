@@ -161,7 +161,7 @@ class FacetSub(Operation):
                            'input_bands_datamap': self.direction.input_bands_datamap,
                            'field_ra': self.direction.field_ra,
                            'field_dec': self.direction.field_dec,
-                           'hosts': self.direction.hosts}
+                           'hosts': self.node_list}
 
 
     def finalize(self):

@@ -42,11 +42,6 @@ make_facet_skymodels_cal.argument.facet_ra       =   {{ facet_ra }}
 make_facet_skymodels_cal.argument.facet_dec      =   {{ facet_dec }}
 make_facet_skymodels_cal.argument.cal_radius_deg =   {{ cal_radius_deg }}
 
-copy_parmdb.control.kind                         =   plugin
-copy_parmdb.control.type                         =   copyParmdbtoMS
-copy_parmdb.control.ms_mapfile                   =   create_ms_map.output.mapfile
-copy_parmdb.control.parmdb_mapfile               =   create_parmdb_map.output.mapfile
-
 add_all_facet_sources.control.type               =   calibrate-stand-alone_new
 add_all_facet_sources.argument.observation       =   create_ms_map.output.mapfile
 add_all_facet_sources.argument.parset            =   {{ parset_dir }}/{{ add_all_parset }}

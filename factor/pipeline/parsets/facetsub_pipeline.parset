@@ -1,6 +1,16 @@
-pipeline.steps = [shift_to_field, copy_column, expand_parmdb_map, subtract, copy_shifted_map]
+pipeline.steps = [update_shifted_all_hosts, update_input_bands_hosts, shift_to_field, copy_column, expand_parmdb_map, subtract, copy_shifted_map]
 
 pipeline.pluginpath                             =   {{ pipeline_dir }}/plugins
+
+update_shifted_all_hosts.control.kind           =   plugin
+update_shifted_all_hosts.control.type           =   updateHosts
+update_shifted_all_hosts.control.mapfile_in     =   {{ shifted_all_bands_datamap }}
+update_shifted_all_hosts.control.hosts          =   {{ hosts }}
+
+update_input_bands_hosts.control.kind           =   plugin
+update_input_bands_hosts.control.type           =   updateHosts
+update_input_bands_hosts.control.mapfile_in     =   {{ input_bands_datamap }}
+update_input_bands_hosts.control.hosts          =   {{ hosts }}
 
 shift_to_field.control.type                     =   dppp
 shift_to_field.control.opts.mapfile_in          =   {{ shifted_all_bands_datamap }}

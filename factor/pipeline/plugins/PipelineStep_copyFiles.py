@@ -29,18 +29,18 @@ def plugin_main(args, **kwargs):
     mapfile_dir = kwargs['mapfile_dir']
     filename = kwargs['filename']
 
-    map = DataMap([])
-    datamap = DataMap.load(mapfile_in)
+    map_out = DataMap([])
+    map_in = DataMap.load(mapfile_in)
 
-    for i, item in enumerate(datamap):
+    for i, item in enumerate(map_in):
         new_file = os.path.join(os.path.dirname(item.file), prefix+os.path.basename(item.file))
         if not os.path.exists(new_file):
             os.system('cp -r {0} {1}'.format(item.file, new_file))
 
-        map.data.append(DataProduct(item.host, new_file, item.skip))
+        map_out.data.append(DataProduct(item.host, new_file, item.skip))
 
     fileid = os.path.join(mapfile_dir, filename)
-    map.save(fileid)
+    map_out.save(fileid)
     result = {'mapfile': fileid}
 
     return result
