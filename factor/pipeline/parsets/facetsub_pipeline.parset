@@ -1,4 +1,4 @@
-pipeline.steps = [shift_to_field, copy_column, expand_parmdb_map, subtract]
+pipeline.steps = [shift_to_field, copy_column, expand_parmdb_map, subtract, copy_shifted_map]
 
 pipeline.pluginpath                             =   {{ pipeline_dir }}/plugins
 
@@ -12,7 +12,7 @@ shift_to_field.parsetarg.shift.type             =   phaseshifter
 shift_to_field.parsetarg.shift.phasecenter      =   [{{ field_ra }}deg, {{ field_dec }}deg]
 
 copy_column.control.type                        =   copy_column
-copy_column.control.mapfiles_in                 =   [shift_to_field.output.mapfile,{{ shifted_all_bands_datamap }}]
+copy_column.control.mapfiles_in                 =   [shift_to_field.output.mapfile,{{ input_bands_datamap }}]
 copy_column.control.inputkeys                   =   [shiftedfile, datafile]
 copy_column.argument.flags                      =   [shiftedfile, datafile, DATA, MODEL_DATA]
 
@@ -32,3 +32,9 @@ subtract.argument.catalog                       =   {{ skymodel_dir }}/empty.sky
 subtract.argument.parmdb                        =   inputparmdb
 subtract.argument.replace-sourcedb              =   True
 subtract.argument.replace-parmdb                =   True
+
+copy_shifted_map.control.kind                   =   plugin
+copy_shifted_map.control.type                   =   copyMapfile
+copy_shifted_map.control.mapfile_in             =   shift_to_field.output.mapfile
+copy_shifted_map.control.mapfile_dir            =   {{ mapfile_dir }}
+copy_shifted_map.control.filename               =   shifted_models.datamap

@@ -118,10 +118,10 @@ class Direction(object):
 
         self.working_dir = factor_working_dir
         self.completed_operations = []
+        self.cleanup_mapfiles = []
         self.save_file = os.path.join(self.working_dir, 'state',
             self.name+'_save.pkl')
         self.pipeline_dir = os.path.join(self.working_dir, 'pipeline')
-        self.vis_dir = os.path.join(self.working_dir, 'visdata')
 
 
     def save_state(self):
@@ -182,12 +182,10 @@ class Direction(object):
         """
         Cleans up unneeded data
         """
-        import glob
+        from lofarpipe.support.data_map import DataMap
 
-        operations = ['facetadd', 'facetselfcal', 'facetsub']
-        for op in operations:
-            # Delete vis data
-            result_dir = glob.glob(os.path.join(self.working_dir, 'results', op,
-                self.name, '*'))
-            if os.path.exists(result_dir):
-                os.system('rm -rf {0}'.format(result_dir))
+        for mapfile in self.cleanup_mapfiles:
+            datamap = DataMap.load(mapfile)
+            for item in datamap:
+                if os.path.exists(item.file):
+                    os.system('rm -rf {0}'.format(item.file))

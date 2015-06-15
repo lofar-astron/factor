@@ -232,3 +232,9 @@ copy_final_model_map.control.type          =   copyMapfile
 copy_final_model_map.control.mapfile_in    =   merge.output.mapfile
 copy_final_model_map.control.mapfile_dir   =   {{ mapfile_dir }}
 copy_final_model_map.control.filename      =   merged_skymodels.datamap
+
+copy_avg_data_map.control.kind             =   plugin
+copy_avg_data_map.control.type             =   copyMapfile
+copy_avg_data_map.control.mapfile_in       =   average.output.mapfile
+copy_avg_data_map.control.mapfile_dir      =   {{ mapfile_dir }}
+copy_avg_data_map.control.filename         =   averaged_data.datamap
