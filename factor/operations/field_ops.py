@@ -45,7 +45,7 @@ class InitSubtract(Operation):
         for band, item in zip(self.bands, datamap):
             band.skymodel_dirindep = item.file
         self.cleanup_mapfiles.append(os.path.join(self.mapfile_dir,
-            'averaged_data.datamap')
+            'averaged_data.datamap'))
 
 
 class MakeMosaic(Operation):
