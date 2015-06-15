@@ -131,7 +131,7 @@ class FacetSelfcal(Operation):
             'facet_image.datamap')
         self.cleanup_mapfiles.append(self.direction.shifted_cal_concat_datamap)
         self.cleanup_mapfiles.append(os.path.join(self.mapfile_dir,
-            'chunk_files.datamap')
+            'chunk_files.datamap'))
 
         try:
             ok_datamap = DataMap.load(os.path.join(self.mapfile_dir,
@@ -168,7 +168,7 @@ class FacetSub(Operation):
         Finalize this operation
         """
         self.cleanup_mapfiles.append(os.path.join(self.mapfile_dir,
-            'shifted_models.datamap')
+            'shifted_models.datamap'))
 
 
 class FacetAddAllFinal(Operation):
