@@ -50,3 +50,20 @@ def get_compute_nodes(clusterdesc_file):
 
     cluster = clusterdesc.ClusterDesc(clusterdesc_file)
     return sorted(clusterdesc.get_compute_nodes(cluster))
+
+
+def find_executables(parset):
+    """
+    Finds paths to required executables
+    """
+    from distutils import spawn
+
+    executables = ['casa_executable', 'wsclean_executable', 'losoto_executable',
+        'H5parm_importer_executable', 'H5parm_exporter_executable']# 'chgcentre_executable']
+    for executable in executables:
+        path = spawn.find_executable(executable)
+        if path is None:
+            log.error('The path to the {0} executable could not be determined. '
+                'Please make sure it is in your PATH.'.format(executable.strip('_executable')))
+            sys.exit(1)
+        parset[executable] = path

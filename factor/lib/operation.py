@@ -10,7 +10,6 @@ from factor.lib.context import Timer
 from factor.lib.scheduler_mp import Scheduler
 from factor import _logging
 from jinja2 import Environment, FileSystemLoader
-from distutils import spawn
 from lofarpipe.support.utilities import create_directory
 
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -105,12 +104,12 @@ class Operation(object):
                          'pipeline_working_dir': self.pipeline_working_dir,
                          'pipeline_runtime_dir': self.pipeline_runtime_dir,
                          'max_cpus_per_node': self.max_cpus_per_node,
-                         'casa_executable': spawn.find_executable('casa'),
-                         'wsclean_executable': spawn.find_executable('wsclean'),
-                         'chgcentre_executable': spawn.find_executable('chgcentre'),
-                         'losoto_executable': spawn.find_executable('losoto.py'),
-                         'H5parm_importer_executable': spawn.find_executable('H5parm_importer.py'),
-                         'H5parm_exporter_executable': spawn.find_executable('H5parm_exporter.py')}
+                         'casa_executable': parset['casa_executable'],
+                         'wsclean_executable': parset['wsclean_executable'],
+#                          'chgcentre_executable': parset['chgcentre_executable'],
+                         'losoto_executable': parset['losoto_executable'],
+                         'H5parm_importer_executable': parset['H5parm_importer_executable'],
+                         'H5parm_exporter_executable': sparset['H5parm_exporter_executable']}
 
         # Add cluster-related info
         if os.path.basename(self.parset['cluster_specific']['clusterdesc']) == 'local.clusterdesc':

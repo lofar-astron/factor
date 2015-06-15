@@ -155,11 +155,15 @@ class Direction(object):
 
     def reset_state(self):
         """
-        Resets the direction state to initial state to allow reprocessing
+        Resets the direction to initial state to allow reprocessing
+
+        Currently, this means just deleting the facetselfcal results directory,
+        but it could be changed to delete only a subset of selfcal steps (by
+        modifying the selfcal pipeline statefile).
         """
         import glob
 
-        operations = ['FacetSelfcal']
+        operations = ['facetselfcal']
         for op in operations:
             # Remove entry in completed_operations
             self.completed_operations.remove(op)
@@ -180,11 +184,10 @@ class Direction(object):
         """
         import glob
 
-        operations = ['FacetAdd', 'FacetSelfcal', 'FacetSub']
+        operations = ['facetadd', 'facetselfcal', 'facetsub']
         for op in operations:
             # Delete vis data
-            action_dirs = glob.glob(os.path.join(self.vis_dir, op, '*'))
-            for action_dir in action_dirs:
-                facet_dir = os.path.join(action_dir, self.name)
-                if os.path.exists(facet_dir):
-                    os.system('rm -rf {0}'.format(facet_dir))
+            result_dir = glob.glob(os.path.join(self.working_dir, 'results', op,
+                self.name, '*'))
+            if os.path.exists(result_dir):
+                os.system('rm -rf {0}'.format(result_dir))

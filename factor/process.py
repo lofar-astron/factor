@@ -52,7 +52,7 @@ def run(parset_file, logging_level='info', dry_run=False):
                 band.skymodel_dirindep = parset['ms_specific'][msbase]['init_skymodel']
         bands.append(band)
 
-    # Get clusterdesc and nodes
+    # Get clusterdesc, node info, etc.
     cluster_parset = parset['cluster_specific']
     if 'clusterdesc_file' not in cluster_parset:
         parset['cluster_specific']['clusterdesc'] = 'local.clusterdesc'
@@ -64,6 +64,7 @@ def run(parset_file, logging_level='info', dry_run=False):
     if not 'node_list' in cluster_parset:
         parset['cluster_specific']['node_list'] = factor.cluster.get_compute_nodes(
             parset['cluster_specific']['clusterdesc'])
+    factor.cluster.find_executables(parset)
 
     # Set up scheduler for operations (pipeline runs)
     scheduler = Scheduler(max_procs=len(parset['cluster_specific']['node_list']),
@@ -249,11 +250,24 @@ def run(parset_file, logging_level='info', dry_run=False):
             if not d.selfcal_ok:
                 log.error('Selfcal failed for direction {0}. Please check '
                     'the settings for this direction.'.format(d.name))
-                d.reset_state()
-                all_good = False
+                if parset['interactive']:
+                    prompt = "Continue with this direction anyway (y/n)? "
+                    answ = raw_input(prompt)
+                    while answ.lower() not in  ['y', 'n', 'yes', 'no']:
+                        answ = raw_input(prompt)
+                    if answ.lower() in ['n', 'no']:
+                        d.reset_state()
+                        all_good = False
+                    else:
+                        d.selfcal_ok = True
+                        d.save_state()
+                else:
+                    d.reset_state()
+                    all_good = False
             else:
                 d.save_state()
         if not all_good:
+            self.log.info('Exiting...')
             sys.exit(1)
 
         # Clean up files
