@@ -1,4 +1,4 @@
-pipeline.steps = [shift_to_field, subtract]
+pipeline.steps = [shift_to_field, copy_column, expand_parmdb_map, subtract]
 
 pipeline.pluginpath                             =   {{ pipeline_dir }}/plugins
 
@@ -11,21 +11,22 @@ shift_to_field.parsetarg.steps                  =   [shift]
 shift_to_field.parsetarg.shift.type             =   phaseshifter
 shift_to_field.parsetarg.shift.phasecenter      =   [{{ field_ra }}deg, {{ field_dec }}deg]
 
-create_compressed_mapfile.control.kind          =   plugin
-create_compressed_mapfile.control.type          =   compressMapfile
-create_compressed_mapfile.control.mapfile_in    =   {{ input_bands_datamap }}
-create_compressed_mapfile.control.mapfile_dir   =   {{ mapfile_dir }}
-create_compressed_mapfile.control.filename      =   concat_input.mapfile
-
 copy_column.control.type                        =   copy_column
-copy_column.control.mapfiles_in                 =   [shift_to_field.output.mapfile,create_compressed_mapfile.output.mapfile]
+copy_column.control.mapfiles_in                 =   [shift_to_field.output.mapfile,{{ shifted_all_bands_datamap }}]
 copy_column.control.inputkeys                   =   [shiftedfile, datafile]
 copy_column.argument.flags                      =   [shiftedfile, datafile, DATA, MODEL_DATA]
+
+expand_parmdb_map.control.kind                  =   plugin
+expand_parmdb_map.control.type                  =   expandMapfile
+expand_parmdb_map.control.mapfile_in            =   {{ dir_dep_parmdb_datamap }}
+expand_parmdb_map.control.mapfile_to_match      =   {{ input_bands_datamap }}
+expand_parmdb_map.control.mapfile_dir           =   {{ mapfile_dir }}
+expand_parmdb_map.control.filename              =   subtract_parmdbs.mapfile
 
 subtract.control.type                           =   calibrate-stand-alone_new
 subtract.argument.observation                   =   {{ input_bands_datamap }}
 subtract.argument.parset                        =   {{ parset_dir }}//facet_dirdep_subtract.parset
 subtract.argument.catalog                       =   {{ skymodel_dir }}/empty.skymodel
-subtract.argument.parmdb                        =   {{ dir_dep_parmdb_datamap }}
+subtract.argument.parmdb                        =   expand_parmdb_map.output.mapfile
 subtract.argument.replace-sourcedb              =   True
 subtract.argument.replace-parmdb                =   True
