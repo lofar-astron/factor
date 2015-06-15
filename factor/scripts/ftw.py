@@ -25,15 +25,15 @@ import time
 
 try:
     # Set up custom ftw task
-    os.system('cp {0} .'.format(sys.argv[8]))
     os.system('cp {0} .'.format(sys.argv[9]))
+    os.system('cp {0} .'.format(sys.argv[10]))
     os.system('buildmytasks')
     execfile('mytasks.py')
 
-    ms    = sys.argv[4]
-    modimage  = sys.argv[5] + '.model'
-    ntermsi   = numpy.int(sys.argv[6])
-    wplanes   = numpy.int(sys.argv[7])
+    ms    = sys.argv[5]
+    modimage  = sys.argv[6] + '.model'
+    ntermsi   = numpy.int(sys.argv[7])
+    wplanes   = numpy.int(sys.argv[8])
 
     if ntermsi == 1:
         mod = [modimage]
