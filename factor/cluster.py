@@ -66,11 +66,11 @@ def find_executables(parset):
                    'H5parm_exporter_executable': ['H5parm_exporter.py']}
     for key, names in executables.iteritems():
         for name in names:
-            path = spawn.find_executable(executable)
+            path = spawn.find_executable(name)
             if path is not None:
-                parset[executable] = path
+                parset[key] = path
                 break
         if path is None:
             log.error('The path to the {0} executable could not be determined. '
-                'Please make sure it is in your PATH.'.format(executable.strip('_executable')))
+                'Please make sure it is in your PATH.'.format(name))
             sys.exit(1)
