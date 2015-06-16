@@ -50,7 +50,7 @@ class FacetAdd(Operation):
                            'skymodels': skymodels,
                            'facet_ra': self.direction.ra,
                            'facet_dec': self.direction.dec,
-                           'cal_radius_deg': self.direction.cal_radius_deg,
+                           'cal_radius_deg': self.direction.cal_size_deg/2.0,
                            'facet_state_file': self.direction.save_file,
                            'hosts': self.node_list,
                            'max_cpus_per_node': self.max_cpus_per_node}
