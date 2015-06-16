@@ -14,6 +14,7 @@ from factor.operations.field_ops import *
 from factor.operations.facet_ops import *
 from factor.lib.scheduler_mp import Scheduler
 from factor.lib.direction import Direction
+from collections import Counter
 
 
 def run(parset_file, logging_level='info', dry_run=False, test_run=False):
@@ -69,8 +70,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     factor.cluster.find_executables(parset)
 
     # Set up scheduler for operations (pipeline runs)
-    scheduler = Scheduler(max_procs=len(parset['cluster_specific']['node_list']),
-        dry_run=dry_run)
+    ndir_simul = len(parset['cluster_specific']['node_list']) * parset['cluster_specific']['ndir_per_node']
+    scheduler = Scheduler(max_procs=ndir_simul, dry_run=dry_run)
 
     # Make direction object for the field
     field = Direction('field', bands[0].ra, bands[0].dec,
@@ -211,7 +212,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         log.info('Processing {0} direction(s) in parallel in this group'.format(
             len(direction_group)))
 
-        # Divide up the nodes among the directions
+        # Divide up the nodes and cores among the directions
         node_list = parset['cluster_specific']['node_list']
         if len(direction_group) >= len(node_list):
             for i in range(len(direction_group)-len(node_list)):
@@ -221,8 +222,15 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             parts = len(direction_group)
             hosts = [node_list[i*len(node_list)//parts:
                 (i+1)*len(node_list)//parts] for i in range(parts)]
+        hosts.sort()
+
+        # Find duplicates and divide up available cores
+        c = Counter(hosts)
         for d, h in zip(direction_group, hosts):
             d.hosts = h
+            ndir_per_node = min(parset['cluster_specific']['ndir_per_node'], c[h])
+            d.max_cpus_per_node = int(round(parset['cluster_specific']['ncpu'] /
+                ndir_per_node))
             d.save_state()
 
         # Add calibrator(s) to empty datasets. These operations

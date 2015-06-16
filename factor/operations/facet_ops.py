@@ -115,7 +115,7 @@ class FacetSelfcal(Operation):
                            'solint_a': self.direction.solint_a,
                            'facet_state_file': self.direction.save_file,
                            'hosts': self.direction.hosts,
-                           'max_cpus_per_node': self.max_cpus_per_node}
+                           'max_cpus_per_node': self.direction.max_cpus_per_node}
 
 
     def finalize(self):

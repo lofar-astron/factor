@@ -75,8 +75,15 @@ groupings = 1:5, 4:0
 # (i.e., local) node is used
 clusterdesc_file = PBS
 
-# Maximum number of CPUs per node to use (default = all)
+# Maximum number of CPUs per node to use per node (default = all)
 ncpu = 6
+
+# Number of directions to process in parallel on each node. If directions are
+# split into groups to be processed in parallel (with the groupings parameter),
+# this parameter controls how many directions are run simultaneously on a
+# single node. Note that the number CPUs (set with the ncpu parameter)
+# will be divided among the directions (default = 1)
+ndir_per_node = 1
 
 
 # MS-specific parameters (optional)
