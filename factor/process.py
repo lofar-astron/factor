@@ -225,7 +225,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
 
         # Find duplicates and divide up available cores
         h_flat = []
-        c = Counter([h_flat.extend(h) for h in hosts])
+        for h in hosts:
+            h_flat.extend(h)
+        c = Counter(h_flat)
         log.info('{0}'.format(h_flat))
         for d, h in zip(direction_group, hosts):
             d.hosts = h
@@ -233,7 +235,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
                 log.info('{0}'.format(h))
                 log.info('c.values: {0}'.format(c.items()))
                 log.info('c[h[0]]: {0}'.format(c[h[0]]))
-                ndir_per_node = min(parset['cluster_specific']['ndir_per_node'], c[h[0]])
+                ndir_per_node = min(parset['cluster_specific']['ndir_per_node'],
+                    c[h[0]])
             else:
                 ndir_per_node = 1
             d.max_cpus_per_node = int(round(parset['cluster_specific']['ncpu'] /
