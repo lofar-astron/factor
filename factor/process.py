@@ -230,7 +230,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             d.hosts = h
             if len(h) == 1:
                 log.info('c.values: {0}'.format(c.items()))
-                log.info('c[h[0]]: {0}'.format(c[h[0]])
+                log.info('c[h[0]]: {0}'.format(c[h[0]]))
                 ndir_per_node = min(parset['cluster_specific']['ndir_per_node'], c[h[0]])
             else:
                 ndir_per_node = 1
