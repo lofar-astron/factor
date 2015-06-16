@@ -229,11 +229,13 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         for d, h in zip(direction_group, hosts):
             d.hosts = h
             if len(h) == 1:
+                log.info('c.values: {0}'.format(c.items()))
+                log.info('c[h[0]]: {0}'.format(c[h[0]])
                 ndir_per_node = min(parset['cluster_specific']['ndir_per_node'], c[h[0]])
             else:
                 ndir_per_node = 1
             d.max_cpus_per_node = int(round(parset['cluster_specific']['ncpu'] /
-                ndir_per_node))
+                float(ndir_per_node)))
             d.save_state()
 
         # Add calibrator(s) to empty datasets. These operations
