@@ -67,11 +67,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
 
     if iterate_threshold:
         # Start with high threshold and lower it until we get at least one island
-        threshpix_orig = threshpix
-        threshisl_orig = threshisl
         nisl = 0
-        threshpix = 25
-        threshisl = 15
         while nisl == 0:
             img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
                                      thresh_pix=np.float(threshpix), thresh_isl=np.float(threshisl),
@@ -82,8 +78,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             nisl = img.nisl
             threshpix /= 1.2
             threshisl /= 1.2
-        threshpix = threshpix_orig
-        threshisl = threshisl_orig
+            if threshpix < 5.0:
+                break
     else:
         img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
                                  thresh_pix=np.float(threshpix), thresh_isl=np.float(threshisl),
