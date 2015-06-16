@@ -64,13 +64,15 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
 
     trim_by = int(trim_by)
     atrous_jmax = int(atrous_jmax)
+    threshpix = float(threshpix)
+    threshisl = float(threshisl)
 
     if iterate_threshold:
         # Start with high threshold and lower it until we get at least one island
         nisl = 0
         while nisl == 0:
             img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
-                                     thresh_pix=np.float(threshpix), thresh_isl=np.float(threshisl),
+                                     thresh_pix=threshpix, thresh_isl=threshisl,
                                      atrous_do=atrous_do, ini_method='curvature', thresh='hard',
                                      adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150,
                                      rms_box_bright=(35,7), rms_map=True, quiet=True,
@@ -82,7 +84,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                 break
     else:
         img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
-                                 thresh_pix=np.float(threshpix), thresh_isl=np.float(threshisl),
+                                 thresh_pix=threshpix, thresh_isl=threshisl,
                                  atrous_do=atrous_do, ini_method='curvature', thresh='hard',
                                  adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150,
                                  rms_box_bright=(35,7), rms_map=True, quiet=True,
