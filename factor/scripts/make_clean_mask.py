@@ -92,6 +92,10 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                                  rms_box_bright=(35,7), rms_map=True, quiet=True,
                                  atrous_jmax=atrous_jmax)
 
+    if img.nisl == 0:
+        print('No islands found. Clean mask cannot be made.')
+        sys.exit(1)
+
     img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
                      img_format=img_format, clobber=True)
 

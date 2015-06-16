@@ -11,7 +11,7 @@ class Direction(object):
     def __init__(self, name, ra, dec, atrous_do=False, mscale_field_do=False, cal_imsize=0,
         solint_p=0, solint_a=0, field_imsize=0, dynamic_range='LD', region_selfcal='',
         region_field='', peel_skymodel='', outlier_do=False, factor_working_dir='',
-        make_final_image=False, cal_radius_deg=None, cal_flux_jy=None):
+        make_final_image=False, cal_size_deg=None, cal_flux_jy=None):
         """
         Create Direction object
 
@@ -50,8 +50,8 @@ class Direction(object):
         make_final_image : bool, optional
             Make final image of this direction, after all directions have been
             selfcaled?
-        cal_radius_deg : float, optional
-            Radius in degrees of calibrator source
+        cal_size_deg : float, optional
+            Size in degrees of calibrator source(s)
         cal_flux_jy : float, optional
             Apparent flux in Jy of calibrator source
         """
@@ -62,11 +62,12 @@ class Direction(object):
         self.mscale_field_do = mscale_field_do
 
         self.cal_imsize = cal_imsize
-        if cal_radius_deg is None:
-            cell = 1.5 # arcsec per pixel
-            self.cal_radius_deg = cal_imsize * cell / 3600.0 / 1.5
+        cell = 1.5 # arcsec per pixel
+        if cal_size_deg is None:
+            self.cal_size_deg = cal_imsize * cell / 3600.0 / 1.5
         else:
-            self.cal_radius_deg = cal_radius_deg
+            self.cal_size_deg = cal_size_deg
+        self.cal_rms_box = self.cal_size_deg * 3600 / cell
 
         self.solint_p = solint_p
         self.solint_a = solint_a

@@ -40,7 +40,7 @@ def directions_read(directions_file, factor_working_dir):
         types = np.dtype({'names': ['name', 'radec', 'atrous_do', 'mscale_field_do',
             'cal_imsize', 'solint_p', 'solint_a', 'field_imsize', 'dynamic_range',
             'region_selfcal', 'region_field', 'peel_skymodel', 'outlier_source',
-            'cal_radius_deg', 'cal_flux_jy'], 'formats':['S255', 'S255', 'S5',
+            'cal_size_deg', 'cal_flux_jy'], 'formats':['S255', 'S255', 'S5',
             'S5', int, int, int, int, 'S2', 'S255', 'S255', 'S255',
             'S5', float, float]})
         directions = np.genfromtxt(directions_file, comments='#', dtype=types)
@@ -81,16 +81,16 @@ def directions_read(directions_file, factor_working_dir):
         if direction['solint_p'] <= 0:
             direction['solint_p'] = 1
         if len(direction) > 13:
-            if direction['cal_radius_deg'] <= 0.0 or np.isnan(direction['cal_radius_deg']):
-                cal_radius_deg = None
+            if direction['cal_size_deg'] <= 0.0 or np.isnan(direction['cal_size_deg']):
+                cal_size_deg = None
             else:
-                cal_radius_deg = direction['cal_radius_deg']
+                cal_size_deg = direction['cal_size_deg']
             if np.isnan(direction['cal_flux_jy']):
                 cal_flux_jy = None
             else:
                 cal_flux_jy = direction['cal_flux_jy']
         else:
-            cal_radius_deg = None
+            cal_size_deg = None
             cal_flux_jy = None
 
         data.append( Direction(direction['name'], ra, dec,
@@ -100,7 +100,7 @@ def directions_read(directions_file, factor_working_dir):
         	direction['dynamic_range'], direction['region_selfcal'],
         	direction['region_field'], direction['peel_skymodel'],
         	direction['outlier_source'], factor_working_dir, False,
-        	cal_radius_deg, cal_flux_jy))
+        	cal_size_deg, cal_flux_jy))
 
     return data
 

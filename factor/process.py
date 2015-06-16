@@ -155,8 +155,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             if not test_run:
                 direction.facet_imsize = getOptimumSize(direction.width * 3600.0 / 1.5
                     * 1.15) # full facet has 15% padding to avoid aliasing issues with ft
-                direction.cal_imsize = getOptimumSize(direction.cal_radius_deg * 3600.0
-                    / 1.5 * 1.5) # cal size has 50% padding
+                direction.cal_imsize = getOptimumSize(direction.cal_size_deg * 3600.0
+                    / 1.5 * 1.2) # cal size has 20% padding
             else:
                 direction.facet_imsize = getOptimumSize(128)
                 direction.cal_imsize = getOptimumSize(128)
