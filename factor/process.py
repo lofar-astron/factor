@@ -222,10 +222,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             parts = len(direction_group)
             hosts = [node_list[i*len(node_list)//parts:
                 (i+1)*len(node_list)//parts] for i in range(parts)]
-        hosts.sort()
 
         # Find duplicates and divide up available cores
-        c = Counter(hosts)
+        h_flat = []
+        c = Counter([h_flat.extend(h) for h in hosts])
         for d, h in zip(direction_group, hosts):
             d.hosts = h
             ndir_per_node = min(parset['cluster_specific']['ndir_per_node'], c[h])
