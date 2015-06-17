@@ -1059,6 +1059,8 @@ def mask_vertices(mask_im, vertices_file):
     """
     Modify the input image to exclude regions outside of the polygon
     """
+    import pyrap.images as pim
+
     ma = mask_im.coordinates()
     new_im = pim.image('',shape=mask_im.shape(), coordsys=ma)
     bool_mask = pim.image('',shape=mask_im.shape(), coordsys=ma)
