@@ -1042,3 +1042,50 @@ class Polygon:
         if scalar:
             mindst = float(mindst)
         return mindst
+
+
+def read_vertices(filename):
+    """
+    Returns facet vertices
+    """
+    import pickle
+
+    with open(filename, 'r') as f:
+        direction_dict = pickle.load(f)
+    return direction_dict['vertices']
+
+
+def mask_vertices(mask_im, vertices_file):
+    """
+    Modify the input image to exclude regions outside of the polygon
+    """
+    img_type = mask_im.imagetype()
+    data = mask_im.getdata()
+    bool_data = np.ones(data.shape)
+
+    vertices = read_vertices(vertices_file)
+    RAverts = vertices[0]
+    Decverts = vertices[1]
+    xvert = []
+    yvert = []
+    for RAvert, Decvert in zip(RAverts, Decverts):
+        pixels = mask_im.topixel([0, 1, Decvert*np.pi/180.0,
+            RAvert*np.pi/180.0])
+        xvert.append(pixels[2]) # x -> Dec
+        yvert.append(pixels[3]) # y -> RA
+    poly = Polygon(xvert, yvert)
+
+    # Find distance to nearest poly edge and unmask those that
+    # are outside the facet (dist < 0)
+    masked_ind = np.indices(data[0, 0].shape)
+    dist = poly.is_inside(masked_ind[0], masked_ind[1])
+    outside_ind = np.where(dist < 0.0)
+    if len(outside_ind[0]) > 0:
+        data[0, 0, masked_ind[0][outside_ind], [masked_ind[1][outside_ind]]] = 0
+        bool_data[0, 0, masked_ind[0][outside_ind], [masked_ind[1][outside_ind]]] = 0
+
+    mask_im.putdata(data)
+    bool_mask = mask_im.copy()
+    bool_mask.putdata(bool_data)
+
+    return mask_im, bool_mask
