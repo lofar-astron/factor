@@ -110,56 +110,6 @@ class Scheduler(object):
             List of operations to process
 
         """
-<<<<<<< HEAD
-        if type(action_list) != list:
-            single = True
-            action_list = [action_list]
-        else:
-            single = False
-
-        # Sync the local node to the remote nodes
-        if self.op_parset['cluster_specific']['distribute']:
-            host_list = self.op_parset['cluster_specific']['node_list']
-            working_dir = self.op_parset['dir_working']
-            for host in host_list:
-                if host != self.hostname:
-                    os.system('rsync -az --delete {0}/ {1}:{0}'.format(
-                        working_dir, host))
-
-        # Run the action(s)
-        return_codes = []
-        with Timer(self.log, 'action'):
-            nprocs = min(self.max_procs, len(action_list))
-            pool = multiprocessing.Pool(processes=self.max_procs)
-            for act in action_list:
-                result = pool.apply_async(call_generic_pipeline, (act.pipeline_executable,
-                    act.pipeline_parset_file, act.pipeline_config_file,
-                    act.logbasename))
-                return_codes.append(result)
-            pool.close()
-            pool.join()
-        if any([r.get() for r in return_codes]):
-            self.log.error('One or more actions failed. Exiting...')
-            sys.exit(1)
-
-        # Sync the remote nodes to the local node
-        if self.op_parset['cluster_specific']['distribute']:
-            host_list = self.op_parset['cluster_specific']['node_list']
-            working_dir = self.op_parset['dir_working']
-            for host in host_list:
-                if host != self.hostname:
-                    os.system('rsync -az --delete {1}:{0}/ {0}'.format(
-                        working_dir, host))
-
-        # Get results
-        results = []
-        for action in action_list:
-            results.append(action.get_results())
-        if single:
-            results = results[0]
-
-        return results
-=======
         if type(operation_list) != list:
             operation_list = [operation_list]
 
@@ -193,4 +143,3 @@ class Scheduler(object):
             op.finalize()
             if not self.dry_run:
                 op.set_completed()
->>>>>>> joinpipelines
