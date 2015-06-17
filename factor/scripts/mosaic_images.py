@@ -78,9 +78,9 @@ def main(images, vertices, outfits, maxwidth=0):
         # Get Stokes axis. Ensure we are working with the Stokes parameter requested.
         stkcoords = image.coordinates().get_coordinate('stokes')
         if stkcoords.get_axis_size() == 1:
-            assert(stkcoords.get_stokes()[0] == args.stokes)
+            assert(stkcoords.get_stokes()[0] == 'I')
         else:
-            stks = stkcoords.get_stokes().index(args.stokes)
+            stks = stkcoords.get_stokes().index('I')
             image = image.subimage(blc=(0, stks), trc=(nc-1, stks), dropdegenerate=False)
         ns = 1
 
