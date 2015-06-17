@@ -60,7 +60,6 @@ def main(images, vertices, outfits, maxwidth=0):
     frequency = np.array(frequency)
     mean_psf_fwhm = np.mean(psf_fwhm, axis=0)
     mean_frequency = np.mean(frequency)
-    mean_psf_fwhm[1]*60, mean_psf_fwhm[2])
 
     # Initialize some vectors
     declims = [] # store the limits of the declination axes
