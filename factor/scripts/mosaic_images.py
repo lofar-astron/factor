@@ -100,7 +100,6 @@ def main(images, vertices, outfits, maxwidth=0):
         declims.append(min(dec_axis))
         declims.append(max(dec_axis))
         mean_ra = np.mean(ra_axis)
-        print im,mean_ra
         raleft.append((ra_axis[0]-mean_ra)*np.cos(val[0])+mean_ra)
         raright.append((ra_axis[-1]-mean_ra)*np.cos(val[0])+mean_ra)
         pims.append(image)
@@ -130,7 +129,7 @@ def main(images, vertices, outfits, maxwidth=0):
     for i in range(len(pims)):
         print 'doing image',i
         im = pims[i].regrid([2,3],ma,outshape=(nc,ns,len(master_dec),len(master_ra)))
-        im, mask = mask_vertices(pims[i], vertices[i])
+        im, mask = mask_vertices(im, vertices[i])
         master_im += np.squeeze(im.getdata())
         master_mask += np.squeeze(mask.getdata())
 

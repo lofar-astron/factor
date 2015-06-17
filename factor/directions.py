@@ -1069,7 +1069,7 @@ def mask_vertices(mask_im, vertices_file):
     xvert = []
     yvert = []
     for RAvert, Decvert in zip(RAverts, Decverts):
-        pixels = mask_im.topixel([0, 0, Decvert*np.pi/180.0,
+        pixels = mask_im.topixel([1, 1, Decvert*np.pi/180.0,
             RAvert*np.pi/180.0])
         xvert.append(pixels[2]) # x -> Dec
         yvert.append(pixels[3]) # y -> RA
