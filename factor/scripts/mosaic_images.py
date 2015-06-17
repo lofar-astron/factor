@@ -130,7 +130,7 @@ def main(images, vertices, outfits, maxwidth=0):
     for i in range(len(pims)):
         print 'doing image',i
         im = pims[i].regrid([2,3],ma,outshape=(nc,ns,len(master_dec),len(master_ra)))
-        im, mask = mask_vertices(im, vertices[i])
+        im, mask = mask_vertices(pims[i], vertices[i])
         master_im += np.squeeze(im.getdata())
         master_mask += np.squeeze(mask.getdata())
 
