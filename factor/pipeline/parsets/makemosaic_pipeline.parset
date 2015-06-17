@@ -29,7 +29,7 @@ create_compressed_mapfile_vertices.control.mapfile_dir =   {{ mapfile_dir }}
 create_compressed_mapfile_vertices.control.filename    =   mosaic_vertices_input.mapfile
 
 make_mosaic.control.type                               =   mosaic_images
-make_mosaic.control.mapfiles_in                        =   [create_compressed_mapfile_images.output.mapfile,create_vertices_map.output.mapfile]
+make_mosaic.control.mapfiles_in                        =   [create_compressed_mapfile_images.output.mapfile,create_compressed_mapfile_vertices.output.mapfile]
 make_mosaic.control.inputkeys                          =   [images,vertices]
 make_mosaic.control.outputkey                          =   outfile
 make_mosaic.argument.flags                             =   [images,vertices,outfile]
