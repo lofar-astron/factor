@@ -124,6 +124,7 @@ def main(images, vertices, outfits, maxwidth=0):
 
     # Initialize the arrays for the output image, sensitivity, and weights
     master_im = np.zeros((len(master_dec),len(master_ra)))
+    master_mask = np.zeros((len(master_dec),len(master_ra)))
 
     # Reproject the images onto the master grid, weight and normalize
     for i, im in enumerate(pims):
