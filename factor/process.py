@@ -154,10 +154,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
 
             # Set image sizes
             if not test_run:
-                direction.facet_imsize = getOptimumSize(direction.width * 3600.0 / 1.5
-                    * 1.15) # full facet has 15% padding to avoid aliasing issues with ft
-                direction.cal_imsize = getOptimumSize(direction.cal_size_deg * 3600.0
-                    / 1.5 * 1.2) # cal size has 20% padding
+                direction.facet_imsize = max(512, getOptimumSize(direction.width * 3600.0 / 1.5
+                    * 1.15)) # full facet has 15% padding to avoid aliasing issues with ft
+                direction.cal_imsize = max(512, getOptimumSize(direction.cal_size_deg * 3600.0
+                    / 1.5 * 1.2)) # cal size has 20% padding
             else:
                 direction.facet_imsize = getOptimumSize(128)
                 direction.cal_imsize = getOptimumSize(128)
@@ -228,13 +228,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         for h in hosts:
             h_flat.extend(h)
         c = Counter(h_flat)
-        log.info('{0}'.format(h_flat))
         for d, h in zip(direction_group, hosts):
             d.hosts = h
             if len(h) == 1:
-                log.info('{0}'.format(h))
-                log.info('c.values: {0}'.format(c.items()))
-                log.info('c[h[0]]: {0}'.format(c[h[0]]))
                 ndir_per_node = min(parset['cluster_specific']['ndir_per_node'],
                     c[h[0]])
             else:
