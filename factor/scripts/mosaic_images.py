@@ -164,13 +164,12 @@ def main(images, vertices, outfits, maxwidth=0):
 if __name__ == '__main__':
     descriptiontext = "Create a mosaic from facet images.\n"
     parser = argparse.ArgumentParser(description=descriptiontext, formatter_class=RawTextHelpFormatter)
-    parser.add_argument('-i','--images', help='List of filenames of facet images.')
-    parser.add_argument('-v','--vertices', help='List of filenames of facet vertices.')
-    parser.add_argument('-o','--outfits', help='Output name of mosaic fits file '
-        '[default mosaic.fits]')
+    parser.add_argument('images', help='List of filenames of facet images')
+    parser.add_argument('vertices', help='List of filenames of facet vertices')
+    parser.add_argument('outfits', help='Output name of mosaic fits file')
     parser.add_argument('-m','--maxwidth', help='Maximum number of pixels to '
         'consider for the width of the mosaic [default 0 = unlimited] This can '
         'be helpful at high declination.', default=0, type=int)
 
     args = parser.parse_args()
-    main(args.images, args.vertices, args.outfits, args.maxwidth)
+    main(args.images, args.vertices, args.outfits, maxwidth=args.maxwidth)
