@@ -111,9 +111,9 @@ def main(images, vertices, outfits, maxwidth=0):
             raright[i] = raright[i]-2.*np.pi
     master_ra = np.arange(max(raleft),min(raright),max(rainc))
     lmra = len(master_ra)
-    if args.maxwidth != 0:
-        if lmra > args.maxwidth:
-            xboundary = (lmra-args.maxwidth)/2
+    if maxwidth != 0:
+        if lmra > maxwidth:
+            xboundary = (lmra-maxwidth)/2
             master_ra = master_ra[xboundary:-xboundary]
     print "Found ra,dec pixel increments (arcsec):"
     print np.array(rainc)*206265.,np.array(decinc)*206265.
@@ -146,10 +146,10 @@ def main(images, vertices, outfits, maxwidth=0):
     new_pim = pim.image('',shape=(1,1, len(master_dec),len(master_ra)), coordsys=ma)
     new_pim.putdata(arrax)
     # Write fits
-    new_pim.tofits(args.outfits, overwrite=True)
+    new_pim.tofits(outfits, overwrite=True)
 
     # need to add new beam info (not sure if this is possible with pyrap)
-    hdu = pyfits.open(args.outfits,mode='update')
+    hdu = pyfits.open(outfits,mode='update')
     header = hdu[0].header
     header.update('BMAJ',mean_psf_fwhm[0])
     header.update('BMIN',mean_psf_fwhm[1])
@@ -158,7 +158,7 @@ def main(images, vertices, outfits, maxwidth=0):
     header.update('RESTFRQ',mean_frequency)
     header.update('RESTFREQ',mean_frequency)
     newhdu = pyfits.PrimaryHDU(data=hdu[0].data, header=header)
-    newhdu.writeto(args.outfits,clobber=True)
+    newhdu.writeto(outfits,clobber=True)
 
 
 if __name__ == '__main__':
