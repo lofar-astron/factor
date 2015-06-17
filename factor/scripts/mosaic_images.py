@@ -13,7 +13,7 @@ import os
 from factor.directions import mask_vertices
 
 
-def main(images, vertices, outfits, maxwidth=0, verbose=False):
+def main(images, vertices, outfits, maxwidth=0):
     """
     Creates mosaic
 
@@ -30,8 +30,6 @@ def main(images, vertices, outfits, maxwidth=0, verbose=False):
     maxwidth : int, optional
         Maximum number of pixels to consider for the width of the mosaic
         [default 0 = unlimited] This can be helpful at high declination.
-    verbose : bool, optional
-        If True, use verbose mode
 
     """
     if type(images) is str:
@@ -119,9 +117,8 @@ def main(images, vertices, outfits, maxwidth=0, verbose=False):
         if lmra > args.maxwidth:
             xboundary = (lmra-args.maxwidth)/2
             master_ra = master_ra[xboundary:-xboundary]
-    if args.verbose:
-        print "Found ra,dec pixel increments (arcsec):"
-        print np.array(rainc)*206265.,np.array(decinc)*206265.
+    print "Found ra,dec pixel increments (arcsec):"
+    print np.array(rainc)*206265.,np.array(decinc)*206265.
     ma = pims[-1].coordinates()
     ma['direction'].set_referencepixel([len(master_dec)/2,len(master_ra)/2])
     ma['direction'].set_increment([decinc[np.argmin(np.abs(decinc))],rainc[np.argmin(np.abs(rainc))]])
@@ -167,15 +164,13 @@ def main(images, vertices, outfits, maxwidth=0, verbose=False):
 if __name__ == '__main__':
     descriptiontext = "Create a mosaic from facet images.\n"
     parser = argparse.ArgumentParser(description=descriptiontext, formatter_class=RawTextHelpFormatter)
-    parser.add_argument('-f','--mapfile', help='Filename of datamap containing '
-        'facet images')
+    parser.add_argument('-i','--images', help='List of filenames of facet images.')
+    parser.add_argument('-v','--vertices', help='List of filenames of facet vertices.')
     parser.add_argument('-o','--outfits', help='Output name of mosaic fits file '
         '[default mosaic.fits]')
     parser.add_argument('-m','--maxwidth', help='Maximum number of pixels to '
         'consider for the width of the mosaic [default 0 = unlimited] This can '
         'be helpful at high declination.', default=0, type=int)
-    parser.add_argument('-v','--verbose', help='Give some verbose output [default False]',
-        action='store_true', default=False, type=bool)
 
     args = parser.parse_args()
-    main(args.mapfile, args.outfits, args.maxwidth, args.verbose)
+    main(args.images, args.vertices, args.outfits, args.maxwidth)
