@@ -62,6 +62,47 @@ Options:
 The parset specifies the parameters of the run. These are described in the next
 sections.
 
+\subsubsection{Quick-start}
+\label{factor:quick-start}
+Below is a quick-start quide to a typical run.
+
+\begin{enumerate}
+\item Collect the input bands (described in Section \ref{factor:data}) in a
+single directory. The MS names can be anything but must end in ``.MS'' or
+``.ms'':
+\begin{verbatim}
+[/data/factor_input]$ ls
+band1.MS         band2.ms         A.MS         b.ms
+\end{verbatim}
+\item Edit the Factor parset (described in Section \ref{factor:parset}) to fit
+your reduction and computing resources. For example, the parset for a single
+machine could be:
+\begin{verbatim}
+[/data]$ more factor.parset
+[global]
+dir_working = /data/factor_output
+dir_ms = /data/factor_input
+piperoot = /software/local/genericpipeline
+parmdb_name = instrument_ap_smoothed
+iteractive = True
+
+[directions]
+flux_min_jy = 0.1
+size_max_arcmin = 3.0
+separation_max_arcmin = 7.5
+max_num = 30
+groupings = 1:0
+check_edges = True
+
+[cluster]
+ncpu = 5
+\end{verbatim}
+\item Run the reduction:
+\begin{verbatim}
+[/data]$ runfactor factor.parset
+\end{verbatim}
+\end{enumerate}
+
 %-----------------------------------------------------------
 \subsection{Parset}
 \label{factor:parset}
@@ -279,7 +320,7 @@ Factor works by default on a compute cluster with a shared file system.
 
 \subsubsection{Cluster with a distributed file system}
 Factor does not yet work on multiple nodes with a distributed file system (such
-as CEP2 and CEP3),
+as CEP2 and CEP3). It does work on a single node of such a system.
 %For use on a cluster with a distributed file system (such as CEP2 and CEP3), set
 %{\tt distribute = True}. Factor will then synchronize files between the
 %available nodes. Note that all data will be mirrored on each node, so one must
@@ -346,45 +387,5 @@ working directory by type. Inside these subdirectories, results are organized by
 operation and dirrection. For example, for a direction named ``dir1'', the
 results produced during self calibration are stored in {{\tt
 results/facetselfcal/dir1/}.
-
-
-\subsection{Quick-start}
-\label{factor:quick-start}
-Below is a quick-start quide to a typical run.
-
-\begin{enumerate}
-\item Collect input bands in a single directory. The MS names can be anything
-but must end in ``.MS'' or ``.ms'':
-\begin{verbatim}
-[/data/factor_input]$ ls
-band1.MS         band2.ms         A.MS         b.ms
-\end{verbatim}
-\item Edit the example parset above to fit your reduction and computing
-resource. For example, the parset for a single machine could be:
-\begin{verbatim}
-[/data]$ more factor.parset
-[global]
-dir_working = /data/factor_output
-dir_ms = /data/factor_input
-piperoot = /software/local/genericpipeline
-parmdb_name = instrument_ap_smoothed
-iteractive = True
-
-[directions]
-flux_min_jy = 0.1
-size_max_arcmin = 3.0
-separation_max_arcmin = 7.5
-max_num = 100
-groupings = 1:1, 4:0
-check_edges = True
-
-[cluster]
-ncpu = 5
-\end{verbatim}
-\item Run the reduction:
-\begin{verbatim}
-[/data]$ runfactor factor.parset
-\end{verbatim}
-\end{enumerate}
 
 \end{document}
