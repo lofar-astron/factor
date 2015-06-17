@@ -1,0 +1,18 @@
+Strategy.InputColumn                        = SUBTRACTED_DATA
+Strategy.ChunkSize                          = 200
+Strategy.UseSolver                          = F
+Strategy.Steps                              = [correct]
+
+Step.correct.Operation                      = CORRECT
+Step.correct.Model.Sources                  = []
+Step.correct.Model.DirectionalGain.Enable   = F
+Step.correct.Model.Gain.Enable              = T
+Step.correct.Model.Cache.Enable             = T
+Step.correct.Model.CommonScalarPhase.Enable = T
+Step.correct.Model.TEC.Enable               = T
+Step.correct.Model.Phasors.Enable           = F
+Step.correct.Model.Beam.Enable              = F
+Step.correct.Model.Beam.UseChannelFreq      = F
+Step.correct.Output.Column                  = CORRECTED_SUBTRACTED_DATA
+Step.correct.Output.WriteCovariance         = F
+Step.correct.Output.WriteFlags              = F

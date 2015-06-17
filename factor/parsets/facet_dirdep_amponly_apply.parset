@@ -1,0 +1,16 @@
+Strategy.InputColumn                        = CORRECTED_DATA
+Strategy.ChunkSize                          = 200
+Strategy.UseSolver                          = F
+Strategy.Steps                              = [correct]
+
+Step.correct.Operation                      = CORRECT
+Step.correct.Model.Sources                  = []
+Step.correct.Model.CommonScalarPhase.Enable = F
+Step.correct.Model.Cache.Enable             = T
+Step.correct.Model.DirectionalGain.Enable   = F
+Step.correct.Model.Gain.Enable              = T
+Step.correct.Model.Phasors.Enable           = F
+Step.correct.Model.Beam.Enable              = F
+Step.correct.Output.Column                  = CORRECTED_DATA
+Step.correct.Output.WriteCovariance         = F
+Step.correct.Output.WriteFlags              = F

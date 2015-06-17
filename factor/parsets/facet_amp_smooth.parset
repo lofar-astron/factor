@@ -1,0 +1,13 @@
+LoSoTo.Steps                  = [smooth, norm]
+LoSoTo.Solset                 = [sol000]
+LoSoTo.Soltab                 = [sol000/amplitude000]
+
+LoSoTo.Steps.smooth.Operation = SMOOTH
+
+LoSoTo.Steps.smooth.FWHM      = [10]
+LoSoTo.Steps.smooth.Axes      = [time]
+LoSoTo.Steps.smooth.Mode      = runningmedian
+
+LoSoTo.Steps.norm.Operation   = NORM
+LoSoTo.Steps.norm.NormVal     = 1.0
+LoSoTo.Steps.norm.NormAxis    = time

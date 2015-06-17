@@ -1,0 +1,98 @@
+# This is an example parset for Factor
+
+
+[global]
+# LOFAR installation root directories. If not given, they will be determined
+# from the environment
+lofarroot = /lofar/build/gnu_opt/installed
+lofarpythonpath = /lofar/build/gnu_opt/installed/lib/python2.7/dist-packages
+
+# Full path to Generic Pipeline root directory (required)
+piperoot = /path/to/genericpipeline
+
+# Full path to working dir - other paths are relative to this (required)
+dir_working = /data/wdir
+
+# Full path to directory containing selfcaled bands, will be scanned for all .MS
+# and .ms files (required). Note that these files will be modified by Factor, so
+# please keep a copy of these data elsewhere
+dir_ms = /data/bands
+
+# Parmdb name for dir-indep. selfcal solutions (stored inside the input
+# band measurement sets, so path should be relative to those; default =
+# instrument)
+parmdb_name = instrument_ap_smoothed
+
+# Make final mosaic (default = True)
+make_mosaic = False
+
+# Use interactive mode (default = False). Factor will ask for confirmation
+# of internally derived DDE calibrators and facets
+interactive = False
+
+# Use chgcenter to minimize number of w planes (default = False). Note that a
+# copy of the full dataset will be made (as chgcentre modifies the data)
+use_chgcentre = False
+
+
+[directions]
+# Full path to file containing calibrator directions. If not given, directions
+# are selected internally using the flux and size cuts below
+directions_file = /data/directions.txt
+
+# Check whether any sources from the initial subtract sky model fall on facet
+# edges. If any are found, the facet regions are adjusted to avoid them (default
+# is False)
+check_edges = False
+
+# Flux and size cuts for selecting directions internally (min flux, max size
+# of a source, and max separation between sources below which they are grouped
+# into one direction; required if no directions_file is given)
+flux_min_Jy = 0.1
+size_max_arcmin = 3.0
+separation_max_arcmin = 6.0
+
+# The number of internally derived directions can be limited to a maximum number
+# of directions if desired (default = all)
+max_num = 50
+
+# Total number of directions to process (default = all)
+ndir = 10
+
+# Grouping of directions into groups that are processed in parallel, defined as
+# grouping:n_total_per_grouping. For example, groupings = 1:5, 4:0 means two
+# groupings are used, with the first 5 directions put into groups of one (i.e.,
+# each direction processed in series) and the rest of the directions divided
+# into groups of 4 (i.e., 4 directions processed in parallel). Shuffling is done
+# between neighboring groups to achieve the largest min separation. Default is
+# one at a time (i.e., groupings = 1:0)
+groupings = 1:5, 4:0
+
+
+[cluster]
+# Full path to cluster description file. Use clusterdesc_file = PBS to use the
+# PBS / torque reserved nodes. If not given, the clusterdesc file for a single
+# (i.e., local) node is used
+clusterdesc_file = PBS
+
+# Maximum number of CPUs per node to use per node (default = all)
+ncpu = 6
+
+# Number of directions to process in parallel on each node (default = 1). If
+# directions are split into groups to be processed in parallel (with the
+# groupings parameter), this parameter controls how many directions are run
+# simultaneously on a single node. Note that the number of CPUs (set with the
+# ncpu parameter) will be divided among the directions on each node
+ndir_per_node = 1
+
+
+# MS-specific parameters (optional)
+[ms1.ms]
+init_skymodel = /data/ms1.sky
+param1 = 123
+param2 = 123
+
+[ms2.ms]
+init_skymodel = /data/ms2.sky
+param1 = 123
+param2 = 123

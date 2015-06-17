@@ -1,14 +1,14 @@
 """
-Definition of context managers (with statements) used for actions and operations
+Definition of context managers
 """
 import time
 import logging
 
 class Timer(object):
     """
-    Context manager used to time actions and operations
+    Context manager used to time operations
     """
-    def __init__(self, log=None, type='action'):
+    def __init__(self, log=None, type='operation'):
         """
         Create object
 
@@ -16,6 +16,8 @@ class Timer(object):
         ----------
         log : logging instance
             The logging instance to use. If None, root is used
+        type : str, optional
+            Type of operation
         """
         if log is None:
             self.log = logging

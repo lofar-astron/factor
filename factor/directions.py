@@ -40,7 +40,7 @@ def directions_read(directions_file, factor_working_dir):
         types = np.dtype({'names': ['name', 'radec', 'atrous_do', 'mscale_field_do',
             'cal_imsize', 'solint_p', 'solint_a', 'field_imsize', 'dynamic_range',
             'region_selfcal', 'region_field', 'peel_skymodel', 'outlier_source',
-            'cal_radius_deg', 'cal_flux_jy'], 'formats':['S255', 'S255', 'S5',
+            'cal_size_deg', 'cal_flux_jy'], 'formats':['S255', 'S255', 'S5',
             'S5', int, int, int, int, 'S2', 'S255', 'S255', 'S255',
             'S5', float, float]})
         directions = np.genfromtxt(directions_file, comments='#', dtype=types)
@@ -81,16 +81,16 @@ def directions_read(directions_file, factor_working_dir):
         if direction['solint_p'] <= 0:
             direction['solint_p'] = 1
         if len(direction) > 13:
-            if direction['cal_radius_deg'] <= 0.0 or np.isnan(direction['cal_radius_deg']):
-                cal_radius_deg = None
+            if direction['cal_size_deg'] <= 0.0 or np.isnan(direction['cal_size_deg']):
+                cal_size_deg = None
             else:
-                cal_radius_deg = direction['cal_radius_deg']
+                cal_size_deg = direction['cal_size_deg']
             if np.isnan(direction['cal_flux_jy']):
                 cal_flux_jy = None
             else:
                 cal_flux_jy = direction['cal_flux_jy']
         else:
-            cal_radius_deg = None
+            cal_size_deg = None
             cal_flux_jy = None
 
         data.append( Direction(direction['name'], ra, dec,
@@ -100,7 +100,7 @@ def directions_read(directions_file, factor_working_dir):
         	direction['dynamic_range'], direction['region_selfcal'],
         	direction['region_field'], direction['peel_skymodel'],
         	direction['outlier_source'], factor_working_dir, False,
-        	cal_radius_deg, cal_flux_jy))
+        	cal_size_deg, cal_flux_jy))
 
     return data
 
@@ -162,7 +162,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     s.remove(dist > 5.0, aggregate=True) # 5 degree radius
 
     # Save this sky model for later checks of sources falling on facet edges
-    s.write(fileName='models/initial.skymodel', clobber=True)
+    s.write(fileName='results/initial.skymodel', clobber=True)
 
     # Filter larger patches
     sizes = s.getPatchSizes(units='arcmin', weight=True)
@@ -385,7 +385,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False):
     # Check for sources near / on facet edges and adjust regions accordingly
     if has_shapely and check_edges:
         log.info('Adjusting facets to avoid sources...')
-        s = lsmtool.load('models/initial.skymodel')
+        s = lsmtool.load('results/initial.skymodel')
         RA, Dec = s.getPatchPositions(asArray=True)
         sx, sy = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
         sizes = s.getPatchSizes(units='degree')
@@ -524,18 +524,14 @@ def make_ds9_calimage_file(directions, outputfile):
         Name of output region file
 
     """
-    from factor.operations.hardcoded_param import facet_selfcal as p
-
     lines = []
     lines.append('# Region file format: DS9 version 4.0\nglobal color=yellow '
                  'font="helvetica 10 normal" select=1 highlite=1 edit=1 '
                  'move=1 delete=1 include=1 fixed=0 source=1\nfk5\n')
 
-    cell = float(p['imager0']['cell'].split('arcsec')[0]) # arcsec per pixel
+    cell = 1.5 # arcsec per pixel
     for direction in directions:
-        imsize = direction.cal_radius_deg * 1.5 * 3600.0 / cell # pixels
-        if imsize < 512:
-            imsize = 512
+        imsize = direction.cal_imsize
         imsize_unmasked = 0.8 * imsize
         RAs = direction.vertices[0]
         Decs = direction.vertices[1]
@@ -1046,3 +1042,55 @@ class Polygon:
         if scalar:
             mindst = float(mindst)
         return mindst
+
+
+def read_vertices(filename):
+    """
+    Returns facet vertices
+    """
+    import pickle
+
+    with open(filename, 'r') as f:
+        direction_dict = pickle.load(f)
+    return direction_dict['vertices']
+
+
+def mask_vertices(mask_im, vertices_file):
+    """
+    Modify the input image to exclude regions outside of the polygon
+    """
+    import pyrap.images as pim
+
+    ma = mask_im.coordinates()
+    new_im = pim.image('',shape=mask_im.shape(), coordsys=ma)
+    bool_mask = pim.image('',shape=mask_im.shape(), coordsys=ma)
+
+    img_type = mask_im.imagetype()
+    data = mask_im.getdata()
+    bool_data = np.ones(data.shape)
+
+    vertices = read_vertices(vertices_file)
+    RAverts = vertices[0]
+    Decverts = vertices[1]
+    xvert = []
+    yvert = []
+    for RAvert, Decvert in zip(RAverts, Decverts):
+        pixels = mask_im.topixel([1, 1, Decvert*np.pi/180.0,
+            RAvert*np.pi/180.0])
+        xvert.append(pixels[2]) # x -> Dec
+        yvert.append(pixels[3]) # y -> RA
+    poly = Polygon(xvert, yvert)
+
+    # Find distance to nearest poly edge and unmask those that
+    # are outside the facet (dist < 0)
+    masked_ind = np.indices(data[0, 0].shape)
+    dist = poly.is_inside(masked_ind[0], masked_ind[1])
+    outside_ind = np.where(dist < 0.0)
+    if len(outside_ind[0]) > 0:
+        data[0, 0, masked_ind[0][outside_ind], [masked_ind[1][outside_ind]]] = 0
+        bool_data[0, 0, masked_ind[0][outside_ind], [masked_ind[1][outside_ind]]] = 0
+
+    new_im.putdata(data)
+    bool_mask.putdata(bool_data)
+
+    return new_im, bool_mask

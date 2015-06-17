@@ -1,0 +1,35 @@
+pipeline.steps = [create_images_map, create_vertices_map, create_compressed_mapfile_images, create_compressed_mapfile_vertices, make_mosaic]
+
+pipeline.pluginpath                                    =   {{ pipeline_dir }}/plugins
+
+create_images_map.control.kind                         =   plugin
+create_images_map.control.type                         =   addListMapfile
+create_images_map.control.hosts                        =   {{ hosts }}
+create_images_map.control.files                        =   {{ facet_image_filenames }}
+create_images_map.control.mapfile_dir                  =   {{ mapfile_dir }}
+create_images_map.control.filename                     =   facet_images.datamap
+
+create_vertices_map.control.kind                       =   plugin
+create_vertices_map.control.type                       =   addListMapfile
+create_vertices_map.control.hosts                      =   {{ hosts }}
+create_vertices_map.control.files                      =   {{ facet_vertices_filenames }}
+create_vertices_map.control.mapfile_dir                =   {{ mapfile_dir }}
+create_vertices_map.control.filename                   =   facet_vertices.datamap
+
+create_compressed_mapfile_images.control.kind          =   plugin
+create_compressed_mapfile_images.control.type          =   compressMapfile
+create_compressed_mapfile_images.control.mapfile_in    =   create_images_map.output.mapfile
+create_compressed_mapfile_images.control.mapfile_dir   =   {{ mapfile_dir }}
+create_compressed_mapfile_images.control.filename      =   mosaic_images_input.datamap
+
+create_compressed_mapfile_vertices.control.kind        =   plugin
+create_compressed_mapfile_vertices.control.type        =   compressMapfile
+create_compressed_mapfile_vertices.control.mapfile_in  =   create_vertices_map.output.mapfile
+create_compressed_mapfile_vertices.control.mapfile_dir =   {{ mapfile_dir }}
+create_compressed_mapfile_vertices.control.filename    =   mosaic_vertices_input.datamap
+
+make_mosaic.control.type                               =   mosaic_images
+make_mosaic.control.mapfiles_in                        =   [create_compressed_mapfile_images.output.mapfile,create_compressed_mapfile_vertices.output.mapfile]
+make_mosaic.control.inputkeys                          =   [images,vertices]
+make_mosaic.control.outputkey                          =   outfile
+make_mosaic.argument.flags                             =   [images,vertices,outfile]

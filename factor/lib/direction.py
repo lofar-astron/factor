@@ -8,10 +8,10 @@ class Direction(object):
     """
     Generic direction class
     """
-    def __init__(self, name, ra, dec, atrous_do, mscale_field_do, cal_imsize,
-        solint_p, solint_a, field_imsize, dynamic_range, region_selfcal,
-        region_field, peel_skymodel, outlier_do, factor_working_dir,
-        make_final_image=False, cal_radius_deg=None, cal_flux_jy=None):
+    def __init__(self, name, ra, dec, atrous_do=False, mscale_field_do=False, cal_imsize=0,
+        solint_p=0, solint_a=0, field_imsize=0, dynamic_range='LD', region_selfcal='',
+        region_field='', peel_skymodel='', outlier_do=False, factor_working_dir='',
+        make_final_image=False, cal_size_deg=None, cal_flux_jy=None):
         """
         Create Direction object
 
@@ -35,7 +35,7 @@ class Direction(object):
             Solution interval for amplitude calibration (# of time slots)
         field_imsize : int
             Size of facet image in 1.5 arcsec pixels
-        dynamic_range : bool
+        dynamic_range : str
             LD (low dynamic range) or HD (high dynamic range)
         region_selfcal : str
             Region for clean mask for calibrator selfcal
@@ -50,13 +50,11 @@ class Direction(object):
         make_final_image : bool, optional
             Make final image of this direction, after all directions have been
             selfcaled?
-        cal_radius_deg : float, optional
-            Radius in degrees of calibrator source
+        cal_size_deg : float, optional
+            Size in degrees of calibrator source(s)
         cal_flux_jy : float, optional
             Apparent flux in Jy of calibrator source
         """
-        from factor.operations.hardcoded_param import facet_selfcal as p
-
         self.name = name
         self.ra = ra
         self.dec = dec
@@ -64,18 +62,19 @@ class Direction(object):
         self.mscale_field_do = mscale_field_do
 
         self.cal_imsize = cal_imsize
-        if cal_radius_deg is None:
-            cell = float(p['imager0']['cell'].split('arcsec')[0]) # arcsec per pixel
-            self.cal_radius_deg = cal_imsize * cell / 3600.0 / 1.5
+        cell = 1.5 # arcsec per pixel
+        if cal_size_deg is None:
+            self.cal_size_deg = cal_imsize * cell / 3600.0 / 1.5
         else:
-            self.cal_radius_deg = cal_radius_deg
+            self.cal_size_deg = cal_size_deg
+        self.cal_rms_box = self.cal_size_deg * 3600 / cell
 
         self.solint_p = solint_p
         self.solint_a = solint_a
-        self.field_imsize = field_imsize
+        self.facet_imsize = field_imsize * 1.15
         self.dynamic_range = dynamic_range
         self.loop_amp_selfcal = False
-        self.improving = True # Whether selfcal is still improving after first amp cal
+        self.selfcal_ok = True # Whether selfcal is still improving after first amp cal
         self.max_residual_val = 0.5 # maximum residual in Jy for facet subtract test
 
         self.region_selfcal = region_selfcal
@@ -98,12 +97,32 @@ class Direction(object):
             self.apparent_flux_mjy = None
         self.nchannels = 1
 
+        # Set number of wplanes for casapy imaging
+        self.wplanes = 1
+        if self.cal_imsize > 512:
+            self.wplanes = 64
+        if self.cal_imsize > 799:
+            self.wplanes = 96
+        if self.cal_imsize > 1023:
+            self.wplanes = 128
+        if self.cal_imsize > 1599:
+            self.wplanes = 256
+        if self.cal_imsize > 2047:
+            self.wplanes = 384
+        if self.cal_imsize > 3000:
+            self.wplanes = 448
+        if self.cal_imsize > 4095:
+            self.wplanes = 512
+
+        # Set flag that tells with subtracted data column to use
+        self.use_new_sub_data = False
+
         self.working_dir = factor_working_dir
         self.completed_operations = []
+        self.cleanup_mapfiles = []
         self.save_file = os.path.join(self.working_dir, 'state',
             self.name+'_save.pkl')
         self.pipeline_dir = os.path.join(self.working_dir, 'pipeline')
-        self.vis_dir = os.path.join(self.working_dir, 'visdata')
 
 
     def save_state(self):
@@ -137,11 +156,15 @@ class Direction(object):
 
     def reset_state(self):
         """
-        Resets the direction state to initial state to allow reprocessing
+        Resets the direction to initial state to allow reprocessing
+
+        Currently, this means just deleting the facetselfcal results directory,
+        but it could be changed to delete only a subset of selfcal steps (by
+        modifying the selfcal pipeline statefile).
         """
         import glob
 
-        operations = ['FacetSelfcal', 'FacetImage', 'FacetCheck']
+        operations = ['facetselfcal']
         for op in operations:
             # Remove entry in completed_operations
             self.completed_operations.remove(op)
@@ -160,16 +183,13 @@ class Direction(object):
         """
         Cleans up unneeded data
         """
-        import glob
+        from lofarpipe.support.data_map import DataMap
 
-        operations = ['FacetAdd', 'FacetSetup', 'FacetSelfcal', 'FacetImage',
-            'FacetCheck', 'FacetSub']
-        for op in operations:
-            # Delete vis data
-            action_dirs = glob.glob(os.path.join(self.vis_dir, op, '*'))
-            for action_dir in action_dirs:
-                facet_dir = os.path.join(action_dir, self.name)
-                if os.path.exists(facet_dir):
-                    os.system('rm -rf {0}'.format(facet_dir))
-
-
+        for mapfile in self.cleanup_mapfiles:
+            try:
+                datamap = DataMap.load(mapfile)
+                for item in datamap:
+                    if os.path.exists(item.file):
+                        os.system('rm -rf {0}'.format(item.file))
+            except IOError:
+                pass

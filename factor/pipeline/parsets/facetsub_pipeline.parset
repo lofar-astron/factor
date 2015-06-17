@@ -1,0 +1,50 @@
+pipeline.steps = [update_shifted_all_hosts, update_input_bands_hosts, shift_to_field, copy_column, expand_parmdb_map, subtract, copy_shifted_map]
+
+pipeline.pluginpath                             =   {{ pipeline_dir }}/plugins
+
+update_shifted_all_hosts.control.kind           =   plugin
+update_shifted_all_hosts.control.type           =   updateHosts
+update_shifted_all_hosts.control.mapfile_in     =   {{ shifted_all_bands_datamap }}
+update_shifted_all_hosts.control.hosts          =   {{ hosts }}
+
+update_input_bands_hosts.control.kind           =   plugin
+update_input_bands_hosts.control.type           =   updateHosts
+update_input_bands_hosts.control.mapfile_in     =   {{ input_bands_datamap }}
+update_input_bands_hosts.control.hosts          =   {{ hosts }}
+
+shift_to_field.control.type                     =   dppp
+shift_to_field.control.opts.mapfile_in          =   {{ shifted_all_bands_datamap }}
+shift_to_field.control.opts.inputkey            =   msin
+shift_to_field.parsetarg.msin.datacolumn        =   MODEL_DATA
+shift_to_field.parsetarg.msout.writefullresflag =   False
+shift_to_field.parsetarg.steps                  =   [shift]
+shift_to_field.parsetarg.shift.type             =   phaseshifter
+shift_to_field.parsetarg.shift.phasecenter      =   [{{ field_ra }}deg, {{ field_dec }}deg]
+
+copy_column.control.type                        =   copy_column
+copy_column.control.mapfiles_in                 =   [shift_to_field.output.mapfile,{{ input_bands_datamap }}]
+copy_column.control.inputkeys                   =   [shiftedfile,datafile]
+copy_column.argument.flags                      =   [shiftedfile,datafile,DATA,MODEL_DATA]
+
+expand_parmdb_map.control.kind                  =   plugin
+expand_parmdb_map.control.type                  =   expandMapfile
+expand_parmdb_map.control.mapfile_in            =   {{ dir_dep_parmdb_datamap }}
+expand_parmdb_map.control.mapfile_to_match      =   {{ input_bands_datamap }}
+expand_parmdb_map.control.mapfile_dir           =   {{ mapfile_dir }}
+expand_parmdb_map.control.filename              =   subtract_parmdbs.datamap
+
+subtract.control.type                           =   calibrate-stand-alone_new
+subtract.control.mapfiles_in                    =   [{{ input_bands_datamap }},expand_parmdb_map.output.mapfile]
+subtract.control.inputkeys                      =   [inputms,inputparmdb]
+subtract.argument.observation                   =   inputms
+subtract.argument.parset                        =   {{ parset_dir }}//facet_dirdep_subtract.parset
+subtract.argument.catalog                       =   {{ skymodel_dir }}/empty.skymodel
+subtract.argument.parmdb                        =   inputparmdb
+subtract.argument.replace-sourcedb              =   True
+subtract.argument.replace-parmdb                =   True
+
+copy_shifted_map.control.kind                   =   plugin
+copy_shifted_map.control.type                   =   copyMapfile
+copy_shifted_map.control.mapfile_in             =   shift_to_field.output.mapfile
+copy_shifted_map.control.mapfile_dir            =   {{ mapfile_dir }}
+copy_shifted_map.control.filename               =   shifted_models.datamap

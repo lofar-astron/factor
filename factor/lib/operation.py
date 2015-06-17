@@ -9,15 +9,20 @@ import socket
 from factor.lib.context import Timer
 from factor.lib.scheduler_mp import Scheduler
 from factor import _logging
+from jinja2 import Environment, FileSystemLoader
+from lofarpipe.support.utilities import create_directory
+
+DIR = os.path.dirname(os.path.abspath(__file__))
+env_parset = Environment(loader=FileSystemLoader(os.path.join(DIR, '..', 'pipeline',
+    'parsets')))
+env_config = Environment(loader=FileSystemLoader(os.path.join(DIR, '..', 'pipeline')))
+
 
 class Operation(object):
     """
-    Generic operation class.
-
-    All operations should be in a separate module. Every module must have a
-    class called in the same way of the module which inherits from this class.
+    Generic operation class
     """
-    def __init__(self, parset, bands, direction=None, reset=False, name=None):
+    def __init__(self, parset, bands, direction, name=None):
         """
         Create Operation object
 
@@ -27,136 +32,122 @@ class Operation(object):
             Parset of operation
         bands : list of Band objects
             Bands for this operation
-        direction : Direction object, optional
+        direction : Direction object
             Direction for this operation
-        reset : bool, optional
-            If True, reset the state of this operation
         name : str, optional
-            Name of the action
+            Name of the operation
         """
         self.parset = parset.copy()
         self.bands = bands
-        self.name = name
+        self.name = name.lower()
         self.parset['op_name'] = name
         self.direction = direction
-        self.reset = reset
-        self.exit_on_error = True
         _logging.set_level(self.parset['logging_level'])
         self.log = logging.getLogger('factor.{0}'.format(self.name))
-        self.s = Scheduler(parset['cluster_specific']['ncpu'], name=name,
-            op_parset=self.parset)
         self.hostname = socket.gethostname()
+        self.node_list = parset['cluster_specific']['node_list']
+        self.max_cpus_per_node = parset['cluster_specific']['ncpu']
+        self.ndir_per_node = parset['cluster_specific']['ndir_per_node']
 
-        factor_working_dir = parset['dir_working']
-        if self.direction is not None:
-            if type(self.direction) is list:
-                self.statebasename = []
-                for d in self.direction:
-                    self.statebasename.append('{0}/state/{1}-{2}'.format(
-                        factor_working_dir, self.name, d.name))
-            else:
-                self.statebasename = '{0}/state/{1}-{2}'.format(factor_working_dir,
-                    self.name, self.direction.name)
+        # Below are paths for output directories
+        self.factor_working_dir = parset['dir_working']
+        # Base name of state file
+        self.statebasename = os.path.join(self.factor_working_dir,
+            'state', '{0}-{1}'.format(self.name, self.direction.name))
+        # Directory that holds important mapfiles in a convenient place
+        self.mapfile_dir = os.path.join(self.factor_working_dir, 'datamaps',
+            self.name, self.direction.name)
+        create_directory(self.mapfile_dir)
+        # Pipeline runtime dir (pipeline makes subdir here with name of direction)
+        self.pipeline_runtime_dir = os.path.join(self.factor_working_dir, 'results',
+            self.name)
+        create_directory(self.pipeline_runtime_dir)
+        # Directory that holds parset and config files
+        self.pipeline_parset_dir = os.path.join(self.pipeline_runtime_dir,
+            self.direction.name)
+        create_directory(self.pipeline_parset_dir)
+        # Pipeline working dir (pipeline makes subdir here with name of direction)
+        self.pipeline_working_dir = os.path.join(self.factor_working_dir, 'results',
+            self.name)
+        create_directory(self.pipeline_working_dir)
+        # Directory that holds logs in a convenient place
+        self.log_dir = os.path.join(self.factor_working_dir, 'logs', self.name)
+        create_directory(self.log_dir)
+        # Log name used for logs in log_dir
+        self.logbasename = os.path.join(self.log_dir, '{0}_{1}'.format(
+            self.name, self.direction.name))
+
+        # Below are paths for scripts, etc. in the Factor install directory
+        self.factor_root_dir = os.path.split(DIR)[0]
+        self.factor_pipeline_dir = os.path.join(self.factor_root_dir, 'pipeline')
+        self.factor_script_dir = os.path.join(self.factor_root_dir, 'scripts')
+        self.factor_parset_dir = os.path.join(self.factor_root_dir, 'parsets')
+        self.factor_skymodel_dir = os.path.join(self.factor_root_dir, 'skymodels')
+
+        # Below are the templates and output paths for the pipeline parset and
+        # config files
+        self.pipeline_parset_template = env_parset.get_template('{0}_pipeline.parset'.
+            format(self.name))
+        self.pipeline_parset_file = os.path.join(self.pipeline_parset_dir,
+            'pipeline.parset')
+        self.pipeline_config_template = env_config.get_template('pipeline.cfg')
+        self.pipeline_config_file = os.path.join(self.pipeline_parset_dir,
+            'pipeline.cfg')
+
+        # Define parameters needed for the pipeline config. Parameters needed
+        # for the pipeline parset should be defined in the subclasses in
+        # self.parms_dict
+        self.cfg_dict = {'lofarroot': parset['lofarroot'],
+                         'pythonpath': parset['lofarpythonpath'],
+                         'factorroot': self.factor_root_dir,
+                         'genericpiperoot': parset['piperoot'],
+                         'pipeline_working_dir': self.pipeline_working_dir,
+                         'pipeline_runtime_dir': self.pipeline_runtime_dir,
+                         'max_cpus_per_node': self.max_cpus_per_node,
+                         'casa_executable': parset['casa_executable'],
+                         'wsclean_executable': parset['wsclean_executable'],
+#                          'chgcentre_executable': parset['chgcentre_executable'],
+                         'losoto_executable': parset['losoto_executable'],
+                         'H5parm_importer_executable': parset['H5parm_importer_executable'],
+                         'H5parm_exporter_executable': parset['H5parm_exporter_executable']}
+
+        # Add cluster-related info
+        if os.path.basename(self.parset['cluster_specific']['clusterdesc']) == 'local.clusterdesc':
+            self.cfg_dict['remote'] = '[remote]\n'\
+                + 'method = local\n'\
+                + 'max_per_node = {0}\n'.format(self.max_cpus_per_node)
         else:
-            self.statebasename = '{0}/state/{1}'.format(factor_working_dir,
-                self.name)
-        self.mapbasename = '{0}/datamaps/{1}/'.format(factor_working_dir, self.name)
-        if not os.path.exists(self.mapbasename):
-            os.makedirs(self.mapbasename)
-        self.visbasename = '{0}/visdata/{1}/'.format(factor_working_dir, self.name)
-        if not os.path.exists(self.visbasename):
-            os.makedirs(self.visbasename)
+            self.cfg_dict['remote'] = ''
+        self.cfg_dict['clusterdesc'] = os.path.join(self.factor_working_dir,
+            self.parset['cluster_specific']['clusterdesc'])
 
 
     def setup(self):
         """
-        Set up the operation
+        Set up this operation
+
+        This involves just filling the pipeline config and parset templates
         """
-        if self.direction is None:
-            self.log.info('<-- Operation %s started' % self.name)
-        else:
-            if type(self.direction) is list:
-                dirstr = ', '.join([d.name for d in self.direction])
-            else:
-                dirstr = self.direction.name
-            self.log.info('<-- Operation %s started (direction(s): %s)' %
-                (self.name, dirstr))
-
-
-    def write_mapfile(self, data_list, prefix=None, direction=None, band=None,
-        index=None, host_list=None):
-        """
-        Write an operation datamap.
-
-        Parameters
-        ----------
-        data_list : list of str
-            List of files for datamap
-        prefix : str, optional
-            A prefix for the name
-        direction : Direction object, optional
-            A direction
-        band : Band object, optional
-            A band
-        index : int, optional
-            An index for the datamap
-        host_list : list of str, optional
-            List of hosts for datamap
-
-        """
-        from factor.lib.datamap_lib import write_mapfile
-
-        if host_list is None:
-            host_list = self.parset['cluster_specific']['node_list']
-
-        mapfile = write_mapfile(data_list, self.name, prefix=prefix,
-                direction=direction, band=band, index=index, host_list=host_list,
-                working_dir=self.parset['dir_working'])
-
-        return mapfile
-
-
-    def run_steps(self):
-        """
-        Define the operation's steps
-        """
-        raise(NotImplementedError)
-
-
-    def run(self):
-        """
-        Run the operation
-        """
-        with Timer(self.log, 'operation'):
-            self.setup()
-            self.run_steps()
-            self.finalize()
+        tmp = self.pipeline_parset_template.render(self.parms_dict)
+        with open(self.pipeline_parset_file, 'w') as f:
+            f.write(tmp)
+        tmp = self.pipeline_config_template.render(self.cfg_dict)
+        with open(self.pipeline_config_file, 'w') as f:
+            f.write(tmp)
 
 
     def finalize(self):
         """
-        Finalize the operation
+        Finalize this operation
+
+        This should be defined in the subclasses if needed
         """
-        # Set the operation completion state
-        if self.direction is None:
-            self.log.info('--> Operation %s finished' % self.name)
-        else:
-            if type(self.direction) is list:
-                dirstr = ', '.join([d.name for d in self.direction])
-            else:
-                dirstr = self.direction.name
-            self.log.info('--> Operation %s finished (direction(s): %s)' %
-                (self.name, dirstr))
+        pass
 
 
-    def check_completed(self, obj_list):
+    def check_completed(self):
         """
         Checks whether operation has been run successfully before
-
-        Parameters
-        ----------
-        obj_list : list
-            Band or Direction objects to check
 
         Returns
         -------
@@ -164,33 +155,16 @@ class Operation(object):
             True if all objects were successfully run
 
         """
-        if type(obj_list) is not list:
-            obj_list = [obj_list]
-
-        for obj in obj_list:
-            obj.load_state()
-            if self.name in obj.completed_operations:
-                all_done = True
-            else:
-                all_done = False
-                break
-
-        return all_done
+        self.direction.load_state()
+        if self.name in self.direction.completed_operations:
+            return True
+        else:
+            return False
 
 
-    def set_completed(self, obj_list):
+    def set_completed(self):
         """
-        Sets the state for the operation objects
-
-        Parameters
-        ----------
-        obj_list : list
-            Band or Direction objects to check
-
+        Sets the state for the operation
         """
-        if type(obj_list) is not list:
-            obj_list = [obj_list]
-
-        for obj in obj_list:
-            obj.completed_operations.append(self.name)
-            obj.save_state()
+        self.direction.completed_operations.append(self.name)
+        self.direction.save_state()

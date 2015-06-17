@@ -62,8 +62,7 @@ def parset_read(parset_file):
         os.mkdir(parset_dict['dir_working'])
     try:
         os.chdir(parset_dict['dir_working'])
-        for subdir in ['/logs', '/images', '/models', '/state', '/parsets',
-            '/visdata', '/parmdbs', '/pipeline', '/datamaps', '/regions']:
+        for subdir in ['/logs', '/state', '/results', '/datamaps', '/regions']:
             if not os.path.isdir(parset_dict['dir_working']+subdir):
                 os.mkdir(parset_dict['dir_working']+subdir)
     except:
@@ -107,7 +106,7 @@ def parset_read(parset_file):
         log.error('Sorry, the AWimager is not currently supported')
         sys.exit(1)
     if 'imager_selfcal' not in parset_dict:
-        parset_dict['imager_selfcal'] = parset_dict['imager']
+        parset_dict['imager_selfcal'] = 'casapy'
     if parset_dict['imager_selfcal'].lower() not in ['awimager', 'casapy', 'wsclean']:
         log.error('Imager "{0}" not understood'.format(parset_dict['imager_selfcal']))
         sys.exit(1)
@@ -179,6 +178,13 @@ def parset_read(parset_file):
         import multiprocessing
         parset_dict['cluster_specific']['ncpu'] = multiprocessing.cpu_count()
     log.debug("Using up to %s CPU(s) per node" % (parset_dict['cluster_specific']['ncpu']))
+    if 'ndir_per_node' in parset_dict['cluster_specific']:
+        parset_dict['cluster_specific']['ndir_per_node'] = parset.getint('cluster',
+            'ndir_per_node')
+    else:
+        parset_dict['cluster_specific']['ndir_per_node'] = 1
+    log.debug("Processing up to %s direction(s) in parallel per node" %
+        (parset_dict['cluster_specific']['ndir_per_node']))
     if 'clusterdesc_file' not in parset_dict['cluster_specific']:
         parset_dict['cluster_specific']['clusterdesc_file'] = parset_dict['lofarroot'] + '/share/local.clusterdesc'
         parset_dict['cluster_specific']['node_list'] = ['localhost']

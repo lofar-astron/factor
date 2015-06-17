@@ -4,6 +4,7 @@ Module that holds all cluster-related functions
 import os
 import logging
 import sys
+import factor._logging
 
 
 log = logging.getLogger('factor.cluster')
@@ -49,3 +50,27 @@ def get_compute_nodes(clusterdesc_file):
 
     cluster = clusterdesc.ClusterDesc(clusterdesc_file)
     return sorted(clusterdesc.get_compute_nodes(cluster))
+
+
+def find_executables(parset):
+    """
+    Finds paths to required executables
+    """
+    from distutils import spawn
+
+    executables = {'casa_executable': ['casa', 'casapy'],
+                   'wsclean_executable': ['wsclean'],
+#                    'chgcentre_executable': ['chgcentre'],
+                   'losoto_executable': ['losoto.py'],
+                   'H5parm_importer_executable': ['H5parm_importer.py'],
+                   'H5parm_exporter_executable': ['H5parm_exporter.py']}
+    for key, names in executables.iteritems():
+        for name in names:
+            path = spawn.find_executable(name)
+            if path is not None:
+                parset[key] = path
+                break
+        if path is None:
+            log.error('The path to the {0} executable could not be determined. '
+                'Please make sure it is in your PATH.'.format(name))
+            sys.exit(1)
