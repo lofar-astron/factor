@@ -107,6 +107,7 @@ class FacetSelfcal(Operation):
                            'field_dec': self.direction.field_dec,
                            'wplanes': self.direction.wplanes,
                            'casa_suffix': casa_suffix,
+                           'wsclean_suffix': wsclean_suffix,
                            'facet_imsize': self.direction.facet_imsize,
                            'cal_wplanes': self.direction.wplanes,
                            'cal_imsize': self.direction.cal_imsize,
