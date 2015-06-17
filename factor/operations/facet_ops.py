@@ -92,7 +92,7 @@ class FacetSelfcal(Operation):
         else:
             nterms = 1
             casa_suffix = None
-            wsclean_suffix = None
+            wsclean_suffix = '-image.fits'
         self.parms_dict = {'input_dir': parset['dir_ms'],
                            'parset_dir': self.factor_parset_dir,
                            'skymodel_dir': self.factor_skymodel_dir,
