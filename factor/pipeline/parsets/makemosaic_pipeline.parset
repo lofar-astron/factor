@@ -20,13 +20,13 @@ create_compressed_mapfile_images.control.kind          =   plugin
 create_compressed_mapfile_images.control.type          =   compressMapfile
 create_compressed_mapfile_images.control.mapfile_in    =   create_images_map.output.mapfile
 create_compressed_mapfile_images.control.mapfile_dir   =   {{ mapfile_dir }}
-create_compressed_mapfile_images.control.filename      =   mosaic_images_input.mapfile
+create_compressed_mapfile_images.control.filename      =   mosaic_images_input.datamap
 
 create_compressed_mapfile_vertices.control.kind        =   plugin
 create_compressed_mapfile_vertices.control.type        =   compressMapfile
 create_compressed_mapfile_vertices.control.mapfile_in  =   create_vertices_map.output.mapfile
 create_compressed_mapfile_vertices.control.mapfile_dir =   {{ mapfile_dir }}
-create_compressed_mapfile_vertices.control.filename    =   mosaic_vertices_input.mapfile
+create_compressed_mapfile_vertices.control.filename    =   mosaic_vertices_input.datamap
 
 make_mosaic.control.type                               =   mosaic_images
 make_mosaic.control.mapfiles_in                        =   [create_compressed_mapfile_images.output.mapfile,create_compressed_mapfile_vertices.output.mapfile]

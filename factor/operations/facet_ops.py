@@ -88,9 +88,11 @@ class FacetSelfcal(Operation):
         if self.direction.nchannels > 1:
             nterms = 2
             casa_suffix = '.tt0'
+            wsclean_suffix = '-MFS-image.fits'
         else:
             nterms = 1
             casa_suffix = None
+            wsclean_suffix = None
         self.parms_dict = {'input_dir': parset['dir_ms'],
                            'parset_dir': self.factor_parset_dir,
                            'skymodel_dir': self.factor_skymodel_dir,
