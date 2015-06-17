@@ -15,6 +15,7 @@ from factor.operations.facet_ops import *
 from factor.lib.scheduler_mp import Scheduler
 from factor.lib.direction import Direction
 from collections import Counter
+from lofarpipe.support.data_map import DataMap
 
 
 def run(parset_file, logging_level='info', dry_run=False, test_run=False):
@@ -316,7 +317,13 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
 
     # Mosaic the final facet images together
     if parset['make_mosaic']:
-        op = MakeMosaic(parset, directions)
+        field.facet_image_filenames = []
+        field.facet_vertices_filenames = []
+        for d in directions:
+            facet_image = DataMap(d.facet_image_mapfile)[0].file
+            field.facet_image_filenames.append(facet_image)
+            field.facet_vertices_filenames.append(d.save_file)
+        op = MakeMosaic(parset, field)
         scheduler.run(op)
 
     log.info("Factor has finished :)")

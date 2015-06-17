@@ -52,10 +52,14 @@ class MakeMosaic(Operation):
     """
     Operation to mosiac facet images
     """
-    def __init__(self, parset, bands, direction):
-        super(MakeMosaic, self).__init__(parset, bands, direction,
+    def __init__(self, parset, direction):
+        super(MakeMosaic, self).__init__(parset, None, direction,
             name='MakeMosaic')
 
         # Define parameters needed for this operation
-        self.parms_dict = {'parset_dir': self.factor_parset_dir,
-                           'mapfile_dir': self.mapfile_dir}
+        self.parms_dict = {'mapfile_dir': self.mapfile_dir,
+                           'pipeline_dir': self.factor_pipeline_dir,
+                           'facet_image_filenames': self.direction.facet_image_filenames,
+                           'facet_vertices_filenames': self.direction.facet_vertices_filenames,
+                           'hosts': self.node_list,
+                           'max_cpus_per_node': self.max_cpus_per_node}

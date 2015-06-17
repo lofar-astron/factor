@@ -1,0 +1,23 @@
+pipeline.steps = [create_images_map, create_vertices_map, make_mosaic]
+
+pipeline.pluginpath                     =   {{ pipeline_dir }}/plugins
+
+create_images_map.control.kind          =   plugin
+create_images_map.control.type          =   addListMapfile
+create_images_map.control.hosts         =   {{ hosts }}
+create_images_map.control.files         =   {{ facet_image_filenames }}
+create_images_map.control.mapfile_dir   =   {{ mapfile_dir }}
+create_images_map.control.filename      =   facet_images.datamap
+
+create_vertices_map.control.kind        =   plugin
+create_vertices_map.control.type        =   addListMapfile
+create_vertices_map.control.hosts       =   {{ hosts }}
+create_vertices_map.control.files       =   {{ facet_vertices_filenames }}
+create_vertices_map.control.mapfile_dir =   {{ mapfile_dir }}
+create_vertices_map.control.filename    =   facet_vertices.datamap
+
+make_mosaic.control.type                =   mosaic_images.py
+make_mosaic.control.mapfiles_in         =   [create_images_map.output.mapfile,create_vertices_map.output.mapfile]
+make_mosaic.control.inputkeys           =   [images,vertices]
+make_mosaic.control.outputkey           =   outfile
+make_mosaic.argument.flags              =   [images,vertices,outfile]
