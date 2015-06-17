@@ -20,7 +20,7 @@ env_config = Environment(loader=FileSystemLoader(os.path.join(DIR, '..', 'pipeli
 
 class Operation(object):
     """
-    Generic operation class.
+    Generic operation class
     """
     def __init__(self, parset, bands, direction, name=None):
         """
@@ -35,7 +35,7 @@ class Operation(object):
         direction : Direction object
             Direction for this operation
         name : str, optional
-            Name of the action
+            Name of the operation
         """
         self.parset = parset.copy()
         self.bands = bands

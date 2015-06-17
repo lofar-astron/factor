@@ -68,7 +68,7 @@ class Scheduler(object):
         op_parset : dict, optional
             Dict of operation parameters
         dry_run : bool, optional
-            If True, the pipelines are not run, but all parsets and config files
+            If True, the pipelines are not run but all parsets and config files
             are made as normal
 
         """
@@ -99,8 +99,8 @@ class Scheduler(object):
         """
         Runs a list of operations in parallel
 
-        Each operation is checked for whether it was already successfully
-        completed, and, if so, it will not be scheduled. However, the finalize()
+        Each operation is checked as to whether it was already successfully
+        completed and, if so, it will not be scheduled. However, the finalize()
         method will be called for all operations, whether or not they were
         scheduled. This is to ensure proper handling of direction object
         attributes.

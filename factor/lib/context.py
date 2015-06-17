@@ -16,6 +16,8 @@ class Timer(object):
         ----------
         log : logging instance
             The logging instance to use. If None, root is used
+        type : str, optional
+            Type of operation
         """
         if log is None:
             self.log = logging
