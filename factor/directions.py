@@ -1088,4 +1088,4 @@ def mask_vertices(mask_im, vertices_file):
     bool_mask = mask_im.copy()
     bool_mask.putdata(bool_data)
 
-    return mask_im, bool_mask
+    return mask_im.putdata(data), mask_im.putdata(bool_data)

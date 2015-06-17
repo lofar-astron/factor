@@ -126,10 +126,10 @@ def main(images, vertices, outfits, maxwidth=0):
     master_im = np.zeros((len(master_dec),len(master_ra)))
 
     # Reproject the images onto the master grid, weight and normalize
-    for i in range(len(pims)):
+    for i, im in enumerate(pims):
         print 'doing image',i
-        im = pims[i].regrid([2,3],ma,outshape=(nc,ns,len(master_dec),len(master_ra)))
         im, mask = mask_vertices(im, vertices[i])
+        im = im.regrid([2,3],ma,outshape=(nc,ns,len(master_dec),len(master_ra)))
         master_im += np.squeeze(im.getdata())
         master_mask += np.squeeze(mask.getdata())
 
