@@ -54,7 +54,7 @@ def main(images, vertices, outfits, maxwidth=0):
         bpar_pa = quanta.quantity(info_dict['positionangle']).get_value('deg')
         psf_fwhm.append([bpar_ma, bpar_mi, bpar_pa])
         frequency.append(this_pim.info()['coordinates']['spectral2']['restfreq'])
-        print '{0:45.45s}  {1:45.45s} {2:0.2f}          {3:0.2f}    {4:0.2f}    {5:0.2f}'.format(images[i], regions[i], 0, bpar_ma*60, bpar_mi*60,bpar_pa)
+        print '{0:45.45s}  {1:45.45s} {2:0.2f}          {3:0.2f}    {4:0.2f}    {5:0.2f}'.format(images[i], vertices[i], 0, bpar_ma*60, bpar_mi*60,bpar_pa)
 
     psf_fwhm = np.array(psf_fwhm)
     frequency = np.array(frequency)
