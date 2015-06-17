@@ -1059,6 +1059,10 @@ def mask_vertices(mask_im, vertices_file):
     """
     Modify the input image to exclude regions outside of the polygon
     """
+    ma = mask_im.coordinates()
+    new_im = pim.image('',shape=mask_im.shape(), coordsys=ma)
+    bool_mask = pim.image('',shape=mask_im.shape(), coordsys=ma)
+
     img_type = mask_im.imagetype()
     data = mask_im.getdata()
     bool_data = np.ones(data.shape)
@@ -1084,8 +1088,7 @@ def mask_vertices(mask_im, vertices_file):
         data[0, 0, masked_ind[0][outside_ind], [masked_ind[1][outside_ind]]] = 0
         bool_data[0, 0, masked_ind[0][outside_ind], [masked_ind[1][outside_ind]]] = 0
 
-    mask_im.putdata(data)
-    bool_mask = mask_im.copy()
+    new_im.putdata(data)
     bool_mask.putdata(bool_data)
 
-    return mask_im.putdata(data), mask_im.putdata(bool_data)
+    return new_im, bool_mask
