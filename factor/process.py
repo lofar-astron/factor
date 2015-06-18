@@ -88,7 +88,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         factor_working_dir=parset['dir_working'])
     exists = field.load_state()
     if not exists:
-        field.set_image_sizes(test_run=test_run)
+        field.set_image_sizes(fwhm_deg=bands[0].fwhm_deg, test_run=test_run)
         field.save_state()
 
     # Run initial sky model generation and create empty datasets. First check that

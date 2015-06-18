@@ -138,7 +138,7 @@ class Direction(object):
         self.pipeline_dir = os.path.join(self.working_dir, 'pipeline')
 
 
-    def set_image_sizes(self, test_run=False):
+    def set_image_sizes(self, fwhm_deg=None, test_run=False):
         """
         Sets sizes for various images
 
@@ -158,13 +158,14 @@ class Direction(object):
             self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
                 / self.cellsize_selfcal_deg * 1.2)) # cal size has 20% padding
 
-            # Set the initsubtract image sizes from the lowest-frequency band's
-            # primary-beam FWHM. For high-res image, use 2.5 * FWHM; for
-            # low-res, use 6.5 * FHWM
-            self.imsize_high_res = self.get_optimum_size(bands[0].fwhm_deg
-                / self.cellsize_highres_deg*2.5)
-            self.imsize_low_res = self.get_optimum_size(bands[0].fwhm_deg
-                / self.cellsize_lowres_deg*6.5)
+            if fwhm_deg is not None:
+                # Set the initsubtract image sizes from the lowest-frequency band's
+                # primary-beam FWHM. For high-res image, use 2.5 * FWHM; for
+                # low-res, use 6.5 * FHWM
+                self.imsize_high_res = self.get_optimum_size(fwhm_deg
+                    / self.cellsize_highres_deg*2.5)
+                self.imsize_low_res = self.get_optimum_size(fwhm_deg
+                    / self.cellsize_lowres_deg*6.5)
         else:
             self.facet_imsize = self.get_optimum_size(128)
             self.cal_imsize = self.get_optimum_size(128)
