@@ -306,7 +306,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
                         group2 = direction_groups_orig[k]
 
                         min_sep_global = 0.0 # degrees
-                        for j in range(10):
+                        for j in range(100):
                             group_merged = group1[:] + group2[:]
                             shuffle(group_merged)
                             group1_test = group_merged[0: len(group1)]
