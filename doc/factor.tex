@@ -64,7 +64,7 @@ sections.
 
 \subsubsection{Quick-start}
 \label{factor:quick-start}
-Below is a quick-start quide to a typical run.
+Below is a quick-start guide to a typical run.
 
 \begin{enumerate}
 \item Collect the input bands (described in Section \ref{factor:data}) in a
@@ -82,7 +82,6 @@ machine could be:
 [global]
 dir_working = /data/factor_output
 dir_ms = /data/factor_input
-piperoot = /software/local/genericpipeline
 parmdb_name = instrument_ap_smoothed
 iteractive = True
 
@@ -207,8 +206,8 @@ param2 = 123
 \subsection{Data Preparation}
 \label{factor:data}
 
-The input data must be have the average amplitude scale set and average clock
-offsets removed. Futhermore, the LOFAR beam towards the phase center should be
+The input data must have the average amplitude scale set and average clock
+offsets removed. Furthermore, the LOFAR beam towards the phase center should be
 removed. The data should then undergo direction-independent, phase-only self
 calibration, and the resulting solutions must be provided to Factor. If desired,
 all sources can be subtracted before Factor is run, thereby allowing one to skip
@@ -248,7 +247,7 @@ thresholding algorithm. These grouped patches of CCs are then filtered to meet
 the specified flux and size limits ({\tt flux\_min\_Jy} and {\tt
 size\_max\_arcmin}, respectively) and nearby patches are merged (specified by
 {\tt separation\_max\_arcmin}). The resulting patches are then sorted by
-apparent flux at the lowest available frequency (from bright to faint), and the
+apparent flux (from bright to faint) at the lowest available frequency, and the
 final {\tt directions\_file} is written to the file {\tt
 factor\_directions.txt} in the working directory.
 
@@ -260,7 +259,7 @@ means two groupings are used, with the first 5 directions put into groups of one
 (i.e., the directions are processed in series) and the rest of the directions
 divided into groups of 4 (i.e., 4 directions processed in parallel). Shuffling
 is done between neighboring groups to achieve the largest minimum separation
-between directions in the groups. This sorting attempts to minimize the effects
+between directions in the groups. This sorting attempts to minimize the affect
 that any artifacts from one direction might have on the other simultaneously
 processed directions.
 
@@ -346,7 +345,7 @@ one).
 Factor is structured based on operations and actions. An operation is composed
 of a sequence of actions. For example, the initial subtraction operation
 (denoted {\tt initsubtract}) performs the following actions: image at high resolution,
-make a sky model, subtract the sky model, average, image and low resolution,
+make a sky model, subtract the sky model, average, image at low resolution,
 make another sky model, and finally subtract the second sky model. Operations
 divide the reduction into logical groupings of actions as follows.
 
@@ -354,12 +353,12 @@ divide the reduction into logical groupings of actions as follows.
 \item[{\tt initsubtract}] Performs the initial imaging and subtraction of sources to
 create ``source-free'' datasets. This operation may be skipped if sky models are
 specified for each band in the parset and the {\tt SUBTRACTED\_DATA\_ALL} column
-is present in all the bands.
+is present in all the input bands.
 \item[{\tt facetadd}] For each direction, the facet sources are added to the
 ``source-free'' datasets. The data are then phase shifted to the appropriate
 coordinates.
-\item[{\tt facetselcal}] The direction-independent calibration is applied, and
-the bands are concatenated and averaged. Selfcalibration is then performed on
+\item[{\tt facetselfcal}] The direction-independent calibration is applied, and
+the bands are concatenated and averaged. Self-calibration is then performed on
 one or more directions, using two rounds of phase-only calibration followed by
 two rounds of fast-phase and slow-amplitude calibration. For each direction, all
 sources in the facet are added to the ``source-free'' datasets. The data are
@@ -367,17 +366,16 @@ then phase shifted to the appropriate coordinates. The direction-dependent
 calibration is applied, and the bands are concatenated and averaged. The entire
 facet is then imaged, producing a final model of the facet sources.
 \item[{\tt facetsub}] The final model is subtracted, producing improved
-``source-free'' datasets.
+``source-free'' datasets which are used by subsequent directions.
 \end{description}
 
-The facet operations are repeated for each direction. The facetselfcal operation
-can run on multiple directions simultaneously. After each action finishes, the
-saved state is updated, allowing for resumption of steps at the granularity of
-the actions in a given operation.
+The facet operations ({\tt facetadd}, {\tt facetselfcal}, and {\tt facetsub})
+are repeated for each direction. The {\tt facetselfcal} operation can run on
+multiple directions simultaneously.
 
 The results of the processing are stored in the {\tt results} directory in the
-working directory by type. Inside these subdirectories, results are organized by
-operation and dirrection. For example, for a direction named ``dir1'', the
+working directory. Inside these subdirectories, results are organized by
+operation and direction. For example, for a direction named ``dir1'', the
 results produced during self calibration are stored in {{\tt
 results/facetselfcal/dir1/}.
 
