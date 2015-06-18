@@ -100,7 +100,6 @@ class Operation(object):
         self.cfg_dict = {'lofarroot': parset['lofarroot'],
                          'pythonpath': parset['lofarpythonpath'],
                          'factorroot': self.factor_root_dir,
-                         'genericpiperoot': parset['piperoot'],
                          'pipeline_working_dir': self.pipeline_working_dir,
                          'pipeline_runtime_dir': self.pipeline_runtime_dir,
                          'max_cpus_per_node': self.max_cpus_per_node,

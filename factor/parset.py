@@ -43,7 +43,7 @@ def parset_read(parset_file):
             parset_dict['lofarroot'] = os.environ['LOFARROOT']
         else:
             log.critical("The LOFAR root directory cannot be determined. Please "
-                "specify it in the parset")
+                "specify it in the parset as lofarroot")
             sys.exit(1)
     if 'lofarpythonpath' not in parset_dict:
         if parset_dict['lofarroot'] in os.environ['PYTHONPATH']:
@@ -54,7 +54,7 @@ def parset_read(parset_file):
                     break
         else:
             log.critical("The LOFAR Python root directory cannot be determined. "
-                "Please specify it in the parset")
+                "Please specify it in the parset as lofarpythonpath")
             sys.exit(1)
 
     # Set-up the working dir (other paths are relative to this)
