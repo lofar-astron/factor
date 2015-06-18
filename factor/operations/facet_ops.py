@@ -135,8 +135,8 @@ class FacetSub(Operation):
     """
     Operation to mosiac facet images
     """
-    def __init__(self, parset, bands, direction):
-        super(FacetSub, self).__init__(parset, bands, direction,
+    def __init__(self, parset, direction):
+        super(FacetSub, self).__init__(parset, None, direction,
             name='FacetSub')
 
         # Define parameters needed for this operation

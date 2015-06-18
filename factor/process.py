@@ -243,7 +243,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             scheduler.run(op)
 
         # Do selfcal on calibrator only
-        ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
+        ops = [FacetSelfcal(parset, d) for d in direction_group]
         scheduler.run(ops)
 
         # Subtract final model(s) from empty field datasets. These operations
@@ -268,7 +268,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         else:
             for d in direction_group_ok:
                 d.use_new_sub_data = True
-        ops = [FacetSub(parset, bands, d) for d in direction_group if d.selfcal_ok]
+        ops = [FacetSub(parset, d) for d in direction_group if d.selfcal_ok]
         for op in ops:
             scheduler.run(op)
 
