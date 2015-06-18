@@ -94,9 +94,7 @@ class Operation(object):
         self.pipeline_config_file = os.path.join(self.pipeline_parset_dir,
             'pipeline.cfg')
 
-        # Define parameters needed for the pipeline config. Parameters needed
-        # for the pipeline parset should be defined in the subclasses in
-        # self.parms_dict
+        # Define parameters needed for the pipeline config.
         self.cfg_dict = {'lofarroot': parset['lofarroot'],
                          'pythonpath': parset['lofarpythonpath'],
                          'factorroot': self.factor_root_dir,
@@ -110,6 +108,17 @@ class Operation(object):
                          'losoto_executable': parset['losoto_executable'],
                          'H5parm_importer_executable': parset['H5parm_importer_executable'],
                          'H5parm_exporter_executable': parset['H5parm_exporter_executable']}
+
+        # Define global parameters needed by all pipeline parsets. Other,
+        # pipeline-specific parameters should be defined in the subclasses by
+        # updating self.parms_dict
+        self.parms_dict = {'parset_dir': self.factor_parset_dir,
+                           'skymodel_dir': self.factor_skymodel_dir,
+                           'mapfile_dir': self.mapfile_dir,
+                           'pipeline_dir': self.factor_pipeline_dir,
+                           'script_dir': self.factor_script_dir,
+                           'hosts': self.node_list,
+                           'max_cpus_per_node': self.max_cpus_per_node}
 
         # Add cluster-related info
         if os.path.basename(self.parset['cluster_specific']['clusterdesc']) == 'local.clusterdesc':

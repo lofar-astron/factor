@@ -39,21 +39,15 @@ class FacetAdd(Operation):
         else:
             add_all_parset = 'facet_dirindep_add_all.parset'
             add_cal_parset = 'facet_dirindep_add_cal.parset'
-        self.parms_dict = {'input_dir': parset['dir_ms'],
-                           'parset_dir': self.factor_parset_dir,
-                           'skymodel_dir': self.factor_skymodel_dir,
-                           'mapfile_dir': self.mapfile_dir,
-                           'pipeline_dir': self.factor_pipeline_dir,
-                           'add_all_parset': add_all_parset,
-                           'add_cal_parset': add_cal_parset,
-                           'dir_indep_parmdb_name': parset['parmdb_name'],
-                           'skymodels': skymodels,
-                           'facet_ra': self.direction.ra,
-                           'facet_dec': self.direction.dec,
-                           'cal_radius_deg': self.direction.cal_size_deg/2.0,
-                           'facet_state_file': self.direction.save_file,
-                           'hosts': self.node_list,
-                           'max_cpus_per_node': self.max_cpus_per_node}
+        self.parms_dict.update({'input_dir': parset['dir_ms'],
+                                'add_all_parset': add_all_parset,
+                                'add_cal_parset': add_cal_parset,
+                                'dir_indep_parmdb_name': parset['parmdb_name'],
+                                'skymodels': skymodels,
+                                'facet_ra': self.direction.ra,
+                                'facet_dec': self.direction.dec,
+                                'cal_radius_deg': self.direction.cal_size_deg/2.0,
+                                'facet_state_file': self.direction.save_file})
 
 
     def finalize(self):
@@ -80,8 +74,8 @@ class FacetSelfcal(Operation):
     """
     Operation to selfcal one or more directions
     """
-    def __init__(self, parset, bands, direction):
-        super(FacetSelfcal, self).__init__(parset, bands, direction,
+    def __init__(self, parset, direction):
+        super(FacetSelfcal, self).__init__(parset, None, direction,
             name='FacetSelfcal')
 
         # Define parameters needed for this operation
@@ -93,32 +87,24 @@ class FacetSelfcal(Operation):
             nterms = 1
             casa_suffix = None
             wsclean_suffix = '-image.fits'
-        self.parms_dict = {'input_dir': parset['dir_ms'],
-                           'parset_dir': self.factor_parset_dir,
-                           'skymodel_dir': self.factor_skymodel_dir,
-                           'mapfile_dir': self.mapfile_dir,
-                           'pipeline_dir': self.factor_pipeline_dir,
-                           'script_dir': self.factor_script_dir,
-                           'shifted_cal_bands_datamap': self.direction.shifted_cal_bands_datamap,
-                           'shifted_all_bands_datamap': self.direction.shifted_all_bands_datamap,
-                           'shifted_empty_bands_datamap': self.direction.shifted_empty_bands_datamap,
-                           'dir_indep_parmdbs_datamap': self.direction.dir_indep_parmdbs_datamap,
-                           'field_ra': self.direction.field_ra,
-                           'field_dec': self.direction.field_dec,
-                           'wplanes': self.direction.wplanes,
-                           'casa_suffix': casa_suffix,
-                           'wsclean_suffix': wsclean_suffix,
-                           'facet_imsize': self.direction.facet_imsize,
-                           'cal_wplanes': self.direction.wplanes,
-                           'cal_imsize': self.direction.cal_imsize,
-                           'nterms': nterms,
-                           'nchannels': self.direction.nchannels,
-                           'chunk_width': (self.direction.solint_a-1)*2,
-                           'solint_p': self.direction.solint_p,
-                           'solint_a': self.direction.solint_a,
-                           'facet_state_file': self.direction.save_file,
-                           'hosts': self.direction.hosts,
-                           'max_cpus_per_node': self.direction.max_cpus_per_node}
+        self.parms_dict.update({'shifted_cal_bands_datamap': self.direction.shifted_cal_bands_datamap,
+                                'shifted_all_bands_datamap': self.direction.shifted_all_bands_datamap,
+                                'shifted_empty_bands_datamap': self.direction.shifted_empty_bands_datamap,
+                                'dir_indep_parmdbs_datamap': self.direction.dir_indep_parmdbs_datamap,
+                                'field_ra': self.direction.field_ra,
+                                'field_dec': self.direction.field_dec,
+                                'wplanes': self.direction.wplanes,
+                                'casa_suffix': casa_suffix,
+                                'wsclean_suffix': wsclean_suffix,
+                                'facet_imsize': self.direction.facet_imsize,
+                                'cal_wplanes': self.direction.wplanes,
+                                'cal_imsize': self.direction.cal_imsize,
+                                'nterms': nterms,
+                                'nchannels': self.direction.nchannels,
+                                'chunk_width': (self.direction.solint_a-1)*2,
+                                'solint_p': self.direction.solint_p,
+                                'solint_a': self.direction.solint_a,
+                                'facet_state_file': self.direction.save_file})
 
 
     def finalize(self):
@@ -154,17 +140,11 @@ class FacetSub(Operation):
             name='FacetSub')
 
         # Define parameters needed for this operation
-        self.parms_dict = {'input_dir': parset['dir_ms'],
-                           'parset_dir': self.factor_parset_dir,
-                           'skymodel_dir': self.factor_skymodel_dir,
-                           'mapfile_dir': self.mapfile_dir,
-                           'pipeline_dir': self.factor_pipeline_dir,
-                           'shifted_all_bands_datamap': self.direction.shifted_all_bands_datamap,
-                           'dir_dep_parmdb_datamap': self.direction.dir_dep_parmdb_datamap,
-                           'input_bands_datamap': self.direction.input_bands_datamap,
-                           'field_ra': self.direction.field_ra,
-                           'field_dec': self.direction.field_dec,
-                           'hosts': self.node_list}
+        self.parms_dict.update({'shifted_all_bands_datamap': self.direction.shifted_all_bands_datamap,
+                                'dir_dep_parmdb_datamap': self.direction.dir_dep_parmdb_datamap,
+                                'input_bands_datamap': self.direction.input_bands_datamap,
+                                'field_ra': self.direction.field_ra,
+                                'field_dec': self.direction.field_dec})
 
 
     def finalize(self):

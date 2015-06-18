@@ -58,6 +58,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
                 band.skymodel_dirindep = parset['ms_specific'][msbase]['init_skymodel']
         bands.append(band)
 
+    # Sort bands by frequency
+    band_freqs = [band.freq for band in bands]
+    bands = np.array(bands)[np.argsort(band_freqs)].tolist()
+
     # Get clusterdesc, node info, etc.
     cluster_parset = parset['cluster_specific']
     if 'clusterdesc_file' not in cluster_parset:
@@ -84,13 +88,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         factor_working_dir=parset['dir_working'])
     exists = field.load_state()
     if not exists:
-        if not test_run:
-            # TODO: calculate image size for each field
-            field.imsize_high_res = getOptimumSize(6144)
-            field.imsize_low_res = getOptimumSize(4800)
-        else:
-            field.imsize_high_res = getOptimumSize(128)
-            field.imsize_low_res = getOptimumSize(128)
+        field.set_image_sizes(test_run=test_run)
         field.save_state()
 
     # Run initial sky model generation and create empty datasets. First check that
@@ -159,14 +157,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             direction.width = widths[i]
 
             # Set image sizes
-            if not test_run:
-                direction.facet_imsize = max(512, getOptimumSize(direction.width * 3600.0 / 1.5
-                    * 1.15)) # full facet has 15% padding to avoid aliasing issues with ft
-                direction.cal_imsize = max(512, getOptimumSize(direction.cal_size_deg * 3600.0
-                    / 1.5 * 1.2)) # cal size has 20% padding
-            else:
-                direction.facet_imsize = getOptimumSize(128)
-                direction.cal_imsize = getOptimumSize(128)
+            direction.set_image_sizes(test_run=test_run)
 
             # Make CASA region files for use during clean
             reg_file = os.path.join(parset['dir_working'], 'regions', direction.name+'.rgn')
@@ -332,65 +323,3 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         scheduler.run(op)
 
     log.info("Factor has finished :)")
-
-
-def getOptimumSize(size):
-    """
-    Gets the nearest optimum image size
-
-    Taken from the casa source code (cleanhelper.py)
-
-    Parameters
-    ----------
-    size : int
-        Target image size in pixels
-
-    Returns
-    -------
-    optimum_size : int
-        Optimum image size nearest to target size
-
-    """
-    import numpy
-
-    def prime_factors(n, douniq=True):
-        """ Return the prime factors of the given number. """
-        factors = []
-        lastresult = n
-        sqlast=int(numpy.sqrt(n))+1
-        if n == 1:
-            return [1]
-        c=2
-        while 1:
-             if (lastresult == 1) or (c > sqlast):
-                 break
-             sqlast=int(numpy.sqrt(lastresult))+1
-             while 1:
-                 if(c > sqlast):
-                     c=lastresult
-                     break
-                 if lastresult % c == 0:
-                     break
-                 c += 1
-
-             factors.append(c)
-             lastresult /= c
-
-        if (factors==[]): factors=[n]
-        return  numpy.unique(factors).tolist() if douniq else factors
-
-    n = int(size)
-    if (n%2 != 0):
-        n+=1
-    fac=prime_factors(n, False)
-    for k in range(len(fac)):
-        if (fac[k] > 7):
-            val=fac[k]
-            while (numpy.max(prime_factors(val)) > 7):
-                val +=1
-            fac[k]=val
-    newlarge=numpy.product(fac)
-    for k in range(n, newlarge, 2):
-        if ((numpy.max(prime_factors(k)) < 8)):
-            return k
-    return newlarge

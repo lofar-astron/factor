@@ -22,16 +22,10 @@ class InitSubtract(Operation):
             name='InitSubtract')
 
         # Define parameters needed for this operation
-        self.parms_dict = {'input_dir': parset['dir_ms'],
-                           'npix_high': self.direction.imsize_high_res,
-                           'npix_low': self.direction.imsize_low_res,
-                           'parset_dir': self.factor_parset_dir,
-                           'skymodel_dir': self.factor_skymodel_dir,
-                           'mapfile_dir': self.mapfile_dir,
-                           'pipeline_dir': self.factor_pipeline_dir,
-                           'dir_indep_parmdb_name': parset['parmdb_name'],
-                           'hosts': self.node_list,
-                           'max_cpus_per_node': self.max_cpus_per_node}
+        self.parms_dict.update({'input_dir': parset['dir_ms'],
+                                'npix_high': self.direction.imsize_high_res,
+                                'npix_low': self.direction.imsize_low_res,
+                                'dir_indep_parmdb_name': parset['parmdb_name']})
 
 
     def finalize(self):
@@ -57,9 +51,5 @@ class MakeMosaic(Operation):
             name='MakeMosaic')
 
         # Define parameters needed for this operation
-        self.parms_dict = {'mapfile_dir': self.mapfile_dir,
-                           'pipeline_dir': self.factor_pipeline_dir,
-                           'facet_image_filenames': self.direction.facet_image_filenames,
-                           'facet_vertices_filenames': self.direction.facet_vertices_filenames,
-                           'hosts': self.node_list,
-                           'max_cpus_per_node': self.max_cpus_per_node}
+        self.parms_dict.update({'facet_image_filenames': self.direction.facet_image_filenames,
+                                'facet_vertices_filenames': self.direction.facet_vertices_filenames})

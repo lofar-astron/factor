@@ -25,10 +25,13 @@ class Band(object):
         self.file = MSfile
         self.msname = self.file.split('/')[-1]
 
+        # Get the reference frequency and set name
         sw = pt.table(self.file+'::SPECTRAL_WINDOW', ack=False)
         self.freq = sw.col('REF_FREQUENCY')[0]
         sw.close()
+        self.name = 'Band_{0:.2f}MHz'.format(self.freq/1e6)
 
+        # Get the field RA and Dec
         obs = pt.table(self.file+'::FIELD', ack=False)
         self.ra = np.degrees(float(obs.col('REFERENCE_DIR')[0][0][0]))
         if self.ra < 0.:
@@ -36,14 +39,15 @@ class Band(object):
         self.dec = np.degrees(float(obs.col('REFERENCE_DIR')[0][0][1]))
         obs.close()
 
+        # Get the station diameter
         ant = pt.table(self.file+'::ANTENNA', ack=False)
         diam = float(ant.col('DISH_DIAMETER')[0])
         ant.close()
 
-        self.fwhm_deg = 1.1 * ((3.0e8 / self.freq) / diam) * 180. / np.pi
-        self.name = 'Band_{0:.2f}MHz'.format(self.freq/1e6)
+        # Add (virtual) elevation column to MS
+        pt.addDerivedMSCal(self.file)
 
-        # Check for SUBTRACTED_DATA_ALL column
+        # Check for SUBTRACTED_DATA_ALL column and calculate mean elevation
         tab = pt.table(self.file, ack=False)
         if 'SUBTRACTED_DATA_ALL' in tab.colnames():
             self.has_sub_data = True
@@ -57,7 +61,12 @@ class Band(object):
                 self.timepersample = t2[1]['TIME'] - t2[0]['TIME']
                 self.nsamples = t2.nrows()
                 break
+        self.mean_el_rad = np.mean(tab.getcol('AZEL1', rowincr=10000)[:, 1])
         tab.close()
+
+        # Calculate mean FOV
+        sec_el = 1.0 / np.sin(self.mean_el_rad)
+        self.fwhm_deg = 1.1 * ((3.0e8 / self.freq) / diam) * 180. / np.pi * sec_el
 
         self.completed_operations = []
         self.save_file = os.path.join(factor_working_dir, 'state',

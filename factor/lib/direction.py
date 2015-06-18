@@ -55,47 +55,51 @@ class Direction(object):
         cal_flux_jy : float, optional
             Apparent flux in Jy of calibrator source
         """
+        # Handle input args
         self.name = name
         self.ra = ra
         self.dec = dec
         self.atrous_do = atrous_do
         self.mscale_field_do = mscale_field_do
-
         self.cal_imsize = cal_imsize
-        cell = 1.5 # arcsec per pixel
-        if cal_size_deg is None:
-            self.cal_size_deg = cal_imsize * cell / 3600.0 / 1.5
-        else:
-            self.cal_size_deg = cal_size_deg
-        self.cal_rms_box = self.cal_size_deg * 3600 / cell
-
         self.solint_p = solint_p
         self.solint_a = solint_a
         self.facet_imsize = field_imsize * 1.15
         self.dynamic_range = dynamic_range
-        self.loop_amp_selfcal = False
-        self.selfcal_ok = True # Whether selfcal is still improving after first amp cal
-        self.max_residual_val = 0.5 # maximum residual in Jy for facet subtract test
-
         self.region_selfcal = region_selfcal
         if self.region_selfcal.lower() == 'empty':
             self.region_selfcal = None
-
         self.region_field = region_field
         if self.region_field.lower() == 'empty':
             self.region_field = None
-
         self.peel_skymodel = peel_skymodel
         if self.peel_skymodel.lower() == 'empty':
             self.peel_skymodel = None
-
         self.outlier_do = outlier_do
         self.make_final_image = make_final_image
         if cal_flux_jy is not None:
             self.apparent_flux_mjy = cal_flux_jy * 1000.0
         else:
             self.apparent_flux_mjy = None
-        self.nchannels = 1
+
+        # Initialize some parameters
+        self.loop_amp_selfcal = False
+        self.selfcal_ok = True # whether selfcal is still improving after first amp cal
+        self.max_residual_val = 0.5 # maximum residual in Jy for facet subtract test
+        self.nchannels = 1 # set number of wide-band channels
+        self.use_new_sub_data = False # set flag that tells which subtracted-data column to use
+        self.cellsize_highres_deg = 0.00208 # initsubtract high-res cell size
+        self.cellsize_lowres_deg = 0.00694 # initsubtract low-res cell size
+        self.cellsize_selfcal_deg = 0.000417 # selfcal cell size
+        self.cellsize_verify_deg = 0.00833 # verify subtract cell size
+
+        # Set the size of the calibrator (used to filter source lists)
+        if cal_size_deg is None:
+            # Get from cal imsize assuming 50% padding
+            self.cal_size_deg = cal_imsize * self.cellsize_selfcal_deg / 1.5
+        else:
+            self.cal_size_deg = cal_size_deg
+        self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
 
         # Set number of wplanes for casapy imaging
         self.wplanes = 1
@@ -114,15 +118,117 @@ class Direction(object):
         if self.cal_imsize > 4095:
             self.wplanes = 512
 
-        # Set flag that tells with subtracted data column to use
-        self.use_new_sub_data = False
+        # Scale solution intervals by apparent flux. The scaling is done so that
+        # sources with flux densities of 100 mJy have a fast interval of 4 time
+        # slots and a slow interval of 240 time slots. The scaling is currently
+        # linear with flux (and thus we accept lower-SNR solutions for the
+        # fainter sources). Ideally, these value should also scale with the
+        # bandwidth
+        if self.apparent_flux_mjy is not None:
+            ref_flux = 100.0
+            self.solint_p = max(1, int(round(4 * ref_flux / self.apparent_flux_mjy)))
+            self.solint_a = max(30, int(round(240 * ref_flux / self.apparent_flux_mjy)))
 
+        # Define some directories, etc.
         self.working_dir = factor_working_dir
         self.completed_operations = []
         self.cleanup_mapfiles = []
         self.save_file = os.path.join(self.working_dir, 'state',
             self.name+'_save.pkl')
         self.pipeline_dir = os.path.join(self.working_dir, 'pipeline')
+
+
+    def set_image_sizes(self, test_run=False):
+        """
+        Sets sizes for various images
+
+        Parameters
+        ----------
+        test_run : bool, optional
+            If True, use test sizes
+
+        """
+        if not test_run:
+            # Set selfcal and facet image sizes
+            self.facet_imsize = max(512, self.get_optimum_size(self.width
+                / self.cellsize_selfcal_deg * 1.15)) # full facet has 15% padding
+            self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
+                / self.cellsize_selfcal_deg * 1.2)) # cal size has 20% padding
+
+            # Set the initsubtract image sizes from the lowest-frequency band's
+            # primary-beam FWHM. For high-res image, use 2.5 * FWHM; for
+            # low-res, use 6.5 * FHWM
+            self.imsize_high_res = self.get_optimum_size(bands[0].fwhm_deg
+                / self.cellsize_highres_deg*2.5)
+            self.imsize_low_res = self.get_optimum_size(bands[0].fwhm_deg
+                / self.cellsize_lowres_deg*6.5)
+        else:
+            self.facet_imsize = self.get_optimum_size(128)
+            self.cal_imsize = self.get_optimum_size(128)
+            self.imsize_high_res = self.get_optimum_size(128)
+            self.imsize_low_res = self.get_optimum_size(128)
+
+
+    def get_optimum_size(self, size):
+        """
+        Gets the nearest optimum image size
+
+        Taken from the casa source code (cleanhelper.py)
+
+        Parameters
+        ----------
+        size : int
+            Target image size in pixels
+
+        Returns
+        -------
+        optimum_size : int
+            Optimum image size nearest to target size
+
+        """
+        import numpy
+
+        def prime_factors(n, douniq=True):
+            """ Return the prime factors of the given number. """
+            factors = []
+            lastresult = n
+            sqlast=int(numpy.sqrt(n))+1
+            if n == 1:
+                return [1]
+            c=2
+            while 1:
+                 if (lastresult == 1) or (c > sqlast):
+                     break
+                 sqlast=int(numpy.sqrt(lastresult))+1
+                 while 1:
+                     if(c > sqlast):
+                         c=lastresult
+                         break
+                     if lastresult % c == 0:
+                         break
+                     c += 1
+
+                 factors.append(c)
+                 lastresult /= c
+
+            if (factors==[]): factors=[n]
+            return  numpy.unique(factors).tolist() if douniq else factors
+
+        n = int(size)
+        if (n%2 != 0):
+            n+=1
+        fac=prime_factors(n, False)
+        for k in range(len(fac)):
+            if (fac[k] > 7):
+                val=fac[k]
+                while (numpy.max(prime_factors(val)) > 7):
+                    val +=1
+                fac[k]=val
+        newlarge=numpy.product(fac)
+        for k in range(n, newlarge, 2):
+            if ((numpy.max(prime_factors(k)) < 8)):
+                return k
+        return newlarge
 
 
     def save_state(self):
