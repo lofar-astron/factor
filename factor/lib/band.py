@@ -45,7 +45,10 @@ class Band(object):
         ant.close()
 
         # Add (virtual) elevation column to MS
-        pt.addDerivedMSCal(self.file)
+        try:
+            pt.addDerivedMSCal(self.file)
+        except RuntimeError:
+            pass
 
         # Check for SUBTRACTED_DATA_ALL column and calculate mean elevation
         tab = pt.table(self.file, ack=False)
