@@ -54,11 +54,11 @@ class Band(object):
         else:
             self.has_sub_data = False
         self.has_sub_data_new = False
-        self.starttime = tab[0]['TIME']
-        self.endtime = tab[-1]['TIME']
+        self.starttime = tab.col('TIME')[0]
+        self.endtime = tab.col('TIME')[-1]
         for t2 in tab.iter(["ANTENNA1","ANTENNA2"]):
             if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
-                self.timepersample = t2[1]['TIME'] - t2[0]['TIME']
+                self.timepersample = t2.col('TIME')[1] - t2.col('TIME')[0]
                 self.nsamples = t2.nrows()
                 break
         self.mean_el_rad = np.mean(tab.getcol('AZEL1', rowincr=10000)[:, 1])
