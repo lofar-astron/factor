@@ -150,8 +150,11 @@ class Direction(object):
         """
         if not test_run:
             # Set selfcal and facet image sizes
-            self.facet_imsize = max(512, self.get_optimum_size(self.width
-                / self.cellsize_selfcal_deg * 1.15)) # full facet has 15% padding
+            if hasattr(self, 'width'):
+                self.facet_imsize = max(512, self.get_optimum_size(self.width
+                    / self.cellsize_selfcal_deg * 1.15)) # full facet has 15% padding
+            else:
+                self.facet_imsize = None
             self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
                 / self.cellsize_selfcal_deg * 1.2)) # cal size has 20% padding
 
