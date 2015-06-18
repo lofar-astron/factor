@@ -100,6 +100,7 @@ class Operation(object):
         self.cfg_dict = {'lofarroot': parset['lofarroot'],
                          'pythonpath': parset['lofarpythonpath'],
                          'factorroot': self.factor_root_dir,
+                         'genericpiperoot': os.path.dirname(parset['genericpipeline_executable']).split('/bin')[0],
                          'pipeline_working_dir': self.pipeline_working_dir,
                          'pipeline_runtime_dir': self.pipeline_runtime_dir,
                          'max_cpus_per_node': self.max_cpus_per_node,
