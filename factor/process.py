@@ -1,21 +1,21 @@
 """
-Module that holds the process run() function called by runfactor
+Module that preforms the processing
 """
 import sys
 import os
 import numpy as np
 import logging
 import pickle
+from collections import Counter
+from lofarpipe.support.data_map import DataMap
 import factor
 import factor.directions
 import factor.parset
 import factor.cluster
 from factor.operations.field_ops import *
 from factor.operations.facet_ops import *
-from factor.lib.scheduler_mp import Scheduler
+from factor.lib.scheduler import Scheduler
 from factor.lib.direction import Direction
-from collections import Counter
-from lofarpipe.support.data_map import DataMap
 
 
 def run(parset_file, logging_level='info', dry_run=False, test_run=False):
@@ -29,9 +29,11 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     logging_level : str, optional
         One of 'degug', 'info', 'warning'
     dry_run : bool, optional
-        If True, do not run pipelines
+        If True, do not run pipelines. All parsets, etc. are made as normal
     test_run : bool, optional
-        If True, use test settings
+        If True, use test settings. These settings are for testing purposes
+        only and will not produce useful results
+
     """
     factor._logging.set_level(logging_level)
     log = logging.getLogger('factor')
@@ -68,11 +70,14 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     if not 'node_list' in cluster_parset:
         parset['cluster_specific']['node_list'] = factor.cluster.get_compute_nodes(
             parset['cluster_specific']['clusterdesc'])
+
+    # Get paths to required executables
     factor.cluster.find_executables(parset)
 
     # Set up scheduler for operations (pipeline runs)
     ndir_simul = len(parset['cluster_specific']['node_list']) * parset['cluster_specific']['ndir_per_node']
-    scheduler = Scheduler(max_procs=ndir_simul, dry_run=dry_run)
+    scheduler = Scheduler(parset['genericpipeline_executable'], max_procs=ndir_simul,
+        dry_run=dry_run)
 
     # Make direction object for the field
     field = Direction('field', bands[0].ra, bands[0].dec,

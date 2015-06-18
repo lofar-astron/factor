@@ -58,7 +58,8 @@ def find_executables(parset):
     """
     from distutils import spawn
 
-    executables = {'casa_executable': ['casa', 'casapy'],
+    executables = {'genericpipeline_executable': ['genericpipeline.py'],
+                   'casa_executable': ['casa', 'casapy'],
                    'wsclean_executable': ['wsclean'],
 #                    'chgcentre_executable': ['chgcentre'],
                    'losoto_executable': ['losoto.py'],

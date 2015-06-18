@@ -5,11 +5,13 @@ import logging
 import multiprocessing
 import os
 import sys
+import imp
 from factor.lib.context import Timer
 import factor._logging
 
 
-def call_generic_pipeline(op_name, direction_name, parset, config, logbasename):
+def call_generic_pipeline(op_name, direction_name, parset, config, logbasename,
+    genericpipeline_path):
     """
     Creates a GenericPipeline object and runs the pipeline
 
@@ -25,11 +27,16 @@ def call_generic_pipeline(op_name, direction_name, parset, config, logbasename):
         Name of pipeline config file
     logbasename : str
         Log file base name
+    genericpipeline_path : str
+        Path to genericpipeline directory (containing bin/, etc.)
 
     """
-    from genericpipeline.bin import genericpipeline as gp
     from lofarpipe.support.pipelinelogging import getSearchingLogger
     from factor.lib.context import RedirectStdStreams
+    loader = imp.load_source('loader', os.path.join(genericpipeline_path, 'bin',
+        'loader.py'))
+    gp = imp.load_source('gp', os.path.join(genericpipeline_path, 'bin',
+        'genericpipeline.py'))
 
     # Initalize pipeline object
     pipeline = gp.GenericPipeline()
@@ -54,26 +61,27 @@ class Scheduler(object):
     """
     The scheduler runs all jobs sent to it in parallel
     """
-    def __init__(self, max_procs=1, name='scheduler', op_parset=None, dry_run=False):
+    def __init__(self, genericpipeline_path, max_procs=1, name='scheduler',
+        dry_run=False):
         """
         Create Scheduler object
 
         Parameters
         ----------
+        genericpipeline_path : str
+            Path to genericpipeline directory (containing bin/, etc.)
         max_procs : int, optional
             Limit the number of parallel processes to this number
         name : str, optional
             Name of the scheduler
-        op_parset : dict, optional
-            Dict of operation parameters
         dry_run : bool, optional
             If True, the pipelines are not run but all parsets and config files
             are made as normal
 
         """
+        self.genericpipeline_path = genericpipeline_path
         self.max_procs = max_procs
         self.name = name
-        self.op_parset = op_parset
         self.dry_run = dry_run
         self.log = logging.getLogger('factor.{0}'.format(name))
         self.success = True
@@ -129,7 +137,8 @@ class Scheduler(object):
                         format(op.name, op.direction.name))
                     pool.apply_async(call_generic_pipeline, (op.name,
                     	op.direction.name, op.pipeline_parset_file,
-                    	op.pipeline_config_file, op.logbasename),
+                    	op.pipeline_config_file, op.logbasename,
+                    	self.genericpipeline_path),
                     	callback=self.result_callback)
                 pool.close()
                 pool.join()

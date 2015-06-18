@@ -113,15 +113,8 @@ parameters are grouped by sections (denoted by headings such as {\tt [global]},
 
 \begin{verbatim}
 [global]
-# LOFAR installation root directories. If not given, they will be determined
-# from the environment
-lofarroot = /lofar/build/gnu_opt/installed
-lofarpythonpath = /lofar/build/gnu_opt/installed/lib/python2.7/dist-packages
-
-# Full path to Generic Pipeline root directory (required)
-piperoot = /path/to/genericpipeline
-
-# Full path to working dir - other paths are relative to this (required)
+# Full path to working dir where Factor will run (required). All output will
+# be placed in this directory
 dir_working = /data/wdir
 
 # Full path to directory containing selfcaled bands, will be scanned for all .MS
@@ -135,7 +128,7 @@ dir_ms = /data/bands
 parmdb_name = instrument_ap_smoothed
 
 # Make final mosaic (default = True)
-make_mosaic = False
+make_mosaic = True
 
 # Use interactive mode (default = False). Factor will ask for confirmation
 # of internally derived DDE calibrators and facets
