@@ -159,7 +159,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     # TODO: adjust this for each observation
     log.info('Removing sources beyond the FWHM of the primary beam...')
     dist = s.getDistance(band.ra, band.dec, byPatch=True)
-    s.remove(dist > 5.0, aggregate=True) # 5 degree radius
+    s.remove(dist > band[0].fwhm_deg, aggregate=True) # 5 degree radius
 
     # Save this sky model for later checks of sources falling on facet edges
     s.write(fileName='results/initial.skymodel', clobber=True)
