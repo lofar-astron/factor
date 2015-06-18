@@ -7,7 +7,8 @@ def plugin_main(args, **kwargs):
     """
     Trims a string from filenames in a mapfile
 
-    Note that everything from the matching string to the end is trimmed.
+    Note that everything from the last instance of the matching string to the
+    end is trimmed.
 
     Parameters
     ----------
@@ -35,8 +36,10 @@ def plugin_main(args, **kwargs):
     map_in = DataMap.load(mapfile_in)
 
     for i, item in enumerate(map_in):
-        map_out.data.append(DataProduct(item.host, item.file[:item.file.index(trim_str)],
-            item.skip))
+        index = item.file.rfind(trim_str)
+        if index >= 0:
+            map_out.data.append(DataProduct(item.host, item.file[:index],
+                item.skip))
 
     fileid = os.path.join(mapfile_dir, filename)
     map_out.save(fileid)
