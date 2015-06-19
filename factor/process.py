@@ -199,7 +199,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         while answ.lower() not in  ['y', 'n', 'yes', 'no']:
             answ = raw_input(prompt)
         if answ.lower() in ['n', 'no']:
-            self.log.info('Exiting...')
+            log.info('Exiting...')
             sys.exit()
 
     # Select subset of directions to process
