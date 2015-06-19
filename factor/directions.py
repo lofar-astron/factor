@@ -461,7 +461,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
                                 'parameters (e.g., if a target source is specified, '
                                 'reduce its radius if possible)')
                             sys.exit(1)
-                    thiessen_polys[i] = xyverts
+                        thiessen_polys[i] = xyverts
 
     # Convert from x, y to RA, Dec
     thiessen_polys_deg = []
