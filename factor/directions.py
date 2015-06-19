@@ -408,11 +408,10 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
             sy.extend(ty)
             sizes.append(target_radius_arcmin*2.0/1.2/60.0)
 
-        log.info('{}'.format(len(sx)))
         # Filter sources to get only those close to a boundary. We need to iterate
         # until no sources are found
         niter = 0
-        while niter < 5:
+        while niter < 3:
             niter += 1
             ind_near_edge = []
             for i, thiessen_poly in enumerate(thiessen_polys):
@@ -422,11 +421,6 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
                 dists = poly.is_inside(sx, sy)
                 for j, dist in enumerate(dists):
                     pix_radius = sizes[j] * 1.2 / 2.0 / 0.066667 # radius of source in pixels
-
-                    if j == len(sx)-1:
-                        log.info('{0} {1}'.format(j, len(sx)-1))
-                        log.info('{0} {1}'.format(abs(dist), pix_radius))
-
                     if abs(dist) < pix_radius and j not in ind_near_edge:
                         ind_near_edge.append(j)
             if len(ind_near_edge) == 0:
@@ -434,8 +428,6 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
             sx_filt = np.array(sx)[ind_near_edge]
             sy_filt = np.array(sy)[ind_near_edge]
             sizes_filt = np.array(sizes)[ind_near_edge]
-
-            log.info('{0}'.format(ind_near_edge))
 
             # Adjust all facets for each source near a boundary
             for x, y, size in zip(sx_filt, sy_filt, sizes_filt):
