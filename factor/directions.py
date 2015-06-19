@@ -424,6 +424,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
                     pix_radius = sizes[j] * 1.2 / 2.0 / 0.066667 # radius of source in pixels
 
                     if j == len(sx)-1:
+                        log.info('{0} {1}'.format(j, len(sx)-1))
                         log.info('{0} {1}'.format(abs(dist), pix_radius))
 
                     if abs(dist) < pix_radius and j not in ind_near_edge:
