@@ -62,7 +62,8 @@ ndir = 10
 groupings = 1:5, 4:0
 
 # A target can be specified to ensure that it falls entirely within a single
-# facet
+# facet. The values should be those of a circular region that encloses the
+# source and not those of the target itself
 target_ra = 14h41m01.884
 target_dec = +35d30m31.52
 target_radius_arcmin = 10.2
