@@ -406,7 +406,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
             tx, ty = radec2xy([tra], [tdec], refRA=midRA, refDec=midDec)
             sx.extend(tx)
             sy.extend(ty)
-            sizes.append(target_radius_arcmin/60.0)
+            sizes.append(target_radius_arcmin*2.0/60.0)
 
         # Filter sources to get only those close to a boundary. We need to iterate
         # until no sources are found
