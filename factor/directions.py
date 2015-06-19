@@ -452,10 +452,10 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
                         xyverts = [np.array([xp, yp]) for xp, yp in zip(p1.exterior.coords.xy[0].tolist(),
                             p1.exterior.coords.xy[1].tolist())]
                     except AttributeError:
-                        log.error('Source avoidance has caused a facet to be "
-                            "divided into multple parts. Please adjust the "
-                            "parameters (e.g., if a target source is specified, "
-                            "reduce its radius if possible)")
+                        log.error('Source avoidance has caused a facet to be '
+                            'divided into multple parts. Please adjust the '
+                            'parameters (e.g., if a target source is specified, '
+                            'reduce its radius if possible)')
                         sys.exit(1)
                     thiessen_polys[i] = xyverts
 
