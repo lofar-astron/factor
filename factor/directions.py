@@ -430,12 +430,12 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
                         ind_near_edge.append(j)
             if len(ind_near_edge) == 0:
                 break
-            sx = np.array(sx)[ind_near_edge]
-            sy = np.array(sy)[ind_near_edge]
-            sizes = np.array(sizes)[ind_near_edge]
+            sx_filt = np.array(sx)[ind_near_edge]
+            sy_filt = np.array(sy)[ind_near_edge]
+            sizes_filt = np.array(sizes)[ind_near_edge]
 
             # Adjust all facets for each source near a boundary
-            for x, y, size in zip(sx, sy, sizes):
+            for x, y, size in zip(sx_filt, sy_filt, sizes_filt):
                 for i, thiessen_poly in enumerate(thiessen_polys):
                     polyv = np.vstack(thiessen_poly)
                     poly_tuple = tuple([(xp, yp) for xp, yp in zip(polyv[:, 0], polyv[:, 1])])
