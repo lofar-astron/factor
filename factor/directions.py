@@ -399,12 +399,13 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
         sizes = s.getPatchSizes(units='degree')
 
         if target_ra is not None and target_dec is not None and target_radius_arcmin is not None:
-            log.info('Including target (at {0}, {1}) in facet adjustment')
+            log.info('Including target (at {0}, {1}) in facet adjustment'.format(
+                target_ra, target_dec))
             tra = Angle(target_ra).to('deg').value
             tdec = Angle(target_dec).to('deg').value
             tx, ty = radec2xy([tra], [tdec], refRA=midRA, refDec=midDec)
-            sx.extend(tx)
-            sy.extend(ty)
+            sx = np.array(sx.tolist().extend(tx))
+            sy = np.array(sy.tolist().extend(ty))
             sizes.append(target_radius_arcmin/60.0)
 
         # Filter sources to get only those close to a boundary. We need to iterate
