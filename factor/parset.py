@@ -143,6 +143,9 @@ def parset_read(parset_file):
     else:
         parset_dict['direction_specific']['groupings'] = {'1': 0}
         parset_dict['direction_specific']['ndir'] = -1
+    if 'target_radius_arcmin' in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['target_radius_arcmin'] = parset.getfloat('directions',
+            'target_radius_arcmin')
 
     # Handle cluster-related parameters
     if 'cluster' in parset._sections.keys():

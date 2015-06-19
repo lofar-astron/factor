@@ -108,6 +108,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
 
     # Define directions. First check for user-supplied file, then for Factor-generated
     # file from a previous run, then for parameters needed to generate it internally
+    dir_parset = parset['direction_specific']
     if 'directions_file' in parset:
         directions = factor.directions.directions_read(parset['directions_file'],
             parset['dir_working'])
@@ -115,7 +116,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         directions = factor.directions.directions_read(os.path.join(parset['dir_working'],
             'factor_directions.txt'), parset['dir_working'])
     else:
-        dir_parset = parset['direction_specific']
         if 'flux_min_jy' not in dir_parset or \
             'size_max_arcmin' not in dir_parset or \
             'separation_max_arcmin' not in dir_parset:
@@ -127,10 +127,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             # Make directions from dir-indep sky models using flux and size parameters
             log.info("No directions file given. Selecting directions internally...")
             parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(bands,
-                parset['direction_specific']['flux_min_jy'],
-                parset['direction_specific']['size_max_arcmin'],
-                parset['direction_specific']['separation_max_arcmin'],
-                directions_max_num=parset['direction_specific']['max_num'],
+                dir_parset['flux_min_jy'], dir_parset['size_max_arcmin'],
+                dir_parset['separation_max_arcmin'], directions_max_num=dir_parset['max_num'],
                 interactive=parset['interactive'])
             directions = factor.directions.directions_read(parset['directions_file'],
                 parset['dir_working'])
@@ -142,8 +140,19 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             polys, widths = pickle.load(f)
             widths = [w[0] for w in widths]
     else:
+        if 'target_ra' in dir_parset and 'target_dec' in dir_parset and \
+            'target_radius_arcmin' in dir_parset:
+            target_ra = dir_parset['target_ra']
+            target_dec = dir_parset['target_dec']
+            target_radius_arcmin = dir_parset['target_radius_arcmin']
+        else:
+            target_ra = None
+            target_dec = None
+            target_radius_arcmin = None
+
         polys, widths = factor.directions.thiessen(directions,
-            check_edges=parset['direction_specific']['check_edges'])
+            check_edges=dir_parset['check_edges'], target_ra=target_ra,
+            target_dec=target_dec, target_radius_arcmin=target_radius_arcmin)
         with open(polys_file, 'wb') as f:
             pickle.dump([polys, widths], f)
 

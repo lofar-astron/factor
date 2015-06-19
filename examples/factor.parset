@@ -61,6 +61,12 @@ ndir = 10
 # one at a time (i.e., groupings = 1:0)
 groupings = 1:5, 4:0
 
+# A target can be specified to ensure that it falls entirely within a single
+# facet
+target_ra = 14h41m01.884
+target_dec = +35d30m31.52
+target_radius_arcmin = 10.2
+
 
 [cluster]
 # Full path to cluster description file. Use clusterdesc_file = PBS to use the

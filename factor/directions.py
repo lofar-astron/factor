@@ -327,7 +327,8 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
     return direction_groups
 
 
-def thiessen(directions_list, bounds_scale=0.52, check_edges=False):
+def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=None,
+            target_dec=None, target_radius_arcmin=None):
     """
     Return list of thiessen polygons and their widths in degrees
 
@@ -340,6 +341,12 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False):
     check_edges : bool, optional
         If True, check whether any know source falls on a facet edge. If sources
         are found that do, the facet is adjusted
+    target_ra : str, optional
+        RA of target source. E.g., '14h41m01.884'
+    target_dec : str, optional
+        Dec of target source. E.g., '+35d30m31.52'
+    target_radius_arcmin : float, optional
+        Radius in arcmin of target source
 
     Returns
     -------
@@ -359,6 +366,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False):
             'adjusted to avoid known sources.')
         has_shapely = False
     from itertools import combinations
+    from astropy.coordinates import Angle
 
     points, midRA, midDec = getxy(directions_list)
     points = points.T
@@ -389,6 +397,14 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False):
         RA, Dec = s.getPatchPositions(asArray=True)
         sx, sy = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
         sizes = s.getPatchSizes(units='degree')
+
+        if target_ra is not None and target_dec is not None and target_radius_arcmin is not None:
+            tra = Angle(RAstr).to('deg').value
+            tdec = Angle(Decstr).to('deg').value
+            tx, ty = radec2xy(tra, tdec, refRA=midRA, refDec=midDec)
+            sx.append(tx)
+            sy.append(ty)
+            sizes.append(target_radius_arcmin/60.0)
 
         # Filter sources to get only those close to a boundary. We need to iterate
         # until no sources are found
