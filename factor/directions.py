@@ -407,10 +407,8 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
             sx.extend(tx)
             sy.extend(ty)
             sizes.append(target_radius_arcmin*2.0/1.2/60.0)
-            sx.reverse()
-            sy.reverse()
-            sizes.reverse()
 
+        log.info('{}'.format(len(sx)))
         # Filter sources to get only those close to a boundary. We need to iterate
         # until no sources are found
         niter = 0
@@ -424,6 +422,10 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
                 dists = poly.is_inside(sx, sy)
                 for j, dist in enumerate(dists):
                     pix_radius = sizes[j] * 1.2 / 2.0 / 0.066667 # radius of source in pixels
+
+                    if j == len(sx)-1:
+                        log.info('{0} {1}'.format(abs(dist), pix_radius))
+
                     if abs(dist) < pix_radius and j not in ind_near_edge:
                         ind_near_edge.append(j)
             if len(ind_near_edge) == 0:
