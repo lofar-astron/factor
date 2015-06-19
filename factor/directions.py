@@ -435,6 +435,8 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
             sy_filt = np.array(sy)[ind_near_edge]
             sizes_filt = np.array(sizes)[ind_near_edge]
 
+            log.info('{0}'.format(ind_near_edge)
+
             # Adjust all facets for each source near a boundary
             for x, y, size in zip(sx_filt, sy_filt, sizes_filt):
                 for i, thiessen_poly in enumerate(thiessen_polys):
