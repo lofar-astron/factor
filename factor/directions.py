@@ -407,8 +407,9 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
             sx.extend(tx)
             sy.extend(ty)
             sizes.append(target_radius_arcmin*2.0/1.2/60.0)
-            log.info('{0} {1} {2}'.format(sx[-5:], sy[-5:], sizes[-5:]))
-            log.info('tx, ty, size: {0}, {1}, {2}'.format(tx, ty, target_radius_arcmin*2.0/1.2/60.0))
+            sx.reverse()
+            sy.reverse()
+            sizes.reverse()
 
         # Filter sources to get only those close to a boundary. We need to iterate
         # until no sources are found
@@ -450,15 +451,16 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
                         else:
                             # If point is inside, union the polys
                             p1 = p1.union(p2buf)
-                    try:
-                        xyverts = [np.array([xp, yp]) for xp, yp in zip(p1.exterior.coords.xy[0].tolist(),
-                            p1.exterior.coords.xy[1].tolist())]
-                    except AttributeError:
-                        log.error('Source avoidance has caused a facet to be '
-                            'divided into multple parts. Please adjust the '
-                            'parameters (e.g., if a target source is specified, '
-                            'reduce its radius if possible)')
-                        sys.exit(1)
+                        try:
+                            xyverts = [np.array([xp, yp]) for xp, yp in
+                                zip(p1.exterior.coords.xy[0].tolist(),
+                                p1.exterior.coords.xy[1].tolist())]
+                        except AttributeError:
+                            log.error('Source avoidance has caused a facet to be '
+                                'divided into multple parts. Please adjust the '
+                                'parameters (e.g., if a target source is specified, '
+                                'reduce its radius if possible)')
+                            sys.exit(1)
                     thiessen_polys[i] = xyverts
 
     # Convert from x, y to RA, Dec
