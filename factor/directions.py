@@ -455,7 +455,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
                         log.error('Source avoidance has caused a facet to be "
                             "divided into multple parts. Please adjust the "
                             "parameters (e.g., if a target source is specified, "
-                            "reduce its radius if possible)"
+                            "reduce its radius if possible)")
                         sys.exit(1)
                     thiessen_polys[i] = xyverts
 
