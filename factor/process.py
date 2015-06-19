@@ -158,31 +158,29 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
 
     # Set various direction attributes
     for i, direction in enumerate(directions):
-        exists = direction.load_state()
+        direction.load_state()
         direction.cleanup_mapfiles = []
+        direction.vertices = polys[i]
+        direction.width = widths[i]
+
+        # Set image sizes
+        direction.set_image_sizes(test_run=test_run)
+
+        # Make CASA region files for use during clean
+        reg_file = os.path.join(parset['dir_working'], 'regions', direction.name+'.rgn')
+        factor.directions.make_region_file(direction.vertices, reg_file)
+        direction.reg = reg_file
+
+        # Set number of bands and channels
+        direction.nbands = len(bands)
+        direction.nchannels = np.int(np.ceil(np.float(direction.nbands/np.float(5))))
+
+        # Set field center
+        direction.field_ra = field.ra
+        direction.field_dec = field.dec
+
+        # Save direction state
         direction.save_state()
-        if not exists:
-            direction.vertices = polys[i]
-            direction.width = widths[i]
-
-            # Set image sizes
-            direction.set_image_sizes(test_run=test_run)
-
-            # Make CASA region files for use during clean
-            reg_file = os.path.join(parset['dir_working'], 'regions', direction.name+'.rgn')
-            factor.directions.make_region_file(direction.vertices, reg_file)
-            direction.reg = reg_file
-
-            # Set number of bands and channels
-            direction.nbands = len(bands)
-            direction.nchannels = np.int(np.ceil(np.float(direction.nbands/np.float(5))))
-
-            # Set field center
-            direction.field_ra = field.ra
-            direction.field_dec = field.dec
-
-            # Save direction state
-            direction.save_state()
 
     # Make DS9 region files so user can check the facets, etc.
     ds9_facet_reg_file = os.path.join(parset['dir_working'], 'regions', 'facets_ds9.reg')
