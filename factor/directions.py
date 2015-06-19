@@ -399,14 +399,14 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
         sizes = s.getPatchSizes(units='degree').tolist()
 
         if target_ra is not None and target_dec is not None and target_radius_arcmin is not None:
-            log.info('Including target (at {0}, {1}) in facet adjustment'.format(
+            log.info('Including target ({0}, {1}) in facet adjustment'.format(
                 target_ra, target_dec))
             tra = Angle(target_ra).to('deg').value
             tdec = Angle(target_dec).to('deg').value
             tx, ty = radec2xy([tra], [tdec], refRA=midRA, refDec=midDec)
             sx.extend(tx)
             sy.extend(ty)
-            sizes.append(target_radius_arcmin*2.0/60.0)
+            sizes.append(target_radius_arcmin*2.0/1.2/60.0)
 
         # Filter sources to get only those close to a boundary. We need to iterate
         # until no sources are found
@@ -448,8 +448,15 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
                         else:
                             # If point is inside, union the polys
                             p1 = p1.union(p2buf)
-                    xyverts = [np.array([xp, yp]) for xp, yp in zip(p1.exterior.coords.xy[0].tolist(),
-                        p1.exterior.coords.xy[1].tolist())]
+                    try:
+                        xyverts = [np.array([xp, yp]) for xp, yp in zip(p1.exterior.coords.xy[0].tolist(),
+                            p1.exterior.coords.xy[1].tolist())]
+                    except AttributeError:
+                        log.error('Source avoidance has caused a facet to be "
+                            "divided into multple parts. Please adjust the "
+                            "parameters (e.g., if a target source is specified, "
+                            "reduce its radius if possible)"
+                        sys.exit(1)
                     thiessen_polys[i] = xyverts
 
     # Convert from x, y to RA, Dec
