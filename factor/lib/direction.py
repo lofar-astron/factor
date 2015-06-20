@@ -88,8 +88,6 @@ class Direction(object):
         self.max_residual_val = 0.5 # maximum residual in Jy for facet subtract test
         self.nchannels = 1 # set number of wide-band channels
         self.use_new_sub_data = False # set flag that tells which subtracted-data column to use
-        self.cellsize_highres_deg = 0.00208 # initsubtract high-res cell size
-        self.cellsize_lowres_deg = 0.00694 # initsubtract low-res cell size
         self.cellsize_selfcal_deg = 0.000417 # selfcal cell size
         self.cellsize_verify_deg = 0.00833 # verify subtract cell size
 
@@ -138,7 +136,7 @@ class Direction(object):
         self.pipeline_dir = os.path.join(self.working_dir, 'pipeline')
 
 
-    def set_image_sizes(self, fwhm_deg=None, test_run=False):
+    def set_image_sizes(self, test_run=False):
         """
         Sets sizes for various images
 
@@ -157,20 +155,9 @@ class Direction(object):
                 self.facet_imsize = None
             self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
                 / self.cellsize_selfcal_deg * 1.2)) # cal size has 20% padding
-
-            if fwhm_deg is not None:
-                # Set the initsubtract image sizes from the lowest-frequency band's
-                # primary-beam FWHM. For high-res image, use 2.5 * FWHM; for
-                # low-res, use 6.5 * FHWM
-                self.imsize_high_res = self.get_optimum_size(fwhm_deg
-                    / self.cellsize_highres_deg*2.5)
-                self.imsize_low_res = self.get_optimum_size(fwhm_deg
-                    / self.cellsize_lowres_deg*6.5)
         else:
             self.facet_imsize = self.get_optimum_size(128)
             self.cal_imsize = self.get_optimum_size(128)
-            self.imsize_high_res = self.get_optimum_size(128)
-            self.imsize_low_res = self.get_optimum_size(128)
 
 
     def get_optimum_size(self, size):
