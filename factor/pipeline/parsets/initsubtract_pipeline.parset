@@ -112,7 +112,7 @@ create_model_high_map.control.mapfile_dir  =   {{ mapfile_dir }}
 create_model_high_map.control.filename     =   model_high_rootnames.datamap
 
 wsclean_ft_high.control.type               =   wsclean_ft
-wsclean_ft_high.control.mapfiles_in        =   [create_ms_map.output.mapfile,create_model_high_map.output.mapfile,,create_high_sizes_map.output.mapfile]
+wsclean_ft_high.control.mapfiles_in        =   [create_ms_map.output.mapfile,create_model_high_map.output.mapfile,create_high_sizes_map.output.mapfile]
 wsclean_ft_high.control.inputkeys          =   [msfile,name,imsize]
 wsclean_ft_high.argument.flags             =   [-predict,msfile]
 wsclean_ft_high.argument.size              =   imsize
