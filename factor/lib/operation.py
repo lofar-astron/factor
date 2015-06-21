@@ -110,8 +110,7 @@ class Operation(object):
                          'H5parm_exporter_executable': parset['H5parm_exporter_executable']}
 
         # Define global parameters needed by all pipeline parsets. Other,
-        # pipeline-specific parameters should be defined in the subclasses by
-        # updating self.parms_dict
+        # pipeline-specific, parameters should be defined in the subclasses
         self.parms_dict = {'parset_dir': self.factor_parset_dir,
                            'skymodel_dir': self.factor_skymodel_dir,
                            'mapfile_dir': self.mapfile_dir,

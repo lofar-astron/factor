@@ -1,5 +1,5 @@
 """
-Module defining the operation scheduler class for multiproccessing
+Module defining the operation scheduler class
 """
 import logging
 import multiprocessing

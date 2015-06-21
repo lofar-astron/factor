@@ -79,9 +79,9 @@ class Band(object):
         self.cellsize_lowres_deg = 0.00694 # initsubtract low-res cell size
         if not test_run:
             self.imsize_high_res = self.get_optimum_size(self.fwhm_deg
-                / self.cellsize_highres_deg*2.5)
+                /self.cellsize_highres_deg* 2.5)
             self.imsize_low_res = self.get_optimum_size(self.fwhm_deg
-                / self.cellsize_lowres_deg*6.5)
+                /self.cellsize_lowres_deg*6.5)
         else:
             self.imsize_high_res = self.get_optimum_size(128)
             self.imsize_low_res = self.get_optimum_size(128)

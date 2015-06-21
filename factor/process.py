@@ -27,7 +27,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     parset_file : str
         Filename of parset containing processing parameters
     logging_level : str, optional
-        One of 'degug', 'info', 'warning'
+        One of 'degug', 'info', 'warning' in decreasing order of verbosity
     dry_run : bool, optional
         If True, do not run pipelines. All parsets, etc. are made as normal
     test_run : bool, optional
@@ -164,11 +164,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
 
         # Set image sizes
         direction.set_image_sizes(test_run=test_run)
-
-        # Make CASA region files for use during clean
-        reg_file = os.path.join(parset['dir_working'], 'regions', direction.name+'.rgn')
-        factor.directions.make_region_file(direction.vertices, reg_file)
-        direction.reg = reg_file
 
         # Set number of bands and channels
         direction.nbands = len(bands)
