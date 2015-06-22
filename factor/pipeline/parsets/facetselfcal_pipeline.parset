@@ -197,7 +197,7 @@ create_model0_map.control.filename                         =   model0_rootnames.
 casa_ft0.control.type                                      =   casa
 casa_ft0.control.mapfiles_in                               =   [concat_data.output.mapfile,create_model0_map.output.mapfile]
 casa_ft0.control.inputkeys                                 =   [inputms,modelimg]
-casa_ft0.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/ftw.py,inputms,modelimg,{{ nterms }},{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
+casa_ft0.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft.py,inputms,modelimg,{{ nterms }},{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
 make_chunks.control.type                                   =   chunk_by_time
 make_chunks.control.mapfile_in                             =   concat_data.output.mapfile
@@ -357,7 +357,7 @@ concat_chunks.argument.flags                               =   [msfiles,msconcat
 casa_ft1.control.type                                      =   casa
 casa_ft1.control.mapfiles_in                               =   [concat_chunks.output.mapfile,create_model1_map.output.mapfile]
 casa_ft1.control.inputkeys                                 =   [inputms,modelimg]
-casa_ft1.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/ftw.py,inputms,modelimg,{{ nterms }},{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
+casa_ft1.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft.py,inputms,modelimg,{{ nterms }},{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
 solve_phaseonly2.control.type                              =   calibrate-stand-alone_new
 solve_phaseonly2.argument.observation                      =   create_chunks_map.output.mapfile
@@ -493,7 +493,7 @@ create_model2_map.control.filename                         =   model1_rootnames.
 casa_ft2.control.type                                      =   casa
 casa_ft2.control.mapfiles_in                               =   [concat_chunks.output.mapfile,create_model2_map.output.mapfile]
 casa_ft2.control.inputkeys                                 =   [inputms,modelimg]
-casa_ft2.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/ftw.py,inputms,modelimg,{{ nterms }},{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
+casa_ft2.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft.py,inputms,modelimg,{{ nterms }},{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
 solve_ampphase11.control.type                              =   calibrate-stand-alone_new
 solve_ampphase11.argument.observation                      =   create_chunks_map.output.mapfile
@@ -667,7 +667,7 @@ create_model3_map.control.filename                         =   model1_rootnames.
 casa_ft3.control.type                                      =   casa
 casa_ft3.control.mapfiles_in                               =   [concat_chunks.output.mapfile,create_model3_map.output.mapfile]
 casa_ft3.control.inputkeys                                 =   [inputms,modelimg]
-casa_ft3.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/ftw.py,inputms,modelimg,{{ nterms }},{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
+casa_ft3.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft.py,inputms,modelimg,{{ nterms }},{{ wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
 solve_ampphase21.control.type                              =   calibrate-stand-alone_new
 solve_ampphase21.argument.observation                      =   create_chunks_map.output.mapfile
