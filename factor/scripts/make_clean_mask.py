@@ -24,7 +24,8 @@ def read_vertices(filename):
 
 def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, rmsbox=None,
          iterate_threshold=False, adaptive_rmsbox=False, img_format='fits',
-         threshold_format='float', trim_by=25, vertices_file=None, atrous_jmax=6):
+         threshold_format='float', trim_by=0.0, vertices_file=None, atrous_jmax=6,
+         pad_to_size=None, skip_source_detection=False):
     """
     Run PyBDSM to make an island clean mask
 
@@ -41,8 +42,11 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     if atrous_do:
         threshisl = 4.0
 
-    if rmsbox is not None:
+    if rmsbox is not None and type(rmsbox) is str:
         rmsbox = eval(rmsbox)
+
+    if pad_to_size is not None and type(pad_to_size) is str:
+        pad_to_size = int(pad_to_size)
 
     if type(atrous_do) is str:
         if atrous_do.lower() == 'true':
@@ -62,64 +66,91 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         else:
             adaptive_rmsbox = False
 
+    if type(skip_source_detection) is str:
+        if skip_source_detection.lower() == 'true':
+            skip_source_detection = True
+        else:
+            skip_source_detection = False
+
     trim_by = int(trim_by)
     atrous_jmax = int(atrous_jmax)
     threshpix = float(threshpix)
     threshisl = float(threshisl)
 
-    if iterate_threshold:
-        # Start with given threshold and lower it until we get at least one island
-        nisl = 0
-        while nisl == 0:
+    if not skip_source_detection:
+        if iterate_threshold:
+            # Start with given threshold and lower it until we get at least one island
+            nisl = 0
+            while nisl == 0:
+                img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
+                                         thresh_pix=threshpix, thresh_isl=threshisl,
+                                         atrous_do=atrous_do, ini_method='curvature', thresh='hard',
+                                         adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150,
+                                         rms_box_bright=(35,7), rms_map=True, quiet=True,
+                                         atrous_jmax=atrous_jmax)
+                nisl = img.nisl
+                threshpix /= 1.2
+                threshisl /= 1.2
+                if threshpix < 5.0:
+                    break
+        else:
             img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
                                      thresh_pix=threshpix, thresh_isl=threshisl,
                                      atrous_do=atrous_do, ini_method='curvature', thresh='hard',
                                      adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150,
                                      rms_box_bright=(35,7), rms_map=True, quiet=True,
                                      atrous_jmax=atrous_jmax)
-            nisl = img.nisl
-            threshpix /= 1.2
-            threshisl /= 1.2
-            if threshpix < 5.0:
-                break
+
+        if img.nisl == 0:
+            print('No islands found. Clean mask cannot be made.')
+            sys.exit(1)
+
+        img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
+                         img_format=img_format, clobber=True)
+
     else:
-        img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
-                                 thresh_pix=threshpix, thresh_isl=threshisl,
-                                 atrous_do=atrous_do, ini_method='curvature', thresh='hard',
-                                 adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150,
-                                 rms_box_bright=(35,7), rms_map=True, quiet=True,
-                                 atrous_jmax=atrous_jmax)
-
-    if img.nisl == 0:
-        print('No islands found. Clean mask cannot be made.')
-        sys.exit(1)
-
-    img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
-                     img_format=img_format, clobber=True)
-
-    if vertices_file is not None or trim_by > 0:
-        # Modify the clean mask to exclude regions outside of the polygon and
-        # trim edges
-        mask_tmp_name = mask_name + '.tmp1'
-        if os.path.exists(mask_tmp_name):
-            os.system('rm -rf {0}'.format(mask_tmp_name))
-        os.system('cp -r {0} {1}'.format(mask_name, mask_tmp_name))
-
-        mask_im = pim.image(mask_tmp_name)
-        img_type = mask_im.imagetype()
-        if img_type == 'FITSImage':
-            mask_im.saveas(mask_name+'.tmp2')
-            mask_im = pim.image(mask_name+'.tmp2')
+        mask_im = pim.image(image_name)
         data = mask_im.getdata()
+        data[:] = 1
+        ones_mask = pim.image('', shape=mask_im.shape(), coordsys=mask_im.coordinates())
+        ones_mask.putdata(data)
+        if img_format == 'fits':
+            ones_mask.tofits(mask_name, overwrite=True)
+        else:
+            ones_mask.saveas(mask_name, overwrite=True)
+
+    if vertices_file is not None or trim_by > 0 or pad_to_size is not None:
+        mask_im = pim.image(mask_name)
+        data = mask_im.getdata()
+        coordsys = mask_im.coordinates()
+
+        if pad_to_size is not None:
+            imsize = pad_to_size
+            coordsys['direction'].set_referencepixel([imsize/2, imsize/2])
+            pixmin = (imsize - mask_im.shape()[2]) / 2
+            if pixmin < 0:
+                print("The padded size must be larger than the original size.")
+                sys.exit(1)
+            pixmax = pixmin + mask_im.shape()[2]
+            data_pad = np.zeros((1, 1, imsize, imsize), dtype=np.float32)
+            data_pad[0, 0, pixmin:pixmax, pixmin:pixmax] = data[0, 0]
+            new_mask = pim.image('', shape=(1, 1, imsize, imsize), coordsys=coordsys)
+            new_mask.putdata(data_pad)
+        else:
+            new_mask = pim.image('', shape=mask_im.shape(), coordsys=coordsys)
+            new_mask.putdata(data)
+
+        data = new_mask.getdata()
 
         if vertices_file is not None:
+            # Modify the clean mask to exclude regions outside of the polygon
             vertices = read_vertices(vertices_file)
             RAverts = vertices[0]
             Decverts = vertices[1]
             xvert = []
             yvert = []
             for RAvert, Decvert in zip(RAverts, Decverts):
-                pixels = mask_im.topixel([0, 1, Decvert*np.pi/180.0,
+                pixels = new_mask.topixel([0, 1, Decvert*np.pi/180.0,
                     RAvert*np.pi/180.0])
                 xvert.append(pixels[2]) # x -> Dec
                 yvert.append(pixels[3]) # y -> RA
@@ -135,19 +166,20 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             if len(outside_ind[0]) > 0:
                 data[0, 0, masked_ind[0][outside_ind], [masked_ind[1][outside_ind]]] = 0
 
-        if trim_by > 0:
+        if trim_by > 0.0:
             sh = np.shape(data)
-            data[0, 0, 0:sh[2], 0:trim_by] = 0
-            data[0, 0, 0:trim_by, 0:sh[3]] = 0
-            data[0, 0, 0:sh[2], sh[3]-trim_by:sh[3]] = 0
-            data[0, 0, sh[2]-trim_by:sh[2], 0:sh[3]] = 0
+            margin = int(sh[2] * trim_by)
+            data[0, 0, 0:sh[2], 0:margin] = 0
+            data[0, 0, 0:margin, 0:sh[3]] = 0
+            data[0, 0, 0:sh[2], sh[3]-margin:sh[3]] = 0
+            data[0, 0, sh[2]-margin:sh[2], 0:sh[3]] = 0
 
         # Save changes
-        mask_im.putdata(data)
+        new_mask.putdata(data)
         if img_format == 'fits':
-            mask_im.tofits(mask_name, overwrite=True)
+            new_mask.tofits(mask_name, overwrite=True)
         else:
-            mask_im.saveas(mask_name, overwrite=True)
+            new_mask.saveas(mask_name, overwrite=True)
 
     if threshold_format == 'float':
         return {'threshold_5sig': 5.0 * img.clipped_rms}
