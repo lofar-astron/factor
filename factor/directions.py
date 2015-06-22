@@ -555,9 +555,8 @@ def make_ds9_calimage_file(directions, outputfile):
                  'font="helvetica 10 normal" select=1 highlite=1 edit=1 '
                  'move=1 delete=1 include=1 fixed=0 source=1\nfk5\n')
 
-    cell = 1.5 # arcsec per pixel
     for direction in directions:
-        imsize = direction.cal_imsize
+        imsize = direction.cal_imsize * direction.cellsize_selfcal_deg * 3600 # arcsec
         imsize_unmasked = 0.8 * imsize
         RAs = direction.vertices[0]
         Decs = direction.vertices[1]
