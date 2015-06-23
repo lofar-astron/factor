@@ -16,19 +16,19 @@ create_parmdb_map.control.parmdb_name      =   {{ dir_indep_parmdb_name }}
 create_parmdb_map.control.mapfile_dir      =   {{ mapfile_dir }}
 create_parmdb_map.control.filename         =   dir_indep_instrument_parmdbs.datamap
 
-create_high_sizes_map.control.kind           =   plugin
-create_high_sizes_map.control.type           =   addListMapfile
-create_high_sizes_map.control.hosts          =   {{ hosts }}
-create_high_sizes_map.control.files          =   {{ highres_image_sizes }}
-create_high_sizes_map.control.mapfile_dir    =   {{ mapfile_dir }}
-create_high_sizes_map.control.filename       =   highres_image_sizes.datamap
+create_high_sizes_map.control.kind         =   plugin
+create_high_sizes_map.control.type         =   addListMapfile
+create_high_sizes_map.control.hosts        =   {{ hosts }}
+create_high_sizes_map.control.files        =   {{ highres_image_sizes }}
+create_high_sizes_map.control.mapfile_dir  =   {{ mapfile_dir }}
+create_high_sizes_map.control.filename     =   highres_image_sizes.datamap
 
-create_low_sizes_map.control.kind           =   plugin
-create_low_sizes_map.control.type           =   addListMapfile
-create_low_sizes_map.control.hosts          =   {{ hosts }}
-create_low_sizes_map.control.files          =   {{ lowres_image_sizes }}
-create_low_sizes_map.control.mapfile_dir    =   {{ mapfile_dir }}
-create_low_sizes_map.control.filename       =   lowres_image_sizes.datamap
+create_low_sizes_map.control.kind          =   plugin
+create_low_sizes_map.control.type          =   addListMapfile
+create_low_sizes_map.control.hosts         =   {{ hosts }}
+create_low_sizes_map.control.files         =   {{ lowres_image_sizes }}
+create_low_sizes_map.control.mapfile_dir   =   {{ mapfile_dir }}
+create_low_sizes_map.control.filename      =   lowres_image_sizes.datamap
 
 # make_copy_ms_map.control.kind              =   plugin
 # make_copy_ms_map.control.type              =   copyFiles
