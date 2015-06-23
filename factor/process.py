@@ -157,7 +157,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
                 target_dec=target_dec, target_radius_arcmin=target_radius_arcmin)
         else:
             target = Direction('target', target_ra, target_dec,
-                factor_working_dir=parset['dir_working']))
+                factor_working_dir=parset['dir_working'])
             directions.append(target)
             polys, widths = factor.directions.thiessen(directions,
                 check_edges=dir_parset['check_edges'])
