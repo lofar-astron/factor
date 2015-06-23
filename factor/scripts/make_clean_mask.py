@@ -208,7 +208,7 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--adaptive_rmsbox', help='use an adaptive rms box', type=bool, default=False)
     parser.add_argument('-f', '--img_format', help='format of output mask', type=str, default='casa')
     parser.add_argument('-d', '--threshold_format', help='format of return value', type=str, default='float')
-    parser.add_argument('-b', '--trim_by', help='Trim masked region by this number of pixels', type=int, default=25)
+    parser.add_argument('-b', '--trim_by', help='Trim masked region by this number of pixels', type=float, default=0.0)
     parser.add_argument('-v', '--vertices_file', help='file containing facet polygon vertices', type=str, default=None)
     parser.add_argument('-j', '--atrous_jmax', help='Max wavelet scale', type=int, default=3)
 
