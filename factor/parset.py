@@ -146,6 +146,11 @@ def parset_read(parset_file):
     if 'target_radius_arcmin' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['target_radius_arcmin'] = parset.getfloat('directions',
             'target_radius_arcmin')
+    if 'target_has_own_facet' in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['target_has_own_facet'] = parset.getboolean('directions',
+            'target_has_own_facet')
+    else:
+        parset_dict['direction_specific']['target_has_own_facet'] = False
 
     # Handle cluster-related parameters
     if 'cluster' in parset._sections.keys():

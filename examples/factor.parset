@@ -40,19 +40,22 @@ check_edges = False
 
 # Flux and size cuts for selecting directions internally (min flux, max size
 # of a source, and max separation between sources below which they are grouped
-# into one direction; required if no directions_file is given)
+# into one direction; required if no directions_file is given). The number of
+# internally derived directions can be limited to a maximum number
+# of directions if desired with max_num (default = all). These parameters will
+# determine the faceting of the field
 flux_min_Jy = 0.1
 size_max_arcmin = 3.0
 separation_max_arcmin = 6.0
-
-# The number of internally derived directions can be limited to a maximum number
-# of directions if desired (default = all)
 max_num = 50
 
 # Total number of directions to process (default = all)
-ndir = 10
+ndir_total = 10
 
-# Grouping of directions into groups that are processed in parallel, defined as
+# Total number of directions to selfcal (default = all)
+ndir_selfcal = 5
+
+# Grouping of directions into groups that are selfcal-ed in parallel, defined as
 # grouping:n_total_per_grouping. For example, groupings = 1:5, 4:0 means two
 # groupings are used, with the first 5 directions put into groups of one (i.e.,
 # each direction processed in series) and the rest of the directions divided
@@ -63,10 +66,14 @@ groupings = 1:5, 4:0
 
 # A target can be specified to ensure that it falls entirely within a single
 # facet. The values should be those of a circular region that encloses the
-# source and not those of the target itself
+# source and not those of the target itself. Lastly, the target can be placed
+# in a facet of its own. In this case, it will not go through selfcal but will
+# instead use the selfcal solutions of the nearest facet for which selfcal was
+# done
 target_ra = 14h41m01.884
 target_dec = +35d30m31.52
 target_radius_arcmin = 10.2
+target_has_own_facet = False
 
 
 [cluster]

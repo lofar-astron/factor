@@ -134,10 +134,12 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
 
     # Load polygons from previous run if possible
     polys_file = os.path.join(parset['dir_working'], 'regions', 'factor_facets.pkl')
+    target_has_own_facet = dir_parset['target_has_own_facet']
     if os.path.exists(polys_file):
         with open(polys_file, 'r') as f:
             polys, widths = pickle.load(f)
             widths = [w[0] for w in widths]
+
     else:
         if 'target_ra' in dir_parset and 'target_dec' in dir_parset and \
             'target_radius_arcmin' in dir_parset:
@@ -149,9 +151,16 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             target_dec = None
             target_radius_arcmin = None
 
-        polys, widths = factor.directions.thiessen(directions,
-            check_edges=dir_parset['check_edges'], target_ra=target_ra,
-            target_dec=target_dec, target_radius_arcmin=target_radius_arcmin)
+        if not target_has_own_facet:
+            polys, widths = factor.directions.thiessen(directions,
+                check_edges=dir_parset['check_edges'], target_ra=target_ra,
+                target_dec=target_dec, target_radius_arcmin=target_radius_arcmin)
+        else:
+            target = Direction('target', target_ra, target_dec,
+                factor_working_dir=parset['dir_working']))
+            directions.append(target)
+            polys, widths = factor.directions.thiessen(directions,
+                check_edges=dir_parset['check_edges'])
         with open(polys_file, 'wb') as f:
             pickle.dump([polys, widths], f)
 
@@ -194,12 +203,23 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             log.info('Exiting...')
             sys.exit()
 
+    # Select subset of directions to process
+    if 'ndir_total' in parset['direction_specific']:
+        if parset['direction_specific']['ndir_total'] > 0 and \
+            parset['direction_specific']['ndir_total'] <= len(directions):
+            directions = directions[:parset['direction_specific']['ndir_total']]
+
     # Select subset of directions to selfcal
-    # TODO: filter out target?
-    if 'ndir' in parset['direction_specific']:
-        if parset['direction_specific']['ndir'] > 0 and \
-            parset['direction_specific']['ndir'] <= len(directions):
-            selfcal_directions = directions[:parset['direction_specific']['ndir']]
+    if 'ndir_selfcal' in parset['direction_specific']:
+        if parset['direction_specific']['ndir_selfcal'] > 0 and \
+            parset['direction_specific']['ndir_selfcal'] <= len(directions):
+            selfcal_directions = directions[:parset['direction_specific']['ndir_selfcal']]
+
+    # Ensure that target is included (but not for selfcal)
+    if target_has_own_facet:
+        names = [d.name for d in directions]
+        if target.name not in names:
+            directions.append(target)
 
     direction_groups = factor.directions.group_directions(selfcal_directions,
         one_at_a_time=parset['direction_specific']['one_at_a_time'],
@@ -212,31 +232,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             len(direction_group)))
 
         # Divide up the nodes and cores among the directions
-        node_list = parset['cluster_specific']['node_list']
-        if len(direction_group) >= len(node_list):
-            for i in range(len(direction_group)-len(node_list)):
-                node_list.append(node_list[i])
-            hosts = [[n] for n in node_list]
-        else:
-            parts = len(direction_group)
-            hosts = [node_list[i*len(node_list)//parts:
-                (i+1)*len(node_list)//parts] for i in range(parts)]
-
-        # Find duplicates and divide up available cores
-        h_flat = []
-        for h in hosts:
-            h_flat.extend(h)
-        c = Counter(h_flat)
-        for d, h in zip(direction_group, hosts):
-            d.hosts = h
-            if len(h) == 1:
-                ndir_per_node = min(parset['cluster_specific']['ndir_per_node'],
-                    c[h[0]])
-            else:
-                ndir_per_node = 1
-            d.max_cpus_per_node = int(round(parset['cluster_specific']['ncpu'] /
-                float(ndir_per_node)))
-            d.save_state()
+        direction_group = factor.directions.divide_nodes(direction_group,
+            parset['cluster_specific']['node_list'],
+            parset['cluster_specific']['ndir_per_node'],
+            parset['cluster_specific']['ncpu'])
 
         # Add calibrator(s) to empty datasets. These operations
         # must be done in series
@@ -323,6 +322,13 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         ops = [FacetAddFinal(parset, bands, d) for d in dirs_to_image]
         for op in ops:
             scheduler.run(op)
+
+        # Divide up the nodes and cores among the directions
+        dirs_to_image = factor.directions.divide_nodes(dirs_to_image,
+            parset['cluster_specific']['node_list'],
+            parset['cluster_specific']['ndir_per_node'],
+            parset['cluster_specific']['ncpu'])
+
         ops = [FacetImageFinal(parset, d) for d in dirs_to_image]
         scheduler.run(ops)
 

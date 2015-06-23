@@ -74,3 +74,33 @@ def find_executables(parset):
             log.error('The path to the {0} executable could not be determined. '
                 'Please make sure it is in your PATH.'.format(name))
             sys.exit(1)
+
+
+def divide_nodes(directions, node_list, ndir_per_node, ncpu_max):
+    """
+    Divide up nodes and cpus among directions
+    """
+    if len(directions) >= len(node_list):
+        for i in range(len(directions)-len(node_list)):
+            node_list.append(node_list[i])
+        hosts = [[n] for n in node_list]
+    else:
+        parts = len(directions)
+        hosts = [node_list[i*len(node_list)//parts:
+            (i+1)*len(node_list)//parts] for i in range(parts)]
+
+    # Find duplicates and divide up available cores
+    h_flat = []
+    for h in hosts:
+        h_flat.extend(h)
+    c = Counter(h_flat)
+    for d, h in zip(directions, hosts):
+        d.hosts = h
+        if len(h) == 1:
+            ndir_per_node = min(ndir_per_node, c[h[0]])
+        else:
+            ndir_per_node = 1
+        d.max_cpus_per_node = int(round(ncpu_max / float(ndir_per_node)))
+        d.save_state()
+
+    return directions
