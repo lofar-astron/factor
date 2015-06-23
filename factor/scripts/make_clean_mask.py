@@ -110,6 +110,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                          img_format=img_format, clobber=True)
 
     if vertices_file is not None or trim_by > 0 or pad_to_size is not None or skip_source_detection:
+        # Alter the mask in various ways
         if skip_source_detection:
             # Read the image
             mask_im = pim.image(image_name)
@@ -212,6 +213,7 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--trim_by', help='Trim masked region by this number of pixels', type=float, default=0.0)
     parser.add_argument('-v', '--vertices_file', help='file containing facet polygon vertices', type=str, default=None)
     parser.add_argument('-j', '--atrous_jmax', help='Max wavelet scale', type=int, default=3)
+    parser.add_argument('-z', '--pad_to_size', help='pad mask to this size', type=int, default=None)
     parser.add_argument('-s', '--skip_source_detection', help='skip source detection', type=bool, default=False)
 
     args = parser.parse_args()
@@ -220,4 +222,5 @@ if __name__ == '__main__':
          iterate_threshold=args.iterate_threshold,
          adaptive_rmsbox=args.adaptive_rmsbox, img_format=args.img_format,
          threshold_format=args.threshold_format, trim_by=args.trim_by,
-         vertices_file=args.vertices_file, atrous_jmax=args.atrous_jmax)
+         vertices_file=args.vertices_file, atrous_jmax=args.atrous_jmax,
+         pad_to_size=args.pad_to_size, skip_source_detection=args.skip_source_detection)
