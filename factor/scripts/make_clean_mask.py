@@ -105,6 +105,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             print('No islands found. Clean mask cannot be made.')
             sys.exit(1)
 
+        print(img_format, type(img_format))
         img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
                          img_format=img_format, clobber=True)
 
@@ -213,6 +214,7 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--trim_by', help='Trim masked region by this number of pixels', type=float, default=0.0)
     parser.add_argument('-v', '--vertices_file', help='file containing facet polygon vertices', type=str, default=None)
     parser.add_argument('-j', '--atrous_jmax', help='Max wavelet scale', type=int, default=3)
+    parser.add_argument('-s', '--skip_source_detection', help='skip source detection', type=bool, default=False)
 
     args = parser.parse_args()
     main(args.image_name, args.mask_name, atrous_do=args.atrous_do,
