@@ -181,12 +181,15 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         else:
             new_mask.saveas(mask_name, overwrite=True)
 
-    if threshold_format == 'float':
-        return {'threshold_5sig': 5.0 * img.clipped_rms}
-    elif threshold_format == 'str_with_units':
-        # This is done to get around the need for quotes around strings in casapy scripts
-        # 'casastr/' is removed by the generic pipeline
-        return {'threshold_5sig': 'casastr/{0}Jy'.format(5.0 * img.clipped_rms)}
+    if not skip_source_detection:
+        if threshold_format == 'float':
+            return {'threshold_5sig': 5.0 * img.clipped_rms}
+        elif threshold_format == 'str_with_units':
+            # This is done to get around the need for quotes around strings in casapy scripts
+            # 'casastr/' is removed by the generic pipeline
+            return {'threshold_5sig': 'casastr/{0}Jy'.format(5.0 * img.clipped_rms)}
+    else:
+        return {'threshold_5sig': '0.0'}
 
 
 if __name__ == '__main__':
