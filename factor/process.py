@@ -210,12 +210,11 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             directions = directions[:parset['direction_specific']['ndir_total']]
 
     # Select subset of directions to selfcal
+    selfcal_directions = directions
     if 'ndir_selfcal' in parset['direction_specific']:
         if parset['direction_specific']['ndir_selfcal'] > 0 and \
             parset['direction_specific']['ndir_selfcal'] <= len(directions):
             selfcal_directions = directions[:parset['direction_specific']['ndir_selfcal']]
-    else:
-        selfcal_directions = directions
 
     # Ensure that target is included (but not for selfcal)
     if target_has_own_facet:
