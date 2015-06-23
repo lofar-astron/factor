@@ -123,6 +123,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         mask_im = pim.image(mask_name)
         data = mask_im.getdata()
         coordsys = mask_im.coordinates()
+        del(mask_im)
 
         if pad_to_size is not None:
             imsize = pad_to_size
