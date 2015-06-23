@@ -6,7 +6,6 @@ import os
 import numpy as np
 import logging
 import pickle
-from collections import Counter
 from lofarpipe.support.data_map import DataMap
 import factor
 import factor.directions

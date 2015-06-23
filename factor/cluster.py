@@ -4,6 +4,7 @@ Module that holds all cluster-related functions
 import os
 import logging
 import sys
+from collections import Counter
 import factor._logging
 
 
