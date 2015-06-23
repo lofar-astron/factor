@@ -296,7 +296,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             else:
                 d.save_state()
         if not all_good:
-            self.log.info('Exiting...')
+            log.info('Exiting...')
             sys.exit(1)
 
         # Clean up files
