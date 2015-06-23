@@ -215,15 +215,15 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             parset['direction_specific']['ndir_selfcal'] <= len(directions):
             selfcal_directions = directions[:parset['direction_specific']['ndir_selfcal']]
 
+    direction_groups = factor.directions.group_directions(selfcal_directions,
+        one_at_a_time=parset['direction_specific']['one_at_a_time'],
+        n_per_grouping=parset['direction_specific']['groupings'])
+
     # Ensure that target is included (but not for selfcal)
     if target_has_own_facet:
         names = [d.name for d in directions]
         if target.name not in names:
             directions.append(target)
-
-    direction_groups = factor.directions.group_directions(selfcal_directions,
-        one_at_a_time=parset['direction_specific']['one_at_a_time'],
-        n_per_grouping=parset['direction_specific']['groupings'])
 
     # Iterate over direction groups
     first_pass = True
