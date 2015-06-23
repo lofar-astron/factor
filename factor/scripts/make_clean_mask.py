@@ -72,7 +72,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         else:
             skip_source_detection = False
 
-    trim_by = int(trim_by)
+    trim_by = float(trim_by)
     atrous_jmax = int(atrous_jmax)
     threshpix = float(threshpix)
     threshisl = float(threshisl)
@@ -168,7 +168,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
 
         if trim_by > 0.0:
             sh = np.shape(data)
-            margin = int(sh[2] * trim_by)
+            margin = int(sh[2] * trim_by / 2.0 )
             data[0, 0, 0:sh[2], 0:margin] = 0
             data[0, 0, 0:margin, 0:sh[3]] = 0
             data[0, 0, 0:sh[2], sh[3]-margin:sh[3]] = 0
