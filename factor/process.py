@@ -233,7 +233,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             len(direction_group)))
 
         # Divide up the nodes and cores among the directions
-        direction_group = factor.directions.divide_nodes(direction_group,
+        direction_group = factor.cluster.divide_nodes(direction_group,
             parset['cluster_specific']['node_list'],
             parset['cluster_specific']['ndir_per_node'],
             parset['cluster_specific']['ncpu'])
@@ -325,7 +325,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             scheduler.run(op)
 
         # Divide up the nodes and cores among the directions
-        dirs_to_image = factor.directions.divide_nodes(dirs_to_image,
+        dirs_to_image = factor.cluster.divide_nodes(dirs_to_image,
             parset['cluster_specific']['node_list'],
             parset['cluster_specific']['ndir_per_node'],
             parset['cluster_specific']['ncpu'])
