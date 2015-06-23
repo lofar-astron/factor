@@ -19,6 +19,7 @@ FacetImageFinal : Operation
 
 """
 import os
+import ast
 from factor.lib.operation import Operation
 from lofarpipe.support.data_map import DataMap
 
@@ -116,6 +117,8 @@ class FacetSelfcal(Operation):
             'dir_dep_parmdb.datamap')
         self.direction.facet_image_mapfile = os.path.join(self.mapfile_dir,
             'final_image.datamap')
+        self.verify_subtract_OK_mapfile = os.path.join(self.mapfile_dir,
+            'verify_subtract_OK.datamap')
         self.direction.cleanup_mapfiles.extend([os.path.join(self.mapfile_dir,
             'chunk_files.datamap'), os.path.join(self.mapfile_dir,
             'concat1_input.datamap'), os.path.join(self.mapfile_dir,
@@ -123,12 +126,10 @@ class FacetSelfcal(Operation):
             'concat3_input.datamap'), os.path.join(self.mapfile_dir,
             'concat4_input.datamap')])
 
-        try:
-            ok_datamap = DataMap.load(os.path.join(self.mapfile_dir,
-                'verify_subtract.datamap'))
-            self.direction.selfcal_ok = ok_datamap[0].item
-        except:
-            pass
+        # Store results of verify_subtract check (True means selfcal went OK)
+        if os.path.exists(self.verify_subtract_OK_mapfile):
+            ok_datamap = DataMap.load(self.verify_subtract_OK_mapfile)
+            self.direction.selfcal_ok = ast.literal_eval(ok_datamap[0].file)
 
 
 class FacetSub(Operation):
