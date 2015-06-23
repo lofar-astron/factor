@@ -123,22 +123,23 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         mask_im = pim.image(mask_name)
         data = mask_im.getdata()
         coordsys = mask_im.coordinates()
+        imshape = mask_im.shape()
         del(mask_im)
 
         if pad_to_size is not None:
             imsize = pad_to_size
             coordsys['direction'].set_referencepixel([imsize/2, imsize/2])
-            pixmin = (imsize - mask_im.shape()[2]) / 2
+            pixmin = (imsize - imshape[2]) / 2
             if pixmin < 0:
                 print("The padded size must be larger than the original size.")
                 sys.exit(1)
-            pixmax = pixmin + mask_im.shape()[2]
+            pixmax = pixmin + imshape()[2]
             data_pad = np.zeros((1, 1, imsize, imsize), dtype=np.float32)
             data_pad[0, 0, pixmin:pixmax, pixmin:pixmax] = data[0, 0]
             new_mask = pim.image('', shape=(1, 1, imsize, imsize), coordsys=coordsys)
             new_mask.putdata(data_pad)
         else:
-            new_mask = pim.image('', shape=mask_im.shape(), coordsys=coordsys)
+            new_mask = pim.image('', shape=imshape(), coordsys=coordsys)
             new_mask.putdata(data)
 
         data = new_mask.getdata()
