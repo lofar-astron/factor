@@ -109,23 +109,21 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
                          img_format=img_format, clobber=True)
 
-    else:
-        mask_im = pim.image(image_name)
-        data = mask_im.getdata()
-        data[:] = 1
-        ones_mask = pim.image('', shape=mask_im.shape(), coordsys=mask_im.coordinates())
-        ones_mask.putdata(data)
-        if img_format == 'fits':
-            ones_mask.tofits(mask_name, overwrite=True)
+    if vertices_file is not None or trim_by > 0 or pad_to_size is not None or skip_source_detection:
+        if skip_source_detection:
+            # Read the image
+            mask_im = pim.image(image_name)
         else:
-            ones_mask.saveas(mask_name, overwrite=True)
-
-    if vertices_file is not None or trim_by > 0 or pad_to_size is not None:
-        mask_im = pim.image(mask_name)
+            # Read the PyBDSM mask
+            mask_im = pim.image(mask_name)
         data = mask_im.getdata()
         coordsys = mask_im.coordinates()
         imshape = mask_im.shape()
         del(mask_im)
+
+        if skip_source_detection:
+            # Mask all pixels
+            data[:] = 1
 
         if pad_to_size is not None:
             imsize = pad_to_size
