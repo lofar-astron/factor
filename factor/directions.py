@@ -1119,3 +1119,29 @@ def mask_vertices(mask_im, vertices_file):
     bool_mask.putdata(bool_data)
 
     return new_im, bool_mask
+
+
+def find_nearest(direction1, directions):
+    """
+    Finds nearest direction to input direction
+
+    Parameters
+    ----------
+    direction1 : Direction object
+        Target direction for which nearset direction is to be found
+    directions : list
+        List of directions to search. Should not include the target direction
+
+    Returns
+    -------
+    direction : Direction object
+        Nearest direction
+
+    """
+    sep = []
+    for direction2 in directions:
+        sep.append(calculateSeparation(direction1.ra, direction1.dec,
+                            direction2.ra, direction2.dec))
+
+    return directions[np.argmin(sep)]
+

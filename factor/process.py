@@ -194,13 +194,14 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             log.info('Exiting...')
             sys.exit()
 
-    # Select subset of directions to process
+    # Select subset of directions to selfcal
+    # TODO: filter out target?
     if 'ndir' in parset['direction_specific']:
         if parset['direction_specific']['ndir'] > 0 and \
             parset['direction_specific']['ndir'] <= len(directions):
-            directions = directions[:parset['direction_specific']['ndir']]
+            selfcal_directions = directions[:parset['direction_specific']['ndir']]
 
-    direction_groups = factor.directions.group_directions(directions,
+    direction_groups = factor.directions.group_directions(selfcal_directions,
         one_at_a_time=parset['direction_specific']['one_at_a_time'],
         n_per_grouping=parset['direction_specific']['groupings'])
 
@@ -303,13 +304,26 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         for d in direction_group:
             d.cleanup()
 
-    # Make final facet images (from final empty datasets) if desired
-    dirs_to_image = [d for d in directions if d.make_final_image]
+    # Make final facet images (from final empty datasets) if desired. Also image
+    # any facets for which selfcal failed or no selfcal was done
+    dirs_to_image = [d for d in directions if d.make_final_image and d.selfcal_ok]
+
+    # Add directions without selfcal if desired
+    if transfer_selfcal_to_rest:
+        dirs_to_transfer = [d for d in directions if not d.selfcal_ok]
+        dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
+
+        for d in dirs_to_transfer:
+            # Search for nearest direction with successful selfcal
+            nearest = factor.directions.find_nearest(d, dirs_with_selfcal)
+            d.dir_dep_parmdb_datamap = nearest.dir_dep_parmdb_datamap
+        dirs_to_image.append(dirs_to_transfer)
+
     if len(dirs_to_image) > 0:
-        ops = [FacetAddAllFinal(parset, bands, d) for d in dirs_to_image]
+        ops = [FacetAddFinal(parset, bands, d) for d in dirs_to_image]
         for op in ops:
             scheduler.run(op)
-        ops = [FacetImageFinal(parset, bands, d) for d in dirs_to_image]
+        ops = [FacetImageFinal(parset, d) for d in dirs_to_image]
         scheduler.run(ops)
 
     # Mosaic the final facet images together

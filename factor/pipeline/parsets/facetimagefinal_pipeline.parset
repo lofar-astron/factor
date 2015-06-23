@@ -1,0 +1,137 @@
+pipeline.steps = [expand_merged_parmdb_map, apply_dir_dep, average, create_compressed_mapfile, concat_averaged, premask, wsclean1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean2, create_imagebase_map2, adjust_wsclean_mapfile2]
+
+pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
+
+expand_merged_parmdb_map.control.kind             =   plugin
+expand_merged_parmdb_map.control.type             =   expandMapfile
+expand_merged_parmdb_map.control.mapfile_in       =   merge_selfcal_parmdbs.output.mapfile
+expand_merged_parmdb_map.control.mapfile_to_match =   {{ shifted_all_bands_datamap }}
+expand_merged_parmdb_map.control.mapfile_dir      =   {{ mapfile_dir }}
+expand_merged_parmdb_map.control.filename         =   expand_merged_parmdbs.datamap
+
+apply_dir_dep.control.type                        =   calibrate-stand-alone_new
+apply_dir_dep.control.mapfiles_in                 =   [{{ shifted_all_bands_datamap }},expand_merged_parmdb_map.output.mapfile]
+apply_dir_dep.control.inputkeys                   =   [inputms,inputparmdb]
+apply_dir_dep.argument.observation                =   inputms
+apply_dir_dep.argument.parset                     =   {{ parset_dir }}//facet_dirdep_apply.parset
+apply_dir_dep.argument.catalog                    =   {{ skymodel_dir }}/empty.skymodel
+apply_dir_dep.argument.parmdb                     =   inputparmdb
+apply_dir_dep.argument.replace-sourcedb           =   True
+apply_dir_dep.argument.replace-parmdb             =   True
+
+average.control.type                              =   dppp
+average.control.mapfile_in                        =   {{ shifted_all_bands_datamap }}
+average.control.inputkey                          =   msin
+average.parsetarg.msin.datacolumn                 =   CORRECTED_DATA
+average.parsetarg.msout.writefullresflag          =   False
+average.parsetarg.steps                           =   [avg]
+average.parsetarg.avg.type                        =   squash
+average.parsetarg.avg.freqstep                    =   5
+average.parsetarg.avg.timestep                    =   3
+
+create_compressed_mapfile.control.kind            =   plugin
+create_compressed_mapfile.control.type            =   compressMapfile
+create_compressed_mapfile.control.mapfile_in      =   average5.output.mapfile
+create_compressed_mapfile.control.mapfile_dir     =   {{ mapfile_dir }}
+create_compressed_mapfile.control.filename        =   concat_averaged_input.datamap
+
+concat_averaged.control.type                      =   virtual_concat
+concat_averaged.control.mapfile_in                =   create_compressed_mapfile5.output.mapfile
+concat_averaged.control.inputkey                  =   msfiles
+concat_averaged.control.outputkey                 =   msconcat
+concat_averaged.argument.flags                    =   [msfiles,msconcat]
+
+premask.control.type                              =   make_clean_mask
+premask.control.mapfile_in                        =   adjust_casa_mapfile4.output.mapfile
+premask.control.inputkey                          =   imagefile
+premask.control.outputkey                         =   maskfile
+premask.argument.flags                            =   [imagefile,maskfile]
+premask.argument.img_format                       =   fits
+premask.argument.pad_to_size                      =   {{ facet_imsize }}
+premask.argument.skip_source_detection            =   True
+premask.argument.vertices_file                    =   {{ facet_state_file }}
+
+wsclean1.control.type                             =   wsclean
+wsclean1.control.mapfiles_in                      =   [concat_averaged.output.mapfile,premask.output.mapfile]
+wsclean1.control.inputkeys                        =   [msfile,fitsmask]
+wsclean1.argument.flags                           =   [-no-update-model-required,-joinchannels,msfile]
+wsclean1.argument.fitsmask                        =   fitsmask
+wsclean1.argument.size                            =   {{ facet_imsize }} {{ facet_imsize }}
+wsclean1.argument.niter                           =   15000
+wsclean1.argument.threshold                       =   0.0
+wsclean1.argument.pol                             =   I
+wsclean1.argument.weight                          =   briggs -0.5
+wsclean1.argument.mgain                           =   0.5
+wsclean1.argument.gain                            =   0.1
+wsclean1.argument.cleanborder                     =   0
+wsclean1.argument.minuv-l                         =   80
+wsclean1.argument.maxuv-l                         =   1000000
+wsclean1.argument.scale                           =   0.000417
+wsclean1.argument.channelsout                     =   {{ nchannels }}
+wsclean1.argument.mem                             =   90
+wsclean1.argument.j                               =   {{ max_cpus_per_node }}
+
+create_imagebase_map1.control.kind                =   plugin
+create_imagebase_map1.control.type                =   trimMapfile
+create_imagebase_map1.control.mapfile_in          =   wsclean1.output.wsclean1-image.fits.mapfile
+create_imagebase_map1.control.trim                =   -
+create_imagebase_map1.control.mapfile_dir         =   {{ mapfile_dir }}
+create_imagebase_map1.control.filename            =   wsclean1_image_rootnames.datamap
+
+adjust_wsclean_mapfile1.control.kind              =   plugin
+adjust_wsclean_mapfile1.control.type              =   appendMapfile
+adjust_wsclean_mapfile1.control.mapfile_in        =   create_imagebase_map1.output.mapfile
+adjust_wsclean_mapfile1.control.append            =   {{ wsclean_suffix }}
+adjust_wsclean_mapfile1.control.mapfile_dir       =   {{ mapfile_dir }}
+adjust_wsclean_mapfile1.control.filename          =   image1.datamap
+
+copy_beam_info.control.type                       =   copy_beam_info
+copy_beam_info.control.mapfile_in                 =   adjust_wsclean_mapfile1.output.mapfile
+copy_beam_info.control.inputkey                   =   imagefile
+copy_beam_info.argument.flags                     =   [imagefile]
+
+mask.control.type                                 =   make_clean_mask
+mask.control.mapfile_in                           =   adjust_wsclean_mapfile1.output.mapfile
+mask.control.inputkey                             =   imagefile
+mask.control.outputkey                            =   maskfile
+mask.argument.flags                               =   [imagefile,maskfile]
+mask.argument.threshisl                           =   5
+mask.argument.threshpix                           =   5
+mask.argument.rmsbox                              =   (80,20)
+mask.argument.adaptive_rmsbox                     =   True
+mask.argument.img_format                          =   fits
+mask.argument.vertices_file                       =   {{ facet_state_file }}
+
+wsclean2.control.type                             =   wsclean
+wsclean2.control.mapfiles_in                      =   [concat_averaged.output.mapfile,mask.output.mapfile]
+wsclean2.control.inputkeys                        =   [msfile,fitsmask]
+wsclean2.argument.flags                           =   [-no-update-model-required,-joinchannels,msfile]
+wsclean2.argument.fitsmask                        =   fitsmask
+wsclean2.argument.size                            =   {{ facet_imsize }} {{ facet_imsize }}
+wsclean2.argument.niter                           =   15000
+wsclean2.argument.threshold                       =   mask.output.threshold_5sig.mapfile
+wsclean2.argument.pol                             =   I
+wsclean2.argument.weight                          =   briggs -0.5
+wsclean2.argument.mgain                           =   0.5
+wsclean2.argument.gain                            =   0.1
+wsclean2.argument.cleanborder                     =   0
+wsclean2.argument.minuv-l                         =   80
+wsclean2.argument.maxuv-l                         =   1000000
+wsclean2.argument.scale                           =   0.000417
+wsclean2.argument.channelsout                     =   {{ nchannels }}
+wsclean2.argument.mem                             =   90
+wsclean2.argument.j                               =   {{ max_cpus_per_node }}
+
+create_imagebase_map2.control.kind                =   plugin
+create_imagebase_map2.control.type                =   trimMapfile
+create_imagebase_map2.control.mapfile_in          =   wsclean2.output.wsclean2-image.fits.mapfile
+create_imagebase_map2.control.trim                =   -
+create_imagebase_map2.control.mapfile_dir         =   {{ mapfile_dir }}
+create_imagebase_map2.control.filename            =   wsclean2_image_rootnames.datamap
+
+adjust_wsclean_mapfile2.control.kind              =   plugin
+adjust_wsclean_mapfile2.control.type              =   appendMapfile
+adjust_wsclean_mapfile2.control.mapfile_in        =   create_imagebase_map2.output.mapfile
+adjust_wsclean_mapfile2.control.append            =   {{ wsclean_suffix }}
+adjust_wsclean_mapfile2.control.mapfile_dir       =   {{ mapfile_dir }}
+adjust_wsclean_mapfile2.control.filename          =   final_image.datamap

@@ -117,6 +117,8 @@ class FacetSelfcal(Operation):
             'dir_dep_parmdb.datamap')
         self.direction.facet_image_mapfile = os.path.join(self.mapfile_dir,
             'final_image.datamap')
+        self.direction.facet_model_mapfile = os.path.join(self.mapfile_dir,
+            'final_model_rootnames.datamap')
         self.verify_subtract_OK_mapfile = os.path.join(self.mapfile_dir,
             'verify_subtract_OK.datamap')
         self.direction.cleanup_mapfiles.extend([os.path.join(self.mapfile_dir,
@@ -152,17 +154,57 @@ class FacetSub(Operation):
         """
         Finalize this operation
         """
-        self.direction.cleanup_mapfiles.append(os.path.join(self.mapfile_dir,
-            'shifted_models.datamap'))
+        self.direction.facet_model_data_mapfile = os.path.join(self.mapfile_dir,
+            'shifted_models.datamap')
 
 
-class FacetAddAllFinal(Operation):
+class FacetAddFinal(Operation):
     """
-    Operation to add all sources in the facet to data (final)
+    Operation to add all sources in the facet in preparation for imaging
+
+    This operation uses the CC skymodels and the direction-independent solutions
     """
     def __init__(self, parset, bands, direction):
         super(FacetAddAllFinal, self).__init__(parset, bands, direction,
             name=name)
+
+        # Define parameters needed for this operation
+        if not self.direction.selfcal_ok:
+            # Use dir-indep CC sky models
+            skymodels = [band.skymodel_dirindep for band in self.bands]
+
+            # Set parset template to sky-model parset
+            self.pipeline_parset_template = env_parset.get_template(
+                '{0}_cc_skymodel_pipeline.parset'.format(self.name))
+
+            self.parms_dict.update({'input_bands_datamap': self.direction.input_bands_datamap,
+                                'dir_indep_parmdb_name': parset['parmdb_name'],
+                                'skymodels': skymodels,
+                                'facet_ra': self.direction.ra,
+                                'facet_dec': self.direction.dec,
+                                'facet_state_file': self.direction.save_file})
+        else:
+            # Set parset template to facet-model-image parset
+            self.pipeline_parset_template = env_parset.get_template(
+                '{0}_model_image_pipeline.parset'.format(self.name))
+
+            self.parms_dict.update({'input_bands_datamap': self.direction.input_bands_datamap,
+                                'dir_dep_parmdb_mapfile': self.direction.dir_dep_parmdb_datamap,
+                                'facet_model_data_mapfile': self.direction.facet_model_data_mapfile,
+                                'facet_ra': self.direction.ra,
+                                'facet_dec': self.direction.dec,
+                                'facet_state_file': self.direction.save_file})
+
+
+    def finalize(self):
+        """
+        Finalize this operation
+        """
+        # Add output datamaps to direction object
+        self.direction.shifted_all_final_bands_datamap = os.path.join(self.mapfile_dir,
+            'shifted_all_final_bands.datamap')
+        self.direction.cleanup_mapfiles.extend([self.direction.shifted_all_final_bands_datamap])
+
 
 
 def FacetImageFinal(FacetImage):
@@ -173,3 +215,26 @@ def FacetImageFinal(FacetImage):
         super(FacetImageFinal, self).__init__(parset, bands, direction,
             name='FacetImageFinal')
 
+        # Define parameters needed for this operation
+        if self.direction.nchannels > 1:
+            wsclean_suffix = '-MFS-image.fits'
+        else:
+            wsclean_suffix = '-image.fits'
+        self.parms_dict.update({'shifted_all_final_bands_datamap': self.direction.shifted_all_final_bands_datamap,
+                                'field_ra': self.direction.field_ra,
+                                'field_dec': self.direction.field_dec,
+                                'wsclean_suffix': wsclean_suffix,
+                                'facet_imsize': self.direction.facet_imsize,
+                                'nchannels': self.direction.nchannels,
+                                'facet_state_file': self.direction.save_file})
+
+
+    def finalize(self):
+        """
+        Finalize this operation
+        """
+        # Add output datamaps to direction object
+        self.direction.facet_image_mapfile = os.path.join(self.mapfile_dir,
+            'final_image.datamap')
+        self.direction.facet_model_mapfile = os.path.join(self.mapfile_dir,
+            'final_model_rootnames.datamap')
