@@ -133,13 +133,13 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             if pixmin < 0:
                 print("The padded size must be larger than the original size.")
                 sys.exit(1)
-            pixmax = pixmin + imshape()[2]
+            pixmax = pixmin + imshape[2]
             data_pad = np.zeros((1, 1, imsize, imsize), dtype=np.float32)
             data_pad[0, 0, pixmin:pixmax, pixmin:pixmax] = data[0, 0]
             new_mask = pim.image('', shape=(1, 1, imsize, imsize), coordsys=coordsys)
             new_mask.putdata(data_pad)
         else:
-            new_mask = pim.image('', shape=imshape(), coordsys=coordsys)
+            new_mask = pim.image('', shape=imshape, coordsys=coordsys)
             new_mask.putdata(data)
 
         data = new_mask.getdata()
