@@ -137,12 +137,16 @@ def parset_read(parset_file):
     else:
         parset_dict['direction_specific']['one_at_a_time'] = True
         parset_dict['direction_specific']['groupings'] = None
-    if 'ndir' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['ndir'] = parset.getint('directions', 'ndir')
-        log.debug("Processing up to %s directions in total" % (parset_dict['direction_specific']['ndir']))
+    if 'ndir_selfcal' in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['ndir_selfcal'] = parset.getint('directions', 'ndir_selfcal')
+        log.debug("Selfcal-ing up to %s directions" % (parset_dict['direction_specific']['ndir_selfcal']))
     else:
-        parset_dict['direction_specific']['groupings'] = {'1': 0}
-        parset_dict['direction_specific']['ndir'] = -1
+        parset_dict['direction_specific']['ndir_selfcal'] = -1
+    if 'ndir_total' in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['ndir_total'] = parset.getint('directions', 'ndir_total')
+        log.debug("Processing up to %s directions in total" % (parset_dict['direction_specific']['ndir_total']))
+    else:
+        parset_dict['direction_specific']['ndir_total'] = -1
     if 'target_radius_arcmin' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['target_radius_arcmin'] = parset.getfloat('directions',
             'target_radius_arcmin')
