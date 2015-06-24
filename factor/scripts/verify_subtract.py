@@ -18,7 +18,7 @@ def main(image_pre, image_post, res_val):
     imgpost = pim.image(image_post)
     maxvalpost = numpy.max(imgpost.getdata())
 
-    if (maxvalpost > res_val) or ((maxvalpost*0.9) > maxvalpre) :
+    if (maxvalpost > res_val) or (maxvalpost*0.9 > maxvalpre) :
         return {'break': False, 'maxvalpost': maxvalpost, 'maxvalpre': maxvalpre}
     else:
         return {'break': True, 'maxvalpost': maxvalpost, 'maxvalpre': maxvalpre}

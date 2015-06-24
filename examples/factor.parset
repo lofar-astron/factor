@@ -23,8 +23,19 @@ make_mosaic = True
 # of internally derived DDE calibrators and facets
 interactive = False
 
+# Require that all bands must pass selfcal verification in order that selfcal
+# be considered successful (default = True). If False, selfcal is considered
+# successful if at least one band passes verification
+strict_selfcal_verification = True
+
+# Exit if selfcal fails for any direction (default = True). If False, processing
+# will continue and the failed direction will receive the selfcal solutions of
+# the nearest successful direction
+exit_on_selfcal_failure = True
+
 # Use chgcenter to minimize number of w planes (default = False). Note that a
 # copy of the full dataset will be made (as chgcentre modifies the data)
+# NOTE: this option is currently disabled pending testing
 use_chgcentre = False
 
 

@@ -91,6 +91,16 @@ def parset_read(parset_file):
         parset_dict['make_mosaic'] = parset.getboolean('global', 'make_mosaic')
     else:
         parset_dict['make_mosaic'] = True
+    if 'strict_selfcal_verification' in parset_dict:
+        parset_dict['strict_selfcal_verification'] = parset.getboolean('global',
+            'strict_selfcal_verification')
+    else:
+        parset_dict['strict_selfcal_verification'] = True
+    if 'exit_on_selfcal_failure' in parset_dict:
+        parset_dict['exit_on_selfcal_failure'] = parset.getboolean('global',
+            'exit_on_selfcal_failure')
+    else:
+        parset_dict['exit_on_selfcal_failure'] = True
     if 'use_chgcentre' in parset_dict:
         parset_dict['use_chgcentre'] = parset.getboolean('global', 'use_chgcentre')
     else:
