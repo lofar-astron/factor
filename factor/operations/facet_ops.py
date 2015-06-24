@@ -178,7 +178,7 @@ class FacetAddFinal(Operation):
     """
     def __init__(self, parset, bands, direction):
         super(FacetAddFinal, self).__init__(parset, bands, direction,
-            name=name)
+            name='FacetAddFinal')
 
         # Define parameters needed for this operation
         if not self.direction.selfcal_ok:
