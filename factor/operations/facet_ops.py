@@ -217,7 +217,7 @@ class FacetAddFinal(Operation):
 
 
 
-def FacetImageFinal(FacetImage):
+def FacetImageFinal(Operation):
     """
     Operation to make final facet image
     """
