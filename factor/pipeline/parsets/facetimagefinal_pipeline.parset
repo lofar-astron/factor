@@ -1,16 +1,16 @@
-pipeline.steps = [expand_merged_parmdb_map, apply_dir_dep, average, create_compressed_mapfile, concat_averaged, premask, wsclean1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean2, create_imagebase_map2, adjust_wsclean_mapfile2]
+pipeline.steps = [expand_merged_parmdb_map, apply_dir_dep, average, create_compressed_mapfile, concat_averaged, wsclean1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean2, create_imagebase_map2, adjust_wsclean_mapfile2]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
 expand_merged_parmdb_map.control.kind             =   plugin
 expand_merged_parmdb_map.control.type             =   expandMapfile
-expand_merged_parmdb_map.control.mapfile_in       =   merge_selfcal_parmdbs.output.mapfile
-expand_merged_parmdb_map.control.mapfile_to_match =   {{ shifted_all_bands_datamap }}
+expand_merged_parmdb_map.control.mapfile_in       =   {{ dir_dep_parmdb_datamap }}
+expand_merged_parmdb_map.control.mapfile_to_match =   {{ shifted_all_final_bands_datamap }}
 expand_merged_parmdb_map.control.mapfile_dir      =   {{ mapfile_dir }}
 expand_merged_parmdb_map.control.filename         =   expand_merged_parmdbs.datamap
 
 apply_dir_dep.control.type                        =   calibrate-stand-alone_new
-apply_dir_dep.control.mapfiles_in                 =   [{{ shifted_all_bands_datamap }},expand_merged_parmdb_map.output.mapfile]
+apply_dir_dep.control.mapfiles_in                 =   [{{ shifted_all_final_bands_datamap }},expand_merged_parmdb_map.output.mapfile]
 apply_dir_dep.control.inputkeys                   =   [inputms,inputparmdb]
 apply_dir_dep.argument.observation                =   inputms
 apply_dir_dep.argument.parset                     =   {{ parset_dir }}//facet_dirdep_apply.parset
@@ -20,7 +20,7 @@ apply_dir_dep.argument.replace-sourcedb           =   True
 apply_dir_dep.argument.replace-parmdb             =   True
 
 average.control.type                              =   dppp
-average.control.mapfile_in                        =   {{ shifted_all_bands_datamap }}
+average.control.mapfile_in                        =   {{ shifted_all_final_bands_datamap }}
 average.control.inputkey                          =   msin
 average.parsetarg.msin.datacolumn                 =   CORRECTED_DATA
 average.parsetarg.msout.writefullresflag          =   False
@@ -31,31 +31,20 @@ average.parsetarg.avg.timestep                    =   3
 
 create_compressed_mapfile.control.kind            =   plugin
 create_compressed_mapfile.control.type            =   compressMapfile
-create_compressed_mapfile.control.mapfile_in      =   average5.output.mapfile
+create_compressed_mapfile.control.mapfile_in      =   average.output.mapfile
 create_compressed_mapfile.control.mapfile_dir     =   {{ mapfile_dir }}
 create_compressed_mapfile.control.filename        =   concat_averaged_input.datamap
 
 concat_averaged.control.type                      =   virtual_concat
-concat_averaged.control.mapfile_in                =   create_compressed_mapfile5.output.mapfile
+concat_averaged.control.mapfile_in                =   create_compressed_mapfile.output.mapfile
 concat_averaged.control.inputkey                  =   msfiles
 concat_averaged.control.outputkey                 =   msconcat
 concat_averaged.argument.flags                    =   [msfiles,msconcat]
 
-premask.control.type                              =   make_clean_mask
-premask.control.mapfile_in                        =   adjust_casa_mapfile4.output.mapfile
-premask.control.inputkey                          =   imagefile
-premask.control.outputkey                         =   maskfile
-premask.argument.flags                            =   [imagefile,maskfile]
-premask.argument.img_format                       =   fits
-premask.argument.pad_to_size                      =   {{ facet_imsize }}
-premask.argument.skip_source_detection            =   True
-premask.argument.vertices_file                    =   {{ facet_state_file }}
-
 wsclean1.control.type                             =   wsclean
-wsclean1.control.mapfiles_in                      =   [concat_averaged.output.mapfile,premask.output.mapfile]
-wsclean1.control.inputkeys                        =   [msfile,fitsmask]
+wsclean1.control.mapfile_in                       =   concat_averaged.output.mapfile
+wsclean1.control.inputkey                         =   msfile
 wsclean1.argument.flags                           =   [-no-update-model-required,-joinchannels,msfile]
-wsclean1.argument.fitsmask                        =   fitsmask
 wsclean1.argument.size                            =   {{ facet_imsize }} {{ facet_imsize }}
 wsclean1.argument.niter                           =   15000
 wsclean1.argument.threshold                       =   0.0

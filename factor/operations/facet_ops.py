@@ -172,9 +172,7 @@ class FacetSub(Operation):
 
 class FacetAddFinal(Operation):
     """
-    Operation to add all sources in the facet in preparation for imaging
-
-    This operation uses the CC skymodels and the direction-independent solutions
+    Operation to add all sources in the facet in preparation for final imaging
     """
     def __init__(self, parset, bands, direction):
         super(FacetAddFinal, self).__init__(parset, bands, direction,
@@ -230,9 +228,8 @@ class FacetImageFinal(Operation):
             wsclean_suffix = '-MFS-image.fits'
         else:
             wsclean_suffix = '-image.fits'
-        self.parms_dict.update({'shifted_all_final_bands_datamap': self.direction.shifted_all_final_bands_datamap,
-                                'field_ra': self.direction.field_ra,
-                                'field_dec': self.direction.field_dec,
+        self.parms_dict.update({'dir_dep_parmdb_datamap': self.direction.dir_dep_parmdb_datamap,
+                                'shifted_all_final_bands_datamap': self.direction.shifted_all_final_bands_datamap,
                                 'wsclean_suffix': wsclean_suffix,
                                 'facet_imsize': self.direction.facet_imsize,
                                 'nchannels': self.direction.nchannels,
