@@ -186,8 +186,7 @@ class FacetAddFinal(Operation):
             skymodels = [band.skymodel_dirindep for band in self.bands]
 
             # Set parset template to sky-model parset
-            self.pipeline_parset_template = env_parset.get_template(
-                '{0}_cc_skymodel_pipeline.parset'.format(self.name))
+            self.pipeline_parset_template = '{0}_cc_skymodel_pipeline.parset'.format(self.name)
 
             self.parms_dict.update({'input_bands_datamap': self.direction.input_bands_datamap,
                                 'dir_indep_parmdb_name': parset['parmdb_name'],
@@ -196,9 +195,8 @@ class FacetAddFinal(Operation):
                                 'facet_dec': self.direction.dec,
                                 'facet_state_file': self.direction.save_file})
         else:
-            # Set parset template to facet-model-image parset
-            self.pipeline_parset_template = env_parset.get_template(
-                '{0}_model_image_pipeline.parset'.format(self.name))
+            # Set parset template to facet model-image parset
+            self.pipeline_parset_template = '{0}_model_image_pipeline.parset'.format(self.name)
 
             self.parms_dict.update({'input_bands_datamap': self.direction.input_bands_datamap,
                                 'dir_dep_parmdb_mapfile': self.direction.dir_dep_parmdb_datamap,

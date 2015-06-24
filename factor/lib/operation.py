@@ -86,11 +86,10 @@ class Operation(object):
 
         # Below are the templates and output paths for the pipeline parset and
         # config files
-        self.pipeline_parset_template = env_parset.get_template('{0}_pipeline.parset'.
-            format(self.name))
+        self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
         self.pipeline_parset_file = os.path.join(self.pipeline_parset_dir,
             'pipeline.parset')
-        self.pipeline_config_template = env_config.get_template('pipeline.cfg')
+        self.pipeline_config_template = '{0}_pipeline.cfg'.format(self.name)
         self.pipeline_config_file = os.path.join(self.pipeline_parset_dir,
             'pipeline.cfg')
 
@@ -136,9 +135,12 @@ class Operation(object):
 
         This involves just filling the pipeline config and parset templates
         """
+        self.pipeline_parset_template = env_parset.get_template(self.pipeline_parset_template)
         tmp = self.pipeline_parset_template.render(self.parms_dict)
         with open(self.pipeline_parset_file, 'w') as f:
             f.write(tmp)
+
+        self.pipeline_config_template = env_config.get_template(self.pipeline_config_template)
         tmp = self.pipeline_config_template.render(self.cfg_dict)
         with open(self.pipeline_config_file, 'w') as f:
             f.write(tmp)
