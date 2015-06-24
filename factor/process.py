@@ -307,16 +307,15 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     # any facets for which selfcal failed or no selfcal was done
     dirs_to_image = [d for d in directions if d.make_final_image and d.selfcal_ok]
 
-    # Add directions without selfcal if desired
-    if parset['transfer_selfcal_to_rest']:
-        dirs_to_transfer = [d for d in directions if not d.selfcal_ok]
-        dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
+    # Add directions without selfcal
+    dirs_to_transfer = [d for d in directions if not d.selfcal_ok]
+    dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
 
-        for d in dirs_to_transfer:
-            # Search for nearest direction with successful selfcal
-            nearest = factor.directions.find_nearest(d, dirs_with_selfcal)
-            d.dir_dep_parmdb_datamap = nearest.dir_dep_parmdb_datamap
-        dirs_to_image.append(dirs_to_transfer)
+    for d in dirs_to_transfer:
+        # Search for nearest direction with successful selfcal
+        nearest = factor.directions.find_nearest(d, dirs_with_selfcal)
+        d.dir_dep_parmdb_datamap = nearest.dir_dep_parmdb_datamap
+    dirs_to_image.append(dirs_to_transfer)
 
     if len(dirs_to_image) > 0:
         ops = [FacetAddFinal(parset, bands, d) for d in dirs_to_image]
