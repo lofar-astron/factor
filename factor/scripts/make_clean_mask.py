@@ -121,10 +121,6 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         imshape = mask_im.shape()
         del(mask_im)
 
-        if skip_source_detection:
-            # Mask all pixels
-            data[:] = 1
-
         if pad_to_size is not None:
             imsize = pad_to_size
             coordsys['direction'].set_referencepixel([imsize/2, imsize/2])
@@ -142,6 +138,10 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             new_mask.putdata(data)
 
         data = new_mask.getdata()
+
+        if skip_source_detection:
+            # Mask all pixels
+            data[:] = 1
 
         if vertices_file is not None:
             # Modify the clean mask to exclude regions outside of the polygon
