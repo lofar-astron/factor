@@ -221,8 +221,8 @@ def FacetImageFinal(FacetImage):
     """
     Operation to make final facet image
     """
-    def __init__(self, parset, bands, direction):
-        super(FacetImageFinal, self).__init__(parset, bands, direction,
+    def __init__(self, parset, direction):
+        super(FacetImageFinal, self).__init__(parset, None, direction,
             name='FacetImageFinal')
 
         # Define parameters needed for this operation
