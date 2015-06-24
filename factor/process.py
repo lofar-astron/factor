@@ -308,7 +308,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     dirs_to_image = [d for d in directions if d.make_final_image and d.selfcal_ok]
 
     # Add directions without selfcal if desired
-    if transfer_selfcal_to_rest:
+    if parset['transfer_selfcal_to_rest']:
         dirs_to_transfer = [d for d in directions if not d.selfcal_ok]
         dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
 
