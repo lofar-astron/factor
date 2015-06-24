@@ -295,7 +295,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
                     all_good = False
             else:
                 d.save_state()
-        if not all_good and parest['exit_on_selfcal_failure']:
+        if not all_good and parset['exit_on_selfcal_failure']:
             log.info('Exiting...')
             sys.exit(1)
 
