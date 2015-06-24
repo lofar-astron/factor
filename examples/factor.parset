@@ -60,7 +60,10 @@ size_max_arcmin = 3.0
 separation_max_arcmin = 6.0
 max_num = 50
 
-# Total number of directions to process (default = all)
+# Total number of directions to process (default = all). If this number is
+# greater than ndir_selfcal, then the remaining directions will not be selfcal-
+# ed but will instead be imaged with the selfcal solutions from the nearest
+# direction for which selfcal was done
 ndir_total = 10
 
 # Total number of directions to selfcal (default = all)
