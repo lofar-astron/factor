@@ -1142,6 +1142,7 @@ def find_nearest(direction1, directions):
     for direction2 in directions:
         sep.append(calculateSeparation(direction1.ra, direction1.dec,
                             direction2.ra, direction2.dec))
+    print(sep)
 
     return directions[np.argmin(sep)]
 
