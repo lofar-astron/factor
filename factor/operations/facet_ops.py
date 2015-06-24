@@ -177,7 +177,7 @@ class FacetAddFinal(Operation):
     This operation uses the CC skymodels and the direction-independent solutions
     """
     def __init__(self, parset, bands, direction):
-        super(FacetAddAllFinal, self).__init__(parset, bands, direction,
+        super(FacetAddFinal, self).__init__(parset, bands, direction,
             name=name)
 
         # Define parameters needed for this operation
