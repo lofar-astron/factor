@@ -66,9 +66,11 @@ class Direction(object):
         self.solint_a = solint_a
         self.facet_imsize = field_imsize * 1.15
         self.dynamic_range = dynamic_range
-        self.region_selfcal = region_selfcal
-        if self.region_selfcal.lower() == 'empty':
-            self.region_selfcal = None
+        if region_selfcal.lower() == 'empty':
+            # Set to empty list (casapy format)
+            self.region_selfcal = '[]'
+        else:
+            self.region_selfcal = '[{0}]'.format(region_selfcal)
         self.region_field = region_field
         if self.region_field.lower() == 'empty':
             self.region_field = None
