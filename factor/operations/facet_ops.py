@@ -188,7 +188,7 @@ class FacetAddFinal(Operation):
             # Set parset template to sky-model parset
             self.pipeline_parset_template = '{0}_cc_skymodel_pipeline.parset'.format(self.name)
 
-            self.parms_dict.update({'input_bands_datamap': self.direction.input_bands_datamap,
+            self.parms_dict.update({'input_dir': parset['dir_ms'],
                                 'dir_indep_parmdb_name': parset['parmdb_name'],
                                 'skymodels': skymodels,
                                 'facet_ra': self.direction.ra,
