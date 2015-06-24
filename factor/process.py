@@ -315,7 +315,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         # Search for nearest direction with successful selfcal
         nearest = factor.directions.find_nearest(d, dirs_with_selfcal)
         d.dir_dep_parmdb_datamap = nearest.dir_dep_parmdb_datamap
-    dirs_to_image.append(dirs_to_transfer)
+    dirs_to_image.extend(dirs_to_transfer)
 
     if len(dirs_to_image) > 0:
         ops = [FacetAddFinal(parset, bands, d) for d in dirs_to_image]
