@@ -89,7 +89,7 @@ class Operation(object):
         self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
         self.pipeline_parset_file = os.path.join(self.pipeline_parset_dir,
             'pipeline.parset')
-        self.pipeline_config_template = '{0}_pipeline.cfg'.format(self.name)
+        self.pipeline_config_template = 'pipeline.cfg'
         self.pipeline_config_file = os.path.join(self.pipeline_parset_dir,
             'pipeline.cfg')
 
