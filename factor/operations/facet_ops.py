@@ -69,6 +69,10 @@ class FacetAdd(Operation):
             'shifted_empty_bands.datamap')
         self.direction.dir_indep_parmdbs_datamap = os.path.join(self.mapfile_dir,
             'dir_indep_instrument_parmdbs.datamap')
+        self.direction.dir_indep_skymodels_datamap = os.path.join(self.mapfile_dir,
+            'full_skymodels.datamap')
+        self.direction.dir_indep_facet_skymodels_datamap = os.path.join(self.mapfile_dir,
+            'facet_skymodels.datamap')
         self.direction.cleanup_mapfiles.extend([self.direction.shifted_all_bands_datamap,
             self.direction.shifted_cal_bands_datamap,
             self.direction.shifted_empty_bands_datamap])
@@ -158,8 +162,16 @@ class FacetSub(Operation):
             name='FacetSub')
 
         # Define parameters needed for this operation
+        if self.direction.use_new_sub_data:
+            add_all_parset = 'facet_dirindep_add_all_new.parset'
+        else:
+            add_all_parset = 'facet_dirindep_add_all.parset'
         self.parms_dict.update({'shifted_all_bands_datamap': self.direction.shifted_all_bands_datamap,
                                 'dir_dep_parmdb_datamap': self.direction.dir_dep_parmdb_datamap,
+                                'dir_indep_parmdbs_datamap': self.direction.dir_indep_parmdbs_datamap,
+                                'dir_indep_skymodels_datamap': self.direction.dir_indep_skymodels_datamap,
+                                'dir_indep_facet_skymodels_datamap': self.direction.dir_indep_facet_skymodels_datamap,
+                                'add_all_parset': add_all_parset,
                                 'input_bands_datamap': self.direction.input_bands_datamap,
                                 'field_ra': self.direction.field_ra,
                                 'field_dec': self.direction.field_dec})
@@ -183,15 +195,12 @@ class FacetAddFinal(Operation):
 
         # Define parameters needed for this operation
         if not self.direction.selfcal_ok:
-            # Use dir-indep CC sky models
-            skymodels = [band.skymodel_dirindep for band in self.bands]
-
             # Set parset template to sky-model parset
             self.pipeline_parset_template = '{0}_cc_skymodel_pipeline.parset'.format(self.name)
 
             self.parms_dict.update({'input_dir': parset['dir_ms'],
                                 'dir_indep_parmdb_name': parset['parmdb_name'],
-                                'skymodels': skymodels,
+                                'dir_indep_skymodels_datamap': self.direction.dir_indep_skymodels_datamap,
                                 'facet_ra': self.direction.ra,
                                 'facet_dec': self.direction.dec,
                                 'facet_state_file': self.direction.save_file})

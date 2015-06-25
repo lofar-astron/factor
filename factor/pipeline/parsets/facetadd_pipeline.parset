@@ -102,3 +102,9 @@ copy_empty_map.control.type                      =   copyMapfile
 copy_empty_map.control.mapfile_in                =   shift_empty.output.mapfile
 copy_empty_map.control.mapfile_dir               =   {{ mapfile_dir }}
 copy_empty_map.control.filename                  =   shifted_empty_bands.datamap
+
+copy_facet_skymodels_all_map.control.kind        =   plugin
+copy_facet_skymodels_all_map.control.type        =   copyMapfile
+copy_facet_skymodels_all_map.control.mapfile_in  =   make_facet_skymodels_all.output.mapfile
+copy_facet_skymodels_all_map.control.mapfile_dir =   {{ mapfile_dir }}
+copy_facet_skymodels_all_map.control.filename    =   facet_skymodels.datamap
