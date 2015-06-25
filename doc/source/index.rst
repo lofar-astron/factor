@@ -6,7 +6,7 @@
 Facet Calibration Pipeline
 ==========================
 
-This document describes each step in the facet calibration pipeline. The pipeline is divided into a number of operations that are simply logical groupings of steps.
+This document describes each step in the facet calibration pipeline. The pipeline is divided into a number of operations. Each operation is a group of steps. This grouping is determined by whether or not multiple pipelines may be run in parallel.
 
 .. toctree::
    :maxdepth: 2

@@ -192,10 +192,10 @@ Output
 
 Pipeline Steps
     merge
-        Merges low- and high-res sky models into a single sky model
+        Call LSMTool to merge low- and high-res sky models into a single sky model
 
     copy_final_model_map
-        Copies datamap for merged sky models to convenient location
+        Copy datamap for merged sky models to convenient location
 
 Test data
     TODO

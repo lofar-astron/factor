@@ -10,8 +10,8 @@ in preparation for self calibration.
 
     There should be one pipeline per facet, and each pipeline must be run in series as they each write data to the input datasets.
 
-    This operation is separated from the self calibration operation (:ref:`facet_selfcal`) as these pipelines
-    must be run in series, whereas the self calibration pipelines can be run in parallel.
+    This operation is separated from the self-calibration operation (:ref:`facet_selfcal`) as these pipelines
+    must be run in series, whereas the self-calibration pipelines can be run in parallel.
 
 Add sources
 -----------
@@ -29,7 +29,7 @@ Pipeline Steps
         the merged sky models
 
     make_facet_skymodels_all, make_facet_skymodels_cal
-        Selects all model components belonging to the facet calibrator and to all facet sources and writes
+        Select all model components belonging to the facet calibrator and to all facet sources and writes
         these sky models in ``makesourcedb`` format.
 
     add_all_facet_sources, add_cal_facet_sources
@@ -39,8 +39,8 @@ Test data
     TODO
 
 
-Split and phase shift
----------------------
+Split and phase shift data
+--------------------------
 
 Input
 	MS files from the previous step with ``FACET_DATA_CAL`` and ``FACET_DATA_ALL`` columns.
@@ -54,7 +54,7 @@ Pipeline Steps
         ``SUBTRACTED_DATA_ALL`` columns (or ``SUBTRACTED_DATA_ALL_NEW`` column if at least one facet has gone through self calibration previously) to the RA and Dec of the facet.
 
     copy_all_map, copy_cal_map, copy_empty_map
-        Copies datamaps for shifted datasets to convenient location
+        Copy datamaps for shifted datasets to convenient location
 
 Test data
     TODO
