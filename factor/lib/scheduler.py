@@ -95,7 +95,7 @@ class Scheduler(object):
         op_name, direction_name, status = result
 
         if status == 0:
-            self.log.info('--> Operation {0} completed successfully (direction: '
+            self.log.info('--> Operation {0} completed (direction: '
                 '{1})'.format(op_name, direction_name))
         else:
             self.log.error('Operation {0} failed (direction: {1})'.format(op_name,

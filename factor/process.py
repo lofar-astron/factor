@@ -227,9 +227,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
 
     # Iterate over direction groups
     first_pass = True
-    for direction_group in direction_groups:
-        log.info('Processing {0} direction(s) in parallel in this group'.format(
-            len(direction_group)))
+    for gindx, direction_group in enumerate(direction_groups):
+        log.info('Processing {0} direction(s) in parallel in Group {1}'.format(
+            len(direction_group), gindx+1))
 
         # Divide up the nodes and cores among the directions
         direction_group = factor.cluster.divide_nodes(direction_group,
@@ -277,14 +277,14 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         for d in direction_group:
             all_good = True
             if not d.selfcal_ok:
-                log.error('Selfcal failed for direction {0}. Please check '
-                    'the settings for this direction.'.format(d.name))
+                log.warn('Selfcal failed for direction {0}.'.format(d.name))
                 if parset['interactive']:
-                    prompt = "Continue with this direction anyway (y/n)? "
+                    prompt = "Use selfcal solutions for this direction anyway (y/n)? "
                     answ = raw_input(prompt)
                     while answ.lower() not in  ['y', 'n', 'yes', 'no']:
                         answ = raw_input(prompt)
                     if answ.lower() in ['n', 'no']:
+                        log.info('Resetting direction {0}...'.format(d.name))
                         d.reset_state()
                         all_good = False
                     else:
@@ -306,14 +306,20 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     # Make final facet images (from final empty datasets) if desired. Also image
     # any facets for which selfcal failed or no selfcal was done
     dirs_to_image = [d for d in directions if d.make_final_image and d.selfcal_ok]
+    log.debug('Reimaging the following direction(s):')
+    log.debug('{0}'.format([d.name for d in dirs_to_image]))
 
     # Add directions without selfcal
     dirs_to_transfer = [d for d in directions if not d.selfcal_ok]
+    log.debug('Imaging the following direction(s) with nearest selcal solutions:')
+    log.debug('{0}'.format([d.name for d in dirs_to_transfer]))
     dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
 
     for d in dirs_to_transfer:
         # Search for nearest direction with successful selfcal
         nearest = factor.directions.find_nearest(d, dirs_with_selfcal)
+        log.debug('Using solutions from direction {0} for direction {1}.'.format(
+            nearest.name, d.name))
         d.dir_dep_parmdb_datamap = nearest.dir_dep_parmdb_datamap
         d.save_state()
     dirs_to_image.extend(dirs_to_transfer)

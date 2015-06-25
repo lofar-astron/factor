@@ -1,7 +1,7 @@
 """
 General operation library
 
-Contains the master class for operations
+Contains the master class for all operations
 """
 import os
 import logging
@@ -74,8 +74,7 @@ class Operation(object):
         self.log_dir = os.path.join(self.factor_working_dir, 'logs', self.name)
         create_directory(self.log_dir)
         # Log name used for logs in log_dir
-        self.logbasename = os.path.join(self.log_dir, '{0}_{1}'.format(
-            self.name, self.direction.name))
+        self.logbasename = os.path.join(self.log_dir, self.direction.name)
 
         # Below are paths for scripts, etc. in the Factor install directory
         self.factor_root_dir = os.path.split(DIR)[0]
@@ -133,7 +132,9 @@ class Operation(object):
         """
         Set up this operation
 
-        This involves just filling the pipeline config and parset templates
+        This involves just filling the pipeline config and parset templates.
+        Generally, this does not need to be re-defined in the subclasses
+        unless the operation has non-standard template names
         """
         self.pipeline_parset_template = env_parset.get_template(self.pipeline_parset_template)
         tmp = self.pipeline_parset_template.render(self.parms_dict)

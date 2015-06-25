@@ -1,21 +1,24 @@
 """
 Module that holds all facet operations
 
-Operations are largely defined by logical groups of actions, but
-they also break up the processing into parallel or serial steps.
+The facet calibration steps are divided into operations on the basis of whether
+or not they can be run in parallel or in series.
 
 Classes
 -------
 FacetAdd : Operation
-    Adds facet sources to data
+    Adds facet sources to data. Must be run in series as writes are made to
+    original datasets
 FacetSelfcal : Operation
-    Runs the selfcal and imaging of a facet
+    Runs the selfcal and imaging of a facet. May be run in parallel
 FacetSub : Operation
-    Subtracts all facet sources from data
-FacetAddAllFinal : Operation
-    Adds all facet sources from final model
+    Subtracts all facet sources from data. Must be run in series as writes are
+    made to original datasets
+FacetAddFinal : Operation
+    Adds all facet sources from final model. Must be run in series as writes are
+    made to original datasets
 FacetImageFinal : Operation
-    Images the entire facet
+    Images the entire facet. May be run in parallel
 
 """
 import os
