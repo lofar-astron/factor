@@ -13,6 +13,9 @@ This document describes each step in the facet calibration pipeline. The pipelin
    :numbered:
 
    initsubtract.rst
+   facetadd.rst
+   facetselfcal.rst
+   facetsubtract.rst
 
 
 Index and search
