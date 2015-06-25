@@ -10,7 +10,7 @@ __revision__ = filter(str.isdigit, "$Revision: 00000 $")
 def changelog():
     """
     Factor Changelog.
-    -----------------------------------------------
-    20/06/2015 - Initial version
+    ----------------------------------------------------------------------------
+    25/06/2015 - Initial release of version 1.0alpha
     """
     pass
