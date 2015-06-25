@@ -84,7 +84,8 @@ class Operation(object):
         self.factor_skymodel_dir = os.path.join(self.factor_root_dir, 'skymodels')
 
         # Below are the templates and output paths for the pipeline parset and
-        # config files
+        # config files. These may need to be re-defined in the subclasses
+        # if the operation has non-standard template names
         self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
         self.pipeline_parset_file = os.path.join(self.pipeline_parset_dir,
             'pipeline.parset')
@@ -108,7 +109,8 @@ class Operation(object):
                          'H5parm_exporter_executable': parset['H5parm_exporter_executable']}
 
         # Define global parameters needed by all pipeline parsets. Other,
-        # pipeline-specific, parameters should be defined in the subclasses
+        # pipeline-specific, parameters should be defined in the subclasses by
+        # updating this dictionary
         self.parms_dict = {'parset_dir': self.factor_parset_dir,
                            'skymodel_dir': self.factor_skymodel_dir,
                            'mapfile_dir': self.mapfile_dir,

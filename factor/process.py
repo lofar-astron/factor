@@ -305,6 +305,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
 
     # Make final facet images (from final empty datasets) if desired. Also image
     # any facets for which selfcal failed or no selfcal was done
+    #
+    # TODO: combine facet sky models and adjust facet edges for new sources
+    #
     dirs_to_image = [d for d in directions if d.make_final_image and d.selfcal_ok]
     log.debug('Reimaging the following direction(s):')
     log.debug('{0}'.format([d.name for d in dirs_to_image]))
