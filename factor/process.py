@@ -326,13 +326,15 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     # TODO: combine facet sky models and adjust facet edges for new sources
     #
     dirs_to_image = [d for d in directions if d.make_final_image and d.selfcal_ok]
-    log.debug('Reimaging the following direction(s):')
-    log.debug('{0}'.format([d.name for d in dirs_to_image]))
+    if len(dirs_to_image) > 0:
+        log.debug('Reimaging the following direction(s):')
+        log.debug('{0}'.format([d.name for d in dirs_to_image]))
 
     # Add directions without selfcal
     dirs_to_transfer = [d for d in directions if not d.selfcal_ok]
-    log.debug('Imaging the following direction(s) with nearest selcal solutions:')
-    log.debug('{0}'.format([d.name for d in dirs_to_transfer]))
+    if len(dirs_to_transfer) > 0:
+        log.debug('Imaging the following direction(s) with nearest selcal solutions:')
+        log.debug('{0}'.format([d.name for d in dirs_to_transfer]))
     dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
 
     for d in dirs_to_transfer:
