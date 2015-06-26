@@ -155,11 +155,10 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     log.info('Found {0} sources through thresholding'.format(
         len(s.getPatchNames())))
 
-    # Filter out sources that lie more than 5 degrees from center.
-    # TODO: adjust this for each observation
-    log.info('Removing sources beyond the FWHM of the primary beam...')
+    # Filter out sources that lie outside of FWHM of FOV
+    log.info('Removing sources beyond 2 * FWHM of the primary beam...')
     dist = s.getDistance(band.ra, band.dec, byPatch=True)
-    s.remove(dist > band.fwhm_deg, aggregate=True) # 5 degree radius
+    s.remove(dist > band.fwhm_deg, aggregate=True)
 
     # Save this sky model for later checks of sources falling on facet edges
     s.write(fileName='results/initial.skymodel', clobber=True)
@@ -183,7 +182,6 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
         if len(nearby[0]) > 1:
             patches = s.getPatchNames()[nearby]
             s.merge(patches.tolist())
-    s.setPatchPositions(method='wmean')
 
     # Filter fainter patches
     s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='sum', force=True)
@@ -206,6 +204,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     log.info('Kept {0} directions in total'.format(len(s.getPatchNames())))
 
     # Write the file
+    s.setPatchPositions(method='mid')
     log.info("Writing directions file: %s" % (directions_file))
     s.write(fileName=directions_file, format='factor', sortBy='I', clobber=True)
 
