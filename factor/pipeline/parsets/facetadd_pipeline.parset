@@ -1,4 +1,4 @@
-pipeline.steps = [create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_facet_skymodels_cal, add_all_facet_sources, add_cal_facet_sources, shift_all, shift_cal, shift_empty, copy_all_map, copy_cal_map, copy_empty_map]
+pipeline.steps = [create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_facet_skymodels_cal, add_all_facet_sources, add_cal_facet_sources, shift_all, shift_cal, shift_empty, copy_all_map, copy_cal_map, copy_empty_map, copy_facet_skymodels_all_map]
 
 pipeline.pluginpath                              =   {{ pipeline_dir }}/plugins
 
