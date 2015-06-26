@@ -47,7 +47,7 @@ Test data
 
 Self-calibration cycle
 ----------------------
-The general self-calibration cycle is described here. Modification to this cycle
+The general self-calibration cycle is described here. Modifications to this cycle
 are described in later steps.
 
 Input
@@ -57,8 +57,8 @@ Output
     Improved ``MODEL_DATA`` column and dir-dependent solutions.
 
 Pipeline Steps
-    averageX
-        Average in time in preparation for imaging
+    averageX, create_compressed_mapfileX, concatX
+        Average and concatenate in time in preparation for imaging
 
     casa_imageX1, adjust_casa_mapfileX, maskX, casa_imageX2
         CASA imaging run. Imaging is done with a cell size of 1.5". Wide-band imaging is done if more than 5 bands are used. Multi-scale clean is always used.
@@ -159,23 +159,24 @@ Smooth amplitudes 2
 The slow amplitude solutions from cycle 4 are smoothed to remove outliers.
 
 
-Merge self-calibration parmdbs
-------------------------------
+Merge self-calibration parmdbs and apply solutions
+--------------------------------------------------
 
 Input
-	Fast phase and slow amplitude solution parmdbs.
+	Fast phase and slow amplitude solution parmdbs and full-resolution datasets (with all facet sources)
 
 Output
-    Merged parmdb with both fast phase and slow amplitude solutions.
+    Merged parmdb with both fast phase and slow amplitude solutions and datasets
+    (with all facet sources) ready to image
 
 Pipeline Steps
     merge_selfcal_parmdbs
-        Apply dir-independent solutions to the phase-shifted ``DATA`` column to make a ``CORRECTED_DATA`` column for imaging. An example of the solutions for RS106 is shown in `Merged parmdb fast solutions plot`_ and `Merged parmdb slow solutions plot`_.
+        Merge the dir-dependent solutions into one parmdb so that they can be applied in a single pass. An example of the solutions for RS106 is shown in `Merged parmdb fast solutions plot`_ and `Merged parmdb slow solutions plot`_.
 
     .. _`Merged parmdb fast solutions plot`:
 
     .. figure:: merged_parmdb_fast_plot.png
-       :scale: 40 %
+       :scale: 80 %
        :figwidth: 75 %
        :align: center
        :alt: example solutions
@@ -185,13 +186,132 @@ Pipeline Steps
     .. _`Merged parmdb slow solutions plot`:
 
     .. figure:: merged_parmdb_slow_plot.png
-       :scale: 40 %
+       :scale: 80 %
        :figwidth: 75 %
        :align: center
        :alt: example solutions
 
        Merged parmdb slow solutions plot
 
+    expand_merged_parmdb_map
+        Match the number of dir-dependent parmdb entries in the datamap to that in the phase-shifted (with all facet sources) datasets datamap.
+
+    apply_dir_dep
+        Apply the dir-dependent solutions
+
 
 Test data
     TODO
+
+
+Make image of entire facet
+--------------------------
+
+Input
+	Full-resolution datasets (with all facet sources) with dir-dependent solutions applied
+
+Output
+    Image of the entire facet. An example image is shown in the `Facet example image`_.
+
+    .. note::
+
+        The image should fully enclose the facet boundaries. Areas outside of the facet are not cleaned (and have all sources subtracted).
+
+    .. _`Facet example image`:
+
+    .. figure:: facet_image.png
+       :scale: 80 %
+       :figwidth: 75 %
+       :align: center
+       :alt: example image
+
+       Facet example image
+
+Pipeline Steps
+    average5, create_compressed_mapfile5, concat_averaged
+        Average in time and frequency and concatenate in frequency in preparation for imaging
+
+    premask, wsclean1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean2
+        WSClean imaging run. Imaging is done with a cell size of 1.5". Wide-band imaging is done if more than 5 bands are used. Multi-scale clean is not used, as WSClean does not currently support clean masks for this mode.
+
+Test data
+    TODO
+
+
+Subtract model
+--------------
+
+Input
+	Model image of entire facet
+
+Output
+    ``SUBTRACTED_DATA`` column for each band with all high-res sources subtracted
+
+Pipeline Steps
+    create_model4_map, adjust_wsclean_mapfile2, create_compressed_mapfile6
+        Make datamap for model images
+
+    concat_unaveraged
+        Concatenate in frequency in preparation for FT
+
+    wsclean_ft
+        Call WSClean to FT model image into ``MODEL_DATA`` column of each band
+
+    subtract
+        Call BBS to subtract ``MODEL_DATA`` column from ``DATA`` column
+
+Test data
+    TODO
+
+
+Make low-res images of subtracted data
+--------------------------------------
+
+Input
+	Full-resolution datasets (with all facet sources subtracted)
+
+Output
+    For each band, wide-field (~ 8 degree radius) images, one from before self calibration and one from after self calibration, are made at approximately 90" resolution. A region of an example image is shown in the `Residual example image`_. Note the improved subtraction for the source in the center (the facet calibrator).
+
+    .. _`Residual example image`:
+
+    .. figure:: residual_image.png
+       :scale: 80 %
+       :figwidth: 75 %
+       :align: center
+       :alt: example image
+
+       Residual example image
+
+Pipeline Steps
+    apply_dir_indep_pre, apply_dir_indep_post
+        Apply dir-independent solutions in preparation for imaging
+
+    average_pre, average_post
+        Average heavily in time and frequency in preparation for imaging
+
+    wsclean_pre, wsclean_post
+        WSClean imaging run. Imaging is done with a cell size of 30".
+
+Test data
+    TODO
+
+
+Verify self calibration
+-----------------------
+
+Input
+	Low-resolution wide-field images of subtracted datasets
+
+Output
+    For each band, a datamap with True (if selfcal succeeded) or False (if selfcal failed)
+
+Pipeline Steps
+    verify_subtract
+        Verifies that no large residuals were introduced between the pre- and post-selfcal images. The verification returns False if the peak residual after selfcal is > 0.75 Jy or is > 1.1 * the peak residual before selfcal.
+
+Test data
+    TODO
+
+
+

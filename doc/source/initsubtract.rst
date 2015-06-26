@@ -81,7 +81,7 @@ Input
     Model images created during high-res imaging (see :ref:`high_res_images`), one for each band.
 
 Output
-    ``SUBTRACTED_DATA`` column for each band with all high-res sources subtracted
+    ``SUBTRACTED_DATA`` and ``CORRECTED_SUBTRACTED_DATA`` columns for each band with all high-res sources subtracted
 
 Pipeline Steps
     create_model_high_map
@@ -91,7 +91,8 @@ Pipeline Steps
         Call WSClean to FT model image into MODEL_DATA column of each band
 
     subtract_high
-        Call BBS to subtract MODEL_DATA column from DATA column
+        Call BBS to subtract MODEL_DATA column from DATA column and correct subtracted column
+        with dir-independent solutions
 
 Test data
     TODO
@@ -103,7 +104,7 @@ Make low-res images
 --------------------
 
 Input
-	Output of previous subtract step (``SUBTRACTED_DATA`` columns)
+	Output of previous subtract step (``CORRECTED_SUBTRACTED_DATA`` columns)
 
 Output
     For each band, a wide-field (~ 15 degree radius) image is made at
@@ -129,7 +130,7 @@ Output
 
 Pipeline Steps
     average
-        Average the ``SUBTRACTED_DATA`` column as input to imager
+        Average the ``CORRECTED_SUBTRACTED_DATA`` column as input to imager
 
     wsclean_low1, mask_low, wsclean_low2
         Low-res WSClean imaging run
