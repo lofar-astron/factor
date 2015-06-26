@@ -13,10 +13,12 @@ update_input_bands_hosts.control.mapfile_in     =   {{ input_bands_datamap }}
 update_input_bands_hosts.control.hosts          =   {{ hosts }}
 
 add_all_facet_sources.control.type              =   calibrate-stand-alone_new
-add_all_facet_sources.argument.observation      =   {{ input_bands_datamap }}
+add_all_facet_sources.control.mapfiles_in       =   [{{ input_bands_datamap }},{{ dir_indep_facet_skymodels_datamap }},{{ dir_indep_parmdbs_datamap }}]
+add_all_facet_sources.control.inputkeys         =   [inputms,inputskymodel,inputparmdb]
+add_all_facet_sources.argument.observation      =   inputms
 add_all_facet_sources.argument.parset           =   {{ parset_dir }}/{{ add_all_parset }}
-add_all_facet_sources.argument.catalog          =   {{ dir_indep_facet_skymodels_datamap }}
-add_all_facet_sources.argument.parmdb           =   {{ dir_indep_parmdbs_datamap }}
+add_all_facet_sources.argument.catalog          =   inputskymodel
+add_all_facet_sources.argument.parmdb           =   inputparmdb
 add_all_facet_sources.argument.replace-sourcedb =   True
 add_all_facet_sources.argument.replace-parmdb   =   True
 
