@@ -256,7 +256,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             # For dryrun, skip check
             for d in direction_group:
                 d.selfcal_ok = True
-                d.save_state()
         direction_group_ok = [d for d in direction_group if d.selfcal_ok]
         if first_pass:
             if len(direction_group_ok) > 0:
@@ -281,6 +280,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
                 direction_group_ok[0].skip_add_subtract = True
             else:
                 direction_group_ok[0].skip_add_subtract = False
+
+        # Update state
+        for d in directions:
+            d.save_state()
 
         # Do subtraction
         ops = [FacetSub(parset, d) for d in direction_group_ok]
