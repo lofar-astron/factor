@@ -87,6 +87,7 @@ class Direction(object):
         # Initialize some parameters
         self.loop_amp_selfcal = False
         self.selfcal_ok = False # whether selfcal succeeded
+        self.skip_add_subtract = False # whether to skip add/subtract in facetsub op
         self.max_residual_val = 0.5 # maximum residual in Jy for facet subtract test
         self.nchannels = 1 # set number of wide-band channels
         self.use_new_sub_data = False # set flag that tells which subtracted-data column to use

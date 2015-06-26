@@ -269,7 +269,21 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         else:
             for d in direction_group_ok:
                 d.use_new_sub_data = True
-        ops = [FacetSub(parset, d) for d in direction_group if d.selfcal_ok]
+
+        # For first direction in the group, we don't need to add the
+        # sources and then subtract them, but instead can simply copy the
+        # full-res subtracted column from facetselfcal after phase shifting it
+        # back to the field center. For the other directions, we have to add and
+        # subtract to pick up the improved subtracted data from the other
+        # directions in this group
+        for i, d in enumerate(direction_group_ok):
+            if i == 0:
+                direction_group_ok[0].skip_add_subtract = True
+            else:
+                direction_group_ok[0].skip_add_subtract = False
+
+        # Do subtraction
+        ops = [FacetSub(parset, d) for d in direction_group_ok]
         for op in ops:
             scheduler.run(op)
 

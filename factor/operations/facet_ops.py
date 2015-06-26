@@ -162,10 +162,16 @@ class FacetSub(Operation):
             name='FacetSub')
 
         # Define parameters needed for this operation
+        if self.direction.skip_add_subtract:
+            self.pipeline_parset_template = '{0}_single_pipeline.parset'.format(self.name)
+        else:
+            self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
+
         if self.direction.use_new_sub_data:
             add_all_parset = 'facet_dirindep_add_all_new.parset'
         else:
             add_all_parset = 'facet_dirindep_add_all.parset'
+
         self.parms_dict.update({'shifted_all_bands_datamap': self.direction.shifted_all_bands_datamap,
                                 'dir_dep_parmdb_datamap': self.direction.dir_dep_parmdb_datamap,
                                 'dir_indep_parmdbs_datamap': self.direction.dir_indep_parmdbs_datamap,
