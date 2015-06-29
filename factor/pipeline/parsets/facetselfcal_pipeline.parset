@@ -955,6 +955,7 @@ mask5.argument.threshisl                                   =   5
 mask5.argument.threshpix                                   =   5
 mask5.argument.rmsbox                                      =   (80,20)
 mask5.argument.adaptive_rmsbox                             =   True
+mask5.argument.atrous_do                                   =   True
 mask5.argument.img_format                                  =   fits
 mask5.argument.vertices_file                               =   {{ facet_state_file }}
 
