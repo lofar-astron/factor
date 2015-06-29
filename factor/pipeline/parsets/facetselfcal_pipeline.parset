@@ -924,7 +924,7 @@ wsclean1.argument.minuv-l                                  =   80
 wsclean1.argument.maxuv-l                                  =   1000000
 wsclean1.argument.scale                                    =   0.000417
 wsclean1.argument.channelsout                              =   {{ nchannels }}
-wsclean1.argument.mem                                      =   90
+wsclean1.argument.mem                                      =   {{ max_percent_memory }}
 wsclean1.argument.j                                        =   {{ max_cpus_per_node }}
 
 create_imagebase_map.control.kind                          =   plugin
@@ -976,7 +976,7 @@ wsclean2.argument.minuv-l                                  =   80
 wsclean2.argument.maxuv-l                                  =   1000000
 wsclean2.argument.scale                                    =   0.000417
 wsclean2.argument.channelsout                              =   {{ nchannels }}
-wsclean2.argument.mem                                      =   90
+wsclean2.argument.mem                                      =   {{ max_percent_memory }}
 wsclean2.argument.j                                        =   {{ max_cpus_per_node }}
 
 create_model4_map.control.kind                             =   plugin
@@ -1011,7 +1011,7 @@ wsclean_ft.control.inputkeys                               =   [msfile,name]
 wsclean_ft.argument.flags                                  =   [-predict,msfile]
 wsclean_ft.argument.size                                   =   {{ facet_imsize }} {{ facet_imsize }}
 wsclean_ft.argument.scale                                  =   0.000417
-wsclean_ft.argument.mem                                    =   90
+wsclean_ft.argument.mem                                    =   {{ max_percent_memory }}
 wsclean_ft.argument.channelsout                            =   {{ nchannels }}
 wsclean_ft.argument.j                                      =   {{ max_cpus_per_node }}
 
@@ -1080,7 +1080,7 @@ wsclean_pre.argument.cleanborder                           =   0
 wsclean_pre.argument.minuv-l                               =   80
 wsclean_pre.argument.maxuv-l                               =   2500
 wsclean_pre.argument.scale                                 =   0.00833
-wsclean_pre.argument.mem                                   =   90
+wsclean_pre.argument.mem                                   =   {{ max_percent_memory }}
 wsclean_pre.argument.j                                     =   {{ max_cpus_per_node }}
 
 wsclean_post.control.type                                  =   wsclean
@@ -1098,7 +1098,7 @@ wsclean_post.argument.cleanborder                          =   0
 wsclean_post.argument.minuv-l                              =   80
 wsclean_post.argument.maxuv-l                              =   2500
 wsclean_post.argument.scale                                =   0.00833
-wsclean_post.argument.mem                                  =   90
+wsclean_post.argument.mem                                  =   {{ max_percent_memory }}
 wsclean_post.argument.j                                    =   {{ max_cpus_per_node }}
 
 verify_subtract.control.type                               =   verify_subtract

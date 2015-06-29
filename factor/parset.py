@@ -177,6 +177,11 @@ def parset_read(parset_file):
         import multiprocessing
         parset_dict['cluster_specific']['ncpu'] = multiprocessing.cpu_count()
     log.debug("Using up to %s CPU(s) per node" % (parset_dict['cluster_specific']['ncpu']))
+    if 'fmem' in parset_dict['cluster_specific']:
+        parset_dict['cluster_specific']['fmem'] = parset.getfloat('cluster', 'fmem')
+    else:
+        parset_dict['cluster_specific']['fmem'] = 0.9
+    log.debug("Using up to {0}% of the memory per node for WSClean" % (parset_dict['cluster_specific']['fmem']))
     if 'ndir_per_node' in parset_dict['cluster_specific']:
         parset_dict['cluster_specific']['ndir_per_node'] = parset.getint('cluster',
             'ndir_per_node')

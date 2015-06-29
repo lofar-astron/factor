@@ -47,6 +47,7 @@ class Operation(object):
         self.hostname = socket.gethostname()
         self.node_list = parset['cluster_specific']['node_list']
         self.max_cpus_per_node = parset['cluster_specific']['ncpu']
+        self.max_percent_memory = parset['cluster_specific']['fmem'] * 100.0
         self.ndir_per_node = parset['cluster_specific']['ndir_per_node']
 
         # Below are paths for output directories

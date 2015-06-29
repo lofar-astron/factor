@@ -27,6 +27,7 @@ class InitSubtract(Operation):
         self.parms_dict.update({'input_dir': parset['dir_ms'],
                                 'highres_image_sizes' : highres_image_sizes,
                                 'lowres_image_sizes' : lowres_image_sizes,
+                                'max_percent_memory' : self.max_percent_memory,
                                 'dir_indep_parmdb_name': parset['parmdb_name']})
 
 

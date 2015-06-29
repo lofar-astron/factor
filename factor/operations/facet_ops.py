@@ -105,6 +105,7 @@ class FacetSelfcal(Operation):
                                 'casa_suffix': casa_suffix,
                                 'wsclean_suffix': wsclean_suffix,
                                 'facet_imsize': self.direction.facet_imsize,
+                                'max_percent_memory' : self.max_percent_memory,
                                 'cal_wplanes': self.direction.wplanes,
                                 'cal_imsize': self.direction.cal_imsize,
                                 'nterms': nterms,
@@ -250,6 +251,7 @@ class FacetImageFinal(Operation):
                                 'shifted_all_final_bands_datamap': self.direction.shifted_all_final_bands_datamap,
                                 'wsclean_suffix': wsclean_suffix,
                                 'facet_imsize': self.direction.facet_imsize,
+                                'max_percent_memory' : self.max_percent_memory,
                                 'nchannels': self.direction.nchannels,
                                 'facet_state_file': self.direction.save_file,
                                 'hosts': self.direction.hosts})
