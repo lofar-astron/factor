@@ -181,7 +181,7 @@ Pipeline Steps
        :align: center
        :alt: example solutions
 
-       Merged parmdb fast solutions plot
+       Merged parmdb fast phase (CommonScalarPhase + TEC) solutions plot for RS106
 
     .. _`Merged parmdb slow solutions plot`:
 
@@ -191,7 +191,7 @@ Pipeline Steps
        :align: center
        :alt: example solutions
 
-       Merged parmdb slow solutions plot
+       Merged parmdb slow phase and amplitude solutions plot for RS106
 
     expand_merged_parmdb_map
         Match the number of dir-dependent parmdb entries in the datamap to that in the phase-shifted (with all facet sources) datasets datamap.
@@ -271,7 +271,7 @@ Input
 	Full-resolution datasets (with all facet sources subtracted)
 
 Output
-    For each band, wide-field (~ 8 degree radius) images, one from before self calibration and one from after self calibration, are made at approximately 90" resolution. A region of an example image is shown in the `Residual example image`_. Note the improved subtraction for the source in the center (the facet calibrator).
+    For each band, wide-field (~ 8 degree radius) images, one from before self calibration and one from after self calibration, are made at approximately 90" resolution. A region of an example image is shown in the `Residual example image`_. Note the improved subtraction for the circled source in the center (the facet calibrator).
 
     .. _`Residual example image`:
 
@@ -281,7 +281,7 @@ Output
        :align: center
        :alt: example image
 
-       Residual example image
+       Residual example image. The left image shows the residuals before self calibration; the right image shows the residuals after self calibration.
 
 Pipeline Steps
     apply_dir_indep_pre, apply_dir_indep_post
