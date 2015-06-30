@@ -41,8 +41,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     """
     if region_file is not None:
         if region_file != '[]':
-            # Copy the CASA region file and return
-            os.system('cp {0} {1}'.format(region_file, mask_name)
+            # Copy the CASA region file (stripped of brackets, etc.) and return
+            os.system('cp {0} {1}'.format(region_file, mask_name.strip('[]"'))
             return {'threshold_5sig': '0.0'}
 
     if atrous_do:
