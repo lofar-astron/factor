@@ -260,6 +260,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
             return min(sep)
 
         # Divide based on flux (assuming order is decreasing flux)
+        log.info('Dividing directions into groups...')
         grouping_levels = [int(g) for g in n_per_grouping.iterkeys()]
         grouping_levels.sort()
         for i, g in enumerate(grouping_levels):
@@ -293,6 +294,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
         # is done by swapping the directions of neighboring groups randomly
         # and picking the group with the largest minimum separation
         if allow_reordering:
+            log.info('Reordering directions to obtain max separation...')
             direction_groups_orig = direction_groups[:]
             if len(direction_groups_orig) > 1:
                 for i in range(0, len(direction_groups_orig), 2):
@@ -305,7 +307,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0,
                         group2 = direction_groups_orig[k]
 
                         min_sep_global = 0.0 # degrees
-                        for j in range(100):
+                        for j in range(10):
                             group_merged = group1[:] + group2[:]
                             shuffle(group_merged)
                             group1_test = group_merged[0: len(group1)]

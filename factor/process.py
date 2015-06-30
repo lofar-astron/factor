@@ -218,9 +218,20 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             parset['direction_specific']['ndir_selfcal'] <= len(directions):
             selfcal_directions = directions[:parset['direction_specific']['ndir_selfcal']]
 
-    direction_groups = factor.directions.group_directions(selfcal_directions,
-        one_at_a_time=parset['direction_specific']['one_at_a_time'],
-        n_per_grouping=parset['direction_specific']['groupings'])
+    # Load groupings from previous run if possible
+    redo_groups = True
+    groups_file = os.path.join(parset['dir_working'], 'state', 'factor_groups.pkl')
+    if os.path.exists(groups_file):
+        with open(groups_file, 'r') as f:
+            prev_groupings, direction_groups = pickle.load(f)
+        if prev_groupings == parset['direction_specific']['groupings']:
+            redo_groups = False
+    if redo_groups:
+        direction_groups = factor.directions.group_directions(selfcal_directions,
+            one_at_a_time=parset['direction_specific']['one_at_a_time'],
+            n_per_grouping=parset['direction_specific']['groupings'])
+        with open(groups_file, 'wb') as f:
+            pickle.dump([parset['direction_specific']['groupings'], direction_groups], f)
 
     # Ensure that target is included (but not for selfcal)
     if target_has_own_facet:
