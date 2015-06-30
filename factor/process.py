@@ -114,7 +114,12 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         directions = factor.directions.directions_read(os.path.join(parset['dir_working'],
             'factor_directions.txt'), parset['dir_working'])
     else:
-        if 'flux_min_jy' not in dir_parset or \
+        if dry_run:
+            # Stop here if dry_run is True but no directions file was given
+            log.warn('No directions file given. Cannot proceed beyond the '
+                'initsubtract operation. Exiting...')
+            sys.exit(0)
+        elif 'flux_min_jy' not in dir_parset or \
             'size_max_arcmin' not in dir_parset or \
             'separation_max_arcmin' not in dir_parset:
                 log.critical('If no directions file is specified, you must '
@@ -138,7 +143,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         with open(polys_file, 'r') as f:
             polys, widths = pickle.load(f)
             widths = [w[0] for w in widths]
-
     else:
         if 'target_ra' in dir_parset and 'target_dec' in dir_parset and \
             'target_radius_arcmin' in dir_parset:
@@ -165,7 +169,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
 
     # Set various direction attributes
     for i, direction in enumerate(directions):
-        direction.load_state()
         direction.cleanup_mapfiles = []
         direction.vertices = polys[i]
         direction.width = widths[i]
