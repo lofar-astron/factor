@@ -107,12 +107,6 @@ class Scheduler(object):
         """
         Runs a list of operations in parallel
 
-        Each operation is checked as to whether it was already successfully
-        completed and, if so, it will not be scheduled. However, the finalize()
-        method will be called for all operations, whether or not they were
-        scheduled. This is to ensure proper handling of direction object
-        attributes.
-
         Parameters
         ----------
         operation_list : Operation instance or list of Operation instances
@@ -122,18 +116,15 @@ class Scheduler(object):
         if type(operation_list) != list:
             operation_list = [operation_list]
 
-        # Check state of each operation
-        operations_to_run = [op for op in operation_list] # if not op.check_completed()]
-
         # Set up the operation(s)
-        for op in operations_to_run:
+        for op in operation_list:
              op.setup()
 
         # Run the operation(s)
-        if not self.dry_run and len(operations_to_run) > 0:
+        if not self.dry_run and len(operation_list) > 0:
             with Timer(self.log, 'operation'):
                 pool = multiprocessing.Pool(processes=self.max_procs)
-                for op in operations_to_run:
+                for op in operation_list:
                     self.log.info('<-- Operation {0} started (direction: {1})'.
                         format(op.name, op.direction.name))
                     pool.apply_async(call_generic_pipeline, (op.name,
