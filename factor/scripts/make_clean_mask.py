@@ -25,7 +25,7 @@ def read_vertices(filename):
 def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, rmsbox=None,
          iterate_threshold=False, adaptive_rmsbox=False, img_format='fits',
          threshold_format='float', trim_by=0.0, vertices_file=None, atrous_jmax=6,
-         pad_to_size=None, skip_source_detection=False):
+         pad_to_size=None, skip_source_detection=False, region_file=None):
     """
     Run PyBDSM to make an island clean mask
 
@@ -39,6 +39,12 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         Dict with 5-sigma rms threshold
 
     """
+    if region_file is not None:
+        if region_file != '[]':
+            # Copy the CASA region file and return
+            os.system('cp {0} {1}'.format(region_file, mask_name)
+            return {'threshold_5sig': '0.0'}
+
     if atrous_do:
         threshisl = 4.0
 
