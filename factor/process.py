@@ -50,6 +50,13 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             log.critical('Direction-independent instument parmdb not found '
                 'for band {0}'.format(band.file))
             sys.exit(1)
+        if band.dirindparmdb == 'instrument':
+            # Check for special BBS table name
+            log.warn('Direction-independent instument parmdb for band {0} is '
+                'named "instrument". Copying to "instrument_dirindep" so that BBS '
+                'will not overwrite this table...'.format(band.file))
+            band.dirindparmdb += '_dirindep'
+            os.system('cp -r {0} {0}_dirindep'.format(band.dirindparmdb))
         band.skymodel_dirindep = None
         msbase = os.path.basename(ms)
         if msbase in parset['ms_specific']:
@@ -301,7 +308,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         for d in directions:
             d.save_state()
 
-        # Do subtraction
+        # Do subtraction for directions for which selfcal is OK
         ops = [FacetSub(parset, d) for d in direction_group_ok]
         for op in ops:
             scheduler.run(op)
