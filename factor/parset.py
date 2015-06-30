@@ -105,6 +105,10 @@ def parset_read(parset_file):
         parset_dict['use_chgcentre'] = parset.getboolean('global', 'use_chgcentre')
     else:
         parset_dict['use_chgcentre'] = False
+    if 'wsclean_nbands' in parset_dict:
+        parset_dict['wsclean_nbands'] = parset.getint('global', 'wsclean_nbands')
+    else:
+        parset_dict['wsclean_nbands'] = 3
 
     # Handle directions-related parameters
     if 'directions' in parset._sections.keys():

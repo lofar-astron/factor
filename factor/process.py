@@ -185,7 +185,11 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
 
         # Set number of bands and channels
         direction.nbands = len(bands)
-        direction.nchannels = np.int(np.ceil(np.float(direction.nbands/np.float(5))))
+        if direction.nbands > 5:
+            direction.nchannels = int(np.ceil(float(direction.nbands)/
+                float(parset['wsclean_nbands'])))
+        else:
+            direction.nchannels = 1
 
         # Set field center
         direction.field_ra = field.ra

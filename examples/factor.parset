@@ -6,7 +6,7 @@
 # be placed in this directory
 dir_working = /data/wdir
 
-# Full path to directory containing selfcaled bands, will be scanned for all .MS
+# Full path to directory containing selfcal-ed bands, will be scanned for all .MS
 # and .ms files (required). Note that these files will be modified by Factor, so
 # please keep a copy of these data elsewhere
 dir_ms = /data/bands
@@ -23,10 +23,10 @@ make_mosaic = True
 # of internally derived DDE calibrators and facets
 interactive = False
 
-# Require that all bands must pass selfcal verification in order that selfcal
-# be considered successful (default = True). If False, selfcal is considered
-# to have been successful if at least one band passes verification
-strict_selfcal_verification = True
+# Max number of bands per WSClean image when wide-band clean is used (default = 5).
+# Smaller values produce better results but require longer run times. Wide-band
+# clean is activated when there are more than 5 bands
+wsclean_nbands = 2
 
 # Exit if selfcal fails for any direction (default = True). If False, processing
 # will continue and the failed direction will receive the selfcal solutions of
