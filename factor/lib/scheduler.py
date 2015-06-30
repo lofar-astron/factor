@@ -123,7 +123,7 @@ class Scheduler(object):
             operation_list = [operation_list]
 
         # Check state of each operation
-        operations_to_run = [op for op in operation_list if not op.check_completed()]
+        operations_to_run = [op for op in operation_list] # if not op.check_completed()]
 
         # Set up the operation(s)
         for op in operations_to_run:

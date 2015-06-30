@@ -267,7 +267,7 @@ class Direction(object):
         operations = ['facetselfcal']
         for op in operations:
             # Remove entry in completed_operations
-            self.completed_operations.remove(op)
+#             self.completed_operations.remove(op)
 
             # Delete pipeline state
             action_dirs = glob.glob(os.path.join(self.pipeline_dir, op, '*'))
