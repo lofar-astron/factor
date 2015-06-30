@@ -70,7 +70,7 @@ class Direction(object):
             # Set to empty list (casapy format)
             self.region_selfcal = '[]'
         else:
-            self.region_selfcal = '[{0}]'.format(region_selfcal)
+            self.region_selfcal = '["{0}"]'.format(region_selfcal)
         self.region_field = region_field
         if self.region_field.lower() == 'empty':
             self.region_field = None
