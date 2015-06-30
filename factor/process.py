@@ -136,7 +136,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             directions = factor.directions.directions_read(parset['directions_file'],
                 parset['dir_working'])
 
-    # Load polygons from previous run if possible
+    # Load polygons from previous run if possible; if not, generate the polygons
     polys_file = os.path.join(parset['dir_working'], 'regions', 'factor_facets.pkl')
     target_has_own_facet = dir_parset['target_has_own_facet']
     if os.path.exists(polys_file):
@@ -218,7 +218,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             parset['direction_specific']['ndir_selfcal'] <= len(directions):
             selfcal_directions = directions[:parset['direction_specific']['ndir_selfcal']]
 
-    # Load groupings from previous run if possible
+    # Load groupings from previous run if possible; if not, divide directions
+    # into groups
     redo_groups = True
     groups_file = os.path.join(parset['dir_working'], 'state', 'factor_groups.pkl')
     if os.path.exists(groups_file):
@@ -233,7 +234,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         with open(groups_file, 'wb') as f:
             pickle.dump([parset['direction_specific']['groupings'], direction_groups], f)
 
-    # Ensure that target is included (but not for selfcal)
+    # Ensure that target is included in the directions to process if desired
+    # (but not for selfcal)
     if target_has_own_facet:
         names = [d.name for d in directions]
         if target.name not in names:
