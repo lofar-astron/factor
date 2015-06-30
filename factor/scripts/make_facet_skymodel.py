@@ -16,6 +16,12 @@ import pickle
 def read_vertices(filename):
     """
     Returns facet vertices
+
+    Parameters
+    ----------
+    filename : str
+        Filename of pickled file with direction vertices
+
     """
     with open(filename, 'r') as f:
         direction_dict = pickle.load(f)
@@ -24,7 +30,29 @@ def read_vertices(filename):
 
 def main(fullskymodel, outmodel, vertices_file, cal_only=False, facet_ra=0.0,
     facet_dec=0.0, cal_radius_deg=0.0):
+    """
+    Makes a makesourcedb sky model for components inside input polygon
 
+    Parameters
+    ----------
+    fullskymodel : str
+        Filename of makesourcedb sky model file containing the full-field model
+    outmodel : str
+        Filename of output sky model
+    vertices_file : str
+        Filename of pickled file with direction vertices that define polygon
+    cal_only : bool, optional
+        If True, only components wihtin cal_radius_deg of (facet_ra, facet_dec)
+        are selected.
+    facet_ra : float, optional
+        RA in degrees of facet center
+    facet_dec : float, optional
+        Dec in degrees of facet center
+    cal_radius_deg : float, optional
+        Radius in degrees around (facet_ra, facet_dec) within which components
+        are considered to belong to the calibrator
+
+    """
     if type(cal_only) is str:
         if cal_only.lower() == 'true':
             cal_only = True

@@ -36,7 +36,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     Returns
     -------
     result : dict
-        Dict with 5-sigma threshold
+        Dict with 5-sigma rms threshold
 
     """
     if atrous_do:

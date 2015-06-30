@@ -10,6 +10,25 @@ import sys
 
 
 def main(inmodel1, inmodel2, outmodel, match_by='name', radius=0.0, keep='all'):
+    """
+    Creates mosaic
+
+    Parameters
+    ----------
+    inmodel1 : str
+        Filename of input model 1
+    inmodel2 : str
+        Filename of input model 2
+    outmodel : str
+        Filename of output model
+    match_by : str, optional
+        The match_by parameter of LSMTool
+    radius : float, optional
+        Radius in degrees for cross match
+    keep : str, optional
+        The keep parameter of LSMTool
+
+    """
     s1 = lsmtool.load(inmodel1)
     s2 = lsmtool.load(inmodel2)
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Convert a fits image to a CASA image
+Convert a FITS image to a CASA image
 
 For WSClean 1.7, use force_stokes_I = True to overide incorrect Stokes
 keyword in model image headers. The restfreq is also set to avoid
@@ -14,6 +14,19 @@ import numpy as np
 
 
 def main(fitsimage, outfilename, force_stokes_i=False):
+    """
+    Convert a fits image to a CASA image
+
+    Parameters
+    ----------
+    fitsimage : str
+        Name of FITS image
+    outfilename : str
+        Name of output CASA image
+    force_stokes_i : bool, optional
+        If True, force Stokes axis to be 'I'
+
+    """
     casaimage = pim.image(fitsimage)
     casaimage.saveas(outfilename, overwrite=True)
 

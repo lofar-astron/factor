@@ -12,7 +12,7 @@ import os
 
 def main(dataset, blockl, clobber=True):
     """
-    Split dataset into time chunks of length blockl time slots
+    Split dataset into time chunks
 
     Parameters
     ----------

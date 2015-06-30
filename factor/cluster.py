@@ -11,9 +11,15 @@ import factor._logging
 log = logging.getLogger('factor.cluster')
 
 
-def make_pbs_clusterdesc(node_local_disk='/tmp'):
+def make_pbs_clusterdesc():
     """
     Make a cluster description file from the PBS_NODEFILE
+
+    Returns
+    -------
+    clusterdesc_file
+        Filename of resulting cluster description file
+
     """
     nodes = []
     try:
@@ -23,7 +29,7 @@ def make_pbs_clusterdesc(node_local_disk='/tmp'):
             'use clusterdesc = PBS.')
         sys.exit(1)
 
-    with open(filename,'r') as file:
+    with open(filename, 'r') as file:
         for line in file:
             node_name = line.split()[0]
             if node_name not in nodes:
@@ -54,7 +60,13 @@ def get_compute_nodes(clusterdesc_file):
 
 def find_executables(parset):
     """
-    Finds paths to required executables
+    Adds the paths to required executables to parset dict
+
+    Parameters
+    ----------
+    parset : dict
+        Parset dictionary
+
     """
     from distutils import spawn
 
@@ -80,6 +92,18 @@ def find_executables(parset):
 def divide_nodes(directions, node_list, ndir_per_node, ncpu_max):
     """
     Divide up nodes and cpus among directions
+
+    Parameters
+    ----------
+    directions: list
+        List of Direction objects for which the nodes will be divided
+    node_list : list
+        List of node names to divide among the directions
+    ndir_per_node : int
+        Number of directions per node
+    ncpu_max : int
+        Number of CPUs per node
+
     """
     if len(directions) >= len(node_list):
         for i in range(len(directions)-len(node_list)):

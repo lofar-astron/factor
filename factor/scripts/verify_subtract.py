@@ -12,6 +12,16 @@ import os
 def main(image_pre, image_post, res_val):
     """
     Check quantities in residual images
+
+    Parameters
+    ----------
+    image_pre : str
+        Filename of image before selfcal
+    image_post : str
+        Filename of image after selfcal
+    res_val : float
+        Maximum allowed value of peak residual (Jy/beam)
+
     """
     imgpre = pim.image(image_pre)
     maxvalpre = numpy.max(numpy.abs(imgpre.getdata()))

@@ -68,7 +68,9 @@ Factor handles all the initialization and sets up the directories, pipeline
 parsets, etc. Factor will also run the pipelines by default. However, if you
 want to run the pipelines yourself, you can set the dry_run (`-d`) argument
 (e.g., `runfactor -d factor.parset`). Factor will then perform all the setup but
-will not run the pipelines.
+will not run the pipelines. Note that this option is most useful if a
+directions file is given, as without this file Factor cannot create pipelines
+for self calibration, etc.
 
 For details on the usage, please see the full documentation and the examples in
 the examples directory.

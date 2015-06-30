@@ -25,7 +25,7 @@ interactive = False
 
 # Require that all bands must pass selfcal verification in order that selfcal
 # be considered successful (default = True). If False, selfcal is considered
-# successful if at least one band passes verification
+# to have been successful if at least one band passes verification
 strict_selfcal_verification = True
 
 # Exit if selfcal fails for any direction (default = True). If False, processing
@@ -44,11 +44,6 @@ use_chgcentre = False
 # are selected internally using the flux and size cuts below
 directions_file = /data/directions.txt
 
-# Check whether any sources from the initial subtract sky model fall on facet
-# edges. If any are found, the facet regions are adjusted to avoid them (default
-# is False)
-check_edges = False
-
 # Flux and size cuts for selecting directions internally (min flux, max size
 # of a source, and max separation between sources below which they are grouped
 # into one direction; required if no directions_file is given). The number of
@@ -59,6 +54,11 @@ flux_min_Jy = 0.1
 size_max_arcmin = 3.0
 separation_max_arcmin = 6.0
 max_num = 50
+
+# Check whether any sources from the initial subtract sky model fall on facet
+# edges. If any are found, the facet regions are adjusted to avoid them (default
+# is False)
+check_edges = False
 
 # Total number of directions to process (default = all). If this number is
 # greater than ndir_selfcal, then the remaining directions will not be selfcal-
