@@ -114,6 +114,7 @@ class FacetSelfcal(Operation):
                                 'solint_p': self.direction.solint_p,
                                 'solint_a': self.direction.solint_a,
                                 'region_selfcal': self.direction.region_selfcal,
+                                'atrous_do': self.direction.atrous_do,
                                 'facet_state_file': self.direction.save_file,
                                 'hosts': self.direction.hosts})
 
