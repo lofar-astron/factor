@@ -68,6 +68,7 @@ class Band(object):
                 break
         self.mean_el_rad = np.mean(tab.getcol('AZEL1', rowincr=10000)[:, 1])
         tab.close()
+        pt.removeDerivedMSCal(self.file)
 
         # Calculate mean FOV
         sec_el = 1.0 / np.sin(self.mean_el_rad)
