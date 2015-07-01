@@ -130,13 +130,14 @@ parmdb_name = instrument_ap_smoothed
 make_mosaic = True
 
 # Use interactive mode (default = False). Factor will ask for confirmation
-# of internally derived DDE calibrators and facets
+# of internally derived DDE calibrators and facets and whether to continue
+# when selfcal fails for a direction
 interactive = False
 
-# Require that all bands must pass selfcal verification in order that selfcal
-# be considered successful (default = True). If False, selfcal is considered
-# successful if at least one band passes verification
-strict_selfcal_verification = True
+# Max number of bands per WSClean image when wide-band clean is used (default = 5).
+# Smaller values produce better results but require longer run times. Wide-band
+# clean is activated when there are more than 5 bands
+wsclean_nbands = 2
 
 # Exit if selfcal fails for any direction (default = True). If False, processing
 # will continue and the failed direction will receive the selfcal solutions of
