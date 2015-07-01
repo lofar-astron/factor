@@ -183,6 +183,8 @@ def parset_read(parset_file):
     log.debug("Using up to %s CPU(s) per node" % (parset_dict['cluster_specific']['ncpu']))
     if 'fmem' in parset_dict['cluster_specific']:
         parset_dict['cluster_specific']['fmem'] = parset.getfloat('cluster', 'fmem')
+        if parset_dict['cluster_specific']['fmem'] > 1.0:
+            parset_dict['cluster_specific']['fmem'] = 1.0
     else:
         parset_dict['cluster_specific']['fmem'] = 0.9
     log.debug("Using up to {0}% of the memory per node for WSClean".format(parset_dict['cluster_specific']['fmem']*100.0))
