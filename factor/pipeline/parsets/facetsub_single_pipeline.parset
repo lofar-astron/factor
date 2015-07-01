@@ -22,7 +22,7 @@ shift_subdata_to_field.parsetarg.shift.type             =   phaseshifter
 shift_subdata_to_field.parsetarg.shift.phasecenter      =   [{{ field_ra }}deg, {{ field_dec }}deg]
 
 copy_column.control.type                                =   copy_column
-copy_column.control.mapfiles_in                         =   [shift_to_field.output.mapfile,{{ input_bands_datamap }}]
+copy_column.control.mapfiles_in                         =   [shift_subdata_to_field.output.mapfile,{{ input_bands_datamap }}]
 copy_column.control.inputkeys                           =   [shiftedfile,datafile]
 copy_column.argument.flags                              =   [shiftedfile,datafile,DATA,SUBTRACTED_DATA_ALL_NEW]
 
