@@ -57,4 +57,4 @@ copy_shifted_map.control.kind                   =   plugin
 copy_shifted_map.control.type                   =   copyMapfile
 copy_shifted_map.control.mapfile_in             =   shift_to_field.output.mapfile
 copy_shifted_map.control.mapfile_dir            =   {{ mapfile_dir }}
-copy_shifted_map.control.filename               =   shifted_models.datamap
+copy_shifted_map.control.filename               =   shifted_to_field_models.datamap

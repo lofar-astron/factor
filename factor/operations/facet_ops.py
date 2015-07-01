@@ -190,7 +190,7 @@ class FacetSub(Operation):
         Finalize this operation
         """
         self.direction.facet_model_data_mapfile = os.path.join(self.mapfile_dir,
-            'shifted_models.datamap')
+            'shifted_to_field_models.datamap')
 
 
 class FacetAddFinal(Operation):
