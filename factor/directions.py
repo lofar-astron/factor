@@ -68,6 +68,18 @@ def directions_read(directions_file, factor_working_dir):
             log.error('DEC %f is wrong for direction: %s. Ignoring direction.'
                 % (direction['radec'], direction['name']))
             continue
+        if direction['atrous_do'].lower() == 'true':
+            direction['atrous_do'] = True
+        else:
+            direction['atrous_do'] = False
+        if direction['mscale_field_do'].lower() == 'true':
+            direction['mscale_field_do'] = True
+        else:
+            direction['mscale_field_do'] = False
+        if direction['outlier_source'].lower() == 'true':
+            direction['outlier_source'] = True
+        else:
+            direction['outlier_source'] = False
         if (direction['solint_a'] <= 0 or direction['solint_p'] <= 0) and \
             np.isnan(direction['apparent_flux']):
             log.error('One of more of the solution intervals is invalid and no '
@@ -94,7 +106,7 @@ def directions_read(directions_file, factor_working_dir):
             cal_flux_jy = None
 
         data.append( Direction(direction['name'], ra, dec,
-        	bool(direction['atrous_do']), bool(direction['mscale_field_do']),
+        	direction['atrous_do'], direction['mscale_field_do'],
         	direction['cal_imsize'], direction['solint_p'],
         	direction['solint_a'], direction['field_imsize'],
         	direction['dynamic_range'], direction['region_selfcal'],
