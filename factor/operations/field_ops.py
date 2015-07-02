@@ -22,9 +22,10 @@ class InitSubtract(Operation):
             name='InitSubtract')
 
         # Define parameters needed for this operation
+        input_bands = [b.file for b in self.bands]
         highres_image_sizes = ['{0} {0}'.format(b.imsize_high_res) for b in self.bands]
         lowres_image_sizes = ['{0} {0}'.format(b.imsize_low_res) for b in self.bands]
-        self.parms_dict.update({'input_dir': parset['dir_ms'],
+        self.parms_dict.update({'input_bands': input_bands,
                                 'highres_image_sizes' : highres_image_sizes,
                                 'lowres_image_sizes' : lowres_image_sizes,
                                 'max_percent_memory' : self.max_percent_memory,

@@ -117,7 +117,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         scheduler.run(op)
         field.cleanup()
     else:
-        log.info("Sky models found for all MS files. Skipping initsubtract "
+        log.info("Sky models found for all bands. Skipping initsubtract "
             "operation")
 
     # Define directions. First check for user-supplied file, then for Factor-generated
