@@ -50,6 +50,7 @@ class Band(object):
         try:
             pt.addDerivedMSCal(self.file)
         except RuntimeError:
+            # RuntimeError indicates column already exists
             pass
 
         # Check for SUBTRACTED_DATA_ALL column and calculate mean elevation
@@ -68,6 +69,8 @@ class Band(object):
                 break
         self.mean_el_rad = np.mean(tab.getcol('AZEL1', rowincr=10000)[:, 1])
         tab.close()
+
+        # Remove (virtual) elevation column from MS
         pt.removeDerivedMSCal(self.file)
 
         # Calculate mean FOV
