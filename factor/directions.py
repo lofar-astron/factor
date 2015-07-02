@@ -105,7 +105,8 @@ def directions_read(directions_file, factor_working_dir):
             cal_size_deg = None
             cal_flux_jy = None
 
-        data.append( Direction(direction['name'], ra, dec,
+        log.info('atrous_do: {}'.format(atrous_do))
+        data.append(Direction(direction['name'], ra, dec,
         	atrous_do, mscale_field_do,
         	direction['cal_imsize'], direction['solint_p'],
         	direction['solint_a'], direction['field_imsize'],
