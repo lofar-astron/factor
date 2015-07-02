@@ -235,22 +235,22 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     groups_file = os.path.join(parset['dir_working'], 'state', 'factor_groups.pkl')
     if os.path.exists(groups_file):
         with open(groups_file, 'r') as f:
-            prev_groupings, direction_groups = pickle.load(f)
-            for dg in direction_groups:
-                # Pick up any changes in direction attributes since groups were pickled
-                for d1 in dg:
-                    for d2 in selfcal_directions:
-                        if d1.name == d2.name:
-                            d1 = d2
-                            break
+            prev_groupings, direction_name_groups = pickle.load(f)
         if prev_groupings == parset['direction_specific']['groupings']:
             redo_groups = False
+            direction_groups = []
+            direction_names = [d.name for d in directions]
+            for name_group in direction_name_groups:
+                direction_groups.append([directions[direction_names.index(name)] for name in name_group])
     if redo_groups:
         direction_groups = factor.directions.group_directions(selfcal_directions,
             one_at_a_time=parset['direction_specific']['one_at_a_time'],
             n_per_grouping=parset['direction_specific']['groupings'])
+        direction_name_groups = []
+        for group in direction_groups:
+            direction_name_groups.append([d.name for d in group])
         with open(groups_file, 'wb') as f:
-            pickle.dump([parset['direction_specific']['groupings'], direction_groups], f)
+            pickle.dump([parset['direction_specific']['groupings'], direction_name_groups], f)
 
     # Ensure that target is included in the directions to process if desired
     # (but not for selfcal)
