@@ -238,10 +238,11 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             prev_groupings, direction_groups = pickle.load(f)
             for dg in direction_groups:
                 # Pick up any changes in direction attributes since groups were pickled
-                for d in selfcal_directions:
-                    if dg.name == d.name:
-                        dg = d
-                        break
+                for d1 in dg:
+                    for d2 in selfcal_directions:
+                        if d1.name == d2.name:
+                            d1 = d2
+                            break
         if prev_groupings == parset['direction_specific']['groupings']:
             redo_groups = False
     if redo_groups:
