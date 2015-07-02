@@ -86,6 +86,15 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
 
     # Set up scheduler for operations (pipeline runs)
     ndir_simul = len(parset['cluster_specific']['node_list']) * parset['cluster_specific']['ndir_per_node']
+    if parset['direction_specific']['groupings'] is not None:
+        ngroup_max = int(max(parset['direction_specific']['groupings'].keys()))
+    else:
+        ngroup_max = 1
+    if ndir_simul < ngroup_max:
+        log.warn('The maximum number of directions that can be proccessed '
+            'simultaneously ({0}) is less than the number of directions in the '
+            'largest group ({1}). For best performance, these values should be '
+            'equal'.format(ndir_simul, ngroup_max))
     scheduler = Scheduler(parset['genericpipeline_executable'], max_procs=ndir_simul,
         dry_run=dry_run)
 
@@ -262,7 +271,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     # Iterate over direction groups
     first_pass = True
     for gindx, direction_group in enumerate(direction_groups):
-        log.info('Processing {0} direction(s) in parallel in Group {1}'.format(
+        log.info('Processing {0} direction(s) in Group {1}'.format(
             len(direction_group), gindx+1))
 
         # Divide up the nodes and cores among the directions

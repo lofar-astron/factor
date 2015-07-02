@@ -147,18 +147,18 @@ def parset_read(parset_file):
             groupings[key] = int(val)
         parset_dict['direction_specific']['groupings'] = groupings
         parset_dict['direction_specific']['one_at_a_time'] = False
-        log.debug("Using the following groupings for directions: {0}".format(groupings))
     else:
         parset_dict['direction_specific']['one_at_a_time'] = True
         parset_dict['direction_specific']['groupings'] = None
+    log.info("Using the following groupings for directions: {0}".format(groupings))
     if 'ndir_selfcal' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['ndir_selfcal'] = parset.getint('directions', 'ndir_selfcal')
-        log.debug("Selfcal-ing up to %s direction(s)" % (parset_dict['direction_specific']['ndir_selfcal']))
+        log.info("Selfcal-ing up to %s direction(s)" % (parset_dict['direction_specific']['ndir_selfcal']))
     else:
         parset_dict['direction_specific']['ndir_selfcal'] = -1
     if 'ndir_total' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['ndir_total'] = parset.getint('directions', 'ndir_total')
-        log.debug("Processing up to %s direction(s) in total" % (parset_dict['direction_specific']['ndir_total']))
+        log.info("Processing up to %s direction(s) in total" % (parset_dict['direction_specific']['ndir_total']))
     else:
         parset_dict['direction_specific']['ndir_total'] = -1
     if 'target_radius_arcmin' in parset_dict['direction_specific']:
@@ -180,20 +180,20 @@ def parset_read(parset_file):
     else:
         import multiprocessing
         parset_dict['cluster_specific']['ncpu'] = multiprocessing.cpu_count()
-    log.debug("Using up to %s CPU(s) per node" % (parset_dict['cluster_specific']['ncpu']))
+    log.info("Using up to %s CPU(s) per node" % (parset_dict['cluster_specific']['ncpu']))
     if 'fmem' in parset_dict['cluster_specific']:
         parset_dict['cluster_specific']['fmem'] = parset.getfloat('cluster', 'fmem')
         if parset_dict['cluster_specific']['fmem'] > 1.0:
             parset_dict['cluster_specific']['fmem'] = 1.0
     else:
         parset_dict['cluster_specific']['fmem'] = 0.9
-    log.debug("Using up to {0}% of the memory per node for WSClean".format(parset_dict['cluster_specific']['fmem']*100.0))
+    log.info("Using up to {0}% of the memory per node for WSClean".format(parset_dict['cluster_specific']['fmem']*100.0))
     if 'ndir_per_node' in parset_dict['cluster_specific']:
         parset_dict['cluster_specific']['ndir_per_node'] = parset.getint('cluster',
             'ndir_per_node')
     else:
         parset_dict['cluster_specific']['ndir_per_node'] = 1
-    log.debug("Processing up to %s direction(s) in parallel per node" %
+    log.info("Processing up to %s direction(s) in parallel per node" %
         (parset_dict['cluster_specific']['ndir_per_node']))
     if 'clusterdesc_file' not in parset_dict['cluster_specific']:
         parset_dict['cluster_specific']['clusterdesc_file'] = parset_dict['lofarroot'] + '/share/local.clusterdesc'
