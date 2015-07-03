@@ -126,9 +126,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         # directions in this group
         for i, d in enumerate(direction_group_ok):
             if i == 0:
-                direction_group_ok[0].skip_add_subtract = True
+                d.skip_add_subtract = True
             else:
-                direction_group_ok[0].skip_add_subtract = False
+                d.skip_add_subtract = False
 
         # Update state
         for d in directions:
