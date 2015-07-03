@@ -71,7 +71,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             "operation")
 
     # Define directions
-    directions, direction_groups = _set_up_directions(parset, bands, log, dry_run)
+    directions, direction_groups = _set_up_directions(parset, bands, log,
+        dry_run, test_run)
 
     # Run selfcal operations on directions
     first_pass = True
@@ -337,7 +338,7 @@ def _set_up_bands(parset, log, test_run=False):
     return bands, bands_initsubtract
 
 
-def _set_up_directions(parset, bands, log, dry_run=False):
+def _set_up_directions(parset, bands, log, dry_run=False, test_run=False):
     """
     Sets up directions (facets)
 
@@ -351,6 +352,9 @@ def _set_up_directions(parset, bands, log, dry_run=False):
         Log for output
     dry_run : bool, optional
         If True, do not run pipelines. All parsets, etc. are made as normal
+    test_run : bool, optional
+        If True, use test settings. These settings are for testing purposes
+        only and will not produce useful results
 
     Returns
     -------
