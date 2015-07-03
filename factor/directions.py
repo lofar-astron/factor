@@ -168,6 +168,8 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
         len(s.getPatchNames())))
 
     # Filter out sources that lie outside of FWHM of FOV
+    if not hasattr(band, 'fwhm_deg'):
+        band.set_image_sizes()
     log.info('Removing sources beyond 2 * FWHM of the primary beam...')
     dist = s.getDistance(band.ra, band.dec, byPatch=True)
     s.remove(dist > band.fwhm_deg, aggregate=True)
