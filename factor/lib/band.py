@@ -43,7 +43,7 @@ class Band(object):
 
         # Get the station diameter
         ant = pt.table(self.file+'::ANTENNA', ack=False)
-        diam = float(ant.col('DISH_DIAMETER')[0])
+        self.diam = float(ant.col('DISH_DIAMETER')[0])
         ant.close()
 
         # Check for SUBTRACTED_DATA_ALL column and calculate mean elevation
@@ -103,7 +103,7 @@ class Band(object):
 
             # Calculate mean FOV
             sec_el = 1.0 / np.sin(self.mean_el_rad)
-            self.fwhm_deg = 1.1 * ((3.0e8 / self.freq) / diam) * 180. / np.pi * sec_el
+            self.fwhm_deg = 1.1 * ((3.0e8 / self.freq) / self.diam) * 180. / np.pi * sec_el
             self.imsize_high_res = self.get_optimum_size(self.fwhm_deg
                 /self.cellsize_highres_deg* 2.5)
             self.imsize_low_res = self.get_optimum_size(self.fwhm_deg
