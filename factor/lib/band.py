@@ -46,13 +46,6 @@ class Band(object):
         diam = float(ant.col('DISH_DIAMETER')[0])
         ant.close()
 
-        # Add (virtual) elevation column to MS
-        try:
-            pt.addDerivedMSCal(self.file)
-        except RuntimeError:
-            # RuntimeError indicates column already exists
-            pass
-
         # Check for SUBTRACTED_DATA_ALL column and calculate mean elevation
         tab = pt.table(self.file, ack=False)
         if 'SUBTRACTED_DATA_ALL' in tab.colnames():
@@ -67,21 +60,61 @@ class Band(object):
                 self.timepersample = t2.col('TIME')[1] - t2.col('TIME')[0]
                 self.nsamples = t2.nrows()
                 break
-        self.mean_el_rad = np.mean(tab.getcol('AZEL1', rowincr=10000)[:, 1])
         tab.close()
 
-        # Remove (virtual) elevation column from MS
-        pt.removeDerivedMSCal(self.file)
-
-        # Calculate mean FOV
-        sec_el = 1.0 / np.sin(self.mean_el_rad)
-        self.fwhm_deg = 1.1 * ((3.0e8 / self.freq) / diam) * 180. / np.pi * sec_el
-
-        # Set the initsubtract image sizes from the primary-beam FWHM. For
-        # high-res image, use 2.5 * FWHM; for low-res, use 6.5 * FHWM
+        # Set the initsubtract cell sizes
         self.cellsize_highres_deg = 0.00208 # initsubtract high-res cell size
         self.cellsize_lowres_deg = 0.00694 # initsubtract low-res cell size
+
+        self.completed_operations = []
+        self.save_file = os.path.join(factor_working_dir, 'state',
+            self.name+'_save.pkl')
+
+
+    def set_image_sizes(self, test_run=False):
+        """
+        Sets sizes for initsubtract images
+
+        The image sizes are scaled from the mean primary-beam FWHM. For
+        the high-res image, we use 2.5 * FWHM; for low-res, we use 6.5 * FHWM.
+
+        Parameters
+        ----------
+        test_run : bool, optional
+            If True, use test sizes
+
+        """
         if not test_run:
+            if hasattr(self, 'mean_el_rad'):
+                self.mean_el_rad = max(512, self.get_optimum_size(self.width
+                    / self.cellsize_selfcal_deg * 1.15)) # full facet has 15% padding
+            else:
+                self.facet_imsize = None
+            self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
+                / self.cellsize_selfcal_deg * 1.2)) # cal size has 20% padding
+        else:
+            self.facet_imsize = self.get_optimum_size(128)
+            self.cal_imsize = self.get_optimum_size(128)
+        if not test_run:
+            if not hasattr(self, 'mean_el_rad'):
+                # Add (virtual) elevation column to MS
+                try:
+                    pt.addDerivedMSCal(self.file)
+                except RuntimeError:
+                    # RuntimeError indicates column already exists
+                    pass
+
+                # Check for SUBTRACTED_DATA_ALL column and calculate mean elevation
+                tab = pt.table(self.file, ack=False)
+                self.mean_el_rad = np.mean(tab.getcol('AZEL1', rowincr=10000)[:, 1])
+                tab.close()
+
+                # Remove (virtual) elevation column from MS
+                pt.removeDerivedMSCal(self.file)
+
+            # Calculate mean FOV
+            sec_el = 1.0 / np.sin(self.mean_el_rad)
+            self.fwhm_deg = 1.1 * ((3.0e8 / self.freq) / diam) * 180. / np.pi * sec_el
             self.imsize_high_res = self.get_optimum_size(self.fwhm_deg
                 /self.cellsize_highres_deg* 2.5)
             self.imsize_low_res = self.get_optimum_size(self.fwhm_deg
@@ -89,10 +122,6 @@ class Band(object):
         else:
             self.imsize_high_res = self.get_optimum_size(128)
             self.imsize_low_res = self.get_optimum_size(128)
-
-        self.completed_operations = []
-        self.save_file = os.path.join(factor_working_dir, 'state',
-            self.name+'_save.pkl')
 
 
     def get_optimum_size(self, size):
