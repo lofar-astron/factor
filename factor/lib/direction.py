@@ -3,6 +3,8 @@ Definition of the direction class
 """
 import os
 import logging
+from astropy.coordinates import Angle
+
 
 class Direction(object):
     """
@@ -57,6 +59,10 @@ class Direction(object):
         """
         # Handle input args
         self.name = name
+        if type(ra) is str:
+            ra = Angle(ra).to('deg').value
+        if type(dec) is str:
+            dec = Angle(dec).to('deg').value
         self.ra = ra
         self.dec = dec
         self.atrous_do = atrous_do
