@@ -27,10 +27,10 @@ make_facet_skymodels_all.control.type           =   make_facet_skymodel
 make_facet_skymodels_all.control.mapfile_in     =   create_full_skymodels_map.output.mapfile
 make_facet_skymodels_all.control.inputkey       =   fullmodelfile
 make_facet_skymodels_all.control.outputkey      =   outfile
-make_facet_skymodels_all.argument.flags         =   [fullmodelfile,outfile,{{ facet_state_file }}]
+make_facet_skymodels_all.argument.flags         =   [fullmodelfile,outfile,{{ vertices_file }}]
 make_facet_skymodels_all.argument.cal_only      =   False
-make_facet_skymodels_all.argument.facet_ra      =   {{ facet_ra }}
-make_facet_skymodels_all.argument.facet_dec     =   {{ facet_dec }}
+make_facet_skymodels_all.argument.facet_ra      =   {{ ra }}
+make_facet_skymodels_all.argument.facet_dec     =   {{ dec }}
 
 add_all_facet_sources.control.type              =   calibrate-stand-alone_new
 add_all_facet_sources.argument.observation      =   create_ms_map.output.mapfile
@@ -47,7 +47,7 @@ shift_all.parsetarg.msin.datacolumn             =   FACET_DATA_ALL
 shift_all.parsetarg.msout.writefullresflag      =   False
 shift_all.parsetarg.steps                       =   [shift]
 shift_all.parsetarg.shift.type                  =   phaseshifter
-shift_all.parsetarg.shift.phasecenter           =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+shift_all.parsetarg.shift.phasecenter           =   [{{ ra }}deg, {{ dec }}deg]
 
 copy_all_map.control.kind                       =   plugin
 copy_all_map.control.type                       =   copyMapfile

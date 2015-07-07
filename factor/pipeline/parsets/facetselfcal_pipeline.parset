@@ -34,7 +34,7 @@ average_data.argument.msin.datacolumn                      =   DATA
 average_data.argument.msout.writefullresflag               =   False
 average_data.argument.steps                                =   [avg]
 average_data.argument.avg.type                             =   squash
-average_data.argument.avg.freqstep                         =   20
+average_data.argument.avg.freqstep                         =   {{ facetselfcal_freqstep }}
 average_data.argument.avg.timestep                         =   1
 
 average_corr.control.type                                  =   dppp
@@ -91,7 +91,7 @@ average0.argument.msout.writefullresflag                   =   False
 average0.argument.steps                                    =   [avg]
 average0.argument.avg.type                                 =   squash
 average0.argument.avg.freqstep                             =   1
-average0.argument.avg.timestep                             =   12
+average0.argument.avg.timestep                             =   {{ facetselfcal_timestep }}
 
 casa_image01.control.type                                  =   casa_clean
 casa_image01.control.mapfile_in                            =   average0.output.mapfile
@@ -229,7 +229,7 @@ average1.argument.msout.writefullresflag                   =   False
 average1.argument.steps                                    =   [avg]
 average1.argument.avg.type                                 =   squash
 average1.argument.avg.freqstep                             =   1
-average1.argument.avg.timestep                             =   12
+average1.argument.avg.timestep                             =   {{ facetselfcal_timestep }}
 
 create_compressed_mapfile1.control.kind                    =   plugin
 create_compressed_mapfile1.control.type                    =   compressMapfile
@@ -380,7 +380,7 @@ average2.argument.msout.writefullresflag                   =   False
 average2.argument.steps                                    =   [avg]
 average2.argument.avg.type                                 =   squash
 average2.argument.avg.freqstep                             =   1
-average2.argument.avg.timestep                             =   12
+average2.argument.avg.timestep                             =   {{ facetselfcal_timestep }}
 
 create_compressed_mapfile2.control.kind                    =   plugin
 create_compressed_mapfile2.control.type                    =   compressMapfile
@@ -557,7 +557,7 @@ average3.argument.msout.writefullresflag                   =   False
 average3.argument.steps                                    =   [avg]
 average3.argument.avg.type                                 =   squash
 average3.argument.avg.freqstep                             =   1
-average3.argument.avg.timestep                             =   12
+average3.argument.avg.timestep                             =   {{ facetselfcal_timestep }}
 
 create_compressed_mapfile3.control.kind                    =   plugin
 create_compressed_mapfile3.control.type                    =   compressMapfile
@@ -740,7 +740,7 @@ average4.argument.msout.writefullresflag                   =   False
 average4.argument.steps                                    =   [avg]
 average4.argument.avg.type                                 =   squash
 average4.argument.avg.freqstep                             =   1
-average4.argument.avg.timestep                             =   12
+average4.argument.avg.timestep                             =   {{ facetselfcal_timestep }}
 
 create_compressed_mapfile4.control.kind                    =   plugin
 create_compressed_mapfile4.control.type                    =   compressMapfile
@@ -887,8 +887,8 @@ average5.parsetarg.msin.datacolumn                         =   CORRECTED_DATA
 average5.parsetarg.msout.writefullresflag                  =   False
 average5.parsetarg.steps                                   =   [avg]
 average5.parsetarg.avg.type                                =   squash
-average5.parsetarg.avg.freqstep                            =   5
-average5.parsetarg.avg.timestep                            =   3
+average5.parsetarg.avg.freqstep                            =   {{ facetimage_freqstep }}
+average5.parsetarg.avg.timestep                            =   {{ facetimage_timestep }}
 
 create_compressed_mapfile5.control.kind                    =   plugin
 create_compressed_mapfile5.control.type                    =   compressMapfile
@@ -910,7 +910,7 @@ premask.argument.flags                                     =   [imagefile,maskfi
 premask.argument.img_format                                =   fits
 premask.argument.pad_to_size                               =   {{ facet_imsize }}
 premask.argument.skip_source_detection                     =   True
-premask.argument.vertices_file                             =   {{ facet_state_file }}
+premask.argument.vertices_file                             =   {{ vertices_file }}
 
 wsclean1.control.type                                      =   wsclean
 wsclean1.control.mapfiles_in                               =   [concat_averaged.output.mapfile,premask.output.mapfile]
@@ -962,7 +962,7 @@ mask5.argument.rmsbox                                      =   (80,20)
 mask5.argument.adaptive_rmsbox                             =   True
 mask5.argument.atrous_do                                   =   True
 mask5.argument.img_format                                  =   fits
-mask5.argument.vertices_file                               =   {{ facet_state_file }}
+mask5.argument.vertices_file                               =   {{ vertices_file }}
 
 wsclean2.control.type                                      =   wsclean
 wsclean2.control.mapfiles_in                               =   [concat_averaged.output.mapfile,mask5.output.mapfile]
@@ -1057,8 +1057,8 @@ average_pre.parsetarg.msin.datacolumn                      =   CORRECTED_SUBTRAC
 average_pre.parsetarg.msout.writefullresflag               =   False
 average_pre.parsetarg.steps                                =   [avg]
 average_pre.parsetarg.avg.type                             =   squash
-average_pre.parsetarg.avg.freqstep                         =   20
-average_pre.parsetarg.avg.timestep                         =   6
+average_pre.parsetarg.avg.freqstep                         =   {{ verify_freqstep }}
+average_pre.parsetarg.avg.timestep                         =   {{ verfiy_timestep }}
 
 average_post.control.type                                  =   dppp
 average_post.control.mapfile_in                            =   {{ shifted_all_bands_datamap }}
@@ -1067,8 +1067,8 @@ average_post.parsetarg.msin.datacolumn                     =   CORRECTED_SUBTRAC
 average_post.parsetarg.msout.writefullresflag              =   False
 average_post.parsetarg.steps                               =   [avg]
 average_post.parsetarg.avg.type                            =   squash
-average_post.parsetarg.avg.freqstep                        =   20
-average_post.parsetarg.avg.timestep                        =   6
+average_post.parsetarg.avg.freqstep                        =   {{ verify_freqstep }}
+average_post.parsetarg.avg.timestep                        =   {{ verfiy_timestep }}
 
 wsclean_pre.control.type                                   =   wsclean
 wsclean_pre.control.mapfile_in                             =   average_pre.output.mapfile

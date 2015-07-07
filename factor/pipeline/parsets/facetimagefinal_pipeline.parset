@@ -26,8 +26,8 @@ average.parsetarg.msin.datacolumn                 =   CORRECTED_DATA
 average.parsetarg.msout.writefullresflag          =   False
 average.parsetarg.steps                           =   [avg]
 average.parsetarg.avg.type                        =   squash
-average.parsetarg.avg.freqstep                    =   5
-average.parsetarg.avg.timestep                    =   3
+average.parsetarg.avg.freqstep                    =   {{ facetimage_freqstep }}
+average.parsetarg.avg.timestep                    =   {{ facetimage_timestep }}
 
 create_compressed_mapfile.control.kind            =   plugin
 create_compressed_mapfile.control.type            =   compressMapfile
@@ -89,7 +89,7 @@ mask.argument.threshpix                           =   5
 mask.argument.rmsbox                              =   (80,20)
 mask.argument.adaptive_rmsbox                     =   True
 mask.argument.img_format                          =   fits
-mask.argument.vertices_file                       =   {{ facet_state_file }}
+mask.argument.vertices_file                       =   {{ vertices_file }}
 
 wsclean2.control.type                             =   wsclean
 wsclean2.control.mapfiles_in                      =   [concat_averaged.output.mapfile,mask.output.mapfile]

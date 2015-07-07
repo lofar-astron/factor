@@ -118,7 +118,9 @@ class Operation(object):
                            'pipeline_dir': self.factor_pipeline_dir,
                            'script_dir': self.factor_script_dir,
                            'hosts': self.node_list,
-                           'max_cpus_per_node': self.max_cpus_per_node}
+                           'max_cpus_per_node': self.max_cpus_per_node,
+                           'max_percent_memory' : self.max_percent_memory}
+        self.parms_dict.update(self.direction.__dict__) # add all direction attributes
 
         # Add cluster-related info
         if os.path.basename(self.parset['cluster_specific']['clusterdesc']) == 'local.clusterdesc':

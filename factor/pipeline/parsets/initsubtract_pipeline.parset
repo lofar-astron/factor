@@ -136,8 +136,8 @@ average.parsetarg.msin.datacolumn          =   CORRECTED_SUBTRACTED_DATA
 average.parsetarg.msout.writefullresflag   =   False
 average.parsetarg.steps                    =   [avg]
 average.parsetarg.avg.type                 =   squash
-average.parsetarg.avg.freqstep             =   5
-average.parsetarg.avg.timestep             =   2
+average.parsetarg.avg.freqstep             =   {{ initsubtract_freqstep }}
+average.parsetarg.avg.timestep             =   {{ initsubtract_timestep }}
 
 # make_copy_avg_map.control.kind             =   plugin
 # make_copy_avg_map.control.type             =   copyFiles

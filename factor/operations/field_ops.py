@@ -16,19 +16,39 @@ from lofarpipe.support.data_map import DataMap
 class InitSubtract(Operation):
     """
     Operation to create empty datasets
+
+    Two pipelines can be run, depending on whether the skymodels are present for
+    all bands or not:
+
+    initsubtract_pipeline.parset - runs the full initial subtraction when one
+        or more bands lack skymodels
+
+    initsubtract_subonly_pipeline.parset - runs only a subtract step when all
+        bands have skymodels
+
+
     """
     def __init__(self, parset, bands, direction):
         super(InitSubtract, self).__init__(parset, bands, direction,
             name='InitSubtract')
 
-        # Define parameters needed for this operation
+        # Set the pipeline parset to use
+        if all([b.skymodel_dirindep is not None for b in self.bands]):
+            self.pipeline_parset_template = '{0}_subonly_pipeline.parset'.format(self.name)
+        else:
+            self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
+
+        # Define extra parameters needed for this operation (beyond those
+        # defined in the master Operation class and as attributes of the
+        # direction object)
         input_bands = [b.file for b in self.bands]
         highres_image_sizes = ['{0} {0}'.format(b.imsize_high_res) for b in self.bands]
         lowres_image_sizes = ['{0} {0}'.format(b.imsize_low_res) for b in self.bands]
+        skymodels = [band.skymodel_dirindep for band in self.bands]
         self.parms_dict.update({'input_bands': input_bands,
                                 'highres_image_sizes' : highres_image_sizes,
                                 'lowres_image_sizes' : lowres_image_sizes,
-                                'max_percent_memory' : self.max_percent_memory,
+                                'skymodels': skymodels,
                                 'dir_indep_parmdb_name': parset['parmdb_name']})
 
 
@@ -53,7 +73,3 @@ class MakeMosaic(Operation):
     def __init__(self, parset, direction):
         super(MakeMosaic, self).__init__(parset, None, direction,
             name='MakeMosaic')
-
-        # Define parameters needed for this operation
-        self.parms_dict.update({'facet_image_filenames': self.direction.facet_image_filenames,
-                                'facet_vertices_filenames': self.direction.facet_vertices_filenames})

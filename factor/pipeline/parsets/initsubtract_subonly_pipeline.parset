@@ -1,0 +1,31 @@
+pipeline.steps = [create_ms_map, create_parmdb_map, create_skymodel_map, subtract]
+
+pipeline.pluginpath                     =   {{ pipeline_dir }}/plugins
+
+create_ms_map.control.kind              =   plugin
+create_ms_map.control.type              =   addListMapfile
+create_ms_map.control.hosts             =   {{ hosts }}
+create_ms_map.control.files             =   {{ input_bands }}
+create_ms_map.control.mapfile_dir       =   {{ mapfile_dir }}
+create_ms_map.control.filename          =   input_bands.datamap
+
+create_parmdb_map.control.kind          =   plugin
+create_parmdb_map.control.type          =   addParmdbMapfile
+create_parmdb_map.control.mapfile_in    =   create_ms_map.output.mapfile
+create_parmdb_map.control.parmdb_name   =   {{ dir_indep_parmdb_name }}
+create_parmdb_map.control.mapfile_dir   =   {{ mapfile_dir }}
+create_parmdb_map.control.filename      =   dir_indep_instrument_parmdbs.datamap
+
+create_skymodel_map.control.kind        =   plugin
+create_skymodel_map.control.type        =   addListMapfile
+create_skymodel_map.control.hosts       =   {{ hosts }}
+create_skymodel_map.control.files       =   {{ skymodels }}
+create_skymodel_map.control.mapfile_dir =   {{ mapfile_dir }}
+create_skymodel_map.control.filename    =   skymodels.datamap
+
+subtract.control.type                   =   calibrate-stand-alone_new
+subtract.argument.observation           =   create_ms_map.output.mapfile
+subtract.argument.parset                =   {{ parset_dir }}/field_subtract_merged.parset
+subtract.argument.catalog               =   create_skymodel_map.output.mapfile
+subtract.argument.parmdb                =   create_parmdb_map.output.mapfile
+subtract.argument.force                 =   True

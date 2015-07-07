@@ -29,7 +29,7 @@ shift_all.parsetarg.msin.datacolumn             =   FACET_DATA_ALL
 shift_all.parsetarg.msout.writefullresflag      =   False
 shift_all.parsetarg.steps                       =   [shift]
 shift_all.parsetarg.shift.type                  =   phaseshifter
-shift_all.parsetarg.shift.phasecenter           =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+shift_all.parsetarg.shift.phasecenter           =   [{{ ra }}deg, {{ dec }}deg]
 
 copy_all_map.control.kind                       =   plugin
 copy_all_map.control.type                       =   copyMapfile

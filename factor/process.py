@@ -57,18 +57,26 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     # Make direction object for the field
     field = Direction('field', bands[0].ra, bands[0].dec,
         factor_working_dir=parset['dir_working'])
+    field.set_averaging_steps(bands[0].chan_width_hz, bands[0].timestep_sec)
     exists = field.load_state()
     if not exists:
         field.save_state()
 
     # Run initial sky model generation and create empty datasets
     if len(bands_initsubtract) > 0:
-        op = InitSubtract(parset, bands_initsubtract, field)
+        input_bands_full = [b.file for b in bands_initsubtract if b.skymodel_dirindep is None]
+        input_bands_subonly = [b.file for b in bands_initsubtract if b.skymodel_dirindep is not None]
+
+        op = InitSubtract(parset, input_bands_full, field)
         scheduler.run(op)
+
+        op = InitSubtract(parset, input_bands_subonly, field)
+        scheduler.run(op)
+
         field.cleanup()
     else:
-        log.info("Sky models found for all bands. Skipping initsubtract "
-            "operation")
+        log.info("Sky models and SUBTRACTED_DATA_ALL found for all bands. "
+            "Skipping initsubtract operation...")
 
     # Define directions
     directions, direction_groups = _set_up_directions(parset, bands, field, log,
@@ -172,7 +180,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     # Make final facet images (from final empty datasets) if desired. Also image
     # any facets for which selfcal failed or no selfcal was done
     #
-    # TODO: combine facet sky models and adjust facet edges for new sources
+    # TODO: combine new facet sky models and adjust facet edges for new sources
     #
     dirs_to_image = [d for d in directions if d.make_final_image and d.selfcal_ok]
     if len(dirs_to_image) > 0:
@@ -435,10 +443,13 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
         direction.vertices = polys[i]
         direction.width = widths[i]
 
+        # Set averaging steps
+        direction.set_averaging_steps(bands[0].chan_width_hz, bands[0].timestep_sec)
+
         # Set image sizes
         direction.set_image_sizes(test_run=test_run)
 
-        # Set number of bands and channels
+        # Set number of bands and channels for images
         direction.nbands = len(bands)
         if direction.nbands > 5:
             direction.nchannels = int(np.ceil(float(direction.nbands)/

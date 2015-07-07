@@ -30,6 +30,8 @@ class Band(object):
         # Get the reference frequency and set name
         sw = pt.table(self.file+'::SPECTRAL_WINDOW', ack=False)
         self.freq = sw.col('REF_FREQUENCY')[0]
+        self.nchan = sw.col('NUM_CHAN')[0]
+        self.chan_width_hz = sw.col('CHAN_WIDTH')[0]
         sw.close()
         self.name = 'Band_{0:.2f}MHz'.format(self.freq/1e6)
 

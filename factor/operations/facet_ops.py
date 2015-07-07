@@ -35,7 +35,9 @@ class FacetAdd(Operation):
         super(FacetAdd, self).__init__(parset, bands, direction,
             name='FacetAdd')
 
-        # Define parameters needed for this operation
+        # Define extra parameters needed for this operation (beyond those
+        # defined in the master Operation class and as attributes of the
+        # direction object)
         skymodels = [band.skymodel_dirindep for band in self.bands]
         if self.direction.use_new_sub_data:
             add_all_parset = 'facet_dirindep_add_all_new.parset'
@@ -47,11 +49,7 @@ class FacetAdd(Operation):
                                 'add_all_parset': add_all_parset,
                                 'add_cal_parset': add_cal_parset,
                                 'dir_indep_parmdb_name': parset['parmdb_name'],
-                                'skymodels': skymodels,
-                                'facet_ra': self.direction.ra,
-                                'facet_dec': self.direction.dec,
-                                'cal_radius_deg': self.direction.cal_size_deg/2.0,
-                                'facet_state_file': self.direction.save_file})
+                                'skymodels': skymodels})
 
 
     def finalize(self):
@@ -86,7 +84,9 @@ class FacetSelfcal(Operation):
         super(FacetSelfcal, self).__init__(parset, None, direction,
             name='FacetSelfcal')
 
-        # Define parameters needed for this operation
+        # Define extra parameters needed for this operation (beyond those
+        # defined in the master Operation class and as attributes of the
+        # direction object)
         if self.direction.nchannels > 1:
             nterms = 2
             casa_suffix = '.tt0'
@@ -95,28 +95,9 @@ class FacetSelfcal(Operation):
             nterms = 1
             casa_suffix = None
             wsclean_suffix = '-image.fits'
-        self.parms_dict.update({'shifted_cal_bands_datamap': self.direction.shifted_cal_bands_datamap,
-                                'shifted_all_bands_datamap': self.direction.shifted_all_bands_datamap,
-                                'shifted_empty_bands_datamap': self.direction.shifted_empty_bands_datamap,
-                                'dir_indep_parmdbs_datamap': self.direction.dir_indep_parmdbs_datamap,
-                                'field_ra': self.direction.field_ra,
-                                'field_dec': self.direction.field_dec,
-                                'wplanes': self.direction.wplanes,
-                                'casa_suffix': casa_suffix,
+        self.parms_dict.update({'casa_suffix': casa_suffix,
                                 'wsclean_suffix': wsclean_suffix,
-                                'facet_imsize': self.direction.facet_imsize,
-                                'max_percent_memory' : self.max_percent_memory,
-                                'cal_wplanes': self.direction.wplanes,
-                                'cal_imsize': self.direction.cal_imsize,
-                                'nterms': nterms,
-                                'nchannels': self.direction.nchannels,
-                                'chunk_width': (self.direction.solint_a-1)*2,
-                                'solint_p': self.direction.solint_p,
-                                'solint_a': self.direction.solint_a,
-                                'region_selfcal': self.direction.region_selfcal,
-                                'atrous_do': self.direction.atrous_do,
-                                'facet_state_file': self.direction.save_file,
-                                'hosts': self.direction.hosts})
+                                'nterms': nterms)
 
 
     def finalize(self):
@@ -163,26 +144,20 @@ class FacetSub(Operation):
         super(FacetSub, self).__init__(parset, None, direction,
             name='FacetSub')
 
-        # Define parameters needed for this operation
+        # Set the pipeline parset to use
         if self.direction.skip_add_subtract:
             self.pipeline_parset_template = '{0}_single_pipeline.parset'.format(self.name)
         else:
             self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
 
+        # Define extra parameters needed for this operation (beyond those
+        # defined in the master Operation class and as attributes of the
+        # direction object)
         if self.direction.use_new_sub_data:
             add_all_parset = 'facet_dirindep_add_all_new.parset'
         else:
             add_all_parset = 'facet_dirindep_add_all.parset'
-
-        self.parms_dict.update({'shifted_all_bands_datamap': self.direction.shifted_all_bands_datamap,
-                                'dir_dep_parmdb_datamap': self.direction.dir_dep_parmdb_datamap,
-                                'dir_indep_parmdbs_datamap': self.direction.dir_indep_parmdbs_datamap,
-                                'dir_indep_skymodels_datamap': self.direction.dir_indep_skymodels_datamap,
-                                'dir_indep_facet_skymodels_datamap': self.direction.dir_indep_facet_skymodels_datamap,
-                                'add_all_parset': add_all_parset,
-                                'input_bands_datamap': self.direction.input_bands_datamap,
-                                'field_ra': self.direction.field_ra,
-                                'field_dec': self.direction.field_dec})
+        self.parms_dict.update({'add_all_parset': add_all_parset})
 
 
     def finalize(self):
@@ -201,28 +176,21 @@ class FacetAddFinal(Operation):
         super(FacetAddFinal, self).__init__(parset, bands, direction,
             name='FacetAddFinal')
 
-        # Define parameters needed for this operation
+        # Set the pipeline parset to use
         if not self.direction.selfcal_ok:
             # Set parset template to sky-model parset
             self.pipeline_parset_template = '{0}_cc_skymodel_pipeline.parset'.format(self.name)
-
-            skymodels = [band.skymodel_dirindep for band in self.bands]
-            self.parms_dict.update({'input_dir': parset['dir_ms'],
-                                'dir_indep_parmdb_name': parset['parmdb_name'],
-                                'skymodels': skymodels,
-                                'facet_ra': self.direction.ra,
-                                'facet_dec': self.direction.dec,
-                                'facet_state_file': self.direction.save_file})
         else:
             # Set parset template to facet model-image parset
             self.pipeline_parset_template = '{0}_model_image_pipeline.parset'.format(self.name)
 
-            self.parms_dict.update({'input_bands_datamap': self.direction.input_bands_datamap,
-                                'dir_dep_parmdb_mapfile': self.direction.dir_dep_parmdb_datamap,
-                                'facet_model_data_mapfile': self.direction.facet_model_data_mapfile,
-                                'facet_ra': self.direction.ra,
-                                'facet_dec': self.direction.dec,
-                                'facet_state_file': self.direction.save_file})
+        # Define extra parameters needed for this operation (beyond those
+        # defined in the master Operation class and as attributes of the
+        # direction object)
+        skymodels = [band.skymodel_dirindep for band in self.bands]
+        self.parms_dict.update({'input_dir': parset['dir_ms'],
+                                'dir_indep_parmdb_name': parset['parmdb_name'],
+                                'skymodels': skymodels})
 
 
     def finalize(self):
@@ -244,19 +212,14 @@ class FacetImageFinal(Operation):
         super(FacetImageFinal, self).__init__(parset, None, direction,
             name='FacetImageFinal')
 
-        # Define parameters needed for this operation
+        # Define extra parameters needed for this operation (beyond those
+        # defined in the master Operation class and as attributes of the
+        # direction object)
         if self.direction.nchannels > 1:
             wsclean_suffix = '-MFS-image.fits'
         else:
             wsclean_suffix = '-image.fits'
-        self.parms_dict.update({'dir_dep_parmdb_datamap': self.direction.dir_dep_parmdb_datamap,
-                                'shifted_all_final_bands_datamap': self.direction.shifted_all_final_bands_datamap,
-                                'wsclean_suffix': wsclean_suffix,
-                                'facet_imsize': self.direction.facet_imsize,
-                                'max_percent_memory' : self.max_percent_memory,
-                                'nchannels': self.direction.nchannels,
-                                'facet_state_file': self.direction.save_file,
-                                'hosts': self.direction.hosts})
+        self.parms_dict.update({'wsclean_suffix': wsclean_suffix})
 
 
     def finalize(self):

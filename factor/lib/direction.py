@@ -9,6 +9,11 @@ from astropy.coordinates import Angle
 class Direction(object):
     """
     Generic direction class
+
+    Note:
+    All attributes needed by the pipeline templates should be set on the class
+    instance so that they can be passed with self.__dict__
+
     """
     def __init__(self, name, ra, dec, atrous_do=False, mscale_field_do=False, cal_imsize=0,
         solint_p=0, solint_a=0, field_imsize=0, dynamic_range='LD', region_selfcal='',
@@ -56,6 +61,7 @@ class Direction(object):
             Size in degrees of calibrator source(s)
         cal_flux_jy : float, optional
             Apparent flux in Jy of calibrator source
+
         """
         # Handle input args
         self.name = name
@@ -70,6 +76,7 @@ class Direction(object):
         self.cal_imsize = cal_imsize
         self.solint_p = solint_p
         self.solint_a = solint_a
+        self.chunk_width = (solint_a - 1) * 2
         self.facet_imsize = field_imsize * 1.15
         self.dynamic_range = dynamic_range
         if region_selfcal.lower() == 'empty':
@@ -90,7 +97,7 @@ class Direction(object):
         else:
             self.apparent_flux_mjy = None
 
-        # Initialize some parameters
+        # Initialize some parameters to default values
         self.loop_amp_selfcal = False
         self.selfcal_ok = False # whether selfcal succeeded
         self.skip_add_subtract = False # whether to skip add/subtract in facetsub op
@@ -106,24 +113,25 @@ class Direction(object):
             self.cal_size_deg = cal_imsize * self.cellsize_selfcal_deg / 1.5
         else:
             self.cal_size_deg = cal_size_deg
+        self.cal_radius_deg = cal_size_deg / 2.0
         self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
 
         # Set number of wplanes for casapy imaging
-        self.wplanes = 1
+        self.cal_wplanes = 1
         if self.cal_imsize > 512:
-            self.wplanes = 64
+            self.cal_wplanes = 64
         if self.cal_imsize > 799:
-            self.wplanes = 96
+            self.cal_wplanes = 96
         if self.cal_imsize > 1023:
-            self.wplanes = 128
+            self.cal_wplanes = 128
         if self.cal_imsize > 1599:
-            self.wplanes = 256
+            self.cal_wplanes = 256
         if self.cal_imsize > 2047:
-            self.wplanes = 384
+            self.cal_wplanes = 384
         if self.cal_imsize > 3000:
-            self.wplanes = 448
+            self.cal_wplanes = 448
         if self.cal_imsize > 4095:
-            self.wplanes = 512
+            self.cal_wplanes = 512
 
         # Scale solution intervals by apparent flux. The scaling is done so that
         # sources with flux densities of 100 mJy have a fast interval of 4 time
@@ -142,6 +150,7 @@ class Direction(object):
         self.cleanup_mapfiles = []
         self.save_file = os.path.join(self.working_dir, 'state',
             self.name+'_save.pkl')
+        self.vertices_file = self.save_file
         self.pipeline_dir = os.path.join(self.working_dir, 'pipeline')
 
 
@@ -229,6 +238,41 @@ class Direction(object):
             if ((numpy.max(prime_factors(k)) < 8)):
                 return k
         return newlarge
+
+
+    def set_averaging_steps(self, chan_width_hz, timestep_sec):
+        """
+        Sets the averaging step sizes
+
+        ### TODO ###
+        The optimal step sizes should be determined by the sizes of the images for
+        which the averaging is done, so that bandwidth and time smearing
+        is not problematic.
+
+        Bandwidth and time smearing can be estimated following
+        http://www.cv.nrao.edu/course/astr534/Interferometers1.html.
+
+        """
+        # For initsubtract, average to 0.5 MHz per channel and 20 sec per time
+        # slot. Since each band is imaged separately and the smearing and image
+        # sizes both scale linearly with frequency, a single frequency and time
+        # step is valid for all bands
+        self.initsubtract_freqstep = max(1, int(round(0.5 * 1e6 / chan_width_hz)))
+        self.initsubtract_timestep = max(1, int(round(20.0 / timestep_sec)))
+
+        # For selfcal, average to 2 MHz per channel and 120 s per time slot
+        self.facetselfcal_freqstep = max(1, int(round(2.0 * 1e6 / chan_width_hz)))
+        self.facetselfcal_timestep = max(1, int(round(120.0 / timestep_sec)))
+
+        # For facet imaging, average to 0.5 MHz per channel and 30 sec per time
+        # slot
+        self.facetimage_freqstep = max(1, int(round(0.5 * 1e6 / chan_width_hz)))
+        self.facetimage_timestep = max(1, int(round(30.0 / timestep_sec)))
+
+        # For selfcal verify, average to 2 MHz per channel and 60 sec per time
+        # slot
+        self.verify_freqstep = max(1, int(round(2.0 * 1e6 / chan_width_hz)))
+        self.verify_timestep = max(1, int(round(60.0 / timestep_sec)))
 
 
     def save_state(self):
