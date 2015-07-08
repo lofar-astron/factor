@@ -64,8 +64,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
 
     # Run initial sky model generation and create empty datasets
     if len(bands_initsubtract) > 0:
-        input_bands_full = [b.file for b in bands_initsubtract if b.skymodel_dirindep is None]
-        input_bands_subonly = [b.file for b in bands_initsubtract if b.skymodel_dirindep is not None]
+        input_bands_full = [b for b in bands_initsubtract if b.skymodel_dirindep is None]
+        input_bands_subonly = [b for b in bands_initsubtract if b.skymodel_dirindep is not None]
 
         op = InitSubtract(parset, input_bands_full, field)
         scheduler.run(op)
