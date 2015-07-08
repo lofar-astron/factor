@@ -154,7 +154,6 @@ class Direction(object):
         self.save_file = os.path.join(self.working_dir, 'state',
             self.name+'_save.pkl')
         self.vertices_file = self.save_file
-        self.pipeline_dir = os.path.join(self.working_dir, 'pipeline')
 
 
     def set_image_sizes(self, test_run=False):
