@@ -403,7 +403,7 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
     # Add the target to the directions list if desired
     target_has_own_facet = dir_parset['target_has_own_facet']
     if 'target_ra' in dir_parset and 'target_dec' in dir_parset and target_has_own_facet:
-        target = Direction('target', target_ra, target_dec,
+        target = Direction('target', dir_parset['target_ra'], dir_parset['target_dec'],
             factor_working_dir=parset['dir_working'])
         directions.append(target)
 
