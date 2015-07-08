@@ -48,7 +48,8 @@ class Band(object):
         self.diam = float(ant.col('DISH_DIAMETER')[0])
         ant.close()
 
-        # Check for SUBTRACTED_DATA_ALL column and calculate mean elevation
+        # Check for SUBTRACTED_DATA_ALL column and calculate times and number
+        # of samples
         tab = pt.table(self.file, ack=False)
         if 'SUBTRACTED_DATA_ALL' in tab.colnames():
             self.has_sub_data = True

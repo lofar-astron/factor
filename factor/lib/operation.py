@@ -21,6 +21,12 @@ env_config = Environment(loader=FileSystemLoader(os.path.join(DIR, '..', 'pipeli
 class Operation(object):
     """
     Generic operation class
+
+    An operation is simply a generic pipeline that performs a part of the facet
+    calibration. The corresponding operation object holds the pipeline settings,
+    populates the pipeline config and parset files, and updates the direction
+    object with variables needed by later operations.
+
     """
     def __init__(self, parset, bands, direction, name=None):
         """

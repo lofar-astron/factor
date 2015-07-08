@@ -10,6 +10,9 @@ class Direction(object):
     """
     Generic direction class
 
+    A direction object holds all the parameters needed for an operation in a
+    given direction (or facet).
+
     Note:
     All attributes needed by the pipeline templates should be set on the class
     instance so that they can be passed with self.__dict__

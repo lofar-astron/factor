@@ -4,7 +4,7 @@ Add Facet Sources Operation
 ===========================
 
 This operation adds both the facet calibrator and all facet sources to the data
-in preparation for self calibration.
+in preparation for self calibration. The pipeline parset for this operation is ``facetadd_pipeline.parset``.
 
 .. note::
 
@@ -26,7 +26,7 @@ Output
 Pipeline Steps
     create_ms_map, create_parmdb_map, create_full_skymodels_map
         Make datamaps for input MS files, their dir-independent parmdbs, and
-        the merged sky models
+        the merged sky models.
 
     make_facet_skymodels_all, make_facet_skymodels_cal
         Select all model components belonging to the facet calibrator and to all facet sources and writes
@@ -54,7 +54,7 @@ Pipeline Steps
         ``SUBTRACTED_DATA_ALL`` columns (or ``SUBTRACTED_DATA_ALL_NEW`` column if at least one facet has gone through self calibration previously) to the RA and Dec of the facet.
 
     copy_all_map, copy_cal_map, copy_empty_map
-        Copy datamaps for shifted datasets to convenient location
+        Copy datamaps for shifted datasets to convenient location.
 
 Test data
     TODO

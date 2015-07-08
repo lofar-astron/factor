@@ -3,7 +3,7 @@
 Facet Self-Calibration Operation
 ================================
 
-This operation performs self calibration on the facet calibrator.
+This operation performs self calibration on the facet calibrator. The pipeline parset for this operation is ``facetselfcal_pipeline.parset``.
 
 .. note::
 
@@ -34,7 +34,7 @@ Pipeline Steps
         Create datamaps suitable for DPPP concatenation.
 
     concat_data, concat_corr
-        Run DPPP to concatenate all bands together
+        Run DPPP to concatenate all bands together.
 
     copy_column
         Copy the ``CORRECTED_DATA`` column so that a single MS file has all needed columns.
@@ -51,23 +51,23 @@ The general self-calibration cycle is described here. Modifications to this cycl
 are described in later steps.
 
 Input
-	Concatenated, averaged MS file with ``DATA`` and ``CORRECTED_DATA`` columns
+	Concatenated, averaged MS file with ``DATA`` and ``CORRECTED_DATA`` columns.
 
 Output
     Improved ``MODEL_DATA`` column and dir-dependent solutions.
 
 Pipeline Steps
     averageX, create_compressed_mapfileX, concatX
-        Average and concatenate in time in preparation for imaging
+        Average and concatenate in time in preparation for imaging.
 
     casa_imageX1, adjust_casa_mapfileX, maskX, casa_imageX2
         CASA imaging run. Imaging is done with a cell size of 1.5". Wide-band imaging is done if more than 5 bands are used. Multi-scale clean is always used.
 
     create_modelX_map, casa_ftX
-        CASA FT run
+        CASA FT run.
 
     solveX
-        Solve for phases or amplitudes
+        Solve for phases or amplitudes.
 
 
 Self-calibration cycle 0
@@ -163,11 +163,11 @@ Merge self-calibration parmdbs and apply solutions
 --------------------------------------------------
 
 Input
-	Fast phase and slow amplitude solution parmdbs and full-resolution datasets (with all facet sources)
+	Fast phase and slow amplitude solution parmdbs and full-resolution datasets (with all facet sources).
 
 Output
     Merged parmdb with both fast phase and slow amplitude solutions and datasets
-    (with all facet sources) ready to image
+    (with all facet sources) ready to image.
 
 Pipeline Steps
     merge_selfcal_parmdbs
@@ -197,7 +197,7 @@ Pipeline Steps
         Match the number of dir-dependent parmdb entries in the datamap to that in the phase-shifted (with all facet sources) datasets datamap.
 
     apply_dir_dep
-        Apply the dir-dependent solutions
+        Apply the dir-dependent solutions.
 
 
 Test data
@@ -208,7 +208,7 @@ Make image of entire facet
 --------------------------
 
 Input
-	Full-resolution datasets (with all facet sources) with dir-dependent solutions applied
+	Full-resolution datasets (with all facet sources) with dir-dependent solutions applied.
 
 Output
     Image of the entire facet. An example image is shown in the `Facet example image`_.
@@ -229,7 +229,7 @@ Output
 
 Pipeline Steps
     average5, create_compressed_mapfile5, concat_averaged
-        Average in time and frequency and concatenate in frequency in preparation for imaging
+        Average in time and frequency and concatenate in frequency in preparation for imaging.
 
     premask, wsclean1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean2
         WSClean imaging run. Imaging is done with a cell size of 1.5". Wide-band imaging is done if more than 5 bands are used. Multi-scale clean is not used, as WSClean does not currently support clean masks for this mode.
@@ -242,23 +242,23 @@ Subtract model
 --------------
 
 Input
-	Model image of entire facet
+	Model image of entire facet.
 
 Output
-    ``SUBTRACTED_DATA`` column for each band with all high-res sources subtracted
+    ``SUBTRACTED_DATA`` column for each band with all high-res sources subtracted.
 
 Pipeline Steps
     create_model4_map, adjust_wsclean_mapfile2, create_compressed_mapfile6
-        Make datamap for model images
+        Make datamap for model images.
 
     concat_unaveraged
-        Concatenate in frequency in preparation for FT
+        Concatenate in frequency in preparation for FT.
 
     wsclean_ft
-        Call WSClean to FT model image into ``MODEL_DATA`` column of each band
+        Call WSClean to FT model image into ``MODEL_DATA`` column of each band.
 
     subtract
-        Call BBS to subtract ``MODEL_DATA`` column from ``DATA`` column
+        Call BBS to subtract ``MODEL_DATA`` column from ``DATA`` column.
 
 Test data
     TODO
@@ -268,7 +268,7 @@ Make low-res images of subtracted data
 --------------------------------------
 
 Input
-	Full-resolution datasets (with all facet sources subtracted)
+	Full-resolution datasets (with all facet sources subtracted).
 
 Output
     For each band, wide-field (~ 8 degree radius) images, one from before self calibration and one from after self calibration, are made at approximately 90" resolution. A region of an example image is shown in the `Residual example image`_. Note the improved subtraction for the circled source in the center (the facet calibrator).
@@ -285,10 +285,10 @@ Output
 
 Pipeline Steps
     apply_dir_indep_pre, apply_dir_indep_post
-        Apply dir-independent solutions in preparation for imaging
+        Apply dir-independent solutions in preparation for imaging.
 
     average_pre, average_post
-        Average heavily in time and frequency in preparation for imaging
+        Average heavily in time and frequency in preparation for imaging.
 
     wsclean_pre, wsclean_post
         WSClean imaging run. Imaging is done with a cell size of 30".
@@ -301,10 +301,10 @@ Verify self calibration
 -----------------------
 
 Input
-	Low-resolution wide-field images of subtracted datasets
+	Low-resolution wide-field images of subtracted datasets.
 
 Output
-    For each band, a datamap with True (if selfcal succeeded) or False (if selfcal failed)
+    For each band, a datamap with True (if selfcal succeeded) or False (if selfcal failed).
 
 Pipeline Steps
     verify_subtract

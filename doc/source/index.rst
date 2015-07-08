@@ -16,6 +16,10 @@ This document describes each step in the facet calibration pipeline. The pipelin
    facetadd.rst
    facetselfcal.rst
    facetsubtract.rst
+   facetaddfinal.rst
+   facetimagefinal.rst
+   mosaic.rst
+   factor.rst
 
 
 Index and search

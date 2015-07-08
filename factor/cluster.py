@@ -1,5 +1,5 @@
 """
-Module that holds all cluster-related functions
+Module that holds all compute cluster-related functions
 """
 import os
 import logging

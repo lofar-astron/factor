@@ -4,7 +4,16 @@ Initial Subtract Operation
 ==========================
 
 This operation images each band at high and low resolution to make and subtract
-sky models.
+sky models. There are two possible pipeline parsets for this operation:
+
+``initsubtract_pipeline.parset``
+    The full initial subtract operation, to be run when the input datasets do
+    not have a ``SUBTRACTED_DATA_ALL`` column nor a sky model.
+
+``initsubtract_subonly_pipeline.parset``
+    A partial initial subtract operation, to be run when the input datasets do
+    not have a ``SUBTRACTED_DATA_ALL`` column but do have a sky model. In this
+    case, only a subtract step is done.
 
 
 .. _high_res_images:
@@ -45,10 +54,10 @@ Output
 Pipeline Steps
     create_ms_map, create_parmdb_map, create_high_sizes_map, create_low_sizes_map
         Make datamaps for input MS files, their dir-independent parmdbs, and
-        the high- and low-res image sizes
+        the high- and low-res image sizes.
 
     wsclean_high1, mask_high, wsclean_high2
-        High-res WSClean imaging run
+        High-res WSClean imaging run.
 
 Test data
     TODO
@@ -61,14 +70,14 @@ Input
     Model images created during high-res imaging (see :ref:`high_res_images`), one for each band.
 
 Output
-    Sky models in ``makesourcedb`` format, one for each band
+    Sky models in ``makesourcedb`` format, one for each band.
 
 Pipeline Steps
     fits_to_image_high
-        Convert WSClean FITS model image to CASA model image
+        Convert WSClean FITS model image to CASA model image.
 
     casa_to_bbs_high
-        Convert CASA model image to ``makesourcedb`` sky model
+        Convert CASA model image to ``makesourcedb`` sky model.
 
 Test data
     TODO
@@ -81,18 +90,18 @@ Input
     Model images created during high-res imaging (see :ref:`high_res_images`), one for each band.
 
 Output
-    ``SUBTRACTED_DATA`` and ``CORRECTED_SUBTRACTED_DATA`` columns for each band with all high-res sources subtracted
+    ``SUBTRACTED_DATA`` and ``CORRECTED_SUBTRACTED_DATA`` columns for each band with all high-res sources subtracted.
 
 Pipeline Steps
     create_model_high_map
-        Make datamap for high-res model images
+        Make datamap for high-res model images.
 
     wsclean_ft_high
-        Call WSClean to FT model image into MODEL_DATA column of each band
+        Call WSClean to FT model image into MODEL_DATA column of each band.
 
     subtract_high
         Call BBS to subtract MODEL_DATA column from DATA column and correct subtracted column
-        with dir-independent solutions
+        with dir-independent solutions.
 
 Test data
     TODO
@@ -130,10 +139,10 @@ Output
 
 Pipeline Steps
     average
-        Average the ``CORRECTED_SUBTRACTED_DATA`` column as input to imager
+        Average the ``CORRECTED_SUBTRACTED_DATA`` column as input to imager.
 
     wsclean_low1, mask_low, wsclean_low2
-        Low-res WSClean imaging run
+        Low-res WSClean imaging run.
 
 Test data
     TODO
@@ -146,14 +155,14 @@ Input
     Model images created during low-res imaging (see :ref:`low_res_images`), one for each band.
 
 Output
-    Sky models in ``makesourcedb`` format, one for each band
+    Sky models in ``makesourcedb`` format, one for each band.
 
 Pipeline Steps
     fits_to_image_low
-        Convert WSClean FITS model image to CASA model image
+        Convert WSClean FITS model image to CASA model image.
 
     casa_to_bbs_low
-        Convert CASA model image to ``makesourcedb`` sky model
+        Convert CASA model image to ``makesourcedb`` sky model.
 
 Test data
     TODO
@@ -166,17 +175,17 @@ Input
     Model images created during low-res imaging (see :ref:`low_res_images`), one for each band.
 
 Output
-    ``SUBTRACTED_DATA_ALL`` column for each band with all low- and high-res sources subtracted
+    ``SUBTRACTED_DATA_ALL`` column for each band with all low- and high-res sources subtracted.
 
 Pipeline Steps
     create_model_low_map
-        Make datamap for low-res model images
+        Make datamap for low-res model images.
 
     wsclean_ft_low
-        Call WSClean to FT model image into MODEL_DATA column of each band
+        Call WSClean to FT model image into MODEL_DATA column of each band.
 
     subtract_low
-        Call BBS to subtract ``MODEL_DATA`` column from ``SUBTRACTED_DATA`` column
+        Call BBS to subtract ``MODEL_DATA`` column from ``SUBTRACTED_DATA`` column.
 
 Test data
     TODO
@@ -186,20 +195,44 @@ Merge low- and high-res sky models
 ----------------------------------
 
 Input
-	Low- and high-res sky models in ``makesourcedb`` format, one of each for each band
+	Low- and high-res sky models in ``makesourcedb`` format, one of each for each band.
 
 Output
-    Merged sky models in ``makesourcedb`` format with both low- and high-res sources, one for each band
+    Merged sky models in ``makesourcedb`` format with both low- and high-res sources, one for each band.
 
 Pipeline Steps
     merge
-        Call LSMTool to merge low- and high-res sky models into a single sky model
+        Call LSMTool to merge low- and high-res sky models into a single sky model.
 
     copy_final_model_map
-        Copy datamap for merged sky models to convenient location
+        Copy datamap for merged sky models to convenient location.
 
 Test data
     TODO
 
+
+Partial initial subtract operation
+----------------------------------
+
+.. note::
+
+    This step is done only for the ``initsubtract_subonly_pipeline.parset`` pipeline and replaces all of the above steps.
+
+Input
+    MS files concatenated into bands of 10 subbands (2 MHz) each, their dir-independent parmdbs, and their sky models.
+
+Output
+    ``SUBTRACTED_DATA_ALL`` column for each band with all low- and high-res sources subtracted.
+
+Pipeline Steps
+    create_ms_map, create_parmdb_map, create_skymodel_map
+        Make datamaps for input MS files, their dir-independent parmdbs, and
+        the sky models.
+
+    subtract
+        Call BBS to subtract the input sky modesl from the ``DATA`` column to make the ``SUBTRACTED_DATA`` column.
+
+Test data
+    TODO
 
 
