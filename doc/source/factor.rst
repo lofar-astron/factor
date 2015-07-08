@@ -36,10 +36,10 @@ factor.parset
     :show-inheritance:
 
 
-factor.lib
+factor.lib Classes
 -----------------------------
 
-.. automodule:: factor.lib
+.. autoclass:: factor.lib.band.Band
     :members:
     :undoc-members:
     :show-inheritance:
