@@ -97,7 +97,7 @@ class FacetSelfcal(Operation):
             wsclean_suffix = '-image.fits'
         self.parms_dict.update({'casa_suffix': casa_suffix,
                                 'wsclean_suffix': wsclean_suffix,
-                                'nterms': nterms)
+                                'nterms': nterms})
 
 
     def finalize(self):
