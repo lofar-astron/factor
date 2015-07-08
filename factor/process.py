@@ -400,9 +400,15 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
             directions = factor.directions.directions_read(parset['directions_file'],
                 parset['dir_working'])
 
+    # Add the target to the directions list if desired
+    target_has_own_facet = dir_parset['target_has_own_facet']
+    if 'target_ra' in dir_parset and 'target_dec' in dir_parset and target_has_own_facet:
+        target = Direction('target', target_ra, target_dec,
+            factor_working_dir=parset['dir_working'])
+        directions.append(target)
+
     # Load polygons from previous run if possible; if not, generate the polygons
     polys_file = os.path.join(parset['dir_working'], 'regions', 'factor_facets.pkl')
-    target_has_own_facet = dir_parset['target_has_own_facet']
     if os.path.exists(polys_file):
         with open(polys_file, 'r') as f:
             polys, widths = pickle.load(f)
@@ -423,9 +429,6 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
                 check_edges=dir_parset['check_edges'], target_ra=target_ra,
                 target_dec=target_dec, target_radius_arcmin=target_radius_arcmin)
         else:
-            target = Direction('target', target_ra, target_dec,
-                factor_working_dir=parset['dir_working'])
-            directions.append(target)
             polys, widths = factor.directions.thiessen(directions,
                 check_edges=dir_parset['check_edges'])
         with open(polys_file, 'wb') as f:
