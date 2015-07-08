@@ -323,7 +323,7 @@ class Direction(object):
                 self.completed_operations.remove(op)
 
             # Delete pipeline state
-            action_dirs = glob.glob(os.path.join(self.pipeline_dir, op, '*'))
+            action_dirs = glob.glob(os.path.join(self.working_dir, 'results', op, '*'))
             for action_dir in action_dirs:
                 facet_dir = os.path.join(action_dir, self.name)
                 if os.path.exists(facet_dir):

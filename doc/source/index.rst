@@ -3,10 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Facet Calibration Pipeline
-==========================
+Factor: Facet Calibration Pipeline
+==================================
 
-This document describes each step in the facet calibration pipeline. The pipeline is divided into a number of operations. Each operation is a group of steps. This grouping is determined by whether or not multiple pipelines may be run in parallel.
+This document describes each step in the Factor facet calibration pipeline. The pipeline is divided into a number of operations. Each operation is a group of steps. This grouping is determined by whether or not multiple pipelines may be run in parallel.
 
 .. toctree::
    :maxdepth: 2

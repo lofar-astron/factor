@@ -21,7 +21,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     """
     Processes a dataset using facet calibration
 
-    This functions runs the operations in the correct order and handles all the
+    This function runs the operations in the correct order and handles all the
     bookkeeping for the processing: e.g., which operations are needed for each
     direction (depending on sucess of selfcal, the order in which they were
     processed, etc.).

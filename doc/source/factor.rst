@@ -1,9 +1,9 @@
-Factor Module Documentation
-===========================
+Factor Module and Class Documentation
+=====================================
 
 
 factor.process
------------------------------
+--------------
 
 .. automodule:: factor.process
     :members:
@@ -11,7 +11,7 @@ factor.process
     :show-inheritance:
 
 factor.cluster
------------------------------
+--------------
 
 .. automodule:: factor.cluster
     :members:
@@ -19,7 +19,7 @@ factor.cluster
     :show-inheritance:
 
 factor.directions
------------------------------
+-----------------
 
 .. automodule:: factor.directions
     :members:
@@ -27,7 +27,7 @@ factor.directions
     :show-inheritance:
 
 factor.parset
------------------------------
+-------------
 
 .. automodule:: factor.parset
     :members:
@@ -36,7 +36,7 @@ factor.parset
 
 
 Classes
------------------------------
+-------
 
 .. autoclass:: factor.lib.band.Band
     :members:
