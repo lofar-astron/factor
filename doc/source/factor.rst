@@ -1,7 +1,6 @@
 Factor Module Documentation
 ===========================
 
-.. toctree::
 
 factor.process
 -----------------------------
@@ -36,7 +35,7 @@ factor.parset
     :show-inheritance:
 
 
-factor.lib Classes
+Classes
 -----------------------------
 
 .. autoclass:: factor.lib.band.Band
@@ -44,4 +43,18 @@ factor.lib Classes
     :undoc-members:
     :show-inheritance:
 
+.. autoclass:: factor.lib.direction.Direction
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. autoclass:: factor.lib.operation.Operation
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. autoclass:: factor.lib.scheduler.Scheduler
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
