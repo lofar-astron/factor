@@ -116,7 +116,7 @@ class Direction(object):
             self.cal_size_deg = cal_imsize * self.cellsize_selfcal_deg / 1.5
         else:
             self.cal_size_deg = cal_size_deg
-        self.cal_radius_deg = cal_size_deg / 2.0
+        self.cal_radius_deg = self.cal_size_deg / 2.0
         self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
 
         # Set number of wplanes for casapy imaging
