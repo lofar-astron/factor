@@ -150,15 +150,6 @@ class FacetSub(Operation):
         else:
             self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
 
-        # Define extra parameters needed for this operation (beyond those
-        # defined in the master Operation class and as attributes of the
-        # direction object)
-        if self.direction.use_new_sub_data:
-            add_all_parset = 'facet_dirindep_add_all_new.parset'
-        else:
-            add_all_parset = 'facet_dirindep_add_all.parset'
-        self.parms_dict.update({'add_all_parset': add_all_parset})
-
 
     def finalize(self):
         """

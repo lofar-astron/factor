@@ -108,7 +108,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         # must be done in series and only on the directions that passed the
         # selfcal check. Also, after this operation is complete for any
         # direction, set flag to indicate all subsequent directions should use
-        # the new subtracted-data column
+        # the new subtracted-data column for the FacetAdd operation
         if dry_run:
             # For dryrun, skip check
             for d in direction_group:
@@ -116,15 +116,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         direction_group_ok = [d for d in direction_group if d.selfcal_ok]
         if first_pass:
             if len(direction_group_ok) > 0:
-                # Only use new data if at least one direction is OK
-                for i, d in enumerate(directions):
-                    # Set flag for *all* directions except first one
-                    if i > 0:
-                        d.use_new_sub_data = True
+                for d in directions:
+                    d.use_new_sub_data = True
                 first_pass = False
-        else:
-            for d in direction_group_ok:
-                d.use_new_sub_data = True
 
         # For first direction in the group, we don't need to add the
         # sources and then subtract them, but instead can simply copy the
