@@ -67,13 +67,19 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         input_bands_full = [b for b in bands_initsubtract if b.skymodel_dirindep is None]
         input_bands_subonly = [b for b in bands_initsubtract if b.skymodel_dirindep is not None]
 
-        op = InitSubtract(parset, input_bands_full, field)
-        scheduler.run(op)
+        if len(input_bands_full) > 0:
+            op = InitSubtract(parset, input_bands_full, field)
+            scheduler.run(op)
+            field.cleanup()
 
-        op = InitSubtract(parset, input_bands_subonly, field)
-        scheduler.run(op)
-
-        field.cleanup()
+        if len(input_bands_subonly) > 0:
+            # Make new field object to handle these bands (to avoid pipeline
+            # conflicts)
+            field_subonly = Direction('field_subonly', bands[0].ra, bands[0].dec,
+                factor_working_dir=parset['dir_working'])
+            op = InitSubtract(parset, input_bands_subonly, field_subonly)
+            scheduler.run(op)
+            field_subonly.cleanup()
     else:
         log.info("Sky models and SUBTRACTED_DATA_ALL found for all bands. "
             "Skipping initsubtract operation...")
