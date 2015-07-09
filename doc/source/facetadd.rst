@@ -13,6 +13,7 @@ in preparation for self calibration. The pipeline parset for this operation is `
     This operation is separated from the self-calibration operation (:ref:`facet_selfcal`) as these pipelines
     must be run in series, whereas the self-calibration pipelines can be run in parallel.
 
+
 Add sources
 -----------
 
@@ -36,7 +37,7 @@ Pipeline Steps
         Run BBS to add sources to the data using the sky models above.
 
 Test data
-    TODO
+    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the sky models ``Test_run/results/facetadd/facet_patch_***/NEP_SB070-079.2ch10s.wsclean_low2-model.make_facet_skymodels_all`` and ``Test_run/results/facetadd/facet_patch_***/NEP_SB070-079.2ch10s.wsclean_low2-model.make_facet_skymodels_cal``, which in turn are used to make the ``FACET_DATA_ALL`` and ``FACET_DATA_CAL`` columns in this MS file.
 
 
 Split and phase shift data
@@ -57,6 +58,6 @@ Pipeline Steps
         Copy datamaps for shifted datasets to convenient location.
 
 Test data
-    TODO
+    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the MS files ``Test_run/results/facetadd/facet_patch_***/NEP_SB070-079.2ch10s.shift_all``, ``Test_run/results/facetadd/facet_patch_***/NEP_SB070-079.2ch10s.shift_cal``, and ``Test_run/results/facetadd/facet_patch_***/NEP_SB070-079.2ch10s.shift_empty``.
 
 

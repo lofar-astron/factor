@@ -40,7 +40,7 @@ Pipeline Steps
         Copy the ``CORRECTED_DATA`` column so that a single MS file has all needed columns.
 
 Test data
-    TODO
+    With ``Test_run/results/facetadd/facet_patch_***/NEP_SB070-079.2ch10s.shift_cal``, this step produces the MS file ``Test_run/results/facetselfcal/facet_patch_***/NEP_SB070-079.2ch10s.concat_data`` with averaged, concatenated (in frequency) ``DATA`` and ``CORRECTED_DATA`` columns.
 
 
 .. _selfcal_cycle:
@@ -201,7 +201,7 @@ Pipeline Steps
 
 
 Test data
-    TODO
+    With ``Test_run/results/facetselfcal/facet_patch_***/NEP_SB260_269.2ch10s_chunk29.merge_phase_parmdbs`` and ``Test_run/results/facetselfcal/facet_patch_***/NEP_SB260_269.2ch10s.smooth_amp2`` parmdbs, this step produces the merged parmdb ``Test_run/results/facetselfcal/facet_patch_***/```.
 
 
 Make image of entire facet

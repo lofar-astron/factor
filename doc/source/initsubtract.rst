@@ -60,7 +60,7 @@ Pipeline Steps
         High-res WSClean imaging run.
 
 Test data
-    TODO
+    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the image ``Test_run/results/initsubtract/field/RX42_SB070-079.2ch10s.wsclean_high2-image.fits``.
 
 
 Make high-res sky models
@@ -70,7 +70,8 @@ Input
     Model images created during high-res imaging (see :ref:`high_res_images`), one for each band.
 
 Output
-    Sky models in ``makesourcedb`` format, one for each band.
+    Sky models in ``makesourcedb`` format, one for each band. A model from a typical 8-hour observation should
+    contain ~ 10000 clean components.
 
 Pipeline Steps
     fits_to_image_high
@@ -80,7 +81,8 @@ Pipeline Steps
         Convert CASA model image to ``makesourcedb`` sky model.
 
 Test data
-    TODO
+    With the model image ``Test_run/results/initsubtract/field/NEP_SB070-079.2ch10s.wsclean_high2-model.fits``, this step produces the ``makesourceb`` sky model
+    ``Test_run/results/initsubtract/field/NEP_SB070-079.2ch10s.wsclean_high2-model.casa_to_bbs_high``.
 
 
 Subtract high-res models
@@ -104,7 +106,7 @@ Pipeline Steps
         with dir-independent solutions.
 
 Test data
-    TODO
+    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the ``SUBTRACTED_DATA`` and ``CORRECTED_SUBTRACTED_DATA`` columns in this MS file.
 
 
 .. _low_res_images:
@@ -145,7 +147,7 @@ Pipeline Steps
         Low-res WSClean imaging run.
 
 Test data
-    TODO
+    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the averaged MS file ``Test_run/results/initsubtract/field/NEP_SB070_079.2ch10s.average``, which in turn is used to make the  image ``Test_run/results/initsubtract/field/RX42_SB070-079.2ch10s.wsclean_low2-image.fits``.
 
 
 Make low-res sky models
@@ -155,7 +157,8 @@ Input
     Model images created during low-res imaging (see :ref:`low_res_images`), one for each band.
 
 Output
-    Sky models in ``makesourcedb`` format, one for each band.
+    Sky models in ``makesourcedb`` format, one for each band. A model from a typical 8-hour observation should
+    contain ~ 1500 clean components.
 
 Pipeline Steps
     fits_to_image_low
@@ -165,7 +168,7 @@ Pipeline Steps
         Convert CASA model image to ``makesourcedb`` sky model.
 
 Test data
-    TODO
+    With the model image ``Test_run/results/initsubtract/field/NEP_SB070-079.2ch10s.wsclean_low2-model.fits``, this step produces the ``makesourceb`` sky model ``Test_run/results/initsubtract/field/NEP_SB070-079.2ch10s.wsclean_low2-model.casa_to_bbs_low``.
 
 
 Subtract low-res models
@@ -188,7 +191,7 @@ Pipeline Steps
         Call BBS to subtract ``MODEL_DATA`` column from ``SUBTRACTED_DATA`` column.
 
 Test data
-    TODO
+    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the ``SUBTRACTED_DATA_ALL`` column in this MS file.
 
 
 Merge low- and high-res sky models
@@ -208,7 +211,7 @@ Pipeline Steps
         Copy datamap for merged sky models to convenient location.
 
 Test data
-    TODO
+    With the sky models ``Test_run/results/initsubtract/field/NEP_SB070_079.2ch10s.wsclean_high2-model.casa_to_bbs_high`` and ``Test_run/results/initsubtract/field/NEP_SB070_079.2ch10s.wsclean_low2-model.casa_to_bbs_low``, this step produces the merged sky model ``Test_run/results/initsubtract/field/NEP_SB070_079.2ch10s.wsclean_low2-model.merge``.
 
 
 Partial initial subtract operation
@@ -233,6 +236,7 @@ Pipeline Steps
         Call BBS to subtract the input sky modesl from the ``DATA`` column to make the ``SUBTRACTED_DATA`` column.
 
 Test data
-    TODO
+    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the ``SUBTRACTED_DATA_ALL`` column in this MS file.
+
 
 

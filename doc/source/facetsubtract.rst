@@ -18,6 +18,7 @@ This operation subtracts all facet sources from the data. There are two possible
     This operation is separated from the self-calibration operation (:ref:`facet_selfcal`) as these pipelines
     must be run in series, whereas the self-calibration pipelines can be run in parallel.
 
+
 Add sources
 -----------
 
