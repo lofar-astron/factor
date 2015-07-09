@@ -1123,8 +1123,8 @@ copy_verify_subtract_post_map.control.mapfile_in           =   verify_subtract.o
 copy_verify_subtract_post_map.control.mapfile_dir          =   {{ mapfile_dir }}
 copy_verify_subtract_post_map.control.filename             =   verify_subtract_maxval_post.datamap
 
-copy_verify_subtract_break_map.control.kind                 =   plugin
-copy_verify_subtract_break_map.control.type                 =   copyMapfile
-copy_verify_subtract_break_map.control.mapfile_in           =   verify_subtract.output.break.mapfile
-copy_verify_subtract_break_map.control.mapfile_dir          =   {{ mapfile_dir }}
-copy_verify_subtract_break_map.control.filename             =   verify_subtract_OK.datamap
+copy_verify_subtract_break_map.control.kind                =   plugin
+copy_verify_subtract_break_map.control.type                =   copyMapfile
+copy_verify_subtract_break_map.control.mapfile_in          =   verify_subtract.output.break.mapfile
+copy_verify_subtract_break_map.control.mapfile_dir         =   {{ mapfile_dir }}
+copy_verify_subtract_break_map.control.filename            =   verify_subtract_OK.datamap
