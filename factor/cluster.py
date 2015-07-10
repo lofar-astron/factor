@@ -51,6 +51,17 @@ def make_pbs_clusterdesc():
 def get_compute_nodes(clusterdesc_file):
     """
     Read a cluster description file and return list of nodes
+
+    Parameters
+    ----------
+    clusterdesc_file : str
+        Filename of cluster description file
+
+    Returns
+    -------
+    result : list
+        Sorted list of node names
+
     """
     from lofarpipe.support import clusterdesc
 
@@ -89,7 +100,7 @@ def find_executables(parset):
             sys.exit(1)
 
 
-def divide_nodes(directions, node_list, ndir_per_node, ncpu_max):
+def divide_nodes(directions, node_list, ndir_per_node, ncpu_max, fmem_max):
     """
     Divide up nodes and cpus among directions
 
@@ -102,7 +113,14 @@ def divide_nodes(directions, node_list, ndir_per_node, ncpu_max):
     ndir_per_node : int
         Number of directions per node
     ncpu_max : int
-        Number of CPUs per node
+        Max number of CPUs per node
+    fmem_max : float
+        Max fraction of memory per node
+
+    Returns
+    -------
+    directions : list
+        List of Direction objects, with attributes modified
 
     """
     if len(directions) >= len(node_list):
@@ -126,6 +144,7 @@ def divide_nodes(directions, node_list, ndir_per_node, ncpu_max):
         else:
             ndir_per_node = 1
         d.max_cpus_per_node = int(round(ncpu_max / float(ndir_per_node)))
+        d.max_percent_memory = fmem_max / float(ndir_per_node)
         d.save_state()
 
     return directions

@@ -126,7 +126,13 @@ class Operation(object):
                            'hosts': self.node_list,
                            'max_cpus_per_node': self.max_cpus_per_node,
                            'max_percent_memory' : self.max_percent_memory}
-        self.parms_dict.update(self.direction.__dict__) # add all direction attributes
+
+        # Update the pars_dict dictionary with the attributes of the operation's
+        # direction object. Any attributes set in the direction object that are
+        # also in the parms_dict will be set to those of the direction object
+        # (e.g., 'max_cpus_per_node', which is set in the direction object by
+        # factor.cluster.divide_nodes() will override the value set above)
+        self.parms_dict.update(self.direction.__dict__)
 
         # Add cluster-related info
         if os.path.basename(self.parset['cluster_specific']['clusterdesc']) == 'local.clusterdesc':

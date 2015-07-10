@@ -98,7 +98,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         direction_group = factor.cluster.divide_nodes(direction_group,
             parset['cluster_specific']['node_list'],
             parset['cluster_specific']['ndir_per_node'],
-            parset['cluster_specific']['ncpu'])
+            parset['cluster_specific']['ncpu'],
+            parset['cluster_specific']['fmem'])
 
         # Add calibrator(s) to empty datasets. These operations
         # must be done in series
