@@ -144,7 +144,7 @@ def divide_nodes(directions, node_list, ndir_per_node, ncpu_max, fmem_max):
         else:
             ndir_per_node = 1
         d.max_cpus_per_node = int(round(ncpu_max / float(ndir_per_node)))
-        d.max_percent_memory = fmem_max / float(ndir_per_node)
+        d.max_percent_memory = fmem_max / float(ndir_per_node) * 100.0
         d.save_state()
 
     return directions
