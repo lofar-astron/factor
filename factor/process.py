@@ -213,7 +213,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         dirs_to_image = factor.cluster.divide_nodes(dirs_to_image,
             parset['cluster_specific']['node_list'],
             parset['cluster_specific']['ndir_per_node'],
-            parset['cluster_specific']['ncpu'])
+            parset['cluster_specific']['ncpu'],
+            parset['cluster_specific']['fmem'])
 
         ops = [FacetImageFinal(parset, d) for d in dirs_to_image]
         scheduler.run(ops)
