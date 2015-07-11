@@ -31,7 +31,8 @@ Pipeline Steps
         Average ``CORRECTED_DATA`` column in time and frequency and concatenate in frequency in preparation for imaging.
 
 Test data
-    TODO
+    With the phase-shifted facet all-source MS files (e.g., ``NEP_SB070-079.2ch10s.shift_all``) in ``Test_run/results/facetaddfinal/facet_patch_***/``, this step produces the MS file ``NEP_SB070-079.2ch10s.concat_averaged`` in ``Test_run/results/facetimagefinal/facet_patch_***/`` with averaged, concatenated (in frequency) ``DATA`` column.
+
 
 
 Make image of entire facet
@@ -62,5 +63,6 @@ Pipeline Steps
         WSClean imaging run. Imaging is done with a cell size of 1.5". Wide-band imaging is done if more than 5 bands are used. Multi-scale clean is not used, as WSClean does not currently support clean masks for this mode.
 
 Test data
-    TODO
+    With the the averaged, virtually-concatenated MS file ``RX42_SB070-079.2ch10s.concat_averaged``, this step produces the image ``NEP_SB070-079.2ch10s.wsclean2-image.fits`` (or ``NEP_SB070-079.2ch10s.wsclean2-MFS-image.fits`` if wide-band clean was used). All of these files are in ``Test_run/results/facetselfcal/facet_patch_***/``.
+
 

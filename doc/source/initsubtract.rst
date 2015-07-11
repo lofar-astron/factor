@@ -60,7 +60,7 @@ Pipeline Steps
         High-res WSClean imaging run.
 
 Test data
-    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the image ``Test_run/results/initsubtract/field/RX42_SB070-079.2ch10s.wsclean_high2-image.fits``.
+    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the image ``RX42_SB070-079.2ch10s.wsclean_high2-image.fits`` in ``Test_run/results/initsubtract/field/``.
 
 
 Make high-res sky models
@@ -81,8 +81,8 @@ Pipeline Steps
         Convert CASA model image to ``makesourcedb`` sky model.
 
 Test data
-    With the model image ``Test_run/results/initsubtract/field/NEP_SB070-079.2ch10s.wsclean_high2-model.fits``, this step produces the ``makesourceb`` sky model
-    ``Test_run/results/initsubtract/field/NEP_SB070-079.2ch10s.wsclean_high2-model.casa_to_bbs_high``.
+    With the model image ``NEP_SB070-079.2ch10s.wsclean_high2-model.fits`` in ``Test_run/results/initsubtract/field/``, this step produces the ``makesourceb`` sky model ``NEP_SB070-079.2ch10s.wsclean_high2-model.casa_to_bbs_high`` in
+    ``Test_run/results/initsubtract/field/``.
 
 
 Subtract high-res models
@@ -147,7 +147,7 @@ Pipeline Steps
         Low-res WSClean imaging run.
 
 Test data
-    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the averaged MS file ``Test_run/results/initsubtract/field/NEP_SB070_079.2ch10s.average``, which in turn is used to make the  image ``Test_run/results/initsubtract/field/RX42_SB070-079.2ch10s.wsclean_low2-image.fits``.
+    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the averaged MS file ``NEP_SB070_079.2ch10s.average`` in ``Test_run/results/initsubtract/field/``, which in turn is used to make the  image ``RX42_SB070-079.2ch10s.wsclean_low2-image.fits`` in ``Test_run/results/initsubtract/field/``.
 
 
 Make low-res sky models
@@ -168,7 +168,7 @@ Pipeline Steps
         Convert CASA model image to ``makesourcedb`` sky model.
 
 Test data
-    With the model image ``Test_run/results/initsubtract/field/NEP_SB070-079.2ch10s.wsclean_low2-model.fits``, this step produces the ``makesourceb`` sky model ``Test_run/results/initsubtract/field/NEP_SB070-079.2ch10s.wsclean_low2-model.casa_to_bbs_low``.
+    With the model image ``NEP_SB070-079.2ch10s.wsclean_low2-model.fits`` in ``Test_run/results/initsubtract/field/``, this step produces the ``makesourceb`` sky model ``NEP_SB070-079.2ch10s.wsclean_low2-model.casa_to_bbs_low`` in ``Test_run/results/initsubtract/field/``.
 
 
 Subtract low-res models
@@ -211,7 +211,7 @@ Pipeline Steps
         Copy datamap for merged sky models to convenient location.
 
 Test data
-    With the sky models ``Test_run/results/initsubtract/field/NEP_SB070_079.2ch10s.wsclean_high2-model.casa_to_bbs_high`` and ``Test_run/results/initsubtract/field/NEP_SB070_079.2ch10s.wsclean_low2-model.casa_to_bbs_low``, this step produces the merged sky model ``Test_run/results/initsubtract/field/NEP_SB070_079.2ch10s.wsclean_low2-model.merge``.
+    With the sky models ``NEP_SB070_079.2ch10s.wsclean_high2-model.casa_to_bbs_high`` and  ``NEP_SB070_079.2ch10s.wsclean_low2-model.casa_to_bbs_low`` in ``Test_run/results/initsubtract/field/``, this step produces the merged sky model ``NEP_SB070_079.2ch10s.wsclean_low2-model.merge`` in  ``Test_run/results/initsubtract/field/``.
 
 
 Partial initial subtract operation
