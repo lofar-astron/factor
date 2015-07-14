@@ -56,12 +56,13 @@ class InitSubtract(Operation):
         """
         Finalize this operation
         """
-        # Add skymodels to band objects
-        merged_skymodel_datamap = os.path.join(self.mapfile_dir,
-            'merged_skymodels.datamap')
-        datamap = DataMap.load(merged_skymodel_datamap)
-        for band, item in zip(self.bands, datamap):
-            band.skymodel_dirindep = item.file
+        # Add skymodels to band objects if any lack them
+        if any([b.skymodel_dirindep is None for b in self.bands]):
+            merged_skymodel_datamap = os.path.join(self.mapfile_dir,
+                'merged_skymodels.datamap')
+            datamap = DataMap.load(merged_skymodel_datamap)
+            for band, item in zip(self.bands, datamap):
+                band.skymodel_dirindep = item.file
         self.direction.cleanup_mapfiles.append(os.path.join(self.mapfile_dir,
             'averaged_data.datamap'))
 
