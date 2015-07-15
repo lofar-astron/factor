@@ -6,8 +6,6 @@ Contains the master class for all operations
 import os
 import logging
 import socket
-from factor.lib.context import Timer
-from factor.lib.scheduler_mp import Scheduler
 from factor import _logging
 from jinja2 import Environment, FileSystemLoader
 from lofarpipe.support.utilities import create_directory
