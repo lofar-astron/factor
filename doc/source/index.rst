@@ -40,7 +40,6 @@ The overall structure of the pipeline is shown in the `Factor flowchart`_ below.
 .. toctree::
    :maxdepth: 2
    :numbered:
-   :private-members:
 
    initsubtract.rst
    facetadd.rst

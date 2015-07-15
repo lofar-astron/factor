@@ -1,6 +1,7 @@
 Factor Module and Class Documentation
 =====================================
 
+The primary Factor modules that are used to set up and run the pipeline are documented here.
 
 factor.process
 --------------
@@ -9,6 +10,7 @@ factor.process
     :members:
     :undoc-members:
     :show-inheritance:
+    :private-members:
 
 factor.cluster
 --------------
