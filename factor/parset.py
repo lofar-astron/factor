@@ -109,6 +109,8 @@ def parset_read(parset_file):
         parset_dict['wsclean_nbands'] = parset.getint('global', 'wsclean_nbands')
     else:
         parset_dict['wsclean_nbands'] = 3
+    if 'facet_imager' not in  parset_dict:
+        parset_dict['facet_imager'] = 'wsclean'
 
     # Handle directions-related parameters
     if 'directions' in parset._sections.keys():

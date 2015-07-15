@@ -33,6 +33,10 @@ wsclean_nbands = 2
 # the nearest successful direction
 exit_on_selfcal_failure = True
 
+# Use WSClean or CASA for imaging of entire facet (default = wsclean). For large
+# bandwidths, the CASA imager is typically faster
+facet_imager = casa
+
 # Use chgcenter to minimize number of w planes (default = False). Note that a
 # copy of the full dataset will be made (as chgcentre modifies the data)
 # NOTE: this option is currently disabled pending testing

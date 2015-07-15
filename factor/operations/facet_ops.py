@@ -84,6 +84,14 @@ class FacetSelfcal(Operation):
         super(FacetSelfcal, self).__init__(parset, None, direction,
             name='FacetSelfcal')
 
+        # Set the pipeline parset to use
+        if self.parset['facet_imager'].lower() == 'casa':
+            # Set parset template to casa parset
+            self.pipeline_parset_template = '{0}_casa_pipeline.parset'.format(self.name)
+        else:
+            # Set parset template to wsclean parset
+            self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
+
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
@@ -203,12 +211,24 @@ class FacetImageFinal(Operation):
         super(FacetImageFinal, self).__init__(parset, None, direction,
             name='FacetImageFinal')
 
+        # Set the pipeline parset to use
+        if self.parset['facet_imager'].lower() == 'casa':
+            # Set parset template to casa parset
+            self.pipeline_parset_template = '{0}_casa_pipeline.parset'.format(self.name)
+        else:
+            # Set parset template to wsclean parset
+            self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
+
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
         if self.direction.nchannels > 1:
+            nterms = 2
+            casa_suffix = '.tt0'
             wsclean_suffix = '-MFS-image.fits'
         else:
+            nterms = 1
+            casa_suffix = None
             wsclean_suffix = '-image.fits'
         self.parms_dict.update({'wsclean_suffix': wsclean_suffix})
 
