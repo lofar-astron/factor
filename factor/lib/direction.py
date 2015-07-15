@@ -119,23 +119,6 @@ class Direction(object):
         self.cal_radius_deg = self.cal_size_deg / 2.0
         self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
 
-        # Set number of wplanes for casapy imaging
-        self.cal_wplanes = 1
-        if self.cal_imsize > 512:
-            self.cal_wplanes = 64
-        if self.cal_imsize > 799:
-            self.cal_wplanes = 96
-        if self.cal_imsize > 1023:
-            self.cal_wplanes = 128
-        if self.cal_imsize > 1599:
-            self.cal_wplanes = 256
-        if self.cal_imsize > 2047:
-            self.cal_wplanes = 384
-        if self.cal_imsize > 3000:
-            self.cal_wplanes = 448
-        if self.cal_imsize > 4095:
-            self.cal_wplanes = 512
-
         # Scale solution intervals by apparent flux. The scaling is done so that
         # sources with flux densities of 100 mJy have a fast interval of 4 time
         # slots and a slow interval of 240 time slots. The scaling is currently
@@ -178,6 +161,38 @@ class Direction(object):
         else:
             self.facet_imsize = self.get_optimum_size(128)
             self.cal_imsize = self.get_optimum_size(128)
+
+        self.cal_wplanes = self.set_wplanes(self.cal_imsize)
+        self.facet_wplanes = self.set_wplanes(self.facet_imsize)
+
+
+    def set_wplanes(self, imsize):
+        """
+        Sets number of wplanes for casa clean
+
+        Parameters
+        ----------
+        imsize : int
+            Image size in pixels
+
+        """
+        wplanes = 1
+        if imsize > 512:
+            wplanes = 64
+        if imsize > 799:
+            wplanes = 96
+        if imsize > 1023:
+            wplanes = 128
+        if imsize > 1599:
+            wplanes = 256
+        if imsize > 2047:
+            wplanes = 384
+        if imsize > 3000:
+            wplanes = 448
+        if imsize > 4095:
+            wplanes = 512
+
+        return wplanes
 
 
     def get_optimum_size(self, size):
