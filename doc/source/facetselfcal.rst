@@ -17,7 +17,7 @@ Data preparation
 ----------------
 
 Input
-	MS files from the :ref:`facet_add` operation with phase-shifted facet calibrator in the
+	MS files from the :ref:`add_facet_sources` operation with phase-shifted facet calibrator in the
 	``DATA`` column and the dir-independent parmdbs.
 
 Output

@@ -37,7 +37,7 @@ Pipeline Steps
         Run BBS to add sources to the data using the sky models above.
 
 Test data
-    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the sky models ``Test_run/results/facetadd/facet_patch_543/NEP_SB070-079.2ch10s.wsclean_low2-model.make_facet_skymodels_all`` and ``Test_run/results/facetadd/facet_patch_543/NEP_SB070-079.2ch10s.wsclean_low2-model.make_facet_skymodels_cal``, which in turn are used to make the ``FACET_DATA_ALL`` and ``FACET_DATA_CAL`` columns in this MS file.
+    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the sky models ``NEP_SB070-079.2ch10s.wsclean_low2-model.make_facet_skymodels_all`` and ``NEP_SB070-079.2ch10s.wsclean_low2-model.make_facet_skymodels_cal`` in ``Test_run/results/facetadd/facet_patch_543/``, which in turn are used to make the ``FACET_DATA_ALL`` and ``FACET_DATA_CAL`` columns in this MS file.
 
 
 Split and phase shift data
