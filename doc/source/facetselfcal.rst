@@ -40,7 +40,7 @@ Pipeline Steps
         Copy the ``CORRECTED_DATA`` column so that a single MS file has all needed columns.
 
 Test data
-    With the phase-shifted facet calibrator MS files (e.g., ``NEP_SB070-079.2ch10s.shift_cal``) in ``Test_run/results/facetadd/facet_patch_***/``, this step produces the MS file ``NEP_SB070-079.2ch10s.concat_data`` in ``Test_run/results/facetselfcal/facet_patch_***/`` with averaged, concatenated (in frequency) ``DATA`` and ``CORRECTED_DATA`` columns.
+    With the phase-shifted facet calibrator MS files (e.g., ``NEP_SB070-079.2ch10s.shift_cal``) in ``Test_run/results/facetadd/facet_patch_543/``, this step produces the MS file ``NEP_SB070-079.2ch10s.concat_data`` in ``Test_run/results/facetselfcal/facet_patch_543/`` with averaged, concatenated (in frequency) ``DATA`` and ``CORRECTED_DATA`` columns.
 
 
 .. _selfcal_cycle:
@@ -70,7 +70,7 @@ Pipeline Steps
         Solve for phases or amplitudes.
 
 Test data
-    In each cycle, this step takes the MS file ``NEP_SB070-079.2ch10s.concat_data`` (or the equivalent MS file that results from virtual concatenation of the time-chunked MS files, such as ``NEP_SB070-079.2ch10s_chunk29.concat1``), averages to get the MS file ``NEP_SB070-079.2ch10s.averageX``, and makes the model image ``NEP_SB070-079.2ch10s_chunk29.casa_imageX2.model`` (``NEP_SB070-079.2ch10s_chunk29.casa_imageX2.model.tt0/tt1`` if wide-band clean is used). All of these files are in ``Test_run/results/facetselfcal/facet_patch_***/``.
+    In each cycle, this step takes the MS file ``NEP_SB070-079.2ch10s.concat_data`` (or the equivalent MS file that results from virtual concatenation of the time-chunked MS files, such as ``NEP_SB070-079.2ch10s_chunk29.concat1``), averages to get the MS file ``NEP_SB070-079.2ch10s.averageX``, and makes the model image ``NEP_SB070-079.2ch10s_chunk29.casa_imageX2.model`` (``NEP_SB070-079.2ch10s_chunk29.casa_imageX2.model.tt0/tt1`` if wide-band clean is used). All of these files are in ``Test_run/results/facetselfcal/facet_patch_543/``.
 
 
 Self-calibration cycle 0
@@ -142,7 +142,7 @@ Smooth amplitudes 1
 The slow amplitude solutions from cycle 3 are smoothed to remove outliers.
 
 Test data
-    With the parmdb ``NEP_SB070-079.2ch10s_chunk29.merge_amp_parmdbs1`` in ``Test_run/results/facetselfcal/facet_patch_***/``, this step produces the smoothed parmdb ``NEP_SB070-079.2ch10s.smooth_amp1``.
+    With the parmdb ``NEP_SB070-079.2ch10s_chunk29.merge_amp_parmdbs1`` in ``Test_run/results/facetselfcal/facet_patch_543/``, this step produces the smoothed parmdb ``NEP_SB070-079.2ch10s.smooth_amp1``.
 
 
 Self-calibration cycle 4
@@ -165,7 +165,7 @@ Smooth amplitudes 2
 The slow amplitude solutions from cycle 4 are smoothed to remove outliers.
 
 Test data
-    With the parmdb ``NEP_SB070-079.2ch10s_chunk29.merge_amp_parmdbs1`` in ``Test_run/results/facetselfcal/facet_patch_***/``, this step produces the smoothed parmdb ``NEP_SB070-079.2ch10s.smooth_amp1``.
+    With the parmdb ``NEP_SB070-079.2ch10s_chunk29.merge_amp_parmdbs1`` in ``Test_run/results/facetselfcal/facet_patch_543/``, this step produces the smoothed parmdb ``NEP_SB070-079.2ch10s.smooth_amp1``.
 
 
 Merge self-calibration parmdbs and apply solutions
@@ -210,7 +210,7 @@ Pipeline Steps
 
 
 Test data
-    With ``NEP_SB070-079.2ch10s_chunk29.merge_phase_parmdbs`` and ``NEP_SB070-079.2ch10s.smooth_amp2`` parmdbs, this step produces the merged parmdb ``NEP_SB070-079.2ch10s_chunk29.merge_selfcal_parmdbs``, all of which are in ``Test_run/results/facetselfcal/facet_patch_***/``.
+    With ``NEP_SB070-079.2ch10s_chunk29.merge_phase_parmdbs`` and ``NEP_SB070-079.2ch10s.smooth_amp2`` parmdbs, this step produces the merged parmdb ``NEP_SB070-079.2ch10s_chunk29.merge_selfcal_parmdbs``, all of which are in ``Test_run/results/facetselfcal/facet_patch_543/``.
 
 
 Make image of entire facet
@@ -244,7 +244,7 @@ Pipeline Steps
         WSClean imaging run. Imaging is done with a cell size of 1.5". Wide-band imaging is done if more than 5 bands are used. Multi-scale clean is not used, as WSClean does not currently support clean masks for this mode.
 
 Test data
-    With the phase-shifted facet all-source MS files (e.g., ``NEP_SB070-079.2ch10s.shift_all``), this step produces the averaged, virtually-concatenated MS file ``RX42_SB070-079.2ch10s.concat_averaged``, which is used to make the image ``NEP_SB070-079.2ch10s.wsclean2-image.fits`` (or ``NEP_SB070-079.2ch10s.wsclean2-MFS-image.fits`` if wide-band clean was used). All of these files are in ``Test_run/results/facetselfcal/facet_patch_***/``.
+    With the phase-shifted facet all-source MS files (e.g., ``NEP_SB070-079.2ch10s.shift_all``), this step produces the averaged, virtually-concatenated MS file ``RX42_SB070-079.2ch10s.concat_averaged``, which is used to make the image ``NEP_SB070-079.2ch10s.wsclean2-image.fits`` (or ``NEP_SB070-079.2ch10s.wsclean2-MFS-image.fits`` if wide-band clean was used). All of these files are in ``Test_run/results/facetselfcal/facet_patch_543/``.
 
 
 Subtract model
@@ -270,7 +270,7 @@ Pipeline Steps
         Call BBS to subtract ``MODEL_DATA`` column from ``DATA`` column.
 
 Test data
-    With the phase-shifted facet all-source MS files (e.g., ``NEP_SB070-079.2ch10s.shift_all``), this step produces the unaveraged, virtually-concatenated MS file ``RX42_SB070-079.2ch10s.concat_unaveraged``, which receives the ``MODEL_DATA`` column (from the wsclean_ft call) and the ``SUBTRACTED_DATA`` column (from the subtract call).  All of these files are in ``Test_run/results/facetselfcal/facet_patch_***/``.
+    With the phase-shifted facet all-source MS files (e.g., ``NEP_SB070-079.2ch10s.shift_all``), this step produces the unaveraged, virtually-concatenated MS file ``RX42_SB070-079.2ch10s.concat_unaveraged``, which receives the ``MODEL_DATA`` column (from the wsclean_ft call) and the ``SUBTRACTED_DATA`` column (from the subtract call).  All of these files are in ``Test_run/results/facetselfcal/facet_patch_543/``.
 
 
 Make low-res images of subtracted data
@@ -303,7 +303,7 @@ Pipeline Steps
         WSClean imaging run. Imaging is done with a cell size of 30".
 
 Test data
-    With the phase-shifted facet all-source MS files (e.g., ``NEP_SB070-079.2ch10s.shift_all``), this step produces averaged MS files for each band (e.g., ``RX42_SB070-079.2ch10s.average_pre`` and ``RX42_SB070-079.2ch10s.average_post``), which in turn are used to make images of each band (e.g., ``RX42_SB070-079.2ch10s.wsclean_pre-image.fits`` and ``RX42_SB070-079.2ch10s.wsclean_post-image.fits``).  All of these files are in ``Test_run/results/facetselfcal/facet_patch_***/``.
+    With the phase-shifted facet all-source MS files (e.g., ``NEP_SB070-079.2ch10s.shift_all``), this step produces averaged MS files for each band (e.g., ``RX42_SB070-079.2ch10s.average_pre`` and ``RX42_SB070-079.2ch10s.average_post``), which in turn are used to make images of each band (e.g., ``RX42_SB070-079.2ch10s.wsclean_pre-image.fits`` and ``RX42_SB070-079.2ch10s.wsclean_post-image.fits``).  All of these files are in ``Test_run/results/facetselfcal/facet_patch_543/``.
 
 
 Verify self calibration
@@ -320,7 +320,7 @@ Pipeline Steps
         Verifies that no large residuals were introduced between the pre- and post-selfcal images. The verification returns False if the peak residual after selfcal is > 0.75 Jy or is > 1.1 * the peak residual before selfcal.
 
 Test data
-    With the images for each band made in the previous step (e.g., ``RX42_SB070-079.2ch10s.wsclean_pre-image.fits`` and ``RX42_SB070-079.2ch10s.wsclean_post-image.fits``), this step produces the ``break.mapfile``, ``maxvalpre.mapfile``, and ``maxvalpost.mapfile`` files in ``Test_run/results/facetselfcal/facet_patch_***/mapfiles/``.
+    With the images for each band made in the previous step (e.g., ``RX42_SB070-079.2ch10s.wsclean_pre-image.fits`` and ``RX42_SB070-079.2ch10s.wsclean_post-image.fits``), this step produces the ``break.mapfile``, ``maxvalpre.mapfile``, and ``maxvalpost.mapfile`` files in ``Test_run/results/facetselfcal/facet_patch_543/mapfiles/``.
 
 
 

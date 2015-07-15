@@ -47,7 +47,7 @@ Pipeline Steps
         Run BBS to add sources to the data using the sky models above.
 
 Test data
-    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the sky model ``NEP_SB070-079.2ch10s.wsclean_low2-model.make_facet_skymodels_all`` in ``Test_run/results/facetadd/facet_patch_***/``, which in turn is used to make the ``FACET_DATA_ALL`` column in this MS file.
+    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the sky model ``NEP_SB070-079.2ch10s.wsclean_low2-model.make_facet_skymodels_all`` in ``Test_run/results/facetadd/facet_patch_543/``, which in turn is used to make the ``FACET_DATA_ALL`` column in this MS file.
 
 
 Add sources from ``MODEL_DATA``
@@ -71,7 +71,7 @@ Pipeline Steps
         Run BBS to add sources to the data using the sky models above and the dir-dependent parmdbs.
 
 Test data
-    With ``Test_data/RX42_SB070-079.2ch10s.ms`` and the phase-shifted facet all-source MS files (e.g., ``NEP_SB070-079.2ch10s.shift_all``) in ``Test_run/results/facetselfcal/facet_patch_***/``, this step produces the ``FACET_DATA_ALL`` column in the ``Test_data/RX42_SB070-079.2ch10s.ms`` file.
+    With ``Test_data/RX42_SB070-079.2ch10s.ms`` and the phase-shifted facet all-source MS files (e.g., ``NEP_SB070-079.2ch10s.shift_all``) in ``Test_run/results/facetselfcal/facet_patch_543/``, this step produces the ``FACET_DATA_ALL`` column in the ``Test_data/RX42_SB070-079.2ch10s.ms`` file.
 
 
 Split and phase shift data
@@ -91,5 +91,5 @@ Pipeline Steps
         Copy datamap for shifted datasets to convenient location.
 
 Test data
-    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the MS files ``Test_run/results/facetaddfinal/facet_patch_***/NEP_SB070-079.2ch10s.shift_all``.
+    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the MS files ``Test_run/results/facetaddfinal/facet_patch_543/NEP_SB070-079.2ch10s.shift_all``.
 

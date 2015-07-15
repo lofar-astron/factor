@@ -29,4 +29,4 @@ Pipeline Steps
         Run mosaicking script to produce final image.
 
 Test data
-    TODO
+    With the facet images produced by the facet self-calibration operation (:ref:`facet_selfcal`) or, if done, by the final imaging operation (:ref:`facet_image`), this step produces the mosaicked image ``RX42_SB070-079.2ch10s.wsclean2-image.make_mosaic`` in ``Test_run/results/makemosaic/field``.

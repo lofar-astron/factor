@@ -37,7 +37,7 @@ Pipeline Steps
         Add all facet sources to the ``SUBTRACTED_DATA_ALL`` (or ``SUBTRACTED_DATA_ALL_NEW``) columns to make a ``FACET_DATA_ALL`` column.
 
 Test data
-    With ``Test_data/RX42_SB070-079.2ch10s.ms`` and ``NEP_SB070-079.2ch10s.wsclean_low2-model.make_facet_skymodels_all`` in ``Test_run/results/facetadd/facet_patch_***/``, this step produces the ``FACET_DATA_ALL`` column in this MS file.
+    With ``Test_data/RX42_SB070-079.2ch10s.ms`` and ``NEP_SB070-079.2ch10s.wsclean_low2-model.make_facet_skymodels_all`` in ``Test_run/results/facetadd/facet_patch_543/``, this step produces the ``FACET_DATA_ALL`` column in this MS file.
 
 
 Subtract sources
@@ -66,7 +66,7 @@ Pipeline Steps
         Copy datamap for shifted model dataset to convenient location.
 
 Test data
-    With the phase-shifted facet all-source MS files (e.g., ``NEP_SB070-079.2ch10s.shift_all``) in ``Test_run/results/facetselfcal/facet_patch_***/``, this step produces the ``SUBTRACTED_DATA_ALL`` column
+    With the phase-shifted facet all-source MS files (e.g., ``NEP_SB070-079.2ch10s.shift_all``) in ``Test_run/results/facetselfcal/facet_patch_543/``, this step produces the ``SUBTRACTED_DATA_ALL`` column
     in ``Test_data/RX42_SB070-079.2ch10s.ms``.
 
 
@@ -100,7 +100,7 @@ Pipeline Steps
         Copy datamap for shifted model dataset to convenient location.
 
 Test data
-    With the phase-shifted facet all-source MS files (e.g., ``NEP_SB070-079.2ch10s.shift_all``) in ``Test_run/results/facetselfcal/facet_patch_***/``, this step produces the ``SUBTRACTED_DATA_ALL`` column
+    With the phase-shifted facet all-source MS files (e.g., ``NEP_SB070-079.2ch10s.shift_all``) in ``Test_run/results/facetselfcal/facet_patch_543/``, this step produces the ``SUBTRACTED_DATA_ALL`` column
     in ``Test_data/RX42_SB070-079.2ch10s.ms``.
 
 
