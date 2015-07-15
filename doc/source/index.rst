@@ -9,7 +9,7 @@ The overall structure of the pipeline is shown in the `Factor flowchart`_ below.
 .. _`Factor flowchart`:
 
 .. figure:: factor_flow.pdf
-   :scale: 40 %
+   :scale: 80 %
    :figwidth: 75 %
    :align: center
    :alt: example image
