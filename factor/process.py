@@ -410,10 +410,24 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
 
     # Add the target to the directions list if desired
     target_has_own_facet = dir_parset['target_has_own_facet']
-    if 'target_ra' in dir_parset and 'target_dec' in dir_parset and target_has_own_facet:
-        target = Direction('target', dir_parset['target_ra'], dir_parset['target_dec'],
-            factor_working_dir=parset['dir_working'])
-        directions.append(target)
+    if target_has_own_facet:
+        if 'target_ra' in dir_parset and 'target_dec' in dir_parset and 'target_radius_arcmin' in dir_parset:
+            # Make target object
+            target = Direction('target', dir_parset['target_ra'], dir_parset['target_dec'],
+                factor_working_dir=parset['dir_working'])
+
+            # Check if target is already in directions list. If so, remove it
+            nearest = factor.directions.find_nearest(target, directions)
+            dist = factor.directions.calculateSeparation(target.ra, target.dec,
+                nearest.ra, nearest.dec)
+            if dist < dir_parset['target_radius_arcmin']/60.0:
+                directions.remove(nearest)
+
+            # Add target to directions list
+            directions.append(target)
+        else:
+            log.critical('target_has_own_facet = True, but target RA, Dec, or radius not found in parset')
+            sys.exit(1)
 
     # Load polygons from previous run if possible; if not, generate the polygons
     polys_file = os.path.join(parset['dir_working'], 'regions', 'factor_facets.pkl')
@@ -432,13 +446,9 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
             target_dec = None
             target_radius_arcmin = None
 
-        if not target_has_own_facet:
-            polys, widths = factor.directions.thiessen(directions,
-                check_edges=dir_parset['check_edges'], target_ra=target_ra,
-                target_dec=target_dec, target_radius_arcmin=target_radius_arcmin)
-        else:
-            polys, widths = factor.directions.thiessen(directions,
-                check_edges=dir_parset['check_edges'])
+        polys, widths = factor.directions.thiessen(directions,
+            check_edges=dir_parset['check_edges'], target_ra=target_ra,
+            target_dec=target_dec, target_radius_arcmin=target_radius_arcmin)
         with open(polys_file, 'wb') as f:
             pickle.dump([polys, widths], f)
 
@@ -494,11 +504,15 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
             directions = directions[:parset['direction_specific']['ndir_total']]
 
     # Select subset of directions to selfcal
-    selfcal_directions = directions
+    if target_has_own_facet:
+        # Make sure target is not a DDE calibrator
+        selfcal_directions = [d in directions if d.name != target.name]
+    else:
+        selfcal_directions = directions
     if 'ndir_selfcal' in parset['direction_specific']:
         if parset['direction_specific']['ndir_selfcal'] > 0 and \
-            parset['direction_specific']['ndir_selfcal'] <= len(directions):
-            selfcal_directions = directions[:parset['direction_specific']['ndir_selfcal']]
+            parset['direction_specific']['ndir_selfcal'] <= len(selfcal_directions):
+            selfcal_directions = selfcal_directions[:parset['direction_specific']['ndir_selfcal']]
 
     # Load groupings from previous run if possible; if not, divide directions
     # into groups
@@ -508,11 +522,18 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
         with open(groups_file, 'r') as f:
             prev_groupings, direction_name_groups = pickle.load(f)
         if prev_groupings == parset['direction_specific']['groupings']:
-            redo_groups = False
-            direction_groups = []
-            direction_names = [d.name for d in directions]
-            for name_group in direction_name_groups:
-                direction_groups.append([directions[direction_names.index(name)] for name in name_group])
+            try:
+                redo_groups = False
+                direction_groups = []
+                direction_names = [d.name for d in directions]
+                for name_group in direction_name_groups:
+                    if target_has_own_facet:
+                        # Make sure target is not a DDE calibrator
+                        direction_groups.append([directions[direction_names.index(name)] for name in name_group if name != target.name])
+                    else:
+                        direction_groups.append([directions[direction_names.index(name)] for name in name_group])
+            except ValueError:
+                redo_groups = True
     if redo_groups:
         direction_groups = factor.directions.group_directions(selfcal_directions,
             one_at_a_time=parset['direction_specific']['one_at_a_time'],
@@ -524,7 +545,8 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
             pickle.dump([parset['direction_specific']['groupings'], direction_name_groups], f)
 
     # Ensure that target is included in the directions to process if desired
-    # (but not for selfcal)
+    # (but not for selfcal), just in case it was excluded by one of the cuts
+    # above
     if target_has_own_facet:
         names = [d.name for d in directions]
         if target.name not in names:
