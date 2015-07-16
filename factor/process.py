@@ -506,7 +506,7 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
     # Select subset of directions to selfcal
     if target_has_own_facet:
         # Make sure target is not a DDE calibrator
-        selfcal_directions = [d in directions if d.name != target.name]
+        selfcal_directions = [d for d in directions if d.name != target.name]
     else:
         selfcal_directions = directions
     if 'ndir_selfcal' in parset['direction_specific']:
