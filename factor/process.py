@@ -420,7 +420,7 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
             nearest = factor.directions.find_nearest(target, directions)
             dist = factor.directions.calculateSeparation(target.ra, target.dec,
                 nearest.ra, nearest.dec)
-            if dist < dir_parset['target_radius_arcmin']/60.0:
+            if dist.value < dir_parset['target_radius_arcmin']/60.0:
                 directions.remove(nearest)
 
             # Add target to directions list
