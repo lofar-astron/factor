@@ -42,13 +42,13 @@ Input
 	Full-resolution datasets (with all facet sources) with dir-dependent solutions applied.
 
 Output
-    Image of the entire facet. An example image is shown in the `Facet example image`_.
+    Image of the entire facet. An example image is shown in Figure :num:`facet-example-image`.
 
     .. note::
 
         The image should fully enclose the facet boundaries. Areas outside of the facet are not cleaned (and have all sources subtracted).
 
-    .. _`Facet example image`:
+    .. _facet-example-image:
 
     .. figure:: facet_image.png
        :scale: 80 %

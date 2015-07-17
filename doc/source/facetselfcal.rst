@@ -75,9 +75,9 @@ Test data
 
 Self-calibration cycle 0
 ------------------------
-The self-calibration cycle (see :ref:`selfcal_cycle`) is performed with phase-only calibration. The resulting image should be similar to the dir-independent images obtained in the :ref:`initial_subtract_operation` (although of higher resolution). An example image is shown in the `Cycle 0 example image`_.
+The self-calibration cycle (see :ref:`selfcal_cycle`) is performed with phase-only calibration. The resulting image should be similar to the dir-independent images obtained in the :ref:`initial_subtract_operation` (although of higher resolution). An example image is shown in Figure :num:`cycle-0-example-image`.
 
-.. _`Cycle 0 example image`:
+.. _cycle-0-example-image:
 
 .. figure:: cycle_0_image.png
    :scale: 40 %
@@ -90,9 +90,9 @@ The self-calibration cycle (see :ref:`selfcal_cycle`) is performed with phase-on
 
 Self-calibration cycle 1
 ------------------------
-The self-calibration cycle (see :ref:`selfcal_cycle`) is performed with phase-only calibration. The resulting image should show marked improvement over the cycle-0 image. An example image is shown in the `Cycle 1 example image`_.
+The self-calibration cycle (see :ref:`selfcal_cycle`) is performed with phase-only calibration. The resulting image should show marked improvement over the cycle-0 image. An example image is shown in Figure :num:`cycle-1-example-image`.
 
-.. _`Cycle 1 example image`:
+.. _cycle-1-example-image:
 
 .. figure:: cycle_1_image.png
    :scale: 40 %
@@ -105,9 +105,9 @@ The self-calibration cycle (see :ref:`selfcal_cycle`) is performed with phase-on
 
 Self-calibration cycle 2
 ------------------------
-The self-calibration cycle (see :ref:`selfcal_cycle`) is performed with phase-only calibration. The resulting image may or may not show improvement over the cycle-1 image. An example image is shown in the `Cycle 2 example image`_.
+The self-calibration cycle (see :ref:`selfcal_cycle`) is performed with phase-only calibration. The resulting image may or may not show improvement over the cycle-1 image. An example image is shown in Figure :num:`cycle-2-example-image`.
 
-.. _`Cycle 2 example image`:
+.. _cycle-2-example-image:
 
 .. figure:: cycle_2_image.png
    :scale: 40 %
@@ -120,13 +120,13 @@ The self-calibration cycle (see :ref:`selfcal_cycle`) is performed with phase-on
 
 Self-calibration cycle 3
 ------------------------
-The self-calibration cycle (see :ref:`selfcal_cycle`) is performed with phase and amplitude calibration (fast phase, slow amplitude). The resulting image should show marked improvement over the cycle-2 image. An example image is shown in the `Cycle 3 example image`_.
+The self-calibration cycle (see :ref:`selfcal_cycle`) is performed with phase and amplitude calibration (fast phase, slow amplitude). The resulting image should show marked improvement over the cycle-2 image. An example image is shown in Figure :num:`cycle-3-example-image`.
 
 .. note::
 
     Negative features in the image are due to poorly subtracted sources from the :ref:`initial_subtract_operation`.
 
-.. _`Cycle 3 example image`:
+.. _cycle-3-example-image:
 
 .. figure:: cycle_3_image.png
    :scale: 40 %
@@ -147,9 +147,9 @@ Test data
 
 Self-calibration cycle 4
 ------------------------
-The self-calibration cycle (see :ref:`selfcal_cycle`) is performed with phase and amplitude calibration (fast phase, slow amplitude). The resulting image may or may not show improvement over the cycle-3 image. An example image is shown in the `Cycle 4 example image`_.
+The self-calibration cycle (see :ref:`selfcal_cycle`) is performed with phase and amplitude calibration (fast phase, slow amplitude). The resulting image may or may not show improvement over the cycle-3 image. An example image is shown in Figure :num:`cycle-4-example-image`.
 
-.. _`Cycle 4 example image`:
+.. _cycle-4-example-image:
 
 .. figure:: cycle_4_image.png
    :scale: 40 %
@@ -180,9 +180,9 @@ Output
 
 Pipeline Steps
     merge_selfcal_parmdbs
-        Merge the dir-dependent solutions into one parmdb so that they can be applied in a single pass. An example of the solutions for RS106 is shown in `Merged parmdb fast solutions plot`_ and `Merged parmdb slow solutions plot`_.
+        Merge the dir-dependent solutions into one parmdb so that they can be applied in a single pass. An example of the solutions for RS106 is shown in Figures :num:`merged-parmdb-fast-solutions-plot` and :num:`merged-parmdb-slow-solutions-plot`.
 
-    .. _`Merged parmdb fast solutions plot`:
+    .. _merged-parmdb-fast-solutions-plot:
 
     .. figure:: merged_parmdb_fast_plot.png
        :scale: 80 %
@@ -192,7 +192,7 @@ Pipeline Steps
 
        Merged parmdb fast phase (CommonScalarPhase + TEC) solutions plot for RS106
 
-    .. _`Merged parmdb slow solutions plot`:
+    .. _merged-parmdb-slow-solutions-plot:
 
     .. figure:: merged_parmdb_slow_plot.png
        :scale: 80 %
@@ -220,13 +220,13 @@ Input
 	Full-resolution datasets (with all facet sources) with dir-dependent solutions applied.
 
 Output
-    Image of the entire facet. An example image is shown in the `Facet example image`_.
+    Image of the entire facet. An example image is shown in Figure :num:`facet-example-image`.
 
     .. note::
 
         The image should fully enclose the facet boundaries. Areas outside of the facet are not cleaned (and have all sources subtracted).
 
-    .. _`Facet example image`:
+    .. _facet-example-image:
 
     .. figure:: facet_image.png
        :scale: 80 %
@@ -280,9 +280,9 @@ Input
 	Full-resolution datasets (with all facet sources subtracted).
 
 Output
-    For each band, wide-field (~ 8 degree radius) images, one from before self calibration and one from after self calibration, are made at approximately 90" resolution. A region of an example image is shown in the `Residual example image`_. Note the improved subtraction for the circled source in the center (the facet calibrator).
+    For each band, wide-field (~ 8 degree radius) images, one from before self calibration and one from after self calibration, are made at approximately 90" resolution. A region of an example image is shown in Figure :num:`residual-example-image`. Note the improved subtraction for the circled source in the center (the facet calibrator).
 
-    .. _`Residual example image`:
+    .. _residual-example-image:
 
     .. figure:: residual_image.png
        :scale: 80 %

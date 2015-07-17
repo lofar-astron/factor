@@ -39,9 +39,9 @@ Output
         sources.
 
     A region (~ 3 degrees across) of an example image is shown
-    in the `High-resolution example image`_.
+    in Figure :num:`high-resolution-example-image`.
 
-    .. _`High-resolution example image`:
+    .. _high-resolution-example-image:
 
     .. figure:: high_res_image.png
        :scale: 40 %
@@ -127,9 +127,9 @@ Output
         picked up in the high-resolution images.
 
     A region (~ 3 degrees across) of an example image is shown
-    in the `Low-resolution example image`_.
+    in the `low-resolution-example-image`_.
 
-    .. _`Low-resolution example image`:
+    .. _low-resolution-example-image:
 
     .. figure:: low_res_image.png
        :scale: 40 %
