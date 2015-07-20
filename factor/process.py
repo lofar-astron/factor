@@ -441,16 +441,12 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
         target_dec = None
         target_radius_arcmin = None
 
-    polys, widths = factor.directions.thiessen(directions, band=bands[0],
+    factor.directions.thiessen(directions, band=bands[0],
         check_edges=dir_parset['check_edges'], target_ra=target_ra,
         target_dec=target_dec, target_radius_arcmin=target_radius_arcmin)
 
     # Set various direction attributes
     for i, direction in enumerate(directions):
-        direction.cleanup_mapfiles = []
-        direction.vertices = polys[i]
-        direction.width = widths[i]
-
         # Set averaging steps
         direction.set_averaging_steps(bands[0].chan_width_hz, bands[0].timepersample)
 

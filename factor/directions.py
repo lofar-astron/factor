@@ -504,23 +504,32 @@ def thiessen(directions_list, bounds_scale=0.52, band=None, check_edges=False,
                             sys.exit(1)
                         thiessen_polys[i] = xyverts
 
-    # Convert from x, y to RA, Dec and find width of facet
-    thiessen_polys_deg = []
-    width_deg = []
-    for poly in thiessen_polys:
+    # Convert from x, y to RA, Dec and find width of facet and facet center
+    for d, poly in zip(directions_list, thiessen_polys):
         poly = np.vstack([poly, poly[0]])
         ra, dec = xy2radec(poly[:, 0], poly[:, 1], midRA, midDec)
-        thiessen_polys_deg.append([np.array(ra[0: -1]), np.array(dec[0: -1])])
+        thiessen_poly_deg = [np.array(ra[0: -1]), np.array(dec[0: -1])]
 
-        # Find size of regions in degrees
-        ra1, dec1 = xy2radec([np.min(poly[:, 0])], [np.min(poly[:, 1])], midRA,
-            midDec)
-        ra2, dec2 = xy2radec([np.max(poly[:, 0])], [np.max(poly[:, 1])], midRA,
-            midDec)
-        hyp_deg = calculateSeparation(ra1, dec1, ra2, dec2)
-        width_deg.append(hyp_deg.value)
+        # Find size and centers of regions in degrees
+        xmin = np.min(poly[:, 0])
+        xmax = np.max(poly[:, 0])
+        xmid = xmin + int((xmax - xmin) / 2.0)
+        ymin = np.min(poly[:, 1])
+        ymax = np.max(poly[:, 1])
+        ymid = ymin + int((ymax - ymin) / 2.0)
 
-    return thiessen_polys_deg, width_deg
+        ra1, dec1 = xy2radec([xmin], [ymin], midRA, midDec)
+        ra2, dec2 = xy2radec([xmax], [ymax], midRA, midDec)
+        ra3, dec3 = xy2radec([xmax], [ymin], midRA, midDec)
+        ra_center, dec_center = xy2radec([xmid], [ymid], midRA, midDec)
+        ra_width_deg = calculateSeparation(ra1, dec1, ra3, dec3)
+        dec_width_deg = calculateSeparation(ra3, dec3, ra2, dec2)
+        width_deg = max(ra_width_deg.value, dec_width_deg.value)
+
+        d.vertices = thiessen_poly_deg
+        d.width = width_deg
+        d.facet_ra = ra_center[0]
+        d.facet_dec = dec_center[0]
 
 
 def make_region_file(vertices, outputfile):
