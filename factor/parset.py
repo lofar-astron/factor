@@ -151,7 +151,7 @@ def parset_read(parset_file):
         parset_dict['direction_specific']['one_at_a_time'] = False
     else:
         parset_dict['direction_specific']['one_at_a_time'] = True
-        parset_dict['direction_specific']['groupings'] = None
+        parset_dict['direction_specific']['groupings'] = {'1':0}
     log.info("Using the following groupings for directions: {0}".format(groupings))
     if 'ndir_selfcal' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['ndir_selfcal'] = parset.getint('directions', 'ndir_selfcal')
