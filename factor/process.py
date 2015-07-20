@@ -431,28 +431,21 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
             log.critical('target_has_own_facet = True, but target RA, Dec, or radius not found in parset')
             sys.exit(1)
 
-    # Load polygons from previous run if possible; if not, generate the polygons
-    polys_file = os.path.join(parset['dir_working'], 'regions', 'factor_facets.pkl')
-    if os.path.exists(polys_file):
-        with open(polys_file, 'r') as f:
-            polys, widths = pickle.load(f)
-            widths = [w[0] for w in widths]
+    if 'target_ra' in dir_parset and 'target_dec' in dir_parset and \
+        'target_radius_arcmin' in dir_parset:
+        target_ra = dir_parset['target_ra']
+        target_dec = dir_parset['target_dec']
+        target_radius_arcmin = dir_parset['target_radius_arcmin']
     else:
-        if 'target_ra' in dir_parset and 'target_dec' in dir_parset and \
-            'target_radius_arcmin' in dir_parset:
-            target_ra = dir_parset['target_ra']
-            target_dec = dir_parset['target_dec']
-            target_radius_arcmin = dir_parset['target_radius_arcmin']
-        else:
-            target_ra = None
-            target_dec = None
-            target_radius_arcmin = None
+        target_ra = None
+        target_dec = None
+        target_radius_arcmin = None
 
-        polys, widths = factor.directions.thiessen(directions,
-            check_edges=dir_parset['check_edges'], target_ra=target_ra,
-            target_dec=target_dec, target_radius_arcmin=target_radius_arcmin)
-        with open(polys_file, 'wb') as f:
-            pickle.dump([polys, widths], f)
+    polys, widths = factor.directions.thiessen(directions,
+        check_edges=dir_parset['check_edges'], target_ra=target_ra,
+        target_dec=target_dec, target_radius_arcmin=target_radius_arcmin)
+    with open(polys_file, 'wb') as f:
+        pickle.dump([polys, widths], f)
 
     # Set various direction attributes
     for i, direction in enumerate(directions):
