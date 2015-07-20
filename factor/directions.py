@@ -145,8 +145,6 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
         Filename of resulting Factor-formatted directions file
 
     """
-    import lsmtool
-
     # Use sky model of lowest-frequency band
     freqs = [band.freq for band in bands]
     min_freq_indx = np.argmin(freqs)
@@ -155,27 +153,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     ds9_directions_file = 'factor_directions_ds9.reg'
 
     # Load sky model and filter it
-    s = lsmtool.load(band.skymodel_dirindep)
-
-    # Group to clean components by thresholding after convolving model with
-    # 1 arcmin beam
-    s.group('threshold', FWHM='60.0 arcsec', root='facet')
-    s.remove('Patch = patch_*', force=True) # Remove sources that did not threshold
-    if len(s) == 0:
-        log.critical("No sources found through thresholding.")
-        sys.exit(1)
-    log.info('Found {0} sources through thresholding'.format(
-        len(s.getPatchNames())))
-
-    # Filter out sources that lie outside of FWHM of FOV
-    if not hasattr(band, 'fwhm_deg'):
-        band.set_image_sizes()
-    log.info('Removing sources beyond 2 * FWHM of the primary beam...')
-    dist = s.getDistance(band.ra, band.dec, byPatch=True)
-    s.remove(dist > band.fwhm_deg, aggregate=True)
-
-    # Save this sky model for later checks of sources falling on facet edges
-    s.write(fileName='results/initial.skymodel', clobber=True)
+    s = make_initial_skymodel(band)
 
     # Filter larger patches
     sizes = s.getPatchSizes(units='arcmin', weight=True)
@@ -223,6 +201,49 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     s.write(fileName=directions_file, format='factor', sortBy='I', clobber=True)
 
     return directions_file
+
+
+def make_initial_skymodel(band):
+    """
+    Makes the initial skymodel used to adjust facet edges
+
+    Parameters
+    ----------
+    band : Band object
+        Band to use for sky model generation
+
+    Returns
+    -------
+    s : LSMTool Skymodel object
+        Resulting sky model
+
+    """
+    import lsmtool
+
+    # Load sky model and filter it
+    s = lsmtool.load(band.skymodel_dirindep)
+
+    # Group to clean components by thresholding after convolving model with
+    # 1 arcmin beam
+    s.group('threshold', FWHM='60.0 arcsec', root='facet')
+    s.remove('Patch = patch_*', force=True) # Remove sources that did not threshold
+    if len(s) == 0:
+        log.critical("No sources found through thresholding.")
+        sys.exit(1)
+    log.info('Found {0} sources through thresholding'.format(
+        len(s.getPatchNames())))
+
+    # Filter out sources that lie outside of FWHM of FOV
+    if not hasattr(band, 'fwhm_deg'):
+        band.set_image_sizes()
+    log.info('Removing sources beyond 2 * FWHM of the primary beam...')
+    dist = s.getDistance(band.ra, band.dec, byPatch=True)
+    s.remove(dist > band.fwhm_deg, aggregate=True)
+
+    # Save this sky model for later checks of sources falling on facet edges
+    s.write(fileName='results/initial.skymodel', clobber=True)
+
+    return s
 
 
 def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
@@ -342,8 +363,8 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
     return direction_groups
 
 
-def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=None,
-            target_dec=None, target_radius_arcmin=None):
+def thiessen(directions_list, bounds_scale=0.52, band=None, check_edges=False,
+    target_ra=None, target_dec=None, target_radius_arcmin=None):
     """
     Return list of thiessen polygons and their widths in degrees
 
@@ -353,6 +374,8 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
         List of input directions
     bounds_scale : int, optional
         Scale to use for bounding box
+    band : Band object, optional
+        Band to use to check for source near facet edges
     check_edges : bool, optional
         If True, check whether any know source falls on a facet edge. If sources
         are found that do, the facet is adjusted
@@ -408,7 +431,13 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
     # Check for sources near / on facet edges and adjust regions accordingly
     if has_shapely and check_edges:
         log.info('Adjusting facets to avoid sources...')
-        s = lsmtool.load('results/initial.skymodel')
+        if os.path.exists('results/initial.skymodel'):
+            s = lsmtool.load('results/initial.skymodel')
+        elif band is not None:
+            s = make_initial_skymodel(band)
+        else:
+            log.error('A band must be given for edge checking')
+            sys.exit(1)
         RA, Dec = s.getPatchPositions(asArray=True)
         sx, sy = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
         sizes = s.getPatchSizes(units='degree').tolist()
@@ -475,7 +504,7 @@ def thiessen(directions_list, bounds_scale=0.52, check_edges=False, target_ra=No
                             sys.exit(1)
                         thiessen_polys[i] = xyverts
 
-    # Convert from x, y to RA, Dec
+    # Convert from x, y to RA, Dec and find width of facet
     thiessen_polys_deg = []
     width_deg = []
     for poly in thiessen_polys:

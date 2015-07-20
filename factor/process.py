@@ -441,11 +441,9 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
         target_dec = None
         target_radius_arcmin = None
 
-    polys, widths = factor.directions.thiessen(directions,
+    polys, widths = factor.directions.thiessen(directions, band=bands[0],
         check_edges=dir_parset['check_edges'], target_ra=target_ra,
         target_dec=target_dec, target_radius_arcmin=target_radius_arcmin)
-    with open(polys_file, 'wb') as f:
-        pickle.dump([polys, widths], f)
 
     # Set various direction attributes
     for i, direction in enumerate(directions):
