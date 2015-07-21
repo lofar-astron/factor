@@ -277,7 +277,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
     from random import shuffle
 
     direction_groups = []
-    if one_at_a_time:
+    if one_at_a_time or n_per_grouping == {'1': 0}:
         for d in directions:
             direction_groups.append([d])
         log.debug('Processing each direction in series')
