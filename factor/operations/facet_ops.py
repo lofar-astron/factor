@@ -230,7 +230,9 @@ class FacetImageFinal(Operation):
             nterms = 1
             casa_suffix = None
             wsclean_suffix = '-image.fits'
-        self.parms_dict.update({'wsclean_suffix': wsclean_suffix})
+        self.parms_dict.update({'casa_suffix': casa_suffix,
+                                'wsclean_suffix': wsclean_suffix,
+                                'nterms': nterms})
 
 
     def finalize(self):
