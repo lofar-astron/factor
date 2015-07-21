@@ -58,7 +58,7 @@ make_pbimage.control.opts.outputkey                    =   image
 make_pbimage.argument.numthreads                       =   {{ max_cpus_per_node }}
 make_pbimage.argument.data                             =   CORRECTED_DATA
 make_pbimage.argument.weight                           =   briggs
-make_pbimage.argument.npix                             =   {{ pbcor_imsize }}
+make_pbimage.argument.npix                             =   4096
 make_pbimage.argument.cellsize                         =   5.5arcsec
 make_pbimage.argument.padding                          =   1.
 make_pbimage.argument.gain                             =   0.1
@@ -77,11 +77,11 @@ make_pbimage.argument.SpheSupport                      =   15
 make_pbimage.argument.robust                           =   -0.25
 make_pbimage.argument.niter                            =   1
 
-zero_avgpb.control.type                                    =   zero_avgpb
-zero_avgpb.control.mapfile_in                              =   make_pbimage.output.make_pbimage0.avgpb.mapfile
-zero_avgpb.control.inputkey                                =   avgpb
-zero_avgpb.control.outputkey                               =   outfile
-zero_avgpb.argument.flags                                  =   [avgpb,outfile]
+zero_avgpb.control.type                                =   zero_avgpb
+zero_avgpb.control.mapfile_in                          =   make_pbimage.output.make_pbimage0.avgpb.mapfile
+zero_avgpb.control.inputkey                            =   avgpb
+zero_avgpb.control.outputkey                           =   outfile
+zero_avgpb.argument.flags                              =   [avgpb,outfile]
 
 image2fits.control.type                                =   image2fits
 image2fits.control.mapfile_in                          =   zero_avgpb.output.mapfile
