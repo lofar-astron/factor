@@ -87,7 +87,8 @@ def find_executables(parset):
 #                    'chgcentre_executable': ['chgcentre'],
                    'losoto_executable': ['losoto.py'],
                    'H5parm_importer_executable': ['H5parm_importer.py'],
-                   'H5parm_exporter_executable': ['H5parm_exporter.py']}
+                   'H5parm_exporter_executable': ['H5parm_exporter.py'],
+                   'image2fits_executable': ['image2fits']}
     for key, names in executables.iteritems():
         for name in names:
             path = spawn.find_executable(name)

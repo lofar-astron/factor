@@ -1,4 +1,4 @@
-pipeline.steps = [expand_merged_parmdb_map, apply_dir_dep, average, create_compressed_mapfile, concat_averaged, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2]
+pipeline.steps = [expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, concat_averaged, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -9,15 +9,25 @@ expand_merged_parmdb_map.control.mapfile_to_match =   {{ shifted_all_final_bands
 expand_merged_parmdb_map.control.mapfile_dir      =   {{ mapfile_dir }}
 expand_merged_parmdb_map.control.filename         =   expand_merged_parmdbs.datamap
 
-apply_dir_dep.control.type                        =   calibrate-stand-alone_new
-apply_dir_dep.control.mapfiles_in                 =   [{{ shifted_all_final_bands_datamap }},expand_merged_parmdb_map.output.mapfile]
-apply_dir_dep.control.inputkeys                   =   [inputms,inputparmdb]
-apply_dir_dep.argument.observation                =   inputms
-apply_dir_dep.argument.parset                     =   {{ parset_dir }}//facet_dirdep_apply.parset
-apply_dir_dep.argument.catalog                    =   {{ skymodel_dir }}/empty.skymodel
-apply_dir_dep.argument.parmdb                     =   inputparmdb
-apply_dir_dep.argument.replace-sourcedb           =   True
-apply_dir_dep.argument.replace-parmdb             =   True
+apply_dir_dep_fast.control.type                   =   calibrate-stand-alone_new
+apply_dir_dep_fast.control.mapfiles_in            =   [{{ shifted_all_final_bands_datamap }},expand_merged_parmdb_map.output.mapfile]
+apply_dir_dep_fast.control.inputkeys              =   [inputms,inputparmdb]
+apply_dir_dep_fast.argument.observation           =   inputms
+apply_dir_dep_fast.argument.parset                =   {{ parset_dir }}//facet_dirdep_apply_fast.parset
+apply_dir_dep_fast.argument.catalog               =   {{ skymodel_dir }}/empty.skymodel
+apply_dir_dep_fast.argument.parmdb                =   inputparmdb
+apply_dir_dep_fast.argument.replace-sourcedb      =   True
+apply_dir_dep_fast.argument.replace-parmdb        =   True
+
+apply_dir_dep_slow.control.type                   =   calibrate-stand-alone_new
+apply_dir_dep_slow.control.mapfiles_in            =   [{{ shifted_all_final_bands_datamap }},expand_merged_parmdb_map.output.mapfile]
+apply_dir_dep_slow.control.inputkeys              =   [inputms,inputparmdb]
+apply_dir_dep_slow.argument.observation           =   inputms
+apply_dir_dep_slow.argument.parset                =   {{ parset_dir }}//facet_dirdep_apply_slow.parset
+apply_dir_dep_slow.argument.catalog               =   {{ skymodel_dir }}/empty.skymodel
+apply_dir_dep_slow.argument.parmdb                =   inputparmdb
+apply_dir_dep_slow.argument.replace-sourcedb      =   True
+apply_dir_dep_slow.argument.replace-parmdb        =   True
 
 average.control.type                              =   dppp
 average.control.mapfile_in                        =   {{ shifted_all_final_bands_datamap }}

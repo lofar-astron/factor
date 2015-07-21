@@ -11,7 +11,7 @@ import sys
 
 def copy_column_to_ms(ms, inputcol, outputcol, ms_from=None):
     """
-    Copies one column to another within an MS file or between two MS files
+    Copies one column to another, within an MS file or between two MS files
 
     Parameters
     ----------

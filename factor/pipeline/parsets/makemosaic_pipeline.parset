@@ -1,4 +1,4 @@
-pipeline.steps = [create_images_map, create_vertices_map, create_compressed_mapfile_images, create_compressed_mapfile_vertices, copy_beam_info, make_mosaic]
+pipeline.steps = [create_images_map, create_vertices_map, create_compressed_mapfile_images, create_compressed_mapfile_vertices, copy_beam_info, make_mosaic, create_compressed_mapfile, concat, make_pbimage, zero_avgpb, image2fits, correct_mosaic, copy_final_mosaic_map1, copy_final_mosaic_map2]
 
 pipeline.pluginpath                                    =   {{ pipeline_dir }}/plugins
 
@@ -38,3 +38,70 @@ make_mosaic.control.mapfiles_in                        =   [create_compressed_ma
 make_mosaic.control.inputkeys                          =   [images,vertices]
 make_mosaic.control.outputkey                          =   outfile
 make_mosaic.argument.flags                             =   [images,vertices,outfile]
+
+create_compressed_mapfile.control.kind                 =   plugin
+create_compressed_mapfile.control.type                 =   compressMapfile
+create_compressed_mapfile.control.mapfile_in           =   {{ input_bands_datamap }}
+create_compressed_mapfile.control.mapfile_dir          =   {{ mapfile_dir }}
+create_compressed_mapfile.control.filename             =   concat_input.datamap
+
+concat.control.type                                    =   virtual_concat
+concat.control.mapfile_in                              =   create_compressed_mapfile.output.mapfile
+concat.control.inputkey                                =   msfiles
+concat.control.outputkey                               =   msconcat
+concat.argument.flags                                  =   [msfiles,msconcat]
+
+make_pbimage.control.type                              =   awimager
+make_pbimage.control.opts.mapfile_in                   =   concat.output.mapfile
+make_pbimage.control.opts.inputkey                     =   ms
+make_pbimage.control.opts.outputkey                    =   image
+make_pbimage.argument.numthreads                       =   {{ max_cpus_per_node }}
+make_pbimage.argument.data                             =   CORRECTED_DATA
+make_pbimage.argument.weight                           =   briggs
+make_pbimage.argument.npix                             =   {{ pbcor_imsize }}
+make_pbimage.argument.cellsize                         =   5.5arcsec
+make_pbimage.argument.padding                          =   1.
+make_pbimage.argument.gain                             =   0.1
+make_pbimage.argument.stokes                           =   I
+make_pbimage.argument.operation                        =   mfclark
+make_pbimage.argument.oversample                       =   5
+make_pbimage.argument.timewindow                       =   300
+make_pbimage.argument.ApplyElement                     =   0
+make_pbimage.argument.FindNWplanes                     =   True
+make_pbimage.argument.threshold                        =   1.0mJy
+make_pbimage.argument.PBCut                            =   1e-2
+make_pbimage.argument.wmax                             =   20000
+make_pbimage.argument.UVmin                            =   0.08
+make_pbimage.argument.UVmax                            =   10
+make_pbimage.argument.SpheSupport                      =   15
+make_pbimage.argument.robust                           =   -0.25
+make_pbimage.argument.niter                            =   1
+
+zero_avgpb.control.type                                    =   zero_avgpb
+zero_avgpb.control.mapfile_in                              =   make_pbimage.output.make_pbimage0.avgpb.mapfile
+zero_avgpb.control.inputkey                                =   avgpb
+zero_avgpb.control.outputkey                               =   outfile
+zero_avgpb.argument.flags                                  =   [avgpb,outfile]
+
+image2fits.control.type                                =   image2fits
+image2fits.control.mapfile_in                          =   zero_avgpb.output.mapfile
+image2fits.control.inputkey                            =   in
+image2fits.control.outputkey                           =   out
+
+correct_mosaic.control.type                            =   pb_correct
+correct_mosaic.control.mapfiles_in                     =   [make_mosaic.output.mapfile,image2fits.output.mapfile]
+correct_mosaic.control.inputkeys                       =   [mosaic,avgpbz]
+correct_mosaic.control.outputkey                       =   outroot
+correct_mosaic.argument.flags                          =   [mosaic,avgpbz,outroot]
+
+copy_final_mosaic_map1.control.kind                    =   plugin
+copy_final_mosaic_map1.control.type                    =   copyMapfile
+copy_final_mosaic_map1.control.mapfile_in              =   correct_mosaic.output.correct_mosaic.pbcor.fits.mapfile
+copy_final_mosaic_map1.control.mapfile_dir             =   {{ mapfile_dir }}
+copy_final_mosaic_map1.control.filename                =   final_pbcor_mosaic.datamap
+
+copy_final_mosaic_map2.control.kind                    =   plugin
+copy_final_mosaic_map2.control.type                    =   copyMapfile
+copy_final_mosaic_map2.control.mapfile_in              =   correct_mosaic.output.correct_mosaic.pbcut.fits.mapfile
+copy_final_mosaic_map2.control.mapfile_dir             =   {{ mapfile_dir }}
+copy_final_mosaic_map2.control.filename                =   final_pbcut_mosaic.datamap
