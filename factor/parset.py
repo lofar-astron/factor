@@ -155,7 +155,7 @@ def parset_read(parset_file):
     log.info("Using the following groupings for directions: {0}".format(groupings))
     if 'ndir_selfcal' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['ndir_selfcal'] = parset.getint('directions', 'ndir_selfcal')
-        log.info("Selfcal-ing up to %s direction(s)" % (parset_dict['direction_specific']['ndir_selfcal']))
+        log.info("Self calibrating up to %s direction(s)" % (parset_dict['direction_specific']['ndir_selfcal']))
     else:
         parset_dict['direction_specific']['ndir_selfcal'] = -1
     if 'ndir_total' in parset_dict['direction_specific']:
