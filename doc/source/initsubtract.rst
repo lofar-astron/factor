@@ -233,7 +233,7 @@ Pipeline Steps
         the sky models.
 
     subtract
-        Call BBS to subtract the input sky modesl from the ``DATA`` column to make the ``SUBTRACTED_DATA`` column.
+        Call BBS to subtract the input sky models from the ``DATA`` column to make the ``SUBTRACTED_DATA`` column.
 
 Test data
     With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the ``SUBTRACTED_DATA_ALL`` column in this MS file.

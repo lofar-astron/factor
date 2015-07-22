@@ -6,6 +6,7 @@ Facet Calibration Software
    :maxdepth: 2
    :numbered:
 
+   acknowledgements.rst
    factor_intro.rst
    prefacet.rst
    initsubtract.rst
