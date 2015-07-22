@@ -1,7 +1,7 @@
 Introduction
 ============
 
-This document describes the facet calibration software that implements the facet calibration scheme described in van Weeren et al. (in prep.) and Williams et al. (in prep.).  The software are divided into a number of pipelines, each of which is described in the following sections.
+The facet calibration software is divided into a number of pipelines, each of which is described in the following sections.
 
 In addition to these pipelines, the Factor software package has been developed to handle the setup and running of pipelines to perform facet calibration in a user-friendly way (note that currently the pre-facet calibration pipeline is not part of Factor). For instructions on using Factor, please see the Factor chapter in the LOFAR Imaging Cookbook.
 
