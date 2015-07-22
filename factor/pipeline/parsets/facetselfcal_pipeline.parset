@@ -78,11 +78,6 @@ copy_column.control.mapfiles_in                            =   [concat_corr.outp
 copy_column.control.inputkeys                              =   [corrdatafile,datafile]
 copy_column.argument.flags                                 =   [corrdatafile,datafile,DATA,CORRECTED_DATA]
 
-# loop_facet_selfcal.control.kind                            =   loop
-# loop_facet_selfcal.control.type                            =   conditional
-# loop_facet_selfcal.control.loopcount                       =   2
-# loop_facet_selfcal.control.loopsteps                       =   [average0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, make_chunks, create_chunks_map, solve_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, create_chunks_compressed_mapfile, concat_chunks, casa_ft1, solve_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, create_model3_map, casa_ft3, solve_ampphase21, merge_phase_parmdbs, solve_ampphase22, merge_amp_parmdbs2, smooth_amp2, expand_smoothed_amp2_parmdb_map, apply_amp2, average4, create_compressed_mapfile4, concat4, casa_image41, adjust_casa_mapfile4, mask4, casa_image42, merge_selfcal_parmdbs, copy_final_model_map, expand_merged_parmdb_map, apply_dir_dep, average5, create_compressed_mapfile5, concat_averaged, premask, wsclean1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean2, create_model4_map, create_compressed_mapfile6, concat_unaveraged, wsclean_ft, adjust_wsclean_mapfile2, subtract, apply_dir_indep_pre, apply_dir_indep_post, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract]
-
 average0.control.type                                      =   dppp
 average0.control.mapfile_in                                =   concat_data.output.mapfile
 average0.control.inputkey                                  =   msin
