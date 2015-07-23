@@ -132,16 +132,10 @@ class FacetSelfcal(Operation):
         if os.path.exists(self.verify_subtract_OK_mapfile):
             ok_datamap = DataMap.load(self.verify_subtract_OK_mapfile)
             ok_flags = [ast.literal_eval(item.file) for item in ok_datamap]
-            if self.parset['strict_selfcal_verification']:
-                if all(ok_flags):
-                    self.direction.selfcal_ok = True
-                else:
-                    self.direction.selfcal_ok = False
+            if all(ok_flags):
+                self.direction.selfcal_ok = True
             else:
-                if any(ok_flags):
-                    self.direction.selfcal_ok = True
-                else:
-                    self.direction.selfcal_ok = False
+                self.direction.selfcal_ok = False
 
 
 class FacetSub(Operation):
