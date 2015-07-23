@@ -1,0 +1,13 @@
+\BOOKMARK [1][-]{section.1}{Factor: Facet Calibration for LOFAR}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Usage}{section.1}% 2
+\BOOKMARK [3][-]{subsubsection.1.1.1}{Quick-start}{subsection.1.1}% 3
+\BOOKMARK [2][-]{subsection.1.2}{Parset}{section.1}% 4
+\BOOKMARK [2][-]{subsection.1.3}{Data Preparation}{section.1}% 5
+\BOOKMARK [2][-]{subsection.1.4}{Directions}{section.1}% 6
+\BOOKMARK [2][-]{subsection.1.5}{Parallelization}{section.1}% 7
+\BOOKMARK [3][-]{subsubsection.1.5.1}{Cluster without a scheduler}{subsection.1.5}% 8
+\BOOKMARK [3][-]{subsubsection.1.5.2}{Cluster with Torque / PBS }{subsection.1.5}% 9
+\BOOKMARK [3][-]{subsubsection.1.5.3}{Cluster with a shared file system}{subsection.1.5}% 10
+\BOOKMARK [3][-]{subsubsection.1.5.4}{Cluster with a distributed file system}{subsection.1.5}% 11
+\BOOKMARK [2][-]{subsection.1.6}{Resuming}{section.1}% 12
+\BOOKMARK [2][-]{subsection.1.7}{Structure}{section.1}% 13

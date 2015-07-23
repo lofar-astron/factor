@@ -378,37 +378,13 @@ Factor is structured based on operations and actions. An operation is composed
 of a sequence of actions. For example, the initial subtraction operation
 (denoted {\tt initsubtract}) performs the following actions: image at high resolution,
 make a sky model, subtract the sky model, average, image at low resolution,
-make another sky model, and finally subtract the second sky model. Operations
-divide the reduction into logical groupings of actions as follows.
-
-\begin{description}
-\item[{\tt initsubtract}] Performs the initial imaging and subtraction of sources to
-create ``source-free'' datasets. This operation may be skipped if sky models are
-specified for each band in the parset and the {\tt SUBTRACTED\_DATA\_ALL} column
-is present in all the input bands.
-\item[{\tt facetadd}] For each direction, the facet sources are added to the
-``source-free'' datasets. The data are then phase shifted to the appropriate
-coordinates.
-\item[{\tt facetselfcal}] The direction-independent calibration is applied, and
-the bands are concatenated and averaged. Self-calibration is then performed on
-one or more directions, using two rounds of phase-only calibration followed by
-two rounds of fast-phase and slow-amplitude calibration. For each direction, all
-sources in the facet are added to the ``source-free'' datasets. The data are
-then phase shifted to the appropriate coordinates. The direction-dependent
-calibration is applied, and the bands are concatenated and averaged. The entire
-facet is then imaged, producing a final model of the facet sources.
-\item[{\tt facetsub}] The final model is subtracted, producing improved
-``source-free'' datasets which are used by subsequent directions.
-\end{description}
-
-The facet operations ({\tt facetadd}, {\tt facetselfcal}, and {\tt facetsub})
-are repeated for each direction. The {\tt facetselfcal} operation can run on
-multiple directions simultaneously.
+make another sky model, and finally subtract the second sky model. For details,
+see the Facet Calibration Pipeline documentation (ref).
 
 The results of the processing are stored in the {\tt results} directory in the
 working directory. Inside these subdirectories, results are organized by
 operation and direction. For example, for a direction named ``dir1'', the
-results produced during self calibration are stored in {{\tt
-results/facetselfcal/dir1/}.
+results produced during the {\tt initsubtract} operation are stored in {{\tt
+results/initsubtract/dir1/}.
 
 \end{document}

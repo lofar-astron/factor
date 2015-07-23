@@ -26,7 +26,7 @@ Code Structure
 The top-level directories are:
 
 * `bin`: contains the `runfactor` executable
-* `doc`: contains the documentation
+* `docs`: contains the documentation
 * `examples`: contains examples parset and directions file
 * `factor`: main code tree
 
