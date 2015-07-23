@@ -13,6 +13,7 @@ import os
 from factor.lib.operation import Operation
 from lofarpipe.support.data_map import DataMap
 
+
 class InitSubtract(Operation):
     """
     Operation to create empty datasets
