@@ -547,6 +547,7 @@ def make_region_file(vertices, outputfile):
     -------
     region_filename : str
         Name of region file
+
     """
     lines = ['#CRTFv0\n\n']
     xylist = []
@@ -958,26 +959,27 @@ def calculateSeparation(ra1, dec1, ra2, dec2):
 # The following taken from
 # http://code.activestate.com/recipes/578381-a-point-in-polygon-program-sw-sloan-algorithm/
 def _det(xvert, yvert):
-    '''Compute twice the area of the triangle defined by points with using
+    """
+    Compute twice the area of the triangle defined by points with using
     determinant formula.
 
-    Input parameters:
+    Parameters
+    ----------
+    xvert : array
+        A vector of nodal x-coords (array-like).
+    yvert : array
+        A vector of nodal y-coords (array-like).
 
-    xvert -- A vector of nodal x-coords (array-like).
-    yvert -- A vector of nodal y-coords (array-like).
+    Returns
+    -------
+    area : float
+        Twice the area of the triangle defined by the points.
+        _det is positive if points define polygon in anticlockwise order.
+        _det is negative if points define polygon in clockwise order.
+        _det is zero if at least two of the points are concident or if
+            all points are collinear.
 
-    Output parameters:
-
-    Twice the area of the triangle defined by the points.
-
-    Notes:
-
-    _det is positive if points define polygon in anticlockwise order.
-    _det is negative if points define polygon in clockwise order.
-    _det is zero if at least two of the points are concident or if
-        all points are collinear.
-
-    '''
+    """
     xvert = np.asfarray(xvert)
     yvert = np.asfarray(yvert)
     x_prev = np.concatenate(([xvert[-1]], xvert[:-1]))
@@ -986,14 +988,17 @@ def _det(xvert, yvert):
 
 
 class Polygon:
-    '''Polygon object.
+    """
+    Polygon object.
 
-    Input parameters:
+    Parameters
+    ----------
+    x : array
+        A sequence of nodal x-coords.
+    y : array
+        A sequence of nodal y-coords.
 
-    x -- A sequence of nodal x-coords.
-    y -- A sequence of nodal y-coords.
-
-    '''
+    """
 
     def __init__(self, x, y):
         if len(x) != len(y):
