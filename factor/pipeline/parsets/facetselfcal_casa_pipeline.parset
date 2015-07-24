@@ -1049,19 +1049,19 @@ subtract.argument.parmdb                                   =   inputparmdb
 subtract.argument.replace-sourcedb                         =   True
 subtract.argument.replace-parmdb                           =   True
 
-create_single_band_all_mapfile..control.kind               =   plugin
+create_single_band_all_mapfile.control.kind                =   plugin
 create_single_band_all_mapfile.control.type                =   filterMapfile
 create_single_band_all_mapfile.control.mapfile_in          =   {{ shifted_all_bands_datamap }}
 create_single_band_all_mapfile.control.mapfile_dir         =   {{ mapfile_dir }}
 create_single_band_all_mapfile.control.filename            =   single_band_all.datamap
 
-create_single_band_empty_mapfile..control.kind             =   plugin
+create_single_band_empty_mapfile.control.kind              =   plugin
 create_single_band_empty_mapfile.control.type              =   filterMapfile
 create_single_band_empty_mapfile.control.mapfile_in        =   {{ shifted_all_bands_datamap }}
 create_single_band_empty_mapfile.control.mapfile_dir       =   {{ mapfile_dir }}
 create_single_band_empty_mapfile.control.filename          =   single_band_empty.datamap
 
-create_single_parmdb_mapfile..control.kind                 =   plugin
+create_single_parmdb_mapfile.control.kind                  =   plugin
 create_single_parmdb_mapfile.control.type                  =   filterMapfile
 create_single_parmdb_mapfile.control.mapfile_in            =   {{ dir_indep_parmdbs_datamap }}
 create_single_parmdb_mapfile.control.mapfile_dir           =   {{ mapfile_dir }}
