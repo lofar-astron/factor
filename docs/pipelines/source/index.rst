@@ -17,5 +17,5 @@ Facet Calibration Software
    facetimagefinal.rst
    mosaic.rst
    future.rst
-..    factor_modules.rst
+   factor_modules.rst
 
