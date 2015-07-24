@@ -977,7 +977,7 @@ def _det(xvert, yvert):
         _det is positive if points define polygon in anticlockwise order.
         _det is negative if points define polygon in clockwise order.
         _det is zero if at least two of the points are concident or if
-            all points are collinear.
+        all points are collinear.
 
     """
     xvert = np.asfarray(xvert)
