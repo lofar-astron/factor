@@ -458,7 +458,7 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
         # Set number of bands and channels for images
         direction.nbands = len(bands)
         if direction.nbands > 5:
-            direction.nchannels = int(np.ceil(float(direction.nbands)/
+            direction.nchannels = int(round(float(direction.nbands)/
                 float(parset['wsclean_nbands'])))
         else:
             direction.nchannels = 1
