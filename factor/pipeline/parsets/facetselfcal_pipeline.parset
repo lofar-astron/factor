@@ -1,4 +1,4 @@
-pipeline.steps = [update_shifted_cal_hosts, update_shifted_all_hosts, update_shifted_empty_hosts, apply_dir_indep, average_data, average_corr, create_compressed_mapfile_data, create_compressed_mapfile_corr, concat_data, concat_corr, copy_column, average0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, make_chunks, create_chunks_map, solve_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, create_chunks_compressed_mapfile, concat_chunks, casa_ft1, solve_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, create_model3_map, casa_ft3, solve_ampphase21, merge_phase_parmdbs, solve_ampphase22, merge_amp_parmdbs2, smooth_amp2, expand_smoothed_amp2_parmdb_map, apply_amp2, average4, create_compressed_mapfile4, concat4, casa_image41, adjust_casa_mapfile4, mask4, casa_image42, merge_selfcal_parmdbs, copy_final_model_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, concat_averaged, premask, wsclean1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean2, create_model4_map, create_compressed_mapfile6, concat_unaveraged, wsclean_ft, adjust_wsclean_mapfile2, subtract, create_single_band_all_mapfile, create_single_band_empty_mapfile, create_single_parmdb_mapfile, apply_dir_indep_pre, apply_dir_indep_post, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
+pipeline.steps = [update_shifted_cal_hosts, update_shifted_all_hosts, update_shifted_empty_hosts, apply_dir_indep, average_data, average_corr, create_compressed_mapfile_data, create_compressed_mapfile_corr, concat_data, concat_corr, copy_column, average0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, make_chunks, create_chunks_map, solve_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, create_chunks_compressed_mapfile, concat_chunks, casa_ft1, solve_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, create_model3_map, casa_ft3, solve_ampphase21, merge_phase_parmdbs, solve_ampphase22, merge_amp_parmdbs2, smooth_amp2, expand_smoothed_amp2_parmdb_map, apply_amp2, average4, create_compressed_mapfile4, concat4, casa_image41, adjust_casa_mapfile4, mask4, casa_image42, merge_selfcal_parmdbs, copy_final_model_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, premask, wsclean1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean2, create_model4_map, create_compressed_mapfile6, wsclean_ft, adjust_wsclean_mapfile2, subtract, create_single_band_all_mapfile, create_single_band_empty_mapfile, create_single_parmdb_mapfile, apply_dir_indep_pre, apply_dir_indep_post, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -900,6 +900,7 @@ create_compressed_mapfile5.control.type                    =   compressMapfile
 create_compressed_mapfile5.control.mapfile_in              =   average5.output.mapfile
 create_compressed_mapfile5.control.mapfile_dir             =   {{ mapfile_dir }}
 create_compressed_mapfile5.control.filename                =   concat_averaged_input.datamap
+create_compressed_mapfile5.control.list_format             =   False
 
 concat_averaged.control.type                               =   virtual_concat
 concat_averaged.control.mapfile_in                         =   create_compressed_mapfile5.output.mapfile
@@ -918,7 +919,7 @@ premask.argument.skip_source_detection                     =   True
 premask.argument.vertices_file                             =   {{ vertices_file }}
 
 wsclean1.control.type                                      =   wsclean
-wsclean1.control.mapfiles_in                               =   [concat_averaged.output.mapfile,premask.output.mapfile]
+wsclean1.control.mapfiles_in                               =   [create_compressed_mapfile5.output.mapfile,premask.output.mapfile]
 wsclean1.control.inputkeys                                 =   [msfile,fitsmask]
 wsclean1.argument.flags                                    =   [-no-update-model-required,-no-reorder,-joinchannels,msfile]
 wsclean1.argument.fitsmask                                 =   fitsmask
@@ -970,7 +971,7 @@ mask5.argument.img_format                                  =   fits
 mask5.argument.vertices_file                               =   {{ vertices_file }}
 
 wsclean2.control.type                                      =   wsclean
-wsclean2.control.mapfiles_in                               =   [concat_averaged.output.mapfile,mask5.output.mapfile]
+wsclean2.control.mapfiles_in                               =   [create_compressed_mapfile5.output.mapfile,mask5.output.mapfile]
 wsclean2.control.inputkeys                                 =   [msfile,fitsmask]
 wsclean2.argument.flags                                    =   [-no-update-model-required,-no-reorder,-joinchannels,msfile]
 wsclean2.argument.fitsmask                                 =   fitsmask
@@ -1008,6 +1009,7 @@ create_compressed_mapfile6.control.type                    =   compressMapfile
 create_compressed_mapfile6.control.mapfile_in              =   {{ shifted_all_bands_datamap }}
 create_compressed_mapfile6.control.mapfile_dir             =   {{ mapfile_dir }}
 create_compressed_mapfile6.control.filename                =   concat_unaveraged_input.datamap
+create_compressed_mapfile6.control.list_format             =   False
 
 concat_unaveraged.control.type                             =   virtual_concat
 concat_unaveraged.control.mapfile_in                       =   create_compressed_mapfile6.output.mapfile
@@ -1016,7 +1018,7 @@ concat_unaveraged.control.outputkey                        =   msconcat
 concat_unaveraged.argument.flags                           =   [msfiles,msconcat]
 
 wsclean_ft.control.type                                    =   wsclean_ft
-wsclean_ft.control.mapfiles_in                             =   [concat_unaveraged.output.mapfile,create_model4_map.output.mapfile]
+wsclean_ft.control.mapfiles_in                             =   [create_compressed_mapfile6.output.mapfile,create_model4_map.output.mapfile]
 wsclean_ft.control.inputkeys                               =   [msfile,name]
 wsclean_ft.argument.flags                                  =   [-predict,msfile]
 wsclean_ft.argument.size                                   =   {{ facet_imsize }} {{ facet_imsize }}
