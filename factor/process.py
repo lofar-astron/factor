@@ -57,7 +57,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     # Make direction object for the field
     field = Direction('field', bands[0].ra, bands[0].dec,
         factor_working_dir=parset['dir_working'])
-    field.set_averaging_steps(bands[0].chan_width_hz, bands[0].timepersample)
+    field.set_averaging_steps(bands[0].chan_width_hz, bands[0].nchan,
+        bands[0].timepersample)
     exists = field.load_state()
     if not exists:
         field.save_state()
