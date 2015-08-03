@@ -286,7 +286,7 @@ class Direction(object):
         # slot. Since each band is imaged separately and the smearing and image
         # sizes both scale linearly with frequency, a single frequency and time
         # step is valid for all bands
-        self.initsubtract_freqstep = max(1, min(int(round(0.5 * 1e6 / chan_width_hz))), nchan)
+        self.initsubtract_freqstep = max(1, min(int(round(0.5 * 1e6 / chan_width_hz)), nchan))
         while nchan % self.initsubtract_freqstep:
             self.initsubtract_freqstep += 1
         self.initsubtract_timestep = max(1, int(round(20.0 / timestep_sec)))
@@ -299,14 +299,14 @@ class Direction(object):
 
         # For facet imaging, average to 0.5 MHz per channel and 30 sec per time
         # slot
-        self.facetimage_freqstep = max(1, min(int(round(0.5 * 1e6 / chan_width_hz))), nchan)
+        self.facetimage_freqstep = max(1, min(int(round(0.5 * 1e6 / chan_width_hz)), nchan))
         while nchan % self.facetimage_freqstep:
             self.facetimage_freqstep += 1
         self.facetimage_timestep = max(1, int(round(30.0 / timestep_sec)))
 
         # For selfcal verify, average to 2 MHz per channel and 60 sec per time
         # slot
-        self.verify_freqstep = max(1, min(int(round(2.0 * 1e6 / chan_width_hz))), nchan)
+        self.verify_freqstep = max(1, min(int(round(2.0 * 1e6 / chan_width_hz)), nchan))
         while nchan % self.verify_freqstep:
             self.verify_freqstep += 1
         self.verify_timestep = max(1, int(round(60.0 / timestep_sec)))
