@@ -450,7 +450,8 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
     # Set various direction attributes
     for i, direction in enumerate(directions):
         # Set averaging steps
-        direction.set_averaging_steps(bands[0].chan_width_hz, bands[0].timepersample)
+        direction.set_averaging_steps(bands[0].chan_width_hz, bands[0].nchan,
+            bands[0].timepersample)
 
         # Set image sizes
         direction.set_image_sizes(test_run=test_run)

@@ -257,9 +257,12 @@ class Direction(object):
         return newlarge
 
 
-    def set_averaging_steps(self, chan_width_hz, timestep_sec):
+    def set_averaging_steps(self, chan_width_hz, nchan, timestep_sec):
         """
         Sets the averaging step sizes
+
+        Note: the frequency step must be an even divisor of the number of
+        channels
 
         ### TODO ###
         The optimal step sizes should be determined by the sizes of the images for
@@ -269,26 +272,43 @@ class Direction(object):
         Bandwidth and time smearing can be estimated following
         http://www.cv.nrao.edu/course/astr534/Interferometers1.html.
 
+        Parameters
+        ----------
+        chan_width_hz : float
+            Channel width
+        nchan : int
+            Number of channels per band
+        timestep_sec : float
+            Time step
+
         """
         # For initsubtract, average to 0.5 MHz per channel and 20 sec per time
         # slot. Since each band is imaged separately and the smearing and image
         # sizes both scale linearly with frequency, a single frequency and time
         # step is valid for all bands
-        self.initsubtract_freqstep = max(1, int(round(0.5 * 1e6 / chan_width_hz)))
+        self.initsubtract_freqstep = max(1, min(int(round(0.5 * 1e6 / chan_width_hz))), nchan)
+        while nchan % self.initsubtract_freqstep:
+            self.initsubtract_freqstep += 1
         self.initsubtract_timestep = max(1, int(round(20.0 / timestep_sec)))
 
         # For selfcal, average to 2 MHz per channel and 120 s per time slot
-        self.facetselfcal_freqstep = max(1, int(round(2.0 * 1e6 / chan_width_hz)))
+        self.facetselfcal_freqstep = max(1, min(int(round(2.0 * 1e6 / chan_width_hz)), nchan))
+        while nchan % self.facetselfcal_freqstep:
+            self.facetselfcal_freqstep += 1
         self.facetselfcal_timestep = max(1, int(round(120.0 / timestep_sec)))
 
         # For facet imaging, average to 0.5 MHz per channel and 30 sec per time
         # slot
-        self.facetimage_freqstep = max(1, int(round(0.5 * 1e6 / chan_width_hz)))
+        self.facetimage_freqstep = max(1, min(int(round(0.5 * 1e6 / chan_width_hz))), nchan)
+        while nchan % self.facetimage_freqstep:
+            self.facetimage_freqstep += 1
         self.facetimage_timestep = max(1, int(round(30.0 / timestep_sec)))
 
         # For selfcal verify, average to 2 MHz per channel and 60 sec per time
         # slot
-        self.verify_freqstep = max(1, int(round(2.0 * 1e6 / chan_width_hz)))
+        self.verify_freqstep = max(1, min(int(round(2.0 * 1e6 / chan_width_hz))), nchan)
+        while nchan % self.verify_freqstep:
+            self.verify_freqstep += 1
         self.verify_timestep = max(1, int(round(60.0 / timestep_sec)))
 
 
