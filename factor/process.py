@@ -59,9 +59,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         factor_working_dir=parset['dir_working'])
     field.set_averaging_steps(bands[0].chan_width_hz, bands[0].nchan,
         bands[0].timepersample)
-    exists = field.load_state()
-    if not exists:
-        field.save_state()
 
     # Run initial sky model generation and create empty datasets
     if len(bands_initsubtract) > 0:
@@ -339,6 +336,8 @@ def _set_up_bands(parset, log, test_run=False):
     # Sort bands by frequency
     band_freqs = [band.freq for band in bands]
     bands = np.array(bands)[np.argsort(band_freqs)].tolist()
+
+    # TODO: Check that bands are uniform in number of channels and phase center
 
     # Determine whether any bands need to be run through the initsubract operation.
     # This operation is needed (only needed if band lacks an initial skymodel or
