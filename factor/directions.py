@@ -145,12 +145,14 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
         Filename of resulting Factor-formatted directions file
 
     """
-    # Use sky model of lowest-frequency band
-    freqs = [band.freq for band in bands]
-    min_freq_indx = np.argmin(freqs)
-    band = bands[min_freq_indx]
     directions_file = 'factor_directions.txt'
     ds9_directions_file = 'factor_directions_ds9.reg'
+
+    # Use sky model of highest-frequency band, as it has the smallest field of
+    # view.
+    freqs = [band.freq for band in bands]
+    max_freq_indx = np.argmax(freqs)
+    band = bands[max_freq_indx]
 
     # Load sky model and filter it
     s = make_initial_skymodel(band)
@@ -183,7 +185,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     log.info('Found {0} sources with fluxes above {1} Jy'.format(
         len(s.getPatchNames()), flux_min_Jy))
 
-    # Trim directions list to get directions_total_num of directions
+    # Trim directions list to get directions_max_num of directions
     if directions_max_num is not None:
         dir_fluxes = s.getColValues('I', aggregate='sum')
         dir_fluxes_sorted = dir_fluxes.tolist()
@@ -236,7 +238,8 @@ def make_initial_skymodel(band):
     # Filter out sources that lie outside of FWHM of FOV
     if not hasattr(band, 'fwhm_deg'):
         band.set_image_sizes()
-    log.info('Removing sources beyond 2 * FWHM of the primary beam...')
+    log.info('Removing sources beyond 2 * FWHM of the primary beam at {} MHz...'.
+        format(band.freq/1e6))
     dist = s.getDistance(band.ra, band.dec, byPatch=True)
     s.remove(dist > band.fwhm_deg, aggregate=True)
 
