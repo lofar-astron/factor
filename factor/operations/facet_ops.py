@@ -6,18 +6,12 @@ or not they can be run in parallel or in series.
 
 Classes
 -------
-FacetAdd : Operation
-    Adds facet sources to data. Must be run in series as writes are made to
-    original datasets
 FacetSelfcal : Operation
     Runs the selfcal and imaging of a facet. May be run in parallel
 FacetSub : Operation
     Subtracts all facet sources from data. Must be run in series as writes are
     made to original datasets
-FacetAddFinal : Operation
-    Adds all facet sources from final model. Must be run in series as writes are
-    made to original datasets
-FacetImageFinal : Operation
+FacetImage : Operation
     Images the entire facet. May be run in parallel
 
 """
@@ -25,55 +19,6 @@ import os
 import ast
 from factor.lib.operation import Operation
 from lofarpipe.support.data_map import DataMap
-
-
-class FacetAdd(Operation):
-    """
-    Operation to add calibrator source to data
-    """
-    def __init__(self, parset, bands, direction):
-        super(FacetAdd, self).__init__(parset, bands, direction,
-            name='FacetAdd')
-
-        # Define extra parameters needed for this operation (beyond those
-        # defined in the master Operation class and as attributes of the
-        # direction object)
-        skymodels = [band.skymodel_dirindep for band in self.bands]
-        if self.direction.use_new_sub_data:
-            add_all_parset = 'facet_dirindep_add_all_new.parset'
-            add_cal_parset = 'facet_dirindep_add_cal_new.parset'
-        else:
-            add_all_parset = 'facet_dirindep_add_all.parset'
-            add_cal_parset = 'facet_dirindep_add_cal.parset'
-        self.parms_dict.update({'input_dir': parset['dir_ms'],
-                                'add_all_parset': add_all_parset,
-                                'add_cal_parset': add_cal_parset,
-                                'dir_indep_parmdb_name': parset['parmdb_name'],
-                                'skymodels': skymodels})
-
-
-    def finalize(self):
-        """
-        Finalize this operation
-        """
-        # Add output datamaps to direction object
-        self.direction.input_bands_datamap = os.path.join(self.mapfile_dir,
-            'input_bands.datamap')
-        self.direction.shifted_all_bands_datamap = os.path.join(self.mapfile_dir,
-            'shifted_all_bands.datamap')
-        self.direction.shifted_cal_bands_datamap = os.path.join(self.mapfile_dir,
-            'shifted_cal_bands.datamap')
-        self.direction.shifted_empty_bands_datamap = os.path.join(self.mapfile_dir,
-            'shifted_empty_bands.datamap')
-        self.direction.dir_indep_parmdbs_datamap = os.path.join(self.mapfile_dir,
-            'dir_indep_instrument_parmdbs.datamap')
-        self.direction.dir_indep_skymodels_datamap = os.path.join(self.mapfile_dir,
-            'full_skymodels.datamap')
-        self.direction.dir_indep_facet_skymodels_datamap = os.path.join(self.mapfile_dir,
-            'facet_skymodels.datamap')
-        self.direction.cleanup_mapfiles.extend([self.direction.shifted_all_bands_datamap,
-            self.direction.shifted_cal_bands_datamap,
-            self.direction.shifted_empty_bands_datamap])
 
 
 class FacetSelfcal(Operation):
@@ -95,6 +40,13 @@ class FacetSelfcal(Operation):
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
+        skymodels = [band.skymodel_dirindep for band in self.bands]
+        if self.direction.use_new_sub_data:
+            add_all_parset = 'facet_dirindep_add_all_new.parset'
+            add_cal_parset = 'facet_dirindep_add_cal_new.parset'
+        else:
+            add_all_parset = 'facet_dirindep_add_all.parset'
+            add_cal_parset = 'facet_dirindep_add_cal.parset'
         if self.direction.nchannels > 1:
             nterms = 2
             casa_suffix = '.tt0'
@@ -103,7 +55,12 @@ class FacetSelfcal(Operation):
             nterms = 1
             casa_suffix = None
             wsclean_suffix = '-image.fits'
-        self.parms_dict.update({'casa_suffix': casa_suffix,
+        self.parms_dict.update({'input_dir': parset['dir_ms'],
+                                'add_all_parset': add_all_parset,
+                                'add_cal_parset': add_cal_parset,
+                                'dir_indep_parmdb_name': parset['parmdb_name'],
+                                'skymodels': skymodels,
+                                'casa_suffix': casa_suffix,
                                 'wsclean_suffix': wsclean_suffix,
                                 'nterms': nterms})
 
@@ -113,6 +70,16 @@ class FacetSelfcal(Operation):
         Finalize this operation
         """
         # Add output datamap to direction object
+        self.direction.input_bands_datamap = os.path.join(self.mapfile_dir,
+            'input_bands.datamap')
+        self.direction.shifted_empty_bands_datamap = os.path.join(self.mapfile_dir,
+            'shifted_empty_bands.datamap')
+        self.direction.dir_indep_parmdbs_datamap = os.path.join(self.mapfile_dir,
+            'dir_indep_instrument_parmdbs.datamap')
+        self.direction.dir_indep_skymodels_datamap = os.path.join(self.mapfile_dir,
+            'full_skymodels.datamap')
+        self.direction.dir_indep_facet_skymodels_datamap = os.path.join(self.mapfile_dir,
+            'facet_skymodels.datamap')
         self.direction.dir_dep_parmdb_datamap = os.path.join(self.mapfile_dir,
             'dir_dep_parmdb.datamap')
         self.direction.facet_image_mapfile = os.path.join(self.mapfile_dir,
@@ -121,7 +88,10 @@ class FacetSelfcal(Operation):
             'final_model_rootnames.datamap')
         self.verify_subtract_OK_mapfile = os.path.join(self.mapfile_dir,
             'verify_subtract_OK.datamap')
-        self.direction.cleanup_mapfiles.extend([os.path.join(self.mapfile_dir,
+        self.direction.cleanup_mapfiles.extend([self.direction.shifted_all_bands_datamap,
+            self.direction.shifted_cal_bands_datamap,
+            self.direction.shifted_empty_bands_datamap,
+            os.path.join(self.mapfile_dir,
             'chunk_files.datamap'), os.path.join(self.mapfile_dir,
             'concat1_input.datamap'), os.path.join(self.mapfile_dir,
             'concat2_input.datamap'), os.path.join(self.mapfile_dir,
@@ -197,9 +167,9 @@ class FacetAddFinal(Operation):
 
 
 
-class FacetImageFinal(Operation):
+class FacetImage(Operation):
     """
-    Operation to make final facet image
+    Operation to make facet image
     """
     def __init__(self, parset, direction):
         super(FacetImageFinal, self).__init__(parset, None, direction,

@@ -1,0 +1,188 @@
+pipeline.steps = [copy_column, expand_parmdb_map, add_all_facet_sources, shift_all, copy_all_map]
+
+pipeline.pluginpath                             =   {{ pipeline_dir }}/plugins
+
+copy_column.control.type                        =   copy_column
+copy_column.control.mapfiles_in                 =   [{{ facet_model_data_mapfile }},{{ input_bands_datamap }}]
+copy_column.control.inputkeys                   =   [shiftedfile,datafile]
+copy_column.argument.flags                      =   [shiftedfile,datafile,DATA,MODEL_DATA]
+
+expand_parmdb_map.control.kind                  =   plugin
+expand_parmdb_map.control.type                  =   expandMapfile
+expand_parmdb_map.control.mapfile_in            =   {{ dir_dep_parmdb_datamap }}
+expand_parmdb_map.control.mapfile_to_match      =   {{ input_bands_datamap }}
+expand_parmdb_map.control.mapfile_dir           =   {{ mapfile_dir }}
+expand_parmdb_map.control.filename              =   add_parmdbs.datamap
+
+add_all_facet_sources.control.type              =   calibrate-stand-alone_new
+add_all_facet_sources.argument.observation      =   {{ input_bands_datamap }}
+add_all_facet_sources.argument.parset           =   {{ parset_dir }}/facet_dirdep_add.parset
+add_all_facet_sources.argument.catalog          =   {{ skymodel_dir }}/empty.skymodel
+add_all_facet_sources.argument.parmdb           =   expand_parmdb_map.output.mapfile
+add_all_facet_sources.argument.replace-sourcedb =   True
+add_all_facet_sources.argument.replace-parmdb   =   True
+
+shift_all.control.type                          =   dppp
+shift_all.control.opts.mapfile_in               =   {{ input_bands_datamap }}
+shift_all.control.opts.inputkey                 =   msin
+shift_all.parsetarg.msin.datacolumn             =   FACET_DATA_ALL
+shift_all.parsetarg.msout.writefullresflag      =   False
+shift_all.parsetarg.steps                       =   [shift]
+shift_all.parsetarg.shift.type                  =   phaseshifter
+shift_all.parsetarg.shift.phasecenter           =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+
+copy_all_map.control.kind                       =   plugin
+copy_all_map.control.type                       =   copyMapfile
+copy_all_map.control.mapfile_in                 =   shift_all.output.mapfile
+copy_all_map.control.mapfile_dir                =   {{ mapfile_dir }}
+copy_all_map.control.filename                   =   shifted_all_final_bands.datamap
+
+pipeline.steps = [expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, concat_averaged, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2]
+
+pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
+
+expand_merged_parmdb_map.control.kind             =   plugin
+expand_merged_parmdb_map.control.type             =   expandMapfile
+expand_merged_parmdb_map.control.mapfile_in       =   {{ dir_dep_parmdb_datamap }}
+expand_merged_parmdb_map.control.mapfile_to_match =   {{ shifted_all_final_bands_datamap }}
+expand_merged_parmdb_map.control.mapfile_dir      =   {{ mapfile_dir }}
+expand_merged_parmdb_map.control.filename         =   expand_merged_parmdbs.datamap
+
+apply_dir_dep_fast.control.type                   =   calibrate-stand-alone_new
+apply_dir_dep_fast.control.mapfiles_in            =   [{{ shifted_all_final_bands_datamap }},expand_merged_parmdb_map.output.mapfile]
+apply_dir_dep_fast.control.inputkeys              =   [inputms,inputparmdb]
+apply_dir_dep_fast.argument.observation           =   inputms
+apply_dir_dep_fast.argument.parset                =   {{ parset_dir }}//facet_dirdep_apply_fast.parset
+apply_dir_dep_fast.argument.catalog               =   {{ skymodel_dir }}/empty.skymodel
+apply_dir_dep_fast.argument.parmdb                =   inputparmdb
+apply_dir_dep_fast.argument.replace-sourcedb      =   True
+apply_dir_dep_fast.argument.replace-parmdb        =   True
+
+apply_dir_dep_slow.control.type                   =   calibrate-stand-alone_new
+apply_dir_dep_slow.control.mapfiles_in            =   [{{ shifted_all_final_bands_datamap }},expand_merged_parmdb_map.output.mapfile]
+apply_dir_dep_slow.control.inputkeys              =   [inputms,inputparmdb]
+apply_dir_dep_slow.argument.observation           =   inputms
+apply_dir_dep_slow.argument.parset                =   {{ parset_dir }}//facet_dirdep_apply_slow.parset
+apply_dir_dep_slow.argument.catalog               =   {{ skymodel_dir }}/empty.skymodel
+apply_dir_dep_slow.argument.parmdb                =   inputparmdb
+apply_dir_dep_slow.argument.replace-sourcedb      =   True
+apply_dir_dep_slow.argument.replace-parmdb        =   True
+
+average.control.type                              =   dppp
+average.control.mapfile_in                        =   {{ shifted_all_final_bands_datamap }}
+average.control.inputkey                          =   msin
+average.parsetarg.msin.datacolumn                 =   CORRECTED_DATA
+average.parsetarg.msout.writefullresflag          =   False
+average.parsetarg.steps                           =   [avg]
+average.parsetarg.avg.type                        =   squash
+average.parsetarg.avg.freqstep                    =   {{ facetimage_freqstep }}
+average.parsetarg.avg.timestep                    =   {{ facetimage_timestep }}
+
+create_compressed_mapfile.control.kind            =   plugin
+create_compressed_mapfile.control.type            =   compressMapfile
+create_compressed_mapfile.control.mapfile_in      =   average.output.mapfile
+create_compressed_mapfile.control.mapfile_dir     =   {{ mapfile_dir }}
+create_compressed_mapfile.control.filename        =   concat_averaged_input.datamap
+
+concat_averaged.control.type                      =   virtual_concat
+concat_averaged.control.mapfile_in                =   create_compressed_mapfile.output.mapfile
+concat_averaged.control.inputkey                  =   msfiles
+concat_averaged.control.outputkey                 =   msconcat
+concat_averaged.argument.flags                    =   [msfiles,msconcat]
+
+casa_image_full1.control.type                     =   casa_clean
+casa_image_full1.control.mapfile_in               =   concat_averaged.output.mapfile
+casa_image_full1.control.inputkey                 =   clean.vis
+casa_image_full1.control.outputkey                =   clean.imagename
+casa_image_full1.control.arguments                =   [--nologger,--nogui,-c]
+casa_image_full1.argument.clean.wprojplanes       =   {{ facet_wplanes }}
+casa_image_full1.argument.clean.uvrange           =   '>80lambda'
+casa_image_full1.argument.clean.nterms            =   {{ nterms }}
+casa_image_full1.argument.clean.niter             =   15000
+casa_image_full1.argument.clean.threshold         =   '0mJy'
+casa_image_full1.argument.clean.imsize            =   [{{ facet_imsize }}, {{ facet_imsize }}]
+casa_image_full1.argument.clean.cell              =   ['1.5arcsec', '1.5arcsec']
+casa_image_full1.argument.clean.robust            =   -0.25
+casa_image_full1.argument.clean.selectdata        =   True
+casa_image_full1.argument.clean.gridmode          =   'widefield'
+casa_image_full1.argument.clean.interactive       =   False
+casa_image_full1.argument.clean.mode              =   'mfs'
+casa_image_full1.argument.clean.gain              =   0.1
+casa_image_full1.argument.clean.psfmode           =   'clark'
+casa_image_full1.argument.clean.imagermode        =   'csclean'
+casa_image_full1.argument.clean.ftmachine         =   'mosaic'
+casa_image_full1.argument.clean.mosweight         =   False
+casa_image_full1.argument.clean.scaletype         =   'SAULT'
+casa_image_full1.argument.clean.weighting         =   'briggs'
+casa_image_full1.argument.clean.uvtaper           =   False
+casa_image_full1.argument.clean.pbcor             =   False
+casa_image_full1.argument.clean.minpb             =   0.2
+casa_image_full1.argument.clean.npixels           =   0
+casa_image_full1.argument.clean.npercycle         =   100
+casa_image_full1.argument.clean.cyclefactor       =   2.5
+casa_image_full1.argument.clean.cyclespeedup      =   -1
+casa_image_full1.argument.clean.chaniter          =   False
+casa_image_full1.argument.clean.flatnoise         =   True
+casa_image_full1.argument.clean.allowchunk        =   False
+
+adjust_casa_mapfile.control.kind                  =   plugin
+adjust_casa_mapfile.control.type                  =   appendMapfile
+adjust_casa_mapfile.control.mapfile_in            =   casa_image_full1.output.casa_image_full1.image.mapfile
+adjust_casa_mapfile.control.append                =   {{ casa_suffix }}
+adjust_casa_mapfile.control.mapfile_dir           =   {{ mapfile_dir }}
+adjust_casa_mapfile.control.filename              =   mask_input.datamap
+
+mask.control.type                                 =   make_clean_mask
+mask.control.mapfile_in                           =   adjust_casa_mapfile.output.mapfile
+mask.control.inputkey                             =   imagefile
+mask.control.outputkey                            =   maskfile
+mask.argument.flags                               =   [imagefile,maskfile]
+mask.argument.threshisl                           =   5
+mask.argument.threshpix                           =   5
+mask.argument.rmsbox                              =   (80,20)
+mask.argument.adaptive_rmsbox                     =   True
+mask.argument.atrous_do                           =   True
+mask.argument.img_format                          =   casa
+mask.argument.vertices_file                       =   {{ vertices_file }}
+mask.argument.threshold_format                    =   str_with_units
+
+casa_image_full2.control.type                     =   casa_clean
+casa_image_full2.control.mapfiles_in              =   [concat_averaged.output.mapfile,mask.output.mapfile,mask.output.threshold_5sig.mapfile]
+casa_image_full2.control.inputkeys                =   [clean.vis,clean.mask,clean.threshold]
+casa_image_full2.control.outputkey                =   clean.imagename
+casa_image_full2.control.arguments                =   [--nologger,--nogui,-c]
+casa_image_full2.argument.clean.wprojplanes       =   {{ facet_wplanes }}
+casa_image_full2.argument.clean.uvrange           =   '>80lambda'
+casa_image_full2.argument.clean.nterms            =   {{ nterms }}
+casa_image_full2.argument.clean.niter             =   1000000
+casa_image_full2.argument.clean.imsize            =   [{{ facet_imsize }}, {{ facet_imsize }}]
+casa_image_full2.argument.clean.cell              =   ['1.5arcsec', '1.5arcsec']
+casa_image_full2.argument.clean.robust            =   -0.25
+casa_image_full2.argument.clean.selectdata        =   True
+casa_image_full2.argument.clean.gridmode          =   'widefield'
+casa_image_full2.argument.clean.interactive       =   False
+casa_image_full2.argument.clean.mode              =   'mfs'
+casa_image_full2.argument.clean.gain              =   0.1
+casa_image_full2.argument.clean.psfmode           =   'clark'
+casa_image_full2.argument.clean.imagermode        =   'csclean'
+casa_image_full2.argument.clean.ftmachine         =   'mosaic'
+casa_image_full2.argument.clean.mosweight         =   False
+casa_image_full2.argument.clean.scaletype         =   'SAULT'
+casa_image_full2.argument.clean.weighting         =   'briggs'
+casa_image_full2.argument.clean.uvtaper           =   False
+casa_image_full2.argument.clean.pbcor             =   False
+casa_image_full2.argument.clean.minpb             =   0.2
+casa_image_full2.argument.clean.npixels           =   0
+casa_image_full2.argument.clean.npercycle         =   100
+casa_image_full2.argument.clean.cyclefactor       =   2.5
+casa_image_full2.argument.clean.cyclespeedup      =   -1
+casa_image_full2.argument.clean.chaniter          =   False
+casa_image_full2.argument.clean.flatnoise         =   True
+casa_image_full2.argument.clean.allowchunk        =   False
+
+adjust_casa_mapfile2.control.kind                 =   plugin
+adjust_casa_mapfile2.control.type                 =   appendMapfile
+adjust_casa_mapfile2.control.mapfile_in           =   casa_image_full2.output.casa_image_full2.image.mapfile
+adjust_casa_mapfile2.control.append               =   {{ casa_suffix }}
+adjust_casa_mapfile2.control.mapfile_dir          =   {{ mapfile_dir }}
+adjust_casa_mapfile2.control.filename             =   final_image.datamap
