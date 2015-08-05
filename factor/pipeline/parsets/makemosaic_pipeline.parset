@@ -1,4 +1,4 @@
-pipeline.steps = [create_images_map, create_vertices_map, create_compressed_mapfile_images, create_compressed_mapfile_vertices, copy_beam_info, make_mosaic, create_compressed_mapfile, concat, make_pbimage, zero_avgpb, image2fits, correct_mosaic, copy_final_mosaic_map1, copy_final_mosaic_map2]
+pipeline.steps = [create_images_map, create_vertices_map, create_compressed_mapfile_images, create_compressed_mapfile_vertices, copy_beam_info, make_mosaic, create_ms_map, create_compressed_mapfile, concat, make_pbimage, zero_avgpb, image2fits, correct_mosaic, copy_final_mosaic_map1, copy_final_mosaic_map2]
 
 pipeline.pluginpath                                    =   {{ pipeline_dir }}/plugins
 
@@ -39,9 +39,16 @@ make_mosaic.control.inputkeys                          =   [images,vertices]
 make_mosaic.control.outputkey                          =   outfile
 make_mosaic.argument.flags                             =   [images,vertices,outfile]
 
+create_ms_map.control.kind                             =   plugin
+create_ms_map.control.type                             =   addMSMapfile
+create_ms_map.control.hosts                            =   {{ hosts }}
+create_ms_map.control.folder                           =   {{ input_dir }}
+create_ms_map.control.mapfile_dir                      =   {{ mapfile_dir }}
+create_ms_map.control.filename                         =   input_bands.datamap
+
 create_compressed_mapfile.control.kind                 =   plugin
 create_compressed_mapfile.control.type                 =   compressMapfile
-create_compressed_mapfile.control.mapfile_in           =   {{ input_bands_datamap }}
+create_compressed_mapfile.control.mapfile_in           =   create_ms_map.output.mapfile
 create_compressed_mapfile.control.mapfile_dir          =   {{ mapfile_dir }}
 create_compressed_mapfile.control.filename             =   concat_input.datamap
 

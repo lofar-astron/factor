@@ -75,3 +75,5 @@ class MakeMosaic(Operation):
     def __init__(self, parset, direction):
         super(MakeMosaic, self).__init__(parset, None, direction,
             name='MakeMosaic')
+
+        self.parms_dict.update({'input_dir': parset['dir_ms']})
