@@ -5,6 +5,7 @@ Script to copy beam info to WSClean MFS FITS images
 import argparse
 from argparse import RawTextHelpFormatter
 from astropy.io import fits as pyfits
+import os
 
 
 def main(image):
