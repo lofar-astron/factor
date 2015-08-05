@@ -19,6 +19,10 @@ def main(image):
         Filename of image in which the beam info will be entered
 
     """
+    if os.path.isdir(image):
+        # Image is a casa image, so skip it
+        return
+
     templateim = image.replace('-MFS-', '-0000-')
     hduimtemplate = pyfits.open(templateim)
     hduim = pyfits.open(image, mode='update')
