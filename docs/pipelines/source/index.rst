@@ -1,4 +1,3 @@
-
 Facet Calibration Software
 ==========================
 
@@ -12,11 +11,9 @@ This document describes the facet calibration software that implements the facet
    factor_intro.rst
    prefacet.rst
    initsubtract.rst
-   facetadd.rst
    facetselfcal.rst
    facetsubtract.rst
-   facetaddfinal.rst
-   facetimagefinal.rst
+   facetimage.rst
    mosaic.rst
    future.rst
    factor_modules.rst

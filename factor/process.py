@@ -103,12 +103,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             parset['cluster_specific']['ncpu'],
             parset['cluster_specific']['fmem'])
 
-        # Add calibrator(s) to empty datasets. These operations
-        # must be done in series
-        ops = [FacetAdd(parset, bands, d) for d in direction_group]
-        for op in ops:
-            scheduler.run(op)
-
         # Do selfcal on calibrator only
         ops = [FacetSelfcal(parset, d) for d in direction_group]
         scheduler.run(ops)
