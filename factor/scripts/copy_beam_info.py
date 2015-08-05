@@ -5,6 +5,7 @@ Script to copy beam info to WSClean MFS FITS images
 import argparse
 from argparse import RawTextHelpFormatter
 from astropy.io import fits as pyfits
+import os
 
 
 def main(image):
@@ -19,6 +20,10 @@ def main(image):
         Filename of image in which the beam info will be entered
 
     """
+    if os.path.isdir(image):
+        # Image is a casa image, so skip it
+        return
+
     templateim = image.replace('-MFS-', '-0000-')
     hduimtemplate = pyfits.open(templateim)
     hduim = pyfits.open(image, mode='update')
