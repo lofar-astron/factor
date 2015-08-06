@@ -507,7 +507,8 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
             selfcal_directions = selfcal_directions[:parset['direction_specific']['ndir_selfcal']]
 
     # Load groupings from previous run if possible; if not, divide directions
-    # into groups
+    # into groups. We do this to preserve the previous groupings, as they are
+    # not constructed in a deterministic way if reordering is enabled
     redo_groups = True
     groups_file = os.path.join(parset['dir_working'], 'state', 'factor_groups.pkl')
     if os.path.exists(groups_file):
@@ -518,12 +519,26 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
                 redo_groups = False
                 direction_groups = []
                 direction_names = [d.name for d in directions]
+                prev_selfcal_direction_names = []
                 for name_group in direction_name_groups:
-                    if target_has_own_facet:
-                        # Make sure target is not a DDE calibrator
-                        direction_groups.append([directions[direction_names.index(name)] for name in name_group if name != target.name])
-                    else:
-                        direction_groups.append([directions[direction_names.index(name)] for name in name_group])
+                    prev_selfcal_direction_names.extend([name for name in name_group])
+
+                # Check to see if there are any changes to the selfcal directions
+                for selfcal_direction in selfcal_directions:
+                    if selfcal_direction not in prev_selfcal_direction_names:
+                        redo_groups = True
+                for name in prev_selfcal_direction_names:
+                    if name not in selfcal_directions:
+                        redo_groups = True
+
+                # If all the directions match, reconstruct groups
+                if not redo_groups:
+                    for name_group in direction_name_groups:
+                        if target_has_own_facet:
+                            # Make sure target is not a DDE calibrator
+                            direction_groups.append([directions[direction_names.index(name)] for name in name_group if name != target.name])
+                        else:
+                            direction_groups.append([directions[direction_names.index(name)] for name in name_group])
             except ValueError:
                 redo_groups = True
     if redo_groups:
