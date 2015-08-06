@@ -42,11 +42,9 @@ class FacetSelfcal(Operation):
         # direction object)
         skymodels = [band.skymodel_dirindep for band in self.bands]
         if self.direction.use_new_sub_data:
-            add_all_parset = 'facet_dirindep_add_all_new.parset'
-            add_cal_parset = 'facet_dirindep_add_cal_new.parset'
+            subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
         else:
-            add_all_parset = 'facet_dirindep_add_all.parset'
-            add_cal_parset = 'facet_dirindep_add_cal.parset'
+            subtracted_data_colname = 'SUBTRACTED_DATA_ALL'
         if self.direction.nchannels > 1:
             nterms = 2
             casa_suffix = '.image.tt0'
@@ -56,8 +54,7 @@ class FacetSelfcal(Operation):
             casa_suffix = None
             wsclean_suffix = '-image.fits'
         self.parms_dict.update({'input_dir': parset['dir_ms'],
-                                'add_all_parset': add_all_parset,
-                                'add_cal_parset': add_cal_parset,
+                                'subtracted_data_colname': subtracted_data_colname,
                                 'dir_indep_parmdb_name': parset['parmdb_name'],
                                 'skymodels': skymodels,
                                 'casa_suffix': casa_suffix,
