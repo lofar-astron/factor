@@ -61,7 +61,11 @@ expand_merged_parmdb_map.control.mapfile_dir      =   {{ mapfile_dir }}
 expand_merged_parmdb_map.control.filename         =   expand_merged_parmdbs.datamap
 
 apply_dir_dep_fast.control.type                   =   calibrate-stand-alone_new
+<<<<<<< HEAD
 apply_dir_dep_fast.control.mapfiles_in            =   [shift_all.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+=======
+apply_dir_dep_fast.control.mapfiles_in            =   [{{ shifted_all_final_bands_datamap }},expand_merged_parmdb_map.output.mapfile]
+>>>>>>> 3fab0401b6441565317b993b9cd5629463a2ae38
 apply_dir_dep_fast.control.inputkeys              =   [inputms,inputparmdb]
 apply_dir_dep_fast.argument.observation           =   inputms
 apply_dir_dep_fast.argument.parset                =   {{ parset_dir }}//facet_dirdep_apply_fast.parset
@@ -71,7 +75,11 @@ apply_dir_dep_fast.argument.replace-sourcedb      =   True
 apply_dir_dep_fast.argument.replace-parmdb        =   True
 
 apply_dir_dep_slow.control.type                   =   calibrate-stand-alone_new
+<<<<<<< HEAD
 apply_dir_dep_slow.control.mapfiles_in            =   [shift_all.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+=======
+apply_dir_dep_slow.control.mapfiles_in            =   [{{ shifted_all_final_bands_datamap }},expand_merged_parmdb_map.output.mapfile]
+>>>>>>> 3fab0401b6441565317b993b9cd5629463a2ae38
 apply_dir_dep_slow.control.inputkeys              =   [inputms,inputparmdb]
 apply_dir_dep_slow.argument.observation           =   inputms
 apply_dir_dep_slow.argument.parset                =   {{ parset_dir }}//facet_dirdep_apply_slow.parset
@@ -81,7 +89,11 @@ apply_dir_dep_slow.argument.replace-sourcedb      =   True
 apply_dir_dep_slow.argument.replace-parmdb        =   True
 
 average.control.type                              =   dppp
+<<<<<<< HEAD
 average.control.mapfile_in                        =   shift_all.output.mapfile
+=======
+average.control.mapfile_in                        =   {{ shifted_all_final_bands_datamap }}
+>>>>>>> 3fab0401b6441565317b993b9cd5629463a2ae38
 average.control.inputkey                          =   msin
 average.parsetarg.msin.datacolumn                 =   CORRECTED_DATA
 average.parsetarg.msout.writefullresflag          =   False
