@@ -103,7 +103,7 @@ concat_data.argument.msout.writefullresflag                =   False
 concat_data.argument.steps                                 =   []
 
 make_chunks.control.type                                   =   chunk_by_time
-make_chunks.control.mapfile_in                             =   create_ms_map.output.mapfile
+make_chunks.control.mapfile_in                             =   concat_data.output.mapfile
 make_chunks.control.inputkey                               =   msfile
 make_chunks.argument.flags                                 =   [msfile,{{ chunk_width }}]
 
