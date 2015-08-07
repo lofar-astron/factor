@@ -26,7 +26,7 @@ class FacetSelfcal(Operation):
     Operation to selfcal one or more directions
     """
     def __init__(self, parset, bands, direction):
-        super(FacetSelfcal, self).__init__(parset, bands, None, direction,
+        super(FacetSelfcal, self).__init__(parset, bands, direction,
             name='FacetSelfcal')
 
         # Set the pipeline parset to use
@@ -133,7 +133,7 @@ class FacetImage(Operation):
     Operation to make facet image
     """
     def __init__(self, parset, bands, direction):
-        super(FacetImageFinal, self).__init__(parset, bands, None, direction,
+        super(FacetImageFinal, self).__init__(parset, bands, direction,
             name='FacetImageFinal')
 
         # Set the pipeline parset to use
