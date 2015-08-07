@@ -47,7 +47,7 @@ class FacetSelfcal(Operation):
             subtracted_data_colname = 'SUBTRACTED_DATA_ALL'
         if self.direction.nchannels > 1:
             nterms = 2
-            casa_suffix = '.image.tt0'
+            casa_suffix = '.tt0'
             wsclean_suffix = '-MFS-image.fits'
         else:
             nterms = 1
@@ -159,7 +159,7 @@ class FacetImage(Operation):
         # direction object)
         if self.direction.nchannels > 1:
             nterms = 2
-            casa_suffix = '.image.tt0'
+            casa_suffix = '.tt0'
             wsclean_suffix = '-MFS-image.fits'
         else:
             nterms = 1
