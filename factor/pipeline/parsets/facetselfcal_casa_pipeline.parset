@@ -115,9 +115,9 @@ create_chunks_map.control.mapfile_dir                      =   {{ mapfile_dir }}
 create_chunks_map.control.filename                         =   chunk_files.datamap
 
 create_chunks_parmdb_map.control.kind                      =   plugin
-create_chunks_parmdb_map.control.type                      =   addParmdbMapfile
-create_chunks_parmdb_map.control.mapfile_in                =   create_chunks_map.output.mapfile
-create_chunks_parmdb_map.control.parmdb_name               =   {{ dir_indep_parmdb_name }}
+create_chunks_parmdb_map.control.type                      =   expandMapfile
+create_chunks_parmdb_map.control.mapfile_in                =   {{ dir_indep_parmdb_name }}
+create_chunks_parmdb_map.control.mapfile_to_match          =   create_chunks_map.output.mapfile
 create_chunks_parmdb_map.control.mapfile_dir               =   {{ mapfile_dir }}
 create_chunks_parmdb_map.control.filename                  =   dir_indep_instrument_parmdbs.datamap
 
