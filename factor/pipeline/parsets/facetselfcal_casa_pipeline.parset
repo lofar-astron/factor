@@ -1017,7 +1017,7 @@ create_model4_map.control.filename                         =   final_model_rootn
 
 adjust_casa_mapfile6.control.kind                          =   plugin
 adjust_casa_mapfile6.control.type                          =   appendMapfile
-adjust_casa_mapfile6.control.mapfile_in                    =   create_model4_map.output.mapfile
+adjust_casa_mapfile6.control.mapfile_in                    =   casa_image_full2.output.casa_image_full2.image.mapfile
 adjust_casa_mapfile6.control.append                        =   {{ casa_suffix }}
 adjust_casa_mapfile6.control.mapfile_dir                   =   {{ mapfile_dir }}
 adjust_casa_mapfile6.control.filename                      =   final_image.datamap
