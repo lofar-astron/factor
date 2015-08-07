@@ -115,7 +115,7 @@ create_chunks_map.control.mapfile_dir                      =   {{ mapfile_dir }}
 create_chunks_map.control.filename                         =   chunk_files.datamap
 
 apply_dir_indep.control.type                               =   calibrate-stand-alone_new
-apply_dir_indep.control.mapfiles_in                        =   [create_chunks_map.output.mapfile,{{ dir_indep_parmdbs_datamap }}]
+apply_dir_indep.control.mapfiles_in                        =   [create_chunks_map.output.mapfile,create_parmdb_map.output.mapfile]
 apply_dir_indep.control.inputkeys                          =   [inputms,inputparmdb]
 apply_dir_indep.argument.observation                       =   inputms
 apply_dir_indep.argument.parset                            =   {{ parset_dir }}//facet_dirindep_apply.parset
