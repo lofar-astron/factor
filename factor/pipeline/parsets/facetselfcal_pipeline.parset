@@ -254,18 +254,6 @@ casa_ft0.control.mapfiles_in                               =   [concat_data.outp
 casa_ft0.control.inputkeys                                 =   [inputms,modelimg]
 casa_ft0.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft.py,inputms,modelimg,{{ nterms }},{{ cal_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
-make_chunks.control.type                                   =   chunk_by_time
-make_chunks.control.mapfile_in                             =   concat_data.output.mapfile
-make_chunks.control.inputkey                               =   msfile
-make_chunks.argument.flags                                 =   [msfile,{{ chunk_width }}]
-
-create_chunks_map.control.kind                             =   plugin
-create_chunks_map.control.type                             =   addListMapfile
-create_chunks_map.control.files                            =   make_chunks.output.files.mapfile
-create_chunks_map.control.hosts                            =   {{ hosts }}
-create_chunks_map.control.mapfile_dir                      =   {{ mapfile_dir }}
-create_chunks_map.control.filename                         =   chunk_files.datamap
-
 solve_phaseonly1.control.type                              =   calibrate-stand-alone_new
 solve_phaseonly1.argument.observation                      =   create_chunks_map.output.mapfile
 solve_phaseonly1.argument.parset                           =   {{ parset_dir }}//facet_dirdep_phaseonly_solve.parset
