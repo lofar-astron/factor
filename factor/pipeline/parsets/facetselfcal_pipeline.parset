@@ -122,12 +122,12 @@ create_chunks_parmdb_map.control.mapfile_dir               =   {{ mapfile_dir }}
 create_chunks_parmdb_map.control.filename                  =   dir_indep_instrument_parmdbs.datamap
 
 apply_dir_indep.control.type                               =   calibrate-stand-alone_new
-apply_dir_indep.control.mapfiles_in                        =   [create_chunks_map.output.mapfile,create_parmdb_map.output.mapfile]
+apply_dir_indep.argument.observation                       =   create_chunks_map.output.mapfile
 apply_dir_indep.control.inputkeys                          =   [inputms,inputparmdb]
 apply_dir_indep.argument.observation                       =   inputms
 apply_dir_indep.argument.parset                            =   {{ parset_dir }}//facet_dirindep_apply.parset
 apply_dir_indep.argument.catalog                           =   {{ skymodel_dir }}/empty.skymodel
-apply_dir_indep.argument.parmdb                            =   inputparmdb
+apply_dir_indep.argument.parmdb                            =   create_chunks_parmdb_map.output.mapfile
 apply_dir_indep.argument.replace-sourcedb                  =   True
 apply_dir_indep.argument.replace-parmdb                    =   True
 
