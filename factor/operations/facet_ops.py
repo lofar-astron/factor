@@ -25,8 +25,8 @@ class FacetSelfcal(Operation):
     """
     Operation to selfcal one or more directions
     """
-    def __init__(self, parset, direction):
-        super(FacetSelfcal, self).__init__(parset, None, direction,
+    def __init__(self, parset, bands, direction):
+        super(FacetSelfcal, self).__init__(parset, bands, None, direction,
             name='FacetSelfcal')
 
         # Set the pipeline parset to use
@@ -132,8 +132,8 @@ class FacetImage(Operation):
     """
     Operation to make facet image
     """
-    def __init__(self, parset, direction):
-        super(FacetImageFinal, self).__init__(parset, None, direction,
+    def __init__(self, parset, bands, direction):
+        super(FacetImageFinal, self).__init__(parset, bands, None, direction,
             name='FacetImageFinal')
 
         # Set the pipeline parset to use
@@ -157,6 +157,7 @@ class FacetImage(Operation):
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
+        skymodels = [band.skymodel_dirindep for band in self.bands]
         if self.direction.nchannels > 1:
             nterms = 2
             casa_suffix = '.tt0'

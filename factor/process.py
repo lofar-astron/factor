@@ -104,7 +104,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             parset['cluster_specific']['fmem'])
 
         # Do selfcal on calibrator only
-        ops = [FacetSelfcal(parset, d) for d in direction_group]
+        ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
         scheduler.run(ops)
 
         # Subtract final model(s) from empty field datasets. These operations
@@ -201,10 +201,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     dirs_to_image.extend(dirs_to_transfer)
 
     if len(dirs_to_image) > 0:
-        ops = [FacetAddFinal(parset, bands, d) for d in dirs_to_image]
-        for op in ops:
-            scheduler.run(op)
-
         # Divide up the nodes and cores among the directions
         dirs_to_image = factor.cluster.divide_nodes(dirs_to_image,
             parset['cluster_specific']['node_list'],
@@ -212,7 +208,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             parset['cluster_specific']['ncpu'],
             parset['cluster_specific']['fmem'])
 
-        ops = [FacetImageFinal(parset, d) for d in dirs_to_image]
+        ops = [FacetImage(parset, bands, d) for d in dirs_to_image]
         scheduler.run(ops)
 
     # Mosaic the final facet images together
