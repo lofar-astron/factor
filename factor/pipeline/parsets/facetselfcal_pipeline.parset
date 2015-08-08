@@ -157,7 +157,7 @@ concat0.control.outputkey                                  =   msconcat
 concat0.argument.flags                                     =   [msfiles,msconcat]
 
 casa_image01.control.type                                  =   casa_clean
-casa_image01.control.mapfile_in                            =   average0.output.mapfile
+casa_image01.control.mapfile_in                            =   concat0.output.mapfile
 casa_image01.control.inputkey                              =   clean.vis
 casa_image01.control.outputkey                             =   clean.imagename
 casa_image01.control.arguments                             =   [--nologger,--nogui,-c]
@@ -216,9 +216,7 @@ mask0.argument.img_format                                  =   casa
 mask0.argument.threshold_format                            =   str_with_units
 
 casa_image02.control.type                                  =   casa_clean
-# casa_image02.control.mapfiles_in                           =   [average0.output.mapfile,mask0.output.mapfile,mask0.output.threshold_5sig.mapfile]
-# casa_image02.control.inputkeys                             =   [clean.vis,clean.mask,clean.threshold]
-casa_image02.control.mapfiles_in                           =   [average0.output.mapfile,mask0.output.mapfile]
+casa_image02.control.mapfiles_in                           =   [concat0.output.mapfile,mask0.output.mapfile]
 casa_image02.control.inputkeys                             =   [clean.vis,clean.mask]
 casa_image02.control.outputkey                             =   clean.imagename
 casa_image02.control.arguments                             =   [--nologger,--nogui,-c]
@@ -260,7 +258,7 @@ create_model0_map.control.mapfile_dir                      =   {{ mapfile_dir }}
 create_model0_map.control.filename                         =   model0_rootnames.datamap
 
 casa_ft0.control.type                                      =   casa
-casa_ft0.control.mapfiles_in                               =   [concat_data.output.mapfile,create_model0_map.output.mapfile]
+casa_ft0.control.mapfiles_in                               =   [create_chunks_map.output.mapfile,create_model0_map.output.mapfile]
 casa_ft0.control.inputkeys                                 =   [inputms,modelimg]
 casa_ft0.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft.py,inputms,modelimg,{{ nterms }},{{ cal_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
