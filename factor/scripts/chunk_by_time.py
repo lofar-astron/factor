@@ -92,7 +92,7 @@ def split_ms(msin, msout, start_out, end_out, clobber=True):
     t1 = t.query('TIME >= ' + str(starttime+start_out*3600.0) + ' && '
       'TIME < ' + str(starttime+end_out*3600.0), sortlist='TIME,ANTENNA1,ANTENNA2')
 
-    t1.copy(msout, True, True)
+    t1.copy(msout, True)
     t1.close()
     t.close()
 

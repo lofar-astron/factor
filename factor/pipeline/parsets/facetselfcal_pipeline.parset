@@ -103,11 +103,19 @@ create_compressed_mapfile_data.control.mapfile_in          =   average_data.outp
 create_compressed_mapfile_data.control.mapfile_dir         =   {{ mapfile_dir }}
 create_compressed_mapfile_data.control.filename            =   concat1_input.datamap
 
-concat_data.control.type                                   =   virtual_concat
+concat_data.control.type                                   =   dppp
 concat_data.control.mapfile_in                             =   create_compressed_mapfile_data.output.mapfile
-concat_data.control.inputkey                               =   msfiles
-concat_data.control.outputkey                              =   msconcat
-concat_data.argument.flags                                 =   [msfiles,msconcat]
+concat_data.control.inputkey                               =   msin
+concat_data.argument.msin.datacolumn                       =   DATA
+concat_data.argument.msout.writefullresflag                =   False
+concat_data.argument.steps                                 =   []
+
+concat_corr.control.type                                   =   dppp
+concat_corr.control.mapfile_in                             =   create_compressed_mapfile_data.output.mapfile
+concat_corr.control.inputkey                               =   msin
+concat_corr.argument.msin.datacolumn                       =   CORRECTED_DATA
+concat_corr.argument.msout.writefullresflag                =   False
+concat_corr.argument.steps                                 =   []
 
 make_chunks.control.type                                   =   chunk_by_time
 make_chunks.control.mapfile_in                             =   concat_data.output.mapfile
