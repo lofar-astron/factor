@@ -85,15 +85,13 @@ class FacetSelfcal(Operation):
             'final_model_rootnames.datamap')
         self.verify_subtract_OK_mapfile = os.path.join(self.mapfile_dir,
             'verify_subtract_OK.datamap')
-        self.direction.cleanup_mapfiles.extend([self.direction.shifted_bands_datamap,
-            self.direction.shifted_cal_bands_datamap,
-            self.direction.shifted_empty_bands_datamap,
-            os.path.join(self.mapfile_dir,
-            'chunk_files.datamap'), os.path.join(self.mapfile_dir,
-            'concat1_input.datamap'), os.path.join(self.mapfile_dir,
-            'concat2_input.datamap'), os.path.join(self.mapfile_dir,
-            'concat3_input.datamap'), os.path.join(self.mapfile_dir,
-            'concat4_input.datamap')])
+        self.direction.cleanup_mapfiles.extend([
+            self.direction.shifted_bands_datamap,
+            os.path.join(self.mapfile_dir, 'chunk_files.datamap'),
+            os.path.join(self.mapfile_dir, 'concat1_input.datamap'),
+            os.path.join(self.mapfile_dir, 'concat2_input.datamap'),
+            os.path.join(self.mapfile_dir, 'concat3_input.datamap'),
+            os.path.join(self.mapfile_dir, 'concat4_input.datamap')])
 
         # Store results of verify_subtract check
         if os.path.exists(self.verify_subtract_OK_mapfile):
