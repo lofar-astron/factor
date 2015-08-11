@@ -3,12 +3,12 @@
 Facet Imaging Operation
 =============================
 
-This operation performs imaging of the entire facet when either the facet did not successfully go through selfcal or reimaging is desired. There are four possible pipeline parsets for this operation:
+This operation performs imaging of the entire facet when either the facet did not successfully go through selfcal or reimaging is desired. There are two possible pipeline parsets for this operation:
 
-``facetimage_imgmodel_pipeline.parset`` or ``facetimage_imgmodel_casa_pipeline.parset``
+``facetimage_imgmodel_pipeline.parset``
     For use when the facet under consideration has successfully gone through self calibration and reimaging is desired.
 
-``facetimage_skymodel_pipeline.parset`` or ``facetimage_skymodel_casa_pipeline.parset``
+``facetimage_skymodel_pipeline.parset``
     For use when the facet under consideration has not successfully gone through self calibration. In this case, the self-calibration solutions from the nearset facet should be used instead.
 
 .. note::
@@ -77,7 +77,7 @@ Input
 	MS files from the previous step with ``FACET_DATA_ALL`` columns.
 
 Output
-    For each band, a phase-shifted dataset with all no sources in the ``DATA`` column.
+    For each band, a phase-shifted dataset with all sources in the ``DATA`` column.
 
 Pipeline Steps
     shift_all
@@ -90,12 +90,11 @@ Test data
     With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the MS files ``Test_run/results/facetaddfinal/facet_patch_543/NEP_SB070-079.2ch10s.shift_all``.
 
 
-Data preparation
-----------------
+Imaging preparation
+-------------------
 
 Input
-	MS files from the :ref:`add_final_facet_sources` operation with phase-shifted facet sources in the
-	``DATA`` column and the dir-dependent parmdbs from self calibration.
+	MS files with phase-shifted facet sources in the ``DATA`` column and the dir-dependent parmdbs from self calibration.
 
 Output
     Datasets ready for imaging.

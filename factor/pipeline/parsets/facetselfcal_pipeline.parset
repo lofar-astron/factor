@@ -1095,7 +1095,7 @@ create_single_band_mapfile.control.filename                =   single_band.datam
 
 create_single_parmdb_mapfile.control.kind                  =   plugin
 create_single_parmdb_mapfile.control.type                  =   filterMapfile
-create_single_parmdb_mapfile.control.mapfile_in            =   {{ dir_indep_parmdbs_datamap }}
+create_single_parmdb_mapfile.control.mapfile_in            =   create_parmdb_map.output.mapfile
 create_single_parmdb_mapfile.control.mapfile_dir           =   {{ mapfile_dir }}
 create_single_parmdb_mapfile.control.filename              =   single_parmdb.datamap
 
@@ -1117,7 +1117,7 @@ average_post.parsetarg.msout.writefullresflag              =   False
 average_post.parsetarg.steps                               =   [avg]
 average_post.parsetarg.avg.type                            =   squash
 average_post.parsetarg.avg.freqstep                        =   {{ verify_freqstep }}
-average_post.parsetarg.avg.timestep                        =   {{ verfiy_timestep }}
+average_post.parsetarg.avg.timestep                        =   {{ verify_timestep }}
 
 apply_dir_indep_pre.control.type                           =   calibrate-stand-alone_new
 apply_dir_indep_pre.control.mapfiles_in                    =   [average_pre.output.mapfile,create_single_parmdb_mapfile.output.mapfile]
