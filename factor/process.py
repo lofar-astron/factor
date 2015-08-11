@@ -90,7 +90,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     directions, direction_groups = _set_up_directions(parset, bands, field, log,
         dry_run, test_run)
 
-    # Run selfcal operations on directions
+    # Run selfcal and subtract operations on directions
     first_pass = True
     for gindx, direction_group in enumerate(direction_groups):
         log.info('Processing {0} direction(s) in Group {1}'.format(

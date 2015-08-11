@@ -4,7 +4,7 @@ pipeline.pluginpath                                     =   {{ pipeline_dir }}/p
 
 update_shifted_all_hosts.control.kind                   =   plugin
 update_shifted_all_hosts.control.type                   =   updateHosts
-update_shifted_all_hosts.control.mapfile_in             =   {{ shifted_all_bands_datamap }}
+update_shifted_all_hosts.control.mapfile_in             =   {{ shifted_bands_datamap }}
 update_shifted_all_hosts.control.hosts                  =   {{ hosts }}
 
 update_input_bands_hosts.control.kind                   =   plugin
@@ -13,7 +13,7 @@ update_input_bands_hosts.control.mapfile_in             =   {{ input_bands_datam
 update_input_bands_hosts.control.hosts                  =   {{ hosts }}
 
 shift_subdata_to_field.control.type                     =   dppp
-shift_subdata_to_field.control.opts.mapfile_in          =   {{ shifted_all_bands_datamap }}
+shift_subdata_to_field.control.opts.mapfile_in          =   {{ shifted_bands_datamap }}
 shift_subdata_to_field.control.opts.inputkey            =   msin
 shift_subdata_to_field.parsetarg.msin.datacolumn        =   SUBTRACTED_DATA
 shift_subdata_to_field.parsetarg.msout.writefullresflag =   False
@@ -27,7 +27,7 @@ copy_column.control.inputkeys                           =   [shiftedfile,datafil
 copy_column.argument.flags                              =   [shiftedfile,datafile,DATA,SUBTRACTED_DATA_ALL_NEW]
 
 shift_model_to_field.control.type                       =   dppp
-shift_model_to_field.control.opts.mapfile_in            =   {{ shifted_all_bands_datamap }}
+shift_model_to_field.control.opts.mapfile_in            =   {{ shifted_bands_datamap }}
 shift_model_to_field.control.opts.inputkey              =   msin
 shift_model_to_field.parsetarg.msin.datacolumn          =   MODEL_DATA
 shift_model_to_field.parsetarg.msout.writefullresflag   =   False

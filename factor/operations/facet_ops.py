@@ -69,7 +69,7 @@ class FacetSelfcal(Operation):
         # Add output datamap to direction object
         self.direction.input_bands_datamap = os.path.join(self.mapfile_dir,
             'input_bands.datamap')
-        self.direction.shifted_empty_bands_datamap = os.path.join(self.mapfile_dir,
+        self.direction.shifted_bands_datamap = os.path.join(self.mapfile_dir,
             'shifted_empty_bands.datamap')
         self.direction.dir_indep_parmdbs_datamap = os.path.join(self.mapfile_dir,
             'dir_indep_instrument_parmdbs.datamap')
