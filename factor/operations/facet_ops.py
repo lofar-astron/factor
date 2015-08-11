@@ -85,7 +85,7 @@ class FacetSelfcal(Operation):
             'final_model_rootnames.datamap')
         self.verify_subtract_OK_mapfile = os.path.join(self.mapfile_dir,
             'verify_subtract_OK.datamap')
-        self.direction.cleanup_mapfiles.extend([self.direction.shifted_all_bands_datamap,
+        self.direction.cleanup_mapfiles.extend([self.direction.shifted_bands_datamap,
             self.direction.shifted_cal_bands_datamap,
             self.direction.shifted_empty_bands_datamap,
             os.path.join(self.mapfile_dir,
