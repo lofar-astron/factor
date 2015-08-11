@@ -9,7 +9,7 @@ This operation performs self calibration on the facet calibrator. The pipeline p
 
     There should be one pipeline per facet, and the pipelines may be run in parallel.
 
-    This operation is separated from the add (:ref:`add_facet_sources`) and subtract (:ref:`subtract_facet_sources`) operations as those pipelines
+    This operation is separated from the subtract (:ref:`subtract_facet_sources`) operation as those pipelines
     must be run in series.
 
 
@@ -17,21 +17,35 @@ Data preparation
 ----------------
 
 Input
-	MS files from the :ref:`add_facet_sources` operation with phase-shifted facet calibrator in the
-	``DATA`` column and the dir-independent parmdbs.
+	MS files from the :ref:`initial_subtract_operation` with
+	``SUBTRACTED_DATA_ALL`` (or ``SUBTRACTED_DATA_ALL_NEW`` if at least one facet has gone through self calibration previously) and ``CORRECTED_DATA`` columns, their dir-independent parmdbs, and the merged sky models in ``makesourcedb`` format.
 
 Output
     Datasets ready for self calibration.
 
 Pipeline Steps
+    create_ms_map, create_parmdb_map, create_full_skymodels_map
+        Make datamaps for input MS files, their dir-independent parmdbs, and
+        the merged sky models.
+
+    make_facet_skymodels_all, make_facet_skymodels_cal
+        Select all model components belonging to the facet calibrator and to all facet sources and writes
+        these sky models in ``makesourcedb`` format.
+
+    shift_empty
+        Run DPPP to split and phase shift ``SUBTRACTED_DATA_ALL`` column (or ``SUBTRACTED_DATA_ALL_NEW`` column if at least one facet has gone through self calibration previously) to the RA and Dec of the facet.
+
+    add_all_facet_sources, add_cal_facet_sources
+        Run BBS to add sources to the data using the sky models above. The ``FACET_DATA_CAL`` column contains the calibrator only, and the ``FACET_DATA_ALL`` column contains all facet sources.
+
+    average_data
+        Average ``FACET_DATA_CAL`` column to 1 channel per band.
+
     apply_dir_indep
         Apply dir-independent solutions to the phase-shifted ``DATA`` column to make a ``CORRECTED_DATA`` column for imaging.
 
-    average_data, average_corr
-        Average ``DATA`` and ``CORRECTED_DATA`` columns to 1 channel per band.
-
-    create_compressed_mapfile_data, create_compressed_mapfile_corr
-        Create datamaps suitable for DPPP concatenation.
+    create_compressed_mapfile_data
+        Create datamap suitable for DPPP concatenation.
 
     concat_data, concat_corr
         Run DPPP to concatenate all bands together.
@@ -39,8 +53,17 @@ Pipeline Steps
     copy_column
         Copy the ``CORRECTED_DATA`` column so that a single MS file has all needed columns.
 
+    make_chunks, create_chunks_map
+        Split the data in time to parallelize the calibration.
+
+    add_imaging_cols
+        Add CASA imaging columns to the split datasets.
+
+    create_chunks_compressed_mapfile, concat_chunks
+        Concatenate the time chunks (for later use with ft steps).
+
 Test data
-    With the phase-shifted facet calibrator MS files (e.g., ``NEP_SB070-079.2ch10s.shift_cal``) in ``Test_run/results/facetadd/facet_patch_543/``, this step produces the MS file ``NEP_SB070-079.2ch10s.concat_data`` in ``Test_run/results/facetselfcal/facet_patch_543/`` with averaged, concatenated (in frequency) ``DATA`` and ``CORRECTED_DATA`` columns.
+    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the sky models ``NEP_SB070-079.2ch10s.wsclean_low2-model.make_facet_skymodels_all`` and ``NEP_SB070-079.2ch10s.wsclean_low2-model.make_facet_skymodels_cal`` and the MS file ``RX42_SB070-079.2ch10s_chunk**.concat_chunks`` in ``Test_run/results/facetadd/facet_patch_543/`` with averaged, concatenated (in frequency) ``DATA`` and ``CORRECTED_DATA`` columns.
 
 
 .. _selfcal_cycle:

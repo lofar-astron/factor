@@ -1,4 +1,4 @@
-Strategy.InputColumn                         = DATA
+Strategy.InputColumn                         = FACET_DATA_ALL
 Strategy.ChunkSize                           = 100
 Strategy.UseSolver                           = F
 Strategy.Steps                               = [subtract]

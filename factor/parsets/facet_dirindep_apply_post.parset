@@ -1,4 +1,4 @@
-Strategy.InputColumn                        = SUBTRACTED_DATA
+Strategy.InputColumn                        = DATA
 Strategy.ChunkSize                          = 200
 Strategy.UseSolver                          = F
 Strategy.Steps                              = [correct]
