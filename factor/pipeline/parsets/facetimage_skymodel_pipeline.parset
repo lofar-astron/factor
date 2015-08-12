@@ -97,7 +97,7 @@ create_compressed_mapfile.control.mapfile_dir     =   {{ mapfile_dir }}
 create_compressed_mapfile.control.filename        =   concat_averaged_input.datamap
 
 concat_averaged.control.type                      =   dppp
-concat_averaged.control.mapfile_in                =   create_compressed_mapfile5.output.mapfile
+concat_averaged.control.mapfile_in                =   create_compressed_mapfile.output.mapfile
 concat_averaged.control.inputkey                  =   msin
 concat_averaged.argument.msin.datacolumn          =   CORRECTED_DATA
 concat_averaged.argument.msout.writefullresflag   =   False
