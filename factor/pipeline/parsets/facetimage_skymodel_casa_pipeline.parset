@@ -1,4 +1,4 @@
-pipeline.steps = [create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, shift_empty, add_all_facet_sources, copy_all_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, concat_averaged, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2]
+pipeline.steps = [create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, shift_empty, add_all_facet_sources, average, copy_all_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile, concat_averaged, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -41,31 +41,37 @@ shift_empty.parsetarg.shift.phasecenter           =   [{{ facet_ra }}deg, {{ fac
 
 add_all_facet_sources.control.type                =   calibrate-stand-alone_new
 add_all_facet_sources.argument.observation        =   shift_empty.output.mapfile
-add_all_facet_sources.argument.parset             =   {{ parset_dir }}/facet_dirindep_add_all_new.parset
+add_all_facet_sources.argument.parset             =   {{ parset_dir }}/facet_dirindep_add_all.parset
 add_all_facet_sources.argument.catalog            =   make_facet_skymodels_all.output.mapfile
 add_all_facet_sources.argument.parmdb             =   create_parmdb_map.output.mapfile
 add_all_facet_sources.argument.replace-sourcedb   =   True
 add_all_facet_sources.argument.replace-parmdb     =   True
 
+average.control.type                              =   dppp
+average.control.mapfile_in                        =   shift_empty.output.mapfile
+average.control.inputkey                          =   msin
+average.parsetarg.msin.datacolumn                 =   FACET_DATA_ALL
+average.parsetarg.msout.writefullresflag          =   False
+average.parsetarg.steps                           =   [avg]
+average.parsetarg.avg.type                        =   squash
+average.parsetarg.avg.freqstep                    =   {{ facetimage_freqstep }}
+average.parsetarg.avg.timestep                    =   {{ facetimage_timestep }}
+
 copy_all_map.control.kind                         =   plugin
 copy_all_map.control.type                         =   copyMapfile
-copy_all_map.control.mapfile_in                   =   shift_all.output.mapfile
+copy_all_map.control.mapfile_in                   =   average.output.mapfile
 copy_all_map.control.mapfile_dir                  =   {{ mapfile_dir }}
 copy_all_map.control.filename                     =   shifted_all_final_bands.datamap
 
 expand_merged_parmdb_map.control.kind             =   plugin
 expand_merged_parmdb_map.control.type             =   expandMapfile
 expand_merged_parmdb_map.control.mapfile_in       =   {{ dir_dep_parmdb_datamap }}
-expand_merged_parmdb_map.control.mapfile_to_match =   shift_all.output.mapfile
+expand_merged_parmdb_map.control.mapfile_to_match =   average.output.mapfile
 expand_merged_parmdb_map.control.mapfile_dir      =   {{ mapfile_dir }}
 expand_merged_parmdb_map.control.filename         =   expand_merged_parmdbs.datamap
 
 apply_dir_dep_fast.control.type                   =   calibrate-stand-alone_new
-<<<<<<< HEAD
-apply_dir_dep_fast.control.mapfiles_in            =   [shift_all.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-=======
-apply_dir_dep_fast.control.mapfiles_in            =   [{{ shifted_all_final_bands_datamap }},expand_merged_parmdb_map.output.mapfile]
->>>>>>> 3fab0401b6441565317b993b9cd5629463a2ae38
+apply_dir_dep_fast.control.mapfiles_in            =   [average.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 apply_dir_dep_fast.control.inputkeys              =   [inputms,inputparmdb]
 apply_dir_dep_fast.argument.observation           =   inputms
 apply_dir_dep_fast.argument.parset                =   {{ parset_dir }}//facet_dirdep_apply_fast.parset
@@ -75,11 +81,7 @@ apply_dir_dep_fast.argument.replace-sourcedb      =   True
 apply_dir_dep_fast.argument.replace-parmdb        =   True
 
 apply_dir_dep_slow.control.type                   =   calibrate-stand-alone_new
-<<<<<<< HEAD
-apply_dir_dep_slow.control.mapfiles_in            =   [shift_all.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-=======
-apply_dir_dep_slow.control.mapfiles_in            =   [{{ shifted_all_final_bands_datamap }},expand_merged_parmdb_map.output.mapfile]
->>>>>>> 3fab0401b6441565317b993b9cd5629463a2ae38
+apply_dir_dep_slow.control.mapfiles_in            =   [average.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 apply_dir_dep_slow.control.inputkeys              =   [inputms,inputparmdb]
 apply_dir_dep_slow.argument.observation           =   inputms
 apply_dir_dep_slow.argument.parset                =   {{ parset_dir }}//facet_dirdep_apply_slow.parset
@@ -87,20 +89,6 @@ apply_dir_dep_slow.argument.catalog               =   {{ skymodel_dir }}/empty.s
 apply_dir_dep_slow.argument.parmdb                =   inputparmdb
 apply_dir_dep_slow.argument.replace-sourcedb      =   True
 apply_dir_dep_slow.argument.replace-parmdb        =   True
-
-average.control.type                              =   dppp
-<<<<<<< HEAD
-average.control.mapfile_in                        =   shift_all.output.mapfile
-=======
-average.control.mapfile_in                        =   {{ shifted_all_final_bands_datamap }}
->>>>>>> 3fab0401b6441565317b993b9cd5629463a2ae38
-average.control.inputkey                          =   msin
-average.parsetarg.msin.datacolumn                 =   CORRECTED_DATA
-average.parsetarg.msout.writefullresflag          =   False
-average.parsetarg.steps                           =   [avg]
-average.parsetarg.avg.type                        =   squash
-average.parsetarg.avg.freqstep                    =   {{ facetimage_freqstep }}
-average.parsetarg.avg.timestep                    =   {{ facetimage_timestep }}
 
 create_compressed_mapfile.control.kind            =   plugin
 create_compressed_mapfile.control.type            =   compressMapfile

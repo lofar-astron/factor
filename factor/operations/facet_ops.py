@@ -131,8 +131,8 @@ class FacetImage(Operation):
     Operation to make facet image
     """
     def __init__(self, parset, bands, direction):
-        super(FacetImageFinal, self).__init__(parset, bands, direction,
-            name='FacetImageFinal')
+        super(FacetImage, self).__init__(parset, bands, direction,
+            name='FacetImage')
 
         # Set the pipeline parset to use
         if self.parset['facet_imager'].lower() == 'casa':
