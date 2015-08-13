@@ -19,6 +19,7 @@
 from factor._version import __version__ as version
 from factor import process
 import optparse
+import sys
 
 
 if __name__ == '__main__':
