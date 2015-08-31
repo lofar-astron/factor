@@ -8,7 +8,7 @@ import pyrap.images as pim
 import numpy as np
 
 
-def main(image, radius=0.5, output=None):
+def main(image, output=None, radius=0.5):
     """
     Zero corners of avgpb images
 
@@ -16,11 +16,11 @@ def main(image, radius=0.5, output=None):
     ----------
     image : str
         avgpb image
+    output : str, optional
+        Output image name. If None, add a 'z' to the end of the input filename
     radius : float, optional
         Radius beyond which to zero avgpb values (expressed as fraction of
         image width)
-    output : str, optional
-        Output image name. If None, add a 'z' to the end of the input filename
 
     """
     if type(radius) is str:
