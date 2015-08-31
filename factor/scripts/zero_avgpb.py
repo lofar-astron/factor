@@ -65,4 +65,4 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--radius',help='Radius beyond which to zero avgpb values', default=0.5, type=float)
 
     args = parser.parse_args()
-    main(args.image, radius=args.radius, output=args.output)
+    main(args.image, output=args.output, radius=args.radius)
