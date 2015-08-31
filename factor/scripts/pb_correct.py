@@ -5,7 +5,7 @@ Script to apply a primary-beam correction to a mosaic image
 import argparse
 from argparse import RawTextHelpFormatter
 from astropy.io import fits as pf
-import pywcs
+import astropy.wcs as pywcs
 import os
 import sys
 import numpy as np
