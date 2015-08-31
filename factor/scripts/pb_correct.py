@@ -2,6 +2,8 @@
 """
 Script to apply a primary-beam correction to a mosaic image
 """
+import argparse
+from argparse import RawTextHelpFormatter
 from astropy.io import fits as pf
 import pywcs
 import os
@@ -25,7 +27,7 @@ def main(mosaicfits, pbfits, outroot):
         Filename root of output files (outroot.pbcor.fits and outroot.pbcut.fits)
 
     """
-    pb_rescaled_fits=mosaicfits.replace('.fits','')+'.pb.fits'
+    pb_rescaled_fits = mosaicfits.replace('.fits', '') + '.pb.fits'
 
     if not os.path.exists(mosaicfits):
         raise Exception, "missing file: {m}".format(m=mosaicfits)
