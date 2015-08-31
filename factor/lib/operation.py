@@ -111,7 +111,8 @@ class Operation(object):
 #                          'chgcentre_executable': parset['chgcentre_executable'],
                          'losoto_executable': parset['losoto_executable'],
                          'H5parm_importer_executable': parset['H5parm_importer_executable'],
-                         'H5parm_exporter_executable': parset['H5parm_exporter_executable']}
+                         'H5parm_exporter_executable': parset['H5parm_exporter_executable'],
+                         'image2fits_executable': parset['image2fits_executable']}
 
         # Define global parameters needed by all pipeline parsets. Other,
         # pipeline-specific, parameters should be defined in the subclasses by
