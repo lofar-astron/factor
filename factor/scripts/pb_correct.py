@@ -127,9 +127,9 @@ def main(mosaicfits, pbfits, outroot):
                 x = xi*np.ones(ny)
                 y = np.arange(ny)
                 pixcrd = np.array([x, y, c, f]).transpose()
-                ra, dec, c, f = wcsout.wcs_pix2sky(pixcrd, 0).transpose()
+                ra, dec, c, f = wcsout.wcs_pix2world(pixcrd, 0).transpose()
                 worldcrd = np.array([ra, dec, c*0, f*0]).transpose()
-                pbx, pby, pbc, pbf = pbwcs.wcs_sky2pix(worldcrd, 0).transpose()
+                pbx, pby, pbc, pbf = pbwcs.wcs_world2pix(worldcrd, 0).transpose()
                 pbx = np.array(pbx, dtype=int)
                 pby = np.array(pby, dtype=int)
 
@@ -164,9 +164,9 @@ def main(mosaicfits, pbfits, outroot):
                 x = xi*np.ones(ny)
                 y = np.arange(ny)
                 pixcrd = np.array([x, y]).transpose()
-                ra, dec = wcsout.wcs_pix2sky(pixcrd, 0).transpose()
+                ra, dec = wcsout.wcs_pix2world(pixcrd, 0).transpose()
                 worldcrd = np.array([ra, dec]).transpose()
-                pbx, pby = pbwcs.wcs_sky2pix(worldcrd, 0).transpose()
+                pbx, pby = pbwcs.wcs_world2pix(worldcrd, 0).transpose()
                 pbx = np.array(pbx, dtype=int)
                 pby = np.array(pby, dtype=int)
 
