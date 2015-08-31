@@ -136,6 +136,8 @@ class FacetSelfcal(Operation):
                 self.direction.selfcal_ok = True
             else:
                 self.direction.selfcal_ok = False
+        else:
+            self.direction.selfcal_ok = False
 
 
 class FacetSub(Operation):

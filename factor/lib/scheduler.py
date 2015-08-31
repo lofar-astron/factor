@@ -98,8 +98,8 @@ class Scheduler(object):
             self.log.info('--> Operation {0} completed (direction: '
                 '{1})'.format(op_name, direction_name))
         else:
-            self.log.error('Operation {0} failed (direction: {1})'.format(op_name,
-                direction_name))
+            self.log.error('Operation {0} failed (direction: '
+                '{1})'.format(op_name, direction_name))
             self.success = False
 
 
