@@ -300,7 +300,6 @@ def _set_up_bands(parset, log, test_run=False):
     from factor.lib.band import Band
     for ms in parset['mss']:
         band = Band(ms, parset['dir_working'], test_run=test_run)
-        band.load_state() # Load previous state (if any)
 
         # Some checks on the dir-indep instrument parmdb
         band.dirindparmdb = os.path.join(band.file, parset['parmdb_name'])
@@ -319,8 +318,8 @@ def _set_up_bands(parset, log, test_run=False):
             log.warn('Direction-independent instument parmdb for band {0} is '
                 'named "instrument". Copying to "instrument_dirindep" so that BBS '
                 'will not overwrite this table...'.format(band.file))
-            band.dirindparmdb += '_dirindep'
             os.system('cp -r {0} {0}_dirindep'.format(band.dirindparmdb))
+            band.dirindparmdb += '_dirindep'
         band.skymodel_dirindep = None
         msbase = os.path.basename(ms)
         if msbase in parset['ms_specific']:

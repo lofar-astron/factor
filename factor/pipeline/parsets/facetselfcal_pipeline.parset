@@ -3,16 +3,16 @@ pipeline.steps = [create_ms_map, create_parmdb_map, create_full_skymodels_map, m
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
 create_ms_map.control.kind                                 =   plugin
-create_ms_map.control.type                                 =   addMSMapfile
+create_ms_map.control.type                                 =   addListMapfile
 create_ms_map.control.hosts                                =   {{ hosts }}
-create_ms_map.control.folder                               =   {{ input_dir }}
+create_ms_map.control.files                                =   {{ ms_files }}
 create_ms_map.control.mapfile_dir                          =   {{ mapfile_dir }}
 create_ms_map.control.filename                             =   input_bands.datamap
 
 create_parmdb_map.control.kind                             =   plugin
-create_parmdb_map.control.type                             =   addParmdbMapfile
-create_parmdb_map.control.mapfile_in                       =   create_ms_map.output.mapfile
-create_parmdb_map.control.parmdb_name                      =   {{ dir_indep_parmdb_name }}
+create_parmdb_map.control.type                             =   addListMapfile
+create_parmdb_map.control.hosts                            =   {{ hosts }}
+create_parmdb_map.control.files                            =   {{ dir_indep_parmdbs }}
 create_parmdb_map.control.mapfile_dir                      =   {{ mapfile_dir }}
 create_parmdb_map.control.filename                         =   dir_indep_instrument_parmdbs.datamap
 

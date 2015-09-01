@@ -40,7 +40,9 @@ class FacetSelfcal(Operation):
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
+        ms_files = [band.file for band in self.bands]
         skymodels = [band.skymodel_dirindep for band in self.bands]
+        dir_indep_parmdbs = [band.dirindparmdb for band in self.bands]
         if self.direction.use_new_sub_data:
             subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
         else:
@@ -53,10 +55,10 @@ class FacetSelfcal(Operation):
             nterms = 1
             casa_suffix = None
             wsclean_suffix = '-image.fits'
-        self.parms_dict.update({'input_dir': parset['dir_ms'],
+        self.parms_dict.update({'ms_files': ms_files,
                                 'subtracted_data_colname': subtracted_data_colname,
-                                'dir_indep_parmdb_name': parset['parmdb_name'],
                                 'skymodels': skymodels,
+                                'dir_indep_parmdbs': dir_indep_parmdbs,
                                 'casa_suffix': casa_suffix,
                                 'wsclean_suffix': wsclean_suffix,
                                 'nterms': nterms})
@@ -167,7 +169,9 @@ class FacetImage(Operation):
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
+        ms_files = [band.file for band in self.bands]
         skymodels = [band.skymodel_dirindep for band in self.bands]
+        dir_indep_parmdbs = [band.dirindparmdb for band in self.bands]
         if self.direction.nchannels > 1:
             nterms = 2
             casa_suffix = '.tt0'
@@ -176,8 +180,8 @@ class FacetImage(Operation):
             nterms = 1
             casa_suffix = None
             wsclean_suffix = '-image.fits'
-        self.parms_dict.update({'input_dir': parset['dir_ms'],
-                                'dir_indep_parmdb_name': parset['parmdb_name'],
+        self.parms_dict.update({'ms_files': ms_files,
+                                'dir_indep_parmdbs': dir_indep_parmdbs,
                                 'skymodels': skymodels,
                                 'casa_suffix': casa_suffix,
                                 'wsclean_suffix': wsclean_suffix,

@@ -46,11 +46,12 @@ class InitSubtract(Operation):
         highres_image_sizes = ['{0} {0}'.format(b.imsize_high_res) for b in self.bands]
         lowres_image_sizes = ['{0} {0}'.format(b.imsize_low_res) for b in self.bands]
         skymodels = [band.skymodel_dirindep for band in self.bands]
+        dir_indep_parmdbs = [band.dirindparmdb for band in self.bands]
         self.parms_dict.update({'input_bands': input_bands,
                                 'highres_image_sizes' : highres_image_sizes,
                                 'lowres_image_sizes' : lowres_image_sizes,
                                 'skymodels': skymodels,
-                                'dir_indep_parmdb_name': parset['parmdb_name']})
+                                'dir_indep_parmdbs': dir_indep_parmdbs})
 
 
     def finalize(self):
