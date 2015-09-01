@@ -364,7 +364,7 @@ def _convert_to_phasors(real_imag_parmdb_file):
     """
     phasors_parmdb_file = real_imag_parmdb_file + '_phasors'
     if os.path.exists(phasors_parmdb_file):
-        shutil.rmtree(phasors_parmdb_file)
+        return phasors_parmdb_file
 
     pdb_in = lofar.parmdb.parmdb(real_imag_parmdb_file)
     pdb_out = lofar.parmdb.parmdb(phasors_parmdb_file, create=True)
