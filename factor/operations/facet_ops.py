@@ -23,7 +23,7 @@ from lofarpipe.support.data_map import DataMap
 
 class FacetSelfcal(Operation):
     """
-    Operation to selfcal one or more directions
+    Operation to selfcal a direction
     """
     def __init__(self, parset, bands, direction):
         super(FacetSelfcal, self).__init__(parset, bands, direction,
@@ -66,7 +66,7 @@ class FacetSelfcal(Operation):
         """
         Finalize this operation
         """
-        # Add output datamap to direction object
+        # Add output datamaps to direction object for later use
         self.direction.input_bands_datamap = os.path.join(self.mapfile_dir,
             'input_bands.datamap')
         self.direction.shifted_bands_datamap = os.path.join(self.mapfile_dir,
@@ -85,13 +85,18 @@ class FacetSelfcal(Operation):
             'final_model_rootnames.datamap')
         self.verify_subtract_OK_mapfile = os.path.join(self.mapfile_dir,
             'verify_subtract_OK.datamap')
-        self.direction.cleanup_mapfiles.extend([
-            self.direction.shifted_bands_datamap,
+
+        # Delete all data used only for selfcal as it's no longer needed
+        self.direction.cleanup_mapfiles = [
+            os.path.join(self.mapfile_dir, 'shifted_cal_bands.datamap')
             os.path.join(self.mapfile_dir, 'chunk_files.datamap'),
+            os.path.join(self.mapfile_dir, 'concat_input.datamap'),
+            os.path.join(self.mapfile_dir, 'concat0_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat1_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat2_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat3_input.datamap'),
-            os.path.join(self.mapfile_dir, 'concat4_input.datamap')])
+            os.path.join(self.mapfile_dir, 'concat4_input.datamap')]
+        self.direction.cleanup()
 
         # Store results of verify_subtract check
         if os.path.exists(self.verify_subtract_OK_mapfile):
@@ -101,11 +106,13 @@ class FacetSelfcal(Operation):
                 self.direction.selfcal_ok = True
             else:
                 self.direction.selfcal_ok = False
+        else:
+            self.direction.selfcal_ok = False
 
 
 class FacetSub(Operation):
     """
-    Operation to mosiac facet images
+    Operation to subtract improved model
     """
     def __init__(self, parset, direction):
         super(FacetSub, self).__init__(parset, None, direction,
@@ -122,8 +129,13 @@ class FacetSub(Operation):
         """
         Finalize this operation
         """
+        # Add model datamap to direction object for later use
         self.direction.facet_model_data_mapfile = os.path.join(self.mapfile_dir,
             'shifted_to_field_models.datamap')
+
+        # Delete shifted data as it's no longer needed
+        self.direction.cleanup_mapfiles = [self.direction.shifted_bands_datamap]
+        self.direction.cleanup()
 
 
 class FacetImage(Operation):
@@ -176,11 +188,13 @@ class FacetImage(Operation):
         """
         Finalize this operation
         """
-        # Add output datamaps to direction object
-        self.direction.shifted_all_final_bands_datamap = os.path.join(self.mapfile_dir,
-            'shifted_all_final_bands.datamap')
+        # Add output datamaps to direction object for later use
         self.direction.facet_image_mapfile = os.path.join(self.mapfile_dir,
             'final_image.datamap')
         self.direction.facet_model_mapfile = os.path.join(self.mapfile_dir,
             'final_model_rootnames.datamap')
-        self.direction.cleanup_mapfiles.extend([self.direction.shifted_all_final_bands_datamap])
+
+        # Delete shifted data as it's no longer needed
+        self.direction.cleanup_mapfiles = [os.path.join(self.mapfile_dir,
+            'shifted_all_final_bands.datamap')]
+        self.direction.cleanup()

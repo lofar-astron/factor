@@ -50,7 +50,7 @@ class InitSubtract(Operation):
                                 'highres_image_sizes' : highres_image_sizes,
                                 'lowres_image_sizes' : lowres_image_sizes,
                                 'skymodels': skymodels,
-                                'dir_indep_parmdb_name': parset['parmdb_name']})
+                                'dir_indep_parmdb_name': parset['parmdb_name'])
 
 
     def finalize(self):
@@ -64,8 +64,11 @@ class InitSubtract(Operation):
             datamap = DataMap.load(merged_skymodel_datamap)
             for band, item in zip(self.bands, datamap):
                 band.skymodel_dirindep = item.file
-        self.direction.cleanup_mapfiles.append(os.path.join(self.mapfile_dir,
-            'averaged_data.datamap'))
+
+        # Delete averaged data as it's no longer needed
+        self.direction.cleanup_mapfiles = [os.path.join(self.mapfile_dir,
+            'averaged_data.datamap')]
+        self.direction.cleanup()
 
 
 class MakeMosaic(Operation):
