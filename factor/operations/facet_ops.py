@@ -88,7 +88,7 @@ class FacetSelfcal(Operation):
 
         # Delete all data used only for selfcal as it's no longer needed
         self.direction.cleanup_mapfiles = [
-            os.path.join(self.mapfile_dir, 'shifted_cal_bands.datamap')
+            os.path.join(self.mapfile_dir, 'shifted_cal_bands.datamap'),
             os.path.join(self.mapfile_dir, 'chunk_files.datamap'),
             os.path.join(self.mapfile_dir, 'concat_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat0_input.datamap'),
