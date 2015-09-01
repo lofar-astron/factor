@@ -3,6 +3,7 @@ Module that preforms the processing
 """
 import sys
 import os
+import shutil
 import numpy as np
 import logging
 import pickle
