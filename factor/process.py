@@ -372,17 +372,18 @@ def _convert_to_phasors(real_imag_parmdb_file):
     stations = set([s.split(':')[-1] for s in pdb_in.getNames()])
 
     # Calculate and store phase and amp values for each station
+    parms = pdb_in.getValuesGrid('*')
     for i, s in enumerate(stations):
         if i == 0:
-            freqs = pdb_in.getValuesGrid('Gain:0:0:Imag:{}'.format(s))['freqs']
-            freqwidths = pdb_in.getValuesGrid('Gain:0:0:Imag:{}'.format(s))['freqwidths']
-            times = pdb_in.getValuesGrid('Gain:0:0:Imag:{}'.format(s))['times']
-            timewidths = pdb_in.getValuesGrid('Gain:0:0:Imag:{}'.format(s))['timewidths']
+            freqs = np.copy(parms['Gain:0:0:Imag:{}'.format(s)]['freqs'])
+            freqwidths = np.copy(parms['Gain:0:0:Imag:{}'.format(s)]['freqwidths'])
+            times = np.copy(parms['Gain:0:0:Imag:{}'.format(s)]['times'])
+            timewidths = np.copy(parms['Gain:0:0:Imag:{}'.format(s)]['timewidths'])
 
-        valIm_00 = np.copy(pdb_in.getValuesGrid('Gain:0:0:Imag:{}'.format(s))['values'][:, 0])
-        valIm_11 = np.copy(pdb_in.getValuesGrid('Gain:1:1:Imag:{}'.format(s))['values'][:, 0])
-        valRe_00 = np.copy(pdb_in.getValuesGrid('Gain:0:0:Real:{}'.format(s))['values'][:, 0])
-        valRe_11 = np.copy(pdb_in.getValuesGrid('Gain:1:1:Real:{}'.format(s))['values'][:, 0])
+        valIm_00 = np.copy(parms['Gain:0:0:Imag:{}'.format(s)]['values'][:, 0])
+        valIm_11 = np.copy(parms['Gain:1:1:Imag:{}'.format(s)]['values'][:, 0])
+        valRe_00 = np.copy(parms['Gain:0:0:Real:{}'.format(s)]['values'][:, 0])
+        valRe_11 = np.copy(parms['Gain:1:1:Real:{}'.format(s)]['values'][:, 0])
 
         valAmp_00 = np.sqrt((valRe_00**2) + (valIm_00**2))
         valAmp_11 = np.sqrt((valRe_11**2) + (valIm_11**2))
