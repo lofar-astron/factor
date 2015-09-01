@@ -392,13 +392,13 @@ def _convert_to_phasors(real_imag_parmdb_file):
         valPh_11 = np.arctan2(valIm_11, valRe_11)
 
         pdb_out.addValues({'Gain:0:0:Phase:{}'.format(s): {'freqs': freqs, 'freqwidths':
-            freqwidths, 'times': times, 'timewidths': timewidths, 'values': valPh_00}})
+            freqwidths, 'times': times, 'timewidths': timewidths, 'values': valPh_00[:,np.newaxis]}})
         pdb_out.addValues({'Gain:1:1:Phase:{}'.format(s): {'freqs': freqs, 'freqwidths':
-            freqwidths, 'times': times, 'timewidths': timewidths, 'values': valPh_11}})
+            freqwidths, 'times': times, 'timewidths': timewidths, 'values': valPh_11[:,np.newaxis]}})
         pdb_out.addValues({'Gain:0:0:Ampl:{}'.format(s): {'freqs': freqs, 'freqwidths':
-            freqwidths, 'times': times, 'timewidths': timewidths, 'values': valAmp_00}})
+            freqwidths, 'times': times, 'timewidths': timewidths, 'values': valAmp_00[:,np.newaxis]}})
         pdb_out.addValues({'Gain:1:1:Ampl:{}'.format(s): {'freqs': freqs, 'freqwidths':
-            freqwidths, 'times': times, 'timewidths': timewidths, 'values': valAmp_11}})
+            freqwidths, 'times': times, 'timewidths': timewidths, 'values': valAmp_11[:,np.newaxis]}})
 
     # Write values
     pdb_out.flush()
