@@ -377,7 +377,13 @@ class Direction(object):
             try:
                 datamap = DataMap.load(mapfile)
                 for item in datamap:
-                    if os.path.exists(item.file):
-                        os.system('rm -rf {0}'.format(item.file))
+                    # Handle case in which item.file is a Python list
+                    if item.file[0] == '[' and item.file[-1] == ']':
+                        files = item.file.strip('[]').split(',')
+                    else:
+                        files = [item.file]
+                    for f in files:
+                        if os.path.exists(f):
+                            os.system('rm -rf {0}'.format(f))
             except IOError:
                 pass
