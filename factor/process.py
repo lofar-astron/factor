@@ -6,6 +6,7 @@ import os
 import numpy as np
 import logging
 import pickle
+import lofar.parmdb
 from lofarpipe.support.data_map import DataMap
 import factor
 import factor.directions
@@ -170,10 +171,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             log.info('Exiting...')
             sys.exit(1)
 
-        # Clean up unneeded files
-        for d in direction_group:
-            d.cleanup()
-
     # Make final facet images (from final empty datasets) if desired. Also image
     # any facets for which selfcal failed or no selfcal was done
     #
@@ -304,11 +301,18 @@ def _set_up_bands(parset, log, test_run=False):
         band = Band(ms, parset['dir_working'], test_run=test_run)
         band.load_state() # Load previous state (if any)
 
+        # Some checks on the dir-indep instrument parmdb
         band.dirindparmdb = os.path.join(band.file, parset['parmdb_name'])
         if not os.path.exists(band.dirindparmdb):
             log.critical('Direction-independent instument parmdb not found '
                 'for band {0}'.format(band.file))
             sys.exit(1)
+        solname = lofar.parmdb.parmdb(band.dirindparmdb).getNames()[0]
+        if 'Real' in solname or 'Imag' in solname:
+            # Convert real/imag to phasors
+            log.warn('Direction-independent instument parmdb for band {0} contains '
+                'real/imaginary values. Converting to phase/amplitude...'.format(band.file)
+            band.dirindparmdb = _convert_to_phasors(band.dirindparmdb)
         if band.dirindparmdb == 'instrument':
             # Check for special BBS table name
             log.warn('Direction-independent instument parmdb for band {0} is '
@@ -340,6 +344,64 @@ def _set_up_bands(parset, log, test_run=False):
             bands_initsubtract.append(band)
 
     return bands, bands_initsubtract
+
+
+def _convert_to_phasors(real_imag_parmdb_file):
+    """
+    Converts instrument parmdb from real/imag to phasors
+
+    Parameters
+    ----------
+    real_imag_parmdb_file : str
+        Filename of input parmdb
+
+    Returns
+    -------
+    phasors_parmdb_file : str
+        Filename of ouput phasors parmdb
+
+    """
+    phasors_parmdb_file = real_imag_parmdb_file + '_phasors'
+    if os.path.exists(phasors_parmdb_file):
+        shutil.rmtree(phasors_parmdb_file)
+
+    pdb_in = lofar.parmdb.parmdb(real_imag_parmdb_file)
+    pdb_out = lofar.parmdb.parmdb(phasors_parmdb_file, create=True)
+
+    # Get station names
+    stations = set([s.split(':')[-1] for s in pdb_in.getNames()])
+
+    # Calculate and store phase and amp values for each station
+    for i, s in enumerate(stations):
+        if i == 0:
+            freqs = pdb_in.getValuesGrid('Gain:0:0:Imag:{}'.format(s))['freqs']
+            freqwidths = pdb_in.getValuesGrid('Gain:0:0:Imag:{}'.format(s))['freqwidths']
+            times = pdb_in.getValuesGrid('Gain:0:0:Imag:{}'.format(s))['times']
+            timewidths = pdb_in.getValuesGrid('Gain:0:0:Imag:{}'.format(s))['timewidths']
+
+        valIm_00 = np.copy(pdb_in.getValuesGrid('Gain:0:0:Imag:{}'.format(s))['values'][:, 0])
+        valIm_11 = np.copy(pdb_in.getValuesGrid('Gain:1:1:Imag:{}'.format(s))['values'][:, 0])
+        valRe_00 = np.copy(pdb_in.getValuesGrid('Gain:0:0:Real:{}'.format(s))['values'][:, 0])
+        valRe_11 = np.copy(pdb_in.getValuesGrid('Gain:1:1:Real:{}'.format(s))['values'][:, 0])
+
+        valAmp_00 = np.sqrt((valRe_00**2) + (valIm_00**2))
+        valAmp_11 = np.sqrt((valRe_11**2) + (valIm_11**2))
+        valPh_00 = np.arctan2(valIm_00, valRe_00)
+        valPh_11 = np.arctan2(valIm_11, valRe_11)
+
+        pdb_out.addValues({'Gain:0:0:Phase:{}'.format(s): {'freqs': freqs, 'freqwidths':
+            freqwidths, 'times': times, 'timewidths': timewidths, 'values': valPh_00}})
+        pdb_out.addValues({'Gain:1:1:Phase:{}'.format(s): {'freqs': freqs, 'freqwidths':
+            freqwidths, 'times': times, 'timewidths': timewidths, 'values': valPh_11}})
+        pdb_out.addValues({'Gain:0:0:Ampl:{}'.format(s): {'freqs': freqs, 'freqwidths':
+            freqwidths, 'times': times, 'timewidths': timewidths, 'values': valAmp_00}})
+        pdb_out.addValues({'Gain:1:1:Ampl:{}'.format(s): {'freqs': freqs, 'freqwidths':
+            freqwidths, 'times': times, 'timewidths': timewidths, 'values': valAmp_11}})
+
+    # Write values
+    pdb_out.flush()
+
+    return phasors_parmdb_file
 
 
 def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False):

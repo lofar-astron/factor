@@ -71,8 +71,23 @@ add_all_facet_sources.argument.parmdb                      =   create_parmdb_map
 add_all_facet_sources.argument.replace-sourcedb            =   True
 add_all_facet_sources.argument.replace-parmdb              =   True
 
+shift_cal.control.type                                     =   dppp
+shift_cal.control.opts.mapfile_in                          =   create_ms_map.output.mapfile
+shift_cal.control.opts.inputkey                            =   msin
+shift_cal.parsetarg.msin.datacolumn                        =   {{ subtracted_data_colname }}
+shift_cal.parsetarg.msout.writefullresflag                 =   False
+shift_cal.parsetarg.steps                                  =   [shift]
+shift_cal.parsetarg.shift.type                             =   phaseshifter
+shift_cal.parsetarg.shift.phasecenter                      =   [{{ ra }}deg, {{ dec }}deg]
+
+copy_cal_map.control.kind                                  =   plugin
+copy_cal_map.control.type                                  =   copyMapfile
+copy_cal_map.control.mapfile_in                            =   shift_cal.output.mapfile
+copy_cal_map.control.mapfile_dir                           =   {{ mapfile_dir }}
+copy_cal_map.control.filename                              =   shifted_cal_bands.datamap
+
 add_cal_facet_sources.control.type                         =   calibrate-stand-alone_new
-add_cal_facet_sources.argument.observation                 =   shift_empty.output.mapfile
+add_cal_facet_sources.argument.observation                 =   shift_cal.output.mapfile
 add_cal_facet_sources.argument.parset                      =   {{ parset_dir }}/facet_dirindep_add_cal.parset
 add_cal_facet_sources.argument.catalog                     =   make_facet_skymodels_cal.output.mapfile
 add_cal_facet_sources.argument.parmdb                      =   create_parmdb_map.output.mapfile
@@ -80,7 +95,7 @@ add_cal_facet_sources.argument.replace-sourcedb            =   True
 add_cal_facet_sources.argument.replace-parmdb              =   True
 
 average_data.control.type                                  =   dppp
-average_data.control.mapfile_in                            =   shift_empty.output.mapfile
+average_data.control.mapfile_in                            =   shift_cal.output.mapfile
 average_data.control.inputkey                              =   msin
 average_data.argument.msin.datacolumn                      =   FACET_DATA_CAL
 average_data.argument.msout.writefullresflag               =   False
@@ -101,7 +116,7 @@ create_compressed_mapfile_data.control.kind                =   plugin
 create_compressed_mapfile_data.control.type                =   compressMapfile
 create_compressed_mapfile_data.control.mapfile_in          =   average_data.output.mapfile
 create_compressed_mapfile_data.control.mapfile_dir         =   {{ mapfile_dir }}
-create_compressed_mapfile_data.control.filename            =   concat1_input.datamap
+create_compressed_mapfile_data.control.filename            =   concat_input.datamap
 
 concat_data.control.type                                   =   dppp
 concat_data.control.mapfile_in                             =   create_compressed_mapfile_data.output.mapfile
