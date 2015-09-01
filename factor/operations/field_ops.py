@@ -50,7 +50,7 @@ class InitSubtract(Operation):
                                 'highres_image_sizes' : highres_image_sizes,
                                 'lowres_image_sizes' : lowres_image_sizes,
                                 'skymodels': skymodels,
-                                'dir_indep_parmdb_name': parset['parmdb_name'])
+                                'dir_indep_parmdb_name': parset['parmdb_name']})
 
 
     def finalize(self):
