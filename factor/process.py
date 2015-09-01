@@ -311,7 +311,7 @@ def _set_up_bands(parset, log, test_run=False):
         if 'Real' in solname or 'Imag' in solname:
             # Convert real/imag to phasors
             log.warn('Direction-independent instument parmdb for band {0} contains '
-                'real/imaginary values. Converting to phase/amplitude...'.format(band.file)
+                'real/imaginary values. Converting to phase/amplitude...'.format(band.file))
             band.dirindparmdb = _convert_to_phasors(band.dirindparmdb)
         if band.dirindparmdb == 'instrument':
             # Check for special BBS table name
