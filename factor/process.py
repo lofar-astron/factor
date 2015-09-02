@@ -150,7 +150,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         for d in direction_group:
             all_good = True
             if not d.selfcal_ok:
-                log.warn('Selfcal failed for direction {0}.'.format(d.name))
+                log.warn('Selfcal verification failed for direction {0}.'.format(d.name))
                 if parset['interactive']:
                     prompt = "Use selfcal solutions for this direction anyway (y/n)? "
                     answ = raw_input(prompt)
