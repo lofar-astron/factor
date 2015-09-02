@@ -27,7 +27,6 @@ class InitSubtract(Operation):
     initsubtract_subonly_pipeline.parset - runs only a subtract step when all
         bands have skymodels
 
-
     """
     def __init__(self, parset, bands, direction):
         super(InitSubtract, self).__init__(parset, bands, direction,
@@ -66,7 +65,7 @@ class InitSubtract(Operation):
             for band, item in zip(self.bands, datamap):
                 band.skymodel_dirindep = item.file
 
-        # Delete averaged data as it's no longer needed
+        # Delete averaged data as they're no longer needed
         self.direction.cleanup_mapfiles = [os.path.join(self.mapfile_dir,
             'averaged_data.datamap')]
         self.direction.cleanup()

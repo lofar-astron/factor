@@ -1,4 +1,4 @@
-pipeline.steps = [update_shifted_all_hosts, update_input_bands_hosts, shift_subdata_to_field, copy_column, shift_model_to_field, copy_shifted_model_map]
+pipeline.steps = [update_shifted_all_hosts, update_input_bands_hosts, shift_subdata_to_field, copy_column, shift_model_to_field, copy_shifted_model_map, copy_shifted_subdata_map]
 
 pipeline.pluginpath                                     =   {{ pipeline_dir }}/plugins
 
@@ -40,3 +40,9 @@ copy_shifted_model_map.control.type                     =   copyMapfile
 copy_shifted_model_map.control.mapfile_in               =   shift_model_to_field.output.mapfile
 copy_shifted_model_map.control.mapfile_dir              =   {{ mapfile_dir }}
 copy_shifted_model_map.control.filename                 =   shifted_to_field_models.datamap
+
+copy_shifted_subdata_map.control.kind                   =   plugin
+copy_shifted_subdata_map.control.type                   =   copyMapfile
+copy_shifted_subdata_map.control.mapfile_in             =   shift_subdata_to_field.output.mapfile
+copy_shifted_subdata_map.control.mapfile_dir            =   {{ mapfile_dir }}
+copy_shifted_subdata_map.control.filename               =   shifted_to_field_subdata.datamap

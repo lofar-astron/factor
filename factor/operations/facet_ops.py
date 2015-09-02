@@ -24,6 +24,14 @@ from lofarpipe.support.data_map import DataMap
 class FacetSelfcal(Operation):
     """
     Operation to selfcal a direction
+
+    Two pipelines can be run, depending on whether casapy or wsclean is used
+    for the full facet imaging:
+
+    facetselfcal_casa_pipeline.parset - runs selfcal with casa
+
+    facetselfcal_pipeline.parset - runs selfcal with wsclean
+
     """
     def __init__(self, parset, bands, direction):
         super(FacetSelfcal, self).__init__(parset, bands, direction,
@@ -88,7 +96,7 @@ class FacetSelfcal(Operation):
         self.verify_subtract_OK_mapfile = os.path.join(self.mapfile_dir,
             'verify_subtract_OK.datamap')
 
-        # Delete all data used only for selfcal as it's no longer needed
+        # Delete all data used only for selfcal as they're no longer needed
         self.direction.cleanup_mapfiles = [
             os.path.join(self.mapfile_dir, 'shifted_cal_bands.datamap'),
             os.path.join(self.mapfile_dir, 'chunk_files.datamap'),
@@ -115,6 +123,16 @@ class FacetSelfcal(Operation):
 class FacetSub(Operation):
     """
     Operation to subtract improved model
+
+    Two pipelines can be run, depending on whether the empty datasets must
+    be updated before subtraction is done:
+
+    facetsub_single_pipeline.parset - runs the subraction without updating the
+        empty datasets
+
+    facetsub_pipeline.parset - runs the subtraction after updating the emtpy
+        datasets
+
     """
     def __init__(self, parset, direction):
         super(FacetSub, self).__init__(parset, None, direction,
@@ -135,14 +153,32 @@ class FacetSub(Operation):
         self.direction.facet_model_data_mapfile = os.path.join(self.mapfile_dir,
             'shifted_to_field_models.datamap')
 
-        # Delete shifted data as it's no longer needed
-        self.direction.cleanup_mapfiles = [self.direction.shifted_bands_datamap]
+        # Delete shifted data as they're no longer needed
+        self.direction.cleanup_mapfiles = [
+            self.direction.shifted_bands_datamap,
+            os.path.join(self.mapfile_dir, 'shifted_to_field_subdata.datamap')]
         self.direction.cleanup()
 
 
 class FacetImage(Operation):
     """
-    Operation to make facet image
+    Operation to make the full facet image
+
+    Four pipelines can be run, depending on whether casapy or wsclean is used
+    for imaging and on whether an improved model (from selfcal) exists:
+
+    facetimage_skymodel_casa_pipeline.parset - runs imaging with original
+        skymodel using casa
+
+    facetimage_imgmodel_casa_pipeline.parset - runs imaging with improved
+        model using casa
+
+    facetimage_skymodel_pipeline.parset - runs imaging with original
+        skymodel using wsclean
+
+    facetimage_imgmodel_pipeline.parset - runs imaging with improved
+        model using wsclean
+
     """
     def __init__(self, parset, bands, direction):
         super(FacetImage, self).__init__(parset, bands, direction,
@@ -198,7 +234,9 @@ class FacetImage(Operation):
         self.direction.facet_model_mapfile = os.path.join(self.mapfile_dir,
             'final_model_rootnames.datamap')
 
-        # Delete shifted data as it's no longer needed
-        self.direction.cleanup_mapfiles = [os.path.join(self.mapfile_dir,
-            'shifted_all_final_bands.datamap')]
+        # Delete shifted data as they're no longer needed
+        self.direction.cleanup_mapfiles = [
+            os.path.join(self.mapfile_dir, 'shifted_empty_final_bands.datamap'),
+            os.path.join(self.mapfile_dir, 'shifted_all_final_bands.datamap'),
+            os.path.join(self.mapfile_dir, 'shifted_avg_final_bands.datamap')]
         self.direction.cleanup()

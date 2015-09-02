@@ -29,8 +29,6 @@ make_facet_skymodels_all.control.inputkey                  =   fullmodelfile
 make_facet_skymodels_all.control.outputkey                 =   outfile
 make_facet_skymodels_all.argument.flags                    =   [fullmodelfile,outfile,{{ vertices_file }}]
 make_facet_skymodels_all.argument.cal_only                 =   False
-make_facet_skymodels_all.argument.facet_ra                 =   {{ ra }}
-make_facet_skymodels_all.argument.facet_dec                =   {{ dec }}
 
 copy_facet_skymodels_all_map.control.kind                  =   plugin
 copy_facet_skymodels_all_map.control.type                  =   copyMapfile

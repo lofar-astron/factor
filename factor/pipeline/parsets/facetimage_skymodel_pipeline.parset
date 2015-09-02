@@ -1,4 +1,4 @@
-pipeline.steps = [create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, shift_empty, add_all_facet_sources, average, copy_all_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile, concat_averaged, wsclean1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean2, create_imagebase_map2, adjust_wsclean_mapfile2]
+pipeline.steps = [create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, shift_empty, copy_shifted_map, add_all_facet_sources, average, copy_all_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile, concat_averaged, wsclean1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean2, create_imagebase_map2, adjust_wsclean_mapfile2]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -38,6 +38,12 @@ shift_empty.parsetarg.msout.writefullresflag      =   False
 shift_empty.parsetarg.steps                       =   [shift]
 shift_empty.parsetarg.shift.type                  =   phaseshifter
 shift_empty.parsetarg.shift.phasecenter           =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+
+copy_shifted_map.control.kind                     =   plugin
+copy_shifted_map.control.type                     =   copyMapfile
+copy_shifted_map.control.mapfile_in               =   shift_empty.output.mapfile
+copy_shifted_map.control.mapfile_dir              =   {{ mapfile_dir }}
+copy_shifted_map.control.filename                 =   shifted_empty_final_bands.datamap
 
 add_all_facet_sources.control.type                =   calibrate-stand-alone_new
 add_all_facet_sources.argument.observation        =   shift_empty.output.mapfile
