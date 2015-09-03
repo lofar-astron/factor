@@ -29,3 +29,4 @@ subtract.argument.parset                =   {{ parset_dir }}/field_subtract_merg
 subtract.argument.catalog               =   create_skymodel_map.output.mapfile
 subtract.argument.parmdb                =   create_parmdb_map.output.mapfile
 subtract.argument.force                 =   True
+subtract.argument.no-columns            =   True

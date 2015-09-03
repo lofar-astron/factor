@@ -128,6 +128,7 @@ subtract_high.argument.catalog             =   {{ skymodel_dir }}/empty.skymodel
 subtract_high.argument.parmdb              =   create_parmdb_map.output.mapfile
 subtract_high.argument.replace-sourcedb    =   True
 subtract_high.argument.replace-parmdb      =   True
+subtract_high.argument.no-columns          =   True
 
 average.control.type                       =   dppp
 average.control.mapfile_in                 =   create_ms_map.output.mapfile
@@ -237,6 +238,7 @@ subtract_low.argument.parset               =   {{ parset_dir }}/field_subtract_l
 subtract_low.argument.catalog              =   {{ skymodel_dir }}/empty.skymodel
 subtract_low.argument.parmdb               =   create_parmdb_map.output.mapfile
 subtract_low.argument.force                =   True
+subtract_low.argument.no-columns           =   True
 
 merge.control.type                         =   merge_skymodels
 merge.control.mapfiles_in                  =   [casa_to_bbs_low.output.mapfile,casa_to_bbs_high.output.mapfile]

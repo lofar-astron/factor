@@ -69,6 +69,7 @@ add_all_facet_sources.argument.catalog                     =   make_facet_skymod
 add_all_facet_sources.argument.parmdb                      =   create_parmdb_map.output.mapfile
 add_all_facet_sources.argument.replace-sourcedb            =   True
 add_all_facet_sources.argument.replace-parmdb              =   True
+add_all_facet_sources.argument.no-columns                  =   True
 
 shift_cal.control.type                                     =   dppp
 shift_cal.control.opts.mapfile_in                          =   create_ms_map.output.mapfile
@@ -93,6 +94,7 @@ add_cal_facet_sources.argument.catalog                     =   make_facet_skymod
 add_cal_facet_sources.argument.parmdb                      =   create_parmdb_map.output.mapfile
 add_cal_facet_sources.argument.replace-sourcedb            =   True
 add_cal_facet_sources.argument.replace-parmdb              =   True
+add_cal_facet_sources.argument.no-columns                  =   True
 
 average_data.control.type                                  =   dppp
 average_data.control.mapfile_in                            =   shift_cal.output.mapfile
@@ -112,6 +114,7 @@ apply_dir_indep.argument.catalog                           =   {{ skymodel_dir }
 apply_dir_indep.argument.parmdb                            =   create_parmdb_map.output.mapfile
 apply_dir_indep.argument.replace-sourcedb                  =   True
 apply_dir_indep.argument.replace-parmdb                    =   True
+apply_dir_indep.argument.no-columns                        =   True
 
 create_compressed_mapfile_data.control.kind                =   plugin
 create_compressed_mapfile_data.control.type                =   compressMapfile

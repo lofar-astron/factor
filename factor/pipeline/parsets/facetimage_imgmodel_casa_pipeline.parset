@@ -21,6 +21,7 @@ add_all_facet_sources.argument.catalog            =   {{ skymodel_dir }}/empty.s
 add_all_facet_sources.argument.parmdb             =   expand_merged_parmdb_map.output.mapfile
 add_all_facet_sources.argument.replace-sourcedb   =   True
 add_all_facet_sources.argument.replace-parmdb     =   True
+add_all_facet_sources.argument.no-columns         =   True
 
 shift_all.control.type                            =   dppp
 shift_all.control.opts.mapfile_in                 =   {{ input_bands_datamap }}
