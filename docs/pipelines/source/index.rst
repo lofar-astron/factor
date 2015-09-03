@@ -10,6 +10,7 @@ This document describes the facet calibration software that implements the facet
    acknowledgements.rst
    factor_intro.rst
    prefacet.rst
+   runfactor.rst
    initsubtract.rst
    facetselfcal.rst
    facetsubtract.rst
