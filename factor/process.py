@@ -577,11 +577,11 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
                     prev_selfcal_direction_names.extend([name for name in name_group])
 
                 # Check to see if there are any changes to the selfcal directions
-                for selfcal_direction in selfcal_directions:
+                for selfcal_direction in direction_names:
                     if selfcal_direction not in prev_selfcal_direction_names:
                         redo_groups = True
                 for name in prev_selfcal_direction_names:
-                    if name not in selfcal_directions:
+                    if name not in direction_names:
                         redo_groups = True
 
                 # If all the directions match, reconstruct groups
