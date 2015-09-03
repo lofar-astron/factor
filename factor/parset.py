@@ -71,8 +71,9 @@ def parset_read(parset_file):
     set_log_file(parset_dict['dir_working']+'/factor.log')
     log.info("Working directory is {0}".format(parset_dict['dir_working']))
 
-    # Get all the MS files in the input directory
-    parset_dict['mss'] = glob.glob(parset_dict['dir_ms']+'/*[MS|ms]')
+    # Get all the MS files in the input directory. These are identified by the
+    # extensions 'ms', 'MS', or 'dpppconcat' (used by the pre-facet pipeline)
+    parset_dict['mss'] = glob.glob(parset_dict['dir_ms']+'/*[MS|ms|dpppconcat]')
     if len(parset_dict['mss']) == 0:
         log.error('No MS files found in {0}!'.format(parset_dict['dir_ms']))
         sys.exit(1)
