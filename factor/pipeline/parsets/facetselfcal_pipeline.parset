@@ -580,7 +580,6 @@ solve_ampphase12.argument.parset                           =   {{ parset_dir }}/
 solve_ampphase12.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
 solve_ampphase12.argument.replace-sourcedb                 =   True
 solve_ampphase12.argument.replace-parmdb                   =   True
-solve_ampphase12.argument.Strategy.ChunkSize               =   {{ solint_a }}
 solve_ampphase12.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_a }}
 
 merge_amp_parmdbs1.control.type                            =   merge_parmdbs_in_time
@@ -761,7 +760,6 @@ solve_ampphase22.argument.parset                           =   {{ parset_dir }}/
 solve_ampphase22.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
 solve_ampphase22.argument.replace-sourcedb                 =   True
 solve_ampphase22.argument.replace-parmdb                   =   True
-solve_ampphase22.argument.Strategy.ChunkSize               =   {{ solint_a }}
 solve_ampphase22.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_a }}
 
 merge_amp_parmdbs2.control.type                            =   merge_parmdbs_in_time
