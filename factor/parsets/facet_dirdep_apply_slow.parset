@@ -1,5 +1,5 @@
 Strategy.InputColumn                        = CORRECTED_DATA_FAST
-Strategy.ChunkSize                          = 200
+Strategy.ChunkSize                          = 1000
 Strategy.UseSolver                          = F
 Strategy.Steps                              = [correct]
 

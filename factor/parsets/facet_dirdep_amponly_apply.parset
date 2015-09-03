@@ -1,6 +1,6 @@
 Strategy.InputColumn                        = CORRECTED_DATA
-Strategy.ChunkSize                          = 200
 Strategy.UseSolver                          = F
+Strategy.ChunkSize                          = 0
 Strategy.Steps                              = [correct]
 
 Step.correct.Operation                      = CORRECT

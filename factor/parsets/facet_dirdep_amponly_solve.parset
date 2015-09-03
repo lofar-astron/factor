@@ -1,5 +1,6 @@
 Strategy.InputColumn                      = CORRECTED_DATA
 Strategy.UseSolver                        = F
+Strategy.ChunkSize                        = 0
 Strategy.Steps                            = [solve]
 
 Step.solve.Operation                      = SOLVE
@@ -12,7 +13,7 @@ Step.solve.Model.Rotation.Enable          = F
 Step.solve.Model.CommonScalarPhase.Enable = F
 Step.solve.Solve.Parms                    = ["Gain:0:0:*","Gain:1:1:*"]
 Step.solve.Solve.CellSize.Freq            = 1
-Step.solve.Solve.CellChunkSize            = 12
+Step.solve.Solve.CellChunkSize            = 20
 Step.solve.Solve.PropagateSolutions       = T
 Step.solve.Solve.Options.MaxIter          = 100
 Step.solve.Solve.Options.LMFactor         = 1.0

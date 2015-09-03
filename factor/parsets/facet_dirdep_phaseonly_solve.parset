@@ -1,6 +1,6 @@
 Strategy.InputColumn                        = DATA
 Strategy.UseSolver                          = F
-Strategy.ChunkSize                          = 100
+Strategy.ChunkSize                          = 0
 Strategy.Steps                              = [solve, correct]
 
 Step.solve.Operation                        = SOLVE
@@ -15,7 +15,7 @@ Step.solve.Model.CommonScalarPhase.Enable   = T
 Step.solve.Model.Beam.Enable                = F
 Step.solve.Solve.Parms                      = ["CommonScalarPhase:*", "TEC:*"]
 Step.solve.Solve.CellSize.Freq              = 0
-Step.solve.Solve.CellChunkSize              = 120
+Step.solve.Solve.CellChunkSize              = 20
 Step.solve.Solve.PropagateSolutions         = T
 Step.solve.Solve.Options.MaxIter            = 100
 Step.solve.Solve.Options.LMFactor           = 1.0
