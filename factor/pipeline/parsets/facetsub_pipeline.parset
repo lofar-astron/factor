@@ -25,11 +25,12 @@ add_all_facet_sources.argument.replace-parmdb   =   True
 shift_to_field.control.type                     =   dppp
 shift_to_field.control.opts.mapfile_in          =   {{ shifted_bands_datamap }}
 shift_to_field.control.opts.inputkey            =   msin
-shift_to_field.parsetarg.msin.datacolumn        =   MODEL_DATA
-shift_to_field.parsetarg.msout.writefullresflag =   False
-shift_to_field.parsetarg.steps                  =   [shift]
-shift_to_field.parsetarg.shift.type             =   phaseshifter
-shift_to_field.parsetarg.shift.phasecenter      =   [{{ field_ra }}deg, {{ field_dec }}deg]
+shift_to_field.argument.msin.datacolumn         =   MODEL_DATA
+shift_to_field.argument.msout.overwrite         =   True
+shift_to_field.argument.msout.writefullresflag  =   False
+shift_to_field.argument.steps                   =   [shift]
+shift_to_field.argument.shift.type              =   phaseshifter
+shift_to_field.argument.shift.phasecenter       =   [{{ field_ra }}deg, {{ field_dec }}deg]
 
 copy_column.control.type                        =   copy_column
 copy_column.control.mapfiles_in                 =   [shift_to_field.output.mapfile,{{ input_bands_datamap }}]
