@@ -289,6 +289,9 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
             """
             Finds the minimum separation in degrees between sources in a group
             """
+            if len(group) == 1:
+                return 0.0
+
             sep = []
             for direction1 in group:
                 for direction2 in group:
