@@ -105,7 +105,8 @@ class FacetSelfcal(Operation):
             os.path.join(self.mapfile_dir, 'concat1_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat2_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat3_input.datamap'),
-            os.path.join(self.mapfile_dir, 'concat4_input.datamap')]
+            os.path.join(self.mapfile_dir, 'concat4_input.datamap'),
+            os.path.join(self.mapfile_dir, 'concat_averaged_input.datamap')]
         self.direction.cleanup()
 
         # Store results of verify_subtract check
