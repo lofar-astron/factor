@@ -79,7 +79,6 @@ class Direction(object):
         self.cal_imsize = cal_imsize
         self.solint_p = solint_p
         self.solint_a = solint_a
-        self.chunk_width = (solint_a - 1) * 2
         self.facet_imsize = field_imsize * 1.15
         self.dynamic_range = dynamic_range
         if region_selfcal.lower() == 'empty':
@@ -129,6 +128,7 @@ class Direction(object):
             ref_flux = 100.0
             self.solint_p = max(1, int(round(4 * ref_flux / self.apparent_flux_mjy)))
             self.solint_a = max(30, int(round(240 * ref_flux / self.apparent_flux_mjy)))
+        self.chunk_width = (solint_a - 1) * 4
 
         # Define some directories, etc.
         self.working_dir = factor_working_dir
