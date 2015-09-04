@@ -119,13 +119,13 @@ class Direction(object):
         self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
 
         # Scale solution intervals by apparent flux. The scaling is done so that
-        # sources with flux densities of 100 mJy have a fast interval of 4 time
+        # sources with flux densities of 250 mJy have a fast interval of 4 time
         # slots and a slow interval of 240 time slots. The scaling is currently
         # linear with flux (and thus we accept lower-SNR solutions for the
         # fainter sources). Ideally, these value should also scale with the
         # bandwidth
         if self.apparent_flux_mjy is not None:
-            ref_flux = 100.0
+            ref_flux = 250.0
             self.solint_p = max(1, int(round(4 * ref_flux / self.apparent_flux_mjy)))
             self.solint_a = max(30, int(round(240 * ref_flux / self.apparent_flux_mjy)))
         self.chunk_width = (solint_a - 1) * 4
