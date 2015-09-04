@@ -571,7 +571,7 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
             try:
                 redo_groups = False
                 direction_groups = []
-                direction_names = [d.name for d in directions]
+                direction_names = [d.name for d in selfcal_directions]
                 prev_selfcal_direction_names = []
                 for name_group in direction_name_groups:
                     prev_selfcal_direction_names.extend([name for name in name_group])
