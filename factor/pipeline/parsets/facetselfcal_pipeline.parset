@@ -69,7 +69,6 @@ add_all_facet_sources.argument.catalog                     =   make_facet_skymod
 add_all_facet_sources.argument.parmdb                      =   create_parmdb_map.output.mapfile
 add_all_facet_sources.argument.replace-sourcedb            =   True
 add_all_facet_sources.argument.replace-parmdb              =   True
-add_all_facet_sources.argument.no-columns                  =   True
 
 shift_cal.control.type                                     =   dppp
 shift_cal.control.opts.mapfile_in                          =   create_ms_map.output.mapfile
