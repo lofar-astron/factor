@@ -72,7 +72,7 @@ def main(msname, instrument_name, instrument_name_smoothed):
     parms = pdb.getValuesGrid('*')
 
     key_names = parms.keys()
-    anttab = pt.table(msname + '/ANTENNA')
+    anttab = pt.table(msname + '::ANTENNA')
     antenna_list = anttab.getcol('NAME')
     anttab.close()
     window = 4
