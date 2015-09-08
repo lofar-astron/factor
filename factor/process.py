@@ -303,23 +303,29 @@ def _set_up_bands(parset, log, test_run=False):
 
         # Some checks on the dir-indep instrument parmdb
         band.dirindparmdb = os.path.join(band.file, parset['parmdb_name'])
+        if parset['parmdb_name'] == 'instrument':
+            # Check for special BBS table name
+            band.dirindparmdb += '_dirindep'
+            if not os.path.exists(band.dirindparmdb):
+                if not os.path.exists(os.path.join(band.file, parset['parmdb_name'])):
+                    log.critical('Direction-independent instument parmdb not found '
+                        'for band {0}'.format(band.file))
+                    sys.exit(1)
+                log.warn('Direction-independent instument parmdb for band {0} is '
+                    'named "instrument". Copying to "instrument_dirindep" so that BBS '
+                    'will not overwrite this table...'.format(band.file))
+                os.system('cp -r {0} {0}_dirindep'.format(band.dirindparmdb))
         if not os.path.exists(band.dirindparmdb):
             log.critical('Direction-independent instument parmdb not found '
                 'for band {0}'.format(band.file))
             sys.exit(1)
+
         solname = lofar.parmdb.parmdb(band.dirindparmdb).getNames()[0]
         if 'Real' in solname or 'Imag' in solname:
             # Convert real/imag to phasors
             log.warn('Direction-independent instument parmdb for band {0} contains '
                 'real/imaginary values. Converting to phase/amplitude...'.format(band.file))
             band.dirindparmdb = _convert_to_phasors(band.dirindparmdb)
-        if band.dirindparmdb == 'instrument':
-            # Check for special BBS table name
-            log.warn('Direction-independent instument parmdb for band {0} is '
-                'named "instrument". Copying to "instrument_dirindep" so that BBS '
-                'will not overwrite this table...'.format(band.file))
-            os.system('cp -r {0} {0}_dirindep'.format(band.dirindparmdb))
-            band.dirindparmdb += '_dirindep'
         band.skymodel_dirindep = None
         msbase = os.path.basename(ms)
         if msbase in parset['ms_specific']:
@@ -571,14 +577,14 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
             try:
                 redo_groups = False
                 direction_groups = []
-                direction_names = [d.name for d in selfcal_directions]
+                direction_names = [d.name for d in directions]
                 prev_selfcal_direction_names = []
                 for name_group in direction_name_groups:
                     prev_selfcal_direction_names.extend([name for name in name_group])
 
                 # Check to see if there are any changes to the selfcal directions
-                for selfcal_direction in direction_names:
-                    if selfcal_direction not in prev_selfcal_direction_names:
+                for name in direction_names:
+                    if name not in prev_selfcal_direction_names:
                         redo_groups = True
                 for name in prev_selfcal_direction_names:
                     if name not in direction_names:
