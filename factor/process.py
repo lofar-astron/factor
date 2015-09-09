@@ -98,7 +98,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
         log.info('Processing {0} direction(s) in Group {1}'.format(
             len(direction_group), gindx+1))
 
-        # Divide up the nodes and cores among the directions
+        # Divide up the nodes and cores among the directions for the parallel
+        # selfcal operations
         direction_group = factor.cluster.divide_nodes(direction_group,
             parset['cluster_specific']['node_list'],
             parset['cluster_specific']['ndir_per_node'],
@@ -137,11 +138,13 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             else:
                 d.skip_add_subtract = False
 
-        # Update state
-        for d in directions:
-            d.save_state()
+        # Combine the nodes and cores for the serial subtract operations
+        direction_group_ok = factor.cluster.combine_nodes(direction_group_ok,
+            parset['cluster_specific']['node_list'],
+            parset['cluster_specific']['ncpu'],
+            parset['cluster_specific']['fmem'])
 
-        # Do subtraction for directions for which selfcal went OK
+       # Do subtraction for directions for which selfcal went OK
         ops = [FacetSub(parset, d) for d in direction_group_ok]
         for op in ops:
             scheduler.run(op)
@@ -199,7 +202,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
     dirs_to_image.extend(dirs_to_transfer)
 
     if len(dirs_to_image) > 0:
-        # Divide up the nodes and cores among the directions
+        # Divide up the nodes and cores among the directions for the parallel
+        # imaging operations
         dirs_to_image = factor.cluster.divide_nodes(dirs_to_image,
             parset['cluster_specific']['node_list'],
             parset['cluster_specific']['ndir_per_node'],
@@ -577,10 +581,10 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
             try:
                 redo_groups = False
                 direction_groups = []
-                direction_names = [d.name for d in directions]
+                direction_names = [d.name for d in selfcal_directions]
                 prev_selfcal_direction_names = []
                 for name_group in direction_name_groups:
-                    prev_selfcal_direction_names.extend([name for name in name_group])
+                    prev_selfcal_direction_names.extend(name_group)
 
                 # Check to see if there are any changes to the selfcal directions
                 for name in direction_names:

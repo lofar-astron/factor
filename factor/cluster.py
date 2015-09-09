@@ -149,3 +149,34 @@ def divide_nodes(directions, node_list, ndir_per_node, ncpu_max, fmem_max):
         d.save_state()
 
     return directions
+
+
+def combine_nodes(directions, node_list, ncpu_max, fmem_max):
+    """
+    Conbine nodes and cpus for series operations
+
+    Parameters
+    ----------
+    directions: list
+        List of Direction objects
+    node_list : list
+        List of node names
+    ncpu_max : int
+        Max number of CPUs per node
+    fmem_max : float
+        Max fraction of memory per node
+
+    Returns
+    -------
+    directions : list
+        List of Direction objects, with attributes modified
+
+    """
+    # Give each direction all resources
+    for d in directions:
+        d.hosts = node_list
+        d.max_cpus_per_node = ncpu_max
+        d.max_percent_memory = fmem_max * 100.0
+        d.save_state()
+
+    return directions
