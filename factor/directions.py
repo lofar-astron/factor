@@ -346,7 +346,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
                     new_group = [d0]
                     remaining_directions.remove(d0)
                     ndir = len(group)
-                    wsep_prev = [0] * (ndir-1)
+                    wsep_prev = [0] * (len(remaining_directions)-1)
                     if ndir > 1:
                         for j in range(1, ndir):
                             weights = [len(remaining_directions)-k for k in
