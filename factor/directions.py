@@ -338,7 +338,8 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
             log.info('Reordering directions to obtain max separation...')
             direction_groups_orig = direction_groups[:]
             remaining_directions = directions[:]
-            print(direction_groups_orig)
+            for i, group in enumerate(direction_groups):
+                print('Group {0}: {1}'.format(i+1, [d.name for d in group]))
             if len(direction_groups) > 1:
                 for i, group in enumerate(direction_groups_orig):
                     d0 = remaining_directions[0]
@@ -354,7 +355,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
                                 d.ra, d.dec) for d in remaining_directions]
                             wsep_new = []
                             for s, w, wsep in zip(sep, weights, wsep_prev):
-                                wsep_new.append(s*w + wsep)
+                                wsep_new.append(s.value*w + wsep)
                             d1 = remaining_directions[np.argmax(wsep_new)]
                             new_group.append(d1)
                             remaining_directions.remove(d1)
@@ -384,9 +385,8 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
 #                             direction_groups[i] = group1_best
 #                             direction_groups[i + 1] = group2_best
         log.debug('Processing directions in the following groups:')
-        print(direction_groups)
         for i, group in enumerate(direction_groups):
-            log.debug('Group {0}: {1}'.format(i+1, [d.name for d in group]))
+            print('Group {0}: {1}'.format(i+1, [d.name for d in group]))
 
     return direction_groups
 
