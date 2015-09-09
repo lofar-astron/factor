@@ -346,18 +346,15 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
                     new_group = [d0]
                     remaining_directions.remove(d0)
                     ndir = len(group)
-                    wsep_prev = [0] * (len(remaining_directions)-1)
+                    wsep_prev = [0] * len(remaining_directions)
                     if ndir > 1:
                         for j in range(1, ndir):
-                            if len(remaining_directions) == 0:
-                                break
                             weights = [len(remaining_directions)-k for k in
                                 range(len(remaining_directions))]
                             sep = [calculateSeparation(d0.ra, d0.dec,
                                 d.ra, d.dec) for d in remaining_directions]
                             wsep_new = []
                             for s, w, wsep in zip(sep, weights, wsep_prev):
-#                                 print('sep and weight: {0}, {1}'.format(s, w))
                                 wsep_new.append(s.value*w + wsep)
                             print(wsep_prev, wsep_new)
                             d1 = remaining_directions[np.argmax(wsep_new)]
