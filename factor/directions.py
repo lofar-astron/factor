@@ -337,31 +337,50 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
         if allow_reordering:
             log.info('Reordering directions to obtain max separation...')
             direction_groups_orig = direction_groups[:]
-            if len(direction_groups_orig) > 1:
-                for i in range(0, len(direction_groups_orig), 2):
-                    group1 = direction_groups_orig[i]
-                    if len(group1) > 1:
-                        if i < len(direction_groups)-1:
-                            k = i + 1
-                        else:
-                            k = i - 1
-                        group2 = direction_groups_orig[k]
+            remaining_directions = directions[:]
+            if len(direction_groups) > 1:
+                for i, group in enumerate(direction_groups_orig):
+                    d0 = remaining_directions[0]
+                    new_group = [d0]
+                    remaining_directions.remove(d0)
+                    ndir = len(group)
+                    wsep_prev = [0] * len(ndir-1)
+                    if ndir > 1:
+                        for j in range(1, ndir):
+                            weights = [len(remaining_directions)-k for k in
+                                range(len(remaining_directions))]
+                            sep = [calculateSeparation(d0.ra, d0.dec,
+                                d.ra, d.dec) for d in remaining_directions]
+                            for s, w, wsep in zip(sep, weights, wsep_prev):
+                                wsep.append(s*w + wsep)
+                            d1 = remaining_directions[np.argmax(wsep)]
+                            new_group.append(d1)
+                            remaining_directions.remove(d1)
+                            wsep_prev.pop(np.argmax(wsep))
+                            wsep.pop(np.argmax(wsep))
+                            wsep_prev = [p+n for p, n in zip(wsep_prev, wsep)]
+                    direction_groups[i] = new_group
 
-                        min_sep_global = 0.0 # degrees
-                        for j in range(10):
-                            group_merged = group1[:] + group2[:]
-                            shuffle(group_merged)
-                            group1_test = group_merged[0: len(group1)]
-                            group2_test = group_merged[len(group1):]
-                            min_sep1 = find_min_separation(group1_test)
-                            min_sep2 = find_min_separation(group2_test)
-                            min_sep = min(min_sep1, min_sep2)
-                            if min_sep > min_sep_global:
-                                min_sep_global = min_sep
-                                group1_best = group1_test
-                                group2_best = group2_test
-                        direction_groups[i] = group1_best
-                        direction_groups[k] = group2_best
+#                 for i in range(0, len(direction_groups_orig), 2):
+#                     group1 = direction_groups_orig[i]
+#                     if len(group1) > 1:
+#                         if i < len(direction_groups)-1:
+#                             group2 = direction_groups_orig[i + 1]
+#                             min_sep_global = 0.0 # degrees
+#                             for j in range(10):
+#                                 group_merged = group1[:] + group2[:]
+#                                 shuffle(group_merged)
+#                                 group1_test = group_merged[0: len(group1)]
+#                                 group2_test = group_merged[len(group1):]
+#                                 min_sep1 = find_min_separation(group1_test)
+#                                 min_sep2 = find_min_separation(group2_test)
+#                                 min_sep = min(min_sep1, min_sep2)
+#                                 if min_sep > min_sep_global:
+#                                     min_sep_global = min_sep
+#                                     group1_best = group1_test
+#                                     group2_best = group2_test
+#                             direction_groups[i] = group1_best
+#                             direction_groups[i + 1] = group2_best
         log.debug('Processing directions in the following groups:')
         for i, group in enumerate(direction_groups):
             log.debug('Group {0}: {1}'.format(i+1, [d.name for d in group]))
