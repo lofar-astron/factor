@@ -355,7 +355,9 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
                                 d.ra, d.dec) for d in remaining_directions]
                             wsep_new = []
                             for s, w, wsep in zip(sep, weights, wsep_prev):
+                                print('sep and weight: {0}, {1}'.format(s, w))
                                 wsep_new.append(s.value*w + wsep)
+                            print(wsep_prev, wsep_new)
                             d1 = remaining_directions[np.argmax(wsep_new)]
                             new_group.append(d1)
                             remaining_directions.remove(d1)
