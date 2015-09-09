@@ -1,6 +1,11 @@
-pipeline.steps = [copy_column, expand_merged_parmdb_map, add_all_facet_sources, shift_all, copy_shifted_map, average, copy_all_map, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile, concat_averaged, wsclean1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean2, create_imagebase_map2, adjust_wsclean_mapfile2]
+pipeline.steps = [update_input_bands_hosts, copy_column, expand_merged_parmdb_map, add_all_facet_sources, shift_all, copy_shifted_map, average, copy_all_map, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile, concat_averaged, wsclean1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean2, create_imagebase_map2, adjust_wsclean_mapfile2]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
+
+update_input_bands_hosts.control.kind             =   plugin
+update_input_bands_hosts.control.type             =   updateHosts
+update_input_bands_hosts.control.mapfile_in       =   {{ input_bands_datamap }}
+update_input_bands_hosts.control.hosts            =   {{ hosts }}
 
 copy_column.control.type                          =   copy_column
 copy_column.control.mapfiles_in                   =   [{{ facet_model_data_mapfile }},{{ input_bands_datamap }}]
@@ -10,7 +15,7 @@ copy_column.argument.flags                        =   [shiftedfile,datafile,DATA
 expand_merged_parmdb_map.control.kind             =   plugin
 expand_merged_parmdb_map.control.type             =   expandMapfile
 expand_merged_parmdb_map.control.mapfile_in       =   {{ dir_dep_parmdb_datamap }}
-expand_merged_parmdb_map.control.mapfile_to_match =   shift_empty.output.mapfile
+expand_merged_parmdb_map.control.mapfile_to_match =   {{ input_bands_datamap }}
 expand_merged_parmdb_map.control.mapfile_dir      =   {{ mapfile_dir }}
 expand_merged_parmdb_map.control.filename         =   expand_merged_parmdbs.datamap
 
