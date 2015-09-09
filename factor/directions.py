@@ -340,6 +340,11 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
             remaining_directions = directions[:]
             for i, group in enumerate(direction_groups):
                 print('Group {0}: {1}'.format(i+1, [d.name for d in group]))
+            fluxes = [d.apparent_flux_mjy for d in remaining_directions]
+            if None in fluxes:
+                use_fluxes = False
+            else:
+                use_fluxes = True
             if len(direction_groups) > 1:
                 for i, group in enumerate(direction_groups_orig):
                     d0 = remaining_directions[0]
@@ -349,8 +354,12 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
                     wsep_prev = [0] * len(remaining_directions)
                     if ndir > 1:
                         for j in range(1, ndir):
-                            weights = [len(remaining_directions)-k for k in
-                                range(len(remaining_directions))]
+                            if use_fluxes:
+                                weights = [d.apparent_flux_mjy for d in
+                                    remaining_directions]
+                            else:
+                                weights = [len(remaining_directions)-k for k in
+                                    range(len(remaining_directions))]
                             sep = [calculateSeparation(d0.ra, d0.dec,
                                 d.ra, d.dec) for d in remaining_directions]
                             wsep_new = []
