@@ -82,6 +82,11 @@ ndir_selfcal = 5
 # one at a time (i.e., groupings = 1:0)
 groupings = 1:5, 4:0
 
+# If grouping is used to process more than one direction in parallel, reordering
+# of the directions in the groups can be done to maximize the separations
+# between directions in each group (default = True)
+allow_reordering = True
+
 # A target can be specified to ensure that it falls entirely within a single
 # facet. The values should be those of a circular region that encloses the
 # source and not those of the target itself. Lastly, the target can be placed

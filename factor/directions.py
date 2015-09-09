@@ -331,9 +331,9 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
                     else:
                         direction_groups += [directions[gstart: gend]]
 
-        # Reorganize groups in each grouping level based on distance. This
-        # is done by swapping the directions of neighboring groups randomly
-        # and picking the group with the largest minimum separation
+        # Reorganize groups in each grouping level to maximize the separation
+        # between directions. The separation is calculated as the rank-weighted
+        # total separation
         if allow_reordering:
             log.info('Reordering directions to obtain max separation...')
             direction_groups_orig = direction_groups[:]
@@ -344,7 +344,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
                     new_group = [d0]
                     remaining_directions.remove(d0)
                     ndir = len(group)
-                    wsep_prev = [0] * len(ndir-1)
+                    wsep_prev = [0] * (ndir-1)
                     if ndir > 1:
                         for j in range(1, ndir):
                             weights = [len(remaining_directions)-k for k in

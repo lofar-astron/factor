@@ -607,7 +607,8 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False)
     if redo_groups:
         direction_groups = factor.directions.group_directions(selfcal_directions,
             one_at_a_time=parset['direction_specific']['one_at_a_time'],
-            n_per_grouping=parset['direction_specific']['groupings'])
+            n_per_grouping=parset['direction_specific']['groupings'],
+            allow_reordering=parset['direction_specific']['allow_reordering'])
         direction_name_groups = []
         for group in direction_groups:
             direction_name_groups.append([d.name for d in group])

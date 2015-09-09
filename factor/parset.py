@@ -149,6 +149,11 @@ def parset_read(parset_file):
         parset_dict['direction_specific']['one_at_a_time'] = True
         parset_dict['direction_specific']['groupings'] = {'1':0}
     log.info("Using the following groupings for directions: {0}".format(groupings))
+    if 'allow_reordering' in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['allow_reordering'] = parset.getboolean('directions',
+            'allow_reordering')
+    else:
+        parset_dict['direction_specific']['allow_reordering'] = True
     if 'ndir_selfcal' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['ndir_selfcal'] = parset.getint('directions', 'ndir_selfcal')
         log.info("Self calibrating up to %s direction(s)" % (parset_dict['direction_specific']['ndir_selfcal']))
