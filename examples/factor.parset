@@ -77,13 +77,12 @@ ndir_selfcal = 5
 # grouping:n_total_per_grouping. For example, groupings = 1:5, 4:0 means two
 # groupings are used, with the first 5 directions put into groups of one (i.e.,
 # each direction processed in series) and the rest of the directions divided
-# into groups of 4 (i.e., 4 directions processed in parallel). Shuffling is done
-# between neighboring groups to achieve the largest min separation. Default is
-# one at a time (i.e., groupings = 1:0)
+# into groups of 4 (i.e., 4 directions processed in parallel). Default is one at
+# a time (i.e., groupings = 1:0)
 groupings = 1:5, 4:0
 
-# If grouping is used to process more than one direction in parallel, reordering
-# of the directions in the groups can be done to maximize the separations
+# If groups are used to process more than one direction in parallel, reordering
+# of the directions in the groups can be done to maximize the separation
 # between directions in each group (default = True)
 allow_reordering = True
 
