@@ -7,7 +7,7 @@ from argparse import RawTextHelpFormatter
 try:
     # Temp version of PyBDSM that uses faster fftconvolve
     from lofar2 import bdsm
-else:
+except ImportError:
     from lofar import bdsm
 import pyrap.images as pim
 import pickle
