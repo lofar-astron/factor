@@ -4,7 +4,10 @@ Script to make a clean mask from an image
 """
 import argparse
 from argparse import RawTextHelpFormatter
-from lofar import bdsm
+try:
+    import lofar.bdsm2 as bdsm
+else:
+    from lofar import bdsm
 import pyrap.images as pim
 import pickle
 import numpy as np
