@@ -5,7 +5,8 @@ Script to make a clean mask from an image
 import argparse
 from argparse import RawTextHelpFormatter
 try:
-    import lofar.bdsm2 as bdsm
+    # Temp version of PyBDSM that uses faster fftconvolve
+    from lofar2 import bdsm
 else:
     from lofar import bdsm
 import pyrap.images as pim
