@@ -4,9 +4,7 @@ Facet Imaging Operation
 =============================
 
 This section describes the facet imaging operation of Factor, denoted
-``facetimage`` (see the flowchart in Figure :num:`factor-flowchart`).
-
-This operation performs imaging of the entire facet when either the facet did not successfully go through selfcal or reimaging is desired. There are two possible pipeline parsets for this operation:
+``facetimage``, which performs imaging of the entire facet when either the facet did not successfully go through selfcal or reimaging is desired. There are two possible pipeline parsets for this operation:
 
 ``facetimage_imgmodel_pipeline.parset``
     For use when the facet under consideration has successfully gone through self calibration and reimaging is desired.

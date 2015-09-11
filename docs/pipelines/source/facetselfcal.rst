@@ -4,9 +4,7 @@ Facet Self-Calibration Operation
 ================================
 
 This section describes the self-calibration operation of Factor, denoted
-``facetselfcal`` (see the flowchart in Figure :num:`factor-flowchart`).
-
-This operation performs self calibration on the facet calibrator. The pipeline parset for this operation is ``facetselfcal_pipeline.parset``.
+``facetselfcal``, which performs self calibration on the facet calibrator. The pipeline parset for this operation is ``facetselfcal_pipeline.parset``.
 
 .. note::
 

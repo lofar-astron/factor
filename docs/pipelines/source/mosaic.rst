@@ -4,9 +4,7 @@ Mosaic Operation
 ================
 
 This section describes the mosaic operation of Factor, denoted
-``makemosaic`` (see the flowchart in Figure :num:`factor-flowchart`).
-
-This operation performs the mosaicking of all facet images into a single image. The pipeline parset for this operation is ``makemosaic_pipeline.parset``.
+``makemosaic``, which performs the mosaicking of all facet images into a single image. The pipeline parset for this operation is ``makemosaic_pipeline.parset``.
 
 
 Make mosaic
