@@ -150,28 +150,11 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False):
             scheduler.run(op)
 
         # Handle directions in this group for which selfcal failed
+        selfcal_ok = [d.selfcal_ok for d in direction_group]
         for d in direction_group:
-            all_good = True
             if not d.selfcal_ok:
                 log.warn('Selfcal verification failed for direction {0}.'.format(d.name))
-                if parset['interactive']:
-                    prompt = "Use selfcal solutions for this direction anyway (y/n)? "
-                    answ = raw_input(prompt)
-                    while answ.lower() not in  ['y', 'n', 'yes', 'no']:
-                        answ = raw_input(prompt)
-                    if answ.lower() in ['n', 'no']:
-                        log.info('Resetting direction {0}...'.format(d.name))
-                        d.reset_state()
-                        all_good = False
-                    else:
-                        d.selfcal_ok = True
-                        d.save_state()
-                else:
-                    d.reset_state()
-                    all_good = False
-            else:
-                d.save_state()
-        if not all_good and parset['exit_on_selfcal_failure']:
+        if not all(selfcal_ok) and parset['exit_on_selfcal_failure']:
             log.info('Exiting...')
             sys.exit(1)
 
