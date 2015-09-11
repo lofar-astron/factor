@@ -318,6 +318,10 @@ def _set_up_bands(parset, log, test_run=False):
         if msbase in parset['ms_specific']:
             if 'init_skymodel' in parset['ms_specific'][msbase]:
                 band.skymodel_dirindep = parset['ms_specific'][msbase]['init_skymodel']
+                if not os.path.exists(band.skymodel_dirindep):
+                    log.error('Sky model specified in parset for band {} was '
+                        'not found'.format(band.msname))
+                    sys.exit(1)
         bands.append(band)
 
     # Sort bands by frequency
