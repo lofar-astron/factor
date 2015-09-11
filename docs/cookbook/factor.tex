@@ -214,6 +214,12 @@ target_has_own_facet = False
 # (i.e., local) node is used
 clusterdesc_file = PBS
 
+# Full path to a local disk on the nodes for I/O-intensive processing. The path
+# must be the same for all nodes. At the moment, the local disk is only used by
+# WSClean jobs. If not given, the default directory in the working directory is
+# used
+dir_local = /tmp
+
 # Maximum number of CPUs per node to use per node (default = all)
 ncpu = 6
 

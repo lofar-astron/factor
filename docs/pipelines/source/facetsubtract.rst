@@ -3,6 +3,9 @@
 Subtract Facet Sources Operation
 ================================
 
+This section describes the facet subtract operation of Factor, denoted
+``facetsub`` (see the flowchart in Figure :num:`factor-flowchart`).
+
 This operation subtracts all facet sources from the data. There are two possible pipeline parsets for this operation:
 
 ``facetsub_pipeline.parset``

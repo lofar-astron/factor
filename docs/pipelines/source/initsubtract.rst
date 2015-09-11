@@ -3,8 +3,12 @@
 Initial Subtract Operation
 ==========================
 
+This section describes the initial subtract operation of Factor, denoted
+``initsubtract`` (see the flowchart in Figure :num:`factor-flowchart`).
+
 This operation images each band at high and low resolution to make and subtract
-sky models. There are two possible pipeline parsets for this operation:
+sky models (two resolutions are used to capture the complete source structure).
+There are two possible pipeline parsets for this operation:
 
 ``initsubtract_pipeline.parset``
     The full initial subtract operation, to be run when the input datasets do

@@ -3,6 +3,9 @@
 Facet Self-Calibration Operation
 ================================
 
+This section describes the self-calibration operation of Factor, denoted
+``facetselfcal`` (see the flowchart in Figure :num:`factor-flowchart`).
+
 This operation performs self calibration on the facet calibrator. The pipeline parset for this operation is ``facetselfcal_pipeline.parset``.
 
 .. note::
@@ -303,7 +306,7 @@ Input
 	Full-resolution datasets (with all facet sources subtracted).
 
 Output
-    For each band, wide-field (~ 8 degree radius) images, one from before self calibration and one from after self calibration, are made at approximately 90" resolution. A region of an example image is shown in Figure :num:`residual-example-image`. Note the improved subtraction for the circled source in the center (the facet calibrator).
+    For each band, wide-field (~ 8 degree radius) images, one from before self calibration and one from after self calibration, are made at approximately 90" resolution. A region of an example image is shown in Figure :num:`residual-example-image`. Note the improved subtraction for the circled source in the center (the facet calibrator). The negative holes in the image are due to the poor initial subtraction done with the direction-independent instrument tables.
 
     .. _residual-example-image:
 
