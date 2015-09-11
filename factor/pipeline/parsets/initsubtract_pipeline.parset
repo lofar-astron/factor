@@ -30,18 +30,6 @@ create_low_sizes_map.control.files         =   {{ lowres_image_sizes }}
 create_low_sizes_map.control.mapfile_dir   =   {{ mapfile_dir }}
 create_low_sizes_map.control.filename      =   lowres_image_sizes.datamap
 
-# make_copy_ms_map.control.kind              =   plugin
-# make_copy_ms_map.control.type              =   copyFiles
-# make_copy_ms_map.control.mapfile_in        =   create_ms_map.output.mapfile
-# make_copy_ms_map.control.prefix            =   chgcentre_highres_copy_
-# make_copy_ms_map.control.mapfile_dir       =   {{ mapfile_dir }}
-# make_copy_ms_map.control.filename          =   copy_data.datamap
-#
-# chgcentre_high.control.type                =   chgcentre
-# chgcentre_high.control.mapfile_in          =   make_copy_ms_map.output.mapfile
-# chgcentre_high.control.inputkey            =   inputms
-# chgcentre_high.argument.flags              =   [-zenith,-shiftback,inputms]
-
 wsclean_high1.control.type                 =   wsclean
 wsclean_high1.control.mapfiles_in          =   [create_ms_map.output.mapfile,create_high_sizes_map.output.mapfile]
 wsclean_high1.control.inputkeys            =   [msfile,imsize]
@@ -57,6 +45,7 @@ wsclean_high1.argument.maxuv-l             =   7000
 wsclean_high1.argument.scale               =   0.00208
 wsclean_high1.argument.mem                 =   {{ max_percent_memory }}
 wsclean_high1.argument.j                   =   {{ max_cpus_per_node }}
+wsclean_high1.argument.tempdir             =   {{ temp_dir }}
 
 mask_high.control.type                     =   make_clean_mask
 mask_high.control.mapfile_in               =   wsclean_high1.output.wsclean_high1-image.fits.mapfile
@@ -87,10 +76,7 @@ wsclean_high2.argument.maxuv-l             =   7000
 wsclean_high2.argument.scale               =   0.00208
 wsclean_high2.argument.mem                 =   {{ max_percent_memory }}
 wsclean_high2.argument.j                   =   {{ max_cpus_per_node }}
-
-# remove_copy_ms_map.control.kind            =   plugin
-# remove_copy_ms_map.control.type            =   copyFiles
-# remove_copy_ms_map.control.mapfile_in      =   chgcentre_high.output.mapfile
+wsclean_high2.argument.tempdir             =   {{ temp_dir }}
 
 fits_to_image_high.control.type            =   convert_fits_image_to_casa
 fits_to_image_high.control.mapfile_in      =   wsclean_high2.output.wsclean_high2-model.fits.mapfile
@@ -119,7 +105,7 @@ wsclean_ft_high.argument.flags             =   [-predict,msfile]
 wsclean_ft_high.argument.size              =   imsize
 wsclean_ft_high.argument.scale             =   0.00208
 wsclean_ft_high.argument.mem               =   {{ max_percent_memory }}
-wsclean_ft_low.argument.j                  =   {{ max_cpus_per_node }}
+wsclean_ft_high.argument.j                  =   {{ max_cpus_per_node }}
 
 subtract_high.control.type                 =   calibrate-stand-alone_new
 subtract_high.argument.observation         =   create_ms_map.output.mapfile
@@ -141,18 +127,6 @@ average.argument.avg.type                  =   squash
 average.argument.avg.freqstep              =   {{ initsubtract_freqstep }}
 average.argument.avg.timestep              =   {{ initsubtract_timestep }}
 
-# make_copy_avg_map.control.kind             =   plugin
-# make_copy_avg_map.control.type             =   copyFiles
-# make_copy_avg_map.control.mapfile_in       =   average.output.mapfile
-# make_copy_avg_map.control.prefix           =   chgcentre_lowres_copy_
-# make_copy_avg_map.control.mapfile_dir      =   {{ mapfile_dir }}
-# make_copy_avg_map.control.filename         =   copy_averaged_data.datamap
-#
-# chgcentre_low.control.type                 =   chgcentre
-# chgcentre_low.control.mapfile_in           =   make_copy_avg_map.output.mapfile
-# chgcentre_low.control.inputkey             =   inputms
-# chgcentre_low.argument.flags               =   [-zenith,-shiftback,inputms]
-
 wsclean_low1.control.type                  =   wsclean
 wsclean_low1.control.mapfiles_in           =   [average.output.mapfile,create_low_sizes_map.output.mapfile]
 wsclean_low1.control.inputkeys             =   [msfile,imsize]
@@ -168,6 +142,7 @@ wsclean_low1.argument.maxuv-l              =   2000
 wsclean_low1.argument.scale                =   0.00694
 wsclean_low1.argument.mem                  =   {{ max_percent_memory }}
 wsclean_low1.argument.j                    =   {{ max_cpus_per_node }}
+wsclean_low1.argument.tempdir             =   {{ temp_dir }}
 
 mask_low.control.type                      =   make_clean_mask
 mask_low.control.mapfile_in                =   wsclean_low1.output.wsclean_low1-image.fits.mapfile
@@ -197,10 +172,7 @@ wsclean_low2.argument.maxuv-l              =   2000
 wsclean_low2.argument.scale                =   0.00694
 wsclean_low2.argument.mem                  =   {{ max_percent_memory }}
 wsclean_low2.argument.j                    =   {{ max_cpus_per_node }}
-
-# remove_copy_avg_map.control.kind           =   plugin
-# remove_copy_avg_map.control.type           =   copyFiles
-# remove_copy_avg_map.control.mapfile_in     =   chgcentre_low.output.mapfile
+wsclean_low2.argument.tempdir              =   {{ temp_dir }}
 
 fits_to_image_low.control.type             =   convert_fits_image_to_casa
 fits_to_image_low.control.mapfile_in       =   wsclean_low2.output.wsclean_low2-model.fits.mapfile

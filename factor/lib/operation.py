@@ -54,30 +54,44 @@ class Operation(object):
         self.max_percent_memory = parset['cluster_specific']['fmem'] * 100.0
         self.ndir_per_node = parset['cluster_specific']['ndir_per_node']
 
-        # Below are paths for output directories
+        # Working directory
         self.factor_working_dir = parset['dir_working']
+
         # Base name of state file
         self.statebasename = os.path.join(self.factor_working_dir,
             'state', '{0}-{1}'.format(self.name, self.direction.name))
+
         # Directory that holds important mapfiles in a convenient place
         self.mapfile_dir = os.path.join(self.factor_working_dir, 'datamaps',
             self.name, self.direction.name)
         create_directory(self.mapfile_dir)
+
         # Pipeline runtime dir (pipeline makes subdir here with name of direction)
         self.pipeline_runtime_dir = os.path.join(self.factor_working_dir, 'results',
             self.name)
         create_directory(self.pipeline_runtime_dir)
+
         # Directory that holds parset and config files
         self.pipeline_parset_dir = os.path.join(self.pipeline_runtime_dir,
             self.direction.name)
         create_directory(self.pipeline_parset_dir)
+
         # Pipeline working dir (pipeline makes subdir here with name of direction)
         self.pipeline_working_dir = os.path.join(self.factor_working_dir, 'results',
             self.name)
         create_directory(self.pipeline_working_dir)
+
+        # Local scratch directory
+        if self.parset['cluster_specific']['dir_local'] is None:
+            self.local_scratch_dir = os.path.join(self.pipeline_working_dir,
+                self.direction.name)
+        else:
+            self.local_scratch_dir = self.parset['cluster_specific']['dir_local']
+
         # Directory that holds logs in a convenient place
         self.log_dir = os.path.join(self.factor_working_dir, 'logs', self.name)
         create_directory(self.log_dir)
+
         # Log name used for logs in log_dir
         self.logbasename = os.path.join(self.log_dir, self.direction.name)
 
@@ -108,7 +122,6 @@ class Operation(object):
                          'max_cpus_per_node': self.max_cpus_per_node,
                          'casa_executable': parset['casa_executable'],
                          'wsclean_executable': parset['wsclean_executable'],
-#                          'chgcentre_executable': parset['chgcentre_executable'],
                          'losoto_executable': parset['losoto_executable'],
                          'H5parm_importer_executable': parset['H5parm_importer_executable'],
                          'H5parm_exporter_executable': parset['H5parm_exporter_executable'],
@@ -122,6 +135,7 @@ class Operation(object):
                            'mapfile_dir': self.mapfile_dir,
                            'pipeline_dir': self.factor_pipeline_dir,
                            'script_dir': self.factor_script_dir,
+                           'local_dir': self.local_scratch_dir,
                            'hosts': self.node_list,
                            'max_cpus_per_node': self.max_cpus_per_node,
                            'max_percent_memory' : self.max_percent_memory}

@@ -73,13 +73,16 @@ def parset_read(parset_file):
 
     # Get all the MS files in the input directory. These are identified by the
     # extensions 'ms', 'MS', or 'dpppconcat' (used by the pre-facet pipeline)
-    parset_dict['mss'] = glob.glob(parset_dict['dir_ms']+'/*[MS|ms|dpppconcat]')
+    ms_files = []
+    for exten in ['MS', 'ms', 'dpppconcat']:
+        ms_files += glob.glob(os.path.join(parset_dict['dir_ms'], '*.{}'.format(exten)))
+    parset_dict['mss'] = ms_files
     if len(parset_dict['mss']) == 0:
         log.error('No MS files found in {0}!'.format(parset_dict['dir_ms']))
         sys.exit(1)
     log.info("Working on %i band(s)" % (len(parset_dict['mss'])))
 
-    # Get dir-indep instrument parmdbs
+    # Set default dir-indep instrument parmdb name
     if 'parmdb_name' not in parset_dict:
         parset_dict['parmdb_name'] = 'instrument'
 
@@ -201,10 +204,8 @@ def parset_read(parset_file):
     if 'clusterdesc_file' not in parset_dict['cluster_specific']:
         parset_dict['cluster_specific']['clusterdesc_file'] = parset_dict['lofarroot'] + '/share/local.clusterdesc'
         parset_dict['cluster_specific']['node_list'] = ['localhost']
-    if 'distribute' in parset_dict['cluster_specific']:
-        parset_dict['cluster_specific']['distribute'] = parset.getboolean('cluster', 'distribute')
-    else:
-        parset_dict['cluster_specific']['distribute'] = False
+    if 'dir_local' not in parset_dict['cluster_specific']:
+        parset_dict['cluster_specific']['dir_local'] = None
 
     # load MS-specific parameters
     parset_dict['ms_specific'] = {}
