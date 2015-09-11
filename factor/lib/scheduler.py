@@ -98,7 +98,7 @@ class Scheduler(object):
             self.log.info('--> Operation {0} completed (direction: '
                 '{1})'.format(op_name, direction_name))
         else:
-            self.log.error('Operation {0} failed (direction: '
+            self.log.error('Operation {0} failed due to an error (direction: '
                 '{1})'.format(op_name, direction_name))
             self.success = False
 
@@ -136,7 +136,7 @@ class Scheduler(object):
                 pool.join()
 
             if not self.success:
-                self.log.error('One or more operations failed. Exiting...')
+                self.log.error('One or more operations failed due to an error. Exiting...')
                 sys.exit(1)
 
         # Finalize the operations
