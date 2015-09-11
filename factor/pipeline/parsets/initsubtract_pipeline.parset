@@ -45,7 +45,7 @@ wsclean_high1.argument.maxuv-l             =   7000
 wsclean_high1.argument.scale               =   0.00208
 wsclean_high1.argument.mem                 =   {{ max_percent_memory }}
 wsclean_high1.argument.j                   =   {{ max_cpus_per_node }}
-wsclean_high1.argument.tempdir             =   {{ temp_dir }}
+wsclean_high1.argument.tempdir             =   {{ local_dir }}
 
 mask_high.control.type                     =   make_clean_mask
 mask_high.control.mapfile_in               =   wsclean_high1.output.wsclean_high1-image.fits.mapfile
@@ -76,7 +76,7 @@ wsclean_high2.argument.maxuv-l             =   7000
 wsclean_high2.argument.scale               =   0.00208
 wsclean_high2.argument.mem                 =   {{ max_percent_memory }}
 wsclean_high2.argument.j                   =   {{ max_cpus_per_node }}
-wsclean_high2.argument.tempdir             =   {{ temp_dir }}
+wsclean_high2.argument.tempdir             =   {{ local_dir }}
 
 fits_to_image_high.control.type            =   convert_fits_image_to_casa
 fits_to_image_high.control.mapfile_in      =   wsclean_high2.output.wsclean_high2-model.fits.mapfile
@@ -142,7 +142,7 @@ wsclean_low1.argument.maxuv-l              =   2000
 wsclean_low1.argument.scale                =   0.00694
 wsclean_low1.argument.mem                  =   {{ max_percent_memory }}
 wsclean_low1.argument.j                    =   {{ max_cpus_per_node }}
-wsclean_low1.argument.tempdir             =   {{ temp_dir }}
+wsclean_low1.argument.tempdir              =   {{ local_dir }}
 
 mask_low.control.type                      =   make_clean_mask
 mask_low.control.mapfile_in                =   wsclean_low1.output.wsclean_low1-image.fits.mapfile
@@ -172,7 +172,7 @@ wsclean_low2.argument.maxuv-l              =   2000
 wsclean_low2.argument.scale                =   0.00694
 wsclean_low2.argument.mem                  =   {{ max_percent_memory }}
 wsclean_low2.argument.j                    =   {{ max_cpus_per_node }}
-wsclean_low2.argument.tempdir              =   {{ temp_dir }}
+wsclean_low2.argument.tempdir              =   {{ local_dir }}
 
 fits_to_image_low.control.type             =   convert_fits_image_to_casa
 fits_to_image_low.control.mapfile_in       =   wsclean_low2.output.wsclean_low2-model.fits.mapfile
