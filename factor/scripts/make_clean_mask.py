@@ -175,7 +175,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             dist = poly.is_inside(masked_ind[0], masked_ind[1])
             outside_ind = np.where(dist < 0.0)
             if len(outside_ind[0]) > 0:
-                data[0, 0, masked_ind[0][outside_ind], [masked_ind[1][outside_ind]]] = 0
+                data[0, 0, masked_ind[0][outside_ind], masked_ind[1][outside_ind]] = 0
 
         if trim_by > 0.0:
             sh = np.shape(data)
