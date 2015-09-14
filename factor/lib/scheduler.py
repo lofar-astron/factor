@@ -139,7 +139,7 @@ class Scheduler(object):
                 self.log.error('One or more operations failed due to an error. Exiting...')
                 sys.exit(1)
 
-        # Finalize the operations
+        # Finalize the operations.
         for op in operation_list:
             op.finalize()
             if not self.dry_run:

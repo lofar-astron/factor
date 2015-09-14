@@ -96,20 +96,6 @@ class FacetSelfcal(Operation):
         self.verify_subtract_OK_mapfile = os.path.join(self.mapfile_dir,
             'verify_subtract_OK.datamap')
 
-        # Delete all data used only for selfcal as they're no longer needed
-        # Note: we keep the averaged data after amplitude calibration
-        # (concat3_input.datamap and concat4_input.datamap), as they are useful
-        # for identifying remaining RFI
-        self.direction.cleanup_mapfiles = [
-            os.path.join(self.mapfile_dir, 'shifted_cal_bands.datamap'),
-            os.path.join(self.mapfile_dir, 'chunk_files.datamap'),
-            os.path.join(self.mapfile_dir, 'concat_input.datamap'),
-            os.path.join(self.mapfile_dir, 'concat0_input.datamap'),
-            os.path.join(self.mapfile_dir, 'concat1_input.datamap'),
-            os.path.join(self.mapfile_dir, 'concat2_input.datamap'),
-            os.path.join(self.mapfile_dir, 'concat_averaged_input.datamap')]
-        self.direction.cleanup()
-
         # Store results of verify_subtract check
         if os.path.exists(self.verify_subtract_OK_mapfile):
             ok_datamap = DataMap.load(self.verify_subtract_OK_mapfile)
@@ -120,6 +106,22 @@ class FacetSelfcal(Operation):
                 self.direction.selfcal_ok = False
         else:
             self.direction.selfcal_ok = False
+
+        # Delete all data used only for selfcal as they're no longer needed.
+        # Note: we keep the data if selfcal failed verification, so that the user
+        # can check them for problems
+        self.direction.cleanup_mapfiles = [
+            os.path.join(self.mapfile_dir, 'shifted_cal_bands.datamap'),
+            os.path.join(self.mapfile_dir, 'chunk_files.datamap'),
+            os.path.join(self.mapfile_dir, 'concat_input.datamap'),
+            os.path.join(self.mapfile_dir, 'concat0_input.datamap'),
+            os.path.join(self.mapfile_dir, 'concat1_input.datamap'),
+            os.path.join(self.mapfile_dir, 'concat2_input.datamap'),
+            os.path.join(self.mapfile_dir, 'concat3_input.datamap'),
+            os.path.join(self.mapfile_dir, 'concat4_input.datamap'),
+            os.path.join(self.mapfile_dir, 'concat_averaged_input.datamap')]
+        if self.direction.selfcal_ok:
+            self.direction.cleanup()
 
 
 class FacetSub(Operation):
