@@ -97,6 +97,9 @@ class FacetSelfcal(Operation):
             'verify_subtract_OK.datamap')
 
         # Delete all data used only for selfcal as they're no longer needed
+        # Note: we keep the averaged data after amplitude calibration
+        # (concat3_input.datamap and concat4_input.datamap), as they are useful
+        # for identifying remaining RFI
         self.direction.cleanup_mapfiles = [
             os.path.join(self.mapfile_dir, 'shifted_cal_bands.datamap'),
             os.path.join(self.mapfile_dir, 'chunk_files.datamap'),
@@ -104,8 +107,6 @@ class FacetSelfcal(Operation):
             os.path.join(self.mapfile_dir, 'concat0_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat1_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat2_input.datamap'),
-            os.path.join(self.mapfile_dir, 'concat3_input.datamap'),
-            os.path.join(self.mapfile_dir, 'concat4_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat_averaged_input.datamap')]
         self.direction.cleanup()
 
