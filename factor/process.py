@@ -20,7 +20,7 @@ from factor.lib.direction import Direction
 
 
 def run(parset_file, logging_level='info', dry_run=False, test_run=False,
-    reset_directions=None):
+    reset_directions=[]):
     """
     Processes a dataset using facet calibration
 
@@ -406,7 +406,7 @@ def _convert_to_phasors(real_imag_parmdb_file):
 
 
 def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
-    reset_directions=None):
+    reset_directions=[]):
     """
     Sets up directions (facets)
 
