@@ -572,7 +572,7 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
 
     # Filter direction that have already gone through selfcal (facetselfcal + facetsub)
     selfcal_directions = [d for d in selfcal_directions if 'facetselfcal' not in
-        d.completed_operations or 'facetsub' not in d.completed_operations)
+        d.completed_operations or 'facetsub' not in d.completed_operations]
     if 'ndir_selfcal' in parset['direction_specific']:
         if parset['direction_specific']['ndir_selfcal'] > 0 and \
             parset['direction_specific']['ndir_selfcal'] <= len(selfcal_directions):
