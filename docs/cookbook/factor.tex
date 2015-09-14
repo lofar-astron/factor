@@ -55,12 +55,17 @@ Usage: runfactor [-v|-q|-d] <parset>
 Options:
   --version   show program's version number and exit
   -h, --help  show this help message and exit
-  -q          enable quiet mode
-  -v          enable verbose mode
-  -d          enable dry-run mode
+  -d                    enable dry-run mode
+  -q                    enable quiet mode
+  -r RESET, --reset=RESET
+                        comma-separated list of directions to reset
+  -t                    enable test mode
+  -v                    enable verbose mode
 \end{verbatim}
 The parset specifies the parameters of the run. These are described in the next
-sections.
+sections. The reset ({\tt -r}) option is used to reset one or more directions in
+the case of a failed run that requires that all operations for the directions
+to be run again from scratch.
 
 \subsubsection{Quick-start}
 \label{factor:quick-start}
