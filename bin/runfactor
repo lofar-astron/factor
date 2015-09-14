@@ -26,8 +26,10 @@ if __name__ == '__main__':
     parser = optparse.OptionParser(usage='%prog [-v|-q] parset',
             version='%%prog %s' % (version))
     parser.add_option('-d', help='enable dry-run mode', action='store_true', default=False)
-    parser.add_option('-t', help='enable test mode', action='store_true', default=False)
     parser.add_option('-q', help='enable quiet mode', action='store_true', default=False)
+    parser.add_option('-r', '--reset', help='comma-separated list of directions to reset',
+        type=str, default=None)
+    parser.add_option('-t', help='enable test mode', action='store_true', default=False)
     parser.add_option('-v', help='enable verbose mode', action='store_true', default=False)
     (options, args) = parser.parse_args()
 
@@ -45,6 +47,11 @@ if __name__ == '__main__':
     else:
         logging_level = 'info'
 
+    # Construct list of directions to reset
+    if options.reset is not None:
+        parts = options.reset.split(',')
+        reset_directions = [p.strip() for p in parts]
+
     # Process the field
     process.run(parset_file, logging_level=logging_level, dry_run=options.d,
-        test_run=options.t)
+        test_run=options.t, reset_directions=reset_directions)

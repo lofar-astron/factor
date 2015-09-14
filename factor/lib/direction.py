@@ -326,6 +326,8 @@ class Direction(object):
         """
         Loads the direction state from a file
 
+        Note: only completed_operations and selfcal_ok attributes are updated
+
         Returns
         -------
         success : bool
@@ -335,7 +337,9 @@ class Direction(object):
 
         try:
             with open(self.save_file, 'r') as f:
-                self.__dict__ = pickle.load(f)
+                d = pickle.load(f)
+                self.completed_operations = d['completed_operations']
+                self.selfcal_ok = d['selfcal_ok']
             return True
         except:
             return False
@@ -345,24 +349,22 @@ class Direction(object):
         """
         Resets the direction to initial state to allow reprocessing
 
-        Currently, this means just deleting the facetselfcal results directory,
+        Currently, this means just deleting the results directories,
         but it could be changed to delete only a subset of selfcal steps (by
         modifying the selfcal pipeline statefile).
         """
         import glob
 
-        operations = ['facetselfcal']
+        operations = ['facetselfcal', 'facetimage'] # facetsub not yet supported
         for op in operations:
             # Remove entry in completed_operations
             if op in self.completed_operations:
                 self.completed_operations.remove(op)
 
-            # Delete pipeline state
-            action_dirs = glob.glob(os.path.join(self.working_dir, 'results', op, '*'))
-            for action_dir in action_dirs:
-                facet_dir = os.path.join(action_dir, self.name)
-                if os.path.exists(facet_dir):
-                    os.system('rm -rf {0}'.format(facet_dir))
+            # Delete results directory
+            facet_dir = os.path.join(self.working_dir, 'results', op, self.name)
+            if os.path.exists(facet_dir):
+                os.system('rm -rf {0}'.format(facet_dir))
 
         self.save_state()
 
