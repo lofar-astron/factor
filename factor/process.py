@@ -524,11 +524,15 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         direction.field_ra = field.ra
         direction.field_dec = field.dec
 
-        # Load previously completed operations
+        # Load previous state (if any)
         direction.load_state()
 
         # Reset state if specified
         if direction.name in reset_directions:
+            if 'facetsub' in direction.completed_operations:
+                log.error('Direction {} has been through the subtract operation and '
+                    'cannot be reset'.format(direction.name))
+                sys.exit(1)
             log.info('Resetting state for direction {}...'.format(direction.name))
             direction.reset_state()
 
