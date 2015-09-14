@@ -151,7 +151,8 @@ def parset_read(parset_file):
     else:
         parset_dict['direction_specific']['one_at_a_time'] = True
         parset_dict['direction_specific']['groupings'] = {'1':0}
-    log.info("Using the following groupings for directions: {0}".format(groupings))
+    log.info("Using the following groupings for directions: {0}"
+        .format(parset_dict['direction_specific']['groupings']))
     if 'allow_reordering' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['allow_reordering'] = parset.getboolean('directions',
             'allow_reordering')
