@@ -355,6 +355,11 @@ class Direction(object):
         """
         import glob
 
+        # Don't reset if the facetsub operation was done, as it can not yet be
+        # properly reset (requires modification of SUBTRACTED_DATA_ALL_NEW)
+        if 'facetsub' in self.completed_operations:
+            return
+
         operations = ['facetselfcal', 'facetimage'] # facetsub not yet supported
         for op in operations:
             # Remove entry in completed_operations
