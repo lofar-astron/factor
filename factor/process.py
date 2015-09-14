@@ -569,15 +569,16 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         selfcal_directions = [d for d in directions if d.name != target.name]
     else:
         selfcal_directions = directions
-
-    # Filter direction that have already gone through selfcal (facetselfcal + facetsub)
-    selfcal_directions = [d for d in selfcal_directions if 'facetselfcal' not in
-        d.completed_operations or 'facetsub' not in d.completed_operations]
     if 'ndir_selfcal' in parset['direction_specific']:
         if parset['direction_specific']['ndir_selfcal'] > 0 and \
             parset['direction_specific']['ndir_selfcal'] <= len(selfcal_directions):
             selfcal_directions = selfcal_directions[:parset['direction_specific']['ndir_selfcal']]
 
+    # Filter direction that have already gone through selfcal (facetselfcal + facetsub)
+    selfcal_directions = [d for d in selfcal_directions if 'facetselfcal' not in
+        d.completed_operations or 'facetsub' not in d.completed_operations]
+
+    # Divide directions into groups for selfcal
     direction_groups = factor.directions.group_directions(selfcal_directions,
         one_at_a_time=parset['direction_specific']['one_at_a_time'],
         n_per_grouping=parset['direction_specific']['groupings'],
