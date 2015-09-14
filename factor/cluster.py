@@ -84,7 +84,6 @@ def find_executables(parset):
     executables = {'genericpipeline_executable': ['genericpipeline.py'],
                    'casa_executable': ['casapy', 'casa'],
                    'wsclean_executable': ['wsclean'],
-#                    'chgcentre_executable': ['chgcentre'],
                    'losoto_executable': ['losoto.py'],
                    'H5parm_importer_executable': ['H5parm_importer.py'],
                    'H5parm_exporter_executable': ['H5parm_exporter.py'],
