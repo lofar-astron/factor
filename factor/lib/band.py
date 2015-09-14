@@ -72,6 +72,7 @@ class Band(object):
         self.completed_operations = []
         self.save_file = os.path.join(factor_working_dir, 'state',
             self.name+'_save.pkl')
+        self.skip = False
 
 
     def set_image_sizes(self, test_run=False):

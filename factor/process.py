@@ -91,6 +91,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         log.info("Sky models and SUBTRACTED_DATA_ALL found for all bands. "
             "Skipping initsubtract operation...")
 
+    # Remove bands that failed initsubtract operation
+    bands = [b for b in bands if not b.skip]
+
     # Define directions
     directions, direction_groups = _set_up_directions(parset, bands, field, log,
         dry_run, test_run, reset_directions)

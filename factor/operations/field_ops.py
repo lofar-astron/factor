@@ -64,6 +64,7 @@ class InitSubtract(Operation):
             datamap = DataMap.load(merged_skymodel_datamap)
             for band, item in zip(self.bands, datamap):
                 band.skymodel_dirindep = item.file
+                band.skip = item.skip
 
         # Delete averaged data as they're no longer needed
         self.direction.cleanup_mapfiles = [os.path.join(self.mapfile_dir,
