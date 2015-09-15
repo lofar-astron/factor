@@ -1,4 +1,4 @@
-PWD /Users/rafferty/LOFAR/Facet/factor/doc
+PWD /Users/rafferty/LOFAR/Facet/factor/docs/cookbook
 INPUT /usr/local/texlive/2012/texmf.cnf
 INPUT /usr/local/texlive/2012/texmf/web2c/texmf.cnf
 INPUT /usr/local/texlive/2012/texmf-var/web2c/pdftex/pdflatex.fmt
@@ -188,6 +188,7 @@ INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/txtt.tfm
 INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/txtt.tfm
 INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/txr.tfm
 INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/txb.tfm
+INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/txb.tfm
 INPUT /usr/local/texlive/2012/texmf-dist/fonts/vf/public/txfonts/txb.vf
 INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/rtxptmb.tfm
 INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/rtxb.tfm
@@ -198,16 +199,15 @@ INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/rtxr.tfm
 INPUT /usr/local/texlive/2012/texmf-dist/fonts/vf/public/txfonts/txb.vf
 INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/rtxptmb.tfm
 INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/rtxb.tfm
-INPUT /usr/local/texlive/2012/texmf-dist/fonts/vf/public/txfonts/txr.vf
-INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/rtxptmr.tfm
-INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/rtxr.tfm
-INPUT /usr/local/texlive/2012/texmf-dist/fonts/vf/public/txfonts/txr.vf
-INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/rtxptmr.tfm
-INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/rtxr.tfm
-INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/txb.tfm
 INPUT /usr/local/texlive/2012/texmf-dist/fonts/vf/public/txfonts/txb.vf
 INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/rtxptmb.tfm
 INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/rtxb.tfm
+INPUT /usr/local/texlive/2012/texmf-dist/fonts/vf/public/txfonts/txr.vf
+INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/rtxptmr.tfm
+INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/rtxr.tfm
+INPUT /usr/local/texlive/2012/texmf-dist/fonts/vf/public/txfonts/txr.vf
+INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/rtxptmr.tfm
+INPUT /usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/rtxr.tfm
 INPUT factor.aux
 INPUT ./factor.out
 INPUT ./factor.out

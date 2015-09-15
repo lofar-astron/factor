@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1427727250 "factor.tex" "factor.pdf" "factor" 1427727251
+["pdflatex"] 1442313658 "factor.tex" "factor.pdf" "factor" 1442313659
   "/usr/local/texlive/2012/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2012/texmf-dist/fonts/map/fontname/texfonts.map" 1272929888 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/local/texlive/2012/texmf-dist/fonts/tfm/public/txfonts/rtxb.tfm" 1136768653 1020 c53143d3e3747b5c1149bd9a5ecd7b55 ""
@@ -82,11 +82,11 @@
   "/usr/local/texlive/2012/texmf-var/web2c/pdftex/pdflatex.fmt" 1345626722 3691572 bcff8c01e94059f5f98fcb686737961f ""
   "/usr/local/texlive/2012/texmf.cnf" 1341108668 572 7ea7194897937febeb63145e1c3a1f03 ""
   "/usr/local/texlive/2012/texmf/web2c/texmf.cnf" 1336865692 31299 729e216d9b945005c0d4b079c0500bc9 ""
-  "factor.aux" 1427727251 2424 0278fb192f5f4214527916411b0c1e91 ""
-  "factor.out" 1427727251 845 4e1337fba961531ab745a53eb1d453f4 ""
-  "factor.tex" 1427726648 14886 057ec7c9aeca4bed2633b03fd4a4fe8b ""
+  "factor.aux" 1442313659 2613 3177fd073e719cc08a3e5ed2e8d77503 ""
+  "factor.out" 1442313659 916 819fdf9487f81b438a9393c44e19313c ""
+  "factor.tex" 1442228078 16348 ad6b21c8a90ec1c0fd3c78cc04a228e6 ""
   (generated)
-  "factor.out"
   "factor.pdf"
-  "factor.log"
+  "factor.out"
   "factor.aux"
+  "factor.log"
