@@ -102,7 +102,7 @@ class Direction(object):
         # Initialize some parameters to default values
         self.loop_amp_selfcal = False
         self.selfcal_ok = False # whether selfcal succeeded
-        self.skip_add_subtract = False # whether to skip add/subtract in facetsub op
+        self.skip_add_subtract = None # whether to skip add/subtract in facetsub op
         self.max_residual_val = 0.5 # maximum residual in Jy for facet subtract test
         self.nchannels = 1 # set number of wide-band channels
         self.use_new_sub_data = False # set flag that tells which subtracted-data column to use
@@ -326,7 +326,8 @@ class Direction(object):
         """
         Loads the direction state from a file
 
-        Note: only completed_operations and selfcal_ok attributes are updated
+        Note: only a few necessary attributes for which the state is needed
+        are loaded
 
         Returns
         -------
@@ -340,6 +341,7 @@ class Direction(object):
                 d = pickle.load(f)
                 self.completed_operations = d['completed_operations']
                 self.selfcal_ok = d['selfcal_ok']
+                self.skip_add_subtract = d['skip_add_subtract']
             return True
         except:
             return False

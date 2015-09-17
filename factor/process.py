@@ -139,8 +139,11 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         # subtract to pick up the improved subtracted data from the other
         # directions in this group
         for i, d in enumerate(direction_group_ok):
-            if i == 0:
-                d.skip_add_subtract = True
+            if d.skip_add_subtract is None:
+                if i == 0:
+                    d.skip_add_subtract = True
+                else:
+                    d.skip_add_subtract = False
             else:
                 d.skip_add_subtract = False
 
@@ -150,7 +153,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             parset['cluster_specific']['ncpu'],
             parset['cluster_specific']['fmem'])
 
-       # Do subtraction for directions for which selfcal went OK
+        # Do subtraction for directions for which selfcal went OK
         ops = [FacetSub(parset, d) for d in direction_group_ok]
         for op in ops:
             scheduler.run(op)
@@ -582,7 +585,8 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
             parset['direction_specific']['ndir_selfcal'] <= len(selfcal_directions):
             selfcal_directions = selfcal_directions[:parset['direction_specific']['ndir_selfcal']]
 
-    # Filter direction that have already gone through selfcal (facetselfcal + facetsub)
+    # Filter out directions that have already gone through selfcal
+    # (facetselfcal + facetsub)
     selfcal_directions = [d for d in selfcal_directions if 'facetselfcal' not in
         d.completed_operations or 'facetsub' not in d.completed_operations]
 
