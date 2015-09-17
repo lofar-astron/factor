@@ -1,5 +1,5 @@
 Strategy.InputColumn                         = FACET_DATA_ALL
-Strategy.ChunkSize                           = 1000
+Strategy.ChunkSize                           = 500
 Strategy.UseSolver                           = F
 Strategy.Steps                               = [subtract]
 
