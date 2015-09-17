@@ -109,7 +109,8 @@ class FacetSelfcal(Operation):
 
         # Delete all data used only for selfcal as they're no longer needed.
         # Note: we keep the data if selfcal failed verification, so that the user
-        # can check them for problems
+        # can check them for problems. The data used to image the full facet
+        # are also kept in case the user wants to re-image the facet by hand
         self.direction.cleanup_mapfiles = [
             os.path.join(self.mapfile_dir, 'shifted_cal_bands.datamap'),
             os.path.join(self.mapfile_dir, 'chunk_files.datamap'),
@@ -118,8 +119,7 @@ class FacetSelfcal(Operation):
             os.path.join(self.mapfile_dir, 'concat1_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat2_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat3_input.datamap'),
-            os.path.join(self.mapfile_dir, 'concat4_input.datamap'),
-            os.path.join(self.mapfile_dir, 'concat_averaged_input.datamap')]
+            os.path.join(self.mapfile_dir, 'concat4_input.datamap')]
         if self.direction.selfcal_ok:
             self.direction.cleanup()
 
