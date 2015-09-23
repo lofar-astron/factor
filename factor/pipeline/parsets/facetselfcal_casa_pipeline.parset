@@ -1,4 +1,4 @@
-pipeline.steps = [create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, copy_facet_skymodels_all_map, make_facet_skymodels_cal, shift_empty, copy_empty_map, add_all_facet_sources, shift_cal, copy_cal_map, add_cal_facet_sources, average_data, apply_dir_indep, create_compressed_mapfile_data, concat_data, concat_corr, copy_column, make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, solve_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, solve_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, create_model3_map, casa_ft3, solve_ampphase21, merge_phase_parmdbs, solve_ampphase22, merge_amp_parmdbs2, smooth_amp2, expand_smoothed_amp2_parmdb_map, apply_amp2, average4, create_compressed_mapfile4, concat4, casa_image41, adjust_casa_mapfile4, mask4, casa_image42, merge_selfcal_parmdbs, copy_merged_parmdb_map, expand_merged_parmdb_map, average5, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile5, concat_averaged, premask, casa_image_full1, adjust_casa_mapfile5, mask5, casa_image_full2, create_model4_map, adjust_casa_mapfile6, create_compressed_mapfile6, concat_unaveraged, casa_ft4, subtract, create_single_band_mapfile, create_single_parmdb_mapfile, average_pre, average_post, apply_dir_indep_pre, apply_dir_indep_post, wsclean_pre, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
+pipeline.steps = [create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, copy_facet_skymodels_all_map, make_facet_skymodels_cal, shift_empty, copy_empty_map, add_all_facet_sources, shift_cal, copy_cal_map, add_cal_facet_sources, apply_dir_indep, create_compressed_mapfile_data, concat_data, concat_corr, copy_column, make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, solve_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, solve_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, create_model3_map, casa_ft3, solve_ampphase21, merge_phase_parmdbs, solve_ampphase22, merge_amp_parmdbs2, smooth_amp2, expand_smoothed_amp2_parmdb_map, apply_amp2, average4, create_compressed_mapfile4, concat4, casa_image41, adjust_casa_mapfile4, mask4, casa_image42, merge_selfcal_parmdbs, copy_merged_parmdb_map, expand_merged_parmdb_map, average5, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile5, concat_averaged, premask, casa_image_full1, adjust_casa_mapfile5, mask5, casa_image_full2, create_model4_map, adjust_casa_mapfile6, create_compressed_mapfile6, concat_unaveraged, casa_ft4, subtract, create_single_band_mapfile, create_single_parmdb_mapfile, average_pre, average_post, apply_dir_indep_pre, apply_dir_indep_post, wsclean_pre, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -76,9 +76,12 @@ shift_cal.control.opts.inputkey                            =   msin
 shift_cal.argument.msin.datacolumn                         =   {{ subtracted_data_colname }}
 shift_cal.argument.msout.overwrite                         =   True
 shift_cal.argument.msout.writefullresflag                  =   False
-shift_cal.argument.steps                                   =   [shift]
+shift_cal.argument.steps                                   =   [shift,avg]
 shift_cal.argument.shift.type                              =   phaseshifter
 shift_cal.argument.shift.phasecenter                       =   [{{ ra }}deg, {{ dec }}deg]
+shift_cal.argument.avg.type                                =   squash
+shift_cal.argument.avg.freqstep                            =   {{ facetselfcal_freqstep }}
+shift_cal.argument.avg.timestep                            =   1
 
 copy_cal_map.control.kind                                  =   plugin
 copy_cal_map.control.type                                  =   copyMapfile
@@ -95,19 +98,8 @@ add_cal_facet_sources.argument.replace-sourcedb            =   True
 add_cal_facet_sources.argument.replace-parmdb              =   True
 add_cal_facet_sources.argument.no-columns                  =   True
 
-average_data.control.type                                  =   dppp
-average_data.control.mapfile_in                            =   shift_cal.output.mapfile
-average_data.control.inputkey                              =   msin
-average_data.argument.msin.datacolumn                      =   FACET_DATA_CAL
-average_data.argument.msout.overwrite                      =   True
-average_data.argument.msout.writefullresflag               =   False
-average_data.argument.steps                                =   [avg]
-average_data.argument.avg.type                             =   squash
-average_data.argument.avg.freqstep                         =   {{ facetselfcal_freqstep }}
-average_data.argument.avg.timestep                         =   1
-
 apply_dir_indep.control.type                               =   calibrate-stand-alone_new
-apply_dir_indep.argument.observation                       =   average_data.output.mapfile
+apply_dir_indep.argument.observation                       =   shift_cal.output.mapfile
 apply_dir_indep.argument.parset                            =   {{ parset_dir }}/facet_dirindep_apply.parset
 apply_dir_indep.argument.catalog                           =   {{ skymodel_dir }}/empty.skymodel
 apply_dir_indep.argument.parmdb                            =   create_parmdb_map.output.mapfile
@@ -117,7 +109,7 @@ apply_dir_indep.argument.no-columns                        =   True
 
 create_compressed_mapfile_data.control.kind                =   plugin
 create_compressed_mapfile_data.control.type                =   compressMapfile
-create_compressed_mapfile_data.control.mapfile_in          =   average_data.output.mapfile
+create_compressed_mapfile_data.control.mapfile_in          =   shift_cal.output.mapfile
 create_compressed_mapfile_data.control.mapfile_dir         =   {{ mapfile_dir }}
 create_compressed_mapfile_data.control.filename            =   concat_input.datamap
 
