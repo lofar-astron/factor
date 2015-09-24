@@ -81,6 +81,8 @@ class FacetSelfcal(Operation):
             'input_bands.datamap')
         self.direction.shifted_bands_datamap = os.path.join(self.mapfile_dir,
             'shifted_empty_bands.datamap')
+        self.direction.diff_models_field_datamap = os.path.join(self.mapfile_dir,
+            'diff_models_field.datamap')
         self.direction.dir_indep_parmdbs_datamap = os.path.join(self.mapfile_dir,
             'dir_indep_instrument_parmdbs.datamap')
         self.direction.dir_indep_skymodels_datamap = os.path.join(self.mapfile_dir,
@@ -141,12 +143,6 @@ class FacetSub(Operation):
     def __init__(self, parset, direction):
         super(FacetSub, self).__init__(parset, None, direction,
             name='FacetSub')
-
-        # Set the pipeline parset to use
-        if self.direction.skip_add_subtract:
-            self.pipeline_parset_template = '{0}_single_pipeline.parset'.format(self.name)
-        else:
-            self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
 
 
     def finalize(self):
