@@ -69,6 +69,7 @@ make_sourcedb_all_facet_sources.argument.format            =   <
 
 predict_all_facet_sources.control.type                     =   dppp_inplace
 predict_all_facet_sources.control.opts.mapfiles_in         =   [shift_empty.output.mapfile,make_sourcedb_all_facet_sources.output.mapfile]
+predict_all_facet_sources.control.opts.inputkeys           =   [msin,sourcedb]
 predict_all_facet_sources.argument.msout                   =   .
 predict_all_facet_sources.argument.steps                   =   [predict_all]
 predict_all_facet_sources.argument.predict_all.type        =   predict
