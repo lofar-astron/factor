@@ -65,6 +65,7 @@ copy_empty_map.control.filename                            =   shifted_empty_ban
 make_sourcedb_all_facet_sources.control.type               =   make_sourcedb
 make_sourcedb_all_facet_sources.control.opts.mapfile_in    =   make_facet_skymodels_all.output.mapfile
 make_sourcedb_all_facet_sources.control.opts.inputkey      =   in
+make_sourcedb_all_facet_sources.control.opts.format        =   <
 
 predict_all_facet_sources.control.type                     =   dppp_inplace
 predict_all_facet_sources.control.opts.mapfiles_in         =   [shift_empty.output.mapfile,make_sourcedb_all_facet_sources.output.mapfile]
