@@ -123,10 +123,6 @@ ndir_per_node = 1
 # MS-specific parameters (optional)
 [ms1.ms]
 init_skymodel = /data/ms1.sky
-param1 = 123
-param2 = 123
 
 [ms2.ms]
 init_skymodel = /data/ms2.sky
-param1 = 123
-param2 = 123
