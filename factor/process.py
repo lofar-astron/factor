@@ -308,9 +308,10 @@ def _set_up_bands(parset, log, test_run=False):
                 log.warn('Direction-independent instument parmdb for band {0} is '
                     'named "instrument". Copying to "instrument_dirindep" so that BBS '
                     'will not overwrite this table...'.format(band.file))
-                os.system('cp -r {0} {0}_dirindep'.format(band.dirindparmdb))
+                os.system('cp -r {0} {1}'.format(os.path.join(band.file,
+                    parset['parmdb_name']), band.dirindparmdb))
         if not os.path.exists(band.dirindparmdb):
-            log.critical('Direction-independent instument parmdb not found '
+            log.critical('Direction-independent instrument parmdb not found '
                 'for band {0}'.format(band.file))
             sys.exit(1)
 

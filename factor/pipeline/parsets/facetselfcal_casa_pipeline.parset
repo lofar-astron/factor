@@ -82,10 +82,10 @@ corrupt_all_model_data.argument.corrupt.type               =   applycal
 corrupt_all_model_data.argument.corrupt.parmdb             =   parmdb
 corrupt_all_model_data.argument.corrupt.invert             =   False
 
-add_all_facet_sources.control.type                         =   add_columns
+add_all_facet_sources.control.type                         =   add_subtract_columns
 add_all_facet_sources.control.opts.mapfiles_in             =   [shift_empty.output.mapfile,corrupt_all_model_data.output.mapfile]
 add_all_facet_sources.control.opts.inputkeys               =   [file1,file2]
-add_all_facet_sources.argument.flags                       =   [file1,file2,DATA,DATA,FACET_DATA_ALL]
+add_all_facet_sources.argument.flags                       =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
 
 shift_cal.control.type                                     =   dppp
 shift_cal.control.opts.mapfile_in                          =   create_ms_map.output.mapfile
@@ -1137,10 +1137,10 @@ copy_final_model_map.control.mapfile_in                    =   corrupt_final_mod
 copy_final_model_map.control.mapfile_dir                   =   {{ mapfile_dir }}
 copy_final_model_map.control.filename                      =   final_model_data_facet.datamap
 
-subtract_initial_final.control.type                        =   subtract_columns
+subtract_initial_final.control.type                        =   add_subtract_columns
 subtract_initial_final.control.opts.mapfiles_in            =   [corrupt_all_model_data.output.mapfile,corrupt_final_model.output.mapfile]
 subtract_initial_final.control.opts.inputkeys              =   [file1,file2]
-subtract_initial_final.argument.flags                      =   [file1,file2,DATA,DATA,MODEL_DATA_DIFF]
+subtract_initial_final.argument.flags                      =   [file1,file2,DATA,DATA,MODEL_DATA_DIFF,subtract]
 
 shift_diff_model_to_field.control.type                     =   dppp
 shift_diff_model_to_field.control.opts.mapfile_in          =   shift_empty.output.mapfile
@@ -1187,10 +1187,10 @@ average_single_model.argument.avg.type                     =   squash
 average_single_model.argument.avg.freqstep                 =   {{ facetimage_freqstep }}
 average_single_model.argument.avg.timestep                 =   {{ facetimage_timestep }}
 
-subtract_single.control.type                               =   subtract_columns
+subtract_single.control.type                               =   add_subtract_columns
 subtract_single.control.opts.mapfiles_in                   =   [create_single_band_mapfile.output.mapfile,average_single_model.output.mapfile]
 subtract_single.control.opts.inputkeys                     =   [file1,file2]
-subtract_single.argument.flags                             =   [file1,file2,DATA,DATA,DATA]
+subtract_single.argument.flags                             =   [file1,file2,DATA,DATA,DATA,subtract]
 
 average_pre.control.type                                   =   dppp
 average_pre.control.mapfile_in                             =   create_single_band_mapfile.output.mapfile
