@@ -51,10 +51,6 @@ class FacetSelfcal(Operation):
         ms_files = [band.file for band in self.bands]
         skymodels = [band.skymodel_dirindep for band in self.bands]
         dir_indep_parmdbs = [band.dirindparmdb for band in self.bands]
-        if self.direction.use_new_sub_data:
-            subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
-        else:
-            subtracted_data_colname = 'SUBTRACTED_DATA_ALL'
         if self.direction.nchannels > 1:
             nterms = 2
             casa_suffix = '.tt0'
@@ -64,7 +60,6 @@ class FacetSelfcal(Operation):
             casa_suffix = None
             wsclean_suffix = '-image.fits'
         self.parms_dict.update({'ms_files': ms_files,
-                                'subtracted_data_colname': subtracted_data_colname,
                                 'skymodels': skymodels,
                                 'dir_indep_parmdbs': dir_indep_parmdbs,
                                 'casa_suffix': casa_suffix,
@@ -79,8 +74,8 @@ class FacetSelfcal(Operation):
         # Add output datamaps to direction object for later use
         self.direction.input_bands_datamap = os.path.join(self.mapfile_dir,
             'input_bands.datamap')
-        self.direction.shifted_bands_datamap = os.path.join(self.mapfile_dir,
-            'shifted_empty_bands.datamap')
+        self.direction.shifted_model_data_datamap = os.path.join(self.mapfile_dir,
+            'final_model_data_facet.datamap')
         self.direction.diff_models_field_datamap = os.path.join(self.mapfile_dir,
             'diff_models_field.datamap')
         self.direction.dir_indep_parmdbs_datamap = os.path.join(self.mapfile_dir,
@@ -129,35 +124,19 @@ class FacetSelfcal(Operation):
 class FacetSub(Operation):
     """
     Operation to subtract improved model
-
-    Two pipelines can be run, depending on whether the empty datasets must
-    be updated before subtraction is done:
-
-    facetsub_single_pipeline.parset - runs the subraction without updating the
-        empty datasets
-
-    facetsub_pipeline.parset - runs the subtraction after updating the emtpy
-        datasets
-
     """
     def __init__(self, parset, direction):
         super(FacetSub, self).__init__(parset, None, direction,
             name='FacetSub')
 
 
-    def finalize(self):
-        """
-        Finalize this operation
-        """
-        # Add model datamap to direction object for later use
-        self.direction.facet_model_data_mapfile = os.path.join(self.mapfile_dir,
-            'shifted_to_field_models.datamap')
-
-        # Delete shifted data as they're no longer needed
-        self.direction.cleanup_mapfiles = [
-            self.direction.shifted_bands_datamap,
-            os.path.join(self.mapfile_dir, 'shifted_to_field_subdata.datamap')]
-        self.direction.cleanup()
+class FacetSubReset(Operation):
+    """
+    Operation to reset the subtraction of improved model
+    """
+    def __init__(self, parset, direction):
+        super(FacetSub, self).__init__(parset, None, direction,
+            name='FacetSub')
 
 
 class FacetImage(Operation):

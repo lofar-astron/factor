@@ -7,10 +7,10 @@ update_input_bands_hosts.control.type             =   updateHosts
 update_input_bands_hosts.control.mapfile_in       =   {{ input_bands_datamap }}
 update_input_bands_hosts.control.hosts            =   {{ hosts }}
 
-copy_column.control.type                          =   copy_column
-copy_column.control.mapfiles_in                   =   [{{ facet_model_data_mapfile }},{{ input_bands_datamap }}]
-copy_column.control.inputkeys                     =   [shiftedfile,datafile]
-copy_column.argument.flags                        =   [shiftedfile,datafile,DATA,MODEL_DATA]
+update_model_data_hosts.control.kind              =   plugin
+update_model_data_hosts.control.type              =   updateHosts
+update_model_data_hosts.control.mapfile_in        =   {{ shifted_model_data_datamap }}
+update_model_data_hosts.control.hosts             =   {{ hosts }}
 
 expand_merged_parmdb_map.control.kind             =   plugin
 expand_merged_parmdb_map.control.type             =   expandMapfile
@@ -19,24 +19,20 @@ expand_merged_parmdb_map.control.mapfile_to_match =   {{ input_bands_datamap }}
 expand_merged_parmdb_map.control.mapfile_dir      =   {{ mapfile_dir }}
 expand_merged_parmdb_map.control.filename         =   expand_merged_parmdbs.datamap
 
-add_all_facet_sources.control.type                =   calibrate-stand-alone_new
-add_all_facet_sources.argument.observation        =   {{ input_bands_datamap }}
-add_all_facet_sources.argument.parset             =   {{ parset_dir }}/facet_dirdep_add.parset
-add_all_facet_sources.argument.catalog            =   {{ skymodel_dir }}/empty.skymodel
-add_all_facet_sources.argument.parmdb             =   expand_merged_parmdb_map.output.mapfile
-add_all_facet_sources.argument.replace-sourcedb   =   True
-add_all_facet_sources.argument.replace-parmdb     =   True
-add_all_facet_sources.argument.no-columns         =   True
+shift_empty.control.type                          =   dppp
+shift_empty.control.opts.mapfile_in               =   {{ input_bands_datamap }}
+shift_empty.control.opts.inputkey                 =   msin
+shift_empty.argument.msin.datacolumn              =   SUBTRACTED_DATA_ALL_NEW
+shift_empty.argument.msout.overwrite              =   True
+shift_empty.argument.msout.writefullresflag       =   False
+shift_empty.argument.steps                        =   [shift]
+shift_empty.argument.shift.type                   =   phaseshifter
+shift_empty.argument.shift.phasecenter            =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
 
-shift_all.control.type                            =   dppp
-shift_all.control.opts.mapfile_in                 =   {{ input_bands_datamap }}
-shift_all.control.opts.inputkey                   =   msin
-shift_all.argument.msin.datacolumn                =   FACET_DATA_ALL
-shift_all.argument.msout.overwrite                =   True
-shift_all.argument.msout.writefullresflag         =   False
-shift_all.argument.steps                          =   [shift]
-shift_all.argument.shift.type                     =   phaseshifter
-shift_all.argument.shift.phasecenter              =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+add_model_to_empty_data.control.type              =   add_columns
+add_model_to_empty_data.control.opts.mapfiles_in  =   [shift_empty.output.mapfile,{{ shifted_model_data_datamap }}]
+add_model_to_empty_data.control.opts.inputkeys    =   [file1,file2]
+add_model_to_empty_data.argument.flags            =   [file1,file2,DATA,DATA,DATA]
 
 copy_shifted_map.control.kind                     =   plugin
 copy_shifted_map.control.type                     =   copyMapfile
@@ -45,21 +41,15 @@ copy_shifted_map.control.mapfile_dir              =   {{ mapfile_dir }}
 copy_shifted_map.control.filename                 =   shifted_all_final_bands.datamap
 
 average.control.type                              =   dppp
-average.control.mapfile_in                        =   shift_all.output.mapfile
+average.control.mapfile_in                        =   shift_empty.output.mapfile
 average.control.inputkey                          =   msin
-average.argument.msin.datacolumn                  =   CORRECTED_DATA
+average.argument.msin.datacolumn                  =   DATA
 average.argument.msout.overwrite                  =   True
 average.argument.msout.writefullresflag           =   False
 average.argument.steps                            =   [avg]
 average.argument.avg.type                         =   squash
 average.argument.avg.freqstep                     =   {{ facetimage_freqstep }}
 average.argument.avg.timestep                     =   {{ facetimage_timestep }}
-
-copy_all_map.control.kind                         =   plugin
-copy_all_map.control.type                         =   copyMapfile
-copy_all_map.control.mapfile_in                   =   average.output.mapfile
-copy_all_map.control.mapfile_dir                  =   {{ mapfile_dir }}
-copy_all_map.control.filename                     =   shifted_avg_final_bands.datamap
 
 apply_dir_dep_fast.control.type                   =   calibrate-stand-alone_new
 apply_dir_dep_fast.control.mapfiles_in            =   [average.output.mapfile,expand_merged_parmdb_map.output.mapfile]

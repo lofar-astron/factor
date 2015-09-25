@@ -108,6 +108,7 @@ class Direction(object):
         self.use_new_sub_data = False # set flag that tells which subtracted-data column to use
         self.cellsize_selfcal_deg = 0.000417 # selfcal cell size
         self.cellsize_verify_deg = 0.00833 # verify subtract cell size
+        self.subtracted_data_colname = 'SUBTRACTED_DATA_ALL'
 
         # Set the size of the calibrator (used to filter source lists)
         if cal_size_deg is None:
@@ -340,8 +341,6 @@ class Direction(object):
             with open(self.save_file, 'r') as f:
                 d = pickle.load(f)
                 self.completed_operations = d['completed_operations']
-                self.selfcal_ok = d['selfcal_ok']
-                self.skip_add_subtract = d['skip_add_subtract']
             return True
         except:
             return False
@@ -349,7 +348,7 @@ class Direction(object):
 
     def reset_state(self):
         """
-        Resets the direction to initial state to allow reprocessing
+        Resets the direction to allow reprocessing
 
         Currently, this means just deleting the results directories,
         but it could be changed to delete only a subset of selfcal steps (by
@@ -357,12 +356,8 @@ class Direction(object):
         """
         import glob
 
-        # Don't reset if the facetsub operation was done, as it can not yet be
-        # properly reset (requires modification of SUBTRACTED_DATA_ALL_NEW)
-        if 'facetsub' in self.completed_operations:
-            return
-
-        operations = ['facetselfcal', 'facetimage'] # facetsub not yet supported
+        operations = ['facetselfcal', 'facetsub', 'facetimage']
+        self.selfcal_ok = False
         for op in operations:
             # Remove entry in completed_operations
             if op in self.completed_operations:

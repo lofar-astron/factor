@@ -104,6 +104,24 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         log.info('Processing {0} direction(s) in Group {1}'.format(
             len(direction_group), gindx+1))
 
+        # Set up reset of any directions that need it. If the direction has
+        # already been through the facetsub operation, we must undo the
+        # changes with the facetsubreset operation before we reset
+        direction_group_reset = [d for d in direction_group if d.do_reset]
+        direction_group_reset_facetsub = [d for d in direction_group_reset if
+            'facetsub' in d.completed_operations]
+        if len(direction_group_reset_facetsub) > 0:
+            direction_group_reset_facetsub = factor.cluster.combine_nodes(
+                direction_group_reset_facetsub,
+                parset['cluster_specific']['node_list'],
+                parset['cluster_specific']['ncpu'],
+                parset['cluster_specific']['fmem'])
+            ops = [FacetSubReset(parset, d) for d in direction_group_reset_facetsub]
+            for op in ops:
+                scheduler.run(op)
+        for d in direction_group_reset:
+            d.reset_state()
+
         # Divide up the nodes and cores among the directions for the parallel
         # selfcal operations
         direction_group = factor.cluster.divide_nodes(direction_group,
@@ -115,12 +133,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         # Do selfcal on calibrator only
         ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
         scheduler.run(ops)
-
-        # Subtract final model(s) from empty field datasets. These operations
-        # must be done in series and only on the directions that passed the
-        # selfcal check. Also, after this operation is complete for any
-        # direction, set flag to indicate all subsequent directions should use
-        # the new subtracted-data column for the FacetAdd operation
         if dry_run:
             # For dryrun, skip check
             for d in direction_group:
@@ -129,23 +141,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         if first_pass:
             if len(direction_group_ok) > 0:
                 for d in directions:
-                    d.use_new_sub_data = True
+                    d.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
                 first_pass = False
-
-        # For first direction in the group, we don't need to add the
-        # sources and then subtract them, but instead can simply copy the
-        # full-res subtracted column from facetselfcal after phase shifting it
-        # back to the field center. For the other directions, we have to add and
-        # subtract to pick up the improved subtracted data from the other
-        # directions in this group
-        for i, d in enumerate(direction_group_ok):
-            if d.skip_add_subtract is None:
-                if i == 0:
-                    d.skip_add_subtract = True
-                else:
-                    d.skip_add_subtract = False
-            else:
-                d.skip_add_subtract = False
 
         # Combine the nodes and cores for the serial subtract operations
         direction_group_ok = factor.cluster.combine_nodes(direction_group_ok,
@@ -153,7 +150,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             parset['cluster_specific']['ncpu'],
             parset['cluster_specific']['fmem'])
 
-        # Do subtraction for directions for which selfcal went OK
+        # Subtract final model(s) for directions for which selfcal went OK
         ops = [FacetSub(parset, d) for d in direction_group_ok]
         for op in ops:
             scheduler.run(op)
@@ -536,12 +533,9 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
 
         # Reset state if specified
         if direction.name in reset_directions:
-            if 'facetsub' in direction.completed_operations:
-                log.error('Direction {} has been through the subtract operation and '
-                    'cannot be reset'.format(direction.name))
-                sys.exit(1)
-            log.info('Resetting state for direction {}...'.format(direction.name))
-            direction.reset_state()
+            direction.do_reset = True
+        else:
+            direction.do_reset = False
 
     # Warn user if they've specified a direction to reset that does not exist
     direction_names = [d.name for d in directions]
@@ -584,11 +578,6 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         if parset['direction_specific']['ndir_selfcal'] > 0 and \
             parset['direction_specific']['ndir_selfcal'] <= len(selfcal_directions):
             selfcal_directions = selfcal_directions[:parset['direction_specific']['ndir_selfcal']]
-
-    # Filter out directions that have already gone through selfcal
-    # (facetselfcal + facetsub)
-    selfcal_directions = [d for d in selfcal_directions if 'facetselfcal' not in
-        d.completed_operations or 'facetsub' not in d.completed_operations]
 
     # Divide directions into groups for selfcal
     direction_groups = factor.directions.group_directions(selfcal_directions,

@@ -1131,6 +1131,12 @@ corrupt_final_model.argument.corrupt.type                  =   applycal
 corrupt_final_model.argument.corrupt.parmdb                =   parmdb
 corrupt_final_model.argument.corrupt.invert                =   False
 
+copy_final_model_map.control.kind                          =   plugin
+copy_final_model_map.control.type                          =   copyMapfile
+copy_final_model_map.control.mapfile_in                    =   corrupt_final_model.output.mapfile
+copy_final_model_map.control.mapfile_dir                   =   {{ mapfile_dir }}
+copy_final_model_map.control.filename                      =   final_model_data_facet.datamap
+
 subtract_initial_final.control.type                        =   subtract_columns
 subtract_initial_final.control.opts.mapfiles_in            =   [corrupt_all_model_data.output.mapfile,corrupt_final_model.output.mapfile]
 subtract_initial_final.control.opts.inputkeys              =   [file1,file2]
