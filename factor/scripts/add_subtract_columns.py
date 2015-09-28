@@ -16,7 +16,7 @@ def main(ms1, ms2, column1, column2, column_out, op='add'):
     ----------
     ms1 : str
         Name of MS file from which column 1 will be taken. This MS file will
-        also receive the new column
+        also receive the output column
     ms2 : str or list
         Name of MS file from which column 2 will be taken. Can be the same as
         ms1
@@ -38,7 +38,7 @@ def main(ms1, ms2, column1, column2, column_out, op='add'):
     cd = t1.getcoldesc(column1)
     cd['name'] = column_out
     try:
-        t.addcols(cd)
+        t1.addcols(cd)
     except:
         pass
 
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     parser.add_argument('ms2', help='name of MS file 2')
     parser.add_argument('column1', help='name of column 1')
     parser.add_argument('column2', help='name of column 2')
-    parser.add_argument('column_out', help='name of the output column')
+    parser.add_argument('column_out', help='name of the output column (written to ms1)')
     parser.add_argument('op', help='operation: "add" or "subtract"')
     args = parser.parse_args()
 
