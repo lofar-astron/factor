@@ -1154,7 +1154,7 @@ subtract_initial_final.control.opts.inputkeys              =   [file1,file2]
 subtract_initial_final.argument.flags                      =   [file1,file2,DATA,DATA,MODEL_DATA_DIFF,subtract]
 
 shift_diff_model_to_field.control.type                     =   dppp
-shift_diff_model_to_field.control.opts.mapfile_in          =   shift_empty.output.mapfile
+shift_diff_model_to_field.control.opts.mapfile_in          =   corrupt_all_model_data.output.mapfile
 shift_diff_model_to_field.control.opts.inputkey            =   msin
 shift_diff_model_to_field.argument.msin.datacolumn         =   MODEL_DATA_DIFF
 shift_diff_model_to_field.argument.msout.overwrite         =   True
