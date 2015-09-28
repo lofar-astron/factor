@@ -1,4 +1,4 @@
-pipeline.steps = [create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, copy_facet_skymodels_all_map, make_facet_skymodels_cal, shift_empty, copy_empty_map, make_sourcedb_all_facet_sources, predict_all_facet_sources, corrupt_all_model_data, add_all_facet_sources, shift_cal, copy_cal_map, add_cal_facet_sources, apply_dir_indep, create_compressed_mapfile_data, concat_data, concat_corr, copy_column, make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, solve_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, solve_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, create_model3_map, casa_ft3, solve_ampphase21, merge_phase_parmdbs, solve_ampphase22, merge_amp_parmdbs2, smooth_amp2, expand_smoothed_amp2_parmdb_map, apply_amp2, average4, create_compressed_mapfile4, concat4, casa_image41, adjust_casa_mapfile4, mask4, casa_image42, merge_selfcal_parmdbs, copy_merged_parmdb_map, expand_merged_parmdb_map, average5, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile5, concat_averaged, premask, casa_image_full1, adjust_casa_mapfile5, mask5, casa_image_full2, create_model4_map, adjust_casa_mapfile6, create_compressed_mapfile6, concat_unaveraged, casa_ft4, corrupt_final_model, copy_final_model_map, subtract_initial_final, shift_diff_model_to_field, copy_diff_model_map, create_single_band_mapfile, create_single_parmdb_mapfile, create_single_model_mapfile, average_single_model, subtract_single, average_pre, average_post, apply_dir_indep_pre, apply_dir_indep_post, wsclean_pre, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
+pipeline.steps = [create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, copy_facet_skymodels_all_map, make_facet_skymodels_cal, shift_empty, copy_empty_map, make_sourcedb_all_facet_sources, predict_all_facet_sources, corrupt_all_model_data, copy_corrupted_all_model_map, add_all_facet_sources, shift_cal, copy_cal_map, add_cal_facet_sources, apply_dir_indep, create_compressed_mapfile_data, concat_data, concat_corr, copy_column, make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, solve_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, solve_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, create_model3_map, casa_ft3, solve_ampphase21, merge_phase_parmdbs, solve_ampphase22, merge_amp_parmdbs2, smooth_amp2, expand_smoothed_amp2_parmdb_map, apply_amp2, average4, create_compressed_mapfile4, concat4, casa_image41, adjust_casa_mapfile4, mask4, casa_image42, merge_selfcal_parmdbs, copy_merged_parmdb_map, expand_merged_parmdb_map, average5, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile5, concat_averaged, premask, casa_image_full1, adjust_casa_mapfile5, mask5, casa_image_full2, create_model4_map, adjust_casa_mapfile6, create_compressed_mapfile6, concat_unaveraged, casa_ft4, corrupt_final_model, copy_final_model_map, subtract_initial_final, copy_diff_model_facet_map, shift_diff_model_to_field, copy_diff_model_field_map, create_single_band_mapfile, create_single_parmdb_mapfile, create_single_model_mapfile, subtract_single, average_pre, average_post, apply_dir_indep_pre, apply_dir_indep_post, wsclean_pre, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -80,10 +80,17 @@ corrupt_all_model_data.control.type                        =   dppp
 corrupt_all_model_data.control.opts.mapfiles_in            =   [shift_empty.output.mapfile,create_parmdb_map.output.mapfile]
 corrupt_all_model_data.control.opts.inputkeys              =   [msin,parmdb]
 corrupt_all_model_data.argument.msin.datacolumn            =   MODEL_DATA
+corrupt_all_model_data.argument.msout.overwrite            =   True
 corrupt_all_model_data.argument.steps                      =   [corrupt]
 corrupt_all_model_data.argument.corrupt.type               =   applycal
 corrupt_all_model_data.argument.corrupt.parmdb             =   parmdb
 corrupt_all_model_data.argument.corrupt.invert             =   False
+
+copy_corrupted_all_model_map.control.kind                  =   plugin
+copy_corrupted_all_model_map.control.type                  =   copyMapfile
+copy_corrupted_all_model_map.control.mapfile_in            =   shift_cal.output.mapfile
+copy_corrupted_all_model_map.control.mapfile_dir           =   {{ mapfile_dir }}
+copy_corrupted_all_model_map.control.filename              =   corrupted_all_model_bands.datamap
 
 add_all_facet_sources.control.type                         =   add_subtract_columns
 add_all_facet_sources.control.opts.mapfiles_in             =   [shift_empty.output.mapfile,corrupt_all_model_data.output.mapfile]
@@ -1129,6 +1136,7 @@ corrupt_final_model.control.type                           =   dppp
 corrupt_final_model.control.opts.mapfiles_in               =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 corrupt_final_model.control.opts.inputkeys                 =   [msin,parmdb]
 corrupt_final_model.argument.msin.datacolumn               =   MODEL_DATA
+corrupt_final_model.argument.msout.overwrite               =   True
 corrupt_final_model.argument.steps                         =   [corrupt_fast1,corrupt_fast2,corrupt_slow]
 corrupt_final_model.argument.corrupt_fast1.type            =   applycal
 corrupt_final_model.argument.corrupt_fast1.parmdb          =   parmdb
@@ -1153,6 +1161,12 @@ subtract_initial_final.control.opts.mapfiles_in            =   [corrupt_all_mode
 subtract_initial_final.control.opts.inputkeys              =   [file1,file2]
 subtract_initial_final.argument.flags                      =   [file1,file2,DATA,DATA,MODEL_DATA_DIFF,subtract]
 
+copy_diff_model_facet_map.control.kind                     =   plugin
+copy_diff_model_facet_map.control.type                     =   copyMapfile
+copy_diff_model_facet_map.control.mapfile_in               =   shift_diff_model_to_field.output.mapfile
+copy_diff_model_facet_map.control.mapfile_dir              =   {{ mapfile_dir }}
+copy_diff_model_facet_map.control.filename                 =   diff_models_facet.datamap
+
 shift_diff_model_to_field.control.type                     =   dppp
 shift_diff_model_to_field.control.opts.mapfile_in          =   corrupt_all_model_data.output.mapfile
 shift_diff_model_to_field.control.opts.inputkey            =   msin
@@ -1163,15 +1177,15 @@ shift_diff_model_to_field.argument.steps                   =   [shift]
 shift_diff_model_to_field.argument.shift.type              =   phaseshifter
 shift_diff_model_to_field.argument.shift.phasecenter       =   [{{ field_ra }}deg, {{ field_dec }}deg]
 
-copy_diff_model_map.control.kind                           =   plugin
-copy_diff_model_map.control.type                           =   copyMapfile
-copy_diff_model_map.control.mapfile_in                     =   shift_diff_model_to_field.output.mapfile
-copy_diff_model_map.control.mapfile_dir                    =   {{ mapfile_dir }}
-copy_diff_model_map.control.filename                       =   diff_models_field.datamap
+copy_diff_model_field_map.control.kind                     =   plugin
+copy_diff_model_field_map.control.type                     =   copyMapfile
+copy_diff_model_field_map.control.mapfile_in               =   shift_diff_model_to_field.output.mapfile
+copy_diff_model_field_map.control.mapfile_dir              =   {{ mapfile_dir }}
+copy_diff_model_field_map.control.filename                 =   diff_models_field.datamap
 
 create_single_band_mapfile.control.kind                    =   plugin
 create_single_band_mapfile.control.type                    =   filterMapfile
-create_single_band_mapfile.control.mapfile_in              =   average5.output.mapfile
+create_single_band_mapfile.control.mapfile_in              =   shift_empty.output.mapfile
 create_single_band_mapfile.control.mapfile_dir             =   {{ mapfile_dir }}
 create_single_band_mapfile.control.filename                =   single_band.datamap
 
@@ -1187,21 +1201,10 @@ create_single_model_mapfile.control.mapfile_in             =   corrupt_final_mod
 create_single_model_mapfile.control.mapfile_dir            =   {{ mapfile_dir }}
 create_single_model_mapfile.control.filename               =   single_model.datamap
 
-average_single_model.control.type                          =   dppp
-average_single_model.control.mapfile_in                    =   create_single_model_mapfile.output.mapfile
-average_single_model.control.inputkey                      =   msin
-average_single_model.argument.msin.datacolumn              =   DATA
-average_single_model.argument.msout.overwrite              =   True
-average_single_model.argument.msout.writefullresflag       =   False
-average_single_model.argument.steps                        =   [avg]
-average_single_model.argument.avg.type                     =   squash
-average_single_model.argument.avg.freqstep                 =   {{ facetimage_freqstep }}
-average_single_model.argument.avg.timestep                 =   {{ facetimage_timestep }}
-
 subtract_single.control.type                               =   add_subtract_columns
-subtract_single.control.opts.mapfiles_in                   =   [create_single_band_mapfile.output.mapfile,average_single_model.output.mapfile]
+subtract_single.control.opts.mapfiles_in                   =   [create_single_band_mapfile.output.mapfile,create_single_model_mapfile.output.mapfile]
 subtract_single.control.opts.inputkeys                     =   [file1,file2]
-subtract_single.argument.flags                             =   [file1,file2,DATA,DATA,DATA,subtract]
+subtract_single.argument.flags                             =   [file1,file2,FACET_DATA_ALL,DATA,SUBTRACTED_DATA,subtract]
 
 average_pre.control.type                                   =   dppp
 average_pre.control.mapfile_in                             =   create_single_band_mapfile.output.mapfile

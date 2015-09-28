@@ -109,7 +109,10 @@ class FacetSelfcal(Operation):
         # can check them for problems. The data used to image the full facet
         # are also kept in case the user wants to re-image the facet by hand
         self.direction.cleanup_mapfiles = [
+            os.path.join(self.mapfile_dir, 'shifted_empty_bands.datamap'),
             os.path.join(self.mapfile_dir, 'shifted_cal_bands.datamap'),
+            os.path.join(self.mapfile_dir, 'corrupted_all_model_bands.datamap'),
+            os.path.join(self.mapfile_dir, 'diff_models_facet.datamap'),
             os.path.join(self.mapfile_dir, 'chunk_files.datamap'),
             os.path.join(self.mapfile_dir, 'concat_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat0_input.datamap'),
