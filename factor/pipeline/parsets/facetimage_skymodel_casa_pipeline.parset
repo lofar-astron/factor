@@ -36,9 +36,12 @@ shift_empty.control.opts.inputkey                 =   msin
 shift_empty.argument.msin.datacolumn              =   SUBTRACTED_DATA_ALL_NEW
 shift_empty.argument.msout.overwrite              =   True
 shift_empty.argument.msout.writefullresflag       =   False
-shift_empty.argument.steps                        =   [shift]
+shift_empty.argument.steps                        =   [shift,avg]
 shift_empty.argument.shift.type                   =   phaseshifter
 shift_empty.argument.shift.phasecenter            =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+shift_empty.argument.avg.type                     =   squash
+shift_empty.argument.avg.freqstep                 =   {{ facetimage_freqstep }}
+shift_empty.argument.avg.timestep                 =   {{ facetimage_timestep }}
 
 copy_shifted_map.control.kind                     =   plugin
 copy_shifted_map.control.type                     =   copyMapfile
@@ -55,32 +58,15 @@ add_all_facet_sources.argument.replace-sourcedb   =   True
 add_all_facet_sources.argument.replace-parmdb     =   True
 add_all_facet_sources.argument.no-columns         =   True
 
-average.control.type                              =   dppp
-average.control.mapfile_in                        =   shift_empty.output.mapfile
-average.control.inputkey                          =   msin
-average.argument.msin.datacolumn                  =   FACET_DATA_ALL
-average.argument.msout.overwrite                  =   True
-average.argument.msout.writefullresflag           =   False
-average.argument.steps                            =   [avg]
-average.argument.avg.type                         =   squash
-average.argument.avg.freqstep                     =   {{ facetimage_freqstep }}
-average.argument.avg.timestep                     =   {{ facetimage_timestep }}
-
-copy_all_map.control.kind                         =   plugin
-copy_all_map.control.type                         =   copyMapfile
-copy_all_map.control.mapfile_in                   =   average.output.mapfile
-copy_all_map.control.mapfile_dir                  =   {{ mapfile_dir }}
-copy_all_map.control.filename                     =   shifted_all_final_bands.datamap
-
 expand_merged_parmdb_map.control.kind             =   plugin
 expand_merged_parmdb_map.control.type             =   expandMapfile
 expand_merged_parmdb_map.control.mapfile_in       =   {{ dir_dep_parmdb_datamap }}
-expand_merged_parmdb_map.control.mapfile_to_match =   average.output.mapfile
+expand_merged_parmdb_map.control.mapfile_to_match =   shift_empty.output.mapfile
 expand_merged_parmdb_map.control.mapfile_dir      =   {{ mapfile_dir }}
 expand_merged_parmdb_map.control.filename         =   expand_merged_parmdbs.datamap
 
 apply_dir_dep_fast.control.type                   =   calibrate-stand-alone_new
-apply_dir_dep_fast.control.mapfiles_in            =   [average.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+apply_dir_dep_fast.control.mapfiles_in            =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 apply_dir_dep_fast.control.inputkeys              =   [inputms,inputparmdb]
 apply_dir_dep_fast.argument.observation           =   inputms
 apply_dir_dep_fast.argument.parset                =   {{ parset_dir }}//facet_dirdep_apply_fast.parset
@@ -90,7 +76,7 @@ apply_dir_dep_fast.argument.replace-sourcedb      =   True
 apply_dir_dep_fast.argument.replace-parmdb        =   True
 
 apply_dir_dep_slow.control.type                   =   calibrate-stand-alone_new
-apply_dir_dep_slow.control.mapfiles_in            =   [average.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+apply_dir_dep_slow.control.mapfiles_in            =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 apply_dir_dep_slow.control.inputkeys              =   [inputms,inputparmdb]
 apply_dir_dep_slow.argument.observation           =   inputms
 apply_dir_dep_slow.argument.parset                =   {{ parset_dir }}//facet_dirdep_apply_slow.parset
@@ -101,7 +87,7 @@ apply_dir_dep_slow.argument.replace-parmdb        =   True
 
 create_compressed_mapfile.control.kind            =   plugin
 create_compressed_mapfile.control.type            =   compressMapfile
-create_compressed_mapfile.control.mapfile_in      =   average.output.mapfile
+create_compressed_mapfile.control.mapfile_in      =   shift_empty.output.mapfile
 create_compressed_mapfile.control.mapfile_dir     =   {{ mapfile_dir }}
 create_compressed_mapfile.control.filename        =   concat_averaged_input.datamap
 

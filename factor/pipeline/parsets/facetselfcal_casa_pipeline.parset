@@ -88,7 +88,7 @@ corrupt_all_model_data.argument.corrupt.invert             =   False
 
 copy_corrupted_all_model_map.control.kind                  =   plugin
 copy_corrupted_all_model_map.control.type                  =   copyMapfile
-copy_corrupted_all_model_map.control.mapfile_in            =   shift_cal.output.mapfile
+copy_corrupted_all_model_map.control.mapfile_in            =   corrupt_all_model_data.output.mapfile
 copy_corrupted_all_model_map.control.mapfile_dir           =   {{ mapfile_dir }}
 copy_corrupted_all_model_map.control.filename              =   corrupted_all_model_bands.datamap
 

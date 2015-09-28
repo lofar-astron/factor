@@ -215,10 +215,3 @@ class FacetImage(Operation):
             'final_image.datamap')
         self.direction.facet_model_mapfile = os.path.join(self.mapfile_dir,
             'final_model_rootnames.datamap')
-
-        # Delete shifted data as they're no longer needed
-        self.direction.cleanup_mapfiles = [
-            os.path.join(self.mapfile_dir, 'shifted_empty_final_bands.datamap'),
-            os.path.join(self.mapfile_dir, 'shifted_all_final_bands.datamap'),
-            os.path.join(self.mapfile_dir, 'shifted_avg_final_bands.datamap')]
-        self.direction.cleanup()
