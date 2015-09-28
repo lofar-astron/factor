@@ -15,16 +15,17 @@ def main(ms1, ms2, column1, column2, column_out, op='add'):
     Parameters
     ----------
     ms1 : str
-        Name of MS file to copy from
+        Name of MS file from which column 1 will be taken. This MS file will
+        also receive the new column
     ms2 : str or list
-        Name of MS file or list of MS files to copy to. May be given as a list
-        or as a string (e.g., '[ms1, ms2]'
+        Name of MS file from which column 2 will be taken. Can be the same as
+        ms1
     column1 : str
         Name of column 1
     column2 : str
         Name of column 2
     column_out : str
-        Name of output column
+        Name of output column (written to ms1)
     op : str
         Operation to perform: 'add' or 'subtract'
 
@@ -55,9 +56,9 @@ def main(ms1, ms2, column1, column2, column_out, op='add'):
         print('Operation not understood. Must be either "add" or "subtract"')
         sys.exit(1)
 
-    t.putcol(column_out, data_out)
-    t.flush()
-    t.close()
+    t1.putcol(column_out, data_out)
+    t1.flush()
+    t1.close()
 
 
 if __name__ == '__main__':
