@@ -10,9 +10,9 @@ def plugin_main(args, **kwargs):
     Parameters
     ----------
     mapfile_in : str
-        Filename of datamap to trim
+        Filename of datamap to append to
     append_str : str
-        String to remove
+        String to append
     mapfile_dir : str
         Directory for output mapfile
     filename: str
