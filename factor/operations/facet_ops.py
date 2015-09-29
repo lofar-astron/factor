@@ -121,6 +121,7 @@ class FacetSelfcal(Operation):
             os.path.join(self.mapfile_dir, 'concat3_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat4_input.datamap')]
         if self.direction.selfcal_ok:
+            self.log.info('Cleaning up files (direction: {})'.format(self.direction.name))
             self.direction.cleanup()
 
 
