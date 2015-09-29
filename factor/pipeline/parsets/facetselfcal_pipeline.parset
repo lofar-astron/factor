@@ -1,4 +1,4 @@
-pipeline.steps = [create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, copy_facet_skymodels_all_map, make_facet_skymodels_cal, shift_empty, copy_empty_map, add_all_facet_sources, shift_cal, copy_cal_map, add_cal_facet_sources, average_data, apply_dir_indep, create_compressed_mapfile_data, concat_data, concat_corr, copy_column, make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, solve_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, solve_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, create_model3_map, casa_ft3, solve_ampphase21, merge_phase_parmdbs, solve_ampphase22, merge_amp_parmdbs2, smooth_amp2, expand_smoothed_amp2_parmdb_map, apply_amp2, average4, create_compressed_mapfile4, concat4, casa_image41, adjust_casa_mapfile4, mask4, casa_image42, merge_selfcal_parmdbs, copy_merged_parmdb_map, expand_merged_parmdb_map, average5, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile5, concat_averaged, premask, wsclean1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean2, create_model4_map, adjust_wsclean_mapfile2, create_compressed_mapfile6, concat_unaveraged, wsclean_ft, subtract, create_single_band_mapfile, create_single_parmdb_mapfile, average_pre, average_post, apply_dir_indep_pre, apply_dir_indep_post, wsclean_pre, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
+pipeline.steps = [create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, copy_facet_skymodels_all_map, make_facet_skymodels_cal, shift_empty, copy_empty_map, make_sourcedb_all_facet_sources, predict_all_facet_sources, corrupt_all_model_data, copy_corrupted_all_model_map, add_all_facet_sources, shift_cal, copy_cal_map, add_cal_facet_sources, apply_dir_indep, create_compressed_mapfile_data, concat_data, concat_corr, copy_column, make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, solve_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, solve_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, create_model3_map, casa_ft3, solve_ampphase21, merge_phase_parmdbs, solve_ampphase22, merge_amp_parmdbs2, smooth_amp2, expand_smoothed_amp2_parmdb_map, apply_amp2, average4, create_compressed_mapfile4, concat4, casa_image41, adjust_casa_mapfile4, mask4, casa_image42, merge_selfcal_parmdbs, copy_merged_parmdb_map, expand_merged_parmdb_map, average5, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile5, concat_averaged, premask, wsclean1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean2, create_model4_map, adjust_wsclean_mapfile2, create_compressed_mapfile6, concat_unaveraged, wsclean_ft, subtract, create_single_band_mapfile, create_single_parmdb_mapfile, average_pre, average_post, apply_dir_indep_pre, apply_dir_indep_post, wsclean_pre, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -62,13 +62,40 @@ copy_empty_map.control.mapfile_in                          =   shift_empty.outpu
 copy_empty_map.control.mapfile_dir                         =   {{ mapfile_dir }}
 copy_empty_map.control.filename                            =   shifted_empty_bands.datamap
 
-add_all_facet_sources.control.type                         =   calibrate-stand-alone_new
-add_all_facet_sources.argument.observation                 =   shift_empty.output.mapfile
-add_all_facet_sources.argument.parset                      =   {{ parset_dir }}/facet_dirindep_add_all.parset
-add_all_facet_sources.argument.catalog                     =   make_facet_skymodels_all.output.mapfile
-add_all_facet_sources.argument.parmdb                      =   create_parmdb_map.output.mapfile
-add_all_facet_sources.argument.replace-sourcedb            =   True
-add_all_facet_sources.argument.replace-parmdb              =   True
+make_sourcedb_all_facet_sources.control.type               =   make_sourcedb
+make_sourcedb_all_facet_sources.control.opts.mapfile_in    =   make_facet_skymodels_all.output.mapfile
+make_sourcedb_all_facet_sources.control.opts.inputkey      =   in
+make_sourcedb_all_facet_sources.argument.format            =   <
+
+predict_all_facet_sources.control.type                     =   dppp_inplace
+predict_all_facet_sources.control.opts.mapfiles_in         =   [shift_empty.output.mapfile,make_sourcedb_all_facet_sources.output.mapfile]
+predict_all_facet_sources.control.opts.inputkeys           =   [msin,sourcedb]
+predict_all_facet_sources.argument.msout                   =   .
+predict_all_facet_sources.argument.msout.datacolumn        =   MODEL_DATA
+predict_all_facet_sources.argument.steps                   =   [predict_all]
+predict_all_facet_sources.argument.predict_all.type        =   predict
+predict_all_facet_sources.argument.predict_all.sourcedb    =   sourcedb
+
+corrupt_all_model_data.control.type                        =   dppp
+corrupt_all_model_data.control.opts.mapfiles_in            =   [shift_empty.output.mapfile,create_parmdb_map.output.mapfile]
+corrupt_all_model_data.control.opts.inputkeys              =   [msin,parmdb]
+corrupt_all_model_data.argument.msin.datacolumn            =   MODEL_DATA
+corrupt_all_model_data.argument.msout.overwrite            =   True
+corrupt_all_model_data.argument.steps                      =   [corrupt]
+corrupt_all_model_data.argument.corrupt.type               =   applycal
+corrupt_all_model_data.argument.corrupt.parmdb             =   parmdb
+corrupt_all_model_data.argument.corrupt.invert             =   False
+
+copy_corrupted_all_model_map.control.kind                  =   plugin
+copy_corrupted_all_model_map.control.type                  =   copyMapfile
+copy_corrupted_all_model_map.control.mapfile_in            =   corrupt_all_model_data.output.mapfile
+copy_corrupted_all_model_map.control.mapfile_dir           =   {{ mapfile_dir }}
+copy_corrupted_all_model_map.control.filename              =   corrupted_all_model_bands.datamap
+
+add_all_facet_sources.control.type                         =   add_subtract_columns
+add_all_facet_sources.control.opts.mapfiles_in             =   [shift_empty.output.mapfile,corrupt_all_model_data.output.mapfile]
+add_all_facet_sources.control.opts.inputkeys               =   [file1,file2]
+add_all_facet_sources.argument.flags                       =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
 
 shift_cal.control.type                                     =   dppp
 shift_cal.control.opts.mapfile_in                          =   create_ms_map.output.mapfile
@@ -76,9 +103,12 @@ shift_cal.control.opts.inputkey                            =   msin
 shift_cal.argument.msin.datacolumn                         =   {{ subtracted_data_colname }}
 shift_cal.argument.msout.overwrite                         =   True
 shift_cal.argument.msout.writefullresflag                  =   False
-shift_cal.argument.steps                                   =   [shift]
+shift_cal.argument.steps                                   =   [shift,avg]
 shift_cal.argument.shift.type                              =   phaseshifter
 shift_cal.argument.shift.phasecenter                       =   [{{ ra }}deg, {{ dec }}deg]
+shift_cal.argument.avg.type                                =   squash
+shift_cal.argument.avg.freqstep                            =   {{ facetselfcal_freqstep }}
+shift_cal.argument.avg.timestep                            =   1
 
 copy_cal_map.control.kind                                  =   plugin
 copy_cal_map.control.type                                  =   copyMapfile
@@ -95,20 +125,9 @@ add_cal_facet_sources.argument.replace-sourcedb            =   True
 add_cal_facet_sources.argument.replace-parmdb              =   True
 add_cal_facet_sources.argument.no-columns                  =   True
 
-average_data.control.type                                  =   dppp
-average_data.control.mapfile_in                            =   shift_cal.output.mapfile
-average_data.control.inputkey                              =   msin
-average_data.argument.msin.datacolumn                      =   FACET_DATA_CAL
-average_data.argument.msout.overwrite                      =   True
-average_data.argument.msout.writefullresflag               =   False
-average_data.argument.steps                                =   [avg]
-average_data.argument.avg.type                             =   squash
-average_data.argument.avg.freqstep                         =   {{ facetselfcal_freqstep }}
-average_data.argument.avg.timestep                         =   1
-
 apply_dir_indep.control.type                               =   calibrate-stand-alone_new
-apply_dir_indep.argument.observation                       =   average_data.output.mapfile
-apply_dir_indep.argument.parset                            =   {{ parset_dir }}//facet_dirindep_apply.parset
+apply_dir_indep.argument.observation                       =   shift_cal.output.mapfile
+apply_dir_indep.argument.parset                            =   {{ parset_dir }}/facet_dirindep_apply.parset
 apply_dir_indep.argument.catalog                           =   {{ skymodel_dir }}/empty.skymodel
 apply_dir_indep.argument.parmdb                            =   create_parmdb_map.output.mapfile
 apply_dir_indep.argument.replace-sourcedb                  =   True
@@ -117,7 +136,7 @@ apply_dir_indep.argument.no-columns                        =   True
 
 create_compressed_mapfile_data.control.kind                =   plugin
 create_compressed_mapfile_data.control.type                =   compressMapfile
-create_compressed_mapfile_data.control.mapfile_in          =   average_data.output.mapfile
+create_compressed_mapfile_data.control.mapfile_in          =   shift_cal.output.mapfile
 create_compressed_mapfile_data.control.mapfile_dir         =   {{ mapfile_dir }}
 create_compressed_mapfile_data.control.filename            =   concat_input.datamap
 
@@ -1102,15 +1121,56 @@ wsclean_ft.argument.mem                                    =   {{ max_percent_me
 wsclean_ft.argument.channelsout                            =   {{ nchannels }}
 wsclean_ft.argument.j                                      =   {{ max_cpus_per_node }}
 
-subtract.control.type                                      =   calibrate-stand-alone_new
-subtract.control.mapfiles_in                               =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-subtract.control.inputkeys                                 =   [inputms,inputparmdb]
-subtract.argument.observation                              =   inputms
-subtract.argument.parset                                   =   {{ parset_dir }}//facet_dirdep_subtract_check.parset
-subtract.argument.catalog                                  =   {{ skymodel_dir }}/empty.skymodel
-subtract.argument.parmdb                                   =   inputparmdb
-subtract.argument.replace-sourcedb                         =   True
-subtract.argument.replace-parmdb                           =   True
+corrupt_final_model.control.type                           =   dppp
+corrupt_final_model.control.opts.mapfiles_in               =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+corrupt_final_model.control.opts.inputkeys                 =   [msin,parmdb]
+corrupt_final_model.argument.msin.datacolumn               =   MODEL_DATA
+corrupt_final_model.argument.msout.overwrite               =   True
+corrupt_final_model.argument.steps                         =   [corrupt_fast1,corrupt_fast2,corrupt_slow]
+corrupt_final_model.argument.corrupt_fast1.type            =   applycal
+corrupt_final_model.argument.corrupt_fast1.parmdb          =   parmdb
+corrupt_final_model.argument.corrupt_fast1.correction      =   tec
+corrupt_final_model.argument.corrupt_fast1.invert          =   False
+corrupt_final_model.argument.corrupt_fast2.type            =   applycal
+corrupt_final_model.argument.corrupt_fast2.parmdb          =   parmdb
+corrupt_final_model.argument.corrupt_fast2.correction      =   commonscalarphase
+corrupt_final_model.argument.corrupt_fast2.invert          =   False
+corrupt_final_model.argument.corrupt_slow.type             =   applycal
+corrupt_final_model.argument.corrupt_slow.parmdb           =   parmdb
+corrupt_final_model.argument.corrupt_slow.invert           =   False
+
+copy_final_model_map.control.kind                          =   plugin
+copy_final_model_map.control.type                          =   copyMapfile
+copy_final_model_map.control.mapfile_in                    =   corrupt_final_model.output.mapfile
+copy_final_model_map.control.mapfile_dir                   =   {{ mapfile_dir }}
+copy_final_model_map.control.filename                      =   final_model_data_facet.datamap
+
+subtract_initial_final.control.type                        =   add_subtract_columns
+subtract_initial_final.control.opts.mapfiles_in            =   [corrupt_all_model_data.output.mapfile,corrupt_final_model.output.mapfile]
+subtract_initial_final.control.opts.inputkeys              =   [file1,file2]
+subtract_initial_final.argument.flags                      =   [file1,file2,DATA,DATA,MODEL_DATA_DIFF,subtract]
+
+copy_diff_model_facet_map.control.kind                     =   plugin
+copy_diff_model_facet_map.control.type                     =   copyMapfile
+copy_diff_model_facet_map.control.mapfile_in               =   shift_diff_model_to_field.output.mapfile
+copy_diff_model_facet_map.control.mapfile_dir              =   {{ mapfile_dir }}
+copy_diff_model_facet_map.control.filename                 =   diff_models_facet.datamap
+
+shift_diff_model_to_field.control.type                     =   dppp
+shift_diff_model_to_field.control.opts.mapfile_in          =   corrupt_all_model_data.output.mapfile
+shift_diff_model_to_field.control.opts.inputkey            =   msin
+shift_diff_model_to_field.argument.msin.datacolumn         =   MODEL_DATA_DIFF
+shift_diff_model_to_field.argument.msout.overwrite         =   True
+shift_diff_model_to_field.argument.msout.writefullresflag  =   False
+shift_diff_model_to_field.argument.steps                   =   [shift]
+shift_diff_model_to_field.argument.shift.type              =   phaseshifter
+shift_diff_model_to_field.argument.shift.phasecenter       =   [{{ field_ra }}deg, {{ field_dec }}deg]
+
+copy_diff_model_field_map.control.kind                     =   plugin
+copy_diff_model_field_map.control.type                     =   copyMapfile
+copy_diff_model_field_map.control.mapfile_in               =   shift_diff_model_to_field.output.mapfile
+copy_diff_model_field_map.control.mapfile_dir              =   {{ mapfile_dir }}
+copy_diff_model_field_map.control.filename                 =   diff_models_field.datamap
 
 create_single_band_mapfile.control.kind                    =   plugin
 create_single_band_mapfile.control.type                    =   filterMapfile
@@ -1123,6 +1183,17 @@ create_single_parmdb_mapfile.control.type                  =   filterMapfile
 create_single_parmdb_mapfile.control.mapfile_in            =   create_parmdb_map.output.mapfile
 create_single_parmdb_mapfile.control.mapfile_dir           =   {{ mapfile_dir }}
 create_single_parmdb_mapfile.control.filename              =   single_parmdb.datamap
+
+create_single_model_mapfile.control.kind                   =   plugin
+create_single_model_mapfile.control.type                   =   filterMapfile
+create_single_model_mapfile.control.mapfile_in             =   corrupt_final_model.output.mapfile
+create_single_model_mapfile.control.mapfile_dir            =   {{ mapfile_dir }}
+create_single_model_mapfile.control.filename               =   single_model.datamap
+
+subtract_single.control.type                               =   add_subtract_columns
+subtract_single.control.opts.mapfiles_in                   =   [create_single_band_mapfile.output.mapfile,create_single_model_mapfile.output.mapfile]
+subtract_single.control.opts.inputkeys                     =   [file1,file2]
+subtract_single.argument.flags                             =   [file1,file2,FACET_DATA_ALL,DATA,SUBTRACTED_DATA,subtract]
 
 average_pre.control.type                                   =   dppp
 average_pre.control.mapfile_in                             =   create_single_band_mapfile.output.mapfile
