@@ -1163,7 +1163,7 @@ subtract_initial_final.argument.flags                      =   [file1,file2,DATA
 
 copy_diff_model_facet_map.control.kind                     =   plugin
 copy_diff_model_facet_map.control.type                     =   copyMapfile
-copy_diff_model_facet_map.control.mapfile_in               =   shift_diff_model_to_field.output.mapfile
+copy_diff_model_facet_map.control.mapfile_in               =   corrupt_all_model_data.output.mapfile
 copy_diff_model_facet_map.control.mapfile_dir              =   {{ mapfile_dir }}
 copy_diff_model_facet_map.control.filename                 =   diff_models_facet.datamap
 
