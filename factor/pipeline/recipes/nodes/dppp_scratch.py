@@ -42,34 +42,15 @@ class dppp_scratch(LOFARnodeTCP):
         self.infile = infile
         self.executable = executable
 
-        if 'msin' in kwargs:
-            self.msin_original = kwargs['msin'].rstrip('/')
-
-        if 'msout' in kwargs:
-            self.msout_original = kwargs['msout'].rstrip('/')
-            kwargs.pop('msout')
-        else:
-            self.msout_original = '.'
-        if self.msout_original == '.':
-            # Input file is modified
-            self.msout_destination_dir = os.path.dirname(self.msin_original)
-        else:
-            # New output is created
-            self.msout_destination_dir = os.path.dirname(self.msout_original)
-
-        if 'local_scratch_dir' in kwargs:
-            self.scratch_dir = kwargs['local_scratch_dir'].rstrip('/')
-            kwargs.pop('local_scratch_dir')
-
+        self.msout_original = kwargs['msout'].rstrip('/')
+        kwargs.pop('msout')
+        self.msout_destination_dir = os.path.dirname(self.msout_original)
+        self.scratch_dir = kwargs['local_scratch_dir'].rstrip('/')
+        kwargs.pop('local_scratch_dir')
         self.logger.info('Using {} as scratch directory'.format(self.scratch_dir))
 
         # Set up scratch paths
-        if self.msout_original == '.':
-            # Input file is modified
-            self.msout_scratch = os.path.join(self.scratch_dir, os.path.basename(self.msin_original))
-        else:
-            # New output is created
-            self.msout_scratch = os.path.join(self.scratch_dir, os.path.basename(self.msout_original))
+        self.msout_scratch = os.path.join(self.scratch_dir, os.path.basename(self.msout_original))
         args.append('msout=' + self.msout_scratch)
 
         # Time execution of this job
@@ -161,8 +142,6 @@ class dppp_scratch(LOFARnodeTCP):
 
     def cleanup(self):
         self.logger.info("Deleting scratch directory")
-        if os.path.exists(self.msin_scratch):
-            shutil.rmtree(self.msin_scratch)
         if os.path.exists(self.msout_scratch):
             shutil.rmtree(self.msout_scratch)
 
