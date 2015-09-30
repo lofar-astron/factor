@@ -86,11 +86,9 @@ class Operation(object):
             self.local_scratch_dir = os.path.join(self.pipeline_working_dir,
                 self.direction.name)
             self.dppp_nodescript = 'executable_args'
-            self.max_cpus_per_node_dppp = self.max_cpus_per_node
         else:
             self.local_scratch_dir = self.parset['cluster_specific']['dir_local']
             self.dppp_nodescript = 'dppp_scratch'
-            self.max_cpus_per_node_dppp = 1
 
         # Directory that holds logs in a convenient place
         self.log_dir = os.path.join(self.factor_working_dir, 'logs', self.name)
@@ -143,7 +141,6 @@ class Operation(object):
                            'local_dir': self.local_scratch_dir,
                            'hosts': self.node_list,
                            'max_cpus_per_node': self.max_cpus_per_node,
-                           'max_cpus_per_node_dppp': self.max_cpus_per_node_dppp,
                            'max_percent_memory' : self.max_percent_memory}
 
         # Update the dictionaries with the attributes of the operation's

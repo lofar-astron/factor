@@ -1019,6 +1019,7 @@ concat_averaged.control.inputkey                           =   msin
 concat_averaged.argument.msin.datacolumn                   =   CORRECTED_DATA
 concat_averaged.argument.msout.overwrite                   =   True
 concat_averaged.argument.msout.writefullresflag            =   False
+concat_averaged.argument.local_scratch_dir                 =   {{ local_dir }}
 concat_averaged.argument.steps                             =   []
 
 premask.control.type                                       =   make_clean_mask
