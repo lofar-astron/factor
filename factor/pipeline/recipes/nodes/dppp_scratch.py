@@ -44,7 +44,7 @@ class dppp_scratch(LOFARnodeTCP):
 
         if 'msin' in kwargs:
             self.msin_original = kwargs['msin'].rstrip('/')
-            kwargs.pop('msin')
+#             kwargs.pop('msin')
 
         if 'msout' in kwargs:
             self.msout_original = kwargs['msout'].rstrip('/')
