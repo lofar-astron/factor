@@ -327,8 +327,7 @@ class Direction(object):
         """
         Loads the direction state from a file
 
-        Note: only a few necessary attributes for which the state is needed
-        are loaded
+        Note: only a few necessary attributes are loaded
 
         Returns
         -------
@@ -340,7 +339,14 @@ class Direction(object):
         try:
             with open(self.save_file, 'r') as f:
                 d = pickle.load(f)
+
+                # Load list of completed operations
                 self.completed_operations = d['completed_operations']
+
+                # Load mapfiles needed for facetsubreset
+                self.diff_models_field_datamap = d['diff_models_field_datamap']
+                self.input_bands_datamap = d['input_bands_datamap']
+                self.subtracted_data_colname = d['subtracted_data_colname']
             return True
         except:
             return False
