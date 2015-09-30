@@ -66,7 +66,7 @@ class dppp_scratch(LOFARnodeTCP):
 
         # Set up scratch paths
         self.msin_scratch = os.path.join(self.scratch_dir, os.path.basename(self.msin_original))
-        args.append('msin=' + self.msin_scratch)
+#         args.append('msin=' + self.msin_scratch)
         if self.msout_original == '.':
             # Input file is modified
             self.msout_scratch = os.path.join(self.scratch_dir, os.path.basename(self.msin_original))
@@ -76,7 +76,7 @@ class dppp_scratch(LOFARnodeTCP):
             self.msout_scratch = os.path.join(self.scratch_dir, os.path.basename(self.msout_original))
             args.append('msout=' + self.msout_scratch)
 
-        self.copy_to_scratch()
+#         self.copy_to_scratch()
 
         # Time execution of this job
         with log_time(self.logger):
