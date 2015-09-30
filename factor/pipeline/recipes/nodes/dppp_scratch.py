@@ -43,28 +43,36 @@ class dppp_scratch(LOFARnodeTCP):
         self.executable = executable
 
         if 'msin' in kwargs:
-            self.msin_original = kwargs['msin']
+            self.msin_original = kwargs['msin'].rstrip('/')
             kwargs.pop('msin')
+
         if 'msout' in kwargs:
-            self.msout_original = kwargs['msout']
+            self.msout_original = kwargs['msout'].rstrip('/')
             kwargs.pop('msout')
         else:
             self.msout_original = '.'
-        if 'scratch_dir' in kwargs:
-            self.scratch_dir = kwargs['scratch_dir']
-            kwargs.pop('scratch_dir')
-        if 'origin_node' in kwargs:
-            self.origin_node = kwargs['origin_node']
-            kwargs.pop('origin_node')
+        if self.msout_original == '.':
+            # Input file is modified
+            self.msout_destination_dir = os.path.dirname(self.msin_original)
+        else:
+            # New output is created
+            self.msout_destination_dir = os.path.dirname(self.msout_original)
+
+        if 'local_scratch_dir' in kwargs:
+            self.scratch_dir = kwargs['local_scratch_dir'].rstrip('/')
+            kwargs.pop('local_scratch_dir')
 
         # Set up scratch paths
         self.msin_scratch = os.path.join(self.scratch_dir, os.path.basename(self.msin_original))
-        if self.msout_original == '.':
-            self.msout_scratch = '.'
-        else:
-            self.msout_scratch = os.path.join(self.scratch_dir, os.path.basename(self.msout_original))
         args.append('msin=' + self.msin_scratch)
-        args.append('msout=' + self.msout_scratch)
+        if self.msout_original == '.':
+            # Input file is modified
+            self.msout_scratch = os.path.join(self.scratch_dir, os.path.basename(self.msin_original))
+            args.append('msout=.')
+        else:
+            # New output is created
+            self.msout_scratch = os.path.join(self.scratch_dir, os.path.basename(self.msout_original))
+            args.append('msout=' + self.msout_scratch)
 
         self.copy_to_scratch()
 
@@ -131,13 +139,13 @@ class dppp_scratch(LOFARnodeTCP):
         self.logger.info("Copying input data to scratch directory")
         if os.path.exists(self.msin_scratch):
             shutil.rmtree(self.msin_scratch)
-        args = ['ze', 'ssh', '{0}:{1}'.format(self.origin_node, self.msin_original), self.msin_scratch]
+        args = ['-a', self.msin_original, self.scratch_dir]
         prog = '/usr/bin/rsync'
         self.execute(prog, args)
 
     def copy_to_origin(self):
         self.logger.info("Copying output data to original directory")
-        args = ['-ze', 'ssh', self.msout_original, '{0}:{1}'.format(self.origin_node, self.msout_scratch)]
+        args = ['-a', self.msout_scratch, self.msout_destination_dir ]
         prog = '/usr/bin/rsync'
         self.execute(prog, args)
 
