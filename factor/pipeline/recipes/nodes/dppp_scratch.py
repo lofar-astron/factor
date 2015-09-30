@@ -98,14 +98,35 @@ class dppp_scratch(LOFARnodeTCP):
                     else:
                         raise
 
-            if parsetasfile:
+            argsformat = args_format['args_format']
+            if not parsetasfile:
+                if argsformat == 'gnu':
+                    for k, v in kwargs.items():
+                        args.append('--' + k + '=' + v)
+                if argsformat == 'lofar':
+                    for k, v in kwargs.items():
+                        args.append(k + '=' + v)
+                if argsformat == 'argparse':
+                    for k, v in kwargs.items():
+                        args.append('--' + k + ' ' + v)
+                if argsformat == 'wsclean':
+                    for k, v in kwargs.items():
+                        multargs = v.split(' ')
+                        if multargs:
+                            multargs.reverse()
+                            for item in multargs:
+                                args.insert(0, item)
+                        else:
+                            args.insert(0, v)
+                        args.insert(0, '-'+ k)
+
+            else:
                 nodeparset = Parset()
                 parsetname = os.path.join(work_dir, os.path.basename(infile) + '.parset')
                 for k, v in kwargs.items():
                     nodeparset.add(k, v)
                 nodeparset.writeFile(parsetname)
-                #args.insert(0, parsetname)
-                args.append(parsetname)
+                args.insert(0, parsetname)
 
             try:
             # ****************************************************************
