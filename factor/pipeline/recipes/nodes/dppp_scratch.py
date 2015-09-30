@@ -144,17 +144,18 @@ class dppp_scratch(LOFARnodeTCP):
             except CalledProcessError, err:
                 # CalledProcessError isn't properly propagated by IPython
                 self.logger.error(str(err))
+                self.cleanup()
                 return 1
             except Exception, err:
                 self.logger.error(str(err))
+                self.cleanup()
                 return 1
+
         # We need some signal to the master script that the script ran ok.
         self.outputs['ok'] = True
 
         # Copy output data back to origin
         self.copy_to_origin()
-
-        # Delete scratch directory
         self.cleanup()
         return 0
 
@@ -174,8 +175,10 @@ class dppp_scratch(LOFARnodeTCP):
 
     def cleanup(self):
         self.logger.info("Deleting scratch directory")
-        shutil.rmtree(self.msin_scratch)
-        shutil.rmtree(self.msout_scratch)
+        if os.path.exists(self.msin_scratch):
+            shutil.rmtree(self.msin_scratch)
+        if os.path.exists(self.msout_scratch):
+            shutil.rmtree(self.msout_scratch)
 
     def execute(self, executable, args):
         try:
