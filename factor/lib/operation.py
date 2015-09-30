@@ -81,12 +81,14 @@ class Operation(object):
             self.name)
         create_directory(self.pipeline_working_dir)
 
-        # Local scratch directory
+        # Local scratch directory and corresponding node recipes
         if self.parset['cluster_specific']['dir_local'] is None:
             self.local_scratch_dir = os.path.join(self.pipeline_working_dir,
                 self.direction.name)
+            self.dppp_nodescript = 'executable_args'
         else:
             self.local_scratch_dir = self.parset['cluster_specific']['dir_local']
+            self.dppp_nodescript = 'dppp_scratch'
 
         # Directory that holds logs in a convenient place
         self.log_dir = os.path.join(self.factor_working_dir, 'logs', self.name)
@@ -125,7 +127,8 @@ class Operation(object):
                          'losoto_executable': parset['losoto_executable'],
                          'H5parm_importer_executable': parset['H5parm_importer_executable'],
                          'H5parm_exporter_executable': parset['H5parm_exporter_executable'],
-                         'image2fits_executable': parset['image2fits_executable']}
+                         'image2fits_executable': parset['image2fits_executable'],
+                         'dppp_nodescript': self.dppp_nodescript}
 
         # Define global parameters needed by all pipeline parsets. Other,
         # pipeline-specific, parameters should be defined in the subclasses by
