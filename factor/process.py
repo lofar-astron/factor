@@ -315,7 +315,13 @@ def _set_up_bands(parset, log, test_run=False):
                 'for band {0}'.format(band.file))
             sys.exit(1)
 
-        solname = lofar.parmdb.parmdb(band.dirindparmdb).getNames()[0]
+        try:
+            solname = lofar.parmdb.parmdb(band.dirindparmdb).getNames()[0]
+        except IndexError:
+            log.critical('Direction-independent instument parmdb appears to be empty '
+                        'for band {0}'.format(band.file))
+            sys.exit(1)
+
         if 'Real' in solname or 'Imag' in solname:
             # Convert real/imag to phasors
             log.warn('Direction-independent instument parmdb for band {0} contains '
