@@ -44,7 +44,6 @@ class dppp_scratch(LOFARnodeTCP):
 
         if 'msin' in kwargs:
             self.msin_original = kwargs['msin'].rstrip('/')
-#             kwargs.pop('msin')
 
         if 'msout' in kwargs:
             self.msout_original = kwargs['msout'].rstrip('/')
@@ -62,21 +61,16 @@ class dppp_scratch(LOFARnodeTCP):
             self.scratch_dir = kwargs['local_scratch_dir'].rstrip('/')
             kwargs.pop('local_scratch_dir')
 
-        self.logger.info(self.scratch_dir)
+        self.logger.info('Using {} as scratch directory'.format(self.scratch_dir))
 
         # Set up scratch paths
-        self.msin_scratch = os.path.join(self.scratch_dir, os.path.basename(self.msin_original))
-#         args.append('msin=' + self.msin_scratch)
         if self.msout_original == '.':
             # Input file is modified
             self.msout_scratch = os.path.join(self.scratch_dir, os.path.basename(self.msin_original))
-            args.append('msout=.')
         else:
             # New output is created
             self.msout_scratch = os.path.join(self.scratch_dir, os.path.basename(self.msout_original))
-            args.append('msout=' + self.msout_scratch)
-
-#         self.copy_to_scratch()
+        args.append('msout=' + self.msout_scratch)
 
         # Time execution of this job
         with log_time(self.logger):
@@ -158,14 +152,6 @@ class dppp_scratch(LOFARnodeTCP):
         self.copy_to_origin()
         self.cleanup()
         return 0
-
-    def copy_to_scratch(self):
-        self.logger.info("Copying input data to scratch directory")
-        if os.path.exists(self.msin_scratch):
-            shutil.rmtree(self.msin_scratch)
-        args = ['-a', self.msin_original, self.scratch_dir]
-        prog = '/usr/bin/rsync'
-        self.execute(prog, args)
 
     def copy_to_origin(self):
         self.logger.info("Copying output data to original directory")
