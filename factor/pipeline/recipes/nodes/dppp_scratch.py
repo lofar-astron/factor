@@ -42,8 +42,6 @@ class dppp_scratch(LOFARnodeTCP):
         self.infile = infile
         self.executable = executable
 
-        self.logger.info(self.work_dir)
-
         if 'msin' in kwargs:
             self.msin_original = kwargs['msin'].rstrip('/')
             kwargs.pop('msin')
