@@ -111,6 +111,7 @@ class FacetSelfcal(Operation):
         self.direction.cleanup_mapfiles = [
             os.path.join(self.mapfile_dir, 'shifted_empty_bands.datamap'),
             os.path.join(self.mapfile_dir, 'shifted_cal_bands.datamap'),
+            os.path.join(self.mapfile_dir, 'predict_all_model_bands.datamap'),
             os.path.join(self.mapfile_dir, 'corrupted_all_model_bands.datamap'),
             os.path.join(self.mapfile_dir, 'diff_models_facet.datamap'),
             os.path.join(self.mapfile_dir, 'chunk_files.datamap'),

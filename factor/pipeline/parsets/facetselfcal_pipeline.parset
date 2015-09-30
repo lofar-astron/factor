@@ -68,19 +68,26 @@ make_sourcedb_all_facet_sources.control.opts.mapfile_in    =   make_facet_skymod
 make_sourcedb_all_facet_sources.control.opts.inputkey      =   in
 make_sourcedb_all_facet_sources.argument.format            =   <
 
-predict_all_facet_sources.control.type                     =   dppp_inplace
+predict_all_facet_sources.control.type                     =   dppp
 predict_all_facet_sources.control.opts.mapfiles_in         =   [shift_empty.output.mapfile,make_sourcedb_all_facet_sources.output.mapfile]
 predict_all_facet_sources.control.opts.inputkeys           =   [msin,sourcedb]
-predict_all_facet_sources.argument.msout                   =   .
-predict_all_facet_sources.argument.msout.datacolumn        =   MODEL_DATA
+predict_all_facet_sources.argument.msout.overwrite         =   True
+predict_all_facet_sources.argument.msout.writefullresflag  =   False
+predict_all_facet_sources.argument.local_scratch_dir       =   {{ local_dir }}
 predict_all_facet_sources.argument.steps                   =   [predict_all]
 predict_all_facet_sources.argument.predict_all.type        =   predict
 predict_all_facet_sources.argument.predict_all.sourcedb    =   sourcedb
 
+copy_predict_all_model_map.control.kind                    =   plugin
+copy_predict_all_model_map.control.type                    =   copyMapfile
+copy_predict_all_model_map.control.mapfile_in              =   predict_all_facet_sources.output.mapfile
+copy_predict_all_model_map.control.mapfile_dir             =   {{ mapfile_dir }}
+copy_predict_all_model_map.control.filename                =   predict_all_model_bands.datamap
+
 corrupt_all_model_data.control.type                        =   dppp
-corrupt_all_model_data.control.opts.mapfiles_in            =   [shift_empty.output.mapfile,create_parmdb_map.output.mapfile]
+corrupt_all_model_data.control.opts.mapfiles_in            =   [predict_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
 corrupt_all_model_data.control.opts.inputkeys              =   [msin,parmdb]
-corrupt_all_model_data.argument.msin.datacolumn            =   MODEL_DATA
+corrupt_all_model_data.argument.msin.datacolumn            =   DATA
 corrupt_all_model_data.argument.msout.overwrite            =   True
 corrupt_all_model_data.argument.local_scratch_dir          =   {{ local_dir }}
 corrupt_all_model_data.argument.steps                      =   [corrupt]
