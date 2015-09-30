@@ -42,6 +42,8 @@ class dppp_scratch(LOFARnodeTCP):
         self.infile = infile
         self.executable = executable
 
+        self.logger.info(self.work_dir)
+
         if 'msin' in kwargs:
             self.msin_original = kwargs['msin'].rstrip('/')
             kwargs.pop('msin')
@@ -62,7 +64,7 @@ class dppp_scratch(LOFARnodeTCP):
             self.scratch_dir = kwargs['local_scratch_dir'].rstrip('/')
             kwargs.pop('local_scratch_dir')
 
-        print(self.scratch_dir)
+        self.logger.info(self.scratch_dir)
 
         # Set up scratch paths
         self.msin_scratch = os.path.join(self.scratch_dir, os.path.basename(self.msin_original))
