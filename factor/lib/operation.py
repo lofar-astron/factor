@@ -53,6 +53,7 @@ class Operation(object):
         self.max_cpus_per_node = parset['cluster_specific']['ncpu']
         self.max_percent_memory = parset['cluster_specific']['fmem'] * 100.0
         self.ndir_per_node = parset['cluster_specific']['ndir_per_node']
+        self.nimg_per_node = parset['cluster_specific']['nimg_per_node']
 
         # Working directory
         self.factor_working_dir = parset['dir_working']
@@ -122,6 +123,7 @@ class Operation(object):
                          'pipeline_working_dir': self.pipeline_working_dir,
                          'pipeline_runtime_dir': self.pipeline_runtime_dir,
                          'max_cpus_per_node': self.max_cpus_per_node,
+                         'nimg_per_node': self.nimg_per_node,
                          'casa_executable': parset['casa_executable'],
                          'wsclean_executable': parset['wsclean_executable'],
                          'losoto_executable': parset['losoto_executable'],

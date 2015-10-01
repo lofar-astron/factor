@@ -202,6 +202,11 @@ def parset_read(parset_file):
         parset_dict['cluster_specific']['ndir_per_node'] = 1
     log.info("Processing up to %s direction(s) in parallel per node" %
         (parset_dict['cluster_specific']['ndir_per_node']))
+    if 'nimg_per_node' in parset_dict['cluster_specific']:
+        parset_dict['cluster_specific']['nimg_per_node'] = parset.getint('cluster',
+            'nimg_per_node')
+    else:
+        parset_dict['cluster_specific']['nimg_per_node'] = 1
     if 'clusterdesc_file' not in parset_dict['cluster_specific']:
         parset_dict['cluster_specific']['clusterdesc_file'] = parset_dict['lofarroot'] + '/share/local.clusterdesc'
         parset_dict['cluster_specific']['node_list'] = ['localhost']
