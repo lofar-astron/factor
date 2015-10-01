@@ -67,7 +67,7 @@ class InitSubtract(Operation):
                     band.skymodel_dirindep = item.file
                     band.skip = item.skip
             else:
-                for band self.bands:
+                for band in self.bands:
                     band.skymodel_dirindep = None
 
         # Delete averaged data as they're no longer needed
