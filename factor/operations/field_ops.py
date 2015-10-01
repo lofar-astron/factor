@@ -32,12 +32,6 @@ class InitSubtract(Operation):
         super(InitSubtract, self).__init__(parset, bands, direction,
             name='InitSubtract')
 
-        # Set the pipeline parset to use
-        if all([b.skymodel_dirindep is not None for b in self.bands]):
-            self.pipeline_parset_template = '{0}_subonly_pipeline.parset'.format(self.name)
-        else:
-            self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
-
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
