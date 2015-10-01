@@ -1120,7 +1120,7 @@ adjust_wsclean_mapfile2.control.filename                   =   final_image.datam
 
 create_expanded_mapfile.control.kind                       =   plugin
 create_expanded_mapfile.control.type                       =   expandMapfile
-create_expanded_mapfile.control.mapfile_in                 =   adjust_wsclean_mapfile2.output.mapfile
+create_expanded_mapfile.control.mapfile_in                 =   create_model4_map.output.mapfile
 create_expanded_mapfile.control.mapfile_to_match           =   shift_empty.output.mapfile
 create_expanded_mapfile.control.mapfile_dir                =   {{ mapfile_dir }}
 create_expanded_mapfile.control.filename                   =   expand_wsclean_model.datamap
