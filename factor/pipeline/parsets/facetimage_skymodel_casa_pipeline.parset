@@ -1,96 +1,6 @@
-pipeline.steps = [create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, shift_empty, copy_shifted_map, add_all_facet_sources, average, copy_all_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile, concat_averaged, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2]
-
-pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
-
-create_ms_map.control.kind                        =   plugin
-create_ms_map.control.type                        =   addListMapfile
-create_ms_map.control.hosts                       =   {{ hosts }}
-create_ms_map.control.files                       =   {{ ms_files }}
-create_ms_map.control.mapfile_dir                 =   {{ mapfile_dir }}
-create_ms_map.control.filename                    =   input_bands.datamap
-
-create_parmdb_map.control.kind                    =   plugin
-create_parmdb_map.control.type                    =   addListMapfile
-create_parmdb_map.control.hosts                   =   {{ hosts }}
-create_parmdb_map.control.files                   =   {{ dir_indep_parmdbs }}
-create_parmdb_map.control.mapfile_dir             =   {{ mapfile_dir }}
-create_parmdb_map.control.filename                =   dir_indep_instrument_parmdbs.datamap
-
-create_full_skymodels_map.control.kind            =   plugin
-create_full_skymodels_map.control.type            =   addListMapfile
-create_full_skymodels_map.control.hosts           =   {{ hosts }}
-create_full_skymodels_map.control.files           =   {{ skymodels }}
-create_full_skymodels_map.control.mapfile_dir     =   {{ mapfile_dir }}
-create_full_skymodels_map.control.filename        =   full_skymodels.datamap
-
-make_facet_skymodels_all.control.type             =   make_facet_skymodel
-make_facet_skymodels_all.control.mapfile_in       =   create_full_skymodels_map.output.mapfile
-make_facet_skymodels_all.control.inputkey         =   fullmodelfile
-make_facet_skymodels_all.control.outputkey        =   outfile
-make_facet_skymodels_all.argument.flags           =   [fullmodelfile,outfile,{{ vertices_file }}]
-make_facet_skymodels_all.argument.cal_only        =   False
-
-shift_empty.control.type                          =   dppp
-shift_empty.control.opts.mapfile_in               =   create_ms_map.output.mapfile
-shift_empty.control.opts.inputkey                 =   msin
-shift_empty.argument.msin.datacolumn              =   SUBTRACTED_DATA_ALL_NEW
-shift_empty.argument.msout.overwrite              =   True
-shift_empty.argument.msout.writefullresflag       =   False
-shift_empty.argument.steps                        =   [shift,avg]
-shift_empty.argument.shift.type                   =   phaseshifter
-shift_empty.argument.shift.phasecenter            =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
-shift_empty.argument.avg.type                     =   squash
-shift_empty.argument.avg.freqstep                 =   {{ facetimage_freqstep }}
-shift_empty.argument.avg.timestep                 =   {{ facetimage_timestep }}
-
-copy_shifted_map.control.kind                     =   plugin
-copy_shifted_map.control.type                     =   copyMapfile
-copy_shifted_map.control.mapfile_in               =   shift_empty.output.mapfile
-copy_shifted_map.control.mapfile_dir              =   {{ mapfile_dir }}
-copy_shifted_map.control.filename                 =   shifted_empty_final_bands.datamap
-
-add_all_facet_sources.control.type                =   calibrate-stand-alone_new
-add_all_facet_sources.argument.observation        =   shift_empty.output.mapfile
-add_all_facet_sources.argument.parset             =   {{ parset_dir }}/facet_dirindep_add_all.parset
-add_all_facet_sources.argument.catalog            =   make_facet_skymodels_all.output.mapfile
-add_all_facet_sources.argument.parmdb             =   create_parmdb_map.output.mapfile
-add_all_facet_sources.argument.replace-sourcedb   =   True
-add_all_facet_sources.argument.replace-parmdb     =   True
-add_all_facet_sources.argument.no-columns         =   True
-
-expand_merged_parmdb_map.control.kind             =   plugin
-expand_merged_parmdb_map.control.type             =   expandMapfile
-expand_merged_parmdb_map.control.mapfile_in       =   {{ dir_dep_parmdb_datamap }}
-expand_merged_parmdb_map.control.mapfile_to_match =   shift_empty.output.mapfile
-expand_merged_parmdb_map.control.mapfile_dir      =   {{ mapfile_dir }}
-expand_merged_parmdb_map.control.filename         =   expand_merged_parmdbs.datamap
-
-apply_dir_dep_fast.control.type                   =   calibrate-stand-alone_new
-apply_dir_dep_fast.control.mapfiles_in            =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-apply_dir_dep_fast.control.inputkeys              =   [inputms,inputparmdb]
-apply_dir_dep_fast.argument.observation           =   inputms
-apply_dir_dep_fast.argument.parset                =   {{ parset_dir }}//facet_dirdep_apply_fast.parset
-apply_dir_dep_fast.argument.catalog               =   {{ skymodel_dir }}/empty.skymodel
-apply_dir_dep_fast.argument.parmdb                =   inputparmdb
-apply_dir_dep_fast.argument.replace-sourcedb      =   True
-apply_dir_dep_fast.argument.replace-parmdb        =   True
-
-apply_dir_dep_slow.control.type                   =   calibrate-stand-alone_new
-apply_dir_dep_slow.control.mapfiles_in            =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-apply_dir_dep_slow.control.inputkeys              =   [inputms,inputparmdb]
-apply_dir_dep_slow.argument.observation           =   inputms
-apply_dir_dep_slow.argument.parset                =   {{ parset_dir }}//facet_dirdep_apply_slow.parset
-apply_dir_dep_slow.argument.catalog               =   {{ skymodel_dir }}/empty.skymodel
-apply_dir_dep_slow.argument.parmdb                =   inputparmdb
-apply_dir_dep_slow.argument.replace-sourcedb      =   True
-apply_dir_dep_slow.argument.replace-parmdb        =   True
-
-create_compressed_mapfile.control.kind            =   plugin
-create_compressed_mapfile.control.type            =   compressMapfile
-create_compressed_mapfile.control.mapfile_in      =   shift_empty.output.mapfile
-create_compressed_mapfile.control.mapfile_dir     =   {{ mapfile_dir }}
-create_compressed_mapfile.control.filename        =   concat_averaged_input.datamap
-
+{% extends "facetimage_skymodel_pipeline.parset" %}
+{% block full_image_steps %}concat_averaged, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2{% endblock full_image_steps %}
+{% block full_image_parms %}
 concat_averaged.control.type                      =   virtual_concat
 concat_averaged.control.mapfile_in                =   create_compressed_mapfile.output.mapfile
 concat_averaged.control.inputkey                  =   msfiles
@@ -193,3 +103,4 @@ adjust_casa_mapfile2.control.mapfile_in           =   casa_image_full2.output.ca
 adjust_casa_mapfile2.control.append               =   {{ casa_suffix }}
 adjust_casa_mapfile2.control.mapfile_dir          =   {{ mapfile_dir }}
 adjust_casa_mapfile2.control.filename             =   final_image.datamap
+{% endblock full_image_parms %}

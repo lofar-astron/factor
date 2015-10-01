@@ -1,4 +1,4 @@
-pipeline.steps = [update_input_bands_hosts, copy_column, expand_merged_parmdb_map, add_all_facet_sources, shift_all, copy_shifted_map, average, copy_all_map, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile, concat_averaged, wsclean1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean2, create_imagebase_map2, adjust_wsclean_mapfile2]
+pipeline.steps = [update_input_bands_hosts, copy_column, expand_merged_parmdb_map, add_all_facet_sources, shift_all, copy_shifted_map, average, copy_all_map, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile, {% block full_image_steps %}concat_averaged, wsclean1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -77,6 +77,7 @@ create_compressed_mapfile.control.mapfile_in      =   average.output.mapfile
 create_compressed_mapfile.control.mapfile_dir     =   {{ mapfile_dir }}
 create_compressed_mapfile.control.filename        =   concat_averaged_input.datamap
 
+{% block full_image_parms %}
 concat_averaged.control.type                      =   dppp
 concat_averaged.control.mapfile_in                =   create_compressed_mapfile5.output.mapfile
 concat_averaged.control.inputkey                  =   msin
@@ -167,3 +168,4 @@ adjust_wsclean_mapfile2.control.mapfile_in        =   create_imagebase_map2.outp
 adjust_wsclean_mapfile2.control.append            =   {{ wsclean_suffix }}
 adjust_wsclean_mapfile2.control.mapfile_dir       =   {{ mapfile_dir }}
 adjust_wsclean_mapfile2.control.filename          =   final_image.datamap
+{% endblock full_image_parms %}
