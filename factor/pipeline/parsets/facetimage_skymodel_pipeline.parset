@@ -115,7 +115,7 @@ wsclean1.argument.maxuv-l                         =   1000000
 wsclean1.argument.scale                           =   0.000417
 wsclean1.argument.channelsout                     =   {{ nchannels }}
 wsclean1.argument.mem                             =   {{ max_percent_memory }}
-wsclean1.argument.j                               =   {{ max_cpus_per_node }}
+wsclean1.argument.j                               =   {{ max_cpus_per_img }}
 
 create_imagebase_map1.control.kind                =   plugin
 create_imagebase_map1.control.type                =   trimMapfile
@@ -166,7 +166,7 @@ wsclean2.argument.maxuv-l                         =   1000000
 wsclean2.argument.scale                           =   0.000417
 wsclean2.argument.channelsout                     =   {{ nchannels }}
 wsclean2.argument.mem                             =   {{ max_percent_memory }}
-wsclean2.argument.j                               =   {{ max_cpus_per_node }}
+wsclean2.argument.j                               =   {{ max_cpus_per_img }}
 
 create_imagebase_map2.control.kind                =   plugin
 create_imagebase_map2.control.type                =   trimMapfile
