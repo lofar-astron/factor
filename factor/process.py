@@ -73,6 +73,12 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         if len(input_bands_full) > 0:
             log.debug('Running full initial subtract operation for bands: {0}'.
                 format([b.name for b in input_bands_full]))
+            field = factor.cluster.divide_nodes([field],
+                parset['cluster_specific']['node_list'],
+                parset['cluster_specific']['ndir_per_node'],
+                parset['cluster_specific']['nimg_per_node'],
+                parset['cluster_specific']['ncpu'],
+                parset['cluster_specific']['fmem'])[0]
             op = InitSubtract(parset, input_bands_full, field)
             scheduler.run(op)
             field.cleanup()
@@ -84,6 +90,12 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 format([b.name for b in input_bands_subonly]))
             field_subonly = Direction('field_subonly', bands[0].ra, bands[0].dec,
                 factor_working_dir=parset['dir_working'])
+            field_subonly = factor.cluster.divide_nodes([field_subonly],
+                parset['cluster_specific']['node_list'],
+                parset['cluster_specific']['ndir_per_node'],
+                parset['cluster_specific']['nimg_per_node'],
+                parset['cluster_specific']['ncpu'],
+                parset['cluster_specific']['fmem'])[0]
             op = InitSubtract(parset, input_bands_subonly, field_subonly)
             scheduler.run(op)
             field_subonly.cleanup()
