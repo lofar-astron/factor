@@ -1,6 +1,11 @@
-pipeline.steps = [update_input_bands_hosts, copy_column, expand_merged_parmdb_map, add_all_facet_sources, shift_all, copy_shifted_map, average, copy_all_map, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile, {% block full_image_steps %}concat_averaged, wsclean1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
+pipeline.steps = [update_mapfile_hosts, update_input_bands_hosts, update_model_data_hosts, expand_merged_parmdb_map, shift_empty, add_model_to_empty_data, copy_shifted_map, average, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile, {% block full_image_steps %}concat_averaged, wsclean1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
+
+update_mapfile_hosts.control.kind                 =   plugin
+update_mapfile_hosts.control.type                 =   updateHosts
+update_mapfile_hosts.control.mapfile_dir          =   input.output.mapfile_dir
+update_mapfile_hosts.control.hosts                =   {{ hosts }}
 
 update_input_bands_hosts.control.kind             =   plugin
 update_input_bands_hosts.control.type             =   updateHosts

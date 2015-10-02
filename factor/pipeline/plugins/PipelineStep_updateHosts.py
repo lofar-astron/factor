@@ -1,4 +1,5 @@
 import os
+import grep
 from lofarpipe.support.data_map import DataMap
 from lofarpipe.support.data_map import DataProduct
 
@@ -9,8 +10,11 @@ def plugin_main(args, **kwargs):
 
     Parameters
     ----------
-    mapfile_in : str
+    mapfile_in : str, optional
         Filename of datamap
+    mapfile_dir: str, optional
+        Directory containing mapfiles. All mapfiles in this directory will be
+        updated
     hosts : str
         List of hosts/nodes. May be given as a list or as a string
         (e.g., '[host1, host2]'
@@ -18,22 +22,27 @@ def plugin_main(args, **kwargs):
     Returns
     -------
     result : dict
-        Input datamap filename
+        Input datamap filename (first only if more than one)
 
     """
-    mapfile_in = kwargs['mapfile_in']
+    if 'mapfile_dir' in kwargs:
+        mapfiles_in = grep.grep(os.path.join(kwargs['mapfile_dir'], '*.mapfile'))
+    else:
+        mapfiles_in = [kwargs['mapfile_in']]
+
     if type(kwargs['hosts']) is str:
         hosts = kwargs['hosts'].strip('[]').split(',')
         hosts = [h.strip() for h in hosts]
 
-    map = DataMap.load(mapfile_in)
-    for i in range(len(map)-len(hosts)):
-        hosts.append(hosts[i])
+    for mapfile_in in mapfiles_in:
+        map = DataMap.load(mapfile_in)
+        for i in range(len(map)-len(hosts)):
+            hosts.append(hosts[i])
 
-    for item, host in zip(map, hosts):
-        item.host = host
+        for item, host in zip(map, hosts):
+            item.host = host
 
-    map.save(mapfile_in)
-    result = {'mapfile': mapfile_in}
+        map.save(mapfile_in)
+    result = {'mapfile': mapfiles_in[0]}
 
     return result

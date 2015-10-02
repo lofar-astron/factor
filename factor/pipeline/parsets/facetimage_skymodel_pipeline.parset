@@ -1,26 +1,31 @@
-pipeline.steps = [create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, shift_empty, copy_shifted_map, add_all_facet_sources, average, copy_all_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile, {% block full_image_steps %}concat_averaged, wsclean1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, shift_empty, copy_shifted_map, add_all_facet_sources, average, copy_all_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile, {% block full_image_steps %}concat_averaged, wsclean1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
+
+update_mapfile_hosts.control.kind                 =   plugin
+update_mapfile_hosts.control.type                 =   updateHosts
+update_mapfile_hosts.control.mapfile_dir          =   input.output.mapfile_dir
+update_mapfile_hosts.control.hosts                =   {{ hosts }}
 
 create_ms_map.control.kind                        =   plugin
 create_ms_map.control.type                        =   addListMapfile
 create_ms_map.control.hosts                       =   {{ hosts }}
 create_ms_map.control.files                       =   {{ ms_files }}
-create_ms_map.control.mapfile_dir                 =   {{ mapfile_dir }}
+create_ms_map.control.mapfile_dir                 =   input.output.mapfile_dir
 create_ms_map.control.filename                    =   input_bands.datamap
 
 create_parmdb_map.control.kind                    =   plugin
 create_parmdb_map.control.type                    =   addListMapfile
 create_parmdb_map.control.hosts                   =   {{ hosts }}
 create_parmdb_map.control.files                   =   {{ dir_indep_parmdbs }}
-create_parmdb_map.control.mapfile_dir             =   {{ mapfile_dir }}
+create_parmdb_map.control.mapfile_dir             =   input.output.mapfile_dir
 create_parmdb_map.control.filename                =   dir_indep_instrument_parmdbs.datamap
 
 create_full_skymodels_map.control.kind            =   plugin
 create_full_skymodels_map.control.type            =   addListMapfile
 create_full_skymodels_map.control.hosts           =   {{ hosts }}
 create_full_skymodels_map.control.files           =   {{ skymodels }}
-create_full_skymodels_map.control.mapfile_dir     =   {{ mapfile_dir }}
+create_full_skymodels_map.control.mapfile_dir     =   input.output.mapfile_dir
 create_full_skymodels_map.control.filename        =   full_skymodels.datamap
 
 make_facet_skymodels_all.control.type             =   make_facet_skymodel

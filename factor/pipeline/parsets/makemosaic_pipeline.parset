@@ -1,6 +1,11 @@
-pipeline.steps = [create_images_map, create_vertices_map, create_compressed_mapfile_images, create_compressed_mapfile_vertices, copy_beam_info, make_mosaic, create_ms_map, create_compressed_mapfile, concat, make_pbimage, zero_avgpb, image2fits, correct_mosaic, copy_final_mosaic_map1, copy_final_mosaic_map2]
+pipeline.steps = [update_mapfile_hosts, create_images_map, create_vertices_map, create_compressed_mapfile_images, create_compressed_mapfile_vertices, copy_beam_info, make_mosaic, create_ms_map, create_compressed_mapfile, concat, make_pbimage, zero_avgpb, image2fits, correct_mosaic, copy_final_mosaic_map1, copy_final_mosaic_map2]
 
 pipeline.pluginpath                                    =   {{ pipeline_dir }}/plugins
+
+update_mapfile_hosts.control.kind                      =   plugin
+update_mapfile_hosts.control.type                      =   updateHosts
+update_mapfile_hosts.control.mapfile_dir               =   input.output.mapfile_dir
+update_mapfile_hosts.control.hosts                     =   {{ hosts }}
 
 create_images_map.control.kind                         =   plugin
 create_images_map.control.type                         =   addListMapfile
