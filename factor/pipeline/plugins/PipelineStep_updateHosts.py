@@ -1,5 +1,5 @@
 import os
-import grep
+import glob
 from lofarpipe.support.data_map import DataMap
 from lofarpipe.support.data_map import DataProduct
 
@@ -26,7 +26,7 @@ def plugin_main(args, **kwargs):
 
     """
     if 'mapfile_dir' in kwargs:
-        mapfiles_in = grep.grep(os.path.join(kwargs['mapfile_dir'], '*.mapfile'))
+        mapfiles_in = glob.glob(os.path.join(kwargs['mapfile_dir'], '*.mapfile'))
     else:
         mapfiles_in = [kwargs['mapfile_in']]
 
