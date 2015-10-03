@@ -660,6 +660,25 @@ apply_amp1.argument.parmdb                                 =   inputparmdb
 apply_amp1.argument.replace-sourcedb                       =   True
 apply_amp1.argument.replace-parmdb                         =   True
 
+flag1.control.type                                         =   dppp_inplace
+flag1.control.mapfile_in                                   =   create_chunks_map.output.mapfile
+flag1.control.inputkey                                     =   msin
+flag1.argument.msin.datacolumn                             =   CORRECTED_DATA
+flag1.argument.msout                                       =   .
+flag1.argument.steps                                       =   [flag]
+flag1.argument.flag.type                                   =   aoflagger
+
+create_compressed_mapfile_empty.control.kind               =   plugin
+create_compressed_mapfile_empty.control.type               =   compressMapfile
+create_compressed_mapfile_empty.control.mapfile_in         =   shift_empty.output.mapfile
+create_compressed_mapfile_empty.control.mapfile_dir        =   {{ mapfile_dir }}
+create_compressed_mapfile_empty.control.filename           =   shift_empty_compressed.datamap
+
+transfer_flags1.control.type                               =   transfer_flags
+transfer_flags1.control.mapfiles_in                        =   [create_chunks_map.output.mapfile,create_compressed_mapfile_empty.output.mapfile]
+transfer_flags1.control.inputkeys                          =   [ms1,ms2]
+transfer_flags1.control.arguments                          =   [ms1,ms2]
+
 average3.control.type                                      =   dppp
 average3.control.mapfile_in                                =   create_chunks_map.output.mapfile
 average3.control.inputkey                                  =   msin
@@ -667,8 +686,7 @@ average3.argument.msin.datacolumn                          =   CORRECTED_DATA
 average3.argument.msout.overwrite                          =   True
 average3.argument.msout.writefullresflag                   =   False
 average3.argument.local_scratch_dir                        =   {{ local_dir }}
-average3.argument.steps                                    =   [flag,avg]
-average3.argument.flag.type                                =   aoflagger
+average3.argument.steps                                    =   [avg]
 average3.argument.avg.type                                 =   squash
 average3.argument.avg.freqstep                             =   1
 average3.argument.avg.timestep                             =   {{ facetselfcal_timestep }}
@@ -843,6 +861,19 @@ apply_amp2.argument.parmdb                                 =   inputparmdb
 apply_amp2.argument.replace-sourcedb                       =   True
 apply_amp2.argument.replace-parmdb                         =   True
 
+flag2.control.type                                         =   dppp_inplace
+flag2.control.mapfile_in                                   =   create_chunks_map.output.mapfile
+flag2.control.inputkey                                     =   msin
+flag2.argument.msin.datacolumn                             =   CORRECTED_DATA
+flag2.argument.msout                                       =   .
+flag2.argument.steps                                       =   [flag]
+flag2.argument.flag.type                                   =   aoflagger
+
+transfer_flags2.control.type                               =   transfer_flags
+transfer_flags2.control.mapfiles_in                        =   [create_chunks_map.output.mapfile,create_compressed_mapfile_empty.output.mapfile]
+transfer_flags2.control.inputkeys                          =   [ms1,ms2]
+transfer_flags2.control.arguments                          =   [ms1,ms2]
+
 average4.control.type                                      =   dppp
 average4.control.mapfile_in                                =   create_chunks_map.output.mapfile
 average4.control.inputkey                                  =   msin
@@ -989,8 +1020,7 @@ average5.argument.msin.datacolumn                          =   FACET_DATA_ALL
 average5.argument.msout.overwrite                          =   True
 average5.argument.msout.writefullresflag                   =   False
 average5.argument.local_scratch_dir                        =   {{ local_dir }}
-average5.argument.steps                                    =   [flag,avg]
-average5.argument.flag.type                                =   aoflagger
+average5.argument.steps                                    =   [avg]
 average5.argument.avg.type                                 =   squash
 average5.argument.avg.freqstep                             =   {{ facetimage_freqstep }}
 average5.argument.avg.timestep                             =   {{ facetimage_timestep }}
@@ -1015,9 +1045,19 @@ apply_dir_dep_slow.argument.parmdb                         =   inputparmdb
 apply_dir_dep_slow.argument.replace-sourcedb               =   True
 apply_dir_dep_slow.argument.replace-parmdb                 =   True
 
+flag_averaged.control.type                                 =   dppp
+flag_averaged.control.mapfile_in                           =   average5.output.mapfile
+flag_averaged.control.inputkey                             =   msin
+flag_averaged.argument.msin.datacolumn                     =   CORRECTED_DATA
+flag_averaged.argument.msout.overwrite                     =   True
+flag_averaged.argument.msout.writefullresflag              =   False
+flag_averaged.argument.local_scratch_dir                   =   {{ local_dir }}
+flag_averaged.argument.steps                               =   [flag]
+flag_averaged.argument.flag.type                           =   aoflagger
+
 create_compressed_mapfile5.control.kind                    =   plugin
 create_compressed_mapfile5.control.type                    =   compressMapfile
-create_compressed_mapfile5.control.mapfile_in              =   average5.output.mapfile
+create_compressed_mapfile5.control.mapfile_in              =   flag_averaged.output.mapfile
 create_compressed_mapfile5.control.mapfile_dir             =   {{ mapfile_dir }}
 create_compressed_mapfile5.control.filename                =   concat_averaged_input.datamap
 
@@ -1191,6 +1231,11 @@ copy_diff_model_field_map.control.type                     =   copyMapfile
 copy_diff_model_field_map.control.mapfile_in               =   shift_diff_model_to_field.output.mapfile
 copy_diff_model_field_map.control.mapfile_dir              =   {{ mapfile_dir }}
 copy_diff_model_field_map.control.filename                 =   diff_models_field.datamap
+
+transfer_flags_to_diff_model.control.type                  =   transfer_flags
+transfer_flags_to_diff_model.control.mapfiles_in           =   [shift_empty.output.mapfile,shift_diff_model_to_field.output.mapfile]
+transfer_flags_to_diff_model.control.inputkeys             =   [ms1,ms2]
+transfer_flags_to_diff_model.control.arguments             =   [ms1,ms2]
 
 create_single_band_mapfile.control.kind                    =   plugin
 create_single_band_mapfile.control.type                    =   filterMapfile
