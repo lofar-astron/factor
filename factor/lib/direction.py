@@ -11,7 +11,7 @@ class Direction(object):
     Generic direction class
 
     A direction object holds all the parameters needed for an operation in a
-    given direction (or facet).
+    given direction (facet).
 
     Note:
     All attributes needed by the pipeline templates should be set on the class
