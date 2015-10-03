@@ -74,8 +74,3 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     main(args.ms1, args.ms2, args.column1, args.column2, args.column_out, args.op)
-
-
-
-
-
