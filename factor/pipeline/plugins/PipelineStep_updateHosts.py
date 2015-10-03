@@ -19,16 +19,14 @@ def plugin_main(args, **kwargs):
         List of hosts/nodes. May be given as a list or as a string
         (e.g., '[host1, host2]'
 
-    Returns
-    -------
-    result : dict
-        Input datamap filename (first only if more than one)
-
     """
     if 'mapfile_dir' in kwargs:
         mapfiles_in = glob.glob(os.path.join(kwargs['mapfile_dir'], '*.mapfile'))
     else:
         mapfiles_in = [kwargs['mapfile_in']]
+
+    if len(mapfiles_in) == 0:
+        return
 
     if type(kwargs['hosts']) is str:
         hosts = kwargs['hosts'].strip('[]').split(',')
@@ -43,6 +41,3 @@ def plugin_main(args, **kwargs):
             item.host = host
 
         map.save(mapfile_in)
-    result = {'mapfile': mapfiles_in[0]}
-
-    return result
