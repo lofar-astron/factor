@@ -43,10 +43,16 @@ def main(ms1, ms2):
         numberofchans1 = np.shape(flags1)[1]
         chanperms = len(ms2)/numberofchans1
 
+        starttime = t1[0]['TIME']
+        endtime = t1[-1]['TIME]
+
+        t1_sub = t1.query('TIME >= ' + str(starttime*3600.0) + ' && '
+          'TIME <= ' + str(endtime*3600.0), sortlist='TIME,ANTENNA1,ANTENNA2')
+
         for ms_id, ms_to in enumerate(ms2):
             if os.path.isdir(ms_to):
                 print('Transfering flags to {}'.format(ms_to))
-                flagsin = t1.getcolslice('FLAG', [chanperms*ms_id, 0], [(chanperms*(ms_id+1))-1, 3])
+                flagsin = t1_sub.getcolslice('FLAG', [chanperms*ms_id, 0], [(chanperms*(ms_id+1))-1, 3])
 
                 t2 = pt.table(ms_to, readonly=False, ack=False)
                 flags2 = t2.getcol('FLAG')
@@ -63,6 +69,7 @@ def main(ms1, ms2):
                 t2.putcol('FLAG', flagsout)
                 t2.flush()
                 t2.close()
+        t1_sub.close()
         t1.close()
 
 
