@@ -38,7 +38,7 @@ def main(ms1, ms2):
     for ms_from in ms1:
         print('Reading flags from {}'.format(ms_from))
         t1 = pt.table(ms_from, readonly=True, ack=False)
-        flags1 = t1.getcol('FLAG', nrow=1))
+        flags1 = t1.getcol('FLAG', nrow=1)
 
         numberofchans1 = np.shape(flags1)[1]
         chanperms = len(ms2)/numberofchans1
