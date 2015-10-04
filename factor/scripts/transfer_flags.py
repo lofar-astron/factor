@@ -39,7 +39,7 @@ def main(ms1, ms2):
         t1 = pt.table(ms_from, readonly=True, ack=False)
         flags1 = t1.getcol('FLAG')
 
-        numberofchans1 = numpy.shape(flags1)[1]
+        numberofchans1 = np.shape(flags1)[1]
         chanperms = len(ms2)/numberofchans1
 
         for ms_id, ms_to in enumerate(ms2):
@@ -51,8 +51,8 @@ def main(ms1, ms2):
                 flags2 = t2.getcol('FLAG')
 
                 # Expand flags to match output MS
-                numberofchans2 = numpy.shape(flags2)[1]
-                numbertorepeat = numpy.ceil(float(numberofchans2)/float(numberofchans1))
+                numberofchans2 = np.shape(flags2)[1]
+                numbertorepeat = np.ceil(float(numberofchans2)/float(numberofchans1))
                 flagsout = np.repeat(flagsin, numbertorepeat, axis=0)
 
                 # Perform logical OR to pick up ms flags
