@@ -44,7 +44,7 @@ def main(ms1, ms2):
         chanperms = len(ms2)/numberofchans1
 
         starttime = t1[0]['TIME']
-        endtime = t1[-1]['TIME]
+        endtime = t1[-1]['TIME']
 
         t1_sub = t1.query('TIME >= ' + str(starttime*3600.0) + ' && '
           'TIME <= ' + str(endtime*3600.0), sortlist='TIME,ANTENNA1,ANTENNA2')
