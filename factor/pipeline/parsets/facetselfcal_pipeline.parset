@@ -865,7 +865,7 @@ create_compressed_mapfile_empty.control.mapfile_dir        =   {{ mapfile_dir }}
 create_compressed_mapfile_empty.control.filename           =   shift_empty_compressed.datamap
 
 transfer_flags.control.type                                =   transfer_flags
-transfer_flags.control.mapfiles_in                         =   [create_chunks_map.output.mapfile,create_compressed_mapfile_empty.output.mapfile]
+transfer_flags.control.mapfiles_in                         =   [create_chunks_compressed_mapfile.output.mapfile,create_compressed_mapfile_empty.output.mapfile]
 transfer_flags.control.inputkeys                           =   [ms1,ms2]
 transfer_flags.control.arguments                           =   [ms1,ms2]
 
