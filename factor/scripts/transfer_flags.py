@@ -38,7 +38,7 @@ def main(ms1, ms2):
     for ms_from in ms1:
         print('Reading flags from {}'.format(ms_from))
         t1 = pt.table(ms_from, readonly=True, ack=False)
-        flags1 = t1.getcol('FLAG')
+        flags1 = t1.getcol('FLAG', nrow=1))
 
         numberofchans1 = np.shape(flags1)[1]
         chanperms = len(ms2)/numberofchans1
@@ -46,7 +46,7 @@ def main(ms1, ms2):
         for ms_id, ms_to in enumerate(ms2):
             if os.path.isdir(ms_to):
                 print('Transfering flags to {}'.format(ms_to))
-                flagsin = flags1.getcolslice('FLAG', [chanperms*ms_id, 0], [(chanperms*(ms_id+1))-1, 3])
+                flagsin = t1.getcolslice('FLAG', [chanperms*ms_id, 0], [(chanperms*(ms_id+1))-1, 3])
 
                 t2 = pt.table(ms_to, readonly=False, ack=False)
                 flags2 = t2.getcol('FLAG')
