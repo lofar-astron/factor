@@ -6,6 +6,7 @@ import argparse
 from argparse import RawTextHelpFormatter
 import pyrap.tables as pt
 import sys
+import os
 import numpy as np
 
 
