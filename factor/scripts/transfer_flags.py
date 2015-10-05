@@ -59,7 +59,7 @@ def main(ms1, ms2):
 
         for ms_id, ms_to in enumerate(ms2):
             if os.path.isdir(ms_to):
-                print('Transfering flags to {}'.format(ms_to))
+                print('Transferring flags to {}'.format(ms_to))
                 flagsin = t1.getcolslice('FLAG', [chanperms*ms_id, 0], [(chanperms*(ms_id+1))-1, 3])
 
                 t2 = pt.table(ms_to, readonly=False, ack=False)
@@ -69,7 +69,11 @@ def main(ms1, ms2):
                 # (assumes ms2 is ordered in increasing time)
                 times2 = t2.getcol('TIME')
                 time_indx1 = np.where(times2 >= starttime)[0][0]
-                time_indx2 = np.where(times2 == endtime)[0][-1] + 1
+                try:
+                    time_indx2 = np.where(times2 == endtime)[0][-1] + 1
+                except IndexError:
+                    # End time of ms1 is beyond that of ms2
+                    time_indx2 = len(times2) - 1
 
                 # Expand flags to match output MS and perform logical OR to pick
                 # up original flags
