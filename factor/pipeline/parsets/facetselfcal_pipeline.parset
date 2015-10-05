@@ -1040,7 +1040,7 @@ apply_dir_dep_slow.argument.parmdb                         =   inputparmdb
 apply_dir_dep_slow.argument.replace-sourcedb               =   True
 apply_dir_dep_slow.argument.replace-parmdb                 =   True
 
-flag_averaged_full.type                                    =   dppp_inplace
+flag_averaged_full.control.type                            =   dppp_inplace
 flag_averaged_full.control.mapfile_in                      =   average5.output.mapfile
 flag_averaged_full.control.inputkey                        =   msin
 flag_averaged_full.argument.msin.datacolumn                =   CORRECTED_DATA
