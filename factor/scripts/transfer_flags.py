@@ -18,8 +18,8 @@ def main(ms1, ms2):
     ----------
     ms1 : str or list
         Name of MS file or list of files from which the flags will be taken.
-        Note: it is implicitly assumed than ms1 has a higher time and/or frequency
-        averaging than ms2
+        Note: it is implicitly assumed than ms1 has the same or higher time
+        and frequency averaging than ms2
     ms2 : str or list
         Name of MS file or list of files to which the flags will be transferred
 
