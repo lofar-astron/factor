@@ -43,8 +43,12 @@ def main(ms1, ms2):
         # Determine how to map channels from ms1 to those in ms2
         numberofchans1 = np.shape(flags1)[1]
         if len(ms2) > 1:
+            # If we need to transfer to more than one ms, assume the channels
+            # are divided up equally among them
             chanperms = max(1, len(ms2)/numberofchans1)
         else:
+            # If we need to transfer to just one ms, assume all the channels
+            # are transferred
             chanperms = numberofchans1
 
         # Get time ranges of ms1
@@ -67,9 +71,12 @@ def main(ms1, ms2):
 
                 # Expand flags to match output MS and perform logical OR to pick
                 # up original flags
-                numberofchans2 = np.shape(flags2)[1]
-                numbertorepeat = np.int(np.ceil(float(numberofchans2)/float(chanperms)))
-                flagsout = np.logical_or(np.repeat(flagsin, numbertorepeat, axis=1),
+                numberofchans2 = flags2.shape[1]
+                chan_repeat = np.int(np.ceil(float(numberofchans2)/float(chanperms)))
+                time_repeat = np.int(np.ceil(float(flagsin.shape[0])/
+                    float(flags2[time_indx1:time_indx2].shape[0])))
+                flagsout = np.logical_or(
+                    np.repeat(np.repeat(flagsin, time_repeat, axis=0), chan_repeat, axis=1),
                     flags2[time_indx1:time_indx2])
 
                 # Write updated flags

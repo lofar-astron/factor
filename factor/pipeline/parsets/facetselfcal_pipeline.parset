@@ -1268,7 +1268,7 @@ average_pre.argument.local_scratch_dir                     =   {{ local_dir }}
 average_pre.argument.steps                                 =   [avg]
 average_pre.argument.avg.type                              =   squash
 average_pre.argument.avg.freqstep                          =   {{ verify_freqstep }}
-average_pre.argument.avg.timestep                          =   {{ verfiy_timestep }}
+average_pre.argument.avg.timestep                          =   {{ verify_timestep }}
 
 average_post.control.type                                  =   dppp
 average_post.control.mapfile_in                            =   create_single_band_mapfile.output.mapfile
