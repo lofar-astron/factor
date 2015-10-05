@@ -17,7 +17,9 @@ def main(ms1, ms2):
     Parameters
     ----------
     ms1 : str or list
-        Name of MS file or list of files from which the flags will be taken
+        Name of MS file or list of files from which the flags will be taken.
+        Note: it is implicitly assumed than ms1 has a higher time and/or frequency
+        averaging than ms2
     ms2 : str or list
         Name of MS file or list of files to which the flags will be transferred
 
@@ -76,7 +78,7 @@ def main(ms1, ms2):
                 time_repeat = np.int(np.ceil(float(time_indx2-time_indx1)/
                     float(flagsin.shape[0])))
                 flagsout = np.logical_or(
-                    np.repeat(np.repeat(flagsin, time_repeat, axis=0), chan_repeat, axis=1),
+                    np.repeat(np.repeat(flagsin, time_repeat, axis=0), chan_repeat, axis=1)[0:time_indx2-time_indx1],
                     flags2[time_indx1:time_indx2])
 
                 # Write updated flags
