@@ -46,30 +46,29 @@ def main(ms1, ms2):
         starttime = t1[0]['TIME']
         endtime = t1[-1]['TIME']
 
-        t1_sub = t1.query('TIME >= ' + str(starttime*3600.0) + ' && '
-          'TIME <= ' + str(endtime*3600.0), sortlist='TIME,ANTENNA1,ANTENNA2')
-
         for ms_id, ms_to in enumerate(ms2):
             if os.path.isdir(ms_to):
                 print('Transfering flags to {}'.format(ms_to))
-                flagsin = t1_sub.getcolslice('FLAG', [chanperms*ms_id, 0], [(chanperms*(ms_id+1))-1, 3])
+                flagsin = t1.getcolslice('FLAG', [chanperms*ms_id, 0], [(chanperms*(ms_id+1))-1, 3])
 
                 t2 = pt.table(ms_to, readonly=False, ack=False)
                 flags2 = t2.getcol('FLAG')
+                times2 = t2.getcol('TIME')
+                time_indx1 = np.where(times2 >= starttime)[0][0]
+                time_indx2 = np.where(times2 == endtime)[0][-1] + 1
 
-                # Expand flags to match output MS
+                # Expand flags to match output MS and perform logical OR to pick
+                # up original flags
                 numberofchans2 = np.shape(flags2)[1]
                 numbertorepeat = np.ceil(float(numberofchans2)/float(numberofchans1))
-                flagsout = np.repeat(flagsin, numbertorepeat, axis=0)
+                flagsout = np.logical_or(np.repeat(flagsin, numbertorepeat, axis=0),
+                    flags2[time_indx1:time_indx2])
 
-                # Perform logical OR to pick up ms flags
-                flagsout = np.logical_or(flagsout, flags2)
-
-                # Write data
-                t2.putcol('FLAG', flagsout)
+                # Write updated flags
+                t2.putcolslice('FLAG', flagsout, [0, 0], [numberofchans2-1, 3],
+                    startrow=time_indx1, nrow=time_indx2-time_indx1)
                 t2.flush()
                 t2.close()
-        t1_sub.close()
         t1.close()
 
 
