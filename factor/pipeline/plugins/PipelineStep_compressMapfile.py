@@ -57,6 +57,8 @@ def plugin_main(args, **kwargs):
                 band_indx = int(item.file.split('B')[1][0:2])
             if i == 0:
                 start_indx = band_indx
+            elif i == 1:
+                indx_skip = band_indx - start_indx
             band_numbers.append(band_indx)
             file_list.append(item.file)
         except ValueError:
@@ -66,7 +68,7 @@ def plugin_main(args, **kwargs):
     if not skip_check:
         indx = 0
         for i in range(len(band_numbers)):
-            if band_numbers[i] != indx+start_indx:
+            if band_numbers[i] != (indx * indx_skip) + start_indx:
                 file_list.insert(indx, 'dummy.ms')
                 indx += 1
             indx += 1
