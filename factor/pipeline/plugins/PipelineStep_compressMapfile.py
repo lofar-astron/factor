@@ -49,6 +49,7 @@ def plugin_main(args, **kwargs):
     band_numbers = []
     file_list = []
     skip_check = False
+    indx_skip = 0
     for i, item in enumerate(map_in):
         try:
             if 'SB' in item.file:
