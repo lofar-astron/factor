@@ -41,7 +41,7 @@ def main(ms1, ms2):
         flags1 = t1.getcol('FLAG', nrow=1)
 
         # Determine how to map channels from ms1 to those in ms2
-        numberofchans1 = np.shape(flags1)[1]
+        numberofchans1 = flags1.shape[1]
         if len(ms2) > 1:
             # If we need to transfer to more than one ms, assume the channels
             # are divided up equally among them
@@ -73,8 +73,8 @@ def main(ms1, ms2):
                 # up original flags
                 numberofchans2 = flags2.shape[1]
                 chan_repeat = np.int(np.ceil(float(numberofchans2)/float(chanperms)))
-                time_repeat = np.int(np.ceil(float(flagsin.shape[0])/
-                    float(flags2[time_indx1:time_indx2].shape[0])))
+                time_repeat = np.int(np.ceil(float(flags2[time_indx1:time_indx2].shape[0]))/
+                    float(flagsin.shape[0]))
                 flagsout = np.logical_or(
                     np.repeat(np.repeat(flagsin, time_repeat, axis=0), chan_repeat, axis=1),
                     flags2[time_indx1:time_indx2])
