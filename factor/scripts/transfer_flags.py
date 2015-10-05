@@ -73,8 +73,8 @@ def main(ms1, ms2):
                 # up original flags
                 numberofchans2 = flags2.shape[1]
                 chan_repeat = np.int(np.ceil(float(numberofchans2)/float(chanperms)))
-                time_repeat = np.int(np.ceil(float(flags2[time_indx1:time_indx2].shape[0]))/
-                    float(flagsin.shape[0]))
+                time_repeat = np.int(np.ceil(float(time_indx2-time_indx1)/
+                    float(flagsin.shape[0])))
                 flagsout = np.logical_or(
                     np.repeat(np.repeat(flagsin, time_repeat, axis=0), chan_repeat, axis=1),
                     flags2[time_indx1:time_indx2])
