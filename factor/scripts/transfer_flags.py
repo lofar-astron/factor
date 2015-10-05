@@ -60,7 +60,7 @@ def main(ms1, ms2):
                 # Expand flags to match output MS and perform logical OR to pick
                 # up original flags
                 numberofchans2 = np.shape(flags2)[1]
-                numbertorepeat = np.ceil(float(numberofchans2)/float(numberofchans1))
+                numbertorepeat = np.int(np.ceil(float(numberofchans2)/float(chanperms)))
                 flagsout = np.logical_or(np.repeat(flagsin, numbertorepeat, axis=1),
                     flags2[time_indx1:time_indx2])
 
