@@ -1044,6 +1044,7 @@ flag_averaged_full.type                                    =   dppp_inplace
 flag_averaged_full.control.mapfile_in                      =   average5.output.mapfile
 flag_averaged_full.control.inputkey                        =   msin
 flag_averaged_full.argument.msin.datacolumn                =   CORRECTED_DATA
+flag_averaged_full.argument.msout                          =   .
 flag_averaged_full.argument.steps                          =   [flag]
 flag_averaged_full.argument.flag.type                      =   aoflagger
 
