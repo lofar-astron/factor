@@ -61,7 +61,7 @@ def main(ms1, ms2):
                 # up original flags
                 numberofchans2 = np.shape(flags2)[1]
                 numbertorepeat = np.ceil(float(numberofchans2)/float(numberofchans1))
-                flagsout = np.logical_or(np.repeat(flagsin, numbertorepeat, axis=0),
+                flagsout = np.logical_or(np.repeat(flagsin, numbertorepeat, axis=1),
                     flags2[time_indx1:time_indx2])
 
                 # Write updated flags
