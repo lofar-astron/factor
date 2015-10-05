@@ -40,9 +40,14 @@ def main(ms1, ms2):
         t1 = pt.table(ms_from, readonly=True, ack=False)
         flags1 = t1.getcol('FLAG', nrow=1)
 
+        # Determine how to map channels from ms1 to those in ms2
         numberofchans1 = np.shape(flags1)[1]
-        chanperms = len(ms2)/numberofchans1
+        if len(ms2) > 1:
+            chanperms = max(1, len(ms2)/numberofchans1)
+        else:
+            chanperms = numberofchans1
 
+        # Get time ranges of ms1
         starttime = t1[0]['TIME']
         endtime = t1[-1]['TIME']
 
@@ -53,6 +58,9 @@ def main(ms1, ms2):
 
                 t2 = pt.table(ms_to, readonly=False, ack=False)
                 flags2 = t2.getcol('FLAG')
+
+                # Get index range for ms2 that corresponds to time range of ms1
+                # (assumes ms2 is ordered in increasing time)
                 times2 = t2.getcol('TIME')
                 time_indx1 = np.where(times2 >= starttime)[0][0]
                 time_indx2 = np.where(times2 == endtime)[0][-1] + 1
