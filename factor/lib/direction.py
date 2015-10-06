@@ -18,8 +18,8 @@ class Direction(object):
     instance so that they can be passed with self.__dict__
 
     """
-    def __init__(self, name, ra, dec, atrous_do=False, mscale_field_do=False, cal_imsize=0,
-        solint_p=0, solint_a=0, field_imsize=0, dynamic_range='LD', region_selfcal='',
+    def __init__(self, name, ra, dec, atrous_do=False, mscale_field_do=False, cal_imsize=512,
+        solint_p=1, solint_a=1, field_imsize=2048, dynamic_range='LD', region_selfcal='',
         region_field='', peel_skymodel='', outlier_do=False, factor_working_dir='',
         make_final_image=False, cal_size_deg=None, cal_flux_jy=None):
         """
