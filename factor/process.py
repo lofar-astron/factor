@@ -289,7 +289,8 @@ def _set_up_bands(parset, log, test_run=False):
     for ms in parset['mss']:
         band = Band(ms, parset['dir_working'], test_run=test_run)
 
-        # Some checks on the dir-indep instrument parmdb
+        # Checks whether the dir-indep instrument parmdb exists or has name
+        # "instrument"
         band.dirindparmdb = os.path.join(band.file, parset['parmdb_name'])
         if parset['parmdb_name'] == 'instrument':
             # Check for special BBS table name
@@ -309,18 +310,29 @@ def _set_up_bands(parset, log, test_run=False):
                 'for band {0}'.format(band.file))
             sys.exit(1)
 
+        # Check whether there are ampl/phase or real/imag
         try:
-            solname = lofar.parmdb.parmdb(band.dirindparmdb).getNames()[0]
+            pdb = lofar.parmdb.parmdb(band.dirindparmdb)
+            solname = pdb.getNames()[0]
         except IndexError:
             log.critical('Direction-independent instument parmdb appears to be empty '
                         'for band {0}'.format(band.file))
             sys.exit(1)
-
         if 'Real' in solname or 'Imag' in solname:
             # Convert real/imag to phasors
             log.warn('Direction-independent instument parmdb for band {0} contains '
                 'real/imaginary values. Converting to phase/amplitude...'.format(band.file))
             band.dirindparmdb = _convert_to_phasors(band.dirindparmdb)
+
+        # Check that there aren't extra default values in the parmdb, as this
+        # confuses DPPP
+        defvals = pdb.getDefValues()
+        for v in defvals:
+            if 'Ampl' not in v and 'Phase' not in v:
+                pdb.deleteDefValues(v)
+        pdb.flush()
+
+        # Check for any sky models specified by user
         band.skymodel_dirindep = None
         msbase = os.path.basename(ms)
         if msbase in parset['ms_specific']:
