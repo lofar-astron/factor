@@ -103,7 +103,7 @@ def find_executables(parset):
 def divide_nodes(directions, node_list, ndir_per_node, nimg_per_node, ncpu_max,
     fmem_max):
     """
-    Divide up nodes and cpus among directions
+    Divide up nodes and cpus for parallel operations
 
     Parameters
     ----------
@@ -154,7 +154,7 @@ def divide_nodes(directions, node_list, ndir_per_node, nimg_per_node, ncpu_max,
 
 def combine_nodes(directions, node_list, ncpu_max, fmem_max):
     """
-    Conbine nodes and cpus for series operations
+    Conbine nodes and cpus for serial operations
 
     Parameters
     ----------
