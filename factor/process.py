@@ -134,7 +134,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         if first_pass:
             if len(direction_group_ok) > 0:
                 for d in directions:
-                    d.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
+                    if d.name != direction_group_ok[0].name:
+                        d.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
                 first_pass = False
 
         # Combine the nodes and cores for the serial subtract operations
