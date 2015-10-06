@@ -166,6 +166,14 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     log.info('Found {0} sources with sizes below {1} '
         'arcmin'.format(len(s.getPatchNames()), size_max_arcmin))
 
+    # Filter fainter patches
+    s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='sum', force=True)
+    if len(s) == 0:
+        log.critical("No sources found that meet the specified min flux criteria.")
+        sys.exit(1)
+    log.info('Found {0} sources with fluxes above {1} Jy'.format(
+        len(s.getPatchNames()), flux_min_Jy))
+
     # Look for nearby pairs
     log.info('Merging sources within {0} arcmin of each other...'.format(
         directions_separation_max_arcmin))
@@ -176,14 +184,6 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
         if len(nearby[0]) > 1:
             patches = s.getPatchNames()[nearby]
             s.merge(patches.tolist())
-
-    # Filter fainter patches
-    s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='sum', force=True)
-    if len(s) == 0:
-        log.critical("No sources found that meet the specified min flux criteria.")
-        sys.exit(1)
-    log.info('Found {0} sources with fluxes above {1} Jy'.format(
-        len(s.getPatchNames()), flux_min_Jy))
 
     # Trim directions list to get directions_max_num of directions
     if directions_max_num is not None:
@@ -221,6 +221,7 @@ def make_initial_skymodel(band):
 
     """
     import lsmtool
+    lsmtool._logging.setLevel('debug')
 
     # Load sky model and filter it
     s = lsmtool.load(band.skymodel_dirindep)
