@@ -94,6 +94,7 @@ corrupt_all_model_data.control.opts.mapfiles_in            =   [predict_all_face
 corrupt_all_model_data.control.opts.inputkeys              =   [msin,parmdb]
 corrupt_all_model_data.argument.msin.datacolumn            =   DATA
 corrupt_all_model_data.argument.msout.overwrite            =   True
+corrupt_all_model_data.argument.msout.writefullresflag     =   False
 corrupt_all_model_data.argument.local_scratch_dir          =   {{ local_dir }}
 corrupt_all_model_data.argument.steps                      =   [corrupt]
 corrupt_all_model_data.argument.corrupt.type               =   applycal
