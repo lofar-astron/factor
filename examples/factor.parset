@@ -49,8 +49,8 @@ directions_file = /data/directions.txt
 # internally derived directions can be limited to a maximum number
 # of directions if desired with max_num (default = all). These parameters will
 # determine the faceting of the field
-flux_min_Jy = 0.1
-size_max_arcmin = 3.0
+flux_min_Jy = 0.3
+size_max_arcmin = 2.0
 separation_max_arcmin = 6.0
 max_num = 50
 
