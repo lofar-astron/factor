@@ -38,11 +38,11 @@ class FacetSelfcal(Operation):
             name='FacetSelfcal')
 
         # Set the pipeline parset to use
-        if self.parset['facet_imager'].lower() == 'casa':
-            # Set parset template to casa parset
+        if self.parset['facet_imager'].lower() == 'casa' or self.parset['facet_imager'].lower() == 'casapy':
+            # Set parset template to CASA parset
             self.pipeline_parset_template = '{0}_casa_pipeline.parset'.format(self.name)
         else:
-            # Set parset template to wsclean parset
+            # Set parset template to default (i.e., WSClean) parset
             self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
 
         # Define extra parameters needed for this operation (beyond those
