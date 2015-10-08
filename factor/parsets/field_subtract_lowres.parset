@@ -1,5 +1,5 @@
 Strategy.InputColumn                         = SUBTRACTED_DATA
-Strategy.ChunkSize                           = 1000
+Strategy.ChunkSize                           = 100
 Strategy.UseSolver                           = F
 Strategy.Steps                               = [subtract]
 
