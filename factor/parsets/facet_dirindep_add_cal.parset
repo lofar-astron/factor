@@ -15,4 +15,4 @@ Step.add.Model.CommonRotation.Enable    = F
 Step.add.Model.Beam.Enable              = F
 Step.add.Output.WriteCovariance         = F
 Step.add.Output.WriteFlags              = F
-Step.add.Output.Column                  = DATA
+Step.add.Output.Column                  = FACET_DATA_CAL
