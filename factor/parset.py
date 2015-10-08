@@ -110,6 +110,10 @@ def parset_read(parset_file):
         parset_dict['wsclean_nbands'] = 3
     if 'facet_imager' not in  parset_dict:
         parset_dict['facet_imager'] = 'wsclean'
+    if 'keep_facet_data' in  parset_dict:
+        parset_dict['keep_facet_data'] = parset.getboolean('global', 'keep_facet_data')
+    else:
+        parset_dict['keep_facet_data'] = True
 
     # Handle directions-related parameters
     if 'directions' in parset._sections.keys():

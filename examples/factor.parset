@@ -37,6 +37,10 @@ exit_on_selfcal_failure = True
 # bandwidths, the CASA imager is typically faster
 facet_imager = casa
 
+# Keep calibrated data for each facet to allow reimaging (default = False). If a
+# target is specified (see below), the calibrated data for the target is always
+# kept, regardless of this setting
+keep_facet_data = False
 
 [directions]
 # Full path to file containing calibrator directions. If not given, directions

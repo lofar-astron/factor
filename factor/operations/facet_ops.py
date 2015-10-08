@@ -121,6 +121,10 @@ class FacetSelfcal(Operation):
             os.path.join(self.mapfile_dir, 'concat2_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat3_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat4_input.datamap')]
+        if not self.parset['keep_facet_data'] and self.direction.name != 'target':
+            # Add calibrated data for the facet
+            self.direction.cleanup_mapfiles.append(
+                os.path.join(self.mapfile_dir, 'concat_averaged_input.datamap'))
         if self.direction.selfcal_ok:
             self.log.info('Cleaning up files (direction: {})'.format(self.direction.name))
             self.direction.cleanup()
