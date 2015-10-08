@@ -19,6 +19,10 @@ def plugin_main(args, **kwargs):
         If True, the compreseed item will use a Python list format (e.g.,
         '[file1, file2, ...]'. If False, it will be a space-separated list (e.g.,
         'file1 file2 ...'
+    check_missing : bool, optional
+        If True, check for missing bands by looking at file names (only works
+        for the common naming conventions fo SB010 or B10). Missing bands are
+        replaced by "dummy.ms" in the output compressed file list.
 
     Returns
     -------
@@ -38,41 +42,52 @@ def plugin_main(args, **kwargs):
             list_format = True
         else:
             list_format = False
+    if 'check_missing' in kwargs:
+        check_missing = kwargs['check_missing']
+    else:
+        check_missing = False
+    if type(check_missing) is str:
+        if check_missing.lower() == 'true':
+            check_missing = True
+        else:
+            check_missing = False
 
     map_in = DataMap.load(mapfile_in)
     map_out = DataMap([])
     map_in.iterator = DataMap.SkipIterator
 
     # Try to detect missing bands by common naming conventions:
-    # SB010 or B10
-    # This assumes bands are ordered from low to high
-    band_numbers = []
-    file_list = []
-    skip_check = False
-    indx_skip = 0
-    for i, item in enumerate(map_in):
-        try:
-            if 'SB' in item.file:
-                band_indx = int(item.file.split('SB')[1][0:3])
-            elif 'B' in item.file:
-                band_indx = int(item.file.split('B')[1][0:2])
-            if i == 0:
-                start_indx = band_indx
-            elif i == 1:
-                indx_skip = band_indx - start_indx
-            band_numbers.append(band_indx)
-            file_list.append(item.file)
-        except ValueError:
-            file_list = [item.file for item in map_in]
-            skip_check = True
-            break
-    if not skip_check:
-        indx = 0
-        for i in range(len(band_numbers)):
-            if band_numbers[i] != (indx * indx_skip) + start_indx:
-                file_list.insert(indx, 'dummy.ms')
+    # SB010 or B10. This assumes bands are ordered from low to high
+    if check_missing:
+        band_numbers = []
+        file_list = []
+        skip_check = False
+        indx_skip = 0
+        for i, item in enumerate(map_in):
+            try:
+                if 'SB' in item.file:
+                    band_indx = int(item.file.split('SB')[1][0:3])
+                elif 'B' in item.file:
+                    band_indx = int(item.file.split('B')[1][0:2])
+                if i == 0:
+                    start_indx = band_indx
+                elif i == 1:
+                    indx_skip = band_indx - start_indx
+                band_numbers.append(band_indx)
+                file_list.append(item.file)
+            except ValueError:
+                file_list = [item.file for item in map_in]
+                skip_check = True
+                break
+        if not skip_check:
+            indx = 0
+            for i in range(len(band_numbers)):
+                if band_numbers[i] != (indx * indx_skip) + start_indx:
+                    file_list.insert(indx, 'dummy.ms')
+                    indx += 1
                 indx += 1
-            indx += 1
+    else:
+        file_list = [item.file for item in map_in]
 
     if list_format:
         newlist = '[{0}]'.format(','.join(file_list))

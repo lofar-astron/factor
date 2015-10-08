@@ -160,6 +160,7 @@ create_compressed_mapfile_data.control.type                =   compressMapfile
 create_compressed_mapfile_data.control.mapfile_in          =   shift_cal.output.mapfile
 create_compressed_mapfile_data.control.mapfile_dir         =   {{ mapfile_dir }}
 create_compressed_mapfile_data.control.filename            =   concat_input.datamap
+create_compressed_mapfile_data.control.check_missing       =   True
 
 concat_data.control.type                                   =   dppp
 concat_data.control.mapfile_in                             =   create_compressed_mapfile_data.output.mapfile
