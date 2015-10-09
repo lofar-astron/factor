@@ -249,7 +249,8 @@ def _set_up_compute_parameters(parset, log, dry_run=False):
     factor.cluster.find_executables(parset)
 
     # Set up scheduler for operations (pipeline runs)
-    ndir_simul = len(parset['cluster_specific']['node_list']) * parset['cluster_specific']['ndir_per_node']
+    ndir_simul = len(parset['cluster_specific']['node_list']) * \
+        parset['cluster_specific']['ndir_per_node']
     if parset['direction_specific']['groupings'] is not None:
         ngroup_max = int(max(parset['direction_specific']['groupings'].keys()))
     else:
@@ -298,9 +299,9 @@ def _set_up_bands(parset, log, test_run=False):
         if msbase in parset['ms_specific']:
             if 'init_skymodel' in parset['ms_specific'][msbase]:
                 skymodel_dirindep = parset['ms_specific'][msbase]['init_skymodel']
-                if not os.path.exists(band.skymodel_dirindep):
+                if not os.path.exists(skymodel_dirindep):
                     log.error('Sky model specified in parset for band {} was '
-                        'not found. Exiting...'.format(band.msname))
+                        'not found. Exiting...'.format(msbase))
                     sys.exit(1)
 
         band = Band(ms, parset['dir_working'], parset['parmdb_name'], skymodel_dirindep,
@@ -324,11 +325,14 @@ def _set_up_bands(parset, log, test_run=False):
         ra_list.append(band.ra)
         dec_list.append(band.dec)
 
+    # Check for frequency gaps
     if has_gaps:
         log.error('Bands cannot have frequency gaps. Exiting...')
         sys.exit(1)
 
-    duplicate_chans = [item for item, count in collections.Counter(nchan_list).items() if count > 1]
+    # Check that all bands have the same number of channels
+    duplicate_chans = [item for item, count in collections.Counter(nchan_list).items()
+        if count > 1]
     if len(duplicate_chans) != 1:
         for d in duplicate_chans:
             bands_with_duplicates = [band.msname for band in bands if band.nchan == d]
@@ -336,6 +340,8 @@ def _set_up_bands(parset, log, test_run=False):
                 ','.join(bands_with_duplicates)))
         log.error('All bands must have the same number of channels. Exiting...')
         sys.exit(1)
+
+    # Check that number of channels supports enough averaging steps
     if duplicate_chans[0] not in [18, 20, 24]:
         log.warn('Number of channels per band is not 18, 20, or 24. Averaging will '
             'not work well (too few divisors)')
