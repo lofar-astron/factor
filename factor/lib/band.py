@@ -107,8 +107,8 @@ class Band(object):
                 os.system('cp -r {0} {1}'.format(os.path.join(self.file,
                     'instrument'), self.dirindparmdb))
         if not os.path.exists(self.dirindparmdb):
-            self.log.critical('Direction-independent instrument parmdb not found '
-                'for band {0}'.format(self.file))
+            self.log.critical('Direction-independent instrument parmdb "{0}" not found '
+                'for band {1}'.format(self.dirindparmdb, self.file))
             sys.exit(1)
 
         # Check whether there are ampl/phase or real/imag
