@@ -7,7 +7,7 @@ import shutil
 import numpy as np
 import logging
 import pickle
-import lofar.parmdb
+import collections
 from lofarpipe.support.data_map import DataMap
 import factor
 import factor.directions
@@ -288,72 +288,57 @@ def _set_up_bands(parset, log, test_run=False):
     bands = []
     from factor.lib.band import Band
     for ms in parset['mss']:
-        band = Band(ms, parset['dir_working'], test_run=test_run)
-
-        # Checks whether the dir-indep instrument parmdb exists or has name
-        # "instrument"
-        band.dirindparmdb = os.path.join(band.file, parset['parmdb_name'])
-        if parset['parmdb_name'] == 'instrument':
-            # Check for special BBS table name
-            band.dirindparmdb += '_dirindep'
-            if not os.path.exists(band.dirindparmdb):
-                if not os.path.exists(os.path.join(band.file, parset['parmdb_name'])):
-                    log.critical('Direction-independent instument parmdb not found '
-                        'for band {0}'.format(band.file))
-                    sys.exit(1)
-                log.warn('Direction-independent instument parmdb for band {0} is '
-                    'named "instrument". Copying to "instrument_dirindep" so that BBS '
-                    'will not overwrite this table...'.format(band.file))
-                os.system('cp -r {0} {1}'.format(os.path.join(band.file,
-                    parset['parmdb_name']), band.dirindparmdb))
-        if not os.path.exists(band.dirindparmdb):
-            log.critical('Direction-independent instrument parmdb not found '
-                'for band {0}'.format(band.file))
-            sys.exit(1)
-
-        # Check whether there are ampl/phase or real/imag
-        try:
-            pdb = lofar.parmdb.parmdb(band.dirindparmdb)
-            solname = pdb.getNames()[0]
-        except IndexError:
-            log.critical('Direction-independent instument parmdb appears to be empty '
-                        'for band {0}'.format(band.file))
-            sys.exit(1)
-        if 'Real' in solname or 'Imag' in solname:
-            # Convert real/imag to phasors
-            log.warn('Direction-independent instument parmdb for band {0} contains '
-                'real/imaginary values. Converting to phase/amplitude...'.format(band.file))
-            band.dirindparmdb = _convert_to_phasors(band.dirindparmdb)
-
-        # Check that there aren't extra default values in the parmdb, as this
-        # confuses DPPP
-        defvals = pdb.getDefValues()
-        for v in defvals:
-            if 'Ampl' not in v and 'Phase' not in v:
-                pdb.deleteDefValues(v)
-        pdb.flush()
-
         # Check for any sky models specified by user
-        band.skymodel_dirindep = None
+        skymodel_dirindep = None
         msbase = os.path.basename(ms)
         if msbase in parset['ms_specific']:
             if 'init_skymodel' in parset['ms_specific'][msbase]:
-                band.skymodel_dirindep = parset['ms_specific'][msbase]['init_skymodel']
+                skymodel_dirindep = parset['ms_specific'][msbase]['init_skymodel']
                 if not os.path.exists(band.skymodel_dirindep):
                     log.error('Sky model specified in parset for band {} was '
-                        'not found'.format(band.msname))
+                        'not found. Exiting...'.format(band.msname))
                     sys.exit(1)
+
+        band = Band(ms, parset['dir_working'], parset['parmdb_name'], skymodel_dirindep,
+            test_run=test_run)
         bands.append(band)
 
     # Sort bands by frequency
     band_freqs = [band.freq for band in bands]
     bands = np.array(bands)[np.argsort(band_freqs)].tolist()
 
-    # TODO: Check that bands are uniform in number of channels and phase center
+    # Check bands for problems
+    nchan_list = []
+    ra_list = []
+    dec_list = []
+    has_gaps = False
+    for band in bands:
+        if len(band.missing_channels) > 0:
+            self.log.error('Found one or more frequency gaps in band {}'.format(band.msname))
+            has_gaps = True
+        nchan_list.append(band.nchan)
+        ra_list.append(band.ra)
+        dec_list.append(band.dec)
+
+    if has_gaps:
+        self.log.error('Bands cannot have frequency gaps. Exiting...')
+        sys.exit(1)
+
+    duplicate_chans = [item for item, count in collections.Counter(nchan_list).items() if count > 1]
+    if len(duplicate_chans) != 1:
+        for d in duplicate_chans:
+            bands_with_duplicates = [band.msname for band in bands if band.nchan == d]
+            self.log.error('Found {0} channels in band(s): {1}'.format(d,
+                ','.join(bands_with_duplicates)))
+        self.log.error('All bands must have the same number of channels. Exiting...')
+        self.exit(1)
+    if duplicate_chans[0] not in [18, 20, 24]:
+        self.log.warn('Number of channels per band is not 18, 20, or 24. Averaging will '
+            'not work well (too few divisors)')
 
     # Determine whether any bands need to be run through the initsubract operation.
-    # This operation is needed (only needed if band lacks an initial skymodel or
-    # the SUBTRACTED_DATA_ALL column).
+    # This operation is only needed if band lacks an initial skymodel or
+    # the SUBTRACTED_DATA_ALL column
     bands_initsubtract = []
     for band in bands:
         if band.skymodel_dirindep is None or not band.has_sub_data:
@@ -362,65 +347,6 @@ def _set_up_bands(parset, log, test_run=False):
             bands_initsubtract.append(band)
 
     return bands, bands_initsubtract
-
-
-def _convert_to_phasors(real_imag_parmdb_file):
-    """
-    Converts instrument parmdb from real/imag to phasors
-
-    Parameters
-    ----------
-    real_imag_parmdb_file : str
-        Filename of input parmdb
-
-    Returns
-    -------
-    phasors_parmdb_file : str
-        Filename of ouput phasors parmdb
-
-    """
-    phasors_parmdb_file = real_imag_parmdb_file + '_phasors'
-    if os.path.exists(phasors_parmdb_file):
-        return phasors_parmdb_file
-
-    pdb_in = lofar.parmdb.parmdb(real_imag_parmdb_file)
-    pdb_out = lofar.parmdb.parmdb(phasors_parmdb_file, create=True)
-
-    # Get station names
-    stations = set([s.split(':')[-1] for s in pdb_in.getNames()])
-
-    # Calculate and store phase and amp values for each station
-    parms = pdb_in.getValuesGrid('*')
-    for i, s in enumerate(stations):
-        if i == 0:
-            freqs = np.copy(parms['Gain:0:0:Imag:{}'.format(s)]['freqs'])
-            freqwidths = np.copy(parms['Gain:0:0:Imag:{}'.format(s)]['freqwidths'])
-            times = np.copy(parms['Gain:0:0:Imag:{}'.format(s)]['times'])
-            timewidths = np.copy(parms['Gain:0:0:Imag:{}'.format(s)]['timewidths'])
-
-        valIm_00 = np.copy(parms['Gain:0:0:Imag:{}'.format(s)]['values'][:, 0])
-        valIm_11 = np.copy(parms['Gain:1:1:Imag:{}'.format(s)]['values'][:, 0])
-        valRe_00 = np.copy(parms['Gain:0:0:Real:{}'.format(s)]['values'][:, 0])
-        valRe_11 = np.copy(parms['Gain:1:1:Real:{}'.format(s)]['values'][:, 0])
-
-        valAmp_00 = np.sqrt((valRe_00**2) + (valIm_00**2))
-        valAmp_11 = np.sqrt((valRe_11**2) + (valIm_11**2))
-        valPh_00 = np.arctan2(valIm_00, valRe_00)
-        valPh_11 = np.arctan2(valIm_11, valRe_11)
-
-        pdb_out.addValues({'Gain:0:0:Phase:{}'.format(s): {'freqs': freqs, 'freqwidths':
-            freqwidths, 'times': times, 'timewidths': timewidths, 'values': valPh_00[:,np.newaxis]}})
-        pdb_out.addValues({'Gain:1:1:Phase:{}'.format(s): {'freqs': freqs, 'freqwidths':
-            freqwidths, 'times': times, 'timewidths': timewidths, 'values': valPh_11[:,np.newaxis]}})
-        pdb_out.addValues({'Gain:0:0:Ampl:{}'.format(s): {'freqs': freqs, 'freqwidths':
-            freqwidths, 'times': times, 'timewidths': timewidths, 'values': valAmp_00[:,np.newaxis]}})
-        pdb_out.addValues({'Gain:1:1:Ampl:{}'.format(s): {'freqs': freqs, 'freqwidths':
-            freqwidths, 'times': times, 'timewidths': timewidths, 'values': valAmp_11[:,np.newaxis]}})
-
-    # Write values
-    pdb_out.flush()
-
-    return phasors_parmdb_file
 
 
 def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
