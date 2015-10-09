@@ -36,7 +36,7 @@ class Timer(object):
             raise type, value, tb
 
         elapsed = time.time() - self.start
-        self.log.debug('Time for {0}: {1:0>8}}'.format(self.type,
+        self.log.debug('Time for {0}: {1:0>8}'.format(self.type,
             datetime.timedelta(seconds=elapsed)))
 
 
