@@ -2,6 +2,7 @@
 Definition of context managers
 """
 import time
+import datetime
 import logging
 
 class Timer(object):
@@ -34,8 +35,9 @@ class Timer(object):
         if type is not None:
             raise type, value, tb
 
-        elapsed = (time.time() - self.start)
-        self.log.debug('Time for {0}: {1} sec'.format(self.type, int(elapsed)))
+        elapsed = time.time() - self.start
+        self.log.debug('Time for {0}: {1:0>8}}'.format(self.type,
+            datetime.timedelta(seconds=elapsed)))
 
 
 class RedirectStdStreams(object):

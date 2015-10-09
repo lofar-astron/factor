@@ -48,7 +48,7 @@ def main(ms_list):
 
 
 if __name__ == '__main__':
-    descriptiontext = "Add/subtract columns (column_out = column1 +/- column2).\n"
+    descriptiontext = "Check a list of MS files for missing frequencies.\n"
 
     parser = argparse.ArgumentParser(description=descriptiontext, formatter_class=RawTextHelpFormatter)
     parser.add_argument('ms_list', help='list of MS files')
