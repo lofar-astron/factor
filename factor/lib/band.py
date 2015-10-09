@@ -34,7 +34,7 @@ class Band(object):
         """
         self.file = MSfile
         self.msname = self.file.split('/')[-1]
-        self.dirindparmdb = os.path.join(band.file, dirindparmdb)
+        self.dirindparmdb = os.path.join(self.file, dirindparmdb)
         self.skymodel_dirindep = skymodel_dirindep
 
         # Get the frequency info and set name
