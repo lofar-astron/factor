@@ -23,7 +23,7 @@ def main(ms_files, outfile, clobber=True):
 
     """
     if type(ms_files) is str:
-        ms_list = [f.strip() for f in ms_list.strip('[]').split(',')]
+        ms_files = [f.strip() for f in ms_files.strip('[]').split(',')]
     if type(clobber) is str:
         if clobber.lower() == 'true':
             clobber = True
