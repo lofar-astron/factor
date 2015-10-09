@@ -4,6 +4,7 @@ Definition of the band class
 import os
 import sys
 import logging
+import factor._logging
 import pyrap.tables as pt
 import lofar.parmdb
 import numpy as np
