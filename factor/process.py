@@ -231,6 +231,8 @@ def _set_up_compute_parameters(parset, log, dry_run=False):
         The operation scheduler used by the run() function
 
     """
+    log.info('Setting up cluster/node parameters...')
+
     cluster_parset = parset['cluster_specific']
     if 'clusterdesc_file' not in cluster_parset:
         parset['cluster_specific']['clusterdesc'] = 'local.clusterdesc'
@@ -382,6 +384,8 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         Groups of directions to be selfcal-ed
 
     """
+    log.info('Setting up directions...')
+
     # First check for user-supplied directions file, then for Factor-generated
     # file from a previous run, then for parameters needed to generate it internally
     dir_parset = parset['direction_specific']

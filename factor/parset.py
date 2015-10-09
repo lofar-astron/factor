@@ -8,7 +8,7 @@ import logging
 import ConfigParser
 from factor._logging import set_log_file
 
-log = logging.getLogger('factor.parset')
+log = logging.getLogger('factor:parset')
 
 
 def parset_read(parset_file):

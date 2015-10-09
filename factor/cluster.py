@@ -8,7 +8,7 @@ from collections import Counter
 import factor._logging
 
 
-log = logging.getLogger('factor.cluster')
+log = logging.getLogger('factor:cluster')
 
 
 def make_pbs_clusterdesc():

@@ -83,7 +83,7 @@ class Scheduler(object):
         self.max_procs = max_procs
         self.name = name
         self.dry_run = dry_run
-        self.log = logging.getLogger('factor.{0}'.format(name))
+        self.log = logging.getLogger('factor:{0}'.format(name))
         self.success = True
 
 
