@@ -4,7 +4,6 @@ Definition of the band class
 import os
 import sys
 import logging
-import factor._logging
 import pyrap.tables as pt
 import lofar.parmdb
 import numpy as np
@@ -46,7 +45,7 @@ class Band(object):
         self.chan_width_hz = sw.col('CHAN_WIDTH')[0][0]
         sw.close()
         self.name = 'Band_{0:.2f}MHz'.format(self.freq/1e6)
-        self.log = logging.getLogger(self.name)
+        self.log = logging.getLogger('factor.{}'.format(self.name))
 
         # Do some checks
         self.check_freqs()

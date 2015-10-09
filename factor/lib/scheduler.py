@@ -7,7 +7,6 @@ import os
 import sys
 import imp
 from factor.lib.context import Timer
-import factor._logging
 
 
 def call_generic_pipeline(op_name, direction_name, parset, config, logbasename,
