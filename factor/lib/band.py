@@ -190,7 +190,7 @@ class Band(object):
         self.log.debug('Checking frequency channels...')
         for i, (freq1, freq2) in enumerate(zip(self.chan_freqs_hz[:-1], self.chan_freqs_hz[1:])):
             ngap = int(round((freq2 - freq1)/self.chan_width_hz))
-            self.missing_channels.extend([i + j + 1 for j in range(ngap)])
+            self.missing_channels.extend([i + j + 1 for j in range(ngap-1)])
         self.log.debug('Missing channels: {}'.format(self.missing_channels))
 
 
