@@ -97,7 +97,7 @@ class Band(object):
         if os.path.basename(self.dirindparmdb) == 'instrument':
             self.dirindparmdb += '_dirindep'
             if not os.path.exists(self.dirindparmdb):
-                if not os.path.exists(os.path.join(self.file, parset['parmdb_name'])):
+                if not os.path.exists(os.path.join(self.file, 'instrument')):
                     log.critical('Direction-independent instument parmdb not found '
                         'for band {0}'.format(self.file))
                     sys.exit(1)
