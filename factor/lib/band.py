@@ -187,9 +187,11 @@ class Band(object):
         Checks for gaps in the frequency channels
         """
         self.missing_channels = []
+        self.log.debug('Checking frequency channels...')
         for i, (freq1, freq2) in enumerate(zip(self.chan_freqs_hz[:-1], self.chan_freqs_hz[1:])):
             ngap = int(round((freq2 - freq1)/self.chan_width_hz))
             self.missing_channels.extend([i + j + 1 for j in range(ngap)])
+        self.log.debug('Missing channels: {}'.format(self.missing_channels))
 
 
     def set_image_sizes(self, test_run=False):
