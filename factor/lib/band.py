@@ -98,16 +98,16 @@ class Band(object):
             self.dirindparmdb += '_dirindep'
             if not os.path.exists(self.dirindparmdb):
                 if not os.path.exists(os.path.join(self.file, 'instrument')):
-                    log.critical('Direction-independent instument parmdb not found '
+                    self.log.critical('Direction-independent instument parmdb not found '
                         'for band {0}'.format(self.file))
                     sys.exit(1)
-                log.warn('Direction-independent instument parmdb for band {0} is '
+                self.log.warn('Direction-independent instument parmdb for band {0} is '
                     'named "instrument". Copying to "instrument_dirindep" so that BBS '
                     'will not overwrite this table...'.format(self.file))
                 os.system('cp -r {0} {1}'.format(os.path.join(self.file,
                     'instrument'), self.dirindparmdb))
         if not os.path.exists(self.dirindparmdb):
-            log.critical('Direction-independent instrument parmdb not found '
+            self.log.critical('Direction-independent instrument parmdb not found '
                 'for band {0}'.format(self.file))
             sys.exit(1)
 
@@ -116,12 +116,12 @@ class Band(object):
             pdb = lofar.parmdb.parmdb(self.dirindparmdb)
             solname = pdb.getNames()[0]
         except IndexError:
-            log.critical('Direction-independent instument parmdb appears to be empty '
+            self.log.critical('Direction-independent instument parmdb appears to be empty '
                         'for band {0}'.format(self.file))
             sys.exit(1)
         if 'Real' in solname or 'Imag' in solname:
             # Convert real/imag to phasors
-            log.warn('Direction-independent instument parmdb for band {0} contains '
+            self.log.warn('Direction-independent instument parmdb for band {0} contains '
                 'real/imaginary values. Converting to phase/amplitude...'.format(self.file))
             self.convert_parmdb_to_phasors()
 
