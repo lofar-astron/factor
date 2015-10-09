@@ -285,8 +285,10 @@ def _set_up_bands(parset, log, test_run=False):
         Subset of bands for InitSubtract operation
 
     """
-    bands = []
     from factor.lib.band import Band
+
+    log.info('Checking input bands...')
+    bands = []
     for ms in parset['mss']:
         # Check for any sky models specified by user
         skymodel_dirindep = None
@@ -314,26 +316,26 @@ def _set_up_bands(parset, log, test_run=False):
     has_gaps = False
     for band in bands:
         if len(band.missing_channels) > 0:
-            self.log.error('Found one or more frequency gaps in band {}'.format(band.msname))
+            log.error('Found one or more frequency gaps in band {}'.format(band.msname))
             has_gaps = True
         nchan_list.append(band.nchan)
         ra_list.append(band.ra)
         dec_list.append(band.dec)
 
     if has_gaps:
-        self.log.error('Bands cannot have frequency gaps. Exiting...')
+        log.error('Bands cannot have frequency gaps. Exiting...')
         sys.exit(1)
 
     duplicate_chans = [item for item, count in collections.Counter(nchan_list).items() if count > 1]
     if len(duplicate_chans) != 1:
         for d in duplicate_chans:
             bands_with_duplicates = [band.msname for band in bands if band.nchan == d]
-            self.log.error('Found {0} channels in band(s): {1}'.format(d,
+            log.error('Found {0} channels in band(s): {1}'.format(d,
                 ','.join(bands_with_duplicates)))
-        self.log.error('All bands must have the same number of channels. Exiting...')
-        self.exit(1)
+        log.error('All bands must have the same number of channels. Exiting...')
+        sys.exit(1)
     if duplicate_chans[0] not in [18, 20, 24]:
-        self.log.warn('Number of channels per band is not 18, 20, or 24. Averaging will '
+        log.warn('Number of channels per band is not 18, 20, or 24. Averaging will '
             'not work well (too few divisors)')
 
     # Determine whether any bands need to be run through the initsubract operation.
