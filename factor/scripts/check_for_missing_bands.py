@@ -39,7 +39,7 @@ def main(ms_list):
     missing_bands = []
     for i, (freq1, freq2) in enumerate(zip(freqs[:-1], freqs[1:])):
         ngap = int(round((freq2 - freq1)/freq_width))
-        missing_bands.extend([i + j + 1 for j in range(ngap)])
+        missing_bands.extend([i + j + 1 for j in range(ngap-1)])
 
     for m in reversed(missing_bands):
         ms_list.insert(m, 'dummy.ms')
