@@ -125,7 +125,7 @@ class FacetSelfcal(Operation):
             # Add calibrated data for the facet to files to be deleted
             self.direction.cleanup_mapfiles.append(
                 os.path.join(self.mapfile_dir, 'concat_averaged_input.datamap'))
-        if not d.make_final_image:
+        if not self.direction.make_final_image:
             # Add final model data for the facet to files to be deleted. These
             # are only needed if the facet is to be reimaged
             self.direction.cleanup_mapfiles.append(self.direction.shifted_model_data_datamap)
