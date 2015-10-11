@@ -72,9 +72,10 @@ def parset_read(parset_file):
     log.info("Working directory is {0}".format(parset_dict['dir_working']))
 
     # Get all the MS files in the input directory. These are identified by the
-    # extensions 'ms', 'MS', or 'dpppconcat' (used by the pre-facet pipeline)
+    # extensions 'ms', 'MS', 'dpppconcat' or 'dpppcopycol' (both used by the
+    # pre-facet pipeline)
     ms_files = []
-    for exten in ['MS', 'ms', 'dpppconcat']:
+    for exten in ['MS', 'ms', 'dpppconcat', 'dpppcopycol']:
         ms_files += glob.glob(os.path.join(parset_dict['dir_ms'], '*.{}'.format(exten)))
     parset_dict['mss'] = ms_files
     if len(parset_dict['mss']) == 0:
