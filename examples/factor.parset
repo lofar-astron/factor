@@ -42,6 +42,7 @@ facet_imager = casa
 # kept, regardless of this setting
 keep_facet_data = False
 
+
 [directions]
 # Full path to file containing calibrator directions. If not given, directions
 # are selected internally using the flux and size cuts below
@@ -84,6 +85,11 @@ groupings = 1:5, 4:0
 # of the directions in the groups can be done to maximize the separation
 # between directions in each group (default = True)
 allow_reordering = True
+
+# Re-image the facets after selfcal has been completed for all directions
+# (default = False). If True, all facets are re-imaged with the final empty
+# datasets, potentially resulting in lower noise
+reimage = False
 
 # A target can be specified to ensure that it falls entirely within a single
 # facet. The values should be those of a circular region that encloses the
