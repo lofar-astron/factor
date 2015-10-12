@@ -1,5 +1,4 @@
 Strategy.InputColumn                      = CORRECTED_DATA
-Strategy.UseSolver                        = F
 Strategy.ChunkSize                        = 0
 Strategy.Steps                            = [solve]
 

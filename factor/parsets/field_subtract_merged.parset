@@ -1,6 +1,5 @@
 Strategy.InputColumn                         = DATA
 Strategy.ChunkSize                           = 100
-Strategy.UseSolver                           = F
 Strategy.Steps                               = [subtract]
 
 Step.subtract.Operation                      = SUBTRACT

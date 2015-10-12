@@ -1,6 +1,5 @@
 Strategy.InputColumn                    = DATA
 Strategy.ChunkSize                      = 200
-Strategy.UseSolver                      = F
 Strategy.Steps                          = [add]
 
 Step.add.Operation                      = ADD

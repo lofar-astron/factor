@@ -1,6 +1,5 @@
 Strategy.InputColumn                         = DATA
 Strategy.ChunkSize                           = 100
-Strategy.UseSolver                           = F
 Strategy.Steps                               = [subtract, correct]
 
 Step.subtract.Operation                      = SUBTRACT
@@ -23,7 +22,6 @@ Step.correct.Model.DirectionalGain.Enable    = F
 Step.correct.Model.Gain.Enable               = T
 Step.correct.Model.Phasors.Enable            = T
 Step.correct.Model.Beam.Enable               = F
-Step.correct.Model.Beam.UseChannelFreq       = F
 Step.correct.Output.Column                   = CORRECTED_SUBTRACTED_DATA
 Step.correct.Output.WriteCovariance          = F
 Step.correct.Output.WriteFlags               = F

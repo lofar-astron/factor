@@ -1,6 +1,5 @@
 Strategy.InputColumn                        = DATA
 Strategy.ChunkSize                          = 1000
-Strategy.UseSolver                          = F
 Strategy.Steps                              = [correct]
 
 Step.correct.Operation                      = CORRECT
@@ -12,7 +11,6 @@ Step.correct.Model.CommonScalarPhase.Enable = T
 Step.correct.Model.TEC.Enable               = T
 Step.correct.Model.Phasors.Enable           = F
 Step.correct.Model.Beam.Enable              = F
-Step.correct.Model.Beam.UseChannelFreq      = F
 Step.correct.Output.Column                  = CORRECTED_DATA
 Step.correct.Output.WriteCovariance         = F
 Step.correct.Output.WriteFlags              = F
