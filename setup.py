@@ -4,7 +4,7 @@ import os
 import factor._version
 
 
-description = 'Facet calibration for LOFAR'
+description = 'Factor: Facet calibration for LOFAR'
 long_description = description
 if os.path.exists('README.md'):
     with open('README.md') as f:
@@ -26,7 +26,7 @@ class PyTest(Command):
 
 
 setup(
-    name='factor',
+    name='Factor',
     version=factor._version.__version__,
     url='http://github.com/revoltek/factor/',
     description=description,
@@ -41,8 +41,9 @@ setup(
         'Topic :: Scientific/Engineering :: Astronomy',
         'Topic :: Software Development :: Libraries :: Python Modules',
         ],
-    install_requires=['numpy', 'jinja2'],
-    scripts = ['bin/factor'],
-    packages=['factor','factor.operations','factor.actions','factor.lib'],
+    install_requires=['numpy', 'scipy', 'astropy', 'jinja2', 'LSMTool', ],
+    dependency_links=['https://github.com/darafferty/LSMTool'],
+    scripts = ['bin/runfactor'],
+    packages=['factor','factor.operations','factor.lib'],
     cmdclass = {'test': PyTest},
     )
