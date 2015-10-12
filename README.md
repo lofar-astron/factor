@@ -17,7 +17,6 @@ Beyond the standard LOFAR software packages, Factor requires the following:
 * [CASA](http://casa.nrao.org) (versions *before* 4.3)
 * [WSClean](http://sourceforge.net/p/wsclean/wiki/Home)
 * [LSMTool](https://github.com/darafferty/LSMTool)
-* [LoSoTo](https://github.com/revotek/losoto)
 * [jinja2](http://jinja.pocoo.org/docs/dev)
 * [Shapely](https://github.com/Toblerity/Shapely)
 

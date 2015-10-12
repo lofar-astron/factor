@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 """
-Script to add two columns between one or two MS files
+Script to add or subtract two columns between one or two MS files
 """
 import argparse
 from argparse import RawTextHelpFormatter
