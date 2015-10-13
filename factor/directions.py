@@ -467,6 +467,10 @@ def thiessen(directions_list, bounds_scale=0.52, band=None, check_edges=False,
             sy.extend(ty)
             sizes.append(target_radius_arcmin*2.0/1.2/60.0)
 
+        # Set minimum size to resolution of high-res image
+        fwhm = 25.0/3600.0 # degrees
+        sizes = [max(size, fwhm) for size in sizes]
+
         # Filter sources to get only those close to a boundary. We need to iterate
         # until no sources are found
         niter = 0
