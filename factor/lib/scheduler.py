@@ -48,6 +48,11 @@ def call_generic_pipeline(op_name, direction_name, parset, config, logbasename,
     pipeline.inputs['config'] = config
     pipeline.inputs['job_name'] = direction_name
 
+    # Set pipeline logging to DEBUG level
+    pipeline.logger.setLevel(logging.DEBUG)
+    for handler in pipeline.logger.handlers:
+        handler.setLevel(logging.DEBUG)
+
     # Run the pipeline, redirecting screen output to log files
     with open("{0}.out.log".format(logbasename), "wb") as out, \
         open("{0}.err.log".format(logbasename), "wb") as err:
