@@ -1203,6 +1203,7 @@ corrupt_final_model.control.opts.mapfiles_in               =   [shift_empty.outp
 corrupt_final_model.control.opts.inputkeys                 =   [msin,parmdb]
 corrupt_final_model.argument.msin.datacolumn               =   MODEL_DATA
 corrupt_final_model.argument.msout.overwrite               =   True
+corrupt_final_model.argument.msout.writefullresflag        =   False
 corrupt_final_model.argument.local_scratch_dir             =   {{ local_dir }}
 corrupt_final_model.argument.steps                         =   [corrupt_fast1,corrupt_fast2,corrupt_slow]
 corrupt_final_model.argument.corrupt_fast1.type            =   applycal
