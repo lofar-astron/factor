@@ -77,7 +77,7 @@ def parset_read(parset_file):
     ms_files = []
     for exten in ['MS', 'ms', 'dpppconcat', 'dpppcopycol']:
         ms_files += glob.glob(os.path.join(parset_dict['dir_ms'], '*.{}'.format(exten)))
-    parset_dict['mss'] = ms_files
+    parset_dict['mss'] = sorted(ms_files)
     if len(parset_dict['mss']) == 0:
         log.error('No MS files found in {0}!'.format(parset_dict['dir_ms']))
         sys.exit(1)
