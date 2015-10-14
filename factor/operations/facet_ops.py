@@ -149,8 +149,8 @@ class FacetSubReset(Operation):
     Operation to reset the subtraction of improved model
     """
     def __init__(self, parset, direction):
-        super(FacetSub, self).__init__(parset, None, direction,
-            name='FacetSub')
+        super(FacetSubReset, self).__init__(parset, None, direction,
+            name='FacetSubReset')
 
 
 class FacetImage(Operation):
