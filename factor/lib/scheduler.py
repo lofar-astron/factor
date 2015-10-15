@@ -49,6 +49,7 @@ def call_generic_pipeline(op_name, direction_name, parset, config, logbasename,
     pipeline.inputs['job_name'] = direction_name
 
     # Set pipeline logging to DEBUG level
+    logging.root.setLevel(logging.DEBUG)
     pipeline.logger.setLevel(logging.DEBUG)
     for handler in pipeline.logger.handlers:
         handler.setLevel(logging.DEBUG)
