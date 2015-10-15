@@ -331,8 +331,7 @@ def _set_up_bands(parset, log, test_run=False):
         sys.exit(1)
 
     # Check that all bands have the same number of channels
-    duplicate_chans = [item for item, count in collections.Counter(nchan_list).items()
-        if count > 1]
+    duplicate_chans = set(nchan_list)
     if len(duplicate_chans) != 1:
         for d in duplicate_chans:
             bands_with_duplicates = [band.msname for band in bands if band.nchan == d]
