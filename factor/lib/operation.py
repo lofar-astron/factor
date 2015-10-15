@@ -198,8 +198,8 @@ class Operation(object):
 
         Returns
         -------
-        all_done : bool
-            True if all objects were successfully run
+        done : bool
+            True if operation was successfully completed
 
         """
         self.direction.load_state()

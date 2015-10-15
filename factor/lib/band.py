@@ -138,7 +138,6 @@ class Band(object):
         """
         Converts instrument parmdb from real/imag to phasors
         """
-
         phasors_parmdb_file = self.dirindparmdb + '_phasors'
         pdb_in = lofar.parmdb.parmdb(self.dirindparmdb)
         pdb_out = lofar.parmdb.parmdb(phasors_parmdb_file, create=True)
