@@ -140,9 +140,6 @@ class Band(object):
         """
 
         phasors_parmdb_file = self.dirindparmdb + '_phasors'
-        if os.path.exists(phasors_parmdb_file):
-            return
-
         pdb_in = lofar.parmdb.parmdb(self.dirindparmdb)
         pdb_out = lofar.parmdb.parmdb(phasors_parmdb_file, create=True)
 
