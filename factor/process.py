@@ -342,7 +342,7 @@ def _set_up_bands(parset, log, test_run=False):
         sys.exit(1)
 
     # Check that number of channels supports enough averaging steps
-    if duplicate_chans[0] not in [18, 20, 24]:
+    if list(duplicate_chans)[0] not in [18, 20, 24]:
         log.warn('Number of channels per band is not 18, 20, or 24. Averaging will '
             'not work well (too few divisors)')
 
