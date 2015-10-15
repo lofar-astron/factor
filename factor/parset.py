@@ -101,6 +101,11 @@ def parset_read(parset_file):
             'exit_on_selfcal_failure')
     else:
         parset_dict['exit_on_selfcal_failure'] = True
+    if 'skip_selfcal_check' in parset_dict:
+        parset_dict['skip_selfcal_check'] = parset.getboolean('global',
+            'skip_selfcal_check')
+    else:
+        parset_dict['skip_selfcal_check'] = False
     if 'use_chgcentre' in parset_dict:
         parset_dict['use_chgcentre'] = parset.getboolean('global', 'use_chgcentre')
     else:
