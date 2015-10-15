@@ -805,7 +805,7 @@ casa_image32.argument.clean.allowchunk                     =   False
 loop_ampcal.control.kind                                   =   loop
 loop_ampcal.control.type                                   =   conditional
 loop_ampcal.control.loopcount                              =   [{{ max_ampcal_iter }}]
-loop_ampcal.control.loopsteps                              =   [create_model3_map,casa_ft3,solve_ampphase21,merge_phase_parmdbs,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,flag2,create_compressed_mapfile_empty,transfer_flags,average4,create_compressed_mapfile4,concat4,casa_image41,adjust_casa_mapfile4,mask4,casa_image42,check_image]
+loop_ampcal.control.loopsteps                              =   [create_model3_map,casa_ft3,solve_ampphase21,merge_phase_parmdbs,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,flag2,create_compressed_mapfile_empty,transfer_flags,average4,create_compressed_mapfile4,concat4,casa_image41,adjust_casa_mapfile4,mask4,casa_image42,adjust_casa_mapfile5,make_previous_image_mapfile,make_new_model_mapfile,check_image]
 
 create_model3_map.control.kind                             =   plugin
 create_model3_map.control.type                             =   trimMapfile
@@ -1028,7 +1028,7 @@ make_new_model_mapfile.control.type                        =   convertModelMapfi
 make_new_model_mapfile.control.mapfile_in                  =   create_model3_map.output.mapfile
 make_new_model_mapfile.control.counter                     =   loop_amp.output.counter
 make_new_model_mapfile.control.mapfile_dir                 =   {{ mapfile_dir }}
-make_new_model_mapfile.control.filename                    =   compare_image_input_old.datamap
+make_new_model_mapfile.control.filename                    =   new_model.datamap
 
 check_image.control.type                                   =   compare_image_stats
 check_image.control.mapfiles_in                            =   [adjust_casa_mapfile5.output.mapfile,make_previous_image_mapfile.output.mapfile]
