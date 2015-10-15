@@ -30,8 +30,10 @@ wsclean_nbands = 2
 
 # Exit if selfcal fails for any direction (default = True). If False, processing
 # will continue and the failed direction will receive the selfcal solutions of
-# the nearest successful direction
+# the nearest successful direction unless skip_selfcal_check is True, in which
+# case processing continues as if the selfcal succeeded
 exit_on_selfcal_failure = True
+skip_selfcal_check = False
 
 # Use WSClean or CASA for imaging of entire facet (default = wsclean). For large
 # bandwidths, the CASA imager is typically faster
