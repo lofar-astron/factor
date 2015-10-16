@@ -37,7 +37,7 @@ def main(image, counter):
     if counter > 0:
         image_prev = '{0}_{1}'.format(image, counter-1)
     else:
-        image_prev = image_copy
+        image_prev = image.replace('image42', 'image32')
 
     return {'previous_image': image_prev}
 
