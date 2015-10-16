@@ -35,7 +35,8 @@ def main(image, counter):
     shutil.copytree(image, image_copy)
 
     if counter > 0:
-        image_prev = '{0}_{1}'.format(image, counter-1)
+        image_prev = '{0}_iter{1}{2}'.format(os.path.splitext(image)[0], counter-1,
+        os.path.splitext(image)[1])
     else:
         image_prev = image.replace('image42', 'image32')
 
