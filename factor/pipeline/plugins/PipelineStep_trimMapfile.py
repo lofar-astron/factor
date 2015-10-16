@@ -20,6 +20,9 @@ def plugin_main(args, **kwargs):
         Directory for output mapfile
     filename: str
         Name of output mapfile
+    counter : int
+        If counter is greater than 0, replace "image32" with "image42". This is
+        a special argument for facetselfcal looping only
 
     Returns
     -------
@@ -31,6 +34,10 @@ def plugin_main(args, **kwargs):
     trim_str = kwargs['trim']
     mapfile_dir = kwargs['mapfile_dir']
     filename = kwargs['filename']
+    if 'counter' in kwargs:
+        counter = int(kwargs['counter'])
+    else:
+        counter = 0
 
     map_out = DataMap([])
     map_in = DataMap.load(mapfile_in)
@@ -38,7 +45,10 @@ def plugin_main(args, **kwargs):
     for i, item in enumerate(map_in):
         index = item.file.rfind(trim_str)
         if index >= 0:
-            map_out.data.append(DataProduct(item.host, item.file[:index],
+            item_trim = item.file[:index]
+            if counter > 0:
+                item_trim = item_trim.replace('image32', 'image42')
+            map_out.data.append(DataProduct(item.host, item_trim,
                 item.skip))
 
     fileid = os.path.join(mapfile_dir, filename)

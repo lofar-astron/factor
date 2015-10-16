@@ -805,7 +805,7 @@ casa_image32.argument.clean.allowchunk                     =   False
 loop_ampcal.control.kind                                   =   loop
 loop_ampcal.control.type                                   =   conditional
 loop_ampcal.control.loopcount                              =   10
-loop_ampcal.control.loopsteps                              =   [create_model3_map,casa_ft3,solve_ampphase21,merge_phase_parmdbs,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,flag2,create_compressed_mapfile_empty,transfer_flags,average4,create_compressed_mapfile4,concat4,casa_image41,adjust_casa_mapfile4,mask4,casa_image42,adjust_casa_mapfile5,make_previous_image_mapfile,make_new_model_mapfile,check_image]
+loop_ampcal.control.loopsteps                              =   [create_model3_map,casa_ft3,solve_ampphase21,merge_phase_parmdbs,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,flag2,create_compressed_mapfile_empty,transfer_flags,average4,create_compressed_mapfile4,concat4,delete_image,casa_image41,adjust_casa_mapfile4,mask4,casa_image42,adjust_casa_mapfile5,copy_image,check_image]
 
 create_model3_map.control.kind                             =   plugin
 create_model3_map.control.type                             =   trimMapfile
@@ -813,6 +813,7 @@ create_model3_map.control.mapfile_in                       =   casa_image32.outp
 create_model3_map.control.trim                             =   .model
 create_model3_map.control.mapfile_dir                      =   {{ mapfile_dir }}
 create_model3_map.control.filename                         =   model1_rootnames.datamap
+create_model3_map.control.counter                          =   loop_ampcal.output.counter
 
 casa_ft3.control.type                                      =   casa
 casa_ft3.control.mapfiles_in                               =   [concat_chunks.output.mapfile,create_model3_map.output.mapfile]
@@ -913,6 +914,11 @@ concat4.control.mapfile_in                                 =   create_compressed
 concat4.control.inputkey                                   =   msfiles
 concat4.control.outputkey                                  =   msconcat
 concat4.argument.flags                                     =   [msfiles,msconcat]
+
+delete_image.control.type                                  =   delete_image
+delete_image.control.mapfile_in                            =   create_model3_map.output.mapfile
+delete_image.control.inputkey                              =   imageroot
+delete_image.argument.flags                                =   [imageroot,loop_ampcal.output.counter]
 
 casa_image41.control.type                                  =   casa_clean
 casa_image41.control.mapfile_in                            =   concat4.output.mapfile
@@ -1016,24 +1022,15 @@ adjust_casa_mapfile5.control.append                        =   {{ casa_suffix }}
 adjust_casa_mapfile5.control.mapfile_dir                   =   {{ mapfile_dir }}
 adjust_casa_mapfile5.control.filename                      =   compare_image_input_new.datamap
 
-make_previous_image_mapfile.control.kind                   =   plugin
-make_previous_image_mapfile.control.type                   =   convertImageMapfile
-make_previous_image_mapfile.control.mapfile_in             =   adjust_casa_mapfile5.output.mapfile
-make_previous_image_mapfile.control.counter                =   loop_ampcal.output.counter
-make_previous_image_mapfile.control.mapfile_dir            =   {{ mapfile_dir }}
-make_previous_image_mapfile.control.filename               =   compare_image_input_old.datamap
-
-make_new_model_mapfile.control.kind                        =   plugin
-make_new_model_mapfile.control.type                        =   convertModelMapfile
-make_new_model_mapfile.control.mapfile_in                  =   create_model3_map.output.mapfile
-make_new_model_mapfile.control.counter                     =   loop_ampcal.output.counter
-make_new_model_mapfile.control.mapfile_dir                 =   {{ mapfile_dir }}
-make_new_model_mapfile.control.filename                    =   new_model.datamap
+copy_image.control.type                                    =   copy_image
+copy_image.control.mapfile_in                              =   adjust_casa_mapfile5.output.mapfile
+copy_image.control.inputkey                                =   image
+copy_image.argument.flags                                  =   [image,loop_ampcal.output.counter]
 
 check_image.control.type                                   =   compare_image_stats
-check_image.control.mapfiles_in                            =   [adjust_casa_mapfile5.output.mapfile,make_previous_image_mapfile.output.mapfile]
-check_image.control.inputkeys                              =   [image_new,image_old]
-check_image.argument.flags                                 =   [image_new,image_old]
+check_image.control.mapfiles_in                            =   [adjust_casa_mapfile5.output.mapfile,copy_image.output.previous_image.mapfile]
+check_image.control.inputkeys                              =   [image_new,image_prev]
+check_image.argument.flags                                 =   [image_new,image_prev]
 
 merge_selfcal_parmdbs.control.type                         =   merge_parmdbs_selfcal
 merge_selfcal_parmdbs.control.mapfiles_in                  =   [merge_phase_parmdbs.output.mapfile,smooth_amp2.output.mapfile]
