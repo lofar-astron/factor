@@ -1019,14 +1019,14 @@ adjust_casa_mapfile5.control.filename                      =   compare_image_inp
 make_previous_image_mapfile.control.kind                   =   plugin
 make_previous_image_mapfile.control.type                   =   convertImageMapfile
 make_previous_image_mapfile.control.mapfile_in             =   adjust_casa_mapfile5.output.mapfile
-make_previous_image_mapfile.control.counter                =   loop_amp.output.counter
+make_previous_image_mapfile.control.counter                =   loop_ampcal.output.counter
 make_previous_image_mapfile.control.mapfile_dir            =   {{ mapfile_dir }}
 make_previous_image_mapfile.control.filename               =   compare_image_input_old.datamap
 
 make_new_model_mapfile.control.kind                        =   plugin
 make_new_model_mapfile.control.type                        =   convertModelMapfile
 make_new_model_mapfile.control.mapfile_in                  =   create_model3_map.output.mapfile
-make_new_model_mapfile.control.counter                     =   loop_amp.output.counter
+make_new_model_mapfile.control.counter                     =   loop_ampcal.output.counter
 make_new_model_mapfile.control.mapfile_dir                 =   {{ mapfile_dir }}
 make_new_model_mapfile.control.filename                    =   new_model.datamap
 
