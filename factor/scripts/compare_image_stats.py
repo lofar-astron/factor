@@ -194,7 +194,7 @@ def find_imagenoise(imagename):
     image = numpy.copy(im.getdata())
     mean, rms =  meanclip(image)
 
-    return rms,  numpy.abs(numpy.max(image)/numpy.min(image))
+    return rms, numpy.abs(numpy.max(image)/numpy.min(image))
 
 
 def main(im1, im2, factor=1.0125):

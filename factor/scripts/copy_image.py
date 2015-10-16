@@ -5,6 +5,8 @@ Script to copy an image for selfcal looping
 import argparse
 from argparse import RawTextHelpFormatter
 import sys
+import shutil
+import os
 
 
 def main(image, counter):
@@ -27,6 +29,9 @@ def main(image, counter):
     counter = int(counter)
 
     image_copy = '{0}_{1}'.format(image, counter)
+    if os.path.exists(image_copy):
+        shutil.rmtree(image_copy)
+    shutil.copytree(image, image_copy)
 
     if counter > 0:
         image_prev = '{0}_{1}'.format(image, counter-1)
