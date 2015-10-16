@@ -97,7 +97,7 @@ def robust_sigma(in_y, zero=0):
     return out_val
 
 
-def meanclip(indata, clipsig=4.0, maxiter=10, converge_num=0.001, verbose=0):
+def meanclip(indata, clipsig=4.0, maxiter=10, converge_num=0.001, verbose=True):
    """
    Computes an iteratively sigma-clipped mean on a
    data set. Clipping is done about median, but mean
@@ -194,7 +194,7 @@ def find_imagenoise(imagename):
     image = numpy.copy(im.getdata())
     mean, rms =  meanclip(image)
 
-    return rms, numpy.abs(numpy.max(image)/numpy.min(image))
+    return rms, numpy.abs(numpy.max(image)/rms)
 
 
 def main(im1, im2, factor=1.0125):
@@ -223,6 +223,9 @@ def main(im1, im2, factor=1.0125):
 
     rms1, dynamic_range1 =  find_imagenoise(im1)
     rms2, dynamic_range2 =  find_imagenoise(im2)
+
+    print('Image 1: rms = {0} Jy/beam; dynamic range = {1}'.format(rms1, dynamic_range1))
+    print('Image 2: rms = {0} Jy/beam; dynamic range = {1}'.format(rms2, dynamic_range2))
 
     if dynamic_range1 / factor > dynamic_range2:
         return {'break': False}
