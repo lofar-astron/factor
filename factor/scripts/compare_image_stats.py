@@ -206,8 +206,10 @@ def main(im1, im2, factor=1.0125):
     ----------
     im1 : str
         Name of image #1
-    im2 : int
+    im2 : str
         Name of image #2
+    factor : float
+        Required improvement factor for success (i.e., break = True)
 
     Returns
     -------
@@ -232,9 +234,9 @@ if __name__ == '__main__':
     descriptiontext = "Compare dynamic range of two images.\n"
 
     parser = argparse.ArgumentParser(description=descriptiontext, formatter_class=RawTextHelpFormatter)
-    parser.add_argument('ms1', help='name of MS file 1')
-    parser.add_argument('ms2', help='name of MS file 2')
-    parser.add_argument('factor', help='improvement factor')
+    parser.add_argument('im1', help='name of image #1')
+    parser.add_argument('im2', help='name of image #2')
+    parser.add_argument('factor', help='required improvement factor for success')
     args = parser.parse_args()
 
-    main(args.ms1, args.ms2, args.factor)
+    main(args.im1, args.im2, args.factor)

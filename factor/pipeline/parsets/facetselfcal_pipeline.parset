@@ -1033,7 +1033,7 @@ make_new_model_mapfile.control.filename                    =   new_model.datamap
 check_image.control.type                                   =   compare_image_stats
 check_image.control.mapfiles_in                            =   [adjust_casa_mapfile5.output.mapfile,make_previous_image_mapfile.output.mapfile]
 check_image.control.inputkeys                              =   [image_new,image_old]
-check_image.argument.flags                                 =   [image,statsfile]
+check_image.argument.flags                                 =   [image_new,image_old]
 
 merge_selfcal_parmdbs.control.type                         =   merge_parmdbs_selfcal
 merge_selfcal_parmdbs.control.mapfiles_in                  =   [merge_phase_parmdbs.output.mapfile,smooth_amp2.output.mapfile]
