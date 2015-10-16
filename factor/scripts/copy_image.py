@@ -28,7 +28,8 @@ def main(image, counter):
     """
     counter = int(counter)
 
-    image_copy = '{0}_{1}'.format(image, counter)
+    image_copy = '{0}_iter{1}{2}'.format(os.path.splitext(image)[0], counter,
+        os.path.splitext(image)[1])
     if os.path.exists(image_copy):
         shutil.rmtree(image_copy)
     shutil.copytree(image, image_copy)
