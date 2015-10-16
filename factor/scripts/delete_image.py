@@ -7,6 +7,7 @@ from argparse import RawTextHelpFormatter
 import sys
 import glob
 import shutil
+import os
 
 
 def main(imageroot, counter):
