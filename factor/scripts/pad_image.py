@@ -37,7 +37,7 @@ def main(root, scalefactor=1.5, verbose=True):
         hdu[0].header['CRPIX2'] += offset
         hdu.writeto(infile, clobber=True)
 
-    return {'padsize': padsize}
+    return {'padsize': '{0} {0}'.format(padsize)}
 
 
 if __name__ == '__main__':
