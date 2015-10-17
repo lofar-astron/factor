@@ -11,8 +11,8 @@ import sys
 import os
 
 
-def main(root, scalefactor=1.5, verbose=False):
-    model_images = glob.glob(root + '-0*-model.fits') + glob.glob(root + '-MFS-model.fits')
+def main(root, scalefactor=1.5, verbose=True):
+    model_images = glob.glob(root + '-model.fits') + glob.glob(root + '-0*-model.fits') + glob.glob(root + '-MFS-model.fits')
 
     for infile in model_images:
         hdu = pyfits.open(infile)
