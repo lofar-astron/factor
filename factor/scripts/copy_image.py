@@ -36,7 +36,7 @@ def main(image, counter):
 
     if counter > 0:
         image_prev = '{0}_iter{1}{2}'.format(os.path.splitext(image)[0], counter-1,
-        os.path.splitext(image)[1])
+            os.path.splitext(image)[1])
     else:
         image_prev = image.replace('image42', 'image32')
 

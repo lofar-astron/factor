@@ -337,7 +337,7 @@ def _set_up_bands(parset, log, test_run=False):
         for d in duplicate_chans:
             bands_with_duplicates = [band.msname for band in bands if band.nchan == d]
             log.error('Found {0} channels in band(s): {1}'.format(d,
-                ','.join(bands_with_duplicates)))
+                ', '.join(bands_with_duplicates)))
         log.error('All bands must have the same number of channels. Exiting...')
         sys.exit(1)
 
