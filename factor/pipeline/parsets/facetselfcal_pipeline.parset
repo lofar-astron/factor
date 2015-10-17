@@ -1221,10 +1221,10 @@ create_expanded_mapfile.control.mapfile_dir                =   {{ mapfile_dir }}
 create_expanded_mapfile.control.filename                   =   expand_wsclean_model.datamap
 
 wsclean_ft.control.type                                    =   wsclean_ft
-wsclean_ft.control.mapfiles_in                             =   [shift_empty.output.mapfile,create_expanded_mapfile.output.mapfile]
-wsclean_ft.control.inputkeys                               =   [msfile,name]
+wsclean_ft.control.mapfiles_in                             =   [shift_empty.output.mapfile,create_expanded_mapfile.output.mapfile,pad_model_images.output.padsize.mapfile]
+wsclean_ft.control.inputkeys                               =   [msfile,name,imsize]
 wsclean_ft.argument.flags                                  =   [-predict,msfile]
-wsclean_ft.argument.size                                   =   pad_model_images.output.padsize.mapfile
+wsclean_ft.argument.size                                   =   imsize
 wsclean_ft.argument.scale                                  =   0.000417
 wsclean_ft.argument.mem                                    =   {{ max_percent_memory }}
 wsclean_ft.argument.channelsout                            =   {{ nchannels }}
