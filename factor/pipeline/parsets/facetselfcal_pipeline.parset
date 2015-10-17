@@ -1213,15 +1213,22 @@ pad_model_images.control.mapfile_in                        =   create_model4_map
 pad_model_images.control.inputkey                          =   imagefile
 pad_model_images.argument.flags                            =   [imagefile]
 
-create_expanded_mapfile.control.kind                       =   plugin
-create_expanded_mapfile.control.type                       =   expandMapfile
-create_expanded_mapfile.control.mapfile_in                 =   create_model4_map.output.mapfile
-create_expanded_mapfile.control.mapfile_to_match           =   shift_empty.output.mapfile
-create_expanded_mapfile.control.mapfile_dir                =   {{ mapfile_dir }}
-create_expanded_mapfile.control.filename                   =   expand_wsclean_model.datamap
+create_expanded_model_mapfile.control.kind                 =   plugin
+create_expanded_model_mapfile.control.type                 =   expandMapfile
+create_expanded_model_mapfile.control.mapfile_in           =   create_model4_map.output.mapfile
+create_expanded_model_mapfile.control.mapfile_to_match     =   shift_empty.output.mapfile
+create_expanded_model_mapfile.control.mapfile_dir          =   {{ mapfile_dir }}
+create_expanded_model_mapfile.control.filename             =   expand_wsclean_model.datamap
+
+create_expanded_size_mapfile.control.kind                  =   plugin
+create_expanded_size_mapfile.control.type                  =   expandMapfile
+create_expanded_size_mapfile.control.mapfile_in            =   pad_model_images.output.padsize.mapfile
+create_expanded_size_mapfile.control.mapfile_to_match      =   shift_empty.output.mapfile
+create_expanded_size_mapfile.control.mapfile_dir           =   {{ mapfile_dir }}
+create_expanded_size_mapfile.control.filename              =   expand_wsclean_model_size.datamap
 
 wsclean_ft.control.type                                    =   wsclean_ft
-wsclean_ft.control.mapfiles_in                             =   [shift_empty.output.mapfile,create_expanded_mapfile.output.mapfile,pad_model_images.output.padsize.mapfile]
+wsclean_ft.control.mapfiles_in                             =   [shift_empty.output.mapfile,create_expanded_model_mapfile.output.mapfile,create_expanded_size_mapfile.output.mapfile]
 wsclean_ft.control.inputkeys                               =   [msfile,name,size]
 wsclean_ft.argument.flags                                  =   [-predict,msfile]
 wsclean_ft.argument.scale                                  =   0.000417
