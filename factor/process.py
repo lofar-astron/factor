@@ -463,7 +463,7 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
     for i, direction in enumerate(directions):
         # Set averaging steps
         direction.set_averaging_steps(bands[0].chan_width_hz, bands[0].nchan,
-            bands[0].timepersample)
+            bands[0].timepersample, bands[0].nsamples)
 
         # Set image sizes
         direction.set_image_sizes(test_run=test_run)
@@ -480,7 +480,7 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         direction.field_ra = field.ra
         direction.field_dec = field.dec
 
-        # Load previous state (if any)
+        # Load previously completed steps (if any)
         direction.load_state()
 
         # Reset state if specified
