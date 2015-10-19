@@ -1,5 +1,5 @@
 {% extends "facetselfcal_pipeline.parset" %}
-{% block full_image_steps %}concat_averaged, premask, casa_image_full1, adjust_casa_mapfile5, mask5, casa_image_full2, create_model4_map, adjust_casa_mapfile6, create_compressed_mapfile6, concat_unaveraged, casa_ft4{% endblock full_image_steps %}
+{% block full_image_steps %}concat_averaged, premask, casa_image_full1, adjust_casa_mapfile6, mask5, casa_image_full2, create_model4_map, adjust_casa_mapfile7, create_compressed_mapfile6, concat_unaveraged, casa_ft4{% endblock full_image_steps %}
 {% block full_image_parms %}
 concat_averaged.control.type                               =   virtual_concat
 concat_averaged.control.mapfile_in                         =   create_compressed_mapfile5.output.mapfile
@@ -52,15 +52,15 @@ casa_image_full1.argument.clean.chaniter                   =   False
 casa_image_full1.argument.clean.flatnoise                  =   True
 casa_image_full1.argument.clean.allowchunk                 =   False
 
-adjust_casa_mapfile5.control.kind                          =   plugin
-adjust_casa_mapfile5.control.type                          =   appendMapfile
-adjust_casa_mapfile5.control.mapfile_in                    =   casa_image_full1.output.casa_image_full1.image.mapfile
-adjust_casa_mapfile5.control.append                        =   {{ casa_suffix }}
-adjust_casa_mapfile5.control.mapfile_dir                   =   {{ mapfile_dir }}
-adjust_casa_mapfile5.control.filename                      =   mask5_input.datamap
+adjust_casa_mapfile6.control.kind                          =   plugin
+adjust_casa_mapfile6.control.type                          =   appendMapfile
+adjust_casa_mapfile6.control.mapfile_in                    =   casa_image_full1.output.casa_image_full1.image.mapfile
+adjust_casa_mapfile6.control.append                        =   {{ casa_suffix }}
+adjust_casa_mapfile6.control.mapfile_dir                   =   {{ mapfile_dir }}
+adjust_casa_mapfile6.control.filename                      =   mask5_input.datamap
 
 mask5.control.type                                         =   make_clean_mask
-mask5.control.mapfile_in                                   =   adjust_casa_mapfile5.output.mapfile
+mask5.control.mapfile_in                                   =   adjust_casa_mapfile6.output.mapfile
 mask5.control.inputkey                                     =   imagefile
 mask5.control.outputkey                                    =   maskfile
 mask5.argument.flags                                       =   [imagefile,maskfile]
@@ -114,12 +114,12 @@ create_model4_map.control.trim                             =   .model
 create_model4_map.control.mapfile_dir                      =   {{ mapfile_dir }}
 create_model4_map.control.filename                         =   final_model_rootnames.datamap
 
-adjust_casa_mapfile6.control.kind                          =   plugin
-adjust_casa_mapfile6.control.type                          =   appendMapfile
-adjust_casa_mapfile6.control.mapfile_in                    =   casa_image_full2.output.casa_image_full2.image.mapfile
-adjust_casa_mapfile6.control.append                        =   {{ casa_suffix }}
-adjust_casa_mapfile6.control.mapfile_dir                   =   {{ mapfile_dir }}
-adjust_casa_mapfile6.control.filename                      =   final_image.datamap
+adjust_casa_mapfile7.control.kind                          =   plugin
+adjust_casa_mapfile7.control.type                          =   appendMapfile
+adjust_casa_mapfile7.control.mapfile_in                    =   casa_image_full2.output.casa_image_full2.image.mapfile
+adjust_casa_mapfile7.control.append                        =   {{ casa_suffix }}
+adjust_casa_mapfile7.control.mapfile_dir                   =   {{ mapfile_dir }}
+adjust_casa_mapfile7.control.filename                      =   final_image.datamap
 
 create_compressed_mapfile6.control.kind                    =   plugin
 create_compressed_mapfile6.control.type                    =   compressMapfile
