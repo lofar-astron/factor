@@ -4,6 +4,7 @@ Definition of the direction class
 import os
 import logging
 from astropy.coordinates import Angle
+import numpy as np
 
 
 class Direction(object):
