@@ -127,10 +127,22 @@ class Band(object):
 
         # Check that there aren't extra default values in the parmdb, as this
         # confuses DPPP
+        pdb = lofar.parmdb.parmdb(self.dirindparmdb)
         defvals = pdb.getDefValues()
         for v in defvals:
             if 'Ampl' not in v and 'Phase' not in v:
                 pdb.deleteDefValues(v)
+
+        # Increase time width of last solution to avoid problems with
+        # applying the solutions to averaged MS files
+        timewidth = pdb.getValuesGrid(solname)[solname]['timewidths'][-1]
+        if timewidth < 120.0:
+            v = pdb.getValuesGrid('*')
+            for k in v:
+                v[k]['timewidths'][-1] = 120.0
+                v[k]['times'][-1] = v[k]['times'][-2] + 120.0
+            pdb.deleteValues('*')
+            pdb.addValues(v)
         pdb.flush()
 
 
