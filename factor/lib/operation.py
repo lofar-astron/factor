@@ -126,9 +126,9 @@ class Operation(object):
                          'nimg_per_node': self.nimg_per_node,
                          'casa_executable': parset['casa_executable'],
                          'wsclean_executable': parset['wsclean_executable'],
-                         'losoto_executable': parset['losoto_executable'],
-                         'H5parm_importer_executable': parset['H5parm_importer_executable'],
-                         'H5parm_exporter_executable': parset['H5parm_exporter_executable'],
+#                          'losoto_executable': parset['losoto_executable'],
+#                          'H5parm_importer_executable': parset['H5parm_importer_executable'],
+#                          'H5parm_exporter_executable': parset['H5parm_exporter_executable'],
                          'image2fits_executable': parset['image2fits_executable'],
                          'dppp_nodescript': self.dppp_nodescript}
 
