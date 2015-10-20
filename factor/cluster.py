@@ -81,12 +81,12 @@ def find_executables(parset):
     """
     from distutils import spawn
 
-    executables = {'genericpipeline_executable': ['genericpipeline.py'],
+    executables = {'genericpipeline_executable': ['genericpipeline2.py', 'genericpipeline.py'],
                    'casa_executable': ['casapy', 'casa'],
                    'wsclean_executable': ['wsclean'],
-                   'losoto_executable': ['losoto.py'],
-                   'H5parm_importer_executable': ['H5parm_importer.py'],
-                   'H5parm_exporter_executable': ['H5parm_exporter.py'],
+#                    'losoto_executable': ['losoto.py'],
+#                    'H5parm_importer_executable': ['H5parm_importer.py'],
+#                    'H5parm_exporter_executable': ['H5parm_exporter.py'],
                    'image2fits_executable': ['image2fits']}
     for key, names in executables.iteritems():
         for name in names:
