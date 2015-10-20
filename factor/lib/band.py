@@ -134,9 +134,8 @@ class Band(object):
 
         # Increase time width of last solution to avoid problems with
         # applying the solutions to averaged MS files
-        timewidth0 = pdb.getValuesGrid(solname)[solname]['timewidths'][0]
-        timewidth1 = pdb.getValuesGrid(solname)[solname]['timewidths'][-1]
-        if timewidth1 < 120.0:
+        timewidth = pdb.getValuesGrid(solname)[solname]['timewidths'][-1]
+        if timewidth < 120.0:
             v = pdb.getValuesGrid('*')
             for k in v:
                 v[k]['timewidths'][-1] = 120.0
