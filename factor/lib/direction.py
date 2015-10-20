@@ -292,7 +292,7 @@ class Direction(object):
         # For selfcal, average to 2 MHz per channel and 120 s per time slot for
         # an image of 512 pixels
         target_bandwidth_mhz = 2.0 * 512.0 / self.cal_imsize
-        target_timewidth_s = 120 * 512.0 / self.cal_imsize
+        target_timewidth_s = 120 * 512.0 / self.cal_imsize # imaging only
         self.facetselfcal_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
         while nchan % self.facetselfcal_freqstep:
             self.facetselfcal_freqstep += 1
