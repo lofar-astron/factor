@@ -127,6 +127,7 @@ class Band(object):
 
         # Check that there aren't extra default values in the parmdb, as this
         # confuses DPPP
+        pdb = lofar.parmdb.parmdb(self.dirindparmdb)
         defvals = pdb.getDefValues()
         for v in defvals:
             if 'Ampl' not in v and 'Phase' not in v:
