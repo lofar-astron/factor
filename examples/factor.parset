@@ -35,6 +35,12 @@ wsclean_nbands = 2
 exit_on_selfcal_failure = True
 skip_selfcal_check = False
 
+# Maximum number of cycles of the last step of selfcal to perform (default =
+# 10). The last step is looped until the number of cycles reaches this value or
+# until the improvement in dynamic range over the previous image is less than
+# 1.25%
+max_selfcal_loops = 10
+
 # Use WSClean or CASA for imaging of entire facet (default = wsclean). For large
 # bandwidths, the CASA imager is typically faster
 facet_imager = casa

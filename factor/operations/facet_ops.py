@@ -59,12 +59,14 @@ class FacetSelfcal(Operation):
             nterms = 1
             casa_suffix = None
             wsclean_suffix = '-image.fits'
+        loopcount = max(1, self.parset['max_selfcal_loops'])
         self.parms_dict.update({'ms_files': ms_files,
                                 'skymodels': skymodels,
                                 'dir_indep_parmdbs': dir_indep_parmdbs,
                                 'casa_suffix': casa_suffix,
                                 'wsclean_suffix': wsclean_suffix,
-                                'nterms': nterms})
+                                'nterms': nterms,
+                                'loopcount': loopcount})
 
 
     def finalize(self):
