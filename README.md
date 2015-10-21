@@ -24,7 +24,7 @@ Beyond the standard LOFAR software packages, Factor requires the following:
 
 In addition, a patch must be made to the LOFAR pipeline framework to prevent
 casapy jobs from hanging. Add the following lines to the catch_segfaults()
-function:
+function of the file CEP/Pipeline/framework/lofarpipe/support/utilities.py:
 
     if usageStats:
         usageStats.addPID(process.pid)
