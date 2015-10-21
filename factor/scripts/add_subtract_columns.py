@@ -12,6 +12,12 @@ def main(ms1, ms2, column1, column2, column_out, op='add'):
     """
     Add/subtract columns (column_out = column1 +/- column2)
 
+    Note: we could also use TaQL to do this. E.g.:
+
+        taql 'update ms1, ms2 t2 set column_out = column1 + t2.column2'
+
+    but we have to create the output column first.
+
     Parameters
     ----------
     ms1 : str
@@ -29,37 +35,36 @@ def main(ms1, ms2, column1, column2, column_out, op='add'):
     op : str
         Operation to perform: 'add' or 'subtract'
 
-    update ms1, ms2 t2 set column_out = column1 + t2.column2
-
     """
     if ms1 == ms2:
         ms2 = None
 
+    # Read in the data
     t1 = pt.table(ms1, readonly=False, ack=False)
     data1 = t1.getcol(column1)
-    desc = t1.getcoldesc(column1)
-    desc['name'] = column_out
-    if column_out not in t1.colnames():
-        cd = pt.tableutil.makecoldesc(desc['name'], desc)
-        tdesc = pt.tableutil.maketabdesc(cd)
-        t1._addcols(tdesc, {}, True)
-        t1._makerow()
-
     if ms2 is not None:
         t2 = pt.table(ms2, readonly=False, ack=False)
         data2 = t2.getcol(column2)
     else:
         data2 = t1.getcol(column2)
 
+    # Add the output column if needed
+    if column_out not in t1.colnames():
+        desc = t1.getcoldesc(column1)
+        desc['name'] = column_out
+        cd = pt.tableutil.makecoldesc(desc['name'], desc)
+        tdesc = pt.tableutil.maketabdesc(cd)
+        t1._addcols(tdesc, {}, True)
+        t1._makerow()
+
+    # Add or subtract columns
     if op.lower() == 'add':
-        data_out = data1 + data2
+        t1.putcol(column_out, data1 + data2)
     elif op.lower() == 'subtract':
-        data_out = data1 - data2
+        t1.putcol(column_out, data1 - data2)
     else:
         print('Operation not understood. Must be either "add" or "subtract"')
         sys.exit(1)
-
-    t1.putcol(column_out, data_out)
     t1.flush()
     t1.close()
 

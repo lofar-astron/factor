@@ -29,15 +29,19 @@ def copy_column_to_ms(ms, inputcol, outputcol, ms_from=None):
     if ms_from is not None:
         tf = pt.table(ms_from, readonly=False, ack=False)
         data = tf.getcol(inputcol)
-        cd = tf.getcoldesc(inputcol)
+        desc = tf.getcoldesc(inputcol)
     else:
         data = t.getcol(inputcol)
-        cd = t.getcoldesc(inputcol)
-    cd['name'] = outputcol
-    try:
-        t.addcols(cd)
-    except:
-        pass
+        desc = t.getcoldesc(inputcol)
+
+    # Add the output column if needed
+    if column_out not in t.colnames():
+        desc['name'] = outputcol
+        cd = pt.tableutil.makecoldesc(desc['name'], desc)
+        tdesc = pt.tableutil.maketabdesc(cd)
+        t._addcols(tdesc, {}, True)
+        t._makerow()
+
     t.putcol(outputcol, data)
     t.flush()
     t.close()
