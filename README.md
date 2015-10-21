@@ -7,8 +7,10 @@ Installation
 Factor is currently installed on the LOFAR CEP3 cluster. Users on CEP3
 should run the following commands before using Factor:
 
-    use LofIm
+    use Lofar
     source ~rafferty/init_factor
+    use Casa
+    use Pythonlibs
 
 ### Dependencies
 
@@ -19,6 +21,24 @@ Beyond the standard LOFAR software packages, Factor requires the following:
 * [LSMTool](https://github.com/darafferty/LSMTool)
 * [jinja2](http://jinja.pocoo.org/docs/dev)
 * [Shapely](https://github.com/Toblerity/Shapely)
+
+In addition, a patch must be made to the LOFAR pipeline framework to prevent
+casapy jobs from hanging. Add the following lines to the catch_segfaults()
+function:
+
+    if usageStats:
+        usageStats.addPID(process.pid)
+
+    ----------- Add lines below -------------
+    if 'casa' in cmd[0]:
+    import time
+        while process.returncode is None:
+            process.poll()
+            time.sleep(1)
+    -----------------------------------------
+
+    sout, serr = process.communicate()
+
 
 Code Structure
 --------------
