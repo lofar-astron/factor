@@ -29,18 +29,21 @@ def main(ms1, ms2, column1, column2, column_out, op='add'):
     op : str
         Operation to perform: 'add' or 'subtract'
 
+    update ms1, ms2 t2 set column_out = column1 + t2.column2
+
     """
     if ms1 == ms2:
         ms2 = None
 
     t1 = pt.table(ms1, readonly=False, ack=False)
     data1 = t1.getcol(column1)
-    cd = t1.getcoldesc(column1)
-    cd['name'] = column_out
-    try:
-        t1.addcols(cd)
-    except:
-        pass
+    desc = t1.getcoldesc(column1)
+    desc['name'] = column_out
+    if column_out not in t1.colnames():
+        cd = pt.tableutil.makecoldesc(desc['name'], desc)
+        tdesc = pt.tableutil.maketabdesc(cd)
+        t1._addcols(tdesc, {}, True)
+        t1._makerow()
 
     if ms2 is not None:
         t2 = pt.table(ms2, readonly=False, ack=False)
