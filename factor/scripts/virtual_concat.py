@@ -45,6 +45,9 @@ def main(ms_files, outfile, clobber=True):
 def msconcat(names, newname, concatTime=False):
     """Virtually concatenate multiple MeasurementSets
 
+    NOTE: this function was taken from the LOFAR trunk and altered to bypass
+    an import problem on CEP3
+
     Multiple MeasurementSets are concatenated into a single MeasurementSet.
     The concatenation is done in an entirely or almost entirely virtual way,
     so hardly any data are copied. It makes the command very fast and hardly
@@ -84,7 +87,6 @@ def msconcat(names, newname, concatTime=False):
 
     """
     from pyrap.tables import table,taql
-    from pt.tableutil import makescacoldesc,makearrcoldesc,makecoldesc,maketabdesc
     import numpy as np
 
     if len(names) == 0:
@@ -115,7 +117,7 @@ def msconcat(names, newname, concatTime=False):
     tnew = table(newname, tdesc, nrow=tn.nrows(), dminfo={'1':{'TYPE':'ForwardColumnEngine', 'NAME':'ForwardData', 'COLUMNS':tn.colnames(), 'SPEC':{'FORWARDTABLE':tn.name()}}})
     # Remove the DATA_DESC_ID column and recreate it in a stored way.
     tnew.removecols ('DATA_DESC_ID')
-    tnew._addcols (maketabdesc(makecoldesc('DATA_DESC_ID', tdesc['DATA_DESC_ID'])),
+    tnew._addcols (pt.tableutil.maketabdesc(pt.tableutil.makecoldesc('DATA_DESC_ID', tdesc['DATA_DESC_ID'])),
                   dminfo={'TYPE':'IncrementalStMan', 'NAME':'DDID', 'SPEC':{}})
     tnew._makerow()
 
@@ -176,16 +178,6 @@ def msconcat(names, newname, concatTime=False):
             chans = [[0,nch] for nch in nchans]
             tnew.putcolkeyword ('MODEL_DATA', 'CHANNEL_SELECTION',
                                 np.int32(chans))
-    # Future work:
-    #   If SOURCE subtables have to concatenated, the FIELD and DOPPLER
-    #   have to be dealt with as well.
-    #   The FEED table can be concatenated; the FEED_ID can stay the same,
-    #   but spwid has to be updated.
-    #   The FREQ_OFFSET table is stand-alone, thus can simply be concatenated
-    #   and have spwid updated.
-    #   The SYSCAL table can be very large, so it might be better to virtually
-    #   concatenate it instead of making a copy (just like the main table).
-    # Flush the table and subtables.
     tnew.flush(True)
 
 if __name__ == '__main__':
