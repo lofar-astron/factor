@@ -44,6 +44,7 @@ setup(
     install_requires=['numpy', 'scipy', 'astropy', 'jinja2', 'LSMTool', ],
     dependency_links=['https://github.com/darafferty/LSMTool'],
     scripts = ['bin/runfactor'],
-    packages=['factor','factor.operations','factor.lib'],
+    packages=['factor', 'factor.operations', 'factor.lib', 'factor.parsets',
+        'factor.pipeline', 'factor.scripts', 'factor.skymodels'],
     cmdclass = {'test': PyTest},
     )
