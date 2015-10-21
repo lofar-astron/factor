@@ -41,6 +41,7 @@ def main(ms_files, outfile, clobber=True):
     except ImportError:
         if os.path.exists(outfile):
             os.system('rm -rf {0}'.format(outfile))
+            os.system('rm -rf {0}'.format(outfile+'_CONCAT'))
         msconcat(ms_files, outfile)
 
 
@@ -88,7 +89,7 @@ def msconcat(names, newname, concatTime=False):
       above.
 
     """
-    from pyrap.tables import table,taql
+    from pyrap.tables import table, taql
     import numpy as np
 
     if len(names) == 0:
