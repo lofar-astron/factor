@@ -35,7 +35,7 @@ def copy_column_to_ms(ms, inputcol, outputcol, ms_from=None):
         desc = t.getcoldesc(inputcol)
 
     # Add the output column if needed
-    if column_out not in t.colnames():
+    if outputcol not in t.colnames():
         desc['name'] = outputcol
         cd = pt.tableutil.makecoldesc(desc['name'], desc)
         tdesc = pt.tableutil.maketabdesc(cd)
