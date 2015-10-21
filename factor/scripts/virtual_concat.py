@@ -39,6 +39,8 @@ def main(ms_files, outfile, clobber=True):
     try:
         pt.msutil.msconcat(ms_files, outfile)
     except ImportError:
+        if os.path.exists(outfile):
+            os.system('rm -rf {0}'.format(outfile))
         msconcat(ms_files, outfile)
 
 
