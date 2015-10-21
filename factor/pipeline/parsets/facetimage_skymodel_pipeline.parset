@@ -42,14 +42,12 @@ shift_empty.argument.msin.datacolumn              =   SUBTRACTED_DATA_ALL_NEW
 shift_empty.argument.msout.overwrite              =   True
 shift_empty.argument.msout.writefullresflag       =   False
 shift_empty.argument.local_scratch_dir            =   {{ local_dir }}
-shift_empty.argument.steps                        =   [shift,avg,flag]
+shift_empty.argument.steps                        =   [shift,avg]
 shift_empty.argument.shift.type                   =   phaseshifter
 shift_empty.argument.shift.phasecenter            =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
 shift_empty.argument.avg.type                     =   squash
 shift_empty.argument.avg.freqstep                 =   {{ facetimage_freqstep }}
 shift_empty.argument.avg.timestep                 =   {{ facetimage_timestep }}
-shift_empty.argument.flag.type                    =   preflagger
-shift_empty.argument.flag.timeslot                =   [{{ facetimage_ntimes }}]
 
 copy_shifted_map.control.kind                     =   plugin
 copy_shifted_map.control.type                     =   copyMapfile

@@ -286,8 +286,6 @@ class Direction(object):
         while nchan % self.initsubtract_freqstep:
             self.initsubtract_freqstep += 1
         self.initsubtract_timestep = max(1, int(round(20.0 / timestep_sec)))
-        self.initsubtract_ntimes = np.ceil(ntimes /
-            self.initsubtract_timestep) - 1 # Number of full time slots after averaging
 
         # For selfcal, average to 2 MHz per channel and 120 s per time slot for
         # an image of 512 pixels
@@ -297,7 +295,6 @@ class Direction(object):
         while nchan % self.facetselfcal_freqstep:
             self.facetselfcal_freqstep += 1
         self.facetselfcal_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
-        self.facetselfcal_ntimes = np.ceil(ntimes / self.facetselfcal_timestep) - 1
 
         # For facet imaging, average to 0.5 MHz per channel and 30 sec per time
         # slot for an image of 2048 pixels
@@ -307,7 +304,6 @@ class Direction(object):
         while nchan % self.facetimage_freqstep:
             self.facetimage_freqstep += 1
         self.facetimage_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
-        self.facetimage_ntimes = np.ceil(ntimes / self.facetimage_timestep) - 1
 
         # For selfcal verify, average to 2 MHz per channel and 60 sec per time
         # slot
@@ -315,7 +311,6 @@ class Direction(object):
         while nchan % self.verify_freqstep:
             self.verify_freqstep += 1
         self.verify_timestep = max(1, int(round(60.0 / timestep_sec)))
-        self.verify_ntimes = np.ceil(ntimes / self.verify_timestep) - 1
 
 
     def save_state(self):
