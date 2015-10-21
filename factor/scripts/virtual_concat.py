@@ -120,7 +120,7 @@ def msconcat(names, newname, concatTime=False):
     # Remove the DATA_DESC_ID column and recreate it in a stored way.
     tnew.removecols ('DATA_DESC_ID')
     tnew._addcols (pt.tableutil.maketabdesc(pt.tableutil.makecoldesc('DATA_DESC_ID', tdesc['DATA_DESC_ID'])),
-                  dminfo={'TYPE':'IncrementalStMan', 'NAME':'DDID', 'SPEC':{}})
+                  {'TYPE':'IncrementalStMan', 'NAME':'DDID', 'SPEC':{}}, True)
     tnew._makerow()
 
     # Copy the table keywords.
