@@ -115,7 +115,7 @@ def msconcat(names, newname, concatTime=False):
     tnew = table(newname, tdesc, nrow=tn.nrows(), dminfo={'1':{'TYPE':'ForwardColumnEngine', 'NAME':'ForwardData', 'COLUMNS':tn.colnames(), 'SPEC':{'FORWARDTABLE':tn.name()}}})
     # Remove the DATA_DESC_ID column and recreate it in a stored way.
     tnew.removecols ('DATA_DESC_ID')
-    tnew._addcols (pt.tableutil.maketabdesc(makecoldesc('DATA_DESC_ID', tdesc['DATA_DESC_ID'])),
+    tnew._addcols (maketabdesc(makecoldesc('DATA_DESC_ID', tdesc['DATA_DESC_ID'])),
                   dminfo={'TYPE':'IncrementalStMan', 'NAME':'DDID', 'SPEC':{}})
     tnew._makerow()
 
