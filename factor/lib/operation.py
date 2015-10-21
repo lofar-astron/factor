@@ -47,7 +47,7 @@ class Operation(object):
         self.parset['op_name'] = name
         self.direction = direction
         _logging.set_level(self.parset['logging_level'])
-        self.log = logging.getLogger('factor.{0}'.format(self.name))
+        self.log = logging.getLogger('factor:{0}'.format(self.name))
         self.hostname = socket.gethostname()
         self.node_list = parset['cluster_specific']['node_list']
         self.max_cpus_per_node = parset['cluster_specific']['ncpu']
