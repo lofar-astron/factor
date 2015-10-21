@@ -89,7 +89,7 @@ want to run the pipelines yourself, you can set the dry_run (`-d`) argument
 (e.g., `runfactor -d factor.parset`). Factor will then perform all the setup but
 will not run the pipelines. Note that this option is most useful if a
 directions file is given, as without this file Factor cannot create pipelines
-for self calibration, etc.
+for self calibration.
 
-For details on the usage, please see the full documentation and the examples in
-the examples directory.
+For details on the usage, please see the [full documentation](http://www.astron.nl/citt/facet-doc/)
+and the examples in the examples directory.
