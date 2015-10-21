@@ -122,7 +122,7 @@ def parset_read(parset_file):
         parset_dict['keep_facet_data'] = True
     if 'max_selfcal_loops' in parset_dict:
         parset_dict['max_selfcal_loops'] = parset.getint('global', 'max_selfcal_loops')
-    else;
+    else:
         parset_dict['max_selfcal_loops'] = 10
 
     # Handle directions-related parameters
