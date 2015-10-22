@@ -12,6 +12,8 @@ should run the following commands before using Factor:
     use Casa
     use Pythonlibs
 
+If you want to install Factor yourself, follow the instructions below.
+
 ### Dependencies
 
 Beyond the standard LOFAR software packages, Factor requires the following:
@@ -39,6 +41,16 @@ function of the file CEP/Pipeline/framework/lofarpipe/support/utilities.py:
 
     sout, serr = process.communicate()
 
+### Downloading and Installing
+
+Get the latest developer version by cloning the git repository:
+
+    git clone https://github.com/revoltek/factor.git
+
+Then install with:
+
+    cd factor
+    python setup.py install
 
 Code Structure
 --------------
