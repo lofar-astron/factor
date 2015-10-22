@@ -52,10 +52,7 @@ def main(ms1, ms2, column1, column2, column_out, op='add'):
     if column_out not in t1.colnames():
         desc = t1.getcoldesc(column1)
         desc['name'] = column_out
-        cd = pt.tableutil.makecoldesc(desc['name'], desc)
-        tdesc = pt.tableutil.maketabdesc(cd)
-        t1._addcols(tdesc, {}, True)
-        t1._makerow()
+        t1.addcols(desc)
 
     # Add or subtract columns
     if op.lower() == 'add':
