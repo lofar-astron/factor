@@ -3,7 +3,6 @@ from setuptools import setup, Command
 import os
 import factor._version
 
-
 description = 'Factor: Facet calibration for LOFAR'
 long_description = description
 if os.path.exists('README.md'):
@@ -44,7 +43,14 @@ setup(
     install_requires=['numpy', 'scipy', 'astropy', 'jinja2', 'LSMTool', ],
     dependency_links=['https://github.com/darafferty/LSMTool'],
     scripts = ['bin/runfactor'],
-    packages=['factor', 'factor.operations', 'factor.lib', 'factor.parsets',
-        'factor.pipeline', 'factor.scripts', 'factor.skymodels'],
+    packages=['factor', 'factor.operations', 'factor.lib'],
+    package_data={'factor': [
+        'parsets/*',
+        'pipeline/*.cfg',
+        'pipeline/parsets/*',
+        'pipeline/plugins/*',
+        'pipeline/recipes/nodes/*',
+        'scripts/*',
+        'skymodels/*']},
     cmdclass = {'test': PyTest},
     )
