@@ -57,7 +57,7 @@ copy_shifted_map.control.filename                 =   shifted_empty_final_bands.
 
 add_all_facet_sources.control.type                =   calibrate-stand-alone_new
 add_all_facet_sources.argument.observation        =   shift_empty.output.mapfile
-add_all_facet_sources.argument.parset             =   {{ parset_dir }}/facet_dirindep_add_all.parset
+add_all_facet_sources.argument.parset             =   {{ parset_dir }}/facet_dirindep_add.parset
 add_all_facet_sources.argument.catalog            =   make_facet_skymodels_all.output.mapfile
 add_all_facet_sources.argument.parmdb             =   create_parmdb_map.output.mapfile
 add_all_facet_sources.argument.replace-sourcedb   =   True
