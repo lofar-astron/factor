@@ -8,6 +8,7 @@ import numpy as np
 import logging
 import pickle
 import collections
+import pyrap.tables as pt
 from lofarpipe.support.data_map import DataMap
 import factor
 import factor.directions
@@ -292,20 +293,32 @@ def _set_up_bands(parset, log, test_run=False):
     from factor.lib.band import Band
 
     log.info('Checking input bands...')
-    bands = []
+    msdict = {}
     for ms in parset['mss']:
+        # group all found MSs by frequency
+        sw = pt.table(ms+'::SPECTRAL_WINDOW', ack=False)
+        msfreq = round(sw.col('REF_FREQUENCY')[0])
+        sw.close()
+        if msfreq in msdict:
+            msdict[msfreq].append(ms)
+        else:
+            msdict[msfreq] = [ms]
+    bands = []
+    for MSs in msdict:
         # Check for any sky models specified by user
+        # there only needs to be a skymodel specyfied for one file in each band
         skymodel_dirindep = None
-        msbase = os.path.basename(ms)
-        if msbase in parset['ms_specific']:
-            if 'init_skymodel' in parset['ms_specific'][msbase]:
-                skymodel_dirindep = parset['ms_specific'][msbase]['init_skymodel']
-                if not os.path.exists(skymodel_dirindep):
-                    log.error('Sky model specified in parset for band {} was '
-                        'not found. Exiting...'.format(msbase))
-                    sys.exit(1)
-
-        band = Band(ms, parset['dir_working'], parset['parmdb_name'], skymodel_dirindep,
+        for ms in MSs
+            msbase = os.path.basename(ms)
+            if msbase in parset['ms_specific']:
+                if 'init_skymodel' in parset['ms_specific'][msbase]:
+                    skymodel_dirindep = parset['ms_specific'][msbase]['init_skymodel']
+                    if not os.path.exists(skymodel_dirindep):
+                        log.error('Sky model specified in parset for band {} was '
+                            'not found. Exiting...'.format(msbase))
+                        sys.exit(1)
+                    break
+        band = Band(MSs, parset['dir_working'], parset['parmdb_name'], skymodel_dirindep,
             test_run=test_run)
         bands.append(band)
 

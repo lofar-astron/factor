@@ -3,6 +3,7 @@ Definition of the band class
 """
 import os
 import sys
+import shutil
 import logging
 import pyrap.tables as pt
 import lofar.parmdb
@@ -33,7 +34,7 @@ class Band(object):
 
         """
         self.files = MSfiles
-        self.msname = [ MS.split('/')[-1] for MS in self.files ]
+        self.msnames = [ MS.split('/')[-1] for MS in self.files ]
         self.dirindparmdbs = [ os.path.join(MS, dirindparmdb) for MS in self.files ]
         self.skymodel_dirindep = skymodel_dirindep
         self.numMS = len(self.files)
@@ -65,15 +66,19 @@ class Band(object):
         self.diam = float(ant.col('DISH_DIAMETER')[0])
         ant.close()
 
+        # cut input files into chunks if needed
+        chunksize = 2400. # in seconds -> 40min
+        self.chunk_input_files(chunksize, dirindparmdb, clobber=True, test_run=test_run)
+
         # Check for SUBTRACTED_DATA_ALL column and calculate times and number
         # of samples
         self.has_sub_data = True
         self.sumsamples = 0
-        self.minSamplesPerFile = 4294967295
+        self.minSamplesPerFile = 4294967295  # If LOFAR lasts that many seconds then I buy you a beer.
         self.starttime = np.finfo('d').max
         self.endtime = 0.
-        for MS in self.files:
-            tab = pt.table(MS, ack=False)
+        for MSid in xrange(self.numMS):
+            tab = pt.table(self.files[MSid], ack=False)
             if not 'SUBTRACTED_DATA_ALL' in tab.colnames():
                 self.has_sub_data = False
             self.has_sub_data_new = False
@@ -82,9 +87,10 @@ class Band(object):
             for t2 in tab.iter(["ANTENNA1","ANTENNA2"]):
                 if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
                     self.timepersample = t2.col('TIME')[1] - t2.col('TIME')[0]
-                    self.sumsamples += t2.nrows()
-                    self.minSamplesPerFile = np.min(self.samplesPerFile,t2.nrows())
-                    break
+                    numsamples = t2.nrows()
+                    self.sumsamples += numsamples
+                    self.minSamplesPerFile = np.min(self.samplesPerFile,numsamples)
+                    break            
             tab.close()
 
         # Set the initsubtract cell sizes
@@ -99,7 +105,7 @@ class Band(object):
         """
         Checks the dir-indep instrument parmdb for various problems
         """
-        for pdb_id in xrange(self.numMS)
+        for pdb_id in xrange(self.numMS):
             # Check for special BBS table name "instrument"
             if os.path.basename(self.dirindparmdbs[pdb_id]) == 'instrument':
                 self.dirindparmdbs[pdb_id] += '_dirindep'
@@ -213,8 +219,8 @@ class Band(object):
         # check that all MSs have the same frequency axis
         for MS_id in xrange(1,self.numMS):
             sw = pt.table(self.files[MS_id]+'::SPECTRAL_WINDOW', ack=False)
-            if self.freq != sw.col('REF_FREQUENCY')[0] or self.nchan != sw.col('NUM_CHAN')[0] \\
-                    or not np.array_equal(self.chan_freqs_hz, sw.getcell('CHAN_FREQ',0)) \\
+            if self.freq != sw.col('REF_FREQUENCY')[0] or self.nchan != sw.col('NUM_CHAN')[0] \
+                    or not np.array_equal(self.chan_freqs_hz, sw.getcell('CHAN_FREQ',0)) \
                     or not np.array_equal(self.chan_width_hz, sw.getcell('CHAN_WIDTH',0)[0] ):
                 self.log.critical('Frequency axis for MS {0} differs from the one for MS {1}! '
                                   'Exiting!'.format(self.files[pdb_id],self.files[0]))
@@ -227,6 +233,75 @@ class Band(object):
             self.missing_channels.extend([i + j + 1 for j in range(ngap-1)])
         self.log.debug('Missing channels: {}'.format(self.missing_channels))
 
+
+
+    def chunk_input_files(self, chunksize, dirindparmdb, clobber=True, test_run=False):
+        """
+        Make copies of input files that are smaller than 2*chunksize
+
+        Chops off chunk of chunksize length until remainder is smaller than 2*chunksize
+        Generates new self.files, self.msnames, and self.dirindparmdbs 
+        The direction independent parmDBs are fully copied into the new MSs
+
+        Parameters
+        ----------
+        chunksize : float
+            length of a chunk in seconds
+        dirindparmdb : str
+            Name of direction-independent instrument parmdb inside the new chunk files
+        clobber : bool, optional
+            If True, remove existing files if needed.      
+        test_run : bool, optional
+            If True, don't actually do the choping.
+        """
+        newfiles = []
+        newdirindparmdbs = []
+        for MS_id in xrange(1,self.numMS):
+            nchunks = 1
+            tab = pt.table(self.files[MSid], ack=False)            
+            timepersample = tab.getcell('EXPOSURE',0)
+            timetab = tab.sort('unique desc TIME')
+            timearray = timetab.getcol('TIME')
+            mystarttime = np.min(timearray)
+            myendtime = np.max(timearray)
+            assert (timepersample*(len(timearray)-1)) > (myendtime-mystarttime)
+            if (myendtime-mystarttime) > (2.*chunksize):
+                nchunks = int((numsamples*self.timepersample)/chunksize)
+            if test_run:
+                self.log.debug('Would split (or not) {0} into {1} chunks. '.format(self.files[MSid],nchunks))
+                tab.close()
+                continue
+            if nchunks > 1:
+                for chunkid in range(nchunks):
+                    chunk_file = '{0}_chunk{1}.ms'.format(os.path.splitext(self.files[MSid])[0], chunkid)
+                    if clobber:
+                        shutil.rmtree(chunk_file,ignore_errors=True)
+                    starttime = mystarttime+chunkid*chunksize
+                    endtime = mystarttime+(chunkid+1)*chunksize
+                    if chunkid == 0: 
+                        starttime -= chunksize
+                    if chunkid == (nchunks-1):
+                        endtime += 2.*chunksize
+                    seltab = tab.query('TIME >= ' + str(starttime+start_out*3600.0) + ' && '
+                                       'TIME < ' + str(starttime+end_out*3600.0), sortlist='TIME,ANTENNA1,ANTENNA2')
+                    seltab.copy(chunk_file, True)
+                    seltab.close()
+                    newdirindparmdb = os.path.join(chunk_file, dirindparmdb)
+                    shutil.copytree(self.dirindparmdbs[MSid],newdirindparmdb)
+                    newfiles.append(chunk_file)
+                    newdirindparmdbs.append(newdirindparmdb)
+            else:
+               newfiles.append(self.files[MSid])
+               newdirindparmdbs.append(self.dirindparmdbs[MSid])
+            tab.close()            
+        if test_run:
+            return
+        self.files = newfiles
+        self.msnames = [ MS.split('/')[-1] for MS in self.files ]
+        self.dirindparmdbs = newdirindparmdbs
+        self.numMS = len(self.files)
+
+  
 
     def set_image_sizes(self, test_run=False):
         """

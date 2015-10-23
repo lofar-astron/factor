@@ -20,7 +20,7 @@ class Direction(object):
 
     """
     def __init__(self, name, ra, dec, atrous_do=False, mscale_field_do=False, cal_imsize=512,
-        solint_p=1, solint_a=1, field_imsize=2048, dynamic_range='LD', region_selfcal='',
+        solint_p_sec=1, solint_a_sec=1, field_imsize=2048, dynamic_range='LD', region_selfcal='',
         region_field='', peel_skymodel='', outlier_do=False, factor_working_dir='',
         make_final_image=False, cal_size_deg=None, cal_flux_jy=None):
         """
@@ -40,10 +40,10 @@ class Direction(object):
             Use multiscale clean for facet field?
         cal_imsize : int
             Size of calibrator image in 1.5 arcsec pixels
-        solint_p : int
-            Solution interval for phase calibration (# of time slots)
-        solint_a : int
-            Solution interval for amplitude calibration (# of time slots)
+        solint_p_sec : float
+            Solution interval for phase calibration (seconds)
+        solint_a_sec : float
+            Solution interval for amplitude calibration (seconds)
         field_imsize : int
             Size of facet image in 1.5 arcsec pixels
         dynamic_range : str
@@ -78,8 +78,8 @@ class Direction(object):
         self.atrous_do = atrous_do
         self.mscale_field_do = mscale_field_do
         self.cal_imsize = cal_imsize
-        self.solint_p = solint_p
-        self.solint_a = solint_a
+        self.solint_p_sec = solint_p_sec
+        self.solint_a_sec = solint_a_sec
         self.facet_imsize = field_imsize * 1.15
         self.dynamic_range = dynamic_range
         if region_selfcal.lower() == 'empty':
@@ -121,16 +121,16 @@ class Direction(object):
         self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
 
         # Scale solution intervals by apparent flux. The scaling is done so that
-        # sources with flux densities of 250 mJy have a fast interval of 4 time
-        # slots and a slow interval of 240 time slots. The scaling is currently
+        # sources with flux densities of 250 mJy have a fast interval of 40 seconds
+        # and a slow interval of 2400 seconds. The scaling is currently
         # linear with flux (and thus we accept lower-SNR solutions for the
         # fainter sources). Ideally, these value should also scale with the
         # bandwidth
         if self.apparent_flux_mjy is not None:
             ref_flux = 250.0
-            self.solint_p = max(1, int(round(4 * ref_flux / self.apparent_flux_mjy)))
-            self.solint_a = max(30, int(round(240 * ref_flux / self.apparent_flux_mjy)))
-        self.chunk_width = (solint_a - 1) * 4
+            self.solint_p_sec = max(1, int(round(40 * ref_flux / self.apparent_flux_mjy)))
+            self.solint_a_sec = max(30, int(round(2400 * ref_flux / self.apparent_flux_mjy)))
+        #self.chunk_width = (solint_a - 1) * 4
 
         # Define some directories, etc.
         self.working_dir = factor_working_dir
