@@ -17,6 +17,7 @@ from factor.operations.field_ops import *
 from factor.operations.facet_ops import *
 from factor.lib.scheduler import Scheduler
 from factor.lib.direction import Direction
+from factor.lib.band import Band
 
 
 def run(parset_file, logging_level='info', dry_run=False, test_run=False,
@@ -289,8 +290,6 @@ def _set_up_bands(parset, log, test_run=False):
         Subset of bands for InitSubtract operation
 
     """
-    from factor.lib.band import Band
-
     log.info('Checking input bands...')
     bands = []
     for ms in parset['mss']:
