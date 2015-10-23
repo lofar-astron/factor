@@ -58,7 +58,7 @@ The top-level directories are:
 
 * `bin`: contains the `runfactor` executable
 * `docs`: contains the documentation
-* `examples`: contains examples parset and directions file
+* `examples`: contains example parset and directions file
 * `factor`: main code tree
 
 Factor may be thought of as a tool to set up and run LOFAR pipeline scripts that

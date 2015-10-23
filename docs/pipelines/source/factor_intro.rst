@@ -3,7 +3,7 @@ Introduction
 
 The facet calibration software is divided into a number of pipelines, each of which is described in the following sections. The pre-facet calibration pipeline parset is available at https://github.com/tammojan/facet-calibration. The other pipeline parsets referenced here are available from the GitHub repository at https://github.com/revoltek/factor under the ``factor/pipeline/parsets`` directory.
 
-In addition to these pipelines, the Factor software package has been developed to handle the setup and running of pipelines to perform facet calibration in a user-friendly way (note that currently the pre-facet calibration pipeline is not part of Factor). For instructions on using Factor, please see the sections below and the Factor chapter in the LOFAR Imaging Cookbook.
+In addition to these pipelines, the Factor software package has been developed to handle the setting up and running of pipelines to perform facet calibration in a user-friendly way (note that currently the pre-facet calibration pipeline is not part of Factor). For instructions on using Factor, please see the sections below and the Factor chapter in the LOFAR Imaging Cookbook.
 
 The overall structure of the pipeline after pre-facet calibration is shown in the Figure :num:`factor-flowchart` below. The pipeline is divided into a number of operations (subpipelines), the division of which is largely determined by whether or not multiple operations may be run in parallel. In this flowchart, each operation is outlined with a black box and is named with the corresponding pipeline parset name.
 
