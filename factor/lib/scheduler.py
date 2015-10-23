@@ -35,8 +35,7 @@ def call_generic_pipeline(op_name, direction_name, parset, config, logbasename,
     genericpipeline_path = os.path.dirname(genericpipeline_executable)
     loader = imp.load_source('loader', os.path.join(genericpipeline_path,
         'loader.py'))
-    gp = imp.load_source('gp', os.path.join(genericpipeline_path,
-        'genericpipeline.py'))
+    gp = imp.load_source('gp', genericpipeline_executable)
 
     # Initalize pipeline object
     pipeline = gp.GenericPipeline()
