@@ -13,15 +13,15 @@ class Band(object):
     """
     The Band object contains parameters needed for each band (MS)
     """
-    def __init__(self, MSfile, factor_working_dir, dirindparmdb,
+    def __init__(self, MSfiles, factor_working_dir, dirindparmdb,
         skymodel_dirindep=None, test_run=False):
         """
         Create Band object
 
         Parameters
         ----------
-        MSfile : str
-            Filename of MS
+        MSfiles : list of str
+            Filenames of MSs for the same frequency band
         factor_working_dir : str
             Full path of working directory
         dirindparmdb : str
@@ -32,13 +32,14 @@ class Band(object):
             If True, use test image sizes
 
         """
-        self.file = MSfile
-        self.msname = self.file.split('/')[-1]
-        self.dirindparmdb = os.path.join(self.file, dirindparmdb)
+        self.files = MSfiles
+        self.msname = [ MS.split('/')[-1] for MS in self.files ]
+        self.dirindparmdbs = [ os.path.join(MS, dirindparmdb) for MS in self.files ]
         self.skymodel_dirindep = skymodel_dirindep
+        self.numMS = len(self.files)
 
         # Get the frequency info and set name
-        sw = pt.table(self.file+'::SPECTRAL_WINDOW', ack=False)
+        sw = pt.table(self.files[0]+'::SPECTRAL_WINDOW', ack=False)
         self.freq = sw.col('REF_FREQUENCY')[0]
         self.nchan = sw.col('NUM_CHAN')[0]
         self.chan_freqs_hz = sw.col('CHAN_FREQ')[0]
@@ -52,7 +53,7 @@ class Band(object):
         self.check_parmdb()
 
         # Get the field RA and Dec
-        obs = pt.table(self.file+'::FIELD', ack=False)
+        obs = pt.table(self.files[0]+'::FIELD', ack=False)
         self.ra = np.degrees(float(obs.col('REFERENCE_DIR')[0][0][0]))
         if self.ra < 0.:
             self.ra = 360.0 + (self.ra)
@@ -60,26 +61,31 @@ class Band(object):
         obs.close()
 
         # Get the station diameter
-        ant = pt.table(self.file+'::ANTENNA', ack=False)
+        ant = pt.table(self.files[0]+'::ANTENNA', ack=False)
         self.diam = float(ant.col('DISH_DIAMETER')[0])
         ant.close()
 
         # Check for SUBTRACTED_DATA_ALL column and calculate times and number
         # of samples
-        tab = pt.table(self.file, ack=False)
-        if 'SUBTRACTED_DATA_ALL' in tab.colnames():
-            self.has_sub_data = True
-        else:
-            self.has_sub_data = False
-        self.has_sub_data_new = False
-        self.starttime = tab.col('TIME')[0]
-        self.endtime = tab.col('TIME')[-1]
-        for t2 in tab.iter(["ANTENNA1","ANTENNA2"]):
-            if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
-                self.timepersample = t2.col('TIME')[1] - t2.col('TIME')[0]
-                self.nsamples = t2.nrows()
-                break
-        tab.close()
+        self.has_sub_data = True
+        self.sumsamples = 0
+        self.minSamplesPerFile = 4294967295
+        self.starttime = np.finfo('d').max
+        self.endtime = 0.
+        for MS in self.files:
+            tab = pt.table(MS, ack=False)
+            if not 'SUBTRACTED_DATA_ALL' in tab.colnames():
+                self.has_sub_data = False
+            self.has_sub_data_new = False
+            self.starttime = np.min(self.starttime,tab.col('TIME'))
+            self.endtime = np.max(self.endtime,tab.col('TIME'))
+            for t2 in tab.iter(["ANTENNA1","ANTENNA2"]):
+                if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
+                    self.timepersample = t2.col('TIME')[1] - t2.col('TIME')[0]
+                    self.sumsamples += t2.nrows()
+                    self.minSamplesPerFile = np.min(self.samplesPerFile,t2.nrows())
+                    break
+            tab.close()
 
         # Set the initsubtract cell sizes
         self.cellsize_highres_deg = 0.00208 # initsubtract high-res cell size
@@ -93,66 +99,73 @@ class Band(object):
         """
         Checks the dir-indep instrument parmdb for various problems
         """
-        # Check for special BBS table name "instrument"
-        if os.path.basename(self.dirindparmdb) == 'instrument':
-            self.dirindparmdb += '_dirindep'
-            if not os.path.exists(self.dirindparmdb):
-                if not os.path.exists(os.path.join(self.file, 'instrument')):
-                    self.log.critical('Direction-independent instument parmdb not found '
-                        'for band {0}'.format(self.file))
-                    sys.exit(1)
-                self.log.warn('Direction-independent instument parmdb for band {0} is '
-                    'named "instrument". Copying to "instrument_dirindep" so that BBS '
-                    'will not overwrite this table...'.format(self.file))
-                os.system('cp -r {0} {1}'.format(os.path.join(self.file,
-                    'instrument'), self.dirindparmdb))
-        if not os.path.exists(self.dirindparmdb):
-            self.log.critical('Direction-independent instrument parmdb "{0}" not found '
-                'for band {1}'.format(self.dirindparmdb, self.file))
-            sys.exit(1)
+        for pdb_id in xrange(self.numMS)
+            # Check for special BBS table name "instrument"
+            if os.path.basename(self.dirindparmdbs[pdb_id]) == 'instrument':
+                self.dirindparmdbs[pdb_id] += '_dirindep'
+                if not os.path.exists(self.dirindparmdbs[pdb_id]):
+                    if not os.path.exists(os.path.join(self.files[pdb_id], 'instrument')):
+                        self.log.critical('Direction-independent instument parmdb not found '
+                            'for band {0}'.format(self.files[pdb_id]))
+                        sys.exit(1)
+                    self.log.warn('Direction-independent instument parmdb for band {0} is '
+                        'named "instrument". Copying to "instrument_dirindep" so that BBS '
+                        'will not overwrite this table...'.format(self.files[pdb_id]))
+                    os.system('cp -r {0} {1}'.format(os.path.join(self.files[pdb_id],
+                        'instrument'), self.dirindparmdbs[pdb_id]))
+            if not os.path.exists(self.dirindparmdbs[pdb_id]):
+                self.log.critical('Direction-independent instrument parmdb "{0}" not found '
+                    'for band {1}'.format(self.dirindparmdbs[pdb_id], self.files[pdb_id]))
+                sys.exit(1)
 
-        # Check whether there are ampl/phase or real/imag
-        try:
-            pdb = lofar.parmdb.parmdb(self.dirindparmdb)
+            # Check whether there are ampl/phase or real/imag
+            try:
+                pdb = lofar.parmdb.parmdb(self.dirindparmdbs[pdb_id])
+                solname = pdb.getNames()[0]
+            except IndexError:
+                self.log.critical('Direction-independent instument parmdb appears to be empty '
+                            'for band {0}'.format(self.files[pdb_id]))
+                sys.exit(1)
+            if 'Real' in solname or 'Imag' in solname:
+                # Convert real/imag to phasors
+                self.log.warn('Direction-independent instument parmdb for band {0} contains '
+                    'real/imaginary values. Converting to phase/amplitude...'.format(self.files[pdb_id]))
+                self.convert_parmdb_to_phasors_id(pdb_id)
+            pdb.close()
+
+            # Check that there aren't extra default values in the parmdb, as this
+            # confuses DPPP
+            pdb = lofar.parmdb.parmdb(self.dirindparmdbs[pdb_id])
             solname = pdb.getNames()[0]
-        except IndexError:
-            self.log.critical('Direction-independent instument parmdb appears to be empty '
-                        'for band {0}'.format(self.file))
-            sys.exit(1)
-        if 'Real' in solname or 'Imag' in solname:
-            # Convert real/imag to phasors
-            self.log.warn('Direction-independent instument parmdb for band {0} contains '
-                'real/imaginary values. Converting to phase/amplitude...'.format(self.file))
-            self.convert_parmdb_to_phasors()
+            defvals = pdb.getDefValues()
+            for v in defvals:
+                if 'Ampl' not in v and 'Phase' not in v:
+                    pdb.deleteDefValues(v)
 
-        # Check that there aren't extra default values in the parmdb, as this
-        # confuses DPPP
-        pdb = lofar.parmdb.parmdb(self.dirindparmdb)
-        solname = pdb.getNames()[0]
-        defvals = pdb.getDefValues()
-        for v in defvals:
-            if 'Ampl' not in v and 'Phase' not in v:
-                pdb.deleteDefValues(v)
-
-        # Increase time width of last solution to avoid problems with
-        # applying the solutions to averaged MS files
-        timewidth = pdb.getValuesGrid(solname)[solname]['timewidths'][-1]
-        if timewidth < 120.0:
-            v = pdb.getValuesGrid('*')
-            for k in v:
-                v[k]['timewidths'][-1] = 120.0
-                v[k]['times'][-1] = v[k]['times'][-2] + 120.0
-            pdb.deleteValues('*')
-            pdb.addValues(v)
-        pdb.flush()
+            # Increase time width of last solution to avoid problems with
+            # applying the solutions to averaged MS files
+            timewidth = pdb.getValuesGrid(solname)[solname]['timewidths'][-1]
+            if timewidth < 120.0:
+                v = pdb.getValuesGrid('*')
+                for k in v:
+                    v[k]['timewidths'][-1] = 120.0
+                    v[k]['times'][-1] = v[k]['times'][-2] + 120.0
+                pdb.deleteValues('*')
+                pdb.addValues(v)
+            pdb.flush()
 
 
-    def convert_parmdb_to_phasors(self):
+    def convert_parmdb_to_phasors_id(self,pdb_id=0):
         """
-        Converts instrument parmdb from real/imag to phasors
+        Converts a single instrument parmdb from real/imag to phasors
+
+        Parameters
+        ----------
+        pdb_id : int
+            index of the instrument parmdb to convert
         """
-        phasors_parmdb_file = self.dirindparmdb + '_phasors'
-        pdb_in = lofar.parmdb.parmdb(self.dirindparmdb)
+        phasors_parmdb_file = self.dirindparmdbs[pdb_id] + '_phasors'
+        pdb_in = lofar.parmdb.parmdb(self.dirindparmdbs[pdb_id])
         pdb_out = lofar.parmdb.parmdb(phasors_parmdb_file, create=True)
 
         # Get station names
@@ -188,13 +201,26 @@ class Band(object):
 
         # Write values
         pdb_out.flush()
-        self.dirindparmdb = phasors_parmdb_file
+        pdb_in.close()
+        pdb_out.close()
+        self.dirindparmdbs[pdb_id] = phasors_parmdb_file
 
 
     def check_freqs(self):
         """
-        Checks for gaps in the frequency channels
+        Checks for gaps in the frequency channels and that all MSs have the same frequency axis
         """
+        # check that all MSs have the same frequency axis
+        for MS_id in xrange(1,self.numMS):
+            sw = pt.table(self.files[MS_id]+'::SPECTRAL_WINDOW', ack=False)
+            if self.freq != sw.col('REF_FREQUENCY')[0] or self.nchan != sw.col('NUM_CHAN')[0] \\
+                    or not np.array_equal(self.chan_freqs_hz, sw.getcell('CHAN_FREQ',0)) \\
+                    or not np.array_equal(self.chan_width_hz, sw.getcell('CHAN_WIDTH',0)[0] ):
+                self.log.critical('Frequency axis for MS {0} differs from the one for MS {1}! '
+                                  'Exiting!'.format(self.files[pdb_id],self.files[0]))
+                sys.exit(1)
+            sw.close()
+        # check for gaps in the frequency channels
         self.missing_channels = []
         for i, (freq1, freq2) in enumerate(zip(self.chan_freqs_hz[:-1], self.chan_freqs_hz[1:])):
             ngap = int(round((freq2 - freq1)/self.chan_width_hz))
@@ -217,20 +243,25 @@ class Band(object):
         """
         if not test_run:
             if not hasattr(self, 'mean_el_rad'):
-                # Add (virtual) elevation column to MS
-                try:
-                    pt.addDerivedMSCal(self.file)
-                except RuntimeError:
-                    # RuntimeError indicates column already exists
-                    pass
+                for MS_id in xrange(self.numMS):
+                    # Add (virtual) elevation column to MS
+                    try:
+                        pt.addDerivedMSCal(self.files[MS_id])
+                    except RuntimeError:
+                        # RuntimeError indicates column already exists
+                        pass
 
-                # Check for SUBTRACTED_DATA_ALL column and calculate mean elevation
-                tab = pt.table(self.file, ack=False)
-                self.mean_el_rad = np.mean(tab.getcol('AZEL1', rowincr=10000)[:, 1])
-                tab.close()
+                    # Check for SUBTRACTED_DATA_ALL column and calculate mean elevation
+                    tab = pt.table(self.file, ack=False)
+                    if MS_id == 0:
+                        global_el_values = tab.getcol('AZEL1', rowincr=10000)[:, 1]
+                    else:
+                        global_el_values = np.hstack( (global_el_values, tab.getcol('AZEL1', rowincr=10000)[:, 1]) )
+                    tab.close()
 
-                # Remove (virtual) elevation column from MS
-                pt.removeDerivedMSCal(self.file)
+                    # Remove (virtual) elevation column from MS
+                    pt.removeDerivedMSCal(self.files[MS_id])
+                self.mean_el_rad = np.mean(global_el_values)
 
             # Calculate mean FOV
             sec_el = 1.0 / np.sin(self.mean_el_rad)
@@ -304,3 +335,29 @@ class Band(object):
             if ((numpy.max(prime_factors(k)) < 8)):
                 return k
         return newlarge
+
+
+    def get_nearest_frequstep(self, freqstep):
+        """
+        Gets the nearest frequstep
+
+        Parameters
+        ----------
+        freqstep : int
+            Target frequency step
+
+        Returns
+        -------
+        optimum_step : int
+            Optimum frequency step nearest to target step
+
+        """
+        # first generate a list of possible values for freqstep
+        if not hasattr(self, 'freq_divisors'):
+            tmp_divisors = []
+            for step in range(self.nchan,0,-1):
+                if (self.nchan % step) == 0:
+                    tmp_divisors.append(step)
+            self.freq_divisors = np.array(tmp_divisors)
+        idx = np.argmin(np.abs(self.freq_divisors-freqstep))
+        return self.freq_divisors[idx]
