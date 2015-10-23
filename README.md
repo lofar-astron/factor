@@ -31,13 +31,13 @@ function of the file CEP/Pipeline/framework/lofarpipe/support/utilities.py:
     if usageStats:
         usageStats.addPID(process.pid)
 
-    ----------- Add lines below -------------
+    #----------- Add lines below -------------
     if 'casa' in cmd[0]:
         import time
         while process.returncode is None:
             process.poll()
             time.sleep(1)
-    -----------------------------------------
+    #-----------------------------------------
 
     sout, serr = process.communicate()
 
