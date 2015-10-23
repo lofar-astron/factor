@@ -278,13 +278,19 @@ class Direction(object):
             Number of timeslots per band
 
         """
+        # generate a (numpy-)array with the divisors of nchan
+        tmp_divisors = []
+        for step in range(nchan,0,-1):
+            if (nchan % step) == 0:
+                tmp_divisors.append(step)
+        freq_divisors = np.array(tmp_divisors)
+  
         # For initsubtract, average to 0.5 MHz per channel and 20 sec per time
         # slot. Since each band is imaged separately and the smearing and image
         # sizes both scale linearly with frequency, a single frequency and time
         # step is valid for all bands
         self.initsubtract_freqstep = max(1, min(int(round(0.5 * 1e6 / chan_width_hz)), nchan))
-        while nchan % self.initsubtract_freqstep:
-            self.initsubtract_freqstep += 1
+        self.initsubtract_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors-self.initsubtract_freqstep))]
         self.initsubtract_timestep = max(1, int(round(20.0 / timestep_sec)))
 
         # For selfcal, average to 2 MHz per channel and 120 s per time slot for
@@ -292,8 +298,7 @@ class Direction(object):
         target_bandwidth_mhz = 2.0 * 512.0 / self.cal_imsize
         target_timewidth_s = 120 * 512.0 / self.cal_imsize # used for imaging only
         self.facetselfcal_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
-        while nchan % self.facetselfcal_freqstep:
-            self.facetselfcal_freqstep += 1
+        self.facetselfcal_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors-self.facetselfcal_freqstep))]
         self.facetselfcal_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
 
         # For facet imaging, average to 0.5 MHz per channel and 30 sec per time
@@ -301,15 +306,13 @@ class Direction(object):
         target_bandwidth_mhz = 0.5 * 2048.0 / self.facet_imsize
         target_timewidth_s = 30 * 2048.0 / self.facet_imsize
         self.facetimage_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
-        while nchan % self.facetimage_freqstep:
-            self.facetimage_freqstep += 1
+        self.facetimage_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors-self.facetimage_freqstep))]
         self.facetimage_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
 
         # For selfcal verify, average to 2 MHz per channel and 60 sec per time
         # slot
         self.verify_freqstep = max(1, min(int(round(2.0 * 1e6 / chan_width_hz)), nchan))
-        while nchan % self.verify_freqstep:
-            self.verify_freqstep += 1
+        self.verify_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors-self.verify_freqstep))]
         self.verify_timestep = max(1, int(round(60.0 / timestep_sec)))
 
 
