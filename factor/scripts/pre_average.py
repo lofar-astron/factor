@@ -9,6 +9,7 @@ import glob
 import sys
 import os
 import itertools
+import pickle
 from scipy.ndimage.filters import gaussian_filter1d as gfilter
 import pyrap.tables as pt
 import lofar.parmdb
@@ -16,13 +17,21 @@ from astropy.stats import median_absolute_deviation
 
 
 def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=10.0,
-    verbose=True):
+    baseline_file=None, verbose=True):
     """
     Pre-average data using a sliding Gaussian kernel on the weights
     """
-    if verbose:
-        print('Calculating baseline lengths...')
-    baseline_dict = get_baseline_lengths(ms_file)
+    if baseline_file is None:
+        if verbose:
+            print('Calculating baseline lengths...')
+        baseline_dict = get_baseline_lengths(ms_file)
+    elif os.path.exists(baseline_file):
+        f = open('baseline_file', 'r')
+        baseline_dict = pickle.load(f)
+        f.close()
+    else:
+        print('Cannot find baseline_file. Exiting...')
+        sys.exit(1)
 
     # Iterate through time chunks
     tab = pt.table(ms_file, ack=False)
