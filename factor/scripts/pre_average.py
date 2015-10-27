@@ -81,7 +81,7 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
     # Filter any stations not in both the instrument table and the ms
     stations_pbd = set([s.split(':')[-1] for s in pdb_in.getNames()])
     stations_ms = set([s for s in baseline_dict.itervalues() if type(s) is str])
-    stations = list(stations_pbd.intersection(stations_ms))
+    stations = sorted(list(stations_pbd.intersection(stations_ms)))
 
     # Select long baselines only, as they will set the ionfactor scaling
     ant1 = []
@@ -89,13 +89,14 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
     dist = []
     min_length = 2.e3
     for k, v in baseline_dict.iteritems():
-        if v > min_length:
-            s1 = stations_ms[k.split('-')[0]]
-            s2 = stations_ms[k.split('-')[1]]
-            if s1 in stations and s2 in stations:
-                ant1.append(s1)
-                ant2.append(s2)
-                dist.append(v)
+        if type(v) is float:
+            if v > min_length:
+                s1 = k.split('-')[0]
+                s2 = k.split('-')[1]
+                if s1 in stations and s2 in stations:
+                    ant1.append(s1)
+                    ant2.append(s2)
+                    dist.append(v)
 
     # Find correlation times
     target_rms_rad = 0.2
