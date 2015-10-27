@@ -179,34 +179,17 @@ def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor, t1,
     all_data = ms.getcol(input_colname)
     all_weights = ms.getcol('WEIGHT_SPECTRUM')
     all_flags = ms.getcol('FLAG')
-#     all_uvw = ms.getcol('UVW')
 
     # iteration on baseline combination
     for ant in itertools.product(set(ant1), set(ant2)):
 
-        if ant[0] >= ant[1]: continue
-
-        for k, v in baseline_dict.iteritems():
-            if type(v) is not str and '-' in k:
-                if v > min_length:
-                    s1 = k.split('-')[0]
-                    s2 = k.split('-')[1]
-                    s1_name = baseline_dict[s1]
-                    s2_name = baseline_dict[s2]
-                    if s1_name in stations and s2_name in stations:
-                        ant1.append(s1_name)
-                        ant2.append(s2_name)
-                        dist.append(v)
-
-
+        if ant[0] >= ant[1]:
+            continue
         sel1 = np.where(ant1 == ant[0])[0]
         sel2 = np.where(ant2 == ant[1])[0]
         sel = sorted(list(frozenset(sel1).intersection(sel2)))
 
         # compute the FWHM
-#         uvw = all_uvw[sel,:]
-#         uvw_dist = np.sqrt(uvw[:, 0]**2 + uvw[:, 1]**2 + uvw[:, 2]**2)
-#         dist = np.mean(uvw_dist) / 1.e3
         dist = baseline_dict['{0}-{1}'.format(ant[0], ant[1])]
         stddev = 30.0 * ionfactor * np.sqrt((25.0 / dist)) * (freq / 60.e6) # in sec
         stddev = stddev/timepersample # in samples
