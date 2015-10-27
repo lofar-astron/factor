@@ -93,9 +93,11 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
             if v > min_length:
                 s1 = k.split('-')[0]
                 s2 = k.split('-')[1]
-                if s1 in stations and s2 in stations:
-                    ant1.append(s1)
-                    ant2.append(s2)
+                s1_name = baseline_dict[s1]
+                s2_name = baseline_dict[s2]
+                if s1_name in stations and s2_name in stations:
+                    ant1.append(int(s1))
+                    ant2.append(int(s2))
                     dist.append(v)
 
     # Find correlation times
