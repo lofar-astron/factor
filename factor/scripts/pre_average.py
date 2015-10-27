@@ -111,7 +111,7 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
     for a1, a2, d in zip(ant1, ant2, dist):
         if freq is None:
             freq = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['freqs'])[0]
-            times = np.copy(parms['Gain:0:0:Imag:{}'.format(a1)]['times'])
+            times = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['times'])
             time_ind = np.where(times >= t1 & times < t2)[0]
             timepersolution = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['timewidths'])[0]
         ph1 = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['values'])[time_ind]
