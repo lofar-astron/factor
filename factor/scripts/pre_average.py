@@ -135,9 +135,6 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
                 break
         if rmstime is None:
             rmstime = len(ph)/2
-        print('BL: {0}-{1}'.format(a1, a2))
-        print('d = {}'.format(d))
-        print('corr time = {}'.format(rmstime))
         rmstimes.append(rmstime)
 
     # Find the mean ionfactor assuming that the correlation time goes as
@@ -145,12 +142,8 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
     #
     #     ionfactor = t_corr / ( np.sqrt((25.e3 / dist)) * (freq / 60.e6) )
     #
-    ionfactor = np.mean(
-        np.array(rmstimes) /
-        np.sqrt(25.e3 / np.array(dist)) *
-        freq / 60e6
-        ) * timepersolution # sec
-    0/0
+    ionfactor = np.mean(np.array(rmstimes) / (np.sqrt(25.e3 / np.array(dist))
+        * freq / 60e6)) * timepersolution # sec
 
     return ionfactor
 
