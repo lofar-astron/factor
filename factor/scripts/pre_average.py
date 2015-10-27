@@ -24,7 +24,9 @@ def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=
 
     # Iterate through time chunks
     tab = pt.table(ms_file, ack=False)
-    remaining_time = tab.col('TIME')[-1] - tab.col('TIME')[0] # seconds
+    start_time = tab[0]['TIME']
+    end_time = tab[-1]['TIME']
+    remaining_time = end_time - start_time # seconds
     tab.close()
     t_delta = minutes_per_block * 60.0 # seconds
     t1 = 0.0
@@ -35,14 +37,15 @@ def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=
         remaining_time -= t_delta
 
         # Find ionfactor for this period
-        ionfactor = find_ionfactor(parmdb_file, baseline_dict, t1, t1+t_delta)
+        ionfactor = find_ionfactor(parmdb_file, baseline_dict, t1+start_time,
+            t1+start_time+t_delta)
         if verbose:
             print('Time range (from start of observation): {0}-{1} sec'.format(t1, t1+t_delta))
             print('ionfactor = {}'.format(ionfactor))
 
         # Do pre-averaging for this period
         BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor,
-            t1, t1+t_delta)
+            t1+start_time, t1+start_time+t_delta)
 
         t1 += t_delta
 
@@ -112,7 +115,7 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
         if freq is None:
             freq = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['freqs'])[0]
             times = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['times'])
-            time_ind = np.where(times >= t1 & times < t2)[0]
+            time_ind = np.where((times >= t1) & (times < t2))[0]
             timepersolution = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['timewidths'])[0]
         ph1 = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['values'])[time_ind]
         ph2 = np.copy(parms['Gain:0:0:Phase:{}'.format(a2)]['values'])[time_ind]
@@ -178,9 +181,8 @@ def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor, t1,
     freqtab.close()
     wav = 299792458. / freq
     timepersample = t.getcell('INTERVAL',0)
-    starttime = t[0]['TIME']
-    ms = t.query('TIME >= ' + str(starttime+t1) + ' && '
-      'TIME < ' + str(starttime+t2), sortlist='TIME,ANTENNA1,ANTENNA2')
+    ms = t.query('TIME >= ' + str(t1) + ' && '
+      'TIME < ' + str(t2), sortlist='TIME,ANTENNA1,ANTENNA2')
     all_time = ms.getcol('TIME_CENTROID')
 
     ant1 = ms.getcol('ANTENNA1')
