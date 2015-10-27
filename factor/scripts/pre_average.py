@@ -326,15 +326,14 @@ def unwrap_fft(phase, iterations=3):
              np.round((puOp(mirrored).real[:ip.shape[0],:ip.shape[1]]-ip)
              /2/np.pi))
 
-    phase2D = phase[:, None]
     i = 0
     if iterations < 1:
         interations = 1
     while i < iterations:
         i += 1
-        phase2D = phaseUnwrapper(phase2D)
+        phase = phaseUnwrapper(phase)
 
-    return phase2D[:, 0]
+    return phase
 
 
 if __name__ == '__main__':
