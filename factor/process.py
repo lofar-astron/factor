@@ -164,7 +164,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     # any facets for which selfcal failed or no selfcal was done
     #
     # TODO: combine new facet sky models and adjust facet edges for new sources
-    # (only if all facets are to be re-imaged)
+    # (but only if all facets are to be re-imaged)
     #
     dirs_to_image = [d for d in directions if d.make_final_image and d.selfcal_ok]
     if len(dirs_to_image) > 0:
