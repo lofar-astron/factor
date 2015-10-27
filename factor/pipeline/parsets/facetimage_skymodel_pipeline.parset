@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, shift_empty, copy_shifted_map, add_all_facet_sources, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, create_compressed_mapfile, {% block full_image_steps %}concat_averaged, wsclean1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, shift_empty, copy_shifted_map, add_all_facet_sources, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, {% block full_image_steps %}concat_averaged, wsclean1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -42,12 +42,9 @@ shift_empty.argument.msin.datacolumn              =   SUBTRACTED_DATA_ALL_NEW
 shift_empty.argument.msout.overwrite              =   True
 shift_empty.argument.msout.writefullresflag       =   False
 shift_empty.argument.local_scratch_dir            =   {{ local_dir }}
-shift_empty.argument.steps                        =   [shift,avg]
+shift_empty.argument.steps                        =   [shift]
 shift_empty.argument.shift.type                   =   phaseshifter
 shift_empty.argument.shift.phasecenter            =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
-shift_empty.argument.avg.type                     =   squash
-shift_empty.argument.avg.freqstep                 =   {{ facetimage_freqstep }}
-shift_empty.argument.avg.timestep                 =   {{ facetimage_timestep }}
 
 copy_shifted_map.control.kind                     =   plugin
 copy_shifted_map.control.type                     =   copyMapfile
@@ -57,7 +54,7 @@ copy_shifted_map.control.filename                 =   shifted_empty_final_bands.
 
 add_all_facet_sources.control.type                =   calibrate-stand-alone_new
 add_all_facet_sources.argument.observation        =   shift_empty.output.mapfile
-add_all_facet_sources.argument.parset             =   {{ parset_dir }}/facet_dirindep_add.parset
+add_all_facet_sources.argument.parset             =   {{ parset_dir }}/facet_dirindep_add_all.parset
 add_all_facet_sources.argument.catalog            =   make_facet_skymodels_all.output.mapfile
 add_all_facet_sources.argument.parmdb             =   create_parmdb_map.output.mapfile
 add_all_facet_sources.argument.replace-sourcedb   =   True
@@ -91,9 +88,21 @@ apply_dir_dep_slow.argument.parmdb                =   inputparmdb
 apply_dir_dep_slow.argument.replace-sourcedb      =   True
 apply_dir_dep_slow.argument.replace-parmdb        =   True
 
+average.control.type                              =   dppp
+average.control.mapfile_in                        =   shift_empty.output.mapfile
+average.control.inputkey                          =   msin
+average.argument.msin.datacolumn                  =   CORRECTED_DATA
+average.argument.msout.overwrite                  =   True
+average.argument.msout.writefullresflag           =   False
+average.argument.local_scratch_dir                =   {{ local_dir }}
+average.argument.steps                            =   [avg]
+average.argument.avg.type                         =   squash
+average.argument.avg.freqstep                     =   {{ facetimage_freqstep }}
+average.argument.avg.timestep                     =   {{ facetimage_timestep }}
+
 create_compressed_mapfile.control.kind            =   plugin
 create_compressed_mapfile.control.type            =   compressMapfile
-create_compressed_mapfile.control.mapfile_in      =   shift_empty.output.mapfile
+create_compressed_mapfile.control.mapfile_in      =   average.output.mapfile
 create_compressed_mapfile.control.mapfile_dir     =   {{ mapfile_dir }}
 create_compressed_mapfile.control.filename        =   concat_averaged_input.datamap
 
