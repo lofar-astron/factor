@@ -45,11 +45,11 @@ def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=
         ionfactor = find_ionfactor(parmdb_file, baseline_dict, t1+start_time,
             t1+start_time+t_delta)
         if verbose:
-            print('ionfactor = {}'.format(ionfactor))
+            print('    ionfactor = {}'.format(ionfactor))
 
         # Do pre-averaging for this period
         if verbose:
-            print('Averaging...')
+            print('    Averaging...')
         BLavg(ms_file, baseline_dict, input_colname, output_colname, ionfactor,
             t1+start_time, t1+start_time+t_delta)
 
