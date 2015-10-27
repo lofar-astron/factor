@@ -120,14 +120,14 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
         ph1 = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['values'])[time_ind]
         ph2 = np.copy(parms['Gain:0:0:Phase:{}'.format(a2)]['values'])[time_ind]
 
-        print('BL: {0}-{1}'.format(ant1, ant2))
+        print('BL: {0}-{1}'.format(a1, a2))
         rmstime = None
         ph = unwrap_fft(ph2 - ph1)
 
         step = 1
         for i in range(1, len(ph)/2, step):
-            p1 = phpart[i:]
-            p2 = phpart[:-i]
+            p1 = ph[i:]
+            p2 = ph[:-i]
             rms = np.linalg.norm(p1-p2) / np.sqrt(len(p1))
             mad = median_absolute_deviation(p1-p2)
             mean = np.mean(p1-p2)
