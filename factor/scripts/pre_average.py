@@ -11,7 +11,6 @@ import os
 import itertools
 from scipy.ndimage.filters import gaussian_filter1d as gfilter
 import pyrap.tables as pt
-import acor
 from astropy.stats import median_absolute_deviation
 
 
