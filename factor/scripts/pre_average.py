@@ -87,7 +87,7 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
     ant1 = []
     ant2 = []
     dist = []
-    min_length = 2.e3
+    min_length = 10.0
     for k, v in baseline_dict.iteritems():
         if type(v) is not str and '-' in k:
             if v > min_length:
