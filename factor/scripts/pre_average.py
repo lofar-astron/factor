@@ -20,6 +20,8 @@ def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=
     """
     Pre-average data using a sliding Gaussian kernel on the weights
     """
+    if verbose:
+        print('Calculating baseline lengths...')
     baseline_dict = get_baseline_lengths(ms_file)
 
     # Iterate through time chunks
@@ -37,13 +39,17 @@ def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=
         remaining_time -= t_delta
 
         # Find ionfactor for this period
+        if verbose:
+            print('Processing time range: {0}-{1} sec '
+                '(from start of observation)...'.format(t1, t1+t_delta))
         ionfactor = find_ionfactor(parmdb_file, baseline_dict, t1+start_time,
             t1+start_time+t_delta)
         if verbose:
-            print('Time range (from start of observation): {0}-{1} sec'.format(t1, t1+t_delta))
             print('ionfactor = {}'.format(ionfactor))
 
         # Do pre-averaging for this period
+        if verbose:
+            print('Averaging...')
         BLavg(ms_file, baseline_dict, input_colname, output_colname, ionfactor,
             t1+start_time, t1+start_time+t_delta)
 
@@ -52,7 +58,7 @@ def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=
 
 def get_baseline_lengths(ms_file):
     """
-    Returns dict of baseline lengths for all baselines in input dataset
+    Returns dict of baseline lengths in km for all baselines in input dataset
     """
     t = pt.table(ms_file, ack=False)
     anttab = pt.table(ms_file+'::ANTENNA', ack=False)
@@ -140,10 +146,10 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
     # Find the mean ionfactor assuming that the correlation time goes as
     # t_corr ~ 1/sqrt(BL). The ionfactor is defined in BLavg() as:
     #
-    #     ionfactor = t_corr / ( np.sqrt((25.e3 / dist)) * (freq / 60.e6) )
+    #     ionfactor = (t_corr / 30.0 sec) / ( np.sqrt((25.0 / dist_km)) * (freq_hz / 60.e6) )
     #
-    ionfactor = np.mean(np.array(rmstimes) / (np.sqrt(25.e3 / np.array(dist))
-        * freq / 60e6)) * timepersolution # sec
+    ionfactor = np.mean(np.array(rmstimes) / 30.0 / (np.sqrt(25.0 / np.array(dist))
+        * freq / 60.0e6)) * timepersolution
 
     return ionfactor
 
@@ -154,7 +160,7 @@ def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor, t1,
     Averages data using a sliding Gaussian kernel on the weights
     """
     if not os.path.exists(msfile):
-        logging.error("Cannot find MS file.")
+        print("Cannot find MS file.")
         sys.exit(1)
 
     # open input/output MS
@@ -173,23 +179,37 @@ def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor, t1,
     all_data = ms.getcol(input_colname)
     all_weights = ms.getcol('WEIGHT_SPECTRUM')
     all_flags = ms.getcol('FLAG')
-    all_uvw = ms.getcol('UVW')
+#     all_uvw = ms.getcol('UVW')
 
     # iteration on baseline combination
     for ant in itertools.product(set(ant1), set(ant2)):
 
         if ant[0] >= ant[1]: continue
+
+        for k, v in baseline_dict.iteritems():
+            if type(v) is not str and '-' in k:
+                if v > min_length:
+                    s1 = k.split('-')[0]
+                    s2 = k.split('-')[1]
+                    s1_name = baseline_dict[s1]
+                    s2_name = baseline_dict[s2]
+                    if s1_name in stations and s2_name in stations:
+                        ant1.append(s1_name)
+                        ant2.append(s2_name)
+                        dist.append(v)
+
+
         sel1 = np.where(ant1 == ant[0])[0]
         sel2 = np.where(ant2 == ant[1])[0]
         sel = sorted(list(frozenset(sel1).intersection(sel2)))
 
         # compute the FWHM
-        uvw = all_uvw[sel,:]
-        uvw_dist = np.sqrt(uvw[:, 0]**2 + uvw[:, 1]**2 + uvw[:, 2]**2)
-        dist = np.mean(uvw_dist) / 1.e3
-        stddev = ionfactor * np.sqrt((25.e3 / dist)) * (freq / 60.e6) # in sec
+#         uvw = all_uvw[sel,:]
+#         uvw_dist = np.sqrt(uvw[:, 0]**2 + uvw[:, 1]**2 + uvw[:, 2]**2)
+#         dist = np.mean(uvw_dist) / 1.e3
+        dist = baseline_dict['{0}-{1}'.format(ant[0], ant[1])]
+        stddev = 30.0 * ionfactor * np.sqrt((25.0 / dist)) * (freq / 60.e6) # in sec
         stddev = stddev/timepersample # in samples
-        logging.debug("For BL %i - %i (dist = %.1f km): sigma=%.2f samples." % (ant[0], ant[1], dist, stddev))
 
         #    Multiply every element of the data by the weights, convolve both
         #    the scaled data and the weights, and then divide the convolved data
