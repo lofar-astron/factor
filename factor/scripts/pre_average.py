@@ -75,7 +75,7 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
     """
     Finds ionospheric scaling factor
     """
-    pdb_in = lofar.parmdb.parmdb(stations_ms)
+    pdb_in = lofar.parmdb.parmdb(parmdb_file)
     parms = pdb_in.getValuesGrid('*')
 
     # Filter any stations not in both the instrument table and the ms
