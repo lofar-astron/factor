@@ -44,7 +44,7 @@ def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=
             print('ionfactor = {}'.format(ionfactor))
 
         # Do pre-averaging for this period
-        BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor,
+        BLavg(ms_file, baseline_dict, input_colname, output_colname, ionfactor,
             t1+start_time, t1+start_time+t_delta)
 
         t1 += t_delta
@@ -108,7 +108,7 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
                     dist.append(v)
 
     # Find correlation times
-    target_rms_rad = 0.2
+    target_rms_rad = 0.25
     rmstimes = []
     freq = None
     for a1, a2, d in zip(ant1, ant2, dist):
@@ -120,7 +120,6 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
         ph1 = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['values'])[time_ind]
         ph2 = np.copy(parms['Gain:0:0:Phase:{}'.format(a2)]['values'])[time_ind]
 
-        print('BL: {0}-{1}'.format(a1, a2))
         rmstime = None
         ph = unwrap_fft(ph2 - ph1)
 
@@ -136,6 +135,8 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
                 break
         if rmstime is None:
             rmstime = len(ph)/2
+        print('BL: {0}-{1}'.format(a1, a2))
+        print('d = {}'.format(d))
         print('corr time = {}'.format(rmstime))
         rmstimes.append(rmstime)
 
@@ -149,6 +150,7 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
         np.sqrt(25.e3 / np.array(dist)) *
         freq / 60e6
         ) * timepersolution # sec
+    0/0
 
     return ionfactor
 
