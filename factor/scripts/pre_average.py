@@ -51,6 +51,8 @@ def get_baseline_lengths(ms_file):
     anttab = pt.table(ms_file+'::ANTENNA')
     antnames = anttab.getcol('NAME')
     anttab.close()
+    ant1 = t.getcol('ANTENNA1')
+    ant2 = t.getcol('ANTENNA2')
     all_uvw = t.getcol('UVW')
     baseline_dict = {}
     for ant in itertools.product(set(ant1), set(ant2)):
