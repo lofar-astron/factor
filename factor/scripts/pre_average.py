@@ -157,18 +157,6 @@ def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor, t1,
         logging.error("Cannot find MS file.")
         sys.exit(1)
 
-    # prepare new ms
-    if not options.overwrite:
-        msfile_new = msfile.replace('.MS','-BLavg.MS')
-        if os.path.exists(msfile_new):
-            if not options.clobber:
-                logging.error("Output file exists and clobber=False")
-                sys.exit(1)
-            os.system('rm -r '+msfile_new)
-        logging.info("Copying MS, this may take a while.")
-        os.system('cp -r '+msfile+' '+msfile_new)
-        msfile = msfile_new
-
     # open input/output MS
     t = pt.table(msfile, readonly=False, ack=False)
     freqtab = pt.table(msfile + '::SPECTRAL_WINDOW', ack=False)
@@ -182,7 +170,7 @@ def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor, t1,
 
     ant1 = ms.getcol('ANTENNA1')
     ant2 = ms.getcol('ANTENNA2')
-    all_data = ms.getcol(options.column)
+    all_data = ms.getcol(input_colname)
     all_weights = ms.getcol('WEIGHT_SPECTRUM')
     all_flags = ms.getcol('FLAG')
     all_uvw = ms.getcol('UVW')
@@ -229,9 +217,16 @@ def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor, t1,
         all_data[sel,:,:] = np.nan_to_num(d)
         all_weights[sel,:,:] = np.nan_to_num(weights)
 
-    ms.putcol('DATA', all_data)
+    # Add the output column if needed
+    if output_colname not in ms.colnames():
+        desc = ms.getcoldesc(input_colname)
+        desc['name'] = output_colname
+        ms.addcols(desc)
+
+    ms.putcol(output_colname, all_data)
     ms.putcol('WEIGHT_SPECTRUM', all_weights)
     ms.close()
+    t.close()
 
 
 def smooth(x, window_len=10, window='hanning'):
