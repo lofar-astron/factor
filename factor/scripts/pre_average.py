@@ -36,6 +36,9 @@ def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=
 
         # Find ionfactor for this period
         ionfactor = find_ionfactor(parmdb_file, baseline_dict, t1, t1+t_delta)
+        if verbose:
+            print('Time range (from start of observation): {0}-{1} sec'.format(t1, t1+t_delta))
+            print('ionfactor = {}'.format(ionfactor))
 
         # Do pre-averaging for this period
         BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor,
@@ -104,14 +107,14 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
     target_rms_rad = 0.2
     rmstimes = []
     freq = None
-    timepersolution = None
     for a1, a2, d in zip(ant1, ant2, dist):
         if freq is None:
             freq = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['freqs'])[0]
-        if timepersolution is None:
+            times = np.copy(parms['Gain:0:0:Imag:{}'.format(s)]['times'])
+            time_ind = np.where(times >= t1 & times < t2)[0]
             timepersolution = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['timewidths'])[0]
-        ph1 = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['values'])
-        ph2 = np.copy(parms['Gain:0:0:Phase:{}'.format(a2)]['values'])
+        ph1 = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['values'])[time_ind]
+        ph2 = np.copy(parms['Gain:0:0:Phase:{}'.format(a2)]['values'])[time_ind]
 
         print('BL: {0}-{1}'.format(ant1, ant2))
         rmstime = None
@@ -129,6 +132,7 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
                 break
         if rmstime is None:
             rmstime = len(ph)/2
+        print('corr time = {}'.format(rmstime))
         rmstimes.append(rmstime)
 
     # Find the mean ionfactor assuming that the correlation time goes as
@@ -285,6 +289,49 @@ def smooth(x, window_len=10, window='hanning'):
         w = getattr(np, window)(window_len)
     y = np.convolve(w/w.sum(), s, mode='same')
     return y[window_len-1:-window_len+1]
+
+
+def unwrap_fft(phase, iterations=3):
+    """
+    Unwrap phase using Fourier techniques.
+
+    For details, see:
+    Marvin A. Schofield & Yimei Zhu, Optics Letters, 28, 14 (2003)
+
+    Keyword arguments:
+    phase -- array of phase solutions
+    iterations -- number of iterations to perform
+    """
+    puRadius=lambda x : np.roll( np.roll(
+          np.add.outer( np.arange(-x.shape[0]/2+1,x.shape[0]/2+1)**2.0,
+                        np.arange(-x.shape[1]/2+1,x.shape[1]/2+1)**2.0 ),
+          x.shape[1]/2+1,axis=1), x.shape[0]/2+1,axis=0)+1e-9
+
+    idt,dt=np.fft.ifft2,np.fft.fft2
+    puOp=lambda x : idt( np.where(puRadius(x)==1e-9,1,puRadius(x)**-1.0)*dt(
+          np.cos(x)*idt(puRadius(x)*dt(np.sin(x)))
+         -np.sin(x)*idt(puRadius(x)*dt(np.cos(x))) ) )
+
+    def phaseUnwrapper(ip):
+       mirrored=np.zeros([x*2 for x in ip.shape])
+       mirrored[:ip.shape[0],:ip.shape[1]]=ip
+       mirrored[ip.shape[0]:,:ip.shape[1]]=ip[::-1,:]
+       mirrored[ip.shape[0]:,ip.shape[1]:]=ip[::-1,::-1]
+       mirrored[:ip.shape[0],ip.shape[1]:]=ip[:,::-1]
+
+       return (ip+2*np.pi*
+             np.round((puOp(mirrored).real[:ip.shape[0],:ip.shape[1]]-ip)
+             /2/np.pi))
+
+    phase2D = phase[:, None]
+    i = 0
+    if iterations < 1:
+        interations = 1
+    while i < iterations:
+        i += 1
+        phase2D = phaseUnwrapper(phase2D)
+
+    return phase2D[:, 0]
 
 
 if __name__ == '__main__':
