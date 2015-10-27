@@ -22,7 +22,7 @@ def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=
     baseline_dict = get_baseline_lengths(ms_file)
 
     # Iterate through time chunks
-    tab = pt.table(self.file, ack=False)
+    tab = pt.table(ms_file, ack=False)
     remaining_time = tab.col('TIME')[-1] - tab.col('TIME')[0] # seconds
     tab.close()
     t_delta = minutes_per_block * 60.0 # seconds
