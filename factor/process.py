@@ -177,7 +177,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         log.info('Imaging the following direction(s) with nearest selcal solutions:')
         log.info('{0}'.format([d.name for d in dirs_to_transfer]))
     dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
-
     for d in dirs_to_transfer:
         # Search for nearest direction with successful selfcal
         nearest = factor.directions.find_nearest(d, dirs_with_selfcal)
@@ -478,6 +477,10 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         # Set field center
         direction.field_ra = field.ra
         direction.field_dec = field.dec
+
+        # Set reimage flag
+        if parset['reimage']:
+            direction.make_final_image = True
 
         # Load previously completed steps (if any)
         direction.load_state()
