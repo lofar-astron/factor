@@ -55,7 +55,7 @@ def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=
         ionfactors.append(find_ionfactor(parmdb_file, baseline_dict, t1+start_time,
             t1+start_time+t_delta))
         if verbose:
-            print('    ionfactor = {}'.format(ionfactor))
+            print('    ionfactor = {}'.format(ionfactors[-1]))
         t1 += t_delta
 
     # Do pre-averaging using lowest ionfactor
