@@ -35,7 +35,7 @@ shift_empty.argument.steps                        =   [shift]
 shift_empty.argument.shift.type                   =   phaseshifter
 shift_empty.argument.shift.phasecenter            =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
 
-add_model_to_empty_data.control.type              =   add_columns
+add_model_to_empty_data.control.type              =   add_subtract_columns
 add_model_to_empty_data.control.opts.mapfiles_in  =   [shift_empty.output.mapfile,{{ shifted_model_data_datamap }}]
 add_model_to_empty_data.control.opts.inputkeys    =   [file1,file2]
 add_model_to_empty_data.argument.flags            =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
