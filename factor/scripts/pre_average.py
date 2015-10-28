@@ -123,7 +123,7 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
                     dist.append(v)
 
     # Find correlation times
-    target_rms_rad = 0.25
+    target_rms_rad = 0.2
     rmstimes = []
     freq = None
     for a1, a2, d in zip(ant1, ant2, dist):
