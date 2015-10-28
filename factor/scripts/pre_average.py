@@ -33,12 +33,13 @@ def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=
         print('Cannot find baseline_file. Exiting...')
         sys.exit(1)
 
-    # Iterate through time chunks
+    # Iterate through time chunks and find the lowest ionfactor
     tab = pt.table(ms_file, ack=False)
     start_time = tab[0]['TIME']
     end_time = tab[-1]['TIME']
     remaining_time = end_time - start_time # seconds
     tab.close()
+    ionfactors = []
     t_delta = minutes_per_block * 60.0 # seconds
     t1 = 0.0
     while remaining_time > 0.0:
@@ -49,20 +50,19 @@ def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=
 
         # Find ionfactor for this period
         if verbose:
-            print('Processing time range: {0}-{1} sec '
+            print('Determining ionfactor for time range: {0}-{1} sec '
                 '(from start of observation)...'.format(t1, t1+t_delta))
-        ionfactor = find_ionfactor(parmdb_file, baseline_dict, t1+start_time,
-            t1+start_time+t_delta)
+        ionfactors.append(find_ionfactor(parmdb_file, baseline_dict, t1+start_time,
+            t1+start_time+t_delta))
         if verbose:
             print('    ionfactor = {}'.format(ionfactor))
-
-        # Do pre-averaging for this period
-        if verbose:
-            print('    Averaging...')
-        BLavg(ms_file, baseline_dict, input_colname, output_colname, ionfactor,
-            t1+start_time, t1+start_time+t_delta)
-
         t1 += t_delta
+
+    # Do pre-averaging using lowest ionfactor
+    ionfactor_min = min(ionfactors)
+    if verbose:
+        print('    Averaging...')
+    BLavg(ms_file, baseline_dict, input_colname, output_colname, ionfactor)
 
 
 def get_baseline_lengths(ms_file):
@@ -163,8 +163,8 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
     return ionfactor
 
 
-def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor, t1,
-    t2, clobber=True):
+def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor,
+    clobber=True):
     """
     Averages data using a sliding Gaussian kernel on the weights
     """
@@ -173,14 +173,12 @@ def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor, t1,
         sys.exit(1)
 
     # open input/output MS
-    t = pt.table(msfile, readonly=False, ack=False)
+    ms = pt.table(msfile, readonly=False, ack=False)
     freqtab = pt.table(msfile + '::SPECTRAL_WINDOW', ack=False)
     freq = freqtab.getcol('REF_FREQUENCY')
     freqtab.close()
     wav = 299792458. / freq
-    timepersample = t.getcell('INTERVAL',0)
-    ms = t.query('TIME >= ' + str(t1) + ' && '
-      'TIME < ' + str(t2), sortlist='TIME,ANTENNA1,ANTENNA2')
+    timepersample = ms.getcell('INTERVAL',0)
     all_time = ms.getcol('TIME_CENTROID')
 
     ant1 = ms.getcol('ANTENNA1')
@@ -238,7 +236,6 @@ def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor, t1,
     ms.putcol(output_colname, all_data)
     ms.putcol('WEIGHT_SPECTRUM', all_weights)
     ms.close()
-    t.close()
 
 
 def smooth(x, window_len=10, window='hanning'):
