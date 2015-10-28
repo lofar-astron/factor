@@ -62,7 +62,7 @@ def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=
     ionfactor_min = min(ionfactors)
     if verbose:
         print('    Averaging...')
-    BLavg(ms_file, baseline_dict, input_colname, output_colname, ionfactor)
+    BLavg(ms_file, baseline_dict, input_colname, output_colname, ionfactor_min)
 
 
 def get_baseline_lengths(ms_file):
