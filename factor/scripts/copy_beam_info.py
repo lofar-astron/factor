@@ -33,9 +33,9 @@ def main(image):
     bmin = headertemplate['BMIN']
     bpa = headertemplate['BPA']
 
-    header.update('BMAJ', bmaj, "")
-    header.update('BMIN', bmin, "")
-    header.update('BPA', bpa, "")
+    header['BMAJ'] = bmaj
+    header['BMIN'] = bmin
+    header['BPA'] = bpa
 
     hduim.flush()
     hduim.close()

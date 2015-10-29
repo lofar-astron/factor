@@ -18,6 +18,7 @@ from factor.operations.field_ops import *
 from factor.operations.facet_ops import *
 from factor.lib.scheduler import Scheduler
 from factor.lib.direction import Direction
+from factor.lib.band import Band
 
 
 def run(parset_file, logging_level='info', dry_run=False, test_run=False,
@@ -164,7 +165,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     # any facets for which selfcal failed or no selfcal was done
     #
     # TODO: combine new facet sky models and adjust facet edges for new sources
-    # (only if all facets are to be re-imaged)
+    # (but only if all facets are to be re-imaged)
     #
     dirs_to_image = [d for d in directions if d.make_final_image and d.selfcal_ok]
     if len(dirs_to_image) > 0:
@@ -177,7 +178,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         log.info('Imaging the following direction(s) with nearest selcal solutions:')
         log.info('{0}'.format([d.name for d in dirs_to_transfer]))
     dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
-
     for d in dirs_to_transfer:
         # Search for nearest direction with successful selfcal
         nearest = factor.directions.find_nearest(d, dirs_with_selfcal)
@@ -290,8 +290,6 @@ def _set_up_bands(parset, log, test_run=False):
         Subset of bands for InitSubtract operation
 
     """
-    from factor.lib.band import Band
-
     log.info('Checking input bands...')
     msdict = {}
     for ms in parset['mss']:
@@ -492,6 +490,10 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         # Set field center
         direction.field_ra = field.ra
         direction.field_dec = field.dec
+
+        # Set reimage flag
+        if parset['reimage']:
+            direction.make_final_image = True
 
         # Load previously completed steps (if any)
         direction.load_state()

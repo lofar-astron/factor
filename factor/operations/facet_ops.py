@@ -132,7 +132,7 @@ class FacetSelfcal(Operation):
                 os.path.join(self.mapfile_dir, 'concat_averaged_input.datamap'))
         if not self.direction.make_final_image:
             # Add final model data for the facet to files to be deleted. These
-            # are only needed if the facet is to be reimaged.
+            # are only needed if the facet is to be reimaged
             self.direction.cleanup_mapfiles.append(self.direction.shifted_model_data_datamap)
         if self.direction.selfcal_ok or not self.parset['exit_on_selfcal_failure']:
             self.log.info('Cleaning up files (direction: {})'.format(self.direction.name))
@@ -230,3 +230,15 @@ class FacetImage(Operation):
             'final_image.datamap')
         self.direction.facet_model_mapfile = os.path.join(self.mapfile_dir,
             'final_model_rootnames.datamap')
+
+        # Delete temp data
+        self.direction.cleanup_mapfiles = [
+            os.path.join(self.mapfile_dir, 'shifted_empty_final_bands.datamap')]
+        if not self.parset['keep_facet_data'] and self.direction.name != 'target':
+            # Add calibrated data for the facet to files to be deleted. These are
+            # only needed if the user wants to reimage by hand (e.g., with a
+            # different weighting. They are always kept for the target
+            self.direction.cleanup_mapfiles.append(
+                os.path.join(self.mapfile_dir, 'concat_averaged_input.datamap'))
+        self.direction.cleanup()
+

@@ -45,9 +45,14 @@ max_selfcal_loops = 10
 # bandwidths, the CASA imager is typically faster
 facet_imager = casa
 
-# Keep calibrated data for each facet to allow reimaging (default = True). If a
-# target is specified (see below), the calibrated data for the target is always
-# kept, regardless of this setting
+# Re-image the facets after selfcal has been completed for all directions
+# (default = False). If True, all facets are re-imaged with the final empty
+# datasets, potentially resulting in lower noise
+reimage = False
+
+# Keep calibrated data for each facet to allow re-imaging by hand (default =
+# True). If a target is specified (see below), the calibrated data for the
+# target is always kept, regardless of this setting
 keep_facet_data = False
 
 
@@ -93,11 +98,6 @@ groupings = 1:5, 4:0
 # of the directions in the groups can be done to maximize the separation
 # between directions in each group (default = True)
 allow_reordering = True
-
-# Re-image the facets after selfcal has been completed for all directions
-# (default = False). If True, all facets are re-imaged with the final empty
-# datasets, potentially resulting in lower noise
-reimage = False
 
 # A target can be specified to ensure that it falls entirely within a single
 # facet. The values should be those of a circular region that encloses the

@@ -1,5 +1,5 @@
-Strategy.InputColumn                        = DATA
-Strategy.ChunkSize                          = 1000
+Strategy.InputColumn                        = FACET_DATA_ALL
+Strategy.ChunkSize                          = 200
 Strategy.Steps                              = [correct]
 
 Step.correct.Operation                      = CORRECT

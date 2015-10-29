@@ -12,6 +12,8 @@ should run the following commands before using Factor:
     use Casa
     use Pythonlibs
 
+If you want to install Factor yourself, follow the instructions below.
+
 ### Dependencies
 
 Beyond the standard LOFAR software packages, Factor requires the following:
@@ -29,16 +31,26 @@ function of the file CEP/Pipeline/framework/lofarpipe/support/utilities.py:
     if usageStats:
         usageStats.addPID(process.pid)
 
-    ----------- Add lines below -------------
+    #----------- Add lines below -------------
     if 'casa' in cmd[0]:
         import time
         while process.returncode is None:
             process.poll()
             time.sleep(1)
-    -----------------------------------------
+    #-----------------------------------------
 
     sout, serr = process.communicate()
 
+### Downloading and Installing
+
+Get the latest developer version by cloning the git repository:
+
+    git clone https://github.com/revoltek/factor.git
+
+Then install with:
+
+    cd factor
+    python setup.py install
 
 Code Structure
 --------------
@@ -46,7 +58,7 @@ The top-level directories are:
 
 * `bin`: contains the `runfactor` executable
 * `docs`: contains the documentation
-* `examples`: contains examples parset and directions file
+* `examples`: contains example parset and directions file
 * `factor`: main code tree
 
 Factor may be thought of as a tool to set up and run LOFAR pipeline scripts that
