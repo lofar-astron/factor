@@ -42,6 +42,8 @@ def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=
     ionfactors = []
     t_delta = minutes_per_block * 60.0 # seconds
     t1 = 0.0
+    if verbose:
+        print('Determining ionfactors...')
     while remaining_time > 0.0:
         if remaining_time < 1.5 * t_delta:
             # If remaining time is too short, just include it all in this chunk
@@ -49,13 +51,11 @@ def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=
         remaining_time -= t_delta
 
         # Find ionfactor for this period
-        if verbose:
-            print('Determining ionfactor for time range: {0}-{1} sec '
-                '(from start of observation)...'.format(t1, t1+t_delta))
         ionfactors.append(find_ionfactor(parmdb_file, baseline_dict, t1+start_time,
             t1+start_time+t_delta))
         if verbose:
-            print('    ionfactor = {}'.format(ionfactors[-1]))
+            print('    ionfactor (for timerange {0}-{1} sec) = {2}'.format(t1,
+                t1+t_delta, ionfactors[-1]))
         t1 += t_delta
 
     # Do pre-averaging using lowest ionfactor
