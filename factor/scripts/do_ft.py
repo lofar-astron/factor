@@ -22,6 +22,9 @@ import time
 # Set up custom ftw task
 os.system('cp {0} .'.format(sys.argv[9]))
 os.system('cp {0} .'.format(sys.argv[10]))
+if 'INSTALLDIR' in os.environ:
+    # Remove this env variable, otherwise CASA puts "mytasks.py" there
+    del os.environ['INSTALLDIR']
 os.system('buildmytasks')
 execfile('mytasks.py')
 
