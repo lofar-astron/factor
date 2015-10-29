@@ -259,7 +259,7 @@ class Direction(object):
         return newlarge
 
 
-    def set_averaging_steps(self, chan_width_hz, nchan, timestep_sec, ntimes):
+    def set_averaging_steps(self, chan_width_hz, nchan, timestep_sec, ntimes_min=None):
         """
         Sets the averaging step sizes
 
@@ -274,8 +274,8 @@ class Direction(object):
             Number of channels per band
         timestep_sec : float
             Time step
-        ntimes : int
-            Number of timeslots per band
+        ntimes_min : int, optional
+            Minimum number of timeslots per band, currently not used
 
         """
         # generate a (numpy-)array with the divisors of nchan

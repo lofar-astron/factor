@@ -65,22 +65,20 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     field = Direction('field', bands[0].ra, bands[0].dec,
         factor_working_dir=parset['dir_working'])
     field.set_averaging_steps(bands[0].chan_width_hz, bands[0].nchan,
-        bands[0].timepersample, bands[0].nsamples)
+        bands[0].timepersample)
 
     # Run initial sky model generation and create empty datasets
     if len(bands_initsubtract) > 0:
-        input_bands_full = [b for b in bands_initsubtract if b.skymodel_dirindep is None]
-        if len(input_bands_full) > 0:
-            log.debug('Running full initial subtract operation for bands: {0}'.
-                format([b.name for b in input_bands_full]))
-            field = factor.cluster.divide_nodes([field],
-                parset['cluster_specific']['node_list'],
-                parset['cluster_specific']['ndir_per_node'],
-                parset['cluster_specific']['nimg_per_node'],
-                parset['cluster_specific']['ncpu'],
-                parset['cluster_specific']['fmem'])[0]
-            op = InitSubtract(parset, input_bands_full, field)
-            scheduler.run(op)
+        log.debug('Running full initial subtract operation for bands: {0}'.
+                  format([b.name for b in bands_initsubtract]))
+        field = factor.cluster.divide_nodes([field],
+                                            parset['cluster_specific']['node_list'],
+                                            parset['cluster_specific']['ndir_per_node'],
+                                            parset['cluster_specific']['nimg_per_node'],
+                                            parset['cluster_specific']['ncpu'],
+                                            parset['cluster_specific']['fmem'])[0]
+        op = InitSubtract(parset, bands_initsubtract, field)
+        scheduler.run(op)
     else:
         log.info("Sky models and SUBTRACTED_DATA_ALL found for all bands. "
             "Skipping initsubtract operation...")
@@ -331,7 +329,7 @@ def _set_up_bands(parset, log, test_run=False):
     has_gaps = False
     for band in bands:
         if len(band.missing_channels) > 0:
-            log.error('Found one or more frequency gaps in band {}'.format(band.msname))
+            log.error('Found one or more frequency gaps in band {}'.format(band.msnames[0]))
             has_gaps = True
         nchan_list.append(band.nchan)
         ra_list.append(band.ra)
@@ -346,7 +344,7 @@ def _set_up_bands(parset, log, test_run=False):
     duplicate_chans = set(nchan_list)
     if len(duplicate_chans) != 1:
         for d in duplicate_chans:
-            bands_with_duplicates = [band.msname for band in bands if band.nchan == d]
+            bands_with_duplicates = [band.msnames[0] for band in bands if band.nchan == d]
             log.error('Found {0} channels in band(s): {1}'.format(d,
                 ', '.join(bands_with_duplicates)))
         log.error('All bands must have the same number of channels. Exiting...')
@@ -355,7 +353,7 @@ def _set_up_bands(parset, log, test_run=False):
     # Check that number of channels supports enough averaging steps
     if list(duplicate_chans)[0] not in [18, 20, 24]:
         log.warn('Number of channels per band is not 18, 20, or 24. Averaging will '
-            'not work well (too few divisors)')
+            'probably not work well (too few divisors?)')
 
     # Determine whether any bands need to be run through the initsubract operation.
     # This operation is only needed if band lacks an initial skymodel or

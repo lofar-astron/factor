@@ -2,24 +2,35 @@ pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create
 
 pipeline.pluginpath                        =   {{ pipeline_dir }}/plugins
 
+# update the hosts entry in all mapfiles in "input.output.mapfile_dir"
 update_mapfile_hosts.control.kind          =   plugin
 update_mapfile_hosts.control.type          =   updateHosts
 update_mapfile_hosts.control.mapfile_dir   =   input.output.mapfile_dir
 update_mapfile_hosts.control.hosts         =   {{ hosts }}
 
+# create a mapfile with all single MSs
 create_ms_map.control.kind                 =   plugin
 create_ms_map.control.type                 =   addListMapfile
 create_ms_map.control.hosts                =   {{ hosts }}
-create_ms_map.control.files                =   {{ input_bands }}
+create_ms_map.control.files                =   {{ input_files_single }}
 create_ms_map.control.mapfile_dir          =   {{ mapfile_dir }}
-create_ms_map.control.filename             =   input_bands.datamap
+create_ms_map.control.filename             =   input_files_single.datamap
 
+# create a mapfile with the direction independent parmDBs (same length as create_ms_map)
 create_parmdb_map.control.kind             =   plugin
 create_parmdb_map.control.type             =   addListMapfile
 create_parmdb_map.control.hosts            =   {{ hosts }}
 create_parmdb_map.control.files            =   {{ dir_indep_parmdbs }}
 create_parmdb_map.control.mapfile_dir      =   {{ mapfile_dir }}
 create_parmdb_map.control.filename         =   dir_indep_instrument_parmdbs.datamap
+
+# create a multi-mapfile with the groups of MSs
+create_msmulti_map.control.kind            =   plugin
+create_msmulti_map.control.type            =   addListMultiMapfile
+create_msmulti_map.control.hosts           =   {{ hosts }}
+create_msmulti_map.control.files           =   {{ input_files_grouped }}
+create_msmulti_map.control.mapfile_dir     =   {{ mapfile_dir }}
+create_msmulti_map.control.filename        =   input_files_grouped.datamap
 
 create_high_sizes_map.control.kind         =   plugin
 create_high_sizes_map.control.type         =   addListMapfile
@@ -35,8 +46,22 @@ create_low_sizes_map.control.files         =   {{ lowres_image_sizes }}
 create_low_sizes_map.control.mapfile_dir   =   {{ mapfile_dir }}
 create_low_sizes_map.control.filename      =   lowres_image_sizes.datamap
 
+# Make sure that MSs have "MODEL_DATA" column before virtual concatenation
+add_imaging_columns.control.type           =   add_imaging_columns
+add_imaging_columns.control.mapfile_in     =   create_ms_map.output.mapfile
+add_imaging_columns.control.inputkey       =   msfiles
+add_imaging_columns..argument.flags        =   [msfiles]
+
+# Do the virtual concatenation for high-res imaging
+concat_high.control.type                  =   virtual_concat
+concat_high.control.mapfile_in            =   create_msmulti_map.output.mapfile
+concat_high.control.inputkey              =   msfiles
+concat_high.control.outputkey             =   msconcat
+concat_high.argument.flags                =   [msfiles,msconcat]
+
+# Image the virtually concatenated MSs
 wsclean_high1.control.type                 =   wsclean
-wsclean_high1.control.mapfiles_in          =   [create_ms_map.output.mapfile,create_high_sizes_map.output.mapfile]
+wsclean_high1.control.mapfiles_in          =   [concat_high.output.mapfile,create_high_sizes_map.output.mapfile]
 wsclean_high1.control.inputkeys            =   [msfile,imsize]
 wsclean_high1.argument.flags               =   [-no-update-model-required,msfile]
 wsclean_high1.argument.size                =   imsize
@@ -66,7 +91,7 @@ mask_high.argument.img_format              =   fits
 mask_high.argument.atrous_jmax             =   3
 
 wsclean_high2.control.type                 =   wsclean
-wsclean_high2.control.mapfiles_in          =   [create_ms_map.output.mapfile,mask_high.output.mapfile,create_high_sizes_map.output.mapfile]
+wsclean_high2.control.mapfiles_in          =   [concat_high.output.mapfile,mask_high.output.mapfile,create_high_sizes_map.output.mapfile]
 wsclean_high2.control.inputkeys            =   [msfile,fitsmask,imsize]
 wsclean_high2.argument.flags               =   [-update-model-required,msfile]
 wsclean_high2.argument.fitsmask            =   fitsmask
@@ -96,6 +121,8 @@ casa_to_bbs_high.control.inputkey          =   inputmodel
 casa_to_bbs_high.control.outputkey         =   outfile
 casa_to_bbs_high.control.arguments         =   [-n,inputmodel,outfile]
 
+# do the subtract with the "MODEL_DATA" column
+# I hope the MODEL_DATA column gets written to the single MSs, not the virtually concatenated one.
 subtract_high.control.type                 =   calibrate-stand-alone_new
 subtract_high.argument.observation         =   create_ms_map.output.mapfile
 subtract_high.argument.parset              =   {{ parset_dir }}/field_subtract_highres.parset
@@ -117,8 +144,22 @@ average.argument.avg.type                  =   squash
 average.argument.avg.freqstep              =   {{ initsubtract_freqstep }}
 average.argument.avg.timestep              =   {{ initsubtract_timestep }}
 
+regroup_map.control.kind                   =   plugin
+regroup_map.control.type                   =   reGroupMapfile
+regroup_map.control.mapfile_in             =   average.output.mapfile
+regroup_map.control.mapfile_groups         =   create_msmulti_map.output.mapfile
+regroup_map.control.mapfile_dir            =   {{ mapfile_dir }}
+regroup_map.control.filename               =   re_grouped.datamap
+
+# Do the virtual concatenation for low-res imaging
+concat_low.control.type                    =   virtual_concat
+concat_low.control.mapfile_in              =   regroup_map.output.mapfile
+concat_low.control.inputkey                =   msfiles
+concat_low.control.outputkey               =   msconcat
+concat_low.argument.flags                  =   [msfiles,msconcat]
+
 wsclean_low1.control.type                  =   wsclean
-wsclean_low1.control.mapfiles_in           =   [average.output.mapfile,create_low_sizes_map.output.mapfile]
+wsclean_low1.control.mapfiles_in           =   [concat_low.output.mapfile,create_low_sizes_map.output.mapfile]
 wsclean_low1.control.inputkeys             =   [msfile,imsize]
 wsclean_low1.argument.flags                =   [-no-update-model-required,msfile]
 wsclean_low1.argument.size                 =   imsize
@@ -147,7 +188,7 @@ mask_low.argument.img_format               =   fits
 mask_low.argument.atrous_jmax              =   3
 
 wsclean_low2.control.type                  =   wsclean
-wsclean_low2.control.mapfiles_in           =   [average.output.mapfile,mask_low.output.mapfile,create_low_sizes_map.output.mapfile]
+wsclean_low2.control.mapfiles_in           =   [concat_low.output.mapfile,mask_low.output.mapfile,create_low_sizes_map.output.mapfile]
 wsclean_low2.control.inputkeys             =   [msfile,fitsmask,imsize]
 wsclean_low2.argument.flags                =   [-no-update-model-required,msfile]
 wsclean_low2.argument.fitsmask             =   fitsmask
