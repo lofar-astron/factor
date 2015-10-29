@@ -193,6 +193,11 @@ copy_column.control.mapfiles_in                            =   [concat_corr.outp
 copy_column.control.inputkeys                              =   [corrdatafile,datafile]
 copy_column.argument.flags                                 =   [corrdatafile,datafile,DATA,CORRECTED_DATA]
 
+pre_average.control.type                                   =   pre_average
+pre_average.control.mapfiles_in                            =   [concat_corr.output.mapfile,create_parmdb_map.output.mapfile]
+pre_average.control.inputkeys                              =   [datafile,parmdb]
+pre_average.argument.flags                                 =   [datafile,parmdb,DATA,BLAVG_DATA]
+
 make_chunks.control.type                                   =   chunk_by_time
 make_chunks.control.mapfile_in                             =   concat_data.output.mapfile
 make_chunks.control.inputkey                               =   msfile
@@ -359,6 +364,13 @@ solve_phaseonly1.argument.catalog                          =   {{ skymodel_dir }
 solve_phaseonly1.argument.replace-sourcedb                 =   True
 solve_phaseonly1.argument.replace-parmdb                   =   True
 solve_phaseonly1.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
+
+apply_phaseonly1.control.type                              =   calibrate-stand-alone_new
+apply_phaseonly1.argument.observation                      =   create_chunks_map.output.mapfile
+apply_phaseonly1.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_apply.parset
+apply_phaseonly1.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
+apply_phaseonly1.argument.replace-sourcedb                 =   True
+apply_phaseonly1.argument.replace-parmdb                   =   True
 
 average1.control.type                                      =   dppp
 average1.control.mapfile_in                                =   create_chunks_map.output.mapfile
