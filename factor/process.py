@@ -297,18 +297,18 @@ def _set_up_bands(parset, log, test_run=False):
     for ms in parset['mss']:
         # group all found MSs by frequency
         sw = pt.table(ms+'::SPECTRAL_WINDOW', ack=False)
-        msfreq = round(sw.col('REF_FREQUENCY')[0])
+        msfreq = int(sw.col('REF_FREQUENCY')[0])
         sw.close()
         if msfreq in msdict:
             msdict[msfreq].append(ms)
         else:
             msdict[msfreq] = [ms]
     bands = []
-    for MSs in msdict:
+    for MSkey in msdict.keys():
         # Check for any sky models specified by user
         # there only needs to be a skymodel specyfied for one file in each band
         skymodel_dirindep = None
-        for ms in MSs
+        for ms in msdict[MSkey]
             msbase = os.path.basename(ms)
             if msbase in parset['ms_specific']:
                 if 'init_skymodel' in parset['ms_specific'][msbase]:
@@ -318,7 +318,7 @@ def _set_up_bands(parset, log, test_run=False):
                             'not found. Exiting...'.format(msbase))
                         sys.exit(1)
                     break
-        band = Band(MSs, parset['dir_working'], parset['parmdb_name'], skymodel_dirindep,
+        band = Band(msdict[MSkey], parset['dir_working'], parset['parmdb_name'], skymodel_dirindep,
             test_run=test_run)
         bands.append(band)
 
