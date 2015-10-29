@@ -61,7 +61,8 @@ def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=
     # Do pre-averaging using lowest ionfactor
     ionfactor_min = min(ionfactors)
     if verbose:
-        print('    Averaging...')
+        print('Using ionfactor = {}'.format(ionfactor_min))
+        print('Averaging...')
     BLavg(ms_file, baseline_dict, input_colname, output_colname, ionfactor_min)
 
 
