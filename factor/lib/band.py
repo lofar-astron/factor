@@ -82,14 +82,14 @@ class Band(object):
             if not 'SUBTRACTED_DATA_ALL' in tab.colnames():
                 self.has_sub_data = False
             self.has_sub_data_new = False
-            self.starttime = np.min(self.starttime,tab.col('TIME'))
-            self.endtime = np.max(self.endtime,tab.col('TIME'))
+            self.starttime = min(self.starttime,tab.getcol('TIME').min)
+            self.endtime = max(self.endtime,tab.getcol('TIME').max)
             for t2 in tab.iter(["ANTENNA1","ANTENNA2"]):
                 if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
                     self.timepersample = t2.col('TIME')[1] - t2.col('TIME')[0]
                     numsamples = t2.nrows()
                     self.sumsamples += numsamples
-                    self.minSamplesPerFile = np.min(self.samplesPerFile,numsamples)
+                    self.minSamplesPerFile = min(self.minSamplesPerFile,numsamples)
                     break            
             tab.close()
 
@@ -137,7 +137,7 @@ class Band(object):
                 self.log.warn('Direction-independent instument parmdb for band {0} contains '
                     'real/imaginary values. Converting to phase/amplitude...'.format(self.files[pdb_id]))
                 self.convert_parmdb_to_phasors_id(pdb_id)
-            pdb.close()
+            pdb = False
 
             # Check that there aren't extra default values in the parmdb, as this
             # confuses DPPP
@@ -196,8 +196,8 @@ class Band(object):
 
         # Write values
         pdb_out.flush()
-        pdb_in.close()
-        pdb_out.close()
+        pdb_in = False
+        pdb_out = False
         self.dirindparmdbs[pdb_id] = phasors_parmdb_file
 
 
@@ -247,22 +247,22 @@ class Band(object):
         newdirindparmdbs = []
         for MS_id in xrange(1,self.numMS):
             nchunks = 1
-            tab = pt.table(self.files[MSid], ack=False)            
+            tab = pt.table(self.files[MS_id], ack=False)            
             timepersample = tab.getcell('EXPOSURE',0)
             timetab = tab.sort('unique desc TIME')
             timearray = timetab.getcol('TIME')
             mystarttime = np.min(timearray)
             myendtime = np.max(timearray)
-            assert (timepersample*(len(timearray)-1)) > (myendtime-mystarttime)
+            assert (timepersample*(len(timearray)-1)+.5) > (myendtime-mystarttime)
             if (myendtime-mystarttime) > (2.*chunksize):
                 nchunks = int((numsamples*self.timepersample)/chunksize)
             if test_run:
-                self.log.debug('Would split (or not) {0} into {1} chunks. '.format(self.files[MSid],nchunks))
+                self.log.debug('Would split (or not) {0} into {1} chunks. '.format(self.files[MS_id],nchunks))
                 tab.close()
                 continue
             if nchunks > 1:
                 for chunkid in range(nchunks):
-                    chunk_file = '{0}_chunk{1}.ms'.format(os.path.splitext(self.files[MSid])[0], chunkid)
+                    chunk_file = '{0}_chunk{1}.ms'.format(os.path.splitext(self.files[MS_id])[0], chunkid)
                     if clobber:
                         shutil.rmtree(chunk_file,ignore_errors=True)
                     starttime = mystarttime+chunkid*chunksize
@@ -276,12 +276,12 @@ class Band(object):
                     seltab.copy(chunk_file, True)
                     seltab.close()
                     newdirindparmdb = os.path.join(chunk_file, dirindparmdb)
-                    shutil.copytree(self.dirindparmdbs[MSid],newdirindparmdb)
+                    shutil.copytree(self.dirindparmdbs[MS_id],newdirindparmdb)
                     newfiles.append(chunk_file)
                     newdirindparmdbs.append(newdirindparmdb)
             else:
-               newfiles.append(self.files[MSid])
-               newdirindparmdbs.append(self.dirindparmdbs[MSid])
+               newfiles.append(self.files[MS_id])
+               newdirindparmdbs.append(self.dirindparmdbs[MS_id])
             tab.close()            
         if test_run:
             return

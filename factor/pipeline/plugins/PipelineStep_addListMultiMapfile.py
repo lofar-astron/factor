@@ -27,11 +27,14 @@ def plugin_main(args, **kwargs):
 
     """
     if type(kwargs['files']) is str:
-        tmplist = files.strip('[]').split('], [').strip()
+        tmplist = kwargs['files'].strip('[]').split('], [')
         files = []
         for filestring in tmplist:
             fileslist = filestring.split(',')
             files.append([f.strip(' \'') for f in fileslist])
+    else:
+        print 'PipelineStep_addListMultiMapfile.py kwargs[\'files\'] is not a string!'
+        raise ValueError('PipelineStep_addListMultiMapfile.py kwargs[\'files\'] is not a string!')
     if type(kwargs['hosts']) is str:
         hosts = kwargs['hosts'].strip('[]').split(',')
         hosts = [h.strip() for h in hosts]

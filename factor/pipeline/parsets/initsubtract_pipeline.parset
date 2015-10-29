@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_high_sizes_map, create_low_sizes_map, wsclean_high1, mask_high, wsclean_high2, fits_to_image_high, casa_to_bbs_high, subtract_high, average, wsclean_low1, mask_low, wsclean_low2, fits_to_image_low, casa_to_bbs_low, create_model_low_map, wsclean_ft_low, subtract_low, merge, copy_final_model_map]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_msmulti_map, create_high_sizes_map, create_low_sizes_map, concat_high, wsclean_high1, mask_high, wsclean_high2, fits_to_image_high, casa_to_bbs_high, subtract_high, average, regroup_map, concat_low, wsclean_low1, mask_low, wsclean_low2, fits_to_image_low, casa_to_bbs_low, create_model_low_map, wsclean_ft_low, subtract_low, merge, copy_final_model_map]
 
 pipeline.pluginpath                        =   {{ pipeline_dir }}/plugins
 
@@ -20,7 +20,7 @@ create_ms_map.control.filename             =   input_files_single.datamap
 create_parmdb_map.control.kind             =   plugin
 create_parmdb_map.control.type             =   addListMapfile
 create_parmdb_map.control.hosts            =   {{ hosts }}
-create_parmdb_map.control.files            =   {{ dir_indep_parmdbs }}
+create_parmdb_map.control.files            =   {{ dir_indep_parmDBs }}
 create_parmdb_map.control.mapfile_dir      =   {{ mapfile_dir }}
 create_parmdb_map.control.filename         =   dir_indep_instrument_parmdbs.datamap
 
