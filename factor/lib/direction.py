@@ -128,7 +128,7 @@ class Direction(object):
         # bandwidth
         if self.apparent_flux_mjy is not None:
             ref_flux = 250.0
-            self.solint_p = max(1, int(round(4 * ref_flux / self.apparent_flux_mjy)))
+            self.solint_p = 1 # 1 for preaverged data # max(1, int(round(4 * ref_flux / self.apparent_flux_mjy)))
             self.solint_a = max(30, int(round(240 * ref_flux / self.apparent_flux_mjy)))
         self.chunk_width = (solint_a - 1) * 4
 
