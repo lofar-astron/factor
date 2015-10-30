@@ -185,7 +185,7 @@ concat_data.argument.steps                                 =   []
 concat_blavg_data.control.type                             =   dppp
 concat_blavg_data.control.mapfile_in                       =   check_for_missing_bands.output.padded_list.mapfile
 concat_blavg_data.control.inputkey                         =   msin
-concat_blavg_data.argument.msin.datacolumn                 =   DATA
+concat_blavg_data.argument.msin.datacolumn                 =   BLAVG_DATA
 concat_blavg_data.argument.msin.missingdata                =   True
 concat_blavg_data.argument.msin.orderms                    =   False
 concat_blavg_data.argument.msout.overwrite                 =   True
@@ -210,8 +210,8 @@ copy_column1.control.inputkeys                             =   [corrdatafile,dat
 copy_column1.argument.flags                                =   [corrdatafile,datafile,DATA,CORRECTED_DATA]
 
 copy_column2.control.type                                  =   copy_column
-copy_column2.control.mapfiles_in                           =   [concat_corr.output.mapfile,concat_blavg_data.output.mapfile]
-copy_column2.control.inputkeys                             =   [corrdatafile,datafile]
+copy_column2.control.mapfiles_in                           =   [concat_blavg_data.output.mapfile,concat_data.output.mapfile]
+copy_column2.control.inputkeys                             =   [blavgfile,datafile]
 copy_column2.argument.flags                                =   [corrdatafile,datafile,DATA,BLAVG_DATA]
 
 make_chunks.control.type                                   =   chunk_by_time
