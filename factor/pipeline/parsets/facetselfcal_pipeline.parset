@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, copy_facet_skymodels_all_map, make_facet_skymodels_cal, shift_empty, copy_empty_map, make_sourcedb_all_facet_sources, predict_all_facet_sources, copy_predict_all_model_map, corrupt_all_model_data, copy_corrupted_all_model_map, add_all_facet_sources, add_imaging_cols_empty, shift_cal, copy_cal_map, add_cal_facet_sources, apply_dir_indep, create_compressed_mapfile_data, check_for_missing_bands, concat_data, concat_corr, copy_column, pre_average, make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, solve_phaseonly1, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, solve_phaseonly2, apply_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, flag1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, copy_merged_parmdb_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, flag_full, average5, create_compressed_mapfile5, {% block full_image_steps %}concat_averaged, premask, wsclean1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, create_expanded_model_mapfile, create_expanded_size_mapfile, wsclean_ft{% endblock full_image_steps %}, corrupt_final_model, copy_final_model_map, subtract_initial_final, shift_diff_model_to_field, copy_diff_model_field_map, transfer_flags_to_diff_model, create_single_band_mapfile, create_single_model_mapfile, subtract_single, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, copy_facet_skymodels_all_map, make_facet_skymodels_cal, shift_empty, copy_empty_map, make_sourcedb_all_facet_sources, predict_all_facet_sources, copy_predict_all_model_map, corrupt_all_model_data, copy_corrupted_all_model_map, add_all_facet_sources, add_imaging_cols_empty, shift_cal, copy_cal_map, add_cal_facet_sources, apply_dir_indep, pre_average, create_compressed_mapfile_data, check_for_missing_bands, concat_data, concat_blavg_data, concat_corr, copy_column1, copy_column2, make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, solve_phaseonly1, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, solve_phaseonly2, apply_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, flag1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, copy_merged_parmdb_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, flag_full, average5, create_compressed_mapfile5, {% block full_image_steps %}concat_averaged, premask, wsclean1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, create_expanded_model_mapfile, create_expanded_size_mapfile, wsclean_ft{% endblock full_image_steps %}, corrupt_final_model, copy_final_model_map, subtract_initial_final, shift_diff_model_to_field, copy_diff_model_field_map, transfer_flags_to_diff_model, create_single_band_mapfile, create_single_model_mapfile, subtract_single, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -155,6 +155,11 @@ apply_dir_indep.argument.replace-sourcedb                  =   True
 apply_dir_indep.argument.replace-parmdb                    =   True
 apply_dir_indep.argument.no-columns                        =   True
 
+pre_average.control.type                                   =   pre_average
+pre_average.control.mapfiles_in                            =   [shift_cal.output.mapfile,create_parmdb_map.output.mapfile]
+pre_average.control.inputkeys                              =   [datafile,parmdb]
+pre_average.argument.flags                                 =   [datafile,parmdb,DATA,BLAVG_DATA]
+
 create_compressed_mapfile_data.control.kind                =   plugin
 create_compressed_mapfile_data.control.type                =   compressMapfile
 create_compressed_mapfile_data.control.mapfile_in          =   shift_cal.output.mapfile
@@ -177,6 +182,17 @@ concat_data.argument.msout.writefullresflag                =   False
 concat_data.argument.local_scratch_dir                     =   {{ local_dir }}
 concat_data.argument.steps                                 =   []
 
+concat_blavg_data.control.type                             =   dppp
+concat_blavg_data.control.mapfile_in                       =   check_for_missing_bands.output.padded_list.mapfile
+concat_blavg_data.control.inputkey                         =   msin
+concat_blavg_data.argument.msin.datacolumn                 =   DATA
+concat_blavg_data.argument.msin.missingdata                =   True
+concat_blavg_data.argument.msin.orderms                    =   False
+concat_blavg_data.argument.msout.overwrite                 =   True
+concat_blavg_data.argument.msout.writefullresflag          =   False
+concat_blavg_data.argument.local_scratch_dir               =   {{ local_dir }}
+concat_blavg_data.argument.steps                           =   []
+
 concat_corr.control.type                                   =   dppp
 concat_corr.control.mapfile_in                             =   check_for_missing_bands.output.padded_list.mapfile
 concat_corr.control.inputkey                               =   msin
@@ -188,15 +204,15 @@ concat_corr.argument.msout.writefullresflag                =   False
 concat_corr.argument.local_scratch_dir                     =   {{ local_dir }}
 concat_corr.argument.steps                                 =   []
 
-copy_column.control.type                                   =   copy_column
-copy_column.control.mapfiles_in                            =   [concat_corr.output.mapfile,concat_data.output.mapfile]
-copy_column.control.inputkeys                              =   [corrdatafile,datafile]
-copy_column.argument.flags                                 =   [corrdatafile,datafile,DATA,CORRECTED_DATA]
+copy_column1.control.type                                  =   copy_column
+copy_column1.control.mapfiles_in                           =   [concat_corr.output.mapfile,concat_data.output.mapfile]
+copy_column1.control.inputkeys                             =   [corrdatafile,datafile]
+copy_column1.argument.flags                                =   [corrdatafile,datafile,DATA,CORRECTED_DATA]
 
-pre_average.control.type                                   =   pre_average
-pre_average.control.mapfiles_in                            =   [concat_corr.output.mapfile,create_parmdb_map.output.mapfile]
-pre_average.control.inputkeys                              =   [datafile,parmdb]
-pre_average.argument.flags                                 =   [datafile,parmdb,DATA,BLAVG_DATA]
+copy_column2.control.type                                  =   copy_column
+copy_column2.control.mapfiles_in                           =   [concat_corr.output.mapfile,concat_blavg_data.output.mapfile]
+copy_column2.control.inputkeys                             =   [corrdatafile,datafile]
+copy_column2.argument.flags                                =   [corrdatafile,datafile,DATA,BLAVG_DATA]
 
 make_chunks.control.type                                   =   chunk_by_time
 make_chunks.control.mapfile_in                             =   concat_data.output.mapfile
