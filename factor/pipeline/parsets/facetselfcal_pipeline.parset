@@ -212,7 +212,7 @@ copy_column1.argument.flags                                =   [corrdatafile,dat
 copy_column2.control.type                                  =   copy_column
 copy_column2.control.mapfiles_in                           =   [concat_blavg_data.output.mapfile,concat_data.output.mapfile]
 copy_column2.control.inputkeys                             =   [blavgfile,datafile]
-copy_column2.argument.flags                                =   [corrdatafile,datafile,DATA,BLAVG_DATA]
+copy_column2.argument.flags                                =   [blavgfile,datafile,DATA,BLAVG_DATA]
 
 make_chunks.control.type                                   =   chunk_by_time
 make_chunks.control.mapfile_in                             =   concat_data.output.mapfile
