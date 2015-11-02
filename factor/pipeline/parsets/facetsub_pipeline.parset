@@ -12,12 +12,12 @@ update_input_bands_hosts.control.type                 =   updateHosts
 update_input_bands_hosts.control.mapfile_in           =   {{ input_bands_datamap }}
 update_input_bands_hosts.control.hosts                =   {{ hosts }}
 
+{% block add_sub_parms %}
 transfer_flags.control.type                           =   transfer_flags
 transfer_flags.control.mapfiles_in                    =   [{{ diff_models_field_datamap }},{{ input_bands_datamap }}]
 transfer_flags.control.inputkeys                      =   [ms1,ms2]
 transfer_flags.control.arguments                      =   [ms1,ms2]
 
-{% block add_sub_parms %}
 add_diff_model_to_empty_data.control.type             =   add_subtract_columns
 add_diff_model_to_empty_data.control.opts.mapfiles_in =   [{{ input_bands_datamap }},{{ diff_models_field_datamap }}]
 add_diff_model_to_empty_data.control.opts.inputkeys   =   [file1,file2]
