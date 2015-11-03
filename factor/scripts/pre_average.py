@@ -16,26 +16,26 @@ import lofar.parmdb
 from astropy.stats import median_absolute_deviation
 
 
-def main(ms_file, parmdb_file, input_colname, output_colname, output_weights_colname,
-    pre_average=True, minutes_per_block=10.0, baseline_file=None, verbose=True):
+def main(ms_file, parmdb_file, input_colname, output_colname, pre_average=True,
+    minutes_per_block=10.0, baseline_file=None, verbose=True):
     """
     Pre-average data using a sliding Gaussian kernel on the weights
     """
+    if type(pre_average) is str:
+        if pre_average.lower() == 'true':
+            pre_average = True
+        else:
+            pre_average = False
+
     if not pre_average:
-        # Just copy input columns to output
+        # Just copy input column to output column
         ms = pt.table(ms_file, readonly=False, ack=False)
         if output_colname not in ms.colnames():
             desc = ms.getcoldesc(input_colname)
             desc['name'] = output_colname
             ms.addcols(desc)
-        if output_weights_colname not in ms.colnames():
-            desc = ms.getcoldesc('WEIGHT_SPECTRUM')
-            desc['name'] = output_weights_colname
-            ms.addcols(desc)
         data = ms.getcol(input_colname)
-        weights = ms.getcol('WEIGHT_SPECTRUM')
         ms.putcol(output_colname, data)
-        ms.putcol(output_weights_colname, weights)
         ms.flush()
         ms.close()
     else:
@@ -82,8 +82,7 @@ def main(ms_file, parmdb_file, input_colname, output_colname, output_weights_col
         if verbose:
             print('Using ionfactor = {}'.format(ionfactor_min))
             print('Averaging...')
-        BLavg(ms_file, baseline_dict, input_colname, output_colname,
-            output_weights_colname, ionfactor_min)
+        BLavg(ms_file, baseline_dict, input_colname, output_colname, ionfactor_min)
 
 
 def get_baseline_lengths(ms_file):
@@ -184,8 +183,8 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
     return ionfactor
 
 
-def BLavg(msfile, baseline_dict, input_colname, output_colname, output_weights_colname,
-    ionfactor, clobber=True):
+def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor,
+    clobber=True):
     """
     Averages data using a sliding Gaussian kernel on the weights
     """
@@ -253,13 +252,9 @@ def BLavg(msfile, baseline_dict, input_colname, output_colname, output_weights_c
         desc = ms.getcoldesc(input_colname)
         desc['name'] = output_colname
         ms.addcols(desc)
-    if output_weights_colname not in ms.colnames():
-        desc = ms.getcoldesc('WEIGHT_SPECTRUM')
-        desc['name'] = output_weights_colname
-        ms.addcols(desc)
 
     ms.putcol(output_colname, all_data)
-    ms.putcol(output_weights_colname, all_weights)
+    ms.putcol('WEIGHT_SPECTRUM', all_weights)
     ms.close()
 
 

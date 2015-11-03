@@ -155,11 +155,6 @@ apply_dir_indep.argument.replace-sourcedb                  =   True
 apply_dir_indep.argument.replace-parmdb                    =   True
 apply_dir_indep.argument.no-columns                        =   True
 
-pre_average.control.type                                   =   pre_average
-pre_average.control.mapfiles_in                            =   [shift_cal.output.mapfile,create_parmdb_map.output.mapfile]
-pre_average.control.inputkeys                              =   [datafile,parmdb]
-pre_average.argument.flags                                 =   [datafile,parmdb,DATA,BLAVG_DATA,BLAVG_WEIGHT_SPECTRUM,{{ pre_average }}]
-
 create_compressed_mapfile_data.control.kind                =   plugin
 create_compressed_mapfile_data.control.type                =   compressMapfile
 create_compressed_mapfile_data.control.mapfile_in          =   shift_cal.output.mapfile
@@ -182,28 +177,6 @@ concat_data.argument.msout.writefullresflag                =   False
 concat_data.argument.local_scratch_dir                     =   {{ local_dir }}
 concat_data.argument.steps                                 =   []
 
-concat_blavg_data.control.type                             =   dppp
-concat_blavg_data.control.mapfile_in                       =   check_for_missing_bands.output.padded_list.mapfile
-concat_blavg_data.control.inputkey                         =   msin
-concat_blavg_data.argument.msin.datacolumn                 =   BLAVG_DATA
-concat_blavg_data.argument.msin.missingdata                =   True
-concat_blavg_data.argument.msin.orderms                    =   False
-concat_blavg_data.argument.msout.overwrite                 =   True
-concat_blavg_data.argument.msout.writefullresflag          =   False
-concat_blavg_data.argument.local_scratch_dir               =   {{ local_dir }}
-concat_blavg_data.argument.steps                           =   []
-
-concat_blavg_weights.control.type                          =   dppp
-concat_blavg_weights.control.mapfile_in                    =   check_for_missing_bands.output.padded_list.mapfile
-concat_blavg_weights.control.inputkey                      =   msin
-concat_blavg_weights.argument.msin.datacolumn              =   BLAVG_WEIGHT_SPECTRUM
-concat_blavg_weights.argument.msin.missingdata             =   True
-concat_blavg_weights.argument.msin.orderms                 =   False
-concat_blavg_weights.argument.msout.overwrite              =   True
-concat_blavg_weights.argument.msout.writefullresflag       =   False
-concat_blavg_weights.argument.local_scratch_dir            =   {{ local_dir }}
-concat_blavg_weights.argument.steps                        =   []
-
 concat_corr.control.type                                   =   dppp
 concat_corr.control.mapfile_in                             =   check_for_missing_bands.output.padded_list.mapfile
 concat_corr.control.inputkey                               =   msin
@@ -215,6 +188,27 @@ concat_corr.argument.msout.writefullresflag                =   False
 concat_corr.argument.local_scratch_dir                     =   {{ local_dir }}
 concat_corr.argument.steps                                 =   []
 
+# Do the baseline-dependent preaveraging. This must be done after concatenation
+# of DATA and CORRECTED_DATA in the previous two steps so that we can safely
+# overwrite the WEIGHT_SPECTRUM column
+pre_average.control.type                                   =   pre_average
+pre_average.control.mapfiles_in                            =   [shift_cal.output.mapfile,create_parmdb_map.output.mapfile]
+pre_average.control.inputkeys                              =   [datafile,parmdb]
+pre_average.argument.flags                                 =   [datafile,parmdb,DATA,BLAVG_DATA,{{ pre_average }}]
+
+# Concat the preaveraged data (and weights)
+concat_blavg_data.control.type                             =   dppp
+concat_blavg_data.control.mapfile_in                       =   check_for_missing_bands.output.padded_list.mapfile
+concat_blavg_data.control.inputkey                         =   msin
+concat_blavg_data.argument.msin.datacolumn                 =   BLAVG_DATA
+concat_blavg_data.argument.msin.missingdata                =   True
+concat_blavg_data.argument.msin.orderms                    =   False
+concat_blavg_data.argument.msout.overwrite                 =   True
+concat_blavg_data.argument.msout.writefullresflag          =   False
+concat_blavg_data.argument.local_scratch_dir               =   {{ local_dir }}
+concat_blavg_data.argument.steps                           =   []
+
+# Copy all the columns needed for selfcal to a single concatenated dataset
 copy_column1.control.type                                  =   copy_column
 copy_column1.control.mapfiles_in                           =   [concat_corr.output.mapfile,concat_data.output.mapfile]
 copy_column1.control.inputkeys                             =   [corrdatafile,datafile]
@@ -226,9 +220,9 @@ copy_column2.control.inputkeys                             =   [blavgfile,datafi
 copy_column2.argument.flags                                =   [blavgfile,datafile,DATA,BLAVG_DATA]
 
 copy_column3.control.type                                  =   copy_column
-copy_column3.control.mapfiles_in                           =   [concat_blavg_weights.output.mapfile,concat_data.output.mapfile]
+copy_column3.control.mapfiles_in                           =   [concat_blavg_data.output.mapfile,concat_data.output.mapfile]
 copy_column3.control.inputkeys                             =   [blavgfile,datafile]
-copy_column3.argument.flags                                =   [blavgfile,datafile,DATA,BLAVG_WEIGHT_SPECTRUM]
+copy_column3.argument.flags                                =   [blavgfile,datafile,WEIGHT_SPECTRUM,BLAVG_WEIGHT_SPECTRUM]
 
 make_chunks.control.type                                   =   chunk_by_time
 make_chunks.control.mapfile_in                             =   concat_data.output.mapfile
