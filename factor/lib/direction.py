@@ -142,7 +142,8 @@ class Direction(object):
         Parameters
         ----------
         pre_average : bool, optional
-            If True, use baseline-dependent averaging and solint_p = 1
+            If True, use baseline-dependent averaging and solint_p = 1 for
+            phase-only calibration
 
         """
         self.pre_average = pre_average
@@ -153,7 +154,7 @@ class Direction(object):
             else:
                 self.solint_p = max(1, int(round(4 * ref_flux / self.apparent_flux_mjy)))
             self.solint_a = max(30, int(round(240 * ref_flux / self.apparent_flux_mjy)))
-        self.chunk_width = (solint_a - 1) * 4
+        self.chunk_width = (self.solint_a - 1) * 4
 
 
     def set_image_sizes(self, test_run=False):
