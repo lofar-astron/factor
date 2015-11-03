@@ -125,7 +125,7 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
     stations_ms = set([s for s in baseline_dict.itervalues() if type(s) is str])
     stations = sorted(list(stations_pbd.intersection(stations_ms)))
 
-    # Select long baselines only, as they will set the ionfactor scaling
+    # Select long baselines only (BL > 10 km), as they will set the ionfactor scaling
     ant1 = []
     ant2 = []
     dist = []
@@ -154,9 +154,12 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
             timepersolution = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['timewidths'])[0]
         ph1 = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['values'])[time_ind]
         ph2 = np.copy(parms['Gain:0:0:Phase:{}'.format(a2)]['values'])[time_ind]
+        good = np.where((~np.isnan(ph1)) & (~np.isnan(ph2)))[0]
+        if len(good) == 0:
+            continue
 
         rmstime = None
-        ph = unwrap_fft(ph2 - ph1)
+        ph = unwrap_fft(ph2[good] - ph1[good])
 
         step = 1
         for i in range(1, len(ph)/2, step):
@@ -171,6 +174,7 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
         if rmstime is None:
             rmstime = len(ph)/2
         rmstimes.append(rmstime)
+        print(rmstime)
 
     # Find the mean ionfactor assuming that the correlation time goes as
     # t_corr ~ 1/sqrt(BL). The ionfactor is defined in BLavg() as:
@@ -179,6 +183,7 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
     #
     ionfactor = np.mean(np.array(rmstimes) / 30.0 / (np.sqrt(25.0 / np.array(dist))
         * freq / 60.0e6)) * timepersolution
+    0/0
 
     return ionfactor
 
