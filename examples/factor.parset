@@ -55,6 +55,11 @@ reimage = False
 # target is always kept, regardless of this setting
 keep_facet_data = False
 
+# Use baseline-dependent preaveraging to increase the signal-to-noise of the
+# phase-only solve (default = True). If True, averaging in time is done to
+# exploit the time correlation in the TEC solutions
+preaverage = True
+
 
 [directions]
 # Full path to file containing calibrator directions. If not given, directions

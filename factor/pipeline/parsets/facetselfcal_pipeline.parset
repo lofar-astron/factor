@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, copy_facet_skymodels_all_map, make_facet_skymodels_cal, shift_empty, copy_empty_map, make_sourcedb_all_facet_sources, predict_all_facet_sources, copy_predict_all_model_map, corrupt_all_model_data, copy_corrupted_all_model_map, add_all_facet_sources, add_imaging_cols_empty, shift_cal, copy_cal_map, add_cal_facet_sources, apply_dir_indep, pre_average, create_compressed_mapfile_data, check_for_missing_bands, concat_data, concat_blavg_data, concat_corr, copy_column1, copy_column2, make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, solve_phaseonly1, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, solve_phaseonly2, apply_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, flag1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, copy_merged_parmdb_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, flag_full, average5, create_compressed_mapfile5, {% block full_image_steps %}concat_averaged, premask, wsclean1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, create_expanded_model_mapfile, create_expanded_size_mapfile, wsclean_ft{% endblock full_image_steps %}, corrupt_final_model, copy_final_model_map, subtract_initial_final, shift_diff_model_to_field, copy_diff_model_field_map, transfer_flags_to_diff_model, create_single_band_mapfile, create_single_model_mapfile, subtract_single, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, copy_facet_skymodels_all_map, make_facet_skymodels_cal, shift_empty, copy_empty_map, make_sourcedb_all_facet_sources, predict_all_facet_sources, copy_predict_all_model_map, corrupt_all_model_data, copy_corrupted_all_model_map, add_all_facet_sources, add_imaging_cols_empty, shift_cal, copy_cal_map, add_cal_facet_sources, apply_dir_indep, pre_average, create_compressed_mapfile_data, check_for_missing_bands, concat_data, concat_blavg_data, concat_blavg_weights, concat_corr, copy_column1, copy_column2, copy_column3, make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, flag1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, copy_merged_parmdb_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, flag_full, average5, create_compressed_mapfile5, {% block full_image_steps %}concat_averaged, premask, wsclean1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, create_expanded_model_mapfile, create_expanded_size_mapfile, wsclean_ft{% endblock full_image_steps %}, corrupt_final_model, copy_final_model_map, subtract_initial_final, shift_diff_model_to_field, copy_diff_model_field_map, transfer_flags_to_diff_model, create_single_band_mapfile, create_single_model_mapfile, subtract_single, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -158,7 +158,7 @@ apply_dir_indep.argument.no-columns                        =   True
 pre_average.control.type                                   =   pre_average
 pre_average.control.mapfiles_in                            =   [shift_cal.output.mapfile,create_parmdb_map.output.mapfile]
 pre_average.control.inputkeys                              =   [datafile,parmdb]
-pre_average.argument.flags                                 =   [datafile,parmdb,DATA,BLAVG_DATA]
+pre_average.argument.flags                                 =   [datafile,parmdb,DATA,BLAVG_DATA,BLAVG_WEIGHT_SPECTRUM]
 
 create_compressed_mapfile_data.control.kind                =   plugin
 create_compressed_mapfile_data.control.type                =   compressMapfile
@@ -193,6 +193,17 @@ concat_blavg_data.argument.msout.writefullresflag          =   False
 concat_blavg_data.argument.local_scratch_dir               =   {{ local_dir }}
 concat_blavg_data.argument.steps                           =   []
 
+concat_blavg_weights.control.type                          =   dppp
+concat_blavg_weights.control.mapfile_in                    =   check_for_missing_bands.output.padded_list.mapfile
+concat_blavg_weights.control.inputkey                      =   msin
+concat_blavg_weights.argument.msin.datacolumn              =   BLAVG_WEIGHT_SPECTRUM
+concat_blavg_weights.argument.msin.missingdata             =   True
+concat_blavg_weights.argument.msin.orderms                 =   False
+concat_blavg_weights.argument.msout.overwrite              =   True
+concat_blavg_weights.argument.msout.writefullresflag       =   False
+concat_blavg_weights.argument.local_scratch_dir            =   {{ local_dir }}
+concat_blavg_weights.argument.steps                        =   []
+
 concat_corr.control.type                                   =   dppp
 concat_corr.control.mapfile_in                             =   check_for_missing_bands.output.padded_list.mapfile
 concat_corr.control.inputkey                               =   msin
@@ -213,6 +224,11 @@ copy_column2.control.type                                  =   copy_column
 copy_column2.control.mapfiles_in                           =   [concat_blavg_data.output.mapfile,concat_data.output.mapfile]
 copy_column2.control.inputkeys                             =   [blavgfile,datafile]
 copy_column2.argument.flags                                =   [blavgfile,datafile,DATA,BLAVG_DATA]
+
+copy_column3.control.type                                  =   copy_column
+copy_column3.control.mapfiles_in                           =   [concat_blavg_weights.output.mapfile,concat_data.output.mapfile]
+copy_column3.control.inputkeys                             =   [blavgfile,datafile]
+copy_column3.argument.flags                                =   [blavgfile,datafile,DATA,BLAVG_WEIGHT_SPECTRUM]
 
 make_chunks.control.type                                   =   chunk_by_time
 make_chunks.control.mapfile_in                             =   concat_data.output.mapfile
@@ -373,6 +389,11 @@ casa_ft0.control.mapfiles_in                               =   [concat_chunks.ou
 casa_ft0.control.inputkeys                                 =   [inputms,modelimg]
 casa_ft0.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft.py,inputms,modelimg,{{ nterms }},{{ cal_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
+switch_weights_col1.control.type                           =   switch_columns
+switch_weights_col1.control.mapfile_in                     =   create_chunks_map.output.mapfile
+switch_weights_col1.control.inputkey                       =   msfiles
+switch_weights_col1.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,BLAVG_WEIGHT_SPECTRUM]
+
 solve_phaseonly1.control.type                              =   calibrate-stand-alone_new
 solve_phaseonly1.argument.observation                      =   create_chunks_map.output.mapfile
 solve_phaseonly1.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_solve.parset
@@ -380,6 +401,11 @@ solve_phaseonly1.argument.catalog                          =   {{ skymodel_dir }
 solve_phaseonly1.argument.replace-sourcedb                 =   True
 solve_phaseonly1.argument.replace-parmdb                   =   True
 solve_phaseonly1.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
+
+switch_weights_col2.control.type                           =   switch_columns
+switch_weights_col2.control.mapfile_in                     =   create_chunks_map.output.mapfile
+switch_weights_col2.control.inputkey                       =   msfiles
+switch_weights_col2.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,BLAVG_WEIGHT_SPECTRUM]
 
 apply_phaseonly1.control.type                              =   calibrate-stand-alone_new
 apply_phaseonly1.argument.observation                      =   create_chunks_map.output.mapfile
@@ -517,6 +543,11 @@ casa_ft1.control.mapfiles_in                               =   [concat_chunks.ou
 casa_ft1.control.inputkeys                                 =   [inputms,modelimg]
 casa_ft1.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft.py,inputms,modelimg,{{ nterms }},{{ cal_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
+switch_weights_col3.control.type                           =   switch_columns
+switch_weights_col3.control.mapfile_in                     =   create_chunks_map.output.mapfile
+switch_weights_col3.control.inputkey                       =   msfiles
+switch_weights_col3.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,BLAVG_WEIGHT_SPECTRUM]
+
 solve_phaseonly2.control.type                              =   calibrate-stand-alone_new
 solve_phaseonly2.argument.observation                      =   create_chunks_map.output.mapfile
 solve_phaseonly2.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_solve.parset
@@ -524,6 +555,11 @@ solve_phaseonly2.argument.catalog                          =   {{ skymodel_dir }
 solve_phaseonly2.argument.replace-sourcedb                 =   True
 solve_phaseonly2.argument.replace-parmdb                   =   True
 solve_phaseonly2.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
+
+switch_weights_col4.control.type                           =   switch_columns
+switch_weights_col4.control.mapfile_in                     =   create_chunks_map.output.mapfile
+switch_weights_col4.control.inputkey                       =   msfiles
+switch_weights_col4.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,BLAVG_WEIGHT_SPECTRUM]
 
 apply_phaseonly2.control.type                              =   calibrate-stand-alone_new
 apply_phaseonly2.argument.observation                      =   create_chunks_map.output.mapfile
@@ -661,6 +697,11 @@ casa_ft2.control.mapfiles_in                               =   [concat_chunks.ou
 casa_ft2.control.inputkeys                                 =   [inputms,modelimg]
 casa_ft2.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft.py,inputms,modelimg,{{ nterms }},{{ cal_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
+switch_weights_col5.control.type                           =   switch_columns
+switch_weights_col5.control.mapfile_in                     =   create_chunks_map.output.mapfile
+switch_weights_col5.control.inputkey                       =   msfiles
+switch_weights_col5.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,BLAVG_WEIGHT_SPECTRUM]
+
 solve_ampphase11.control.type                              =   calibrate-stand-alone_new
 solve_ampphase11.argument.observation                      =   create_chunks_map.output.mapfile
 solve_ampphase11.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_solve.parset
@@ -668,6 +709,11 @@ solve_ampphase11.argument.catalog                          =   {{ skymodel_dir }
 solve_ampphase11.argument.replace-sourcedb                 =   True
 solve_ampphase11.argument.replace-parmdb                   =   True
 solve_ampphase11.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
+
+switch_weights_col6.control.type                           =   switch_columns
+switch_weights_col6.control.mapfile_in                     =   create_chunks_map.output.mapfile
+switch_weights_col6.control.inputkey                       =   msfiles
+switch_weights_col6.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,BLAVG_WEIGHT_SPECTRUM]
 
 apply_ampphase11.control.type                              =   calibrate-stand-alone_new
 apply_ampphase11.argument.observation                      =   create_chunks_map.output.mapfile
@@ -841,7 +887,7 @@ casa_image32.argument.clean.allowchunk                     =   False
 loop_ampcal.control.kind                                   =   loop
 loop_ampcal.control.type                                   =   conditional
 loop_ampcal.control.loopcount                              =   {{ loopcount }}
-loop_ampcal.control.loopsteps                              =   [create_model3_map,casa_ft3,solve_ampphase21,apply_ampphase21,merge_phase_parmdbs,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,flag2,create_compressed_mapfile_empty,transfer_flags,average4,create_compressed_mapfile4,concat4,delete_image,casa_image41,adjust_casa_mapfile4,mask4,casa_image42,adjust_casa_mapfile5,copy_image,check_image]
+loop_ampcal.control.loopsteps                              =   [create_model3_map,casa_ft3,switch_weights_col7,solve_ampphase21,switch_weights_col8,apply_ampphase21,merge_phase_parmdbs,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,flag2,create_compressed_mapfile_empty,transfer_flags,average4,create_compressed_mapfile4,concat4,delete_image,casa_image41,adjust_casa_mapfile4,mask4,casa_image42,adjust_casa_mapfile5,copy_image,check_image]
 
 create_model3_map.control.kind                             =   plugin
 create_model3_map.control.type                             =   trimMapfile
@@ -856,6 +902,11 @@ casa_ft3.control.mapfiles_in                               =   [concat_chunks.ou
 casa_ft3.control.inputkeys                                 =   [inputms,modelimg]
 casa_ft3.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft.py,inputms,modelimg,{{ nterms }},{{ cal_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
+switch_weights_col7.control.type                           =   switch_columns
+switch_weights_col7.control.mapfile_in                     =   create_chunks_map.output.mapfile
+switch_weights_col7.control.inputkey                       =   msfiles
+switch_weights_col7.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,BLAVG_WEIGHT_SPECTRUM]
+
 solve_ampphase21.control.type                              =   calibrate-stand-alone_new
 solve_ampphase21.argument.observation                      =   create_chunks_map.output.mapfile
 solve_ampphase21.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_solve.parset
@@ -863,6 +914,11 @@ solve_ampphase21.argument.catalog                          =   {{ skymodel_dir }
 solve_ampphase21.argument.replace-sourcedb                 =   True
 solve_ampphase21.argument.replace-parmdb                   =   True
 solve_ampphase21.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
+
+switch_weights_col8.control.type                           =   switch_columns
+switch_weights_col8.control.mapfile_in                     =   create_chunks_map.output.mapfile
+switch_weights_col8.control.inputkey                       =   msfiles
+switch_weights_col8.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,BLAVG_WEIGHT_SPECTRUM]
 
 apply_ampphase21.control.type                              =   calibrate-stand-alone_new
 apply_ampphase21.argument.observation                      =   create_chunks_map.output.mapfile

@@ -16,11 +16,23 @@ import lofar.parmdb
 from astropy.stats import median_absolute_deviation
 
 
-def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=10.0,
-    baseline_file=None, verbose=True):
+def main(ms_file, parmdb_file, input_colname, output_colname, output_weights_colname,
+    minutes_per_block=10.0, baseline_file=None, verbose=True):
     """
     Pre-average data using a sliding Gaussian kernel on the weights
     """
+    if not pre_average:
+        # Just copy input column to output
+        # Add the output column if needed
+        ms = pt.table(ms_file, readonly=False, ack=False)
+        if output_colname not in ms.colnames():
+            desc = ms.getcoldesc(input_colname)
+            desc['name'] = output_colname
+            ms.addcols(desc)
+
+        ms.putcol(output_colname, data)
+        ms.close()
+
     if baseline_file is None:
         if verbose:
             print('Calculating baseline lengths...')
@@ -63,7 +75,8 @@ def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=
     if verbose:
         print('Using ionfactor = {}'.format(ionfactor_min))
         print('Averaging...')
-    BLavg(ms_file, baseline_dict, input_colname, output_colname, ionfactor_min)
+    BLavg(ms_file, baseline_dict, input_colname, output_colname,
+        output_weights_colname, ionfactor_min)
 
 
 def get_baseline_lengths(ms_file):
@@ -164,8 +177,8 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
     return ionfactor
 
 
-def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor,
-    clobber=True):
+def BLavg(msfile, baseline_dict, input_colname, output_colname, output_weights_colname,
+    ionfactor, clobber=True):
     """
     Averages data using a sliding Gaussian kernel on the weights
     """
@@ -228,14 +241,18 @@ def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor,
         all_data[sel,:,:] = np.nan_to_num(d)
         all_weights[sel,:,:] = np.nan_to_num(weights)
 
-    # Add the output column if needed
+    # Add the output columns if needed
     if output_colname not in ms.colnames():
         desc = ms.getcoldesc(input_colname)
         desc['name'] = output_colname
         ms.addcols(desc)
+    if output_weights_colname not in ms.colnames():
+        desc = ms.getcoldesc('WEIGHT_SPECTRUM')
+        desc['name'] = output_weights_colname
+        ms.addcols(desc)
 
     ms.putcol(output_colname, all_data)
-    ms.putcol('WEIGHT_SPECTRUM', all_weights)
+    ms.putcol(output_weights_colname, all_weights)
     ms.close()
 
 

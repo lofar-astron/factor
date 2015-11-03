@@ -128,6 +128,10 @@ def parset_read(parset_file):
         parset_dict['max_selfcal_loops'] = parset.getint('global', 'max_selfcal_loops')
     else:
         parset_dict['max_selfcal_loops'] = 10
+    if 'preaverage' in parset_dict:
+        parset_dict['preaverage'] = parset.getboolean('global', 'preaverage')
+    else:
+        parset_dict['preaverage'] = True
 
     # Handle directions-related parameters
     if 'directions' in parset._sections.keys():
