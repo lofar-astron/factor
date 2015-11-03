@@ -482,9 +482,8 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         if parset['reimage']:
             direction.make_final_image = True
 
-        # Set preaverage flag
-        if parset['preaverage']:
-            direction.pre_average = True
+        # Set solution intervals for selfcal
+        direction.set_solution_intervals(parset['preaverage'])
 
         # Load previously completed steps (if any)
         direction.load_state()

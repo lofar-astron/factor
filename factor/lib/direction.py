@@ -121,18 +121,6 @@ class Direction(object):
         self.cal_radius_deg = self.cal_size_deg / 2.0
         self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
 
-        # Scale solution intervals by apparent flux. The scaling is done so that
-        # sources with flux densities of 250 mJy have a fast interval of 4 time
-        # slots and a slow interval of 240 time slots. The scaling is currently
-        # linear with flux (and thus we accept lower-SNR solutions for the
-        # fainter sources). Ideally, these value should also scale with the
-        # bandwidth
-        if self.apparent_flux_mjy is not None:
-            ref_flux = 250.0
-            self.solint_p = 1 # 1 for preaverged data # max(1, int(round(4 * ref_flux / self.apparent_flux_mjy)))
-            self.solint_a = max(30, int(round(240 * ref_flux / self.apparent_flux_mjy)))
-        self.chunk_width = (solint_a - 1) * 4
-
         # Define some directories, etc.
         self.working_dir = factor_working_dir
         self.completed_operations = []
@@ -140,6 +128,32 @@ class Direction(object):
         self.save_file = os.path.join(self.working_dir, 'state',
             self.name+'_save.pkl')
         self.vertices_file = self.save_file
+
+
+    def set_solution_intervals(self, pre_average):
+        """Scale solution intervals by apparent flux
+
+        The scaling is done so that sources with flux densities of 250 mJy have
+        a fast interval of 4 time slots and a slow interval of 240 time slots.
+        The scaling is currently linear with flux (and thus we accept lower-SNR
+        solutions for the fainter sources). Ideally, these value should also
+        scale with the bandwidth
+
+        Parameters
+        ----------
+        pre_average : bool, optional
+            If True, use baseline-dependent averaging and solint_p = 1
+
+        """
+        self.pre_average = pre_average
+        if self.apparent_flux_mjy is not None:
+            ref_flux = 250.0
+            if self.pre_average:
+                self.solint_p = 1
+            else:
+                self.solint_p = max(1, int(round(4 * ref_flux / self.apparent_flux_mjy)))
+            self.solint_a = max(30, int(round(240 * ref_flux / self.apparent_flux_mjy)))
+        self.chunk_width = (solint_a - 1) * 4
 
 
     def set_image_sizes(self, test_run=False):
