@@ -48,9 +48,16 @@ class FacetSelfcal(Operation):
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
-        ms_files = [band.file for band in self.bands]
+        ms_files = [band.files for band in self.bands]
+        ms_files_single = []
+        for bandfiles in ms_files:
+            for filename in bandfiles:
+                ms_files_single.append(filename)
+        dir_indep_parmDBs = []
+        for band in self.bands:
+            for parmdb in band.dirindparmdbs:
+                dir_indep_parmDBs.append(parmdb)
         skymodels = [band.skymodel_dirindep for band in self.bands]
-        dir_indep_parmdbs = [band.dirindparmdb for band in self.bands]
         if self.direction.nchannels > 1:
             nterms = 2
             casa_suffix = '.tt0'
@@ -60,9 +67,10 @@ class FacetSelfcal(Operation):
             casa_suffix = None
             wsclean_suffix = '-image.fits'
         loopcount = max(1, self.parset['max_selfcal_loops'])
-        self.parms_dict.update({'ms_files': ms_files,
+        self.parms_dict.update({'ms_files_single': ms_files_single,
+                                'ms_files_grouped' : str(ms_files),
                                 'skymodels': skymodels,
-                                'dir_indep_parmdbs': dir_indep_parmdbs,
+                                'dir_indep_parmDBs': dir_indep_parmDBs,
                                 'casa_suffix': casa_suffix,
                                 'wsclean_suffix': wsclean_suffix,
                                 'nterms': nterms,
@@ -76,6 +84,7 @@ class FacetSelfcal(Operation):
         # Add output datamaps to direction object for later use
         self.direction.input_bands_datamap = os.path.join(self.mapfile_dir,
             'input_bands.datamap')
+        assert os.path.exists(self.direction.input_bands_datamap)
         self.direction.shifted_model_data_datamap = os.path.join(self.mapfile_dir,
             'final_model_data_facet.datamap')
         self.direction.diff_models_field_datamap = os.path.join(self.mapfile_dir,
@@ -117,7 +126,7 @@ class FacetSelfcal(Operation):
             os.path.join(self.mapfile_dir, 'predict_all_model_bands.datamap'),
             os.path.join(self.mapfile_dir, 'corrupted_all_model_bands.datamap'),
             os.path.join(self.mapfile_dir, 'diff_models_facet.datamap'),
-            os.path.join(self.mapfile_dir, 'chunk_files.datamap'),
+# fixme!            os.path.join(self.mapfile_dir, 'chunk_files.datamap'),
             os.path.join(self.mapfile_dir, 'concat_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat0_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat1_input.datamap'),

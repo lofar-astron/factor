@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, copy_facet_skymodels_all_map, make_facet_skymodels_cal, shift_empty, copy_empty_map, make_sourcedb_all_facet_sources, predict_all_facet_sources, copy_predict_all_model_map, corrupt_all_model_data, copy_corrupted_all_model_map, add_all_facet_sources, add_imaging_cols_empty, shift_cal, copy_cal_map, add_cal_facet_sources, apply_dir_indep, create_compressed_mapfile_data, check_for_missing_bands, concat_data, concat_corr, copy_column, make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, solve_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, solve_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, flag1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, copy_merged_parmdb_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, flag_full, average5, create_compressed_mapfile5, {% block full_image_steps %}concat_averaged, premask, wsclean1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, create_expanded_model_mapfile, create_expanded_size_mapfile, wsclean_ft{% endblock full_image_steps %}, corrupt_final_model, copy_final_model_map, subtract_initial_final, shift_diff_model_to_field, copy_diff_model_field_map, transfer_flags_to_diff_model, create_single_band_mapfile, create_single_model_mapfile, subtract_single, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, copy_facet_skymodels_all_map, make_facet_skymodels_cal, shift_empty, copy_empty_map, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, predict_all_facet_sources, copy_predict_all_model_map, corrupt_all_model_data, copy_corrupted_all_model_map, add_all_facet_sources, add_imaging_cols_empty, shift_cal, copy_cal_map, expand_facet_skymodels_cal, add_cal_facet_sources, apply_dir_indep, create_compressed_mapfile_data, sort_into_Groups, concat_data, make_concat_corr_mapfile, concat_corr, copy_column, add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, solve_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, solve_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, flag1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, copy_merged_parmdb_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, flag_full, average5, create_compressed_mapfile5, sort_average5, {% block full_image_steps %}concat_averaged, concat_averaged_compressed_map, premask, wsclean1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, create_expanded_model_mapfile, create_expanded_size_mapfile, wsclean_ft{% endblock full_image_steps %}, corrupt_final_model, copy_final_model_map, subtract_initial_final, shift_diff_model_to_field, copy_diff_model_field_map, transfer_flags_to_diff_model, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -7,17 +7,26 @@ update_mapfile_hosts.control.type                          =   updateHosts
 update_mapfile_hosts.control.mapfile_dir                   =   input.output.mapfile_dir
 update_mapfile_hosts.control.hosts                         =   {{ hosts }}
 
+# create a mapfile with all single MSs
 create_ms_map.control.kind                                 =   plugin
 create_ms_map.control.type                                 =   addListMapfile
 create_ms_map.control.hosts                                =   {{ hosts }}
-create_ms_map.control.files                                =   {{ ms_files }}
+create_ms_map.control.files                                =   {{ ms_files_single }}
 create_ms_map.control.mapfile_dir                          =   {{ mapfile_dir }}
-create_ms_map.control.filename                             =   input_bands.datamap
+create_ms_map.control.filename                             =   input_files_single.datamap
+
+# create a multi-mapfile with the groups of MSs
+create_msmulti_map.control.kind                            =   plugin
+create_msmulti_map.control.type                            =   addListMultiMapfile
+create_msmulti_map.control.hosts                           =   {{ hosts }}
+create_msmulti_map.control.files                           =   {{ ms_files_grouped }}
+create_msmulti_map.control.mapfile_dir                     =   {{ mapfile_dir }}
+create_msmulti_map.control.filename                        =   input_files_grouped.datamap
 
 create_parmdb_map.control.kind                             =   plugin
 create_parmdb_map.control.type                             =   addListMapfile
 create_parmdb_map.control.hosts                            =   {{ hosts }}
-create_parmdb_map.control.files                            =   {{ dir_indep_parmdbs }}
+create_parmdb_map.control.files                            =   {{ dir_indep_parmDBs }}
 create_parmdb_map.control.mapfile_dir                      =   {{ mapfile_dir }}
 create_parmdb_map.control.filename                         =   dir_indep_instrument_parmdbs.datamap
 
@@ -73,8 +82,16 @@ make_sourcedb_all_facet_sources.control.opts.mapfile_in    =   make_facet_skymod
 make_sourcedb_all_facet_sources.control.opts.inputkey      =   in
 make_sourcedb_all_facet_sources.argument.format            =   <
 
+expand_sourcedb_all_facet_sources.control.kind             =   plugin
+expand_sourcedb_all_facet_sources.control.type             =   mapfileSingleToGroup
+expand_sourcedb_all_facet_sources.control.mapfile_in       =   make_sourcedb_all_facet_sources.output.mapfile
+expand_sourcedb_all_facet_sources.control.mapfile_groups   =   create_msmulti_map.output.mapfile
+expand_sourcedb_all_facet_sources.control.mapfile_dir      =   {{ mapfile_dir }}
+expand_sourcedb_all_facet_sources.control.filename         =   expand_sourcedb_all_facet_sources.datamap
+
+# predict the skymodel data for the full facet into the phase-shifted measurement sets
 predict_all_facet_sources.control.type                     =   dppp
-predict_all_facet_sources.control.opts.mapfiles_in         =   [shift_empty.output.mapfile,make_sourcedb_all_facet_sources.output.mapfile]
+predict_all_facet_sources.control.opts.mapfiles_in         =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile]
 predict_all_facet_sources.control.opts.inputkeys           =   [msin,sourcedb]
 predict_all_facet_sources.argument.msout.overwrite         =   True
 predict_all_facet_sources.argument.msout.writefullresflag  =   False
@@ -137,10 +154,17 @@ copy_cal_map.control.mapfile_in                            =   shift_cal.output.
 copy_cal_map.control.mapfile_dir                           =   {{ mapfile_dir }}
 copy_cal_map.control.filename                              =   shifted_cal_bands.datamap
 
+expand_facet_skymodels_cal.control.kind                    =   plugin
+expand_facet_skymodels_cal.control.type                    =   mapfileSingleToGroup
+expand_facet_skymodels_cal.control.mapfile_in              =   make_facet_skymodels_cal.output.mapfile
+expand_facet_skymodels_cal.control.mapfile_groups          =   create_msmulti_map.output.mapfile
+expand_facet_skymodels_cal.control.mapfile_dir             =   {{ mapfile_dir }}
+expand_facet_skymodels_cal.control.filename                =   expand_facet_skymodels_cal.datamap
+
 add_cal_facet_sources.control.type                         =   calibrate-stand-alone_new
 add_cal_facet_sources.argument.observation                 =   shift_cal.output.mapfile
 add_cal_facet_sources.argument.parset                      =   {{ parset_dir }}/facet_dirindep_add.parset
-add_cal_facet_sources.argument.catalog                     =   make_facet_skymodels_cal.output.mapfile
+add_cal_facet_sources.argument.catalog                     =   expand_facet_skymodels_cal.output.mapfile
 add_cal_facet_sources.argument.parmdb                      =   create_parmdb_map.output.mapfile
 add_cal_facet_sources.argument.replace-sourcedb            =   True
 add_cal_facet_sources.argument.replace-parmdb              =   True
@@ -161,13 +185,15 @@ create_compressed_mapfile_data.control.mapfile_in          =   shift_cal.output.
 create_compressed_mapfile_data.control.mapfile_dir         =   {{ mapfile_dir }}
 create_compressed_mapfile_data.control.filename            =   concat_input.datamap
 
-check_for_missing_bands.control.type                       =   check_for_missing_bands
-check_for_missing_bands.control.mapfile_in                 =   create_compressed_mapfile_data.output.mapfile
-check_for_missing_bands.control.inputkey                   =   mslist
-check_for_missing_bands.argument.flags                     =   [mslist]
+sort_into_Groups.control.type                              =   sort_times_into_freqGroups
+sort_into_Groups.argument.flags                            =   [create_compressed_mapfile_data.output.mapfile]
+sort_into_Groups.argument.filename                         =   sorted_groups.datamap
+sort_into_Groups.argument.mapfile_dir                      =   {{ mapfile_dir }}
+sort_into_Groups.argument.hosts                            =   {{ hosts }}
 
 concat_data.control.type                                   =   dppp
-concat_data.control.mapfile_in                             =   check_for_missing_bands.output.padded_list.mapfile
+concat_data.control.mapfile_out                            =   {{ mapfile_dir }}/sorted_groups.datamap_groups
+concat_data.control.mapfile_in                             =   {{ mapfile_dir }}/sorted_groups.datamap
 concat_data.control.inputkey                               =   msin
 concat_data.argument.msin.datacolumn                       =   DATA
 concat_data.argument.msin.missingdata                      =   True
@@ -177,8 +203,17 @@ concat_data.argument.msout.writefullresflag                =   False
 concat_data.argument.local_scratch_dir                     =   {{ local_dir }}
 concat_data.argument.steps                                 =   []
 
+make_concat_corr_mapfile.control.kind                      =  plugin
+make_concat_corr_mapfile.control.type                      =  createMapfile
+make_concat_corr_mapfile.control.method                    =  add_suffix_to_file
+make_concat_corr_mapfile.control.mapfile_in                =  {{ mapfile_dir }}/sorted_groups.datamap_groups
+make_concat_corr_mapfile.control.add_suffix_to_file        =  "_corrdata.ms"     
+make_concat_corr_mapfile.control.mapfile_dir               =  {{ mapfile_dir }}
+make_concat_corr_mapfile.control.filename                  =  make_concat_corr.datamap
+
 concat_corr.control.type                                   =   dppp
-concat_corr.control.mapfile_in                             =   check_for_missing_bands.output.padded_list.mapfile
+concat_corr.control.mapfile_out                            =   make_concat_corr_mapfile.output.mapfile
+concat_corr.control.mapfile_in                             =   {{ mapfile_dir }}/sorted_groups.datamap
 concat_corr.control.inputkey                               =   msin
 concat_corr.argument.msin.datacolumn                       =   CORRECTED_DATA
 concat_corr.argument.msin.missingdata                      =   True
@@ -193,37 +228,25 @@ copy_column.control.mapfiles_in                            =   [concat_corr.outp
 copy_column.control.inputkeys                              =   [corrdatafile,datafile]
 copy_column.argument.flags                                 =   [corrdatafile,datafile,DATA,CORRECTED_DATA]
 
-make_chunks.control.type                                   =   chunk_by_time
-make_chunks.control.mapfile_in                             =   concat_data.output.mapfile
-make_chunks.control.inputkey                               =   msfile
-make_chunks.argument.flags                                 =   [msfile,{{ chunk_width }}]
-
-create_chunks_map.control.kind                             =   plugin
-create_chunks_map.control.type                             =   addListMapfile
-create_chunks_map.control.files                            =   make_chunks.output.files.mapfile
-create_chunks_map.control.hosts                            =   {{ hosts }}
-create_chunks_map.control.mapfile_dir                      =   {{ mapfile_dir }}
-create_chunks_map.control.filename                         =   chunk_files.datamap
-
 add_imaging_cols.control.type                              =   add_imaging_columns
-add_imaging_cols.control.mapfile_in                        =   create_chunks_map.output.mapfile
+add_imaging_cols.control.mapfile_in                        =   concat_data.output.mapfile
 add_imaging_cols.control.inputkey                          =   msfile
 add_imaging_cols.argument.flags                            =   [msfile]
 
-create_chunks_compressed_mapfile.control.kind              =   plugin
-create_chunks_compressed_mapfile.control.type              =   compressMapfile
-create_chunks_compressed_mapfile.control.mapfile_in        =   create_chunks_map.output.mapfile
-create_chunks_compressed_mapfile.control.mapfile_dir       =   {{ mapfile_dir }}
-create_chunks_compressed_mapfile.control.filename          =   concat_chunks_input.datamap
+concat_data_compressed_mapfile.control.kind              =   plugin
+concat_data_compressed_mapfile.control.type              =   compressMapfile
+concat_data_compressed_mapfile.control.mapfile_in        =   concat_data.output.mapfile
+concat_data_compressed_mapfile.control.mapfile_dir       =   {{ mapfile_dir }}
+concat_data_compressed_mapfile.control.filename          =   concat_chunks_input.datamap
 
 concat_chunks.control.type                                 =   virtual_concat
-concat_chunks.control.mapfile_in                           =   create_chunks_compressed_mapfile.output.mapfile
+concat_chunks.control.mapfile_in                           =   concat_data_compressed_mapfile.output.mapfile
 concat_chunks.control.inputkey                             =   msfiles
 concat_chunks.control.outputkey                            =   msconcat
 concat_chunks.argument.flags                               =   [msfiles,msconcat]
 
 average0.control.type                                      =   dppp
-average0.control.mapfile_in                                =   create_chunks_map.output.mapfile
+average0.control.mapfile_in                                =   concat_data.output.mapfile
 average0.control.inputkey                                  =   msin
 average0.argument.msin.datacolumn                          =   CORRECTED_DATA
 average0.argument.msout.overwrite                          =   True
@@ -353,7 +376,7 @@ casa_ft0.control.inputkeys                                 =   [inputms,modelimg
 casa_ft0.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft.py,inputms,modelimg,{{ nterms }},{{ cal_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
 solve_phaseonly1.control.type                              =   calibrate-stand-alone_new
-solve_phaseonly1.argument.observation                      =   create_chunks_map.output.mapfile
+solve_phaseonly1.argument.observation                      =   concat_data.output.mapfile
 solve_phaseonly1.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_solve.parset
 solve_phaseonly1.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
 solve_phaseonly1.argument.replace-sourcedb                 =   True
@@ -361,7 +384,7 @@ solve_phaseonly1.argument.replace-parmdb                   =   True
 solve_phaseonly1.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
 
 average1.control.type                                      =   dppp
-average1.control.mapfile_in                                =   create_chunks_map.output.mapfile
+average1.control.mapfile_in                                =   concat_data.output.mapfile
 average1.control.inputkey                                  =   msin
 average1.argument.msin.datacolumn                          =   CORRECTED_DATA
 average1.argument.msout.overwrite                          =   True
@@ -492,7 +515,7 @@ casa_ft1.control.inputkeys                                 =   [inputms,modelimg
 casa_ft1.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft.py,inputms,modelimg,{{ nterms }},{{ cal_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
 solve_phaseonly2.control.type                              =   calibrate-stand-alone_new
-solve_phaseonly2.argument.observation                      =   create_chunks_map.output.mapfile
+solve_phaseonly2.argument.observation                      =   concat_data.output.mapfile
 solve_phaseonly2.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_solve.parset
 solve_phaseonly2.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
 solve_phaseonly2.argument.replace-sourcedb                 =   True
@@ -500,7 +523,7 @@ solve_phaseonly2.argument.replace-parmdb                   =   True
 solve_phaseonly2.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
 
 average2.control.type                                      =   dppp
-average2.control.mapfile_in                                =   create_chunks_map.output.mapfile
+average2.control.mapfile_in                                =   concat_data.output.mapfile
 average2.control.inputkey                                  =   msin
 average2.argument.msin.datacolumn                          =   CORRECTED_DATA
 average2.argument.msout.overwrite                          =   True
@@ -631,7 +654,7 @@ casa_ft2.control.inputkeys                                 =   [inputms,modelimg
 casa_ft2.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft.py,inputms,modelimg,{{ nterms }},{{ cal_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
 solve_ampphase11.control.type                              =   calibrate-stand-alone_new
-solve_ampphase11.argument.observation                      =   create_chunks_map.output.mapfile
+solve_ampphase11.argument.observation                      =   concat_data.output.mapfile
 solve_ampphase11.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_solve.parset
 solve_ampphase11.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
 solve_ampphase11.argument.replace-sourcedb                 =   True
@@ -639,7 +662,7 @@ solve_ampphase11.argument.replace-parmdb                   =   True
 solve_ampphase11.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
 
 solve_ampphase12.control.type                              =   calibrate-stand-alone_new
-solve_ampphase12.argument.observation                      =   create_chunks_map.output.mapfile
+solve_ampphase12.argument.observation                      =   concat_data.output.mapfile
 solve_ampphase12.argument.parset                           =   {{ parset_dir }}/facet_dirdep_amponly_solve.parset
 solve_ampphase12.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
 solve_ampphase12.argument.replace-sourcedb                 =   True
@@ -647,13 +670,14 @@ solve_ampphase12.argument.replace-parmdb                   =   True
 solve_ampphase12.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_a }}
 
 merge_amp_parmdbs1.control.type                            =   merge_parmdbs_in_time
-merge_amp_parmdbs1.control.mapfile_in                      =   create_chunks_compressed_mapfile.output.mapfile
+merge_amp_parmdbs1.control.mapfile_in                      =   concat_data_compressed_mapfile.output.mapfile
 merge_amp_parmdbs1.control.inputkey                        =   mslist
 merge_amp_parmdbs1.control.outputkey                       =   outparmdb
 merge_amp_parmdbs1.argument.flags                          =   [mslist,instrument,outparmdb]
 
+# smooth_amps uses only ANTENNA subtable of inputms, so it should work on virtual concatenated MS
 smooth_amp1.control.type                                   =   smooth_amps
-smooth_amp1.control.mapfiles_in                            =   [concat_data.output.mapfile,merge_amp_parmdbs1.output.mapfile]
+smooth_amp1.control.mapfiles_in                            =   [concat_chunks.output.mapfile.mapfile,merge_amp_parmdbs1.output.mapfile]
 smooth_amp1.control.inputkeys                              =   [inputms,ampparmdb]
 smooth_amp1.control.outputkey                              =   outparmdb
 smooth_amp1.control.arguments                              =   [inputms,ampparmdb,outparmdb]
@@ -661,12 +685,12 @@ smooth_amp1.control.arguments                              =   [inputms,ampparmd
 expand_smoothed_amp1_parmdb_map.control.kind               =   plugin
 expand_smoothed_amp1_parmdb_map.control.type               =   expandMapfile
 expand_smoothed_amp1_parmdb_map.control.mapfile_in         =   smooth_amp1.output.mapfile
-expand_smoothed_amp1_parmdb_map.control.mapfile_to_match   =   create_chunks_map.output.mapfile
+expand_smoothed_amp1_parmdb_map.control.mapfile_to_match   =   concat_data.output.mapfile
 expand_smoothed_amp1_parmdb_map.control.mapfile_dir        =   {{ mapfile_dir }}
 expand_smoothed_amp1_parmdb_map.control.filename           =   expand_amp1_smoothed_parmdbs.datamap
 
 apply_amp1.control.type                                    =   calibrate-stand-alone_new
-apply_amp1.control.mapfiles_in                             =   [create_chunks_map.output.mapfile,expand_smoothed_amp1_parmdb_map.output.mapfile]
+apply_amp1.control.mapfiles_in                             =   [concat_data.output.mapfile,expand_smoothed_amp1_parmdb_map.output.mapfile]
 apply_amp1.control.inputkeys                               =   [inputms,inputparmdb]
 apply_amp1.argument.observation                            =   inputms
 apply_amp1.argument.parset                                 =   {{ parset_dir }}/facet_dirdep_amponly_apply.parset
@@ -676,7 +700,7 @@ apply_amp1.argument.replace-sourcedb                       =   True
 apply_amp1.argument.replace-parmdb                         =   True
 
 flag1.control.type                                         =   dppp_inplace
-flag1.control.mapfile_in                                   =   create_chunks_map.output.mapfile
+flag1.control.mapfile_in                                   =   concat_data.output.mapfile
 flag1.control.inputkey                                     =   msin
 flag1.argument.msin.datacolumn                             =   CORRECTED_DATA
 flag1.argument.msout                                       =   .
@@ -684,7 +708,7 @@ flag1.argument.steps                                       =   [flag]
 flag1.argument.flag.type                                   =   aoflagger
 
 average3.control.type                                      =   dppp
-average3.control.mapfile_in                                =   create_chunks_map.output.mapfile
+average3.control.mapfile_in                                =   concat_data.output.mapfile
 average3.control.inputkey                                  =   msin
 average3.argument.msin.datacolumn                          =   CORRECTED_DATA
 average3.argument.msout.overwrite                          =   True
@@ -821,21 +845,22 @@ casa_ft3.control.inputkeys                                 =   [inputms,modelimg
 casa_ft3.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft.py,inputms,modelimg,{{ nterms }},{{ cal_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
 solve_ampphase21.control.type                              =   calibrate-stand-alone_new
-solve_ampphase21.argument.observation                      =   create_chunks_map.output.mapfile
+solve_ampphase21.argument.observation                      =   concat_data.output.mapfile
 solve_ampphase21.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_solve.parset
 solve_ampphase21.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
 solve_ampphase21.argument.replace-sourcedb                 =   True
 solve_ampphase21.argument.replace-parmdb                   =   True
 solve_ampphase21.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
 
+# This is needed later when the loop is done and we want to apply the solutions to the original data
 merge_phase_parmdbs.control.type                           =   merge_parmdbs_in_time
-merge_phase_parmdbs.control.mapfile_in                     =   create_chunks_compressed_mapfile.output.mapfile
+merge_phase_parmdbs.control.mapfile_in                     =   concat_data_compressed_mapfile.output.mapfile
 merge_phase_parmdbs.control.inputkey                       =   mslist
 merge_phase_parmdbs.control.outputkey                      =   outparmdb
 merge_phase_parmdbs.argument.flags                         =   [mslist,instrument,outparmdb]
 
 solve_ampphase22.control.type                              =   calibrate-stand-alone_new
-solve_ampphase22.argument.observation                      =   create_chunks_map.output.mapfile
+solve_ampphase22.argument.observation                      =   concat_data.output.mapfile
 solve_ampphase22.argument.parset                           =   {{ parset_dir }}/facet_dirdep_amponly_solve.parset
 solve_ampphase22.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
 solve_ampphase22.argument.replace-sourcedb                 =   True
@@ -843,13 +868,14 @@ solve_ampphase22.argument.replace-parmdb                   =   True
 solve_ampphase22.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_a }}
 
 merge_amp_parmdbs2.control.type                            =   merge_parmdbs_in_time
-merge_amp_parmdbs2.control.mapfile_in                      =   create_chunks_compressed_mapfile.output.mapfile
+merge_amp_parmdbs2.control.mapfile_in                      =   concat_data_compressed_mapfile.output.mapfile
 merge_amp_parmdbs2.control.inputkey                        =   mslist
 merge_amp_parmdbs2.control.outputkey                       =   outparmdb
 merge_amp_parmdbs2.argument.flags                          =   [mslist,instrument,outparmdb]
 
+# smooth_amps uses only ANTENNA subtable of inputms, so it should work on virtual concatenated MS
 smooth_amp2.control.type                                   =   smooth_amps
-smooth_amp2.control.mapfiles_in                            =   [concat_data.output.mapfile,merge_amp_parmdbs2.output.mapfile]
+smooth_amp2.control.mapfiles_in                            =   [concat_chunks.output.mapfile,merge_amp_parmdbs2.output.mapfile]
 smooth_amp2.control.inputkeys                              =   [inputms,ampparmdb]
 smooth_amp2.control.outputkey                              =   outparmdb
 smooth_amp2.control.arguments                              =   [inputms,ampparmdb,outparmdb]
@@ -857,12 +883,12 @@ smooth_amp2.control.arguments                              =   [inputms,ampparmd
 expand_smoothed_amp2_parmdb_map.control.kind               =   plugin
 expand_smoothed_amp2_parmdb_map.control.type               =   expandMapfile
 expand_smoothed_amp2_parmdb_map.control.mapfile_in         =   smooth_amp2.output.mapfile
-expand_smoothed_amp2_parmdb_map.control.mapfile_to_match   =   create_chunks_map.output.mapfile
+expand_smoothed_amp2_parmdb_map.control.mapfile_to_match   =   concat_data.output.mapfile
 expand_smoothed_amp2_parmdb_map.control.mapfile_dir        =   {{ mapfile_dir }}
 expand_smoothed_amp2_parmdb_map.control.filename           =   expand_amp2_smoothed_parmdbs.datamap
 
 apply_amp2.control.type                                    =   calibrate-stand-alone_new
-apply_amp2.control.mapfiles_in                             =   [create_chunks_map.output.mapfile,expand_smoothed_amp2_parmdb_map.output.mapfile]
+apply_amp2.control.mapfiles_in                             =   [concat_data.output.mapfile,expand_smoothed_amp2_parmdb_map.output.mapfile]
 apply_amp2.control.inputkeys                               =   [inputms,inputparmdb]
 apply_amp2.argument.observation                            =   inputms
 apply_amp2.argument.parset                                 =   {{ parset_dir }}/facet_dirdep_amponly_apply.parset
@@ -872,7 +898,7 @@ apply_amp2.argument.replace-sourcedb                       =   True
 apply_amp2.argument.replace-parmdb                         =   True
 
 flag2.control.type                                         =   dppp_inplace
-flag2.control.mapfile_in                                   =   create_chunks_map.output.mapfile
+flag2.control.mapfile_in                                   =   concat_data.output.mapfile
 flag2.control.inputkey                                     =   msin
 flag2.argument.msin.datacolumn                             =   CORRECTED_DATA
 flag2.argument.msout                                       =   .
@@ -886,12 +912,12 @@ create_compressed_mapfile_empty.control.mapfile_dir        =   {{ mapfile_dir }}
 create_compressed_mapfile_empty.control.filename           =   shift_empty_compressed.datamap
 
 transfer_flags.control.type                                =   transfer_flags
-transfer_flags.control.mapfiles_in                         =   [create_chunks_compressed_mapfile.output.mapfile,create_compressed_mapfile_empty.output.mapfile]
+transfer_flags.control.mapfiles_in                         =   [concat_data_compressed_mapfile.output.mapfile,create_compressed_mapfile_empty.output.mapfile]
 transfer_flags.control.inputkeys                           =   [ms1,ms2]
 transfer_flags.control.arguments                           =   [ms1,ms2]
 
 average4.control.type                                      =   dppp
-average4.control.mapfile_in                                =   create_chunks_map.output.mapfile
+average4.control.mapfile_in                                =   concat_data.output.mapfile
 average4.control.inputkey                                  =   msin
 average4.argument.msin.datacolumn                          =   CORRECTED_DATA
 average4.argument.msout.overwrite                          =   True
@@ -1091,21 +1117,34 @@ average5.argument.avg.type                                 =   squash
 average5.argument.avg.freqstep                             =   {{ facetimage_freqstep }}
 average5.argument.avg.timestep                             =   {{ facetimage_timestep }}
 
-create_compressed_mapfile5.control.kind                    =   plugin
-create_compressed_mapfile5.control.type                    =   compressMapfile
-create_compressed_mapfile5.control.mapfile_in              =   average5.output.mapfile
-create_compressed_mapfile5.control.mapfile_dir             =   {{ mapfile_dir }}
-create_compressed_mapfile5.control.filename                =   concat_averaged_input.datamap
+create_compressed_mapfile5.control.kind                 =   plugin
+create_compressed_mapfile5.control.type                 =   compressMapfile
+create_compressed_mapfile5.control.mapfile_in           =   average5.output.mapfile
+create_compressed_mapfile5.control.mapfile_dir          =   {{ mapfile_dir }}
+create_compressed_mapfile5.control.filename             =   concat_averaged_input.datamap
+
+sort_average5.control.type                              =   sort_times_into_freqGroups
+sort_average5.argument.flags                            =   [create_compressed_mapfile5.output.mapfile]
+sort_average5.argument.filename                         =   average5_sorted_groups.datamap
+sort_average5.argument.mapfile_dir                      =   {{ mapfile_dir }}
+sort_average5.argument.hosts                            =   {{ hosts }}
 
 {% block full_image_parms %}
 concat_averaged.control.type                               =   dppp
-concat_averaged.control.mapfile_in                         =   create_compressed_mapfile5.output.mapfile
+concat_averaged.control.mapfile_out                        =   {{ mapfile_dir }}/average5_sorted_groups.datamap_groups
+concat_averaged.control.mapfile_in                         =   {{ mapfile_dir }}/average5_sorted_groups.datamap
 concat_averaged.control.inputkey                           =   msin
 concat_averaged.argument.msin.datacolumn                   =   DATA
 concat_averaged.argument.msout.overwrite                   =   True
 concat_averaged.argument.msout.writefullresflag            =   False
 concat_averaged.argument.local_scratch_dir                 =   {{ local_dir }}
 concat_averaged.argument.steps                             =   []
+
+concat_averaged_compressed_map.control.kind                =   plugin
+concat_averaged_compressed_map.control.type                =   compressMapfile
+concat_averaged_compressed_map.control.mapfile_in          =   concat_averaged.output.mapfile
+concat_averaged_compressed_map.control.mapfile_dir         =   {{ mapfile_dir }}
+concat_averaged_compressed_map.control.filename            =   concat_averaged_compressed.datamap
 
 premask.control.type                                       =   make_clean_mask
 premask.control.mapfile_in                                 =   adjust_casa_mapfile4.output.mapfile
@@ -1118,9 +1157,9 @@ premask.argument.skip_source_detection                     =   True
 premask.argument.vertices_file                             =   {{ vertices_file }}
 
 wsclean1.control.type                                      =   wsclean
-wsclean1.control.mapfiles_in                               =   [concat_averaged.output.mapfile,premask.output.mapfile]
-wsclean1.control.inputkeys                                 =   [msfile,fitsmask]
-wsclean1.argument.flags                                    =   [-no-update-model-required,-joinchannels,msfile]
+wsclean1.control.mapfiles_in                               =   [concat_averaged_compressed_map.output.mapfile,premask.output.mapfile]
+wsclean1.control.inputkeys                                 =   [msfiles,fitsmask]
+wsclean1.argument.flags                                    =   [-no-update-model-required,-joinchannels,msfiles]
 wsclean1.argument.fitsmask                                 =   fitsmask
 wsclean1.argument.size                                     =   {{ facet_imsize }} {{ facet_imsize }}
 wsclean1.argument.niter                                    =   15000
@@ -1170,9 +1209,9 @@ mask5.argument.img_format                                  =   fits
 mask5.argument.vertices_file                               =   {{ vertices_file }}
 
 wsclean2.control.type                                      =   wsclean
-wsclean2.control.mapfiles_in                               =   [concat_averaged.output.mapfile,mask5.output.mapfile]
-wsclean2.control.inputkeys                                 =   [msfile,fitsmask]
-wsclean2.argument.flags                                    =   [-no-update-model-required,-joinchannels,msfile]
+wsclean2.control.mapfiles_in                               =   [concat_averaged_compressed_map.output.mapfile,mask5.output.mapfile]
+wsclean2.control.inputkeys                                 =   [msfiles,fitsmask]
+wsclean2.argument.flags                                    =   [-no-update-model-required,-joinchannels,msfiles]
 wsclean2.argument.fitsmask                                 =   fitsmask
 wsclean2.argument.size                                     =   {{ facet_imsize }} {{ facet_imsize }}
 wsclean2.argument.niter                                    =   15000
@@ -1250,6 +1289,7 @@ corrupt_final_model.argument.corrupt_fast2.correction      =   commonscalarphase
 corrupt_final_model.argument.corrupt_fast2.invert          =   False
 corrupt_final_model.argument.corrupt_slow.type             =   applycal
 corrupt_final_model.argument.corrupt_slow.parmdb           =   parmdb
+corrupt_final_model.argument.corrupt_slow.correction       =   gain
 corrupt_final_model.argument.corrupt_slow.invert           =   False
 
 copy_final_model_map.control.kind                          =   plugin
@@ -1285,25 +1325,30 @@ transfer_flags_to_diff_model.control.mapfiles_in           =   [shift_empty.outp
 transfer_flags_to_diff_model.control.inputkeys             =   [ms1,ms2]
 transfer_flags_to_diff_model.control.arguments             =   [ms1,ms2]
 
-create_single_band_mapfile.control.kind                    =   plugin
-create_single_band_mapfile.control.type                    =   filterMapfile
-create_single_band_mapfile.control.mapfile_in              =   shift_empty.output.mapfile
-create_single_band_mapfile.control.mapfile_dir             =   {{ mapfile_dir }}
-create_single_band_mapfile.control.filename                =   single_band.datamap
+#
+# Verify the the quality of the selfcal on the middle band
+#
 
-create_single_model_mapfile.control.kind                   =   plugin
-create_single_model_mapfile.control.type                   =   filterMapfile
-create_single_model_mapfile.control.mapfile_in             =   corrupt_final_model.output.mapfile
-create_single_model_mapfile.control.mapfile_dir            =   {{ mapfile_dir }}
-create_single_model_mapfile.control.filename               =   single_model.datamap
+create_middle_band_mapfile.control.kind                    =   plugin
+create_middle_band_mapfile.control.type                    =   selectMiddleFreq
+create_middle_band_mapfile.control.mapfile_in              =   shift_empty.output.mapfile
+create_middle_band_mapfile.control.mapfile_dir             =   {{ mapfile_dir }}
+create_middle_band_mapfile.control.filename                =   single_band.datamap
+
+create_middle_model_mapfile.control.kind                   =   plugin
+create_middle_model_mapfile.control.type                   =   selectMatching
+create_middle_model_mapfile.control.mapfile_in             =   corrupt_final_model.output.mapfile
+create_middle_model_mapfile.control.mapfile_reference      =   create_middle_band_mapfile.output.mapfile
+create_middle_model_mapfile.control.mapfile_dir            =   {{ mapfile_dir }}
+create_middle_model_mapfile.control.filename               =   single_model.datamap
 
 subtract_single.control.type                               =   add_subtract_columns
-subtract_single.control.opts.mapfiles_in                   =   [create_single_band_mapfile.output.mapfile,create_single_model_mapfile.output.mapfile]
+subtract_single.control.opts.mapfiles_in                   =   [create_middle_band_mapfile.output.mapfile,create_middle_model_mapfile.output.mapfile]
 subtract_single.control.opts.inputkeys                     =   [file1,file2]
 subtract_single.argument.flags                             =   [file1,file2,FACET_DATA_ALL,DATA,SUBTRACTED_DATA,subtract]
 
 average_pre.control.type                                   =   dppp
-average_pre.control.mapfile_in                             =   create_single_band_mapfile.output.mapfile
+average_pre.control.mapfile_in                             =   create_middle_band_mapfile.output.mapfile
 average_pre.control.inputkey                               =   msin
 average_pre.argument.msin.datacolumn                       =   DATA
 average_pre.argument.msout.overwrite                       =   True
@@ -1317,7 +1362,7 @@ average_pre.argument.avg.freqstep                          =   {{ verify_freqste
 average_pre.argument.avg.timestep                          =   {{ verify_timestep }}
 
 average_post.control.type                                  =   dppp
-average_post.control.mapfile_in                            =   create_single_band_mapfile.output.mapfile
+average_post.control.mapfile_in                            =   create_middle_band_mapfile.output.mapfile
 average_post.control.inputkey                              =   msin
 average_post.argument.msin.datacolumn                      =   SUBTRACTED_DATA
 average_post.argument.msout.overwrite                      =   True
@@ -1330,10 +1375,16 @@ average_post.argument.avg.type                             =   squash
 average_post.argument.avg.freqstep                         =   {{ verify_freqstep }}
 average_post.argument.avg.timestep                         =   {{ verify_timestep }}
 
+average_pre_compressed_map.control.kind                    =   plugin
+average_pre_compressed_map.control.type                    =   compressMapfile
+average_pre_compressed_map.control.mapfile_in              =   average_pre.output.mapfile
+average_pre_compressed_map.control.mapfile_dir             =   {{ mapfile_dir }}
+average_pre_compressed_map.control.filename                =   average_pre_compressed.datamap
+
 wsclean_pre.control.type                                   =   wsclean
-wsclean_pre.control.mapfile_in                             =   average_pre.output.mapfile
-wsclean_pre.control.inputkey                               =   msfile
-wsclean_pre.argument.flags                                 =   [-no-update-model-required,msfile]
+wsclean_pre.control.mapfile_in                             =   average_pre_compressed_map.output.mapfile
+wsclean_pre.control.inputkey                               =   msfiles
+wsclean_pre.argument.flags                                 =   [-no-update-model-required,msfiles]
 wsclean_pre.argument.size                                  =   2048 2048
 wsclean_pre.argument.niter                                 =   10
 wsclean_pre.argument.threshold                             =   0.0
@@ -1348,10 +1399,16 @@ wsclean_pre.argument.scale                                 =   0.00833
 wsclean_pre.argument.mem                                   =   {{ max_percent_memory }}
 wsclean_pre.argument.j                                     =   {{ max_cpus_per_node }}
 
+average_post_compressed_map.control.kind                   =   plugin
+average_post_compressed_map.control.type                   =   compressMapfile
+average_post_compressed_map.control.mapfile_in             =   average_pre.output.mapfile
+average_post_compressed_map.control.mapfile_dir            =   {{ mapfile_dir }}
+average_post_compressed_map.control.filename               =   average_post_compressed.datamap
+
 wsclean_post.control.type                                  =   wsclean
-wsclean_post.control.mapfile_in                            =   average_post.output.mapfile
-wsclean_post.control.inputkey                              =   msfile
-wsclean_post.argument.flags                                =   [-no-update-model-required,msfile]
+wsclean_post.control.mapfile_in                            =   average_post_compressed_map.output.mapfile
+wsclean_post.control.inputkey                              =   msfiles
+wsclean_post.argument.flags                                =   [-no-update-model-required,msfiles]
 wsclean_post.argument.size                                 =   2048 2048
 wsclean_post.argument.niter                                =   10
 wsclean_post.argument.threshold                            =   0.0
