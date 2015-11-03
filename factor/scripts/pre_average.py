@@ -145,6 +145,7 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
     # Find correlation times
     target_rms_rad = 0.2
     rmstimes = []
+    dists = []
     freq = None
     for a1, a2, d in zip(ant1, ant2, dist):
         if freq is None:
@@ -154,6 +155,8 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
             timepersolution = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['timewidths'])[0]
         ph1 = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['values'])[time_ind]
         ph2 = np.copy(parms['Gain:0:0:Phase:{}'.format(a2)]['values'])[time_ind]
+
+        # Filter flagged solutions
         good = np.where((~np.isnan(ph1)) & (~np.isnan(ph2)))[0]
         if len(good) == 0:
             continue
@@ -174,16 +177,15 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
         if rmstime is None:
             rmstime = len(ph)/2
         rmstimes.append(rmstime)
-        print(rmstime)
+        dists.append(d)
 
     # Find the mean ionfactor assuming that the correlation time goes as
     # t_corr ~ 1/sqrt(BL). The ionfactor is defined in BLavg() as:
     #
     #     ionfactor = (t_corr / 30.0 sec) / ( np.sqrt((25.0 / dist_km)) * (freq_hz / 60.e6) )
     #
-    ionfactor = np.mean(np.array(rmstimes) / 30.0 / (np.sqrt(25.0 / np.array(dist))
+    ionfactor = np.mean(np.array(rmstimes) / 30.0 / (np.sqrt(25.0 / np.array(dists))
         * freq / 60.0e6)) * timepersolution
-    0/0
 
     return ionfactor
 
