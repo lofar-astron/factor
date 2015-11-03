@@ -17,66 +17,73 @@ from astropy.stats import median_absolute_deviation
 
 
 def main(ms_file, parmdb_file, input_colname, output_colname, output_weights_colname,
-    minutes_per_block=10.0, baseline_file=None, verbose=True):
+    pre_average=True, minutes_per_block=10.0, baseline_file=None, verbose=True):
     """
     Pre-average data using a sliding Gaussian kernel on the weights
     """
     if not pre_average:
-        # Just copy input column to output
-        # Add the output column if needed
+        # Just copy input columns to output
         ms = pt.table(ms_file, readonly=False, ack=False)
         if output_colname not in ms.colnames():
             desc = ms.getcoldesc(input_colname)
             desc['name'] = output_colname
             ms.addcols(desc)
-
+        if output_weights_colname not in ms.colnames():
+            desc = ms.getcoldesc('WEIGHT_SPECTRUM')
+            desc['name'] = output_weights_colname
+            ms.addcols(desc)
+        data = ms.getcol(input_colname)
+        weights = ms.getcol('WEIGHT_SPECTRUM')
         ms.putcol(output_colname, data)
+        ms.putcol(output_weights_colname, weights)
+        ms.flush()
         ms.close()
-
-    if baseline_file is None:
-        if verbose:
-            print('Calculating baseline lengths...')
-        baseline_dict = get_baseline_lengths(ms_file)
-    elif os.path.exists(baseline_file):
-        f = open('baseline_file', 'r')
-        baseline_dict = pickle.load(f)
-        f.close()
     else:
-        print('Cannot find baseline_file. Exiting...')
-        sys.exit(1)
+        # Do the BL averaging
+        if baseline_file is None:
+            if verbose:
+                print('Calculating baseline lengths...')
+            baseline_dict = get_baseline_lengths(ms_file)
+        elif os.path.exists(baseline_file):
+            f = open('baseline_file', 'r')
+            baseline_dict = pickle.load(f)
+            f.close()
+        else:
+            print('Cannot find baseline_file. Exiting...')
+            sys.exit(1)
 
-    # Iterate through time chunks and find the lowest ionfactor
-    tab = pt.table(ms_file, ack=False)
-    start_time = tab[0]['TIME']
-    end_time = tab[-1]['TIME']
-    remaining_time = end_time - start_time # seconds
-    tab.close()
-    ionfactors = []
-    t_delta = minutes_per_block * 60.0 # seconds
-    t1 = 0.0
-    if verbose:
-        print('Determining ionfactors...')
-    while remaining_time > 0.0:
-        if remaining_time < 1.5 * t_delta:
-            # If remaining time is too short, just include it all in this chunk
-            t_delta = remaining_time + 10.0
-        remaining_time -= t_delta
-
-        # Find ionfactor for this period
-        ionfactors.append(find_ionfactor(parmdb_file, baseline_dict, t1+start_time,
-            t1+start_time+t_delta))
+        # Iterate through time chunks and find the lowest ionfactor
+        tab = pt.table(ms_file, ack=False)
+        start_time = tab[0]['TIME']
+        end_time = tab[-1]['TIME']
+        remaining_time = end_time - start_time # seconds
+        tab.close()
+        ionfactors = []
+        t_delta = minutes_per_block * 60.0 # seconds
+        t1 = 0.0
         if verbose:
-            print('    ionfactor (for timerange {0}-{1} sec) = {2}'.format(t1,
-                t1+t_delta, ionfactors[-1]))
-        t1 += t_delta
+            print('Determining ionfactors...')
+        while remaining_time > 0.0:
+            if remaining_time < 1.5 * t_delta:
+                # If remaining time is too short, just include it all in this chunk
+                t_delta = remaining_time + 10.0
+            remaining_time -= t_delta
 
-    # Do pre-averaging using lowest ionfactor
-    ionfactor_min = min(ionfactors)
-    if verbose:
-        print('Using ionfactor = {}'.format(ionfactor_min))
-        print('Averaging...')
-    BLavg(ms_file, baseline_dict, input_colname, output_colname,
-        output_weights_colname, ionfactor_min)
+            # Find ionfactor for this period
+            ionfactors.append(find_ionfactor(parmdb_file, baseline_dict, t1+start_time,
+                t1+start_time+t_delta))
+            if verbose:
+                print('    ionfactor (for timerange {0}-{1} sec) = {2}'.format(t1,
+                    t1+t_delta, ionfactors[-1]))
+            t1 += t_delta
+
+        # Do pre-averaging using lowest ionfactor
+        ionfactor_min = min(ionfactors)
+        if verbose:
+            print('Using ionfactor = {}'.format(ionfactor_min))
+            print('Averaging...')
+        BLavg(ms_file, baseline_dict, input_colname, output_colname,
+            output_weights_colname, ionfactor_min)
 
 
 def get_baseline_lengths(ms_file):

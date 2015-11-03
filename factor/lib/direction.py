@@ -110,6 +110,7 @@ class Direction(object):
         self.cellsize_selfcal_deg = 0.000417 # selfcal cell size
         self.cellsize_verify_deg = 0.00833 # verify subtract cell size
         self.subtracted_data_colname = 'SUBTRACTED_DATA_ALL'
+        self.pre_average = False
 
         # Set the size of the calibrator (used to filter source lists)
         if cal_size_deg is None:

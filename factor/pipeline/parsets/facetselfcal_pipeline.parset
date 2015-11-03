@@ -158,7 +158,7 @@ apply_dir_indep.argument.no-columns                        =   True
 pre_average.control.type                                   =   pre_average
 pre_average.control.mapfiles_in                            =   [shift_cal.output.mapfile,create_parmdb_map.output.mapfile]
 pre_average.control.inputkeys                              =   [datafile,parmdb]
-pre_average.argument.flags                                 =   [datafile,parmdb,DATA,BLAVG_DATA,BLAVG_WEIGHT_SPECTRUM]
+pre_average.argument.flags                                 =   [datafile,parmdb,DATA,BLAVG_DATA,BLAVG_WEIGHT_SPECTRUM,{{ pre_average }}]
 
 create_compressed_mapfile_data.control.kind                =   plugin
 create_compressed_mapfile_data.control.type                =   compressMapfile
