@@ -7,7 +7,7 @@ update_mapfile_hosts.control.type                          =   updateHosts
 update_mapfile_hosts.control.mapfile_dir                   =   input.output.mapfile_dir
 update_mapfile_hosts.control.hosts                         =   {{ hosts }}
 
-# create a mapfile with all single MSs
+# create a mapfile with all single MSs from supplied list, length = nfiles
 create_ms_map.control.kind                                 =   plugin
 create_ms_map.control.type                                 =   addListMapfile
 create_ms_map.control.hosts                                =   {{ hosts }}
@@ -15,7 +15,7 @@ create_ms_map.control.files                                =   {{ ms_files_singl
 create_ms_map.control.mapfile_dir                          =   {{ mapfile_dir }}
 create_ms_map.control.filename                             =   input_files_single.datamap
 
-# create a multi-mapfile with the groups of MSs
+# create a multi-mapfile with the groups of MSs from supplied list, length = nbands
 create_msmulti_map.control.kind                            =   plugin
 create_msmulti_map.control.type                            =   addListMultiMapfile
 create_msmulti_map.control.hosts                           =   {{ hosts }}
@@ -23,6 +23,7 @@ create_msmulti_map.control.files                           =   {{ ms_files_group
 create_msmulti_map.control.mapfile_dir                     =   {{ mapfile_dir }}
 create_msmulti_map.control.filename                        =   input_files_grouped.datamap
 
+# create a mapfile with the direction-independent parmDBs from supplied list, length = nfiles
 create_parmdb_map.control.kind                             =   plugin
 create_parmdb_map.control.type                             =   addListMapfile
 create_parmdb_map.control.hosts                            =   {{ hosts }}
@@ -30,6 +31,7 @@ create_parmdb_map.control.files                            =   {{ dir_indep_parm
 create_parmdb_map.control.mapfile_dir                      =   {{ mapfile_dir }}
 create_parmdb_map.control.filename                         =   dir_indep_instrument_parmdbs.datamap
 
+# create a mapfile with the current skymodels from supplied list, length = nbands
 create_full_skymodels_map.control.kind                     =   plugin
 create_full_skymodels_map.control.type                     =   addListMapfile
 create_full_skymodels_map.control.hosts                    =   {{ hosts }}
@@ -37,6 +39,7 @@ create_full_skymodels_map.control.files                    =   {{ skymodels }}
 create_full_skymodels_map.control.mapfile_dir              =   {{ mapfile_dir }}
 create_full_skymodels_map.control.filename                 =   full_skymodels.datamap
 
+# extract the skymodel for this facet from global skymodel, length = nbands
 make_facet_skymodels_all.control.type                      =   make_facet_skymodel
 make_facet_skymodels_all.control.mapfile_in                =   create_full_skymodels_map.output.mapfile
 make_facet_skymodels_all.control.inputkey                  =   fullmodelfile
@@ -44,12 +47,14 @@ make_facet_skymodels_all.control.outputkey                 =   outfile
 make_facet_skymodels_all.argument.flags                    =   [fullmodelfile,outfile,{{ vertices_file }}]
 make_facet_skymodels_all.argument.cal_only                 =   False
 
+# copy mapfile with facet-skymodels to known name, length = nbands
 copy_facet_skymodels_all_map.control.kind                  =   plugin
 copy_facet_skymodels_all_map.control.type                  =   copyMapfile
 copy_facet_skymodels_all_map.control.mapfile_in            =   make_facet_skymodels_all.output.mapfile
 copy_facet_skymodels_all_map.control.mapfile_dir           =   {{ mapfile_dir }}
 copy_facet_skymodels_all_map.control.filename              =   facet_skymodels.datamap
 
+# extract the skymodel for the calibrator of this facet from global skymodel, length = nbands
 make_facet_skymodels_cal.control.type                      =   make_facet_skymodel
 make_facet_skymodels_cal.control.mapfile_in                =   create_full_skymodels_map.output.mapfile
 make_facet_skymodels_cal.control.inputkey                  =   fullmodelfile
@@ -60,6 +65,7 @@ make_facet_skymodels_cal.argument.facet_ra                 =   {{ ra }}
 make_facet_skymodels_cal.argument.facet_dec                =   {{ dec }}
 make_facet_skymodels_cal.argument.cal_radius_deg           =   {{ cal_radius_deg }}
 
+# shift full-res data to facet position, length = nfiles
 shift_empty.control.type                                   =   dppp
 shift_empty.control.opts.mapfile_in                        =   create_ms_map.output.mapfile
 shift_empty.control.opts.inputkey                          =   msin
@@ -71,17 +77,20 @@ shift_empty.argument.steps                                 =   [shift]
 shift_empty.argument.shift.type                            =   phaseshifter
 shift_empty.argument.shift.phasecenter                     =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
 
+# copy mapfile with shifted data to known name, length = nfiles
 copy_empty_map.control.kind                                =   plugin
 copy_empty_map.control.type                                =   copyMapfile
 copy_empty_map.control.mapfile_in                          =   shift_empty.output.mapfile
 copy_empty_map.control.mapfile_dir                         =   {{ mapfile_dir }}
 copy_empty_map.control.filename                            =   shifted_empty_bands.datamap
 
+# convert the facet skymodel into a sourcedb, length = nbands
 make_sourcedb_all_facet_sources.control.type               =   make_sourcedb
 make_sourcedb_all_facet_sources.control.opts.mapfile_in    =   make_facet_skymodels_all.output.mapfile
 make_sourcedb_all_facet_sources.control.opts.inputkey      =   in
 make_sourcedb_all_facet_sources.argument.format            =   <
 
+# expand the sourcedb mapfile so that there is one entry for every file, length = nfiles
 expand_sourcedb_all_facet_sources.control.kind             =   plugin
 expand_sourcedb_all_facet_sources.control.type             =   mapfileSingleToGroup
 expand_sourcedb_all_facet_sources.control.mapfile_in       =   make_sourcedb_all_facet_sources.output.mapfile
@@ -89,7 +98,7 @@ expand_sourcedb_all_facet_sources.control.mapfile_groups   =   create_msmulti_ma
 expand_sourcedb_all_facet_sources.control.mapfile_dir      =   {{ mapfile_dir }}
 expand_sourcedb_all_facet_sources.control.filename         =   expand_sourcedb_all_facet_sources.datamap
 
-# predict the skymodel data for the full facet into the phase-shifted measurement sets
+# predict the skymodel data for the full facet into the phase-shifted measurement sets, length = nfiles
 predict_all_facet_sources.control.type                     =   dppp
 predict_all_facet_sources.control.opts.mapfiles_in         =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile]
 predict_all_facet_sources.control.opts.inputkeys           =   [msin,sourcedb]
@@ -100,12 +109,14 @@ predict_all_facet_sources.argument.steps                   =   [predict_all]
 predict_all_facet_sources.argument.predict_all.type        =   predict
 predict_all_facet_sources.argument.predict_all.sourcedb    =   sourcedb
 
+# copy the mapfile from the predict step to known name, length = nfiles
 copy_predict_all_model_map.control.kind                    =   plugin
 copy_predict_all_model_map.control.type                    =   copyMapfile
 copy_predict_all_model_map.control.mapfile_in              =   predict_all_facet_sources.output.mapfile
 copy_predict_all_model_map.control.mapfile_dir             =   {{ mapfile_dir }}
 copy_predict_all_model_map.control.filename                =   predict_all_model_bands.datamap
 
+# corrupt the predicted facet data with the known parmDB, length = nfiles
 corrupt_all_model_data.control.type                        =   dppp
 corrupt_all_model_data.control.opts.mapfiles_in            =   [predict_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
 corrupt_all_model_data.control.opts.inputkeys              =   [msin,parmdb]
@@ -118,22 +129,26 @@ corrupt_all_model_data.argument.corrupt.type               =   applycal
 corrupt_all_model_data.argument.corrupt.parmdb             =   parmdb
 corrupt_all_model_data.argument.corrupt.invert             =   False
 
+# copy the mapfile from the previous corrupt step to known name, length = nfiles
 copy_corrupted_all_model_map.control.kind                  =   plugin
 copy_corrupted_all_model_map.control.type                  =   copyMapfile
 copy_corrupted_all_model_map.control.mapfile_in            =   corrupt_all_model_data.output.mapfile
 copy_corrupted_all_model_map.control.mapfile_dir           =   {{ mapfile_dir }}
 copy_corrupted_all_model_map.control.filename              =   corrupted_all_model_bands.datamap
 
+# add predicted facet data to phase-shifted empty data, length = nfiles
 add_all_facet_sources.control.type                         =   add_subtract_columns
 add_all_facet_sources.control.opts.mapfiles_in             =   [shift_empty.output.mapfile,corrupt_all_model_data.output.mapfile]
 add_all_facet_sources.control.opts.inputkeys               =   [file1,file2]
 add_all_facet_sources.argument.flags                       =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
 
+# add the imaging columns to the phase-shifted data, length = nfiles
 add_imaging_cols_empty.control.type                        =   add_imaging_columns
 add_imaging_cols_empty.control.mapfile_in                  =   shift_empty.output.mapfile
 add_imaging_cols_empty.control.inputkey                    =   msfile
 add_imaging_cols_empty.argument.flags                      =   [msfile]
 
+# shift full-res data to calibrator position and average in frequency, length = nfiles
 shift_cal.control.type                                     =   dppp
 shift_cal.control.opts.mapfile_in                          =   create_ms_map.output.mapfile
 shift_cal.control.opts.inputkey                            =   msin
@@ -148,12 +163,14 @@ shift_cal.argument.avg.type                                =   squash
 shift_cal.argument.avg.freqstep                            =   {{ facetselfcal_freqstep }}
 shift_cal.argument.avg.timestep                            =   1
 
+# copy the mapfile for shifted calibrator data to known name, length = nfiles
 copy_cal_map.control.kind                                  =   plugin
 copy_cal_map.control.type                                  =   copyMapfile
 copy_cal_map.control.mapfile_in                            =   shift_cal.output.mapfile
 copy_cal_map.control.mapfile_dir                           =   {{ mapfile_dir }}
 copy_cal_map.control.filename                              =   shifted_cal_bands.datamap
 
+# expand the calibrator skymodel mapfile so that there is one entry for every file, length = nfiles
 expand_facet_skymodels_cal.control.kind                    =   plugin
 expand_facet_skymodels_cal.control.type                    =   mapfileSingleToGroup
 expand_facet_skymodels_cal.control.mapfile_in              =   make_facet_skymodels_cal.output.mapfile
@@ -161,6 +178,7 @@ expand_facet_skymodels_cal.control.mapfile_groups          =   create_msmulti_ma
 expand_facet_skymodels_cal.control.mapfile_dir             =   {{ mapfile_dir }}
 expand_facet_skymodels_cal.control.filename                =   expand_facet_skymodels_cal.datamap
 
+# add corrupted calibrator data to shifted cal-data, length = nfiles
 add_cal_facet_sources.control.type                         =   calibrate-stand-alone_new
 add_cal_facet_sources.argument.observation                 =   shift_cal.output.mapfile
 add_cal_facet_sources.argument.parset                      =   {{ parset_dir }}/facet_dirindep_add.parset
@@ -170,6 +188,7 @@ add_cal_facet_sources.argument.replace-sourcedb            =   True
 add_cal_facet_sources.argument.replace-parmdb              =   True
 add_cal_facet_sources.argument.no-columns                  =   True
 
+# correct calibrator (+residual) data, length = nfiles
 apply_dir_indep.control.type                               =   calibrate-stand-alone_new
 apply_dir_indep.argument.observation                       =   shift_cal.output.mapfile
 apply_dir_indep.argument.parset                            =   {{ parset_dir }}/facet_dirindep_apply.parset
@@ -179,18 +198,21 @@ apply_dir_indep.argument.replace-sourcedb                  =   True
 apply_dir_indep.argument.replace-parmdb                    =   True
 apply_dir_indep.argument.no-columns                        =   True
 
+# compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile_data.control.kind                =   plugin
 create_compressed_mapfile_data.control.type                =   compressMapfile
 create_compressed_mapfile_data.control.mapfile_in          =   shift_cal.output.mapfile
 create_compressed_mapfile_data.control.mapfile_dir         =   {{ mapfile_dir }}
 create_compressed_mapfile_data.control.filename            =   concat_input.datamap
 
+# sort compressed mapfile so that there is one group pre timestamp, length = ntimes
 sort_into_Groups.control.type                              =   sort_times_into_freqGroups
 sort_into_Groups.argument.flags                            =   [create_compressed_mapfile_data.output.mapfile]
 sort_into_Groups.argument.filename                         =   sorted_groups.datamap
 sort_into_Groups.argument.mapfile_dir                      =   {{ mapfile_dir }}
 sort_into_Groups.argument.hosts                            =   {{ hosts }}
 
+# concat data in frequency 
 concat_data.control.type                                   =   dppp
 concat_data.control.mapfile_out                            =   {{ mapfile_dir }}/sorted_groups.datamap_groups
 concat_data.control.mapfile_in                             =   {{ mapfile_dir }}/sorted_groups.datamap
