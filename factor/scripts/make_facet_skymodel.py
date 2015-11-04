@@ -87,6 +87,11 @@ def main(fullskymodel, outmodel, vertices_file, cal_only=False, facet_ra=0.0,
     else:
         s.write(outmodel, clobber=True)
 
+    # Set clipping level to twice the total flux
+    clip_level_jy = 2.0 * sum(s.getColValues('I', units='Jy'))
+
+    return {'clip_level_jy': clip_level_jy}
+
 
 if __name__ == '__main__':
     descriptiontext = "Make a sky model for a facet.\n"
