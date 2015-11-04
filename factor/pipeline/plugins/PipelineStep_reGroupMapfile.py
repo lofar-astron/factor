@@ -44,9 +44,9 @@ def plugin_main(args, **kwargs):
     for group in groupmap:
         grouplist = []
         skip = False
-        for filename in group.file:
+        for fname in group.file:
             if check_names:
-                refbase = os.path.splitext(os.path.basename(filename))[0]
+                refbase = os.path.splitext(os.path.basename(fname))[0]
                 newbase = os.path.splitext(os.path.basename(inmap[inindex].file))[0]
                 if refbase != newbase:
                     raise ValueError('PipelineStep_reGroupMapfile: basenames {0} and {1} differ'.format(refbase,newbase))
@@ -150,7 +150,6 @@ class MultiDataMap(DataMap):
         elif not data:
             pass
         else:
-            print 'HELP: ', data
             self._set_data(data, dtype=MultiDataProduct)
 
     def split_list(self, number):

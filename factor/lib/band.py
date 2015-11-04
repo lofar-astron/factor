@@ -212,7 +212,7 @@ class Band(object):
                     or not np.array_equal(self.chan_freqs_hz, sw.getcell('CHAN_FREQ',0)) \
                     or not np.array_equal(self.chan_width_hz, sw.getcell('CHAN_WIDTH',0)[0] ):
                 self.log.critical('Frequency axis for MS {0} differs from the one for MS {1}! '
-                                  'Exiting!'.format(self.files[pdb_id],self.files[0]))
+                                  'Exiting!'.format(self.files[MS_id],self.files[0]))
                 sys.exit(1)
             sw.close()
         # check for gaps in the frequency channels
@@ -316,7 +316,7 @@ class Band(object):
                         pass
 
                     # Check for SUBTRACTED_DATA_ALL column and calculate mean elevation
-                    tab = pt.table(self.file, ack=False)
+                    tab = pt.table(self.files[MS_id], ack=False)
                     if MS_id == 0:
                         global_el_values = tab.getcol('AZEL1', rowincr=10000)[:, 1]
                     else:
