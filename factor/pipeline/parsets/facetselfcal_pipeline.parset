@@ -755,7 +755,7 @@ apply_amp1.argument.replace-sourcedb                       =   True
 apply_amp1.argument.replace-parmdb                         =   True
 
 flag1.control.type                                         =   dppp_inplace
-flag1.control.mapfile_in                                   =   create_chunks_map.output.mapfile
+flag1.control.mapfile_in                                   =   concat_chunks.output.mapfile
 flag1.control.inputkey                                     =   msin
 flag1.argument.msin.datacolumn                             =   CORRECTED_DATA
 flag1.argument.msout                                       =   .
@@ -966,7 +966,7 @@ apply_amp2.argument.replace-sourcedb                       =   True
 apply_amp2.argument.replace-parmdb                         =   True
 
 flag2.control.type                                         =   dppp_inplace
-flag2.control.mapfile_in                                   =   create_chunks_map.output.mapfile
+flag2.control.mapfile_in                                   =   concat_chunks.output.mapfile
 flag2.control.inputkey                                     =   msin
 flag2.argument.msin.datacolumn                             =   CORRECTED_DATA
 flag2.argument.msout                                       =   .
