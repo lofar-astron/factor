@@ -83,13 +83,19 @@ class Operation(object):
         create_directory(self.pipeline_working_dir)
 
         # Local scratch directory and corresponding node recipes
-        if self.parset['cluster_specific']['dir_local'] is None:
+        if self.parset['cluster_specific']['dir_local'] is None:   
+            # Not specified, specify scratch directory in normal work directory
             self.local_scratch_dir = os.path.join(self.pipeline_working_dir,
                 self.direction.name)
             self.dppp_nodescript = 'executable_args'
-        else:
+        elif self.parset['cluster_specific']['clusterdesc_file'].lower() == 'pbs':  
+            # PBS = "system in Hamburg" -> use special NDPPP nodescript
             self.local_scratch_dir = self.parset['cluster_specific']['dir_local']
             self.dppp_nodescript = 'dppp_scratch'
+        else:                        
+            # other: use given scratch directory an standard nodescrit
+            self.local_scratch_dir = self.parset['cluster_specific']['dir_local']
+            self.dppp_nodescript = 'executable_args'
 
         # Directory that holds logs in a convenient place
         self.log_dir = os.path.join(self.factor_working_dir, 'logs', self.name)
