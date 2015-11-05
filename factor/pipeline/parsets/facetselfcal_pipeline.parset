@@ -777,11 +777,7 @@ flag1.argument.msin.datacolumn                             =   CORRECTED_DATA
 flag1.argument.msout                                       =   .
 flag1.argument.steps                                       =   [flag]
 flag1.argument.flag.type                                   =   preflagger
-<<<<<<< HEAD
-flag1.argument.flag.amplmax                                =   make_facet_skymodels_cal.output.clip_level_jy.mapfile
-=======
 flag1.argument.flag.amplmax                                =   select_single_cliplevel_cal.output.mapfile
->>>>>>> master
 
 average3.control.type                                      =   dppp
 average3.control.mapfile_in                                =   create_chunks_map.output.mapfile
@@ -993,11 +989,7 @@ flag2.argument.msin.datacolumn                             =   CORRECTED_DATA
 flag2.argument.msout                                       =   .
 flag2.argument.steps                                       =   [flag]
 flag2.argument.flag.type                                   =   preflagger
-<<<<<<< HEAD
-flag2.argument.flag.amplmax                                =   make_facet_skymodels_cal.output.clip_level_jy.mapfile
-=======
 flag2.argument.flag.amplmax                                =   select_single_cliplevel_cal.output.mapfile
->>>>>>> master
 
 create_compressed_mapfile_empty.control.kind               =   plugin
 create_compressed_mapfile_empty.control.type               =   compressMapfile
@@ -1198,11 +1190,7 @@ flag_full.argument.msin.datacolumn                         =   CORRECTED_DATA
 flag_full.argument.msout                                   =   .
 flag_full.argument.steps                                   =   [flag]
 flag_full.argument.flag.type                               =   preflagger
-<<<<<<< HEAD
-flag_full.argument.flag.amplmax                            =   make_facet_skymodels_all.output.clip_level_jy.mapfile
-=======
 flag_full.argument.flag.amplmax                            =   select_single_cliplevel_all.output.mapfile
->>>>>>> master
 
 average5.control.type                                      =   dppp
 average5.control.mapfile_in                                =   shift_empty.output.mapfile
