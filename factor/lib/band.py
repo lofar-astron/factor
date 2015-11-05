@@ -99,6 +99,7 @@ class Band(object):
 
         self.completed_operations = []
         self.skip = False
+        self.log.debug("Band {0}, using {1} files.".format(self.name,len(self.files)))
 
 
     def check_parmdb(self):
@@ -245,7 +246,7 @@ class Band(object):
         """
         newfiles = []
         newdirindparmdbs = []
-        for MS_id in xrange(1,self.numMS):
+        for MS_id in xrange(self.numMS):
             nchunks = 1
             tab = pt.table(self.files[MS_id], ack=False)            
             timepersample = tab.getcell('EXPOSURE',0)

@@ -225,6 +225,7 @@ concat_data.argument.msout.writefullresflag                =   False
 concat_data.argument.local_scratch_dir                     =   {{ local_dir }}
 concat_data.argument.steps                                 =   []
 
+
 make_concat_corr_mapfile.control.kind                      =  plugin
 make_concat_corr_mapfile.control.type                      =  createMapfile
 make_concat_corr_mapfile.control.method                    =  add_suffix_to_file
@@ -246,7 +247,7 @@ concat_corr.argument.local_scratch_dir                     =   {{ local_dir }}
 concat_corr.argument.steps                                 =   []
 
 copy_column.control.type                                   =   copy_column
-copy_column.control.mapfiles_in                            =   [concat_corr.output.mapfile,concat_data.output.mapfile]
+copy_column.control.mapfiles_in                            =   [make_concat_corr_mapfile.output.mapfile,concat_data.output.mapfile]
 copy_column.control.inputkeys                              =   [corrdatafile,datafile]
 copy_column.argument.flags                                 =   [corrdatafile,datafile,DATA,CORRECTED_DATA]
 
