@@ -33,8 +33,11 @@ def plugin_main(args, **kwargs):
     map_in.iterator = DataMap.SkipIterator
     files = [item.file for item in map_in]
     hosts = [item.host for item in map_in]
-    mid_ind = len(files)/2
-    map_out.data.append(DataProduct(hosts[mid_ind], files[mid_ind], False))
+    if 'index' in kwargs:
+        index = int(kwargs['index'])
+    else:
+        index = len(files)/2
+    map_out.data.append(DataProduct(hosts[index], files[index], False))
 
     fileid = os.path.join(mapfile_dir, filename)
     map_out.save(fileid)
