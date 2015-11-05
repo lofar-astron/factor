@@ -44,6 +44,12 @@ def main(dataset, blockl, clobber=True):
     t.close()
 
     nchunks = int(np.ceil((np.float(nsamples) / np.float(blockl))))
+
+    # Don't allow more than 15 chunks for performance reasons
+    while nchunks > 15:
+        blockl *= 2
+        nchunks = int(np.ceil((np.float(nsamples) / np.float(blockl))))
+
     tlen = timepersample * np.float(blockl) / 3600.0 # length of block in hours
     tobs = timepersample * nsamples / 3600.0 # length of obs in hours
 
