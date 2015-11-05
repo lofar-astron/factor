@@ -1184,7 +1184,7 @@ apply_dir_dep_slow.argument.replace-sourcedb               =   True
 apply_dir_dep_slow.argument.replace-parmdb                 =   True
 
 flag_full.control.type                                     =   dppp_inplace
-flag_full.control.mapfiles_in                              =   [shift_empty.output.mapfile,select_single_cliplevel_all.output.mapfile]
+flag_full.control.mapfiles_in                              =   [shift_empty.output.mapfile,make_facet_skymodels_all.output.clip_level_jy.mapfile]
 flag_full.control.inputkeys                                =   [msin,clip_level]
 flag_full.argument.msin.datacolumn                         =   CORRECTED_DATA
 flag_full.argument.msout                                   =   .
