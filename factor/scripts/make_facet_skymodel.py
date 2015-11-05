@@ -87,8 +87,8 @@ def main(fullskymodel, outmodel, vertices_file, cal_only=False, facet_ra=0.0,
     else:
         s.write(outmodel, clobber=True)
 
-    # Set clipping level to twice the total flux
-    clip_level_jy = 2.0 * sum(s.getColValues('I', units='Jy'))
+    # Set clipping level to 3 times the total flux
+    clip_level_jy = 3.0 * sum(s.getColValues('I', units='Jy'))
 
     return {'clip_level_jy': clip_level_jy}
 
