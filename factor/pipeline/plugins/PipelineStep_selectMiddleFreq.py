@@ -17,6 +17,8 @@ def plugin_main(args, **kwargs):
         Directory for output mapfile
     filename: str
         Name of output mapfile
+    index: int, optional
+        Index of the frequency band to use.
 
     Returns
     -------
@@ -51,16 +53,19 @@ def plugin_main(args, **kwargs):
     # find the center-frequency
     freqs =  freq_groups.keys()
     freqs.sort()
-    midfreq = freqs[len(freqs)/2]
-    # make sure that chosen frequncy has maxfiles entries
-    while len(freq_groups[midfreq]) < maxfiles:
-        freqs.remove(midfreq)
-        midfreq = freqs[len(freqs)/2]
+    selfreq = freqs[len(freqs)/2]
+    if 'index' in kwargs:
+        selfreq = int(kwargs['index'])
+    else:
+        # make sure that chosen frequncy has maxfiles entries
+        while len(freq_groups[selfreq]) < maxfiles:
+            freqs.remove(selfreq)
+            selfreq = freqs[len(freqs)/2]
     # extend the hosts-list
-    for i in range(maxfiles-len(hosts)):
+    for i in range(len(freq_groups[selfreq])-len(hosts)):
         hosts.append(hosts[i])
     # fill the output-map
-    for (host,fname) in zip(hosts,freq_groups[midfreq]):
+    for (host,fname) in zip(hosts,freq_groups[selfreq]):
         map_out.append(DataProduct(host, fname, False))
 
     fileid = os.path.join(mapfile_dir, filename)
