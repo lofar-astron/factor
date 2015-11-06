@@ -57,6 +57,12 @@ def main(dataset, blockl, local_dir=None, clobber=True):
     tlen = timepersample * np.float(blockl) / 3600.0 # length of block in hours
     tobs = timepersample * nsamples / 3600.0 # length of obs in hours
 
+    # Copy to local directory if needed
+    dataset_original = dataset
+    if local_dir is not None:
+        dataset = os.path.join(local_dir, os.path.basename(dataset_original))
+        os.system('/usr/bin/rsync -a {0} {1}', dataset_original, local_dir)
+
     files = []
     for c in range(nchunks):
         chunk_file = '{0}_chunk{1}.ms'.format(os.path.splitext(dataset)[0], c)
@@ -68,6 +74,9 @@ def main(dataset, blockl, local_dir=None, clobber=True):
         if c == nchunks-1 and t1 < tobs:
             t1 = tobs + 0.1 # make sure last chunk gets all that remains
         split_ms(dataset, chunk_file, t0, t1, local_dir, clobber=clobber)
+
+    if local_dir is not None and not os.path.samefile(dataset, dataset_original):
+        shutil.rmtree(dataset)
 
     return {'files': '[{0}]'.format(','.join(files))}
 
@@ -115,10 +124,11 @@ def split_ms(msin, msout, start_out, end_out, local_dir, clobber=True):
     t1.close()
     t.close()
 
-    if local_dir is not None and not os.path.samefile(msout, msout_original):
+    if local_dir is not None:
         msout_destination_dir = os.path.dirname(msout_original)
         os.system('/usr/bin/rsync -a {0} {1}', msout, msout_destination_dir)
-        shutil.rmtree(msout)
+        if not os.path.samefile(msout, msout_original):
+            shutil.rmtree(msout)
 
 
 if __name__ == '__main__':
