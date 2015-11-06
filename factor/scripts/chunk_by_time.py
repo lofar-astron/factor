@@ -102,6 +102,8 @@ def split_ms(msin, msout, start_out, end_out, local_dir, clobber=True):
     msout_original = msout
     if local_dir is not None:
         msout = os.path.join(local_dir, os.path.basename(msout_original))
+        if os.path.exists(msout):
+            os.system('rm -rf {0}'.format(msout))
 
     t = pt.table(msin, ack=False)
     starttime = t[0]['TIME']
