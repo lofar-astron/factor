@@ -347,8 +347,8 @@ class Direction(object):
                 self.completed_operations = d['completed_operations']
 
                 # Load mapfiles needed for facetsubreset
-                self.diff_models_field_datamap = d['diff_models_field_datamap']
-                self.input_bands_datamap = d['input_bands_datamap']
+                self.diff_models_field_datamap = d['diff_models_field_datamap'] # length = nfiles
+                self.input_files_single_datamap = d['input_files_single_datamap'] # length = nfiles
                 self.subtracted_data_colname = d['subtracted_data_colname']
             return True
         except:
