@@ -65,7 +65,7 @@ def main(dataset, blockl, local_dir=None, clobber=True):
 
     files = []
     for c in range(nchunks):
-        chunk_file = '{0}_chunk{1}.ms'.format(os.path.splitext(dataset)[0], c)
+        chunk_file = '{0}_chunk{1}.ms'.format(os.path.splitext(dataset_original)[0], c)
         files.append(chunk_file)
         t0 = tlen * np.float(c) # hours
         t1 = t0 + tlen # hours
@@ -95,7 +95,7 @@ def split_ms(msin, msout, start_out, end_out, local_dir, clobber=True):
         Start time in hours relative to first time
     end_out : float
         End time in hours relative to first time
-    local_dir : str, optional
+    local_dir : str
         Path to local directory for output of t1.copy(). The file is then
         copied to the original output directory
     clobber : bool, optional
