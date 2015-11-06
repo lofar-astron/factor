@@ -61,7 +61,7 @@ def main(dataset, blockl, local_dir=None, clobber=True):
     dataset_original = dataset
     if local_dir is not None:
         dataset = os.path.join(local_dir, os.path.basename(dataset_original))
-        os.system('/usr/bin/rsync -a {0} {1}', dataset_original, local_dir)
+        os.system('/usr/bin/rsync -a {0} {1}'.format(dataset_original, local_dir))
 
     files = []
     for c in range(nchunks):
@@ -126,7 +126,7 @@ def split_ms(msin, msout, start_out, end_out, local_dir, clobber=True):
 
     if local_dir is not None:
         msout_destination_dir = os.path.dirname(msout_original)
-        os.system('/usr/bin/rsync -a {0} {1}', msout, msout_destination_dir)
+        os.system('/usr/bin/rsync -a {0} {1}'.format(msout, msout_destination_dir))
         if not os.path.samefile(msout, msout_original):
             shutil.rmtree(msout)
 
