@@ -111,6 +111,7 @@ class Direction(object):
         self.cellsize_verify_deg = 0.00833 # verify subtract cell size
         self.subtracted_data_colname = 'SUBTRACTED_DATA_ALL'
         self.pre_average = False
+        self.blavg_weight_column = 'WEIGHT_SPECTRUM'
 
         # Set the size of the calibrator (used to filter source lists)
         if cal_size_deg is None:
@@ -155,6 +156,10 @@ class Direction(object):
                 self.solint_p = max(1, int(round(4 * ref_flux / self.apparent_flux_mjy)))
             self.solint_a = max(30, int(round(240 * ref_flux / self.apparent_flux_mjy)))
         self.chunk_width = (self.solint_a - 1) * 4
+
+        # Set name of column to use for averaged weights
+        if self.pre_average:
+            self.blavg_weight_column = 'BLAVG_WEIGHT_SPECTRUM'
 
 
     def set_image_sizes(self, test_run=False):

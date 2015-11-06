@@ -25,6 +25,9 @@ def main(ms_file, column1, column2):
     """
     t = pt.table(ms_file, readonly=False, ack=False)
 
+    if column1 == column2:
+        return
+
     if column1 not in t.colnames() and column2 not in t.colnames():
         print('Both columns must be present in MS')
         sys.exit(1)
