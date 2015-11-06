@@ -8,6 +8,7 @@ import pyrap.tables as pt
 import numpy as np
 import sys
 import os
+import shutil
 
 
 def main(dataset, blockl, local_dir=None, clobber=True):
@@ -97,10 +98,10 @@ def split_ms(msin, msout, start_out, end_out, local_dir, clobber=True):
             os.system('rm -rf {0}'.format(msout))
         else:
             return
+
+    msout_original = msout
     if local_dir is not None:
-        msout_original = msout
         msout = os.path.join(local_dir, os.path.basename(msout_original))
-        msout_destination_dir = os.path.dirname(msout_original)
 
     t = pt.table(msin, ack=False)
     starttime = t[0]['TIME']
@@ -112,8 +113,10 @@ def split_ms(msin, msout, start_out, end_out, local_dir, clobber=True):
     t1.close()
     t.close()
 
-    if local_dir is not None:
+    if local_dir is not None and not os.path.samefile(msout, msout_original):
+        msout_destination_dir = os.path.dirname(msout_original)
         os.system('/usr/bin/rsync -a {0} {1}', msout, msout_destination_dir)
+        shutil.rmtree(msout)
 
 
 if __name__ == '__main__':
