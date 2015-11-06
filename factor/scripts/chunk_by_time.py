@@ -66,7 +66,7 @@ def main(dataset, blockl, local_dir=None, clobber=True):
             t0 = -0.1 # make sure first chunk gets first slot
         if c == nchunks-1 and t1 < tobs:
             t1 = tobs + 0.1 # make sure last chunk gets all that remains
-        split_ms(dataset, chunk_file, t0, t1, local_dir=local_dir, clobber=clobber)
+        split_ms(dataset, chunk_file, t0, t1, local_dir, clobber=clobber)
 
     return {'files': '[{0}]'.format(','.join(files))}
 
