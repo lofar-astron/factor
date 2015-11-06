@@ -238,7 +238,7 @@ copy_column3.argument.flags                                =   [blavgfile,datafi
 make_chunks.control.type                                   =   chunk_by_time
 make_chunks.control.mapfile_in                             =   concat_data.output.mapfile
 make_chunks.control.inputkey                               =   msfile
-make_chunks.argument.flags                                 =   [msfile,{{ chunk_width }}]
+make_chunks.argument.flags                                 =   [msfile,{{ chunk_width }},{{ local_dir }}]
 
 create_chunks_map.control.kind                             =   plugin
 create_chunks_map.control.type                             =   addListMapfile

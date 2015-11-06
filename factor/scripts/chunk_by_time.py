@@ -10,7 +10,7 @@ import sys
 import os
 
 
-def main(dataset, blockl, clobber=True):
+def main(dataset, blockl, local_dir=None, clobber=True):
     """
     Split dataset into time chunks
 
@@ -20,6 +20,9 @@ def main(dataset, blockl, clobber=True):
         Name of MS file to split
     blockl : int
         Number of time slots per chunk
+    local_dir : str, optional
+        Path to local directory for output of t1.copy(). The file is then
+        copied to the original output directory
     clobber : bool, optional
         If True, existing files are overwritten
 
@@ -63,12 +66,12 @@ def main(dataset, blockl, clobber=True):
             t0 = -0.1 # make sure first chunk gets first slot
         if c == nchunks-1 and t1 < tobs:
             t1 = tobs + 0.1 # make sure last chunk gets all that remains
-        split_ms(dataset, chunk_file, t0, t1, clobber=clobber)
+        split_ms(dataset, chunk_file, t0, t1, local_dir=local_dir, clobber=clobber)
 
     return {'files': '[{0}]'.format(','.join(files))}
 
 
-def split_ms(msin, msout, start_out, end_out, clobber=True):
+def split_ms(msin, msout, start_out, end_out, local_dir, clobber=True):
     """
     Splits an MS between start and end times in hours relative to first time
 
@@ -82,6 +85,9 @@ def split_ms(msin, msout, start_out, end_out, clobber=True):
         Start time in hours relative to first time
     end_out : float
         End time in hours relative to first time
+    local_dir : str, optional
+        Path to local directory for output of t1.copy(). The file is then
+        copied to the original output directory
     clobber : bool, optional
         If True, existing files are overwritten
 
@@ -91,6 +97,10 @@ def split_ms(msin, msout, start_out, end_out, clobber=True):
             os.system('rm -rf {0}'.format(msout))
         else:
             return
+    if local_dir is not None:
+        msout_original = msout
+        msout = os.path.join(local_dir, os.path.basename(msout_original))
+        msout_destination_dir = os.path.dirname(msout_original)
 
     t = pt.table(msin, ack=False)
     starttime = t[0]['TIME']
@@ -101,6 +111,9 @@ def split_ms(msin, msout, start_out, end_out, clobber=True):
     t1.copy(msout, True)
     t1.close()
     t.close()
+
+    if local_dir is not None:
+        os.system('/usr/bin/rsync -a {0} {1}', msout, msout_destination_dir)
 
 
 if __name__ == '__main__':
