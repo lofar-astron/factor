@@ -99,7 +99,7 @@ class Band(object):
 
         self.completed_operations = []
         self.skip = False
-        self.log.debug("Band {0}, using {1} files.".format(self.name,len(self.files)))
+        self.log.debug("Using {0} files.".format(len(self.files)))
 
 
     def check_parmdb(self):
