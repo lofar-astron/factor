@@ -699,7 +699,7 @@ create_model2_map.control.type                             =   trimMapfile
 create_model2_map.control.mapfile_in                       =   casa_image22.output.casa_image22.model.mapfile
 create_model2_map.control.trim                             =   .model
 create_model2_map.control.mapfile_dir                      =   {{ mapfile_dir }}
-create_model2_map.control.filename                         =   model1_rootnames.datamap
+create_model2_map.control.filename                         =   model2_rootnames.datamap
 
 casa_ft2.control.type                                      =   casa
 casa_ft2.control.mapfiles_in                               =   [concat_chunks.output.mapfile,create_model2_map.output.mapfile]
@@ -906,7 +906,7 @@ create_model3_map.control.type                             =   trimMapfile
 create_model3_map.control.mapfile_in                       =   casa_image32.output.casa_image32.model.mapfile
 create_model3_map.control.trim                             =   .model
 create_model3_map.control.mapfile_dir                      =   {{ mapfile_dir }}
-create_model3_map.control.filename                         =   model1_rootnames.datamap
+create_model3_map.control.filename                         =   model3_rootnames.datamap
 create_model3_map.control.counter                          =   loop_ampcal.output.counter
 
 casa_ft3.control.type                                      =   casa

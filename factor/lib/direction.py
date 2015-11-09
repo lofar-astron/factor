@@ -249,8 +249,8 @@ class Direction(object):
         return newlarge
 
 
-    def set_averaging_steps_and_solution_intervals(self, chan_width_hz, nchan, timestep_sec,
-        ntimes, pre_average):
+    def set_averaging_steps_and_solution_intervals(self, chan_width_hz, nchan,
+        timestep_sec, ntimes, pre_average=False):
         """
         Sets the averaging step sizes and solution intervals for selfcal
 
@@ -295,13 +295,12 @@ class Direction(object):
         self.initsubtract_timestep = max(1, int(round(20.0 / timestep_sec)))
 
         # For selfcal, average to 2 MHz per channel and 120 s per time slot for
-        # an image of 512 pixels. We also need to set the amplitude solve
-        # frequency step accordingly so that we get 2MHz per solution
+        # an image of 512 pixels
         target_bandwidth_mhz = 2.0 * 512.0 / self.cal_imsize
         target_timewidth_s = 120 * 512.0 / self.cal_imsize # used for imaging only
         self.facetselfcal_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
         while nchan % self.facetselfcal_freqstep:
-            self.facetselfcal_freqstep += 2.0 / self.facetselfcal_freqstep
+            self.facetselfcal_freqstep += 1
         self.facetselfcal_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
 
         # For facet imaging, average to 0.5 MHz per channel and 30 sec per time
