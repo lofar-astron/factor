@@ -214,6 +214,14 @@ def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor,
     all_weights = ms.getcol('WEIGHT_SPECTRUM')
     all_flags = ms.getcol('FLAG')
 
+    all_flags[ np.isnan(all_data) ] = True # flag NaNs
+    all_weights = all_weights * ~all_flags # set weight of flagged data to 0
+
+    # Check that all NaNs are flagged
+    if np.count_nonzero(np.isnan(all_data[~all_flags])) > 0:
+        logging.error('NaNs in unflagged data!')
+        sys.exit(1)
+
     # iteration on baseline combination
     for ant in itertools.product(set(ant1), set(ant2)):
 
@@ -234,11 +242,12 @@ def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor,
         #    That's basically the equivalent of a running weighted average with
         #    a Gaussian window function.
 
-        # get weights
-        flags = all_flags[sel,:,:]
-        weights = all_weights[sel,:,:]*~flags # set flagged data weight to 0
-        # get data
-        data = all_data[sel,:,:]*weights
+        # get weights and data
+        weights = all_weights[sel,:,:]
+        data = all_data[sel,:,:]
+
+        # set bad data to 0 so nans do not propagate
+        data = np.nan_to_num(data*weights)
 
         # smear weighted data and weights
         dataR = gfilter(np.real(data), stddev, axis=0)#, truncate=4.)
@@ -246,13 +255,10 @@ def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor,
         weights = gfilter(weights, stddev, axis=0)#, truncate=4.)
 
         # re-create data
-        # NOTE: both data and/or weight might be 0
-        d = (dataR + 1j * dataI)
-        weights[np.where(data == 0)] = np.nan # prevent 0/0 exception
-        d = d/weights # when weights == 0 or nan -> data is nan
-        # if data is nan, put data to 0 (anyway they must be flagged)
-        all_data[sel,:,:] = np.nan_to_num(d)
-        all_weights[sel,:,:] = np.nan_to_num(weights)
+        data = (dataR + 1j * dataI)
+        data[(weights != 0)] /= weights[(weights != 0)] # avoid divbyzero
+        all_data[sel,:,:] = data
+        all_weights[sel,:,:] = weights
 
     # Add the output columns if needed
     if output_colname not in ms.colnames():
@@ -261,6 +267,7 @@ def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor,
         ms.addcols(desc)
 
     ms.putcol(output_colname, all_data)
+    ms.putcol('FLAG', all_flags) # this saves flags of nans, which is always good
     ms.putcol('WEIGHT_SPECTRUM', all_weights)
     ms.close()
 
