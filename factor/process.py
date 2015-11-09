@@ -64,7 +64,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     field = Direction('field', bands[0].ra, bands[0].dec,
         factor_working_dir=parset['dir_working'])
     field.set_averaging_steps(bands[0].chan_width_hz, bands[0].nchan,
-        bands[0].timepersample, bands[0].nsamples)
+        bands[0].timepersample, bands[0].nsamples, parset['preaverage'])
 
     # Run initial sky model generation and create empty datasets
     if len(bands_initsubtract) > 0:
