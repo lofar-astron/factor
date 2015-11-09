@@ -1,14 +1,16 @@
 {% extends "facetimage_skymodel_pipeline.parset" %}
-{% block full_image_steps %}concat_averaged, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2{% endblock full_image_steps %}
+{% block full_image_steps %}virtual_concat, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2{% endblock full_image_steps %}
 {% block full_image_parms %}
-concat_averaged.control.type                      =   virtual_concat
-concat_averaged.control.mapfile_in                =   create_compressed_mapfile.output.mapfile
-concat_averaged.control.inputkey                  =   msfiles
-concat_averaged.control.outputkey                 =   msconcat
-concat_averaged.argument.flags                    =   [msfiles,msconcat]
+# make a virtual concatenated map, length = 1
+virtual_concat.control.type                      =   virtual_concat
+virtual_concat.control.mapfile_in                =   concat_averaged_compressed_map.output.mapfile
+virtual_concat.control.inputkey                  =   msfiles
+virtual_concat.control.outputkey                 =   msconcat
+virtual_concat.argument.flags                    =   [msfiles,msconcat]
 
+# image the virtual concatenated data, length = 1
 casa_image_full1.control.type                     =   casa_clean
-casa_image_full1.control.mapfile_in               =   concat_averaged.output.mapfile
+casa_image_full1.control.mapfile_in               =   virtual_concat.output.mapfile
 casa_image_full1.control.inputkey                 =   clean.vis
 casa_image_full1.control.outputkey                =   clean.imagename
 casa_image_full1.control.arguments                =   [--nologger,--nogui,-c]
@@ -42,6 +44,7 @@ casa_image_full1.argument.clean.chaniter          =   False
 casa_image_full1.argument.clean.flatnoise         =   True
 casa_image_full1.argument.clean.allowchunk        =   False
 
+# fiddle with the casa mapfiles, length = 1
 adjust_casa_mapfile.control.kind                  =   plugin
 adjust_casa_mapfile.control.type                  =   appendMapfile
 adjust_casa_mapfile.control.mapfile_in            =   casa_image_full1.output.casa_image_full1.image.mapfile
@@ -49,6 +52,7 @@ adjust_casa_mapfile.control.append                =   {{ casa_suffix }}
 adjust_casa_mapfile.control.mapfile_dir           =   {{ mapfile_dir }}
 adjust_casa_mapfile.control.filename              =   mask_input.datamap
 
+# generate a clean-mask from first image, length = 1
 mask.control.type                                 =   make_clean_mask
 mask.control.mapfile_in                           =   adjust_casa_mapfile.output.mapfile
 mask.control.inputkey                             =   imagefile
@@ -63,8 +67,9 @@ mask.argument.img_format                          =   casa
 mask.argument.vertices_file                       =   {{ vertices_file }}
 mask.argument.threshold_format                    =   str_with_units
 
+# image the virtual concatenated data with the updated mask, length = 1
 casa_image_full2.control.type                     =   casa_clean
-casa_image_full2.control.mapfiles_in              =   [concat_averaged.output.mapfile,mask.output.mapfile,mask.output.threshold_5sig.mapfile]
+casa_image_full2.control.mapfiles_in              =   [virtual_concat.output.mapfile,mask.output.mapfile,mask.output.threshold_5sig.mapfile]
 casa_image_full2.control.inputkeys                =   [clean.vis,clean.mask,clean.threshold]
 casa_image_full2.control.outputkey                =   clean.imagename
 casa_image_full2.control.arguments                =   [--nologger,--nogui,-c]
@@ -97,6 +102,7 @@ casa_image_full2.argument.clean.chaniter          =   False
 casa_image_full2.argument.clean.flatnoise         =   True
 casa_image_full2.argument.clean.allowchunk        =   False
 
+# create a mapfile with the final image and a known name, length = 1
 adjust_casa_mapfile2.control.kind                 =   plugin
 adjust_casa_mapfile2.control.type                 =   appendMapfile
 adjust_casa_mapfile2.control.mapfile_in           =   casa_image_full2.output.casa_image_full2.image.mapfile
