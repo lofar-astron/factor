@@ -745,10 +745,10 @@ merge_amp_parmdbs1.control.outputkey                       =   outparmdb
 merge_amp_parmdbs1.argument.flags                          =   [mslist,instrument,outparmdb]
 
 smooth_amp1.control.type                                   =   smooth_amps
-smooth_amp1.control.mapfiles_in                            =   [concat_data.output.mapfile,merge_amp_parmdbs1.output.mapfile]
-smooth_amp1.control.inputkeys                              =   [inputms,ampparmdb]
+smooth_amp1.control.mapfile_in                             =   merge_amp_parmdbs1.output.mapfile
+smooth_amp1.control.inputkey                               =   ampparmdb
 smooth_amp1.control.outputkey                              =   outparmdb
-smooth_amp1.control.arguments                              =   [inputms,ampparmdb,outparmdb]
+smooth_amp1.control.arguments                              =   [ampparmdb,outparmdb]
 
 expand_smoothed_amp1_parmdb_map.control.kind               =   plugin
 expand_smoothed_amp1_parmdb_map.control.type               =   expandMapfile
@@ -958,10 +958,10 @@ merge_amp_parmdbs2.control.outputkey                       =   outparmdb
 merge_amp_parmdbs2.argument.flags                          =   [mslist,instrument,outparmdb]
 
 smooth_amp2.control.type                                   =   smooth_amps
-smooth_amp2.control.mapfiles_in                            =   [concat_data.output.mapfile,merge_amp_parmdbs2.output.mapfile]
-smooth_amp2.control.inputkeys                              =   [inputms,ampparmdb]
+smooth_amp2.control.mapfile_in                             =   merge_amp_parmdbs2.output.mapfile
+smooth_amp2.control.inputkey                               =   ampparmdb
 smooth_amp2.control.outputkey                              =   outparmdb
-smooth_amp2.control.arguments                              =   [inputms,ampparmdb,outparmdb]
+smooth_amp2.control.arguments                              =   [ampparmdb,outparmdb]
 
 expand_smoothed_amp2_parmdb_map.control.kind               =   plugin
 expand_smoothed_amp2_parmdb_map.control.type               =   expandMapfile
