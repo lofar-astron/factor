@@ -718,6 +718,7 @@ solve_ampphase11.argument.catalog                          =   {{ skymodel_dir }
 solve_ampphase11.argument.replace-sourcedb                 =   True
 solve_ampphase11.argument.replace-parmdb                   =   True
 solve_ampphase11.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
+solve_ampphase11.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq }}
 
 switch_weights_col6.control.type                           =   switch_columns
 switch_weights_col6.control.mapfile_in                     =   create_chunks_map.output.mapfile
@@ -736,6 +737,7 @@ solve_ampphase12.argument.catalog                          =   {{ skymodel_dir }
 solve_ampphase12.argument.replace-sourcedb                 =   True
 solve_ampphase12.argument.replace-parmdb                   =   True
 solve_ampphase12.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_a }}
+solve_ampphase12.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq }}
 
 merge_amp_parmdbs1.control.type                            =   merge_parmdbs_in_time
 merge_amp_parmdbs1.control.mapfile_in                      =   create_chunks_compressed_mapfile.output.mapfile
@@ -924,6 +926,7 @@ solve_ampphase21.argument.catalog                          =   {{ skymodel_dir }
 solve_ampphase21.argument.replace-sourcedb                 =   True
 solve_ampphase21.argument.replace-parmdb                   =   True
 solve_ampphase21.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
+solve_ampphase21.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq }}
 
 switch_weights_col8.control.type                           =   switch_columns
 switch_weights_col8.control.mapfile_in                     =   create_chunks_map.output.mapfile
@@ -948,6 +951,7 @@ solve_ampphase22.argument.catalog                          =   {{ skymodel_dir }
 solve_ampphase22.argument.replace-sourcedb                 =   True
 solve_ampphase22.argument.replace-parmdb                   =   True
 solve_ampphase22.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_a }}
+solve_ampphase22.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq }}
 
 merge_amp_parmdbs2.control.type                            =   merge_parmdbs_in_time
 merge_amp_parmdbs2.control.mapfile_in                      =   create_chunks_compressed_mapfile.output.mapfile

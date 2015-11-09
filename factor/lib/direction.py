@@ -131,37 +131,6 @@ class Direction(object):
         self.vertices_file = self.save_file
 
 
-    def set_solution_intervals(self, pre_average):
-        """Scale solution intervals by apparent flux
-
-        The scaling is done so that sources with flux densities of 250 mJy have
-        a fast interval of 4 time slots and a slow interval of 240 time slots.
-        The scaling is currently linear with flux (and thus we accept lower-SNR
-        solutions for the fainter sources). Ideally, these value should also
-        scale with the bandwidth
-
-        Parameters
-        ----------
-        pre_average : bool, optional
-            If True, use baseline-dependent averaging and solint_p = 1 for
-            phase-only calibration
-
-        """
-        self.pre_average = pre_average
-        if self.apparent_flux_mjy is not None:
-            ref_flux = 250.0
-            if self.pre_average:
-                self.solint_p = 1
-            else:
-                self.solint_p = max(1, int(round(4 * ref_flux / self.apparent_flux_mjy)))
-            self.solint_a = max(30, int(round(240 * ref_flux / self.apparent_flux_mjy)))
-        self.chunk_width = (self.solint_a - 1) * 4
-
-        # Set name of column to use for averaged weights
-        if self.pre_average:
-            self.blavg_weight_column = 'BLAVG_WEIGHT_SPECTRUM'
-
-
     def set_image_sizes(self, test_run=False):
         """
         Sets sizes for various images
@@ -280,9 +249,16 @@ class Direction(object):
         return newlarge
 
 
-    def set_averaging_steps(self, chan_width_hz, nchan, timestep_sec, ntimes):
+    def set_averaging_steps_and_solution_intervals(self, chan_width_hz, nchan, timestep_sec,
+        ntimes, pre_average):
         """
-        Sets the averaging step sizes
+        Sets the averaging step sizes and solution intervals for selfcal
+
+        The solution-interval scaling is done so that sources with flux
+        densities of 250 mJy have a fast interval of 4 time slots and a slow
+        interval of 240 time slots. The scaling is currently linear with flux
+        (and thus we accept lower-SNR solutions for the fainter sources).
+        Ideally, these value should also scale with the bandwidth
 
         Note: the frequency step must be an even divisor of the number of
         channels
@@ -297,8 +273,18 @@ class Direction(object):
             Time step
         ntimes : int
             Number of timeslots per band
+        pre_average : bool, optional
+            If True, use baseline-dependent averaging and solint_p = 1 for
+            phase-only calibration
 
         """
+        # Set name of column to use for averaged weights
+        self.pre_average = pre_average
+        if self.pre_average:
+            self.blavg_weight_column = 'BLAVG_WEIGHT_SPECTRUM'
+        else:
+            self.blavg_weight_column = 'WEIGHT_SPECTRUM'
+
         # For initsubtract, average to 0.5 MHz per channel and 20 sec per time
         # slot. Since each band is imaged separately and the smearing and image
         # sizes both scale linearly with frequency, a single frequency and time
@@ -309,12 +295,13 @@ class Direction(object):
         self.initsubtract_timestep = max(1, int(round(20.0 / timestep_sec)))
 
         # For selfcal, average to 2 MHz per channel and 120 s per time slot for
-        # an image of 512 pixels
+        # an image of 512 pixels. We also need to set the amplitude solve
+        # frequency step accordingly so that we get 2MHz per solution
         target_bandwidth_mhz = 2.0 * 512.0 / self.cal_imsize
         target_timewidth_s = 120 * 512.0 / self.cal_imsize # used for imaging only
         self.facetselfcal_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
         while nchan % self.facetselfcal_freqstep:
-            self.facetselfcal_freqstep += 1
+            self.facetselfcal_freqstep += 2.0 / self.facetselfcal_freqstep
         self.facetselfcal_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
 
         # For facet imaging, average to 0.5 MHz per channel and 30 sec per time
@@ -332,6 +319,24 @@ class Direction(object):
         while nchan % self.verify_freqstep:
             self.verify_freqstep += 1
         self.verify_timestep = max(1, int(round(60.0 / timestep_sec)))
+
+        # Set time intervals for selfcal solve steps
+        if self.apparent_flux_mjy is not None:
+            ref_flux = 250.0
+            if self.pre_average:
+                self.solint_p = 1
+            else:
+                self.solint_p = max(1, int(round(4 * ref_flux / self.apparent_flux_mjy)))
+            self.solint_a = max(30, int(round(240 * ref_flux / self.apparent_flux_mjy)))
+
+        # Set chunk width for time chunking to 4 times the amplitude solution time
+        # interval (minus one time slot to ensure that we don't get a very short
+        # solution interval at the end of the chunk)
+        self.chunk_width = (self.solint_a - 1) * 4
+
+        # Set frequency interval for selfcal solve steps to the number of
+        # channels in a band after averaging
+        self.solint_freq = nchan / self.facetselfcal_freqstep
 
 
     def save_state(self):

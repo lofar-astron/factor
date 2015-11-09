@@ -459,14 +459,14 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
 
     # Set various direction attributes
     for i, direction in enumerate(directions):
-        # Set averaging steps
-        direction.set_averaging_steps(bands[0].chan_width_hz, bands[0].nchan,
-            bands[0].timepersample, bands[0].nsamples)
+        # Set averaging steps and solution intervals for selfcal
+        direction.set_averaging_steps_and_solution_intervals(bands[0].chan_width_hz, bands[0].nchan,
+            bands[0].timepersample, bands[0].nsamples, parset['preaverage'])
 
         # Set image sizes
         direction.set_image_sizes(test_run=test_run)
 
-        # Set number of bands and channels for images
+        # Set number of bands and channels for images (affects wide-band clean)
         direction.nbands = len(bands)
         if direction.nbands > 5:
             direction.nchannels = int(round(float(direction.nbands)/
@@ -481,9 +481,6 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         # Set reimage flag
         if parset['reimage']:
             direction.make_final_image = True
-
-        # Set solution intervals for selfcal
-        direction.set_solution_intervals(parset['preaverage'])
 
         # Load previously completed steps (if any)
         direction.load_state()
