@@ -278,11 +278,13 @@ class Direction(object):
             phase-only calibration
 
         """
-        # Set name of column to use for averaged weights
+        # Set name of column to use for data and averaged weights
         self.pre_average = pre_average
         if self.pre_average:
+            self.data_column = 'BLAVG_DATA'
             self.blavg_weight_column = 'BLAVG_WEIGHT_SPECTRUM'
         else:
+            self.data_column = 'DATA'
             self.blavg_weight_column = 'WEIGHT_SPECTRUM'
 
         # For initsubtract, average to 0.5 MHz per channel and 20 sec per time

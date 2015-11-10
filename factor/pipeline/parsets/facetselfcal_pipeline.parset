@@ -409,6 +409,7 @@ solve_phaseonly1.argument.parset                           =   {{ parset_dir }}/
 solve_phaseonly1.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
 solve_phaseonly1.argument.replace-sourcedb                 =   True
 solve_phaseonly1.argument.replace-parmdb                   =   True
+solve_phaseonly1.argument.Strategy.InputColumn             =   {{ data_column }}
 solve_phaseonly1.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
 
 switch_weights_col2.control.type                           =   switch_columns
@@ -563,6 +564,7 @@ solve_phaseonly2.argument.parset                           =   {{ parset_dir }}/
 solve_phaseonly2.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
 solve_phaseonly2.argument.replace-sourcedb                 =   True
 solve_phaseonly2.argument.replace-parmdb                   =   True
+solve_phaseonly2.argument.Strategy.InputColumn             =   {{ data_column }}
 solve_phaseonly2.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
 
 switch_weights_col4.control.type                           =   switch_columns
@@ -717,6 +719,7 @@ solve_ampphase11.argument.parset                           =   {{ parset_dir }}/
 solve_ampphase11.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
 solve_ampphase11.argument.replace-sourcedb                 =   True
 solve_ampphase11.argument.replace-parmdb                   =   True
+solve_ampphase11.argument.Strategy.InputColumn             =   {{ data_column }}
 solve_ampphase11.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
 
 switch_weights_col6.control.type                           =   switch_columns
@@ -924,6 +927,7 @@ solve_ampphase21.argument.parset                           =   {{ parset_dir }}/
 solve_ampphase21.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
 solve_ampphase21.argument.replace-sourcedb                 =   True
 solve_ampphase21.argument.replace-parmdb                   =   True
+solve_ampphase21.argument.Strategy.InputColumn             =   {{ data_column }}
 solve_ampphase21.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
 
 switch_weights_col8.control.type                           =   switch_columns
