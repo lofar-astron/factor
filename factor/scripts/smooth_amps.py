@@ -100,24 +100,24 @@ def main(instrument_name, instrument_name_smoothed):
                 parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = amp * numpy.cos(phase)
                 parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = amp * numpy.sin(phase)
 
-    # Normalize
+    # Normalize the amplitude solutions to a mean on one (for each channel separately)
     amplist = []
-    for pol in pol_list:
-        for antenna in antenna_list:
-            for chan in range(nchans):
+    for chan in range(nchans):
+        for pol in pol_list:
+            for antenna in antenna_list:
                 real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
                 imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
                 amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
                 amplist.append(amp)
-    norm_factor = 1./(numpy.mean(amplist))
+        norm_factor = 1./(numpy.mean(amplist))
 
-    for pol in pol_list:
-        for antenna in antenna_list:
-            for chan in range(nchans):
-                real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
-                imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
-                parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = numpy.copy(imag*norm_factor)
-                parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = numpy.copy(real*norm_factor)
+        for pol in pol_list:
+            for antenna in antenna_list:
+                for chan in range(nchans):
+                    real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
+                    imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
+                    parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = numpy.copy(real*norm_factor)
+                    parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = numpy.copy(imag*norm_factor)
 
     if os.path.exists(instrument_name_smoothed):
         shutil.rmtree(instrument_name_smoothed)
