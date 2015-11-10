@@ -40,7 +40,7 @@ def make_pbs_clusterdesc():
     lines.append('# Compute nodes\n')
     lines.append('Compute.Nodes = [{0}]\n'.format(', '.join(sorted(nodes))))
 
-    clusterdesc_file = 'factor.clusterdesc'
+    clusterdesc_file = 'factor_pbs.clusterdesc'
     with open(clusterdesc_file, 'wb') as file:
         file.writelines(lines)
     log.info('Using {0} node(s)'.format(len(nodes)))

@@ -160,12 +160,21 @@ class Operation(object):
         self.parms_dict.update(self.direction.__dict__)
 
         # Add cluster-related info
-        if os.path.basename(self.parset['cluster_specific']['clusterdesc']) == 'local.clusterdesc':
+        if self.parset['cluster_specific']['clustertype'] == 'local':
             self.cfg_dict['remote'] = '[remote]\n'\
                 + 'method = local\n'\
                 + 'max_per_node = {0}\n'.format(self.max_cpus_per_node)
-        else:
+        elif self.parset['cluster_specific']['clustertype'] == 'juropa_slurm':
+            self.cfg_dict['remote'] = '[remote]\n'\
+                + 'method = slurm_srun\n'\
+                + 'max_per_node = {0}\n'.format(self.max_cpus_per_node)
+        elif self.parset['cluster_specific']['clustertype'] == 'pbs':
             self.cfg_dict['remote'] = ''
+        else:
+            self.log.error('Could not determine the nature of your cluster!')
+            sys.exit(1)
+            
+        # an absolute path in ...['clusterdesc'] will overrule the the "working_dir"
         self.cfg_dict['clusterdesc'] = os.path.join(self.factor_working_dir,
             self.parset['cluster_specific']['clusterdesc'])
 

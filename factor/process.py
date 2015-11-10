@@ -235,13 +235,25 @@ def _set_up_compute_parameters(parset, log, dry_run=False):
 
     cluster_parset = parset['cluster_specific']
     if 'clusterdesc_file' not in cluster_parset:
+        log.warn('Did not find \"clusterdesc_file\" in parset-dict! This shouldn\'t happen, but trying to continue anyhow.')
         parset['cluster_specific']['clusterdesc'] = 'local.clusterdesc'
     else:
-        if cluster_parset['clusterdesc_file'].lower() == 'pbs':
+        if cluster_parset['clusterdesc_file'].lower() == 'pbs' or cluster_parset['cluster_type'].lower() == 'pbs':
+            log.info('Using cluster setting: \"PBS\".')
             parset['cluster_specific']['clusterdesc'] = factor.cluster.make_pbs_clusterdesc()
+            parset['cluster_specific']['clustertype'] = 'pbs'
+        elif cluster_parset['clusterdesc_file'].lower() == 'juropa_slurm' \
+                or cluster_parset['cluster_type'].lower() == 'juropa_slurm':
+            log.info('Using cluster setting: \"JUROPA_slurm\" (Single genericpipeline using multiple nodes).')
+            # slurm_srun on JUROPA uses the local.clusterdesc
+            parset['cluster_specific']['clusterdesc'] = parset['lofarroot'] + '/share/local.clusterdesc'
+            parset['cluster_specific']['clustertype'] = 'juropa_slurm'
+            parset['cluster_specific']['node_list'] = ['localhost']
         else:
+            log.info('Using cluster setting: \"local\" (Single node).')
             parset['cluster_specific']['clusterdesc'] = cluster_parset['clusterdesc_file']
-    if not 'node_list' in cluster_parset:
+            parset['cluster_specific']['clustertype'] = 'local'
+    if not 'node_list' in parset['cluster_specific']:
         parset['cluster_specific']['node_list'] = factor.cluster.get_compute_nodes(
             parset['cluster_specific']['clusterdesc'])
 
