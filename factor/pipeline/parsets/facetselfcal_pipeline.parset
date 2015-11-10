@@ -901,7 +901,7 @@ casa_image32.argument.clean.allowchunk                     =   False
 loop_ampcal.control.kind                                   =   loop
 loop_ampcal.control.type                                   =   conditional
 loop_ampcal.control.loopcount                              =   {{ loopcount }}
-loop_ampcal.control.loopsteps                              =   [create_model3_map,casa_ft3,switch_weights_col7,solve_ampphase21,switch_weights_col8,apply_ampphase21,merge_phase_parmdbs,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,flag2,create_compressed_mapfile_empty,transfer_flags,average4,create_compressed_mapfile4,concat4,delete_image,casa_image41,adjust_casa_mapfile4,mask4,casa_image42,adjust_casa_mapfile5,copy_image,check_image]
+loop_ampcal.control.loopsteps                              =   [create_model3_map,casa_ft3,{% if pre_average %}switch_weights_col7,{% endif %}solve_ampphase21,{% if pre_average %}switch_weights_col8,{% endif %}apply_ampphase21,merge_phase_parmdbs,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,flag2,create_compressed_mapfile_empty,transfer_flags,average4,create_compressed_mapfile4,concat4,delete_image,casa_image41,adjust_casa_mapfile4,mask4,casa_image42,adjust_casa_mapfile5,copy_image,check_image]
 
 create_model3_map.control.kind                             =   plugin
 create_model3_map.control.type                             =   trimMapfile
