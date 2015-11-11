@@ -60,6 +60,10 @@ keep_facet_data = False
 # exploit the time correlation in the TEC solutions
 preaverage = True
 
+# Transfer flags from clipping of amplitudes during selfcal back to original
+# datasets (default = False)?
+transfer_flags = False
+
 
 [directions]
 # Full path to file containing calibrator directions. If not given, directions

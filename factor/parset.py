@@ -132,6 +132,10 @@ def parset_read(parset_file):
         parset_dict['preaverage'] = parset.getboolean('global', 'preaverage')
     else:
         parset_dict['preaverage'] = True
+    if 'transfer_flags' in parset_dict:
+        parset_dict['transfer_flags'] = parset.getboolean('global', 'transfer_flags')
+    else:
+        parset_dict['transfer_flags'] = False
 
     # Handle directions-related parameters
     if 'directions' in parset._sections.keys():
