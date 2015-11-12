@@ -16,8 +16,8 @@ import lofar.parmdb
 from astropy.stats import median_absolute_deviation
 
 
-def main(ms_file, parmdb_file, input_colname, output_colname, pre_average=True,
-    minutes_per_block=10.0, baseline_file=None, verbose=True):
+def main(ms_file, parmdb_file, input_colname, output_colname, target_rms_rad,
+    pre_average=True, minutes_per_block=10.0, baseline_file=None, verbose=True):
     """
     Pre-average data using a sliding Gaussian kernel on the weights
     """
@@ -71,7 +71,7 @@ def main(ms_file, parmdb_file, input_colname, output_colname, pre_average=True,
 
             # Find ionfactor for this period
             ionfactors.append(find_ionfactor(parmdb_file, baseline_dict, t1+start_time,
-                t1+start_time+t_delta))
+                t1+start_time+t_delta, target_rms_rad=target_rms_rad))
             if verbose:
                 print('    ionfactor (for timerange {0}-{1} sec) = {2}'.format(t1,
                     t1+t_delta, ionfactors[-1]))
@@ -113,7 +113,7 @@ def get_baseline_lengths(ms_file):
     return baseline_dict
 
 
-def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
+def find_ionfactor(parmdb_file, baseline_dict, t1, t2, target_rms_rad=0.2):
     """
     Finds ionospheric scaling factor
     """
@@ -143,7 +143,6 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
                     dist.append(v)
 
     # Find correlation times
-    target_rms_rad = 0.2
     rmstimes = []
     dists = []
     freq = None

@@ -109,6 +109,7 @@ class Direction(object):
         self.use_new_sub_data = False # set flag that tells which subtracted-data column to use
         self.cellsize_selfcal_deg = 0.000417 # selfcal cell size
         self.cellsize_verify_deg = 0.00833 # verify subtract cell size
+        self.target_rms_rad = 0.2 # preaverage target rms
         self.subtracted_data_colname = 'SUBTRACTED_DATA_ALL'
         self.pre_average = False
         self.blavg_weight_column = 'WEIGHT_SPECTRUM'
@@ -254,8 +255,8 @@ class Direction(object):
         """
         Sets the averaging step sizes and solution intervals for selfcal
 
-        The solution-interval scaling is done so that sources with flux
-        densities of 250 mJy have a fast interval of 4 time slots and a slow
+        The solution-interval scaling is done so that sources with total flux
+        densities of 2 Jy have a fast interval of 4 time slots and a slow
         interval of 240 time slots. The scaling is currently linear with flux
         (and thus we accept lower-SNR solutions for the fainter sources).
         Ideally, these value should also scale with the bandwidth
@@ -323,12 +324,30 @@ class Direction(object):
 
         # Set time intervals for selfcal solve steps
         if self.apparent_flux_mjy is not None:
-            ref_flux = 250.0
+            ref_flux = 1400.0
             if self.pre_average:
+                # Set solution interval to 1 timeslot and vary the target rms per
+                # solution interval instead (which affects the width of the
+                # preaveraging Gaussian)
                 self.solint_p = 1
+                self.target_rms_rad = int(round(0.5 * ref_flux / self.apparent_flux_mjy))
+                if self.target_rms_rad < 0.2:
+                    self.target_rms_rad = 0.2
+                if self.target_rms_rad < 0.5:
+                    self.target_rms_rad = 0.5
             else:
-                self.solint_p = max(1, int(round(4 * ref_flux / self.apparent_flux_mjy)))
-            self.solint_a = max(30, int(round(240 * ref_flux / self.apparent_flux_mjy)))
+                self.solint_p = int(round(8 * (ref_flux / self.apparent_flux_mjy)**2))
+                if self.solint_p < 1:
+                    self.solint_p = 1
+                if self.solint_p > 8:
+                    self.solint_p = 8
+
+            self.solint_a = int(round(240 * (ref_flux / self.apparent_flux_mjy)**2))
+            if self.solint_a < 30:
+                self.solint_a = 30
+            if self.solint_a > 240:
+                self.solint_a = 240
+
 
         # Set chunk width for time chunking to 4 times the amplitude solution time
         # interval (minus one time slot to ensure that we don't get a very short

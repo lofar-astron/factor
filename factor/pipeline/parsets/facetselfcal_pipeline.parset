@@ -203,7 +203,7 @@ concat_corr.argument.steps                                 =   []
 pre_average.control.type                                   =   pre_average
 pre_average.control.mapfiles_in                            =   [shift_cal.output.mapfile,create_parmdb_map.output.mapfile]
 pre_average.control.inputkeys                              =   [datafile,parmdb]
-pre_average.argument.flags                                 =   [datafile,parmdb,DATA,BLAVG_DATA]
+pre_average.argument.flags                                 =   [datafile,parmdb,DATA,BLAVG_DATA,{{ target_rms_rad }}]
 
 # Concat the preaveraged data (and weights)
 concat_blavg_data.control.type                             =   dppp
