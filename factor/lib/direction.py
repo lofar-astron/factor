@@ -343,7 +343,8 @@ class Direction(object):
                 if self.solint_p > 8:
                     self.solint_p = 8
 
-            # Amplitude solve is per band
+            # Amplitude solve is per band, so don't scale with number of bands
+            ref_flux = 1400.0
             self.solint_a = int(round(240 * (ref_flux / self.apparent_flux_mjy)**2))
             if self.solint_a < 30:
                 self.solint_a = 30
