@@ -89,7 +89,9 @@ check_edges = False
 # Total number of directions to process (default = all). If this number is
 # greater than ndir_selfcal, then the remaining directions will not be selfcal-
 # ed but will instead be imaged with the selfcal solutions from the nearest
-# direction for which selfcal was done
+# direction for which selfcal was done (if a target is specified and
+# target_has_own_facet = True, it will be imaged in this way after ndir_total
+# number of directions are processed)
 ndir_total = 10
 
 # Total number of directions to selfcal (default = all)
