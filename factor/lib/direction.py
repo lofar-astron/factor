@@ -325,7 +325,7 @@ class Direction(object):
 
         # Set time intervals for selfcal solve steps
         if self.apparent_flux_mjy is not None:
-            ref_flux = 1400.0 * (40.0 / nbands)**0.5
+            ref_flux = 1400.0 * (4.0 / nbands)**0.5
             if self.pre_average:
                 # Set solution interval to 1 timeslot and vary the target rms per
                 # solution interval instead (which affects the width of the
