@@ -238,12 +238,12 @@ def _set_up_compute_parameters(parset, log, dry_run=False):
         log.warn('Did not find \"clusterdesc_file\" in parset-dict! This shouldn\'t happen, but trying to continue anyhow.')
         parset['cluster_specific']['clusterdesc'] = 'local.clusterdesc'
     else:
-        if cluster_parset['clusterdesc_file'].lower() == 'pbs' or cluster_parset['cluster_type'].lower() == 'pbs':
+        if cluster_parset['clusterdesc_file'].lower() == 'pbs' or ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'pbs'):
             log.info('Using cluster setting: \"PBS\".')
             parset['cluster_specific']['clusterdesc'] = factor.cluster.make_pbs_clusterdesc()
             parset['cluster_specific']['clustertype'] = 'pbs'
         elif cluster_parset['clusterdesc_file'].lower() == 'juropa_slurm' \
-                or cluster_parset['cluster_type'].lower() == 'juropa_slurm':
+                or ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'juropa_slurm'):
             log.info('Using cluster setting: \"JUROPA_slurm\" (Single genericpipeline using multiple nodes).')
             # slurm_srun on JUROPA uses the local.clusterdesc
             parset['cluster_specific']['clusterdesc'] = parset['lofarroot'] + '/share/local.clusterdesc'
@@ -416,8 +416,8 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
     # First check for user-supplied directions file, then for Factor-generated
     # file from a previous run, then for parameters needed to generate it internally
     dir_parset = parset['direction_specific']
-    if 'directions_file' in parset:
-        directions = factor.directions.directions_read(parset['directions_file'],
+    if 'directions_file' in dir_parset:
+        directions = factor.directions.directions_read(dir_parset['directions_file'],
             parset['dir_working'])
     elif os.path.exists(os.path.join(parset['dir_working'], 'factor_directions.txt')):
         directions = factor.directions.directions_read(os.path.join(parset['dir_working'],
