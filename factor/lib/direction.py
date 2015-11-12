@@ -251,7 +251,7 @@ class Direction(object):
 
 
     def set_averaging_steps_and_solution_intervals(self, chan_width_hz, nchan,
-        timestep_sec, ntimes, pre_average=False):
+        timestep_sec, ntimes, nbands, pre_average=False):
         """
         Sets the averaging step sizes and solution intervals for selfcal
 
@@ -259,7 +259,6 @@ class Direction(object):
         densities of 2 Jy have a fast interval of 4 time slots and a slow
         interval of 240 time slots. The scaling is currently linear with flux
         (and thus we accept lower-SNR solutions for the fainter sources).
-        Ideally, these value should also scale with the bandwidth
 
         Note: the frequency step must be an even divisor of the number of
         channels
@@ -274,6 +273,8 @@ class Direction(object):
             Time step
         ntimes : int
             Number of timeslots per band
+        nbands : int
+            Number of bands
         pre_average : bool, optional
             If True, use baseline-dependent averaging and solint_p = 1 for
             phase-only calibration
@@ -324,16 +325,16 @@ class Direction(object):
 
         # Set time intervals for selfcal solve steps
         if self.apparent_flux_mjy is not None:
-            ref_flux = 1400.0
+            ref_flux = 1400.0 * (40.0 / nbands)**0.5
             if self.pre_average:
                 # Set solution interval to 1 timeslot and vary the target rms per
                 # solution interval instead (which affects the width of the
                 # preaveraging Gaussian)
                 self.solint_p = 1
-                self.target_rms_rad = int(round(0.5 * ref_flux / self.apparent_flux_mjy))
+                self.target_rms_rad = int(round(0.5 * (ref_flux / self.apparent_flux_mjy)**2))
                 if self.target_rms_rad < 0.2:
                     self.target_rms_rad = 0.2
-                if self.target_rms_rad < 0.5:
+                if self.target_rms_rad > 0.5:
                     self.target_rms_rad = 0.5
             else:
                 self.solint_p = int(round(8 * (ref_flux / self.apparent_flux_mjy)**2))
@@ -342,6 +343,7 @@ class Direction(object):
                 if self.solint_p > 8:
                     self.solint_p = 8
 
+            # Amplitude solve is per band
             self.solint_a = int(round(240 * (ref_flux / self.apparent_flux_mjy)**2))
             if self.solint_a < 30:
                 self.solint_a = 30
