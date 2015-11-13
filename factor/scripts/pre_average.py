@@ -26,6 +26,8 @@ def main(ms_file, parmdb_file, input_colname, output_colname, target_rms_rad,
             pre_average = True
         else:
             pre_average = False
+    if type(target_rms_rad) is str:
+        target_rms_rad = float(target_rms_rad)
 
     if not pre_average:
         # Just copy input column to output column
