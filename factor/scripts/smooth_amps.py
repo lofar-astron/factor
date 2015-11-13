@@ -108,7 +108,7 @@ def main(instrument_name, instrument_name_smoothed):
                 imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
                 amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
                 amplist.append(amp)
-        norm_factor = 1./(numpy.mean(amplist))
+    norm_factor = 1./(numpy.mean(amplist))
 
     for chan in range(nchans):
         for pol in pol_list:
