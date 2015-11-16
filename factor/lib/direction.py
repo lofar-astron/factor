@@ -354,8 +354,11 @@ class Direction(object):
 
         # Set chunk width for time chunking to 4 times the amplitude solution time
         # interval (minus one time slot to ensure that we don't get a very short
-        # solution interval at the end of the chunk)
-        self.chunk_width = (self.solint_a - 1) * 4
+        # solution interval at the end of the chunk), but make sure it doesn't
+        # exceed ~ 200 time slots to avoid memory/performance issues
+        self.chunk_width = self.solint_a - 1
+        while self.chunk_width < 200:
+            self.chunk_width += self.solint_a - 1
 
         # Set frequency interval for selfcal solve steps to the number of
         # channels in a band after averaging
