@@ -1,12 +1,13 @@
 {% extends "facetselfcal_pipeline.parset" %}
-{% block full_image_steps %}concat_averaged, premask, casa_image_full1, adjust_casa_mapfile6, mask5, casa_image_full2, create_model4_map, adjust_casa_mapfile7, create_compressed_mapfile6, concat_unaveraged, casa_ft4{% endblock full_image_steps %}
+{% block full_image_steps %}concat_pre_averaged, premask, casa_image_full1, adjust_casa_mapfile6, mask5, casa_image_full2, create_model4_map, adjust_casa_mapfile7, create_compressed_mapfile6, concat_unaveraged, casa_ft4{% endblock full_image_steps %}
 {% block full_image_parms %}
-# virtaully concat all averaged data, length = 1
-concat_averaged.control.type                               =   virtual_concat
-concat_averaged.control.mapfile_in                         =   create_compressed_mapfile5.output.mapfile
-concat_averaged.control.inputkey                           =   msfiles
-concat_averaged.control.outputkey                          =   msconcat
-concat_averaged.argument.flags                             =   [msfiles,msconcat]
+# virtaully concat the pre-averaged data, length = 1
+# pre-averaging is needed so that the virtual_concat doesn't try to open too many files
+concat_pre_averaged.control.type                           =   virtual_concat
+concat_pre_averaged.control.mapfile_in                     =   concat_averaged_compressed_map.output.mapfile
+concat_pre_averaged.control.inputkey                       =   msfiles
+concat_pre_averaged.control.outputkey                      =   msconcat
+concat_pre_averaged.argument.flags                         =   [msfiles,msconcat]
 
 # make a mask from the previous image, length = 1
 premask.control.type                                       =   make_clean_mask
@@ -21,7 +22,7 @@ premask.argument.vertices_file                             =   {{ vertices_file 
 
 # image the virtual concatenated data with the preliminary mask, length = 1
 casa_image_full1.control.type                              =   casa_clean
-casa_image_full1.control.mapfiles_in                       =   [concat_averaged.output.mapfile,premask.output.mapfile]
+casa_image_full1.control.mapfiles_in                       =   [concat_pre_averaged.output.mapfile,premask.output.mapfile]
 casa_image_full1.control.inputkeys                         =   [clean.vis,clean.mask]
 casa_image_full1.control.outputkey                         =   clean.imagename
 casa_image_full1.control.arguments                         =   [--nologger,--nogui,-c]
@@ -80,7 +81,7 @@ mask5.argument.threshold_format                            =   str_with_units
 
 # image the virtual concatenated data with the updated mask, length = 1
 casa_image_full2.control.type                              =   casa_clean
-casa_image_full2.control.mapfiles_in                       =   [concat_averaged.output.mapfile,mask5.output.mapfile,mask5.output.threshold_5sig.mapfile]
+casa_image_full2.control.mapfiles_in                       =   [concat_pre_averaged.output.mapfile,mask5.output.mapfile,mask5.output.threshold_5sig.mapfile]
 casa_image_full2.control.inputkeys                         =   [clean.vis,clean.mask,clean.threshold]
 casa_image_full2.control.outputkey                         =   clean.imagename
 casa_image_full2.control.arguments                         =   [--nologger,--nogui,-c]

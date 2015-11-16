@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, select_single_cliplevel_all, copy_facet_skymodels_all_map, make_facet_skymodels_cal, select_single_cliplevel_cal, shift_empty, copy_empty_map, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, predict_all_facet_sources, copy_predict_all_model_map, corrupt_all_model_data, copy_corrupted_all_model_map, add_all_facet_sources, add_imaging_cols_empty, shift_cal, copy_cal_map, expand_facet_skymodels_cal, add_cal_facet_sources, apply_dir_indep, create_compressed_mapfile_data, sort_into_Groups, concat_data, make_concat_corr_mapfile, concat_corr, copy_column, add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, solve_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, solve_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, expand_cliplevel_cal, flag1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, copy_merged_parmdb_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, expand_cliplevel_all, flag_full, average5, create_compressed_mapfile5, {% block full_image_steps %}sort_average5, concat_averaged, concat_averaged_compressed_map, premask, wsclean1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, create_expanded_model_mapfile, create_expanded_size_mapfile, wsclean_ft{% endblock full_image_steps %}, corrupt_final_model, copy_final_model_map, subtract_initial_final, shift_diff_model_to_field, copy_diff_model_field_map, transfer_flags_to_diff_model, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, select_single_cliplevel_all, copy_facet_skymodels_all_map, make_facet_skymodels_cal, select_single_cliplevel_cal, shift_empty, copy_empty_map, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, predict_all_facet_sources, copy_predict_all_model_map, corrupt_all_model_data, copy_corrupted_all_model_map, add_all_facet_sources, add_imaging_cols_empty, shift_cal, copy_cal_map, expand_facet_skymodels_cal, add_cal_facet_sources, apply_dir_indep, create_compressed_mapfile_data, sort_into_Groups, concat_data, make_concat_corr_mapfile, concat_corr, copy_column, add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, solve_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, solve_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, expand_cliplevel_cal, flag1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, copy_merged_parmdb_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, expand_cliplevel_all, flag_full, average5, create_compressed_mapfile5, sort_average5, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %}premask, wsclean1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, create_expanded_model_mapfile, create_expanded_size_mapfile, wsclean_ft{% endblock full_image_steps %}, corrupt_final_model, copy_final_model_map, subtract_initial_final, shift_diff_model_to_field, copy_diff_model_field_map, transfer_flags_to_diff_model, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -765,7 +765,7 @@ merge_amp_parmdbs1.argument.flags                          =   [mslist,instrumen
 # smooth the amplitues in the merged parmDB, length = 1
 # smooth_amps uses only ANTENNA subtable of inputms, so it should work on virtual concatenated MS
 smooth_amp1.control.type                                   =   smooth_amps
-smooth_amp1.control.mapfiles_in                            =   [concat_chunks.output.mapfile.mapfile,merge_amp_parmdbs1.output.mapfile]
+smooth_amp1.control.mapfiles_in                            =   [concat_chunks.output.mapfile,merge_amp_parmdbs1.output.mapfile]
 smooth_amp1.control.inputkeys                              =   [inputms,ampparmdb]
 smooth_amp1.control.outputkey                              =   outparmdb
 smooth_amp1.control.arguments                              =   [inputms,ampparmdb,outparmdb]
@@ -791,21 +791,20 @@ apply_amp1.argument.replace-parmdb                         =   True
 
 # expand the select_single_cliplevel_cal mapfile to all time-steps, length = ntimes
 expand_cliplevel_cal.control.kind                          =   plugin
-expand_cliplevel_cal.control.control.type                  =   expandMapfile
-expand_cliplevel_cal.control.control.mapfile_in            =   select_single_cliplevel_cal.output.mapfile
-expand_cliplevel_cal.control.control.mapfile_to_match      =   concat_data.output.mapfile
-expand_cliplevel_cal.control.control.mapfile_dir           =   input.output.mapfile_dir
-expand_cliplevel_cal.control.control.filename              =   expand_cliplevel_cal.datamap
+expand_cliplevel_cal.control.type                          =   expandMapfile
+expand_cliplevel_cal.control.mapfile_in                    =   select_single_cliplevel_cal.output.mapfile
+expand_cliplevel_cal.control.mapfile_to_match              =   concat_data.output.mapfile
+expand_cliplevel_cal.control.mapfile_dir                   =   input.output.mapfile_dir
+expand_cliplevel_cal.control.filename                      =   expand_cliplevel_cal.datamap
 
-# flag high amplitudes caused by bad gains, length = ntimes
-flag1.control.type                                         =   dppp_inplace
-flag1.control.mapfile_in                                   =   concat_data.output.mapfile
-flag1.control.inputkey                                     =   msin
-flag1.argument.msin.datacolumn                             =   CORRECTED_DATA
-flag1.argument.msout                                       =   .
-flag1.argument.steps                                       =   [flag]
-flag1.argument.flag.type                                   =   preflagger
-flag1.argument.flag.amplmax                                =   expand_cliplevel_cal.output.mapfile
+## flag high amplitudes caused by bad gains, length = ntimes
+#flag1.control.type                                         =   dppp_inplace
+#flag1.control.mapfiles_in                                  =   [concat_data.output.mapfile,expand_cliplevel_cal.output.mapfile]
+#flag1.control.inputkeys                                    =   [msin,flag.amplmax]
+#flag1.argument.msin.datacolumn                             =   CORRECTED_DATA
+#flag1.argument.msout                                       =   .
+#flag1.argument.steps                                       =   [flag]
+#flag1.argument.flag.type                                   =   preflagger
 
 ########## end of third round of selfcal
 ########## start of fourth round of selfcal
@@ -1021,32 +1020,31 @@ apply_amp2.argument.parmdb                                 =   inputparmdb
 apply_amp2.argument.replace-sourcedb                       =   True
 apply_amp2.argument.replace-parmdb                         =   True
 
-# flag high amplitudes caused by bad gains, length = ntimes
-# (No need to expand the cliplevels again, we've already done that.)
-flag2.control.type                                         =   dppp_inplace
-flag2.control.mapfile_in                                   =   concat_data.output.mapfile
-flag2.control.inputkey                                     =   msin
-flag2.argument.msin.datacolumn                             =   CORRECTED_DATA
-flag2.argument.msout                                       =   .
-flag2.argument.steps                                       =   [flag]
-flag2.argument.flag.type                                   =   preflagger
-flag2.argument.flag.amplmax                                =   expand_cliplevel_cal.output.mapfile
+## flag high amplitudes caused by bad gains, length = ntimes
+## (No need to expand the cliplevels again, we've already done that.)
+#flag2.control.type                                         =   dppp_inplace
+#flag2.control.mapfiles_in                                  =   [concat_data.output.mapfile,expand_cliplevel_cal.output.mapfile]
+#flag2.control.inputkeys                                    =   [msin,flag.amplmax]
+#flag2.argument.msin.datacolumn                             =   CORRECTED_DATA
+#flag2.argument.msout                                       =   .
+#flag2.argument.steps                                       =   [flag]
+#flag2.argument.flag.type                                   =   preflagger
 
 ########## end of fourth or of the looped round of selfcal
 
-########## transfer flags to original data in case this is the last time in the loop
-# create a compressed mapfile of the non-concatenated data, length = nfiles
-create_compressed_mapfile_empty.control.kind               =   plugin
-create_compressed_mapfile_empty.control.type               =   compressMapfile
-create_compressed_mapfile_empty.control.mapfile_in         =   shift_empty.output.mapfile
-create_compressed_mapfile_empty.control.mapfile_dir        =   {{ mapfile_dir }}
-create_compressed_mapfile_empty.control.filename           =   shift_empty_compressed.datamap
-
-# transfer the flags to original data
-transfer_flags.control.type                                =   transfer_flags
-transfer_flags.control.mapfiles_in                         =   [concat_data_compressed_mapfile.output.mapfile,create_compressed_mapfile_empty.output.mapfile]
-transfer_flags.control.inputkeys                           =   [ms1,ms2]
-transfer_flags.control.arguments                           =   [ms1,ms2]
+########### transfer flags to original data in case this is the last time in the loop
+## create a compressed mapfile of the non-concatenated data, length = 1
+#create_compressed_mapfile_empty.control.kind               =   plugin
+#create_compressed_mapfile_empty.control.type               =   compressMapfile
+#create_compressed_mapfile_empty.control.mapfile_in         =   shift_empty.output.mapfile
+#create_compressed_mapfile_empty.control.mapfile_dir        =   {{ mapfile_dir }}
+#create_compressed_mapfile_empty.control.filename           =   shift_empty_compressed.datamap
+#
+## transfer the flags to original data, length = 1
+#transfer_flags.control.type                                =   transfer_flags
+#transfer_flags.control.mapfiles_in                         =   [concat_data_compressed_mapfile.output.mapfile,create_compressed_ma#pfile_empty.output.mapfile]
+#transfer_flags.control.inputkeys                           =   [ms1,ms2]
+#transfer_flags.control.arguments                           =   [ms1,ms2]
 
 ########## start of looped round of selfcal
 ########## make image to check if we can stop the loop, or as new model
@@ -1252,21 +1250,20 @@ apply_dir_dep_slow.argument.replace-parmdb                 =   True
 
 # expand the select_single_cliplevel_all mapfile to all time-steps, length = nfiles
 expand_cliplevel_all.control.kind                          =   plugin
-expand_cliplevel_all.control.control.type                  =   expandMapfile
-expand_cliplevel_all.control.control.mapfile_in            =   select_single_cliplevel_all.output.mapfile
-expand_cliplevel_all.control.control.mapfile_to_match      =   shift_empty.output.mapfile
-expand_cliplevel_all.control.control.mapfile_dir           =   input.output.mapfile_dir
-expand_cliplevel_all.control.control.filename              =   expand_cliplevel_all.datamap
+expand_cliplevel_all.control.type                          =   expandMapfile
+expand_cliplevel_all.control.mapfile_in                    =   select_single_cliplevel_all.output.mapfile
+expand_cliplevel_all.control.mapfile_to_match              =   shift_empty.output.mapfile
+expand_cliplevel_all.control.mapfile_dir                   =   input.output.mapfile_dir
+expand_cliplevel_all.control.filename                      =   expand_cliplevel_all.datamap
 
-# flag high amplitudes caused by bad gains, length = nfiles
-flag_full.control.type                                     =   dppp_inplace
-flag_full.control.mapfile_in                               =   shift_empty.output.mapfile
-flag_full.control.inputkey                                 =   msin
-flag_full.argument.msin.datacolumn                         =   CORRECTED_DATA
-flag_full.argument.msout                                   =   .
-flag_full.argument.steps                                   =   [flag]
-flag_full.argument.flag.type                               =   preflagger
-flag_full.argument.flag.amplmax                            =   expand_cliplevel_all.output.mapfile
+## flag high amplitudes caused by bad gains, length = nfiles
+#flag_full.control.type                                     =   dppp_inplace
+#flag_full.control.mapfiles_in                              =   [shift_empty.output.mapfile,expand_cliplevel_all.output.mapfile]
+#flag_full.control.inputkeys                                =   [msin,flag.amplmax]
+#flag_full.argument.msin.datacolumn                         =   CORRECTED_DATA
+#flag_full.argument.msout                                   =   .
+#flag_full.argument.steps                                   =   [flag]
+#flag_full.argument.flag.type                               =   preflagger
 
 # average the corrected data, length = nfiles
 average5.control.type                                      =   dppp
@@ -1288,10 +1285,6 @@ create_compressed_mapfile5.control.mapfile_in           =   average5.output.mapf
 create_compressed_mapfile5.control.mapfile_dir          =   {{ mapfile_dir }}
 create_compressed_mapfile5.control.filename             =   concat_averaged_input.datamap
 
-
-########## start of a block that can be replaced by another imager.
-
-{% block full_image_parms %}
 # sort compressed mapfile so that there is one group per timestamp, length = ntimes
 # not sure if this is needed / useful
 sort_average5.control.type                              =   sort_times_into_freqGroups
@@ -1319,6 +1312,9 @@ concat_averaged_compressed_map.control.mapfile_in          =   concat_averaged.o
 concat_averaged_compressed_map.control.mapfile_dir         =   {{ mapfile_dir }}
 concat_averaged_compressed_map.control.filename            =   concat_averaged_compressed.datamap
 
+########## start of a block that can be replaced by another imager.
+
+{% block full_image_parms %}
 # make a mask from the last selfcal image, length = 1
 premask.control.type                                       =   make_clean_mask
 premask.control.mapfile_in                                 =   adjust_casa_mapfile4.output.mapfile
@@ -1514,11 +1510,11 @@ copy_diff_model_field_map.control.mapfile_in               =   shift_diff_model_
 copy_diff_model_field_map.control.mapfile_dir              =   {{ mapfile_dir }}
 copy_diff_model_field_map.control.filename                 =   diff_models_field.datamap
 
-# transfer the flags to new residuals, length = nfiles
-transfer_flags_to_diff_model.control.type                  =   transfer_flags
-transfer_flags_to_diff_model.control.mapfiles_in           =   [shift_empty.output.mapfile,shift_diff_model_to_field.output.mapfile]
-transfer_flags_to_diff_model.control.inputkeys             =   [ms1,ms2]
-transfer_flags_to_diff_model.control.arguments             =   [ms1,ms2]
+## transfer the flags to new residuals, length = nfiles
+#transfer_flags_to_diff_model.control.type                  =   transfer_flags
+#transfer_flags_to_diff_model.control.mapfiles_in           =   [shift_empty.output.mapfile,shift_diff_model_to_field.output.mapfile]
+#transfer_flags_to_diff_model.control.inputkeys             =   [ms1,ms2]
+#transfer_flags_to_diff_model.control.arguments             =   [ms1,ms2]
 
 #
 # Verify the the quality of the selfcal on the middle band
