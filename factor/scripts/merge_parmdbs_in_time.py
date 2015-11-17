@@ -44,16 +44,16 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
             os.system('rm -rf {0}'.format(outparmdb))
         else:
             return
-    os.system('cp -r {0} {1}'.format(inparmdbs[0], outparmdb))
+#     os.system('cp -r {0} {1}'.format(inparmdbs[0], outparmdb))
 
-    if len(inparmdbs) > 1:
-        pdb_concat = lofar.parmdb.parmdb(outparmdb)
-        for inparmdb in inparmdbs[1:]:
-            pdb = lofar.parmdb.parmdb(inparmdb)
-            for parmname in pdb.getNames():
-                v = pdb.getValuesGrid(parmname)
-                pdb_concat.addValues(v.copy())
-        pdb_concat.flush()
+#     if len(inparmdbs) > 1:
+    pdb_concat = lofar.parmdb.parmdb(outparmdb, create=True)
+    for inparmdb in inparmdbs:
+        pdb = lofar.parmdb.parmdb(inparmdb)
+        for parmname in pdb.getNames():
+            v = pdb.getValuesGrid(parmname)
+            pdb_concat.addValues(v)
+    pdb_concat.flush()
 
 
 if __name__ == '__main__':

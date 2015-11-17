@@ -11,7 +11,7 @@ import shutil
 
 def main(parmdb_p, parmdb_a, parmdb_out, clobber=True):
     """
-    Merges facet selfcal parmdbs into a parmdb for a single band
+    Merges facet selfcal parmdbs into a single parmdb
 
     Parameters
     ----------
