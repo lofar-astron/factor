@@ -84,8 +84,7 @@ def main(instrument_name, instrument_name_smoothed):
             for chan in range(nchans):
                 real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
                 imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
-
-                phase = numpy.arctan2(imag,real)
+                phase = numpy.arctan2(imag, real)
                 amp = numpy.sqrt(imag**2 + real**2)
 
                 amp = numpy.log10(amp)
@@ -95,6 +94,19 @@ def main(instrument_name, instrument_name_smoothed):
                 amp = median_window_filter(amp, 4, 6)
                 amp = median_window_filter(amp, 3, 6)
                 amp = 10**amp
+
+                # Make sure amplitude solutions do not vary from unity by more than 50%
+                # and phase solutions from the mean by 0.2 rad
+                low_ind = numpy.where(amp < 0.667)
+                amp[low_ind] = 0.667
+                high_ind = numpy.where(amp > 1.5)
+                amp[high_ind] = 1.5
+
+                phase = (phase + numpy.pi) % (2.0 * numpy.pi) - numpy.pi
+                low_ind = numpy.where(phase-numpy.mean(phase) < -0.2)
+                phase[low_ind] = -0.2 + numpy.mean(phase)
+                high_ind = numpy.where(phase-numpy.mean(phase) > +0.2)
+                phase[high_ind] = 0.2 + numpy.mean(phase)
 
                 parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = amp * numpy.cos(phase)
                 parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = amp * numpy.sin(phase)
