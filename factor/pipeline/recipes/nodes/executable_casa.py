@@ -40,17 +40,20 @@ class executable_casa(LOFARnodeTCP):
 
         self.environment.update(environment)
 
-        # hack the planet
-        #executable = 'casa'
-
         # Time execution of this job
         with log_time(self.logger):
-            if os.path.exists(infile):
-                self.logger.info("Processing %s" % infile)
+            if infile[0] == '[':
+                infiles = [ms.strip(" []\'\"") for ms in infile.split(',')]
+                reffile = infiles[0]
             else:
-                self.logger.error("Dataset %s does not exist" % infile)
-                return 1
+                reffile = infile
 
+            if os.path.exists(reffile):
+                self.logger.info("Processing %s" % reffile)
+            else:
+                self.logger.error("Dataset %s does not exist" % reffile)
+                return 1
+ 
             # Check if executable is present
             if not os.access(executable, os.X_OK):
                 self.logger.error("Executable %s not found" % executable)
@@ -68,8 +71,8 @@ class executable_casa(LOFARnodeTCP):
 
             #print 'KWARGS: ', kwargs
             if not parsetasfile:
-                for k, v in kwargs.items():
-                    args.append('--' + k + '=' + v)
+                self.logger.error("Nodescript \"executable_casa.py\" requires \"parsetasfile\" to be True!")
+                return 1
             else:
                 nodeparset = Parset()
                 sublist = []
@@ -94,12 +97,42 @@ class executable_casa(LOFARnodeTCP):
                     for k in subpar.keys():
                         #print 'SUBPARSET: ',k ,' ',subpar[k]
                         #args.append('--' + k + '=' + subpar[k])
+                        # Find type for parameter
                         if str(subpar[k]).find('/') == 0:
                             casastring += str(k) + '=' + "'" + str(subpar[k]) + "'" + ','
                         elif str(subpar[k]).find('casastr/') == 0:
                             casastring += str(k) + '=' + "'" + str(subpar[k]).strip('casastr/') + "'" + ','
-                        else:
+                        elif str(subpar[k]).lower() == 'false' or str(subpar[k]).lower() == 'true':
                             casastring += str(k) + '=' + str(subpar[k]) + ','
+                        else:
+                            # Test if int/float or list of int/float
+                            try:
+                                self.logger.info('value: {}'.format(subpar[k]))
+                                test = float(str(subpar[k]))
+                                is_int_float = True
+                            except:
+                                is_int_float = False
+                            if is_int_float:
+                                casastring += str(k) + '=' + str(subpar[k]) + ','
+                            else: 
+                                if '[' in str(subpar[k]) or '(' in str(subpar[k]):
+                                    # Check if list of int/float or strings
+                                    list_vals = [f.strip() for f in str(subpar[k]).strip('[]()').split(',')]
+                                    is_int_float = True
+                                    for list_val in list_vals:
+                                        try:
+                                            test = float(list_val)
+                                        except:
+                                            is_int_float = False
+                                            break
+                                    if is_int_float:
+                                        casastring += str(k) + '=' + str(subpar[k]) + ','
+                                    else:
+                                        casastring += str(k) + '=' + '[{}]'.format(','.join(["'"+list_val+"'" for list_val in list_vals])) + ','
+                                else:
+                                    # Simple string
+                                    casastring += str(k) + '=' + "'" + str(subpar[k]) + "'" + ','
+
                     casastring = casastring.rstrip(',')
                     casastring += ')\n'
                 #print 'CASASTRING:'
@@ -111,40 +144,38 @@ class executable_casa(LOFARnodeTCP):
                 # create tmp dirs
                 casapydir = tempfile.mkdtemp(dir=work_dir)
                 if casastring != '':
-                    casafilename = os.path.join(work_dir, os.path.basename(infile) + '.casacommand.py')
+                    casafilename = os.path.join(work_dir, os.path.basename(reffile) + '.casacommand.py')
                     casacommandfile = open(casafilename, 'w')
-#                    casacommandfile.write("casalog.filter('WARN')\n")
                     casacommandfile.write(casastring)
                     casacommandfile.close()
                     args.append(casafilename)
-                somename = os.path.join(work_dir, os.path.basename(infile) + '.casashell.sh')
+                somename = os.path.join(work_dir, os.path.basename(reffile) + '.casashell.sh')
                 commandstring = ''
                 commandstring += executable
-                for item in args:
-                    commandstring += ' ' + item
+                for item in args:                    
+                    if str(item).find(' ')>-1 or str(item).find('[')>-1:
+                        commandstring += ' "' + item + '"'
+                    else:
+                        commandstring += ' ' + item
 
                 #print 'COMMANDSTRING: ',commandstring
                 crap = open(somename, 'w')
                 crap.write('#!/bin/bash \n')
                 crap.write('echo "Trying CASAPY command" \n')
-                #crap.write('/home/zam/sfroehli/casapy-42.1.29047-001-1-64b/bin/casa' + ' --nologger'+' -c ' + casafilename)
                 crap.write(commandstring + ' >& casa.log\n')
-                #crap.write('\nexit 0')
                 crap.close()
 
                 import stat
                 st = os.stat(somename)
-                #os.chmod(casafilename, stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
                 os.chmod(somename, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
             try:
             # ****************************************************************
             # Run
-                #cmd = [executable] + args
                 cmd = [somename]
                 with CatchLog4CPlus(
                     casapydir,
-                    self.logger.name + "." + os.path.basename(infile),
+                    self.logger.name + "." + os.path.basename(reffile),
                     os.path.basename(executable),
                 ) as logger:
                     # Catch segfaults and retry

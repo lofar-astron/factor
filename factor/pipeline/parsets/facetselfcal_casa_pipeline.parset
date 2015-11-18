@@ -1,5 +1,5 @@
 {% extends "facetselfcal_pipeline.parset" %}
-{% block full_image_steps %}concat_pre_averaged, premask, casa_image_full1, adjust_casa_mapfile6, mask5, casa_image_full2, create_model4_map, adjust_casa_mapfile7, create_compressed_mapfile6, concat_unaveraged, casa_ft4{% endblock full_image_steps %}
+{% block full_image_steps %}concat_pre_averaged, premask, casa_image_full1, adjust_casa_mapfile6, mask5, casa_image_full2, create_model4_map, adjust_casa_mapfile7, create_compressed_mapfile6, casa_ft4{% endblock full_image_steps %}
 {% block full_image_parms %}
 # virtaully concat the pre-averaged data, length = 1
 # pre-averaging is needed so that the virtual_concat doesn't try to open too many files
@@ -137,17 +137,17 @@ create_compressed_mapfile6.control.mapfile_in              =   shift_empty.outpu
 create_compressed_mapfile6.control.mapfile_dir             =   {{ mapfile_dir }}
 create_compressed_mapfile6.control.filename                =   concat_unaveraged_input.datamap
 
-# virtual concat of the unaveraged data, length = 1 
-concat_unaveraged.control.type                             =   virtual_concat
-concat_unaveraged.control.mapfile_in                       =   create_compressed_mapfile6.output.mapfile
-concat_unaveraged.control.inputkey                         =   msfiles
-concat_unaveraged.control.outputkey                        =   msconcat
-concat_unaveraged.argument.flags                           =   [msfiles,msconcat]
+## virtual concat of the unaveraged data, length = 1 
+#concat_unaveraged.control.type                             =   virtual_concat
+#concat_unaveraged.control.mapfile_in                       =   create_compressed_mapfile6.output.mapfile
+#concat_unaveraged.control.inputkey                         =   msfiles
+#concat_unaveraged.control.outputkey                        =   msconcat
+#concat_unaveraged.argument.flags                           =   [msfiles,msconcat]
 
-# make model visibilities on the virtual-concatenated MS, length = 1
-# will be written into the unaveraged MSs 
+# make model visibilities on the unaveraged data, length = 1
+#  
 casa_ft4.control.type                                      =   casa
-casa_ft4.control.mapfiles_in                               =   [concat_unaveraged.output.mapfile,create_model4_map.output.mapfile]
+casa_ft4.control.mapfiles_in                               =   [create_compressed_mapfile6.output.mapfile,create_model4_map.output.mapfile]
 casa_ft4.control.inputkeys                                 =   [inputms,modelimg]
-casa_ft4.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft.py,inputms,modelimg,{{ nterms }},{{ facet_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
+casa_ft4.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft_multi.py,modelimg,{{ nterms }},{{ facet_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py,inputms]
 {% endblock full_image_parms %}
