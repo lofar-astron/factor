@@ -64,7 +64,7 @@ def median_window_filter(ampl, half_window, threshold):
     return ampl_tot_copy
 
 
-def main(msname, instrument_name, instrument_name_smoothed):
+def main(instrument_name, instrument_name_smoothed):
     pol_list = ['0:0','1:1']
     gain = 'Gain'
 
@@ -72,48 +72,51 @@ def main(msname, instrument_name, instrument_name_smoothed):
     parms = pdb.getValuesGrid('*')
 
     key_names = parms.keys()
-    anttab = pt.table(msname + '::ANTENNA')
-    antenna_list = anttab.getcol('NAME')
-    anttab.close()
+    nchans = len(parms[key_names[0]]['freqs'])
+
+    # Get station names
+    antenna_list = set([s.split(':')[-1] for s in pdb.getNames()])
     window = 4
 
     # Smooth
     for pol in pol_list:
         for antenna in antenna_list:
-            real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, 0])
-            imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, 0])
+            for chan in range(nchans):
+                real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
+                imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
 
-            phase = numpy.arctan2(imag,real)
-            amp = numpy.sqrt(imag**2 + real**2)
-            window_window = numpy.int(len(amp)/3.)
+                phase = numpy.arctan2(imag,real)
+                amp = numpy.sqrt(imag**2 + real**2)
 
-            amp = numpy.log10(amp)
-            amp = median_window_filter(amp, window, 6)
-            amp = median_window_filter(amp, window, 6)
-            amp = median_window_filter(amp, 7, 6)
-            amp = median_window_filter(amp, 4, 6)
-            amp = median_window_filter(amp, 3, 6)
-            amp = 10**amp
+                amp = numpy.log10(amp)
+                amp = median_window_filter(amp, window, 6)
+                amp = median_window_filter(amp, window, 6)
+                amp = median_window_filter(amp, 7, 6)
+                amp = median_window_filter(amp, 4, 6)
+                amp = median_window_filter(amp, 3, 6)
+                amp = 10**amp
 
-            parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, 0] = amp*numpy.cos(phase)
-            parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, 0] = amp*numpy.sin(phase)
+                parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = amp * numpy.cos(phase)
+                parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = amp * numpy.sin(phase)
 
-    # Normalize
+    # Normalize the amplitude solutions to a mean of one across all channels
     amplist = []
-    for pol in pol_list:
-        for antenna in antenna_list:
-            real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, 0])
-            imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, 0])
-            amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
-            amplist.append(amp)
+    for chan in range(nchans):
+        for pol in pol_list:
+            for antenna in antenna_list:
+                real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
+                imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
+                amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
+                amplist.append(amp)
     norm_factor = 1./(numpy.mean(amplist))
 
-    for pol in pol_list:
-        for antenna in antenna_list:
-            real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, 0])
-            imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, 0])
-            parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, 0] = numpy.copy(imag*norm_factor)
-            parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, 0] = numpy.copy(real*norm_factor)
+    for chan in range(nchans):
+        for pol in pol_list:
+            for antenna in antenna_list:
+                real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
+                imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
+                parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = numpy.copy(real*norm_factor)
+                parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = numpy.copy(imag*norm_factor)
 
     if os.path.exists(instrument_name_smoothed):
         shutil.rmtree(instrument_name_smoothed)
@@ -126,9 +129,8 @@ if __name__ == '__main__':
     descriptiontext = "Smooth and normalize amplitude solutions.\n"
 
     parser = argparse.ArgumentParser(description=descriptiontext, formatter_class=RawTextHelpFormatter)
-    parser.add_argument('msname', help='name of the MS file to get antenna names')
     parser.add_argument('instrument_name', help='name of the instrument parmdb to smooth')
     parser.add_argument('instrument_name_smoothed', help='name of the output parmdb')
     args = parser.parse_args()
 
-    main(args.msname, args.instrument_name, args.instrument_name_smoothed)
+    main(args.instrument_name, args.instrument_name_smoothed)
