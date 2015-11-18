@@ -83,16 +83,16 @@ class Operation(object):
         create_directory(self.pipeline_working_dir)
 
         # Local scratch directory and corresponding node recipes
-        if self.parset['cluster_specific']['dir_local'] is None:   
+        if self.parset['cluster_specific']['dir_local'] is None:
             # Not specified, specify scratch directory in normal work directory
             self.local_scratch_dir = os.path.join(self.pipeline_working_dir,
                 self.direction.name)
             self.dppp_nodescript = 'executable_args'
-        elif self.parset['cluster_specific']['clusterdesc_file'].lower() == 'pbs':  
+        elif self.parset['cluster_specific']['clusterdesc_file'].lower() == 'pbs':
             # PBS = "system in Hamburg" -> use special NDPPP nodescript
             self.local_scratch_dir = self.parset['cluster_specific']['dir_local']
             self.dppp_nodescript = 'dppp_scratch'
-        else:                        
+        else:
             # other: use given scratch directory an standard nodescrit
             self.local_scratch_dir = self.parset['cluster_specific']['dir_local']
             self.dppp_nodescript = 'executable_args'
@@ -198,14 +198,33 @@ class Operation(object):
         pass
 
 
-    def check_completed(self):
+    def check_started(self):
         """
-        Checks whether operation has been run successfully before
+        Checks whether operation has been started (but not necessarily
+        completed) before for this direction
 
         Returns
         -------
         all_done : bool
-            True if all objects were successfully run
+            True if operation was started on this direction
+
+        """
+        self.direction.load_state()
+        if self.name in self.direction.started_operations:
+            return True
+        else:
+            return False
+
+
+    def check_completed(self):
+        """
+        Checks whether operation has been run successfully before for this
+        direction
+
+        Returns
+        -------
+        all_done : bool
+            True if operation was successfully run on this direction
 
         """
         self.direction.load_state()
@@ -215,9 +234,17 @@ class Operation(object):
             return False
 
 
+    def set_started(self):
+        """
+        Sets the started state for the operation
+        """
+        self.direction.started_operations.append(self.name)
+        self.direction.save_state()
+
+
     def set_completed(self):
         """
-        Sets the state for the operation
+        Sets the completed state for the operation
         """
         self.direction.completed_operations.append(self.name)
         self.direction.save_state()

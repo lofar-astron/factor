@@ -129,6 +129,7 @@ class Scheduler(object):
             with Timer(self.log, 'operation'):
                 pool = multiprocessing.Pool(processes=self.max_procs)
                 for op in operation_list:
+                    op.set_started()
                     self.log.info('<-- Operation {0} started (direction: {1})'.
                         format(op.name, op.direction.name))
                     pool.apply_async(call_generic_pipeline, (op.name,

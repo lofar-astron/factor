@@ -100,7 +100,7 @@ class Direction(object):
         else:
             self.apparent_flux_mjy = None
 
-        # Initialize some parameters to default values
+        # Initialize some parameters to default/initial values
         self.loop_amp_selfcal = False
         self.selfcal_ok = False # whether selfcal succeeded
         self.skip_add_subtract = None # whether to skip add/subtract in facetsub op
@@ -113,6 +113,9 @@ class Direction(object):
         self.subtracted_data_colname = 'SUBTRACTED_DATA_ALL'
         self.pre_average = False
         self.blavg_weight_column = 'WEIGHT_SPECTRUM'
+        self.started_operations = []
+        self.completed_operations = []
+        self.cleanup_mapfiles = []
 
         # Set the size of the calibrator (used to filter source lists)
         if cal_size_deg is None:
@@ -123,10 +126,8 @@ class Direction(object):
         self.cal_radius_deg = self.cal_size_deg / 2.0
         self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
 
-        # Define some directories, etc.
+        # Define some directories and files
         self.working_dir = factor_working_dir
-        self.completed_operations = []
-        self.cleanup_mapfiles = []
         self.save_file = os.path.join(self.working_dir, 'state',
             self.name+'_save.pkl')
         self.vertices_file = self.save_file
@@ -378,7 +379,8 @@ class Direction(object):
         """
         Loads the direction state from a file
 
-        Note: only a few necessary attributes are loaded
+        Note: only state attributes are loaded to avoid overwritting
+        non-state attributes
 
         Returns
         -------
@@ -391,13 +393,21 @@ class Direction(object):
             with open(self.save_file, 'r') as f:
                 d = pickle.load(f)
 
+                # Load list of started operations
+                if 'started_operations' in d:
+                    self.started_operations = d['started_operations']
+
                 # Load list of completed operations
-                self.completed_operations = d['completed_operations']
+                if 'completed_operations' in d:
+                    self.completed_operations = d['completed_operations']
 
                 # Load mapfiles needed for facetsubreset
-                self.diff_models_field_datamap = d['diff_models_field_datamap']
-                self.input_bands_datamap = d['input_bands_datamap']
-                self.subtracted_data_colname = d['subtracted_data_colname']
+                if ('diff_models_field_datamap' in d and
+                    'input_bands_datamap' in d and
+                    'subtracted_data_colname' in d):
+                    self.diff_models_field_datamap = d['diff_models_field_datamap']
+                    self.input_bands_datamap = d['input_bands_datamap']
+                    self.subtracted_data_colname = d['subtracted_data_colname']
             return True
         except:
             return False
@@ -411,11 +421,18 @@ class Direction(object):
         but it could be changed to delete only a subset of selfcal steps (by
         modifying the selfcal pipeline statefile).
         """
+        # Reset selfcal flag
         self.selfcal_ok = False
-        for op in self.completed_operations[:]:
-            self.completed_operations.remove(op)
 
-            # Delete results directory
+        # Remove operation name from lists of started and completed operations
+        # and delete the results directories
+        for op in set(self.completed_operations[:] + self.started_operations[:]):
+            if op in self.completed_operations:
+                self.completed_operations.remove(op)
+            if op in self.started_operations:
+                self.started_operations.remove(op)
+
+            # Delete results directory for this operation
             op_dir = os.path.join(self.working_dir, 'results', op, self.name)
             if os.path.exists(op_dir):
                 os.system('rm -rf {0}'.format(op_dir))

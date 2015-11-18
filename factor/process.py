@@ -484,7 +484,7 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         # Set transfer flag
         direction.transfer_flags = parset['transfer_flags']
 
-        # Load previously completed steps (if any)
+        # Load previous state (if any)
         direction.load_state()
 
         # Reset state if specified
