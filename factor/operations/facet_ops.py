@@ -112,7 +112,6 @@ class FacetSelfcal(Operation):
         # Note: we keep the data if selfcal failed verification, so that the user
         # can check them for problems
         self.direction.cleanup_mapfiles = [
-            os.path.join(self.mapfile_dir, 'shifted_empty_bands.datamap'),
             os.path.join(self.mapfile_dir, 'shifted_cal_bands.datamap'),
             os.path.join(self.mapfile_dir, 'predict_all_model_bands.datamap'),
             os.path.join(self.mapfile_dir, 'corrupted_all_model_bands.datamap'),
@@ -124,12 +123,18 @@ class FacetSelfcal(Operation):
             os.path.join(self.mapfile_dir, 'concat2_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat3_input.datamap'),
             os.path.join(self.mapfile_dir, 'concat4_input.datamap')]
-        if not self.parset['keep_facet_data'] and self.direction.name != 'target':
-            # Add calibrated data for the facet to files to be deleted. These are
-            # only needed if the user wants to reimage by hand (e.g., with a
-            # different weighting. They are always kept for the target
+        if not self.parset['keep_avg_facet_data'] and self.direction.name != 'target':
+            # Add averaged calibrated data for the facet to files to be deleted.
+            # These are only needed if the user wants to reimage by hand (e.g.,
+            # with a different weighting). They are always kept for the target
             self.direction.cleanup_mapfiles.append(
                 os.path.join(self.mapfile_dir, 'concat_averaged_input.datamap'))
+        if not self.parset['keep_unavg_facet_data']:
+            # Add unaveraged calibrated data for the facet to files to be deleted.
+            # These are only needed if the user wants to phase shift them to
+            # another direction (e.g., to combine several facets together)
+            self.direction.cleanup_mapfiles.append(
+                os.path.join(self.mapfile_dir, 'shifted_empty_bands.datamap'))
         if not self.direction.make_final_image:
             # Add final model data for the facet to files to be deleted. These
             # are only needed if the facet is to be reimaged

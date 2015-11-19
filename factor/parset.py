@@ -120,10 +120,14 @@ def parset_read(parset_file):
         parset_dict['reimage'] = parset.getboolean('global', 'reimage')
     else:
         parset_dict['reimage'] = False
-    if 'keep_facet_data' in parset_dict:
-        parset_dict['keep_facet_data'] = parset.getboolean('global', 'keep_facet_data')
+    if 'keep_avg_facet_data' in parset_dict:
+        parset_dict['keep_avg_facet_data'] = parset.getboolean('global', 'keep_avg_facet_data')
     else:
-        parset_dict['keep_facet_data'] = True
+        parset_dict['keep_avg_facet_data'] = True
+    if 'keep_unavg_facet_data' in parset_dict:
+        parset_dict['keep_unavg_facet_data'] = parset.getboolean('global', 'keep_unavg_facet_data')
+    else:
+        parset_dict['keep_unavg_facet_data'] = False
     if 'max_selfcal_loops' in parset_dict:
         parset_dict['max_selfcal_loops'] = parset.getint('global', 'max_selfcal_loops')
     else:

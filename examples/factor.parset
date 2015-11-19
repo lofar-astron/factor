@@ -51,9 +51,11 @@ facet_imager = casa
 reimage = False
 
 # Keep calibrated data for each facet to allow re-imaging by hand (default =
-# True). If a target is specified (see below), the calibrated data for the
-# target is always kept, regardless of this setting
-keep_facet_data = False
+# True for averaged data and False for unaveraged data). If a target is
+# specified (see below), the calibrated data for the target is always kept,
+# regardless of this setting
+keep_avg_facet_data = False
+keep_unavg_facet_data = False
 
 # Use baseline-dependent preaveraging to increase the signal-to-noise of the
 # phase-only solve (default = True). If True, averaging in time is done to
