@@ -118,6 +118,15 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
                          img_format=img_format, clobber=True)
 
+        # Check if there are large islands preset (indicating that multi-scale
+        # clean is needed)
+        has_large_isl = False
+        for isl in img.islands:
+            if isl.size_active > 100:
+                # Assuming normal sampling, a size of 100 pixels would imply
+                # a source of ~ 10 beams
+                has_large_isl = True
+
     if vertices_file is not None or trim_by > 0 or pad_to_size is not None or skip_source_detection:
         # Alter the mask in various ways
         if skip_source_detection:
@@ -194,11 +203,12 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
 
     if not skip_source_detection:
         if threshold_format == 'float':
-            return {'threshold_5sig': 5.0 * img.clipped_rms}
+            return {'threshold_5sig': 5.0 * img.clipped_rms, 'multiscale': has_large_isl}
         elif threshold_format == 'str_with_units':
             # This is done to get around the need for quotes around strings in casapy scripts
             # 'casastr/' is removed by the generic pipeline
-            return {'threshold_5sig': 'casastr/{0}Jy'.format(5.0 * img.clipped_rms)}
+            return {'threshold_5sig': 'casastr/{0}Jy'.format(5.0 * img.clipped_rms),
+                'multiscale': has_large_isl}
     else:
         return {'threshold_5sig': '0.0'}
 
