@@ -18,7 +18,7 @@ If you want to install Factor yourself, follow the instructions below.
 
 Beyond the standard LOFAR software packages, Factor requires the following:
 
-* [CASA](http://casa.nrao.org) (versions *before* 4.3 or version 4.5.0 or later)
+* [CASA](http://casa.nrao.edu) (versions *before* 4.3 or version 4.5.0 or later)
 * [WSClean](http://sourceforge.net/p/wsclean/wiki/Home) (version 1.9 or later)
 * [LSMTool](https://github.com/darafferty/LSMTool)
 * [jinja2](http://jinja.pocoo.org/docs/dev)
