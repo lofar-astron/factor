@@ -1,4 +1,4 @@
-Strategy.ChunkSize                          = 0
+Strategy.ChunkSize                          = 120
 Strategy.Steps                              = [solve]
 
 Step.solve.Operation                        = SOLVE
