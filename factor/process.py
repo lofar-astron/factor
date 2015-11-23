@@ -364,8 +364,8 @@ def _set_up_bands(parset, log, test_run=False):
 
     # Check that number of channels supports enough averaging steps
     if list(duplicate_chans)[0] not in [18, 20, 24]:
-        log.warn('Number of channels per band is not 18, 20, or 24. Averaging will '
-            'probably not work well (too few divisors?)')
+        log.warn('Number of channels per band is {0}, not 18, 20, or 24. Averaging will '
+            'probably not work well (too few divisors?)'.format(list(duplicate_chans)[0]))
 
     # Determine whether any bands need to be run through the initsubract operation.
     # This operation is only needed if band lacks an initial skymodel or
