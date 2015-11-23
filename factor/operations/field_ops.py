@@ -33,7 +33,7 @@ class InitSubtract(Operation):
             name='InitSubtract')
 
         # specify  the image parameters here
-        cellsize_highres_deg = 0.000834
+        cellsize_highres_deg =  0.00208
         cellsize_lowres_deg = 0.00694
         fieldsize_highres = 2.5
         fieldsize_lowres = 6.5
