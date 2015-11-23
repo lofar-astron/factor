@@ -52,6 +52,8 @@ class InitSubtract(Operation):
                                 'input_files_grouped' : str(input_files),
                                 'highres_image_sizes' : highres_image_sizes,
                                 'lowres_image_sizes' : lowres_image_sizes,
+                                'cellsize_highres_deg' : self.bands[0].cellsize_highres_deg,
+                                'cellsize_lowres_deg' : self.bands[0].cellsize_lowres_deg,
                                 #'skymodels': skymodels,
                                 'dir_indep_parmDBs': dir_indep_parmDBs})
 
