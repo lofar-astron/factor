@@ -29,7 +29,7 @@ def read_vertices(filename):
 def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, rmsbox=None,
          iterate_threshold=False, adaptive_rmsbox=False, img_format='fits',
          threshold_format='float', trim_by=0.0, vertices_file=None, atrous_jmax=6,
-         pad_to_size=None, skip_source_detection=False, region_file=None):
+         pad_to_size=None, skip_source_detection=False, region_file=None, nsig=5.0):
     """
     Run PyBDSM to make an island clean mask
 
@@ -86,6 +86,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     atrous_jmax = int(atrous_jmax)
     threshpix = float(threshpix)
     threshisl = float(threshisl)
+    nsig = float(nsig)
 
     if not skip_source_detection:
         if iterate_threshold:
@@ -203,11 +204,11 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
 
     if not skip_source_detection:
         if threshold_format == 'float':
-            return {'threshold_5sig': 5.0 * img.clipped_rms, 'multiscale': has_large_isl}
+            return {'threshold_5sig': nsig * img.clipped_rms, 'multiscale': has_large_isl}
         elif threshold_format == 'str_with_units':
             # This is done to get around the need for quotes around strings in casapy scripts
             # 'casastr/' is removed by the generic pipeline
-            return {'threshold_5sig': 'casastr/{0}Jy'.format(5.0 * img.clipped_rms),
+            return {'threshold_5sig': 'casastr/{0}Jy'.format(nsig * img.clipped_rms),
                 'multiscale': has_large_isl}
     else:
         return {'threshold_5sig': '0.0'}

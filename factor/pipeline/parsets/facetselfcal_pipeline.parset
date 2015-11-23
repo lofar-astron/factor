@@ -1232,7 +1232,7 @@ wsclean_image_full1.control.inputkeys                      =   [msfile,fitsmask]
 wsclean_image_full1.argument.flags                         =   [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
 wsclean_image_full1.argument.fitsmask                      =   fitsmask
 wsclean_image_full1.argument.size                          =   {{ facet_imsize }} {{ facet_imsize }}
-wsclean_image_full1.argument.niter                         =   15000
+wsclean_image_full1.argument.niter                         =   30000
 wsclean_image_full1.argument.threshold                     =   0.0
 wsclean_image_full1.argument.pol                           =   I
 wsclean_image_full1.argument.weight                        =   briggs -0.5
@@ -1275,6 +1275,7 @@ mask5.argument.rmsbox                                      =   (80,20)
 mask5.argument.adaptive_rmsbox                             =   True
 mask5.argument.atrous_do                                   =   True
 mask5.argument.img_format                                  =   fits
+mask5.argument.nsig                                        =   1.0
 mask5.argument.vertices_file                               =   {{ vertices_file }}
 
 wsclean_image_full2.control.type                           =   wsclean
