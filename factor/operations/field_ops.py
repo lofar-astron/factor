@@ -32,6 +32,14 @@ class InitSubtract(Operation):
         super(InitSubtract, self).__init__(parset, bands, direction,
             name='InitSubtract')
 
+        # specify  the image parameters here
+        cellsize_highres_deg = 0.000834
+        cellsize_lowres_deg = 0.00694
+        fieldsize_highres = 2.5
+        fieldsize_lowres = 6.5
+        maxlambda_highres = 7000
+        maxlambda_lowres = 2000
+
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
@@ -42,6 +50,8 @@ class InitSubtract(Operation):
                 input_files_single.append(filename)
         dir_indep_parmDBs = []
         for band in self.bands:
+            band.set_image_sizes(cellsize_highres_deg=cellsize_highres_deg,cellsize_lowres_deg=cellsize_lowres_deg,
+                                 fieldsize_highres=fieldsize_highres,fieldsize_lowres=fieldsize_lowres)
             for parmdb in band.dirindparmdbs:
                 dir_indep_parmDBs.append(parmdb)
         band_names = [b.name for b in self.bands]
@@ -52,8 +62,10 @@ class InitSubtract(Operation):
                                 'input_files_grouped' : str(input_files),
                                 'highres_image_sizes' : highres_image_sizes,
                                 'lowres_image_sizes' : lowres_image_sizes,
-                                'cellsize_highres_deg' : self.bands[0].cellsize_highres_deg,
-                                'cellsize_lowres_deg' : self.bands[0].cellsize_lowres_deg,
+                                'cellsize_highres_deg' : cellsize_highres_deg,
+                                'cellsize_lowres_deg' : cellsize_lowres_deg,
+                                'maxlambda_highres' : maxlambda_highres,
+                                'maxlambda_lowres' : maxlambda_lowres,
                                 #'skymodels': skymodels,
                                 'dir_indep_parmDBs': dir_indep_parmDBs})
 

@@ -293,7 +293,8 @@ class Band(object):
 
   
 
-    def set_image_sizes(self, test_run=False):
+    def set_image_sizes(self, test_run=False,cellsize_highres_deg=None,cellsize_lowres_deg=None,
+                        fieldsize_highres=2.5,fieldsize_lowres=6.5):
         """
         Sets sizes for initsubtract images
 
@@ -304,8 +305,19 @@ class Band(object):
         ----------
         test_run : bool, optional
             If True, use test sizes
-
+        cellsize_highres_deg : float, optional
+            cellsize for the high-res images in deg
+        cellsize_lowres_deg : float, optional
+            cellsize for the low-res images in deg
+        fieldsize_highres : float, optional
+            How many FWHM's shall the high-res images be.
+        fieldsize_lowres : float, optional
+            How many FWHM's shall the low-res images be.
         """
+        if cellsize_highres_deg:
+            self.cellsize_highres_deg = cellsize_highres_deg
+        if cellsize_lowres_deg:
+            self.cellsize_lowres_deg = cellsize_lowres_deg
         if not test_run:
             if not hasattr(self, 'mean_el_rad'):
                 for MS_id in xrange(self.numMS):
@@ -332,9 +344,9 @@ class Band(object):
             sec_el = 1.0 / np.sin(self.mean_el_rad)
             self.fwhm_deg = 1.1 * ((3.0e8 / self.freq) / self.diam) * 180. / np.pi * sec_el
             self.imsize_high_res = self.get_optimum_size(self.fwhm_deg
-                /self.cellsize_highres_deg* 2.5)
+                /self.cellsize_highres_deg * fieldsize_highres)
             self.imsize_low_res = self.get_optimum_size(self.fwhm_deg
-                /self.cellsize_lowres_deg*6.5)
+                /self.cellsize_lowres_deg * fieldsize_lowres)
         else:
             self.imsize_high_res = self.get_optimum_size(128)
             self.imsize_low_res = self.get_optimum_size(128)
