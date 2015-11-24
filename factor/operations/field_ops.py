@@ -32,12 +32,16 @@ class InitSubtract(Operation):
         super(InitSubtract, self).__init__(parset, bands, direction,
             name='InitSubtract')
 
-        # specify  the image parameters here
-        cellsize_highres_deg =  0.00208
+        #### specify  the image parameters here
+        # cellsize in degrees, 0.00208 deg is about 7.5 arcsec
+        cellsize_highres_deg = 0.00208  
         cellsize_lowres_deg = 0.00694
+        # size of the image is this value times the FWHM of the station beam
         fieldsize_highres = 2.5
         fieldsize_lowres = 6.5
-        maxlambda_highres = 7000
+        # maximum uv-distance in lambda that will be used for imaging
+        # 7 klambda is machted to 7.5 arcsec cellsize
+        maxlambda_highres = 7000 
         maxlambda_lowres = 2000
 
         # Define extra parameters needed for this operation (beyond those
