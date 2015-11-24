@@ -439,7 +439,7 @@ def thiessen(directions_list, bounds_scale=0.5, band=None, check_edges=False,
         log.debug('Bounds scale too low. Setting to 0.5')
         bounds_scale = 0.5
     thiessen_polys = []
-    while bounds_scale > 0.4:
+    while bounds_scale > 0.35:
         thiessen_polys_prev = thiessen_polys[:]
         try:
             x_scale, y_scale = (points.min(axis=0) - points.max(axis=0)) * bounds_scale
