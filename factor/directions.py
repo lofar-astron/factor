@@ -426,7 +426,7 @@ def thiessen(directions_list, bounds_scale=0.5, band=None, check_edges=False,
 
     # Generate array of outer points used to constrain the outer facets
     nouter = 128
-    means = np.ones((nouter)) * points.mean(axis=0)
+    means = np.ones((nouter, 2)) * points.mean(axis=0)
     offsets = []
     angles = [np.pi/(nouter/2.0)*i for i in range(0, nouter)]
     for ang in angles:
