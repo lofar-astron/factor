@@ -424,38 +424,37 @@ def thiessen(directions_list, bounds_scale=0.5, band=None, check_edges=False,
     points, midRA, midDec = getxy(directions_list)
     points = points.T
 
+    # Generate array of outer points to limit sizes of facets
+    means = np.ones((32, 2)) * points.mean(axis=0)
+    offsets = []
+    angles = [np.pi/16.0*i for i in range(0, 32)]
+    for ang in angles:
+        offsets.append([np.cos(ang), np.sin(ang)])
+
     # Reduce the scale as much as possible to minimize the size of the outer
     # facets
     thiessen_polys = []
     while True:
+        thiessen_polys_prev = thiessen_polys[:]
         try:
-            thiessen_polys_prev = thiessen_polys[:]
-
             x_scale, y_scale = (points.min(axis=0) - points.max(axis=0)) * bounds_scale
-
-            means = np.ones((32, 2)) * points.mean(axis=0)
-
             radius = np.sqrt(x_scale**2 + y_scale**2)
-            angles = [np.pi/16.0*i for i in range(0, 32)]
-            offsets = []
-            for ang in angles:
-                offsets.append([np.cos(ang), np.sin(ang)])
             scale_offsets = radius * np.array(offsets)
             outer_box = means + scale_offsets
-
-            points = np.vstack([points, outer_box])
-            tri = Delaunay(points)
+            points_all = np.vstack([points, outer_box])
+            tri = Delaunay(points_all)
             circumcenters = np.array([_circumcenter(tri.points[t])
                                       for t in tri.vertices])
             thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
-                              for n in range(len(points) - 32)]
+                              for n in range(len(points_all) - 32)]
             bounds_scale *= 0.95
             log.info('Bounds scale: {}'.format(bounds_scale))
         except IndexError:
             # IndexError indicates problem with triangle vertices. Use previous
             # polygons
             thiessen_polys = thiessen_polys_prev
-            break
+            if bounds_scale < 0.4:
+                break
 
     # Check for vertices that are very close to each other, as this give problems
     # to the edge adjustment below
