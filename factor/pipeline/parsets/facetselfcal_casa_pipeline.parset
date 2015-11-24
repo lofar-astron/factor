@@ -1,8 +1,8 @@
 {% extends "facetselfcal_pipeline.parset" %}
-{% block full_image_steps %}concat_pre_averaged, premask, casa_image_full1, adjust_casa_mapfile6, mask5, casa_image_full2, create_model4_map, adjust_casa_mapfile7, create_compressed_mapfile6, casa_ft4{% endblock full_image_steps %}
+{% block full_image_steps %}concat_pre_averaged, premask, casa_image_full1, adjust_casa_mapfile6, mask5, casa_image_full2, create_model4_map, adjust_casa_mapfile7, regroup_shift_empty_map, concat_unaveraged, create_compressed_mapfile6, casa_ft4{% endblock full_image_steps %}
 {% block full_image_parms %}
 # virtaully concat the pre-averaged data, length = 1
-# pre-averaging is needed so that the virtual_concat doesn't try to open too many files
+# pre-concatenating is needed so that the virtual_concat doesn't try to open too many files
 concat_pre_averaged.control.type                           =   virtual_concat
 concat_pre_averaged.control.mapfile_in                     =   concat_averaged_compressed_map.output.mapfile
 concat_pre_averaged.control.inputkey                       =   msfiles
@@ -130,22 +130,33 @@ adjust_casa_mapfile7.control.append                        =   {{ casa_suffix }}
 adjust_casa_mapfile7.control.mapfile_dir                   =   {{ mapfile_dir }}
 adjust_casa_mapfile7.control.filename                      =   final_image.datamap
 
-# create a compressed mapfile with the unaveraged data, length = 1 
+# sort the "shift_empty" unaveraged data into groups that can be concatenated, length = some
+# needed because virtual concatenating all files results in a "too many open files" error.
+regroup_shift_empty_map.control.kind                   =   plugin
+regroup_shift_empty_map.control.type                   =   reGroupMapfile
+regroup_shift_empty_map.control.mapfile_in             =   shift_empty.output.mapfile
+regroup_shift_empty_map.control.mapfile_groups         =   create_msmulti_map.output.mapfile
+regroup_shift_empty_map.control.mapfile_dir            =   input.output.mapfile_dir
+regroup_shift_empty_map.control.join_max_files         =   100
+regroup_shift_empty_map.control.filename               =   regroup_shift_empty.datamap
+
+## virtual concat of the re-grouped unaveraged data, length = some
+concat_unaveraged.control.type                             =   virtual_concat
+concat_unaveraged.control.mapfile_in                       =   regroup_shift_empty_map.output.mapfile
+concat_unaveraged.control.inputkey                         =   msfiles
+concat_unaveraged.control.outputkey                        =   msconcat
+concat_unaveraged.argument.flags                           =   [msfiles,msconcat]
+
+# create a compressed mapfile with the virtual concated files, length = 1 
+# needed because the following casa-step can run only once.
 create_compressed_mapfile6.control.kind                    =   plugin
 create_compressed_mapfile6.control.type                    =   compressMapfile
 create_compressed_mapfile6.control.mapfile_in              =   shift_empty.output.mapfile
 create_compressed_mapfile6.control.mapfile_dir             =   {{ mapfile_dir }}
 create_compressed_mapfile6.control.filename                =   concat_unaveraged_input.datamap
 
-## virtual concat of the unaveraged data, length = 1 
-#concat_unaveraged.control.type                             =   virtual_concat
-#concat_unaveraged.control.mapfile_in                       =   create_compressed_mapfile6.output.mapfile
-#concat_unaveraged.control.inputkey                         =   msfiles
-#concat_unaveraged.control.outputkey                        =   msconcat
-#concat_unaveraged.argument.flags                           =   [msfiles,msconcat]
-
 # make model visibilities on the unaveraged data, length = 1
-#  
+# can run only once, because (may) create files in the directory of input data
 casa_ft4.control.type                                      =   casa
 casa_ft4.control.mapfiles_in                               =   [create_compressed_mapfile6.output.mapfile,create_model4_map.output.mapfile]
 casa_ft4.control.inputkeys                                 =   [inputms,modelimg]

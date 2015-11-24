@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, select_single_cliplevel_all, copy_facet_skymodels_all_map, make_facet_skymodels_cal, select_single_cliplevel_cal, shift_empty, copy_empty_map, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, predict_all_facet_sources, copy_predict_all_model_map, corrupt_all_model_data, copy_corrupted_all_model_map, add_all_facet_sources, add_imaging_cols_empty, shift_cal, copy_cal_map, expand_facet_skymodels_cal, add_cal_facet_sources, apply_dir_indep, create_compressed_mapfile_data, sort_into_Groups, concat_data, make_concat_corr_mapfile, concat_corr, copy_column, add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, solve_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, solve_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, expand_cliplevel_cal, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, copy_merged_parmdb_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, expand_cliplevel_all, average5, create_compressed_mapfile5, sort_average5, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %}premask, wsclean1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, create_expanded_model_mapfile, create_expanded_size_mapfile, wsclean_ft{% endblock full_image_steps %}, corrupt_final_model, copy_final_model_map, subtract_initial_final, shift_diff_model_to_field, copy_diff_model_field_map, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, copy_facet_skymodels_all_map, make_facet_skymodels_cal, shift_empty, copy_empty_map, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, predict_all_facet_sources, copy_predict_all_model_map, corrupt_all_model_data, copy_corrupted_all_model_map, add_all_facet_sources, add_imaging_cols_empty, shift_cal, copy_cal_map, expand_facet_skymodels_cal, add_cal_facet_sources, apply_dir_indep, create_compressed_mapfile_data, sort_into_Groups, concat_data, make_concat_corr_mapfile, concat_corr, copy_column, add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, solve_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, solve_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, solve_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, copy_merged_parmdb_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, sort_average5, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %}premask, wsclean1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, create_expanded_model_mapfile, create_expanded_size_mapfile, wsclean_ft{% endblock full_image_steps %}, corrupt_final_model, copy_final_model_map, subtract_initial_final, shift_diff_model_to_field, copy_diff_model_field_map, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -47,14 +47,6 @@ make_facet_skymodels_all.control.outputkey                 =   outfile
 make_facet_skymodels_all.argument.flags                    =   [fullmodelfile,outfile,{{ vertices_file }}]
 make_facet_skymodels_all.argument.cal_only                 =   False
 
-# Get the clip level in Jy of the lowest-freq model for full facet, length = 1
-select_single_cliplevel_all.control.kind                   =   plugin
-select_single_cliplevel_all.control.type                   =   filterMapfile
-select_single_cliplevel_all.control.mapfile_in             =   make_facet_skymodels_all.output.clip_level_jy.mapfile
-select_single_cliplevel_all.control.mapfile_dir            =   {{ mapfile_dir }}
-select_single_cliplevel_all.control.filename               =   clip_level_jy_all.datamap
-select_single_cliplevel_all.control.index                  =   0
-
 # copy mapfile with facet-skymodels to known name, length = nbands
 copy_facet_skymodels_all_map.control.kind                  =   plugin
 copy_facet_skymodels_all_map.control.type                  =   copyMapfile
@@ -72,14 +64,6 @@ make_facet_skymodels_cal.argument.cal_only                 =   True
 make_facet_skymodels_cal.argument.facet_ra                 =   {{ ra }}
 make_facet_skymodels_cal.argument.facet_dec                =   {{ dec }}
 make_facet_skymodels_cal.argument.cal_radius_deg           =   {{ cal_radius_deg }}
-
-# Get the clip level in Jy of the lowest-freq model for cal-data, length = 1
-select_single_cliplevel_cal.control.kind                   =   plugin
-select_single_cliplevel_cal.control.type                   =   filterMapfile
-select_single_cliplevel_cal.control.mapfile_in             =   make_facet_skymodels_cal.output.clip_level_jy.mapfile
-select_single_cliplevel_cal.control.mapfile_dir            =   {{ mapfile_dir }}
-select_single_cliplevel_cal.control.filename               =   clip_level_jy_cal.datamap
-select_single_cliplevel_cal.control.index                  =   0
 
 # shift full-res data to facet position, length = nfiles
 shift_empty.control.type                                   =   dppp
@@ -221,7 +205,7 @@ create_compressed_mapfile_data.control.mapfile_in          =   shift_cal.output.
 create_compressed_mapfile_data.control.mapfile_dir         =   {{ mapfile_dir }}
 create_compressed_mapfile_data.control.filename            =   concat_input.datamap
 
-# sort compressed mapfile so that there is one group pre timestamp, length = ntimes
+# sort compressed mapfile so that there is one group per timestamp, length = ntimes
 sort_into_Groups.control.type                              =   sort_times_into_freqGroups
 sort_into_Groups.argument.flags                            =   [create_compressed_mapfile_data.output.mapfile]
 sort_into_Groups.argument.filename                         =   sorted_groups.datamap
@@ -789,14 +773,6 @@ apply_amp1.argument.parmdb                                 =   inputparmdb
 apply_amp1.argument.replace-sourcedb                       =   True
 apply_amp1.argument.replace-parmdb                         =   True
 
-# expand the select_single_cliplevel_cal mapfile to all time-steps, length = ntimes
-expand_cliplevel_cal.control.kind                          =   plugin
-expand_cliplevel_cal.control.type                          =   expandMapfile
-expand_cliplevel_cal.control.mapfile_in                    =   select_single_cliplevel_cal.output.mapfile
-expand_cliplevel_cal.control.mapfile_to_match              =   concat_data.output.mapfile
-expand_cliplevel_cal.control.mapfile_dir                   =   input.output.mapfile_dir
-expand_cliplevel_cal.control.filename                      =   expand_cliplevel_cal.datamap
-
 ########## end of third round of selfcal
 ########## start of fourth round of selfcal
 
@@ -1214,14 +1190,6 @@ apply_dir_dep_slow.argument.catalog                        =   {{ skymodel_dir }
 apply_dir_dep_slow.argument.parmdb                         =   inputparmdb
 apply_dir_dep_slow.argument.replace-sourcedb               =   True
 apply_dir_dep_slow.argument.replace-parmdb                 =   True
-
-# expand the select_single_cliplevel_all mapfile to all time-steps, length = nfiles
-expand_cliplevel_all.control.kind                          =   plugin
-expand_cliplevel_all.control.type                          =   expandMapfile
-expand_cliplevel_all.control.mapfile_in                    =   select_single_cliplevel_all.output.mapfile
-expand_cliplevel_all.control.mapfile_to_match              =   shift_empty.output.mapfile
-expand_cliplevel_all.control.mapfile_dir                   =   input.output.mapfile_dir
-expand_cliplevel_all.control.filename                      =   expand_cliplevel_all.datamap
 
 # average the corrected data, length = nfiles
 average5.control.type                                      =   dppp

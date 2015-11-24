@@ -18,6 +18,15 @@ def plugin_main(args, **kwargs):
     check_basename : Bool (str) , optional
         Check if the basenames (see os.path.basename()) minus extension match
         default = True
+    join_groups : int (str), optional
+        If it is set, then join so many groups into one new group. (Gives fewer 
+        groups but more files per group than in mapfile_groups.)
+        default = keep same grouping as in mapfile_groups
+    join_max_files : int (str), optional
+        If it is set, then try to join as many groups together before the number of 
+        files per group woud exceed "join_max_files". Similar to "join_groups", but 
+        the number of joind groups is not fixed but depends on the number of files 
+        per group. Mutaully exclusive with "join_groups"!
     mapfile_dir : str
         Directory for output mapfile
     filename: str
@@ -57,6 +66,41 @@ def plugin_main(args, **kwargs):
             inindex += 1            
         map_out.data.append(MultiDataProduct(group.host, grouplist, skip))
     assert inindex == len(inmap)
+
+    if 'join_groups' in kwargs:
+        if 'join_max_files' in kwargs:
+            raise ValueError("PipelineStep_reGroupMapfile: \"join_groups\" and \"join_max_files\" are mutually exclusive!")
+        groups_to_join =  int(kwargs['join_groups'])
+        if groups_to_join > 1:
+            newmap = MultiDataMap([])
+            for start_idx in xrange(0,len(map_out),groups_to_join):
+                end_idx = min((start_idx+groups_to_join),len(map_out))
+                grouplist = []
+                for group in map_out[start_idx:end_idx]:
+                    grouplist.extend(group.file)
+                    if group.skip:
+                        raise ValueError("PipelineStep_reGroupMapfile: Found group that should be skipped! "
+                                         "(I.e. there is probably something wrong with your data!)")
+                newmap.data.append(MultiDataProduct(map_out[start_idx].host, grouplist, False))
+            map_out = newmap
+    elif 'join_max_files' in kwargs:
+        max_files =  int(kwargs['join_max_files'])
+        newmap = MultiDataMap([])
+        grouplist = map_out[0].file
+        grouphost = map_out[0].host
+        for gindex in xrange(1,len(map_out)):
+            if map_out[gindex].skip:
+                raise ValueError("PipelineStep_reGroupMapfile: Found group that should be skipped! "
+                                 "(I.e. there is probably something wrong with your data!)")
+            if (len(grouplist)+len(map_out[gindex].file)) > max_files:
+                newmap.data.append(MultiDataProduct(grouphost, grouplist, False))
+                grouplist = map_out[gindex].file
+                grouphost = map_out[gindex].host
+            else:
+               grouplist.extend(map_out[gindex].file)
+        # add the final (partial?) group to the map
+        newmap.data.append(MultiDataProduct(grouphost, grouplist, False))
+        map_out = newmap
 
     fileid = os.path.join(mapfile_dir, filename)
     map_out.save(fileid)
