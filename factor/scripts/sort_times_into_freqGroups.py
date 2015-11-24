@@ -237,7 +237,7 @@ if __name__ == '__main__':
     opt.add_option('-v', '--verbose', help='Go Vebose! (default=False)', action='store_true', default=False)
     opt.add_option('-r', '--randomize', help='Randomize order of the input files. (default=False)', action='store_true', default=False)
     opt.add_option('-d', '--decimate', help='Remove every 10th file (after randomization if that is done). (default=False)', action='store_true', default=False)
-    opt.add_option('-n', '--numbands', help='Numboer of how many files should be grouped togetherin frequency. (default=all files in one group)', type='int', default=-1)
+    opt.add_option('-n', '--numbands', help='Number of how many files should be grouped together in frequency. (default=all files in one group)', type='int', default=-1)
     opt.add_option('-f', '--filename', help='Name for the mapfiles to write. (default=\"test.mapfile\")', type='string', default='test.mapfile')
 
     (options, args) = opt.parse_args()
