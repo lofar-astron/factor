@@ -425,7 +425,7 @@ def thiessen(directions_list, bounds_scale=0.5, band=None, check_edges=False,
     points = points.T
 
     # Generate array of outer points used to constrain the outer facets
-    nouter = 256
+    nouter = 64
     means = np.ones((nouter, 2)) * points.mean(axis=0)
     offsets = []
     angles = [np.pi/(nouter/2.0)*i for i in range(0, nouter)]
@@ -439,7 +439,7 @@ def thiessen(directions_list, bounds_scale=0.5, band=None, check_edges=False,
         log.debug('Bounds scale too low. Setting to 0.5')
         bounds_scale = 0.5
     thiessen_polys = []
-    while bounds_scale > 0.35:
+    while bounds_scale > 0.4:
         thiessen_polys_prev = thiessen_polys[:]
         try:
             x_scale, y_scale = (points.min(axis=0) - points.max(axis=0)) * bounds_scale
