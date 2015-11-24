@@ -424,24 +424,36 @@ def thiessen(directions_list, bounds_scale=0.5, band=None, check_edges=False,
     points, midRA, midDec = getxy(directions_list)
     points = points.T
 
-    x_scale, y_scale = (points.min(axis=0) - points.max(axis=0)) * bounds_scale
+    # Reduce the scale until problems occur
+    thiessen_polys = []
+    while True:
+        try:
+            thiessen_polys_prev = thiessen_polys[:]
 
-    means = np.ones((32, 2)) * points.mean(axis=0)
+            x_scale, y_scale = (points.min(axis=0) - points.max(axis=0)) * bounds_scale
 
-    radius = np.sqrt(x_scale**2 + y_scale**2)
-    angles = [np.pi/16.0*i for i in range(0, 32)]
-    offsets = []
-    for ang in angles:
-        offsets.append([np.cos(ang), np.sin(ang)])
-    scale_offsets = radius * np.array(offsets)
-    outer_box = means + scale_offsets
+            means = np.ones((32, 2)) * points.mean(axis=0)
 
-    points = np.vstack([points, outer_box])
-    tri = Delaunay(points)
-    circumcenters = np.array([_circumcenter(tri.points[t])
-                              for t in tri.vertices])
-    thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
-                      for n in range(len(points) - 32)]
+            radius = np.sqrt(x_scale**2 + y_scale**2)
+            angles = [np.pi/16.0*i for i in range(0, 32)]
+            offsets = []
+            for ang in angles:
+                offsets.append([np.cos(ang), np.sin(ang)])
+            scale_offsets = radius * np.array(offsets)
+            outer_box = means + scale_offsets
+
+            points = np.vstack([points, outer_box])
+            tri = Delaunay(points)
+            circumcenters = np.array([_circumcenter(tri.points[t])
+                                      for t in tri.vertices])
+            thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
+                              for n in range(len(points) - 32)]
+            bounds_scale *= 0.95
+        except IndexError:
+            # IndexError indicates problem with triangle vertices. Use previous
+            # polygons
+            thiessen_polys = thiessen_polys_prev
+            break
 
     # Check for sources near / on facet edges and adjust regions accordingly
     if has_shapely and check_edges:
