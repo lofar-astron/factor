@@ -237,13 +237,17 @@ class FacetImage(Operation):
             'final_model_rootnames.datamap')
 
         # Delete temp data
-        self.direction.cleanup_mapfiles = [
-            os.path.join(self.mapfile_dir, 'shifted_empty_final_bands.datamap')]
-        if not self.parset['keep_facet_data'] and self.direction.name != 'target':
-            # Add calibrated data for the facet to files to be deleted. These are
-            # only needed if the user wants to reimage by hand (e.g., with a
-            # different weighting. They are always kept for the target
+        if not self.parset['keep_avg_facet_data'] and self.direction.name != 'target':
+            # Add averaged calibrated data for the facet to files to be deleted.
+            # These are only needed if the user wants to reimage by hand (e.g.,
+            # with a different weighting). They are always kept for the target
             self.direction.cleanup_mapfiles.append(
                 os.path.join(self.mapfile_dir, 'concat_averaged_input.datamap'))
+        if not self.parset['keep_unavg_facet_data']:
+            # Add unaveraged calibrated data for the facet to files to be deleted.
+            # These are only needed if the user wants to phase shift them to
+            # another direction (e.g., to combine several facets together)
+            self.direction.cleanup_mapfiles.append(
+                os.path.join(self.mapfile_dir, 'shifted_empty_final_bands.datamap'))
         self.direction.cleanup()
 
