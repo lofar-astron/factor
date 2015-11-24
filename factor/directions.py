@@ -424,7 +424,8 @@ def thiessen(directions_list, bounds_scale=0.5, band=None, check_edges=False,
     points, midRA, midDec = getxy(directions_list)
     points = points.T
 
-    # Reduce the scale until problems occur
+    # Reduce the scale as much as possible to minimize the size of the outer
+    # facets
     thiessen_polys = []
     while True:
         try:
@@ -449,6 +450,7 @@ def thiessen(directions_list, bounds_scale=0.5, band=None, check_edges=False,
             thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
                               for n in range(len(points) - 32)]
             bounds_scale *= 0.95
+            log.info('Bounds scale: {}'.format(bounds_scale))
         except IndexError:
             # IndexError indicates problem with triangle vertices. Use previous
             # polygons
