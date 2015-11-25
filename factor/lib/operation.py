@@ -72,6 +72,11 @@ class Operation(object):
             self.name)
         create_directory(self.pipeline_runtime_dir)
 
+       # Directory that holds the mapfiles
+        self.pipeline_mapfile_dir = os.path.join(self.pipeline_runtime_dir,
+            self.direction.name, 'mapfiles')
+        create_directory(self.pipeline_mapfile_dir)
+
         # Directory that holds parset and config files
         self.pipeline_parset_dir = os.path.join(self.pipeline_runtime_dir,
             self.direction.name)
