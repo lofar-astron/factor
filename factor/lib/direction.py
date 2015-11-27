@@ -18,55 +18,51 @@ class Direction(object):
     All attributes needed by the pipeline templates should be set on the class
     instance so that they can be passed with self.__dict__
 
+    Parameters
+    ----------
+    name : str
+        Name of direction
+    ra : float
+        RA in degrees of direction center
+    dec : float
+        Dec in degrees of direction center
+    atrous_do : bool
+        Fit to wavelet images in PyBDSM?
+    mscale_field_do : bool
+        Use multiscale clean for facet field?
+    cal_imsize : int
+        Size of calibrator image in 1.5 arcsec pixels
+    solint_p : int
+        Solution interval for phase calibration (# of time slots)
+    solint_a : int
+        Solution interval for amplitude calibration (# of time slots)
+    field_imsize : int
+        Size of facet image in 1.5 arcsec pixels
+    dynamic_range : str
+        LD (low dynamic range) or HD (high dynamic range)
+    region_selfcal : str
+        Region for clean mask for calibrator selfcal
+    region_field : str
+        Region for clean mask for facet image
+    peel_skymodel : str
+        Sky model for peeling
+    outlier_do : bool
+        If True, peel source without selfcal
+    factor_working_dir : str
+        Full path of working directory
+    make_final_image : bool, optional
+        Make final image of this direction, after all directions have been
+        selfcaled?
+    cal_size_deg : float, optional
+        Size in degrees of calibrator source(s)
+    cal_flux_jy : float, optional
+        Apparent flux in Jy of calibrator source
+
     """
     def __init__(self, name, ra, dec, atrous_do=False, mscale_field_do=False, cal_imsize=512,
         solint_p=1, solint_a=30, field_imsize=2048, dynamic_range='LD', region_selfcal='',
         region_field='', peel_skymodel='', outlier_do=False, factor_working_dir='',
         make_final_image=False, cal_size_deg=None, cal_flux_jy=None):
-        """
-        Create Direction object
-
-        Parameters
-        ----------
-        name : str
-            Name of direction
-        ra : float
-            RA in degrees of direction center
-        dec : float
-            Dec in degrees of direction center
-        atrous_do : bool
-            Fit to wavelet images in PyBDSM?
-        mscale_field_do : bool
-            Use multiscale clean for facet field?
-        cal_imsize : int
-            Size of calibrator image in 1.5 arcsec pixels
-        solint_p : int
-            Solution interval for phase calibration (# of time slots)
-        solint_a : int
-            Solution interval for amplitude calibration (# of time slots)
-        field_imsize : int
-            Size of facet image in 1.5 arcsec pixels
-        dynamic_range : str
-            LD (low dynamic range) or HD (high dynamic range)
-        region_selfcal : str
-            Region for clean mask for calibrator selfcal
-        region_field : str
-            Region for clean mask for facet image
-        peel_skymodel : str
-            Sky model for peeling
-        outlier_do : bool
-            If True, peel source without selfcal
-        factor_working_dir : str
-            Full path of working directory
-        make_final_image : bool, optional
-            Make final image of this direction, after all directions have been
-            selfcaled?
-        cal_size_deg : float, optional
-            Size in degrees of calibrator source(s)
-        cal_flux_jy : float, optional
-            Apparent flux in Jy of calibrator source
-
-        """
         # Handle input args
         self.name = name
         if type(ra) is str:
@@ -158,6 +154,23 @@ class Direction(object):
 
         self.cal_wplanes = self.set_wplanes(self.cal_imsize)
         self.facet_wplanes = self.set_wplanes(self.facet_imsize)
+
+
+    def set_image_channels(self, nbands, nbands_per_channel):
+        """
+        Sets number of channels for wide-band imaging
+
+        Parameters
+        ----------
+        nbands : int
+            Number of bands
+
+        """
+        if nbands > 5:
+            self.nchannels = int(round(float(nbands)/
+                float(nbands_per_channel)))
+        else:
+            self.nchannels = 1
 
 
     def set_wplanes(self, imsize):
@@ -257,12 +270,13 @@ class Direction(object):
         Sets the averaging step sizes and solution intervals for selfcal
 
         The solution-interval scaling is done so that sources with total flux
-        densities of 2 Jy have a fast interval of 4 time slots and a slow
-        interval of 240 time slots. The scaling is currently linear with flux
-        (and thus we accept lower-SNR solutions for the fainter sources).
+        densities below 1.4 Jy at the highest frequency have a fast interval of
+        8 time slots and a slow interval of 240 time slots for a bandwidth of 4
+        bands. The fast intervals are scaled with the bandwidth and flux as
+        nbands^-0.5 and flux^2. The slow intervals are scaled as flux^2.
 
-        Note: the frequency step must be an even divisor of the number of
-        channels
+        Note: the frequency step for averaging must be an even divisor of the
+        number of channels
 
         Parameters
         ----------

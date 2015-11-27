@@ -65,25 +65,22 @@ def call_generic_pipeline(op_name, direction_name, parset, config, logbasename,
 class Scheduler(object):
     """
     The scheduler runs all jobs sent to it in parallel
+
+    Parameters
+    ----------
+    genericpipeline_executable : str
+        Path to genericpipeline.py executable
+    max_procs : int, optional
+        Limit the number of parallel processes to this number
+    name : str, optional
+        Name of the scheduler
+    dry_run : bool, optional
+        If True, the pipelines are not run but all parsets and config files
+        are made as normal
+
     """
     def __init__(self, genericpipeline_executable, max_procs=1, name='scheduler',
         dry_run=False):
-        """
-        Create Scheduler object
-
-        Parameters
-        ----------
-        genericpipeline_executable : str
-            Path to genericpipeline.py executable
-        max_procs : int, optional
-            Limit the number of parallel processes to this number
-        name : str, optional
-            Name of the scheduler
-        dry_run : bool, optional
-            If True, the pipelines are not run but all parsets and config files
-            are made as normal
-
-        """
         self.genericpipeline_executable = genericpipeline_executable
         self.max_procs = max_procs
         self.name = name

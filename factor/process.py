@@ -68,18 +68,16 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
     # Run initial sky model generation and create empty datasets
     if len(bands_initsubtract) > 0:
-        input_bands_full = [b for b in bands_initsubtract if b.skymodel_dirindep is None]
-        if len(input_bands_full) > 0:
-            log.debug('Running full initial subtract operation for bands: {0}'.
-                format([b.name for b in input_bands_full]))
-            field = factor.cluster.divide_nodes([field],
-                parset['cluster_specific']['node_list'],
-                parset['cluster_specific']['ndir_per_node'],
-                parset['cluster_specific']['nimg_per_node'],
-                parset['cluster_specific']['ncpu'],
-                parset['cluster_specific']['fmem'])[0]
-            op = InitSubtract(parset, input_bands_full, field)
-            scheduler.run(op)
+        log.info('Running initsubtract operation for bands: {0}'.
+            format([b.name for b in bands_initsubtract]))
+        field = factor.cluster.divide_nodes([field],
+            parset['cluster_specific']['node_list'],
+            parset['cluster_specific']['ndir_per_node'],
+            parset['cluster_specific']['nimg_per_node'],
+            parset['cluster_specific']['ncpu'],
+            parset['cluster_specific']['fmem'])[0]
+        op = InitSubtract(parset, bands_initsubtract, field)
+        scheduler.run(op)
     else:
         log.info("Sky models and SUBTRACTED_DATA_ALL found for all bands. "
             "Skipping initsubtract operation...")
@@ -92,7 +90,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         dry_run, test_run, reset_directions)
 
     # Run selfcal and subtract operations on directions
-    first_pass = True
+    set_sub_data_colname = True
     for gindx, direction_group in enumerate(direction_groups):
         log.info('Processing {0} direction(s) in Group {1}'.format(
             len(direction_group), gindx+1))
@@ -133,12 +131,12 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             for d in direction_group:
                 d.selfcal_ok = True
         direction_group_ok = [d for d in direction_group if d.selfcal_ok]
-        if first_pass:
+        if set_sub_data_colname:
             if len(direction_group_ok) > 0:
                 for d in directions:
                     if d.name != direction_group_ok[0].name:
                         d.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
-                first_pass = False
+                set_sub_data_colname = False
 
         # Combine the nodes and cores for the serial subtract operations
         direction_group_ok = factor.cluster.combine_nodes(direction_group_ok,
@@ -284,9 +282,11 @@ def _set_up_bands(parset, log, test_run=False):
     Returns
     -------
     bands : List of Band instances
-        All bands to be used by the run() function
+        All bands to be used by the run() function, ordered from low to high
+        frequency
     bands_initsubtract : List of Band instances
-        Subset of bands for InitSubtract operation
+        Subset of bands for InitSubtract operation, ordered from low to high
+        frequency
 
     """
     log.info('Checking input bands...')
@@ -392,6 +392,7 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
 
     # First check for user-supplied directions file, then for Factor-generated
     # file from a previous run, then for parameters needed to generate it internally
+    initial_skymodel = None
     dir_parset = parset['direction_specific']
     if 'directions_file' in parset:
         directions = factor.directions.directions_read(parset['directions_file'],
@@ -413,9 +414,11 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
                     'separation_max_arcmin')
                 sys.exit(1)
         else:
-            # Make directions from dir-indep sky models using flux and size parameters
+            # Make directions from dir-indep sky model of highest-frequency
+            # band, as it has the smallest field of view
             log.info("No directions file given. Selecting directions internally...")
-            parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(bands,
+            initial_skymodel = factor.directions.make_initial_skymodel(bands[-1])
+            parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(initial_skymodel,
                 dir_parset['flux_min_jy'], dir_parset['size_max_arcmin'],
                 dir_parset['separation_max_arcmin'], directions_max_num=dir_parset['max_num'],
                 interactive=parset['interactive'])
@@ -453,7 +456,10 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         target_dec = None
         target_radius_arcmin = None
 
-    factor.directions.thiessen(directions, band=bands[0],
+    if initial_skymodel is None and dir_parset['check_edges']:
+        initial_skymodel = factor.directions.make_initial_skymodel(bands[-1])
+
+    factor.directions.thiessen(directions, s=initial_skymodel,
         check_edges=dir_parset['check_edges'], target_ra=target_ra,
         target_dec=target_dec, target_radius_arcmin=target_radius_arcmin)
 
@@ -467,12 +473,7 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         direction.set_image_sizes(test_run=test_run)
 
         # Set number of bands and channels for images (affects wide-band clean)
-        direction.nbands = len(bands)
-        if direction.nbands > 5:
-            direction.nchannels = int(round(float(direction.nbands)/
-                float(parset['wsclean_nbands'])))
-        else:
-            direction.nchannels = 1
+        direction.set_image_channels(len(bands))
 
         # Set field center
         direction.field_ra = field.ra
@@ -484,7 +485,7 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         # Set transfer flag
         direction.transfer_flags = parset['transfer_flags']
 
-        # Load previous state (if any)
+        # Load previously completed operations (if any)
         direction.load_state()
 
         # Reset state if specified
@@ -537,7 +538,6 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
 
     # Divide directions into groups for selfcal
     direction_groups = factor.directions.group_directions(selfcal_directions,
-        one_at_a_time=parset['direction_specific']['one_at_a_time'],
         n_per_grouping=parset['direction_specific']['groupings'],
         allow_reordering=parset['direction_specific']['allow_reordering'])
 

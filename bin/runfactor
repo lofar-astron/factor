@@ -23,7 +23,7 @@ import sys
 
 
 if __name__ == '__main__':
-    parser = optparse.OptionParser(usage='%prog [-v|-q] parset',
+    parser = optparse.OptionParser(usage='%prog parset',
             version='%%prog %s' % (version))
     parser.add_option('-d', help='enable dry-run mode', action='store_true', default=False)
     parser.add_option('-q', help='enable quiet mode', action='store_true', default=False)

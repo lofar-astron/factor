@@ -5,6 +5,7 @@ import os
 import numpy as np
 import logging
 from factor.lib.direction import Direction
+from factor.lib.polygon import Polygon
 import sys
 from scipy.spatial import Delaunay
 
@@ -117,7 +118,7 @@ def directions_read(directions_file, factor_working_dir):
     return data
 
 
-def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
+def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
     directions_separation_max_arcmin, directions_max_num=None,
     interactive=False):
     """
@@ -125,8 +126,8 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
 
     Parameters
     ----------
-    bands : list of Band objects
-        Input Bands with dir-indep skymodels
+    s : LSMTool SkyModel object
+        Skymodel made by grouping clean components of dir-independent model
     flux_min_Jy : float
         Minimum flux for a calibrator in Jy
     size_max_arcmin : float
@@ -147,15 +148,6 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     """
     directions_file = 'factor_directions.txt'
     ds9_directions_file = 'factor_directions_ds9.reg'
-
-    # Use sky model of highest-frequency band, as it has the smallest field of
-    # view.
-    freqs = [band.freq for band in bands]
-    max_freq_indx = np.argmax(freqs)
-    band = bands[max_freq_indx]
-
-    # Load sky model and filter it
-    s = make_initial_skymodel(band)
 
     # Filter larger patches
     sizes = s.getPatchSizes(units='arcmin', weight=True)
@@ -221,13 +213,15 @@ def make_initial_skymodel(band):
 
     """
     import lsmtool
+
+    # Set LSMTool logging level
     lsmtool._logging.setLevel('debug')
 
-    # Load sky model and filter it
+    # Load sky model
     s = lsmtool.load(band.skymodel_dirindep)
 
-    # Group to clean components by thresholding after convolving model with
-    # 1 arcmin beam
+    # Group clean components by thresholding after convolving model with
+    # 1-arcmin beam
     s.group('threshold', FWHM='60.0 arcsec', root='facet')
     s.remove('Patch = patch_*', force=True) # Remove sources that did not threshold
     if len(s) == 0:
@@ -244,14 +238,10 @@ def make_initial_skymodel(band):
     dist = s.getDistance(band.ra, band.dec, byPatch=True)
     s.remove(dist > band.fwhm_deg, aggregate=True)
 
-    # Save this sky model for later checks of sources falling on facet edges
-    s.write(fileName='results/initial.skymodel', clobber=True)
-
     return s
 
 
-def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
-    allow_reordering=True):
+def group_directions(directions n_per_grouping={'1':0}, allow_reordering=True):
     """
     Sorts directions into groups that can be selfcaled simultaneously
 
@@ -262,8 +252,6 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
     ----------
     directions : list of Direction objects
         List of input directions to group
-    one_at_a_time : bool, optional
-        If True, run one direction at a time
     n_per_grouping : dict, optional
         Dict specifying the total number of sources at each grouping level. The
         sources at each grouping level can be reordered to maximize the
@@ -278,10 +266,8 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
         List of direction groups
 
     """
-    from random import shuffle
-
     direction_groups = []
-    if one_at_a_time or n_per_grouping == {'1': 0}:
+    if n_per_grouping == {'1': 0}:
         for d in directions:
             direction_groups.append([d])
         log.debug('Processing each direction in series')
@@ -371,6 +357,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
                             wsep_new.pop(np.argmax(wsep_new))
                             wsep_prev = [p+n for p, n in zip(wsep_prev, wsep_new)]
                     direction_groups[i] = new_group
+
         log.debug('Processing directions in the following groups:')
         for i, group in enumerate(direction_groups):
             print('Group {0}: {1}'.format(i+1, [d.name for d in group]))
@@ -378,7 +365,7 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
     return direction_groups
 
 
-def thiessen(directions_list, bounds_scale=0.5, band=None, check_edges=False,
+def thiessen(directions_list, bounds_scale=0.5, s=None, check_edges=False,
     target_ra=None, target_dec=None, target_radius_arcmin=None):
     """
     Return list of thiessen polygons and their widths in degrees
@@ -389,7 +376,7 @@ def thiessen(directions_list, bounds_scale=0.5, band=None, check_edges=False,
         List of input directions
     bounds_scale : int, optional
         Scale to use for bounding box
-    band : Band object, optional
+    s : LSMTool SkyModel object, optional
         Band to use to check for source near facet edges
     check_edges : bool, optional
         If True, check whether any know source falls on a facet edge. If sources
@@ -474,13 +461,6 @@ def thiessen(directions_list, bounds_scale=0.5, band=None, check_edges=False,
     # Check for sources near / on facet edges and adjust regions accordingly
     if has_shapely and check_edges:
         log.info('Adjusting facets to avoid sources...')
-        if os.path.exists('results/initial.skymodel'):
-            s = lsmtool.load('results/initial.skymodel')
-        elif band is not None:
-            s = make_initial_skymodel(band)
-        else:
-            log.error('A band must be given for edge checking')
-            sys.exit(1)
         RA, Dec = s.getPatchPositions(asArray=True)
         sx, sy = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
         sizes = s.getPatchSizes(units='degree').tolist()
@@ -821,8 +801,6 @@ def getxy(directions_list):
         Dec values
 
     """
-    import numpy as np
-
     if len(directions_list) == 0:
         return np.array([0, 0]), 0, 0
 
@@ -881,8 +859,6 @@ def radec2xy(RA, Dec, refRA=None, refDec=None):
         values
 
     """
-    import numpy as np
-
     x = []
     y = []
     if refRA is None:
@@ -927,8 +903,6 @@ def xy2radec(x, y, refRA=0.0, refDec=0.0):
         values
 
     """
-    import numpy as np
-
     RA = []
     Dec = []
 
@@ -961,7 +935,6 @@ def makeWCS(refRA, refDec):
 
     """
     from astropy.wcs import WCS
-    import numpy as np
 
     w = WCS(naxis=2)
     w.wcs.crpix = [1000, 1000]
@@ -1003,180 +976,21 @@ def calculateSeparation(ra1, dec1, ra2, dec2):
     return coord1.separation(coord2)
 
 
-# The following taken from
-# http://code.activestate.com/recipes/578381-a-point-in-polygon-program-sw-sloan-algorithm/
-def _det(xvert, yvert):
-    """
-    Compute twice the area of the triangle defined by points with using
-    determinant formula.
-
-    Parameters
-    ----------
-    xvert : array
-        A vector of nodal x-coords (array-like).
-    yvert : array
-        A vector of nodal y-coords (array-like).
-
-    Returns
-    -------
-    area : float
-        Twice the area of the triangle defined by the points.
-        _det is positive if points define polygon in anticlockwise order.
-        _det is negative if points define polygon in clockwise order.
-        _det is zero if at least two of the points are concident or if
-        all points are collinear.
-
-    """
-    xvert = np.asfarray(xvert)
-    yvert = np.asfarray(yvert)
-    x_prev = np.concatenate(([xvert[-1]], xvert[:-1]))
-    y_prev = np.concatenate(([yvert[-1]], yvert[:-1]))
-    return np.sum(yvert * x_prev - xvert * y_prev, axis=0)
-
-
-class Polygon:
-    """
-    Polygon object.
-
-    Parameters
-    ----------
-    x : array
-        A sequence of nodal x-coords.
-    y : array
-        A sequence of nodal y-coords.
-
-    """
-
-    def __init__(self, x, y):
-        if len(x) != len(y):
-            raise IndexError('x and y must be equally sized.')
-        self.x = np.asfarray(x)
-        self.y = np.asfarray(y)
-        # Closes the polygon if were open
-        x1, y1 = x[0], y[0]
-        xn, yn = x[-1], y[-1]
-        if x1 != xn or y1 != yn:
-            self.x = np.concatenate((self.x, [x1]))
-            self.y = np.concatenate((self.y, [y1]))
-        # Anti-clockwise coordinates
-        if _det(self.x, self.y) < 0:
-            self.x = self.x[::-1]
-            self.y = self.y[::-1]
-
-    def is_inside(self, xpoint, ypoint, smalld=1e-12):
-        '''Check if point is inside a general polygon.
-
-        Input parameters:
-
-        xpoint -- The x-coord of the point to be tested.
-        ypoint -- The y-coords of the point to be tested.
-        smalld -- A small float number.
-
-        xpoint and ypoint could be scalars or array-like sequences.
-
-        Output parameters:
-
-        mindst -- The distance from the point to the nearest point of the
-                  polygon.
-                  If mindst < 0 then point is outside the polygon.
-                  If mindst = 0 then point in on a side of the polygon.
-                  If mindst > 0 then point is inside the polygon.
-
-        Notes:
-
-        An improved version of the algorithm of Nordbeck and Rydstedt.
-
-        REF: SLOAN, S.W. (1985): A point-in-polygon program. Adv. Eng.
-             Software, Vol 7, No. 1, pp 45-47.
-
-        '''
-        xpoint = np.asfarray(xpoint)
-        ypoint = np.asfarray(ypoint)
-        # Scalar to array
-        if xpoint.shape is tuple():
-            xpoint = np.array([xpoint], dtype=float)
-            ypoint = np.array([ypoint], dtype=float)
-            scalar = True
-        else:
-            scalar = False
-        # Check consistency
-        if xpoint.shape != ypoint.shape:
-            raise IndexError('x and y has different shapes')
-        # If snear = True: Dist to nearest side < nearest vertex
-        # If snear = False: Dist to nearest vertex < nearest side
-        snear = np.ma.masked_all(xpoint.shape, dtype=bool)
-        # Initialize arrays
-        mindst = np.ones_like(xpoint, dtype=float) * np.inf
-        j = np.ma.masked_all(xpoint.shape, dtype=int)
-        x = self.x
-        y = self.y
-        n = len(x) - 1  # Number of sides/vertices defining the polygon
-        # Loop over each side defining polygon
-        for i in range(n):
-            d = np.ones_like(xpoint, dtype=float) * np.inf
-            # Start of side has coords (x1, y1)
-            # End of side has coords (x2, y2)
-            # Point has coords (xpoint, ypoint)
-            x1 = x[i]
-            y1 = y[i]
-            x21 = x[i + 1] - x1
-            y21 = y[i + 1] - y1
-            x1p = x1 - xpoint
-            y1p = y1 - ypoint
-            # Points on infinite line defined by
-            #     x = x1 + t * (x1 - x2)
-            #     y = y1 + t * (y1 - y2)
-            # where
-            #     t = 0    at (x1, y1)
-            #     t = 1    at (x2, y2)
-            # Find where normal passing through (xpoint, ypoint) intersects
-            # infinite line
-            t = -(x1p * x21 + y1p * y21) / (x21 ** 2 + y21 ** 2)
-            tlt0 = t < 0
-            tle1 = (0 <= t) & (t <= 1)
-            # Normal intersects side
-            d[tle1] = ((x1p[tle1] + t[tle1] * x21) ** 2 +
-                       (y1p[tle1] + t[tle1] * y21) ** 2)
-            # Normal does not intersects side
-            # Point is closest to vertex (x1, y1)
-            # Compute square of distance to this vertex
-            d[tlt0] = x1p[tlt0] ** 2 + y1p[tlt0] ** 2
-            # Store distances
-            mask = d < mindst
-            mindst[mask] = d[mask]
-            j[mask] = i
-            # Point is closer to (x1, y1) than any other vertex or side
-            snear[mask & tlt0] = False
-            # Point is closer to this side than to any other side or vertex
-            snear[mask & tle1] = True
-        if np.ma.count(snear) != snear.size:
-            raise IndexError('Error computing distances')
-        mindst **= 0.5
-        # Point is closer to its nearest vertex than its nearest side, check if
-        # nearest vertex is concave.
-        # If the nearest vertex is concave then point is inside the polygon,
-        # else the point is outside the polygon.
-        jo = j.copy()
-        jo[j == 0] -= 1
-        area = _det([x[j + 1], x[j], x[jo - 1]], [y[j + 1], y[j], y[jo - 1]])
-        mindst[~snear] = np.copysign(mindst, area)[~snear]
-        # Point is closer to its nearest side than to its nearest vertex, check
-        # if point is to left or right of this side.
-        # If point is to left of side it is inside polygon, else point is
-        # outside polygon.
-        area = _det([x[j], x[j + 1], xpoint], [y[j], y[j + 1], ypoint])
-        mindst[snear] = np.copysign(mindst, area)[snear]
-        # Point is on side of polygon
-        mindst[np.fabs(mindst) < smalld] = 0
-        # If input values were scalar then the output should be too
-        if scalar:
-            mindst = float(mindst)
-        return mindst
-
-
 def read_vertices(filename):
     """
     Returns facet vertices
+
+    Parameters
+    ----------
+    filename : str
+        Filename of pickle file that contains direction dictionary with
+        vertices
+
+    Returns
+    -------
+    vertices : list
+        List of facet vertices
+
     """
     import pickle
 
@@ -1188,6 +1002,22 @@ def read_vertices(filename):
 def mask_vertices(mask_im, vertices_file):
     """
     Modify the input image to exclude regions outside of the polygon
+
+    Parameters
+    ----------
+    mask_im : pyrap.images image() object
+        Mask image to modify
+    vertices_file: str
+        Filename of pickle file that contains direction dictionary with
+        vertices
+
+    Returns
+    -------
+    new_im:  pyrap.images image() object
+        Modified mask image
+    bool_mask :  pyrap.images image() object
+        List of facet vertices
+
     """
     import pyrap.images as pim
 

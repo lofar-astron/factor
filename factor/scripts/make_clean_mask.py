@@ -14,7 +14,7 @@ import pickle
 import numpy as np
 import sys
 import os
-from factor.directions import Polygon
+from factor.lib.polygon import Polygon
 
 
 def read_vertices(filename):

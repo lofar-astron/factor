@@ -17,16 +17,6 @@ from lofarpipe.support.data_map import DataMap
 class InitSubtract(Operation):
     """
     Operation to create empty datasets
-
-    Two pipelines can be run, depending on whether the skymodels are present for
-    all bands or not:
-
-    initsubtract_pipeline.parset - runs the full initial subtraction when one
-        or more bands lack skymodels
-
-    initsubtract_subonly_pipeline.parset - runs only a subtract step when all
-        bands have skymodels
-
     """
     def __init__(self, parset, bands, direction):
         super(InitSubtract, self).__init__(parset, bands, direction,

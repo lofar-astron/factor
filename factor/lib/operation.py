@@ -25,22 +25,19 @@ class Operation(object):
     populates the pipeline config and parset templates, and updates the direction
     object with variables needed by later operations.
 
+    Parameters
+    ----------
+    parset : str
+        Parset of operation
+    bands : list of Band objects
+        Bands for this operation
+    direction : Direction object
+        Direction for this operation
+    name : str, optional
+        Name of the operation
+
     """
     def __init__(self, parset, bands, direction, name=None):
-        """
-        Create Operation object
-
-        Parameters
-        ----------
-        parset : str
-            Parset of operation
-        bands : list of Band objects
-            Bands for this operation
-        direction : Direction object
-            Direction for this operation
-        name : str, optional
-            Name of the operation
-        """
         self.parset = parset.copy()
         self.bands = bands
         self.name = name.lower()

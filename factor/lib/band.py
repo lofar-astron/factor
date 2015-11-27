@@ -12,26 +12,24 @@ import numpy as np
 class Band(object):
     """
     The Band object contains parameters needed for each band (MS)
+
+    Parameters
+    ----------
+    MSfile : str
+        Filename of MS
+    factor_working_dir : str
+        Full path of working directory
+    dirindparmdb : str
+        Name of direction-independent instrument parmdb (relative to MSfile)
+    skymodel_dirindep : str
+        Full path of direction-independent sky model
+    test_run : bool, optional
+        If True, use test image sizes
+
     """
     def __init__(self, MSfile, factor_working_dir, dirindparmdb,
         skymodel_dirindep=None, test_run=False):
-        """
-        Create Band object
-
-        Parameters
-        ----------
-        MSfile : str
-            Filename of MS
-        factor_working_dir : str
-            Full path of working directory
-        dirindparmdb : str
-            Name of direction-independent instrument parmdb (relative to MSfile)
-        skymodel_dirindep : str
-            Full path of direction-independent sky model
-        test_run : bool, optional
-            If True, use test image sizes
-
-        """
+        # Set filenames
         self.file = MSfile
         self.msname = self.file.split('/')[-1]
         self.dirindparmdb = os.path.join(self.file, dirindparmdb)
@@ -213,7 +211,7 @@ class Band(object):
                     # RuntimeError indicates column already exists
                     pass
 
-                # Check for SUBTRACTED_DATA_ALL column and calculate mean elevation
+                # Calculate mean elevation
                 tab = pt.table(self.file, ack=False)
                 self.mean_el_rad = np.mean(tab.getcol('AZEL1', rowincr=10000)[:, 1])
                 tab.close()
