@@ -76,8 +76,6 @@ class FacetSelfcal(Operation):
         # Add output datamaps to direction object for later use
         self.direction.input_bands_datamap = os.path.join(self.mapfile_dir,
             'input_bands.datamap')
-        self.direction.shifted_model_data_datamap = os.path.join(self.mapfile_dir,
-            'final_model_data_facet.datamap')
         self.direction.diff_models_field_datamap = os.path.join(self.mapfile_dir,
             'diff_models_field.datamap')
         self.direction.dir_indep_parmdbs_datamap = os.path.join(self.mapfile_dir,
@@ -92,6 +90,10 @@ class FacetSelfcal(Operation):
             'final_image.datamap')
         self.direction.facet_model_mapfile = os.path.join(self.mapfile_dir,
             'final_model_rootnames.datamap')
+        self.wsclean_modelimg_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'expand_wsclean_model')
+        self.wsclean_modelimg_size_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'expand_wsclean_model_size')
         self.verify_subtract_OK_mapfile = os.path.join(self.mapfile_dir,
             'verify_subtract_OK.datamap')
 
@@ -116,6 +118,7 @@ class FacetSelfcal(Operation):
             os.path.join(self.mapfile_dir, 'predict_all_model_bands.datamap'),
             os.path.join(self.mapfile_dir, 'corrupted_all_model_bands.datamap'),
             os.path.join(self.mapfile_dir, 'diff_models_facet.datamap'),
+            os.path.join(self.mapfile_dir, 'final_model_data_facet.datamap'),
             os.path.join(self.pipeline_mapfile_dir, 'concat_data.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat_corr.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat_blavg_data.mapfile'),
@@ -139,10 +142,6 @@ class FacetSelfcal(Operation):
             # another direction (e.g., to combine several facets together)
             self.direction.cleanup_mapfiles.append(
                 os.path.join(self.mapfile_dir, 'shifted_empty_bands.datamap'))
-        if not self.direction.make_final_image:
-            # Add final model data for the facet to files to be deleted. These
-            # are only needed if the facet is to be reimaged
-            self.direction.cleanup_mapfiles.append(self.direction.shifted_model_data_datamap)
         if self.direction.selfcal_ok or not self.parset['exit_on_selfcal_failure']:
             self.log.info('Cleaning up files (direction: {})'.format(self.direction.name))
             self.direction.cleanup()

@@ -116,10 +116,6 @@ def parset_read(parset_file):
         parset_dict['wsclean_nbands'] = 3
     if 'facet_imager' not in parset_dict:
         parset_dict['facet_imager'] = 'wsclean'
-    if 'reimage' in parset_dict:
-        parset_dict['reimage'] = parset.getboolean('global', 'reimage')
-    else:
-        parset_dict['reimage'] = False
     if 'keep_avg_facet_data' in parset_dict:
         parset_dict['keep_avg_facet_data'] = parset.getboolean('global', 'keep_avg_facet_data')
     else:
@@ -177,9 +173,7 @@ def parset_read(parset_file):
         for key, val in zip(keys, vals):
             groupings[key] = int(val)
         parset_dict['direction_specific']['groupings'] = groupings
-        parset_dict['direction_specific']['one_at_a_time'] = False
     else:
-        parset_dict['direction_specific']['one_at_a_time'] = True
         parset_dict['direction_specific']['groupings'] = {'1':0}
     log.info("Using the following groupings for directions: {0}"
         .format(parset_dict['direction_specific']['groupings']))
