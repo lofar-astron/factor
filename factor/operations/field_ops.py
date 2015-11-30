@@ -10,6 +10,7 @@ MakeMosaic : Operation
 
 """
 import os
+import logging
 from factor.lib.operation import Operation
 from lofarpipe.support.data_map import DataMap
 
@@ -103,8 +104,21 @@ class MakeMosaic(Operation):
     """
     Operation to mosiac facet images
     """
-    def __init__(self, parset, direction):
-        super(MakeMosaic, self).__init__(parset, None, direction,
+    def __init__(self, parset, direction, bands=None):
+        super(MakeMosaic, self).__init__(parset, bands, direction,
             name='MakeMosaic')
+        
+        if bands:
+            input_files = [b.files for b in self.bands]
+            input_files_single = []
+            for bandfiles in input_files:
+                for filename in bandfiles:
+                    input_files_single.append(filename)
+        else:
+            self.log.warn("MakeMosaic called without bands, the new pipeline parset may not work.")
+            input_files = []
+            input_files_single = []
 
-        self.parms_dict.update({'input_dir': parset['dir_ms']})
+        self.parms_dict.update({'input_files_single': input_files_single,
+                                'input_files_grouped' : str(input_files),
+                                'input_dir': parset['dir_ms']})
