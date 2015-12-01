@@ -5,17 +5,8 @@ Initial Subtract Operation
 
 This section describes the initial subtract operation of Factor, denoted
 ``initsubtract``, which images each band at high and low resolution to make and subtract
-sky models (two resolutions are used to capture the complete source structure).
-There are two possible pipeline parsets for this operation:
-
-``initsubtract_pipeline.parset``
-    The full initial subtract operation, to be run when the input datasets do
-    not have a ``SUBTRACTED_DATA_ALL`` column nor a sky model.
-
-``initsubtract_subonly_pipeline.parset``
-    A partial initial subtract operation, to be run when the input datasets do
-    not have a ``SUBTRACTED_DATA_ALL`` column but do have a sky model. In this
-    case, only a subtract step is done.
+sky models (two resolutions are used to capture the complete source structure and allow
+imaging of the first side lobe of the primary beam).
 
 
 .. _high_res_images:
@@ -61,9 +52,6 @@ Pipeline Steps
     wsclean_high1, mask_high, wsclean_high2
         High-res WSClean imaging run.
 
-Test data
-    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the image ``RX42_SB070-079.2ch10s.wsclean_high2-image.fits`` in ``Test_run/results/initsubtract/field/``.
-
 
 Make high-res sky models
 ------------------------
@@ -81,10 +69,6 @@ Pipeline Steps
 
     casa_to_bbs_high
         Convert CASA model image to ``makesourcedb`` sky model.
-
-Test data
-    With the model image ``NEP_SB070-079.2ch10s.wsclean_high2-model.fits`` in ``Test_run/results/initsubtract/field/``, this step produces the ``makesourceb`` sky model ``NEP_SB070-079.2ch10s.wsclean_high2-model.casa_to_bbs_high`` in
-    ``Test_run/results/initsubtract/field/``.
 
 
 Subtract high-res models
@@ -106,9 +90,6 @@ Pipeline Steps
     subtract_high
         Call BBS to subtract MODEL_DATA column from DATA column and correct subtracted column
         with dir-independent solutions.
-
-Test data
-    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the ``SUBTRACTED_DATA`` and ``CORRECTED_SUBTRACTED_DATA`` columns in this MS file.
 
 
 .. _low_res_images:
@@ -148,9 +129,6 @@ Pipeline Steps
     wsclean_low1, mask_low, wsclean_low2
         Low-res WSClean imaging run.
 
-Test data
-    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the averaged MS file ``NEP_SB070_079.2ch10s.average`` in ``Test_run/results/initsubtract/field/``, which in turn is used to make the  image ``RX42_SB070-079.2ch10s.wsclean_low2-image.fits`` in ``Test_run/results/initsubtract/field/``.
-
 
 Make low-res sky models
 -----------------------
@@ -168,9 +146,6 @@ Pipeline Steps
 
     casa_to_bbs_low
         Convert CASA model image to ``makesourcedb`` sky model.
-
-Test data
-    With the model image ``NEP_SB070-079.2ch10s.wsclean_low2-model.fits`` in ``Test_run/results/initsubtract/field/``, this step produces the ``makesourceb`` sky model ``NEP_SB070-079.2ch10s.wsclean_low2-model.casa_to_bbs_low`` in ``Test_run/results/initsubtract/field/``.
 
 
 Subtract low-res models
@@ -192,9 +167,6 @@ Pipeline Steps
     subtract_low
         Call BBS to subtract ``MODEL_DATA`` column from ``SUBTRACTED_DATA`` column.
 
-Test data
-    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the ``SUBTRACTED_DATA_ALL`` column in this MS file.
-
 
 Merge low- and high-res sky models
 ----------------------------------
@@ -211,9 +183,6 @@ Pipeline Steps
 
     copy_final_model_map
         Copy datamap for merged sky models to convenient location.
-
-Test data
-    With the sky models ``NEP_SB070_079.2ch10s.wsclean_high2-model.casa_to_bbs_high`` and  ``NEP_SB070_079.2ch10s.wsclean_low2-model.casa_to_bbs_low`` in ``Test_run/results/initsubtract/field/``, this step produces the merged sky model ``NEP_SB070_079.2ch10s.wsclean_low2-model.merge`` in  ``Test_run/results/initsubtract/field/``.
 
 
 Partial initial subtract operation
@@ -236,9 +205,6 @@ Pipeline Steps
 
     subtract
         Call BBS to subtract the input sky models from the ``DATA`` column to make the ``SUBTRACTED_DATA`` column.
-
-Test data
-    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the ``SUBTRACTED_DATA_ALL`` column in this MS file.
 
 
 

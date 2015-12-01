@@ -4,7 +4,7 @@ Mosaic Operation
 ================
 
 This section describes the mosaic operation of Factor, denoted
-``makemosaic``, which performs the mosaicking of all facet images into a single image. The pipeline parset for this operation is ``makemosaic_pipeline.parset``.
+``makemosaic``, which performs the mosaicking of all facet images into a single image.
 
 
 Make mosaic
@@ -29,9 +29,6 @@ Pipeline Steps
     make_mosaic
         Run mosaicking script to produce final image.
 
-Test data
-    With the facet images produced by the facet self-calibration operation (:ref:`facet_selfcal`) or, if done, by the final imaging operation (:ref:`facet_image`), this step produces the mosaicked image ``RX42_SB070-079.2ch10s.wsclean2-image.make_mosaic`` in ``Test_run/results/makemosaic/field``.
-
 
 Correct mosaic for primary beam
 -------------------------------
@@ -50,6 +47,3 @@ Pipeline Steps
 
     correct_mosaic
         The mosaic image is corrected with the ``avgpb`` image.
-
-Test data
-    With the mosaic image produced above, this step produces the PB-corrected image ``??`` in ``Test_run/results/makemosaic/field``.
