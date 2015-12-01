@@ -486,7 +486,7 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         direction.set_image_sizes(test_run=test_run)
 
         # Set number of bands and channels for images (affects wide-band clean)
-        direction.set_image_channels(len(bands))
+        direction.set_image_channels(len(bands), parset['wsclean_nbands'])
 
         # Set field center
         direction.field_ra = field.ra
