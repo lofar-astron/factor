@@ -492,12 +492,6 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         direction.field_ra = field.ra
         direction.field_dec = field.dec
 
-        # Set reimage flag
-        direction.make_final_image = parset['reimage']
-
-        # Set transfer flag
-        direction.transfer_flags = parset['transfer_flags']
-
         # Load previously completed operations (if any)
         direction.load_state()
 
