@@ -123,6 +123,19 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             parset['cluster_specific']['ncpu'],
             parset['cluster_specific']['fmem'])
 
+        # Check for any directions within transfer radius that have successfully
+        # gone through selfcal
+        dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
+        if len(dirs_with_selfcal) > 0:
+            for d in direction_group:
+                nearest, sep = factor.directions.find_nearest(d, dirs_with_selfcal)
+                if sep < parset['direction_specific']['transfer_radius']:
+                    log.debug('Initializing selfcal for direction {0} with solutions from direction {1}.'.format(
+                        d.name, nearest.name))
+                    d.dir_dep_parmdb_datamap = nearest.dir_dep_parmdb_datamap
+                    d.save_state()
+                    d.transfer_nearest_solutions = True
+
         # Do selfcal on calibrator only
         ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
         scheduler.run(ops)
@@ -177,7 +190,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
     for d in dirs_to_transfer:
         # Search for nearest direction with successful selfcal
-        nearest = factor.directions.find_nearest(d, dirs_with_selfcal)
+        nearest, sep = factor.directions.find_nearest(d, dirs_with_selfcal)
         log.debug('Using solutions from direction {0} for direction {1}.'.format(
             nearest.name, d.name))
         d.dir_dep_parmdb_datamap = nearest.dir_dep_parmdb_datamap

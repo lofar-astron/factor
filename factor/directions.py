@@ -1071,6 +1071,8 @@ def find_nearest(direction1, directions):
     -------
     direction : Direction object
         Nearest direction
+    sep : float
+        Separation in degrees
 
     """
     sep = []
@@ -1078,7 +1080,7 @@ def find_nearest(direction1, directions):
         sep.append(calculateSeparation(direction1.ra, direction1.dec,
                             direction2.ra, direction2.dec).value)
 
-    return directions[np.argmin(sep)]
+    return directions[np.argmin(sep)], sep[np.argmin(sep)]
 
 
 def _float_approx_equal(x, y, tol=1e-18, rel=1e-7):

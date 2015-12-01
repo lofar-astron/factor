@@ -200,6 +200,11 @@ def parset_read(parset_file):
             'target_has_own_facet')
     else:
         parset_dict['direction_specific']['target_has_own_facet'] = False
+    if 'transfer_radius' in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['transfer_radius'] = parset.getfloat('directions',
+            'transfer_radius')
+    else:
+        parset_dict['direction_specific']['transfer_radius'] = 1.0
 
     # Handle cluster-related parameters
     if 'cluster' in parset._sections.keys():
