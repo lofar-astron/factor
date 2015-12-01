@@ -241,7 +241,7 @@ def make_initial_skymodel(band):
     return s
 
 
-def group_directions(directions n_per_grouping={'1':0}, allow_reordering=True):
+def group_directions(directions, n_per_grouping={'1':0}, allow_reordering=True):
     """
     Sorts directions into groups that can be selfcaled simultaneously
 
