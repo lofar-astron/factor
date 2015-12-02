@@ -65,7 +65,7 @@ class MakeMosaic(Operation):
     Operation to mosiac facet images
     """
     def __init__(self, parset, bands, direction):
-        super(MakeMosaic, self).__init__(parset, None, direction,
+        super(MakeMosaic, self).__init__(parset, bands, direction,
             name='MakeMosaic')
 
         # Define extra parameters needed for this operation (beyond those
