@@ -64,8 +64,12 @@ class MakeMosaic(Operation):
     """
     Operation to mosiac facet images
     """
-    def __init__(self, parset, direction):
+    def __init__(self, parset, bands, direction):
         super(MakeMosaic, self).__init__(parset, None, direction,
             name='MakeMosaic')
 
-        self.parms_dict.update({'input_dir': parset['dir_ms']})
+        # Define extra parameters needed for this operation (beyond those
+        # defined in the master Operation class and as attributes of the
+        # direction object)
+        input_bands = [b.file for b in self.bands]
+        self.parms_dict.update({'input_bands': input_bands})
