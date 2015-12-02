@@ -81,6 +81,7 @@ apply_dir_dep_fast.argument.catalog                   =   {{ skymodel_dir }}/emp
 apply_dir_dep_fast.argument.parmdb                    =   inputparmdb
 apply_dir_dep_fast.argument.replace-sourcedb          =   True
 apply_dir_dep_fast.argument.replace-parmdb            =   True
+apply_dir_dep_fast.argument.Strategy.InputColumn      =   FACET_DATA_ALL
 
 apply_dir_dep_slow.control.type                       =   calibrate-stand-alone_new
 apply_dir_dep_slow.control.mapfiles_in                =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
