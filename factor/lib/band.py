@@ -93,7 +93,7 @@ class Band(object):
                     break            
             tab.close()
 
-        # Set the initsubtract cell sizes
+        # Set the initsubtract cell sizes to default / dummy values
         self.cellsize_highres_deg = 0.00208 # initsubtract high-res cell size
         self.cellsize_lowres_deg = 0.00694 # initsubtract low-res cell size
 
