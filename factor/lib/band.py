@@ -252,32 +252,49 @@ class Band(object):
             timepersample = tab.getcell('EXPOSURE',0)
             timetab = tab.sort('unique desc TIME')
             timearray = timetab.getcol('TIME')
+            numsamples = len(timearray)
             mystarttime = np.min(timearray)
             myendtime = np.max(timearray)
-            assert (timepersample*(len(timearray)-1)+.5) > (myendtime-mystarttime)
+            assert (timepersample*(numsamples-1)+.5) > (myendtime-mystarttime)
             if (myendtime-mystarttime) > (2.*chunksize):
-                nchunks = int((numsamples*self.timepersample)/chunksize)
+                nchunks = int((numsamples*timepersample)/chunksize)
             if test_run:
                 self.log.debug('Would split (or not) {0} into {1} chunks. '.format(self.files[MS_id],nchunks))
                 tab.close()
                 continue
             if nchunks > 1:
+                newdirname = os.path.join(os.path.dirname(self.files[MS_id]),'chunks')
+                if not os.path.exists(newdirname):
+                    os.mkdir(newdirname)
                 for chunkid in range(nchunks):
-                    chunk_file = '{0}_chunk{1}.ms'.format(os.path.splitext(self.files[MS_id])[0], chunkid)
-                    if clobber:
-                        shutil.rmtree(chunk_file,ignore_errors=True)
+                    chunk_name = '{0}_chunk{1}.ms'.format(os.path.splitext(os.path.basename(self.files[MS_id]))[0], chunkid)
+                    chunk_file = os.path.join(newdirname,chunk_name)
+                    newdirindparmdb = os.path.join(chunk_file, dirindparmdb)
                     starttime = mystarttime+chunkid*chunksize
                     endtime = mystarttime+(chunkid+1)*chunksize
                     if chunkid == 0: 
                         starttime -= chunksize
                     if chunkid == (nchunks-1):
                         endtime += 2.*chunksize
-                    seltab = tab.query('TIME >= ' + str(starttime+start_out*3600.0) + ' && '
-                                       'TIME < ' + str(starttime+end_out*3600.0), sortlist='TIME,ANTENNA1,ANTENNA2')
-                    seltab.copy(chunk_file, True)
+                    seltab = tab.query('TIME >= ' + str(starttime) + ' && '
+                                       'TIME < ' + str(endtime), sortlist='TIME,ANTENNA1,ANTENNA2')
+                    self.log.debug('Going to copy {0} samples to file {1}'.format(str(len(seltab)),chunk_file))
+                    if os.path.exists(chunk_file):
+                        try:
+                            newtab = pt.table(chunk_file, ack=False)
+                            if len(newtab) == len(seltab):
+                                self.log.debug('Found existing file of correct length, not copying!')
+                                copy = False
+                            newtab.close()
+                        except:
+                            copy = True
+                            os.shutil.rmtree(chunk_file)
+                    else:
+                        copy = True
+                    if copy:
+                        seltab.copy(chunk_file, True)
+                        shutil.copytree(self.dirindparmdbs[MS_id],newdirindparmdb)
                     seltab.close()
-                    newdirindparmdb = os.path.join(chunk_file, dirindparmdb)
-                    shutil.copytree(self.dirindparmdbs[MS_id],newdirindparmdb)
                     newfiles.append(chunk_file)
                     newdirindparmdbs.append(newdirindparmdb)
             else:
