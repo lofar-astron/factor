@@ -26,7 +26,7 @@ create_parmdb_map.control.filename                         =   dir_indep_instrum
 expand_merged_parmdb_map.control.kind                      =   plugin
 expand_merged_parmdb_map.control.type                      =   expandMapfile
 expand_merged_parmdb_map.control.mapfile_in                =   {{ dir_dep_parmdb_datamap }}
-expand_merged_parmdb_map.control.mapfile_to_match          =   {{ input_bands_datamap }}
+expand_merged_parmdb_map.control.mapfile_to_match          =   create_ms_map.output.mapfile
 expand_merged_parmdb_map.control.mapfile_dir               =   {{ mapfile_dir }}
 expand_merged_parmdb_map.control.filename                  =   expand_merged_parmdbs.datamap
 {% endif %}
