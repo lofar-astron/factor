@@ -473,29 +473,6 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         check_edges=dir_parset['check_edges'], target_ra=target_ra,
         target_dec=target_dec, target_radius_arcmin=target_radius_arcmin)
 
-    # Set various direction attributes
-    for i, direction in enumerate(directions):
-        # Set averaging steps and solution intervals for selfcal
-        direction.set_averaging_steps_and_solution_intervals(bands[0].chan_width_hz, bands[0].nchan,
-            bands[0].timepersample, bands[0].nsamples, len(bands), parset['preaverage'])
-
-        # Set imaging parameters
-        direction.set_imaging_parameters(len(bands), parset['wsclean_nbands'],
-            initial_skymodel, test_run=test_run)
-
-        # Set field center
-        direction.field_ra = field.ra
-        direction.field_dec = field.dec
-
-        # Load previously completed operations (if any)
-        direction.load_state()
-
-        # Reset state if specified
-        if direction.name in reset_directions:
-            direction.do_reset = True
-        else:
-            direction.do_reset = False
-
     # Warn user if they've specified a direction to reset that does not exist
     direction_names = [d.name for d in directions]
     for name in reset_directions:
@@ -526,6 +503,30 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         if parset['direction_specific']['ndir_total'] > 0 and \
             parset['direction_specific']['ndir_total'] <= len(directions):
             directions = directions[:parset['direction_specific']['ndir_total']]
+
+    # Set various direction attributes
+    log.info("Determining imaging parameters for each direction...")
+    for i, direction in enumerate(directions):
+        # Set averaging steps and solution intervals for selfcal
+        direction.set_averaging_steps_and_solution_intervals(bands[0].chan_width_hz, bands[0].nchan,
+            bands[0].timepersample, bands[0].nsamples, len(bands), parset['preaverage'])
+
+        # Set imaging parameters
+        direction.set_imaging_parameters(len(bands), parset['wsclean_nbands'],
+            initial_skymodel, test_run=test_run)
+
+        # Set field center
+        direction.field_ra = field.ra
+        direction.field_dec = field.dec
+
+        # Load previously completed operations (if any)
+        direction.load_state()
+
+        # Reset state if specified
+        if direction.name in reset_directions:
+            direction.do_reset = True
+        else:
+            direction.do_reset = False
 
     # Select subset of directions to selfcal
     if target_has_own_facet:
