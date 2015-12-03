@@ -6,7 +6,7 @@ import logging
 from astropy.coordinates import Angle
 import numpy as np
 from lsmtool.operations_lib import radec2xy
-from factor.directions import read_vertices
+import factor.directions
 import matplotlib.path as mplPath
 
 
@@ -189,7 +189,7 @@ class Direction(object):
         self.casa_full_image_threshold_mjy = "{}mJy".format(1.5 * 0.7 / (np.sqrt(np.float(nbands))))
 
         # Set multiscale imaging mode
-        vertices = read_vertices(self.vertices_file)
+        vertices = factor.directions.read_vertices(self.vertices_file)
         x, y, midRA, midDec = initial_skymodel._getXY()
         xv, yv = radec2xy(vertices[0], vertices[1], midRA, midDec)
         xyvertices = np.array([[xp, yp] for xp, yp in zip(xv, yv)])
