@@ -137,12 +137,13 @@ class Scheduler(object):
             with Timer(log, 'operation'):
                 pool = multiprocessing.Pool(processes=self.max_procs)
                 for op in operation_list:
-                    op.set_started()
-                    pool.apply_async(call_generic_pipeline, (op.name,
-                    	op.direction.name, op.pipeline_parset_file,
-                    	op.pipeline_config_file, op.logbasename,
-                    	self.genericpipeline_executable),
-                    	callback=self.result_callback)
+                    if not op.check_completed:
+                        op.set_started()
+                        pool.apply_async(call_generic_pipeline, (op.name,
+                            op.direction.name, op.pipeline_parset_file,
+                            op.pipeline_config_file, op.logbasename,
+                            self.genericpipeline_executable),
+                            callback=self.result_callback)
                 pool.close()
                 pool.join()
 
