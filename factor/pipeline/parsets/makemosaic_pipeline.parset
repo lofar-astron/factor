@@ -96,9 +96,8 @@ zero_avgpb.control.outputkey                           =   outfile
 zero_avgpb.argument.flags                              =   [avgpb,outfile]
 
 image2fits.control.type                                =   image2fits
-image2fits.control.mapfile_in                          =   zero_avgpb.output.mapfile
-image2fits.control.inputkey                            =   in
 image2fits.control.outputkey                           =   out
+image2fits.argument.in                                 =   zero_avgpb.output.mapfile
 
 correct_mosaic.control.type                            =   pb_correct
 correct_mosaic.control.mapfiles_in                     =   [make_mosaic.output.mapfile,image2fits.output.mapfile]

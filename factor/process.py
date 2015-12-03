@@ -68,6 +68,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
     # Run initial sky model generation and create empty datasets
     if len(bands_initsubtract) > 0:
+        # Reset the field direction if specified
+        if 'field' in reset_directions:
+            field.reset_state('initsubtract')
+
         log.info('Running initsubtract operation for bands: {0}'.
             format([b.name for b in bands_initsubtract]))
         field = factor.cluster.divide_nodes([field],
@@ -112,7 +116,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 scheduler.run(op)
         for d in direction_group_reset:
             log.info('Resetting direction {}'.format(d.name))
-            d.reset_state()
+            d.reset_state(['facetselfcal', 'facetsub'])
 
         # Divide up the nodes and cores among the directions for the parallel
         # selfcal operations
@@ -198,6 +202,11 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     dirs_to_image.extend(dirs_to_transfer)
 
     if len(dirs_to_image) > 0:
+        # Set up reset of any directions that need it
+        directions_reset = [d for d in dirs_to_image if d.do_reset]
+        for d in directions_reset:
+            d.reset_state('facetimage')
+
         # Divide up the nodes and cores among the directions for the parallel
         # imaging operations
         dirs_to_image = factor.cluster.divide_nodes(dirs_to_image,
@@ -212,6 +221,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
     # Mosaic the final facet images together
     if parset['make_mosaic']:
+        # Reset the field direction if specified
+        if 'field' in reset_directions or 'mosaic' in reset_directions:
+            field.reset_state('make_mosaic')
+
         field.facet_image_filenames = []
         field.facet_vertices_filenames = []
         for d in directions:
@@ -476,7 +489,7 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
     # Warn user if they've specified a direction to reset that does not exist
     direction_names = [d.name for d in directions]
     for name in reset_directions:
-        if name not in direction_names:
+        if name not in direction_names and name != 'field':
             log.warn('Direction {} was specified for resetting but does not '
                 'exist in current list of directions'.format(name))
 

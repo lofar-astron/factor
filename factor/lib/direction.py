@@ -464,27 +464,40 @@ class Direction(object):
             return False
 
 
-    def reset_state(self):
+    def reset_state(self, op_names=None):
         """
         Resets the direction to allow reprocessing
 
         Currently, this means just deleting the results directories,
         but it could be changed to delete only a subset of selfcal steps (by
         modifying the selfcal pipeline statefile).
+
+        Parameters
+        ----------
+        op_names : list of str, optional
+            Name of operation to reset. If None, all started and completed
+            operations are reset
+
         """
+        if op_names is None:
+            op_names = self.completed_operations[:] + self.started_operations[:]
+        elif type(op_names) is str:
+            op_names = [op_names]
+
         # Reset selfcal flag
-        self.selfcal_ok = False
+        if 'facetselfcal' in op_names:
+            self.selfcal_ok = False
 
         # Remove operation name from lists of started and completed operations
         # and delete the results directories
-        for op in set(self.completed_operations[:] + self.started_operations[:]):
-            if op in self.completed_operations:
-                self.completed_operations.remove(op)
-            if op in self.started_operations:
-                self.started_operations.remove(op)
+        for op_name in op_names:
+            if op_name in self.completed_operations:
+                self.completed_operations.remove(op_name)
+            if op_name in self.started_operations:
+                self.started_operations.remove(op_name)
 
             # Delete results directory for this operation
-            op_dir = os.path.join(self.working_dir, 'results', op, self.name)
+            op_dir = os.path.join(self.working_dir, 'results', op_name, self.name)
             if os.path.exists(op_dir):
                 os.system('rm -rf {0}'.format(op_dir))
 
