@@ -401,11 +401,12 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         Groups of directions to be selfcal-ed
 
     """
+    log.info("Building initial sky model...")
+    initial_skymodel = factor.directions.make_initial_skymodel(bands[-1])
     log.info('Setting up directions...')
 
     # First check for user-supplied directions file, then for Factor-generated
     # file from a previous run, then for parameters needed to generate it internally
-    initial_skymodel = None
     dir_parset = parset['direction_specific']
     if 'directions_file' in parset:
         directions = factor.directions.directions_read(parset['directions_file'],
@@ -430,7 +431,6 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
             # Make directions from dir-indep sky model of highest-frequency
             # band, as it has the smallest field of view
             log.info("No directions file given. Selecting directions internally...")
-            initial_skymodel = factor.directions.make_initial_skymodel(bands[-1])
             parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(initial_skymodel,
                 dir_parset['flux_min_jy'], dir_parset['size_max_arcmin'],
                 dir_parset['separation_max_arcmin'], directions_max_num=dir_parset['max_num'],
@@ -469,9 +469,6 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         target_dec = None
         target_radius_arcmin = None
 
-    if initial_skymodel is None and dir_parset['check_edges']:
-        initial_skymodel = factor.directions.make_initial_skymodel(bands[-1])
-
     factor.directions.thiessen(directions, s=initial_skymodel,
         check_edges=dir_parset['check_edges'], target_ra=target_ra,
         target_dec=target_dec, target_radius_arcmin=target_radius_arcmin)
@@ -482,11 +479,9 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         direction.set_averaging_steps_and_solution_intervals(bands[0].chan_width_hz, bands[0].nchan,
             bands[0].timepersample, bands[0].nsamples, len(bands), parset['preaverage'])
 
-        # Set image sizes
-        direction.set_image_sizes(test_run=test_run)
-
-        # Set number of bands and channels for images (affects wide-band clean)
-        direction.set_image_channels(len(bands), parset['wsclean_nbands'])
+        # Set imaging parameters
+        direction.set_imaging_parameters(len(bands), parset['wsclean_nbands'],
+            initial_skymodel, test_run=test_run)
 
         # Set field center
         direction.field_ra = field.ra

@@ -51,21 +51,10 @@ class FacetSelfcal(Operation):
         ms_files = [band.file for band in self.bands]
         skymodels = [band.skymodel_dirindep for band in self.bands]
         dir_indep_parmdbs = [band.dirindparmdb for band in self.bands]
-        if self.direction.nchannels > 1:
-            nterms = 2
-            casa_suffix = '.tt0'
-            wsclean_suffix = '-MFS-image.fits'
-        else:
-            nterms = 1
-            casa_suffix = None
-            wsclean_suffix = '-image.fits'
         loopcount = max(1, self.parset['max_selfcal_loops'])
         self.parms_dict.update({'ms_files': ms_files,
                                 'skymodels': skymodels,
                                 'dir_indep_parmdbs': dir_indep_parmdbs,
-                                'casa_suffix': casa_suffix,
-                                'wsclean_suffix': wsclean_suffix,
-                                'nterms': nterms,
                                 'loopcount': loopcount})
 
 
@@ -213,20 +202,9 @@ class FacetImage(Operation):
         ms_files = [band.file for band in self.bands]
         skymodels = [band.skymodel_dirindep for band in self.bands]
         dir_indep_parmdbs = [band.dirindparmdb for band in self.bands]
-        if self.direction.nchannels > 1:
-            nterms = 2
-            casa_suffix = '.tt0'
-            wsclean_suffix = '-MFS-image.fits'
-        else:
-            nterms = 1
-            casa_suffix = None
-            wsclean_suffix = '-image.fits'
         self.parms_dict.update({'ms_files': ms_files,
                                 'dir_indep_parmdbs': dir_indep_parmdbs,
-                                'skymodels': skymodels,
-                                'casa_suffix': casa_suffix,
-                                'wsclean_suffix': wsclean_suffix,
-                                'nterms': nterms})
+                                'skymodels': skymodels})
 
 
     def finalize(self):

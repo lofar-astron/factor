@@ -5,6 +5,9 @@ import os
 import logging
 from astropy.coordinates import Angle
 import numpy as np
+from lsmtool.operations_lib import radec2xy
+from factor.directions import read_vertices
+import matplotlib.path as mplPath
 
 
 class Direction(object):
@@ -129,12 +132,19 @@ class Direction(object):
         self.vertices_file = self.save_file
 
 
-    def set_image_sizes(self, test_run=False):
+    def set_imaging_parameters(self, nbands, nbands_per_channel, initial_skymodel,
+        test_run=False):
         """
-        Sets sizes for various images
+        Sets various parameters for images in facetselfcal and facetimage pipelines
 
         Parameters
         ----------
+        nbands : int
+            Number of bands
+        nbands_per_channel : int
+            Number of bands per output channel (WSClean only)
+        initial_skymodel : LSMTool SkyModel object
+            Sky model used to check source sizes
         test_run : bool, optional
             If True, use test sizes
 
@@ -155,22 +165,52 @@ class Direction(object):
         self.cal_wplanes = self.set_wplanes(self.cal_imsize)
         self.facet_wplanes = self.set_wplanes(self.facet_imsize)
 
-
-    def set_image_channels(self, nbands, nbands_per_channel):
-        """
-        Sets number of channels for wide-band imaging
-
-        Parameters
-        ----------
-        nbands : int
-            Number of bands
-
-        """
+        # Set number of channels for wide-band imaging
         if nbands > 5:
             self.nchannels = int(round(float(nbands)/
                 float(nbands_per_channel)))
         else:
             self.nchannels = 1
+
+        if self.nchannels > 1:
+            self.nterms = 2
+            self.casa_suffix = '.tt0'
+            self.wsclean_suffix = '-MFS-image.fits'
+        else:
+            self.nterms = 1
+            self.casa_suffix = None
+            self.wsclean_suffix = '-image.fits'
+
+        # Set number of iterations for full facet image, scaled to the number
+        # of bands
+        self.wsclean_full_image_niter = int(5000 * (np.sqrt(np.float(nbands))))
+        self.wsclean_full_image_threshold_jy =  1.5e-3 * 0.7 / (np.sqrt(np.float(nbands)))
+        self.casa_full_image_niter = int(2000 * (np.sqrt(np.float(nbands))))
+        self.casa_full_image_threshold_mjy = "{}mJy".format(1.5 * 0.7 / (np.sqrt(np.float(nbands))))
+
+        # Set multiscale imaging mode
+        vertices = read_vertices(self.vertices_file)
+        x, y, midRA, midDec = initial_skymodel._getXY()
+        xv, yv = radec2xy(vertices[0], vertices[1], midRA, midDec)
+        xyvertices = np.array([[xp, yp] for xp, yp in zip(xv, yv)])
+        bbPath = mplPath.Path(xyvertices)
+        inside = np.zeros(len(initial_skymodel), dtype=bool)
+        for i in range(len(initial_skymodel)):
+            inside[i] = bbPath.contains_point((x[i], y[i]))
+        initial_skymodel.select(inside, force=True)
+
+        # Get source sizes and check for large sources (anything above 1 arcmin)
+        large_size_arcmin = 1.0
+        sizes = s.getPatchSizes(units='arcmin')
+        if any([s > large_size_arcmin for s in sizes]):
+            self.mscale_field_do = True
+
+        if self.mscale_field_do:
+            self.casa_multiscale = '[0, 3, 7, 25, 60, 150]'
+            self.wsclean_multiscale = '-multiscale,'
+        else:
+            self.casa_multiscale = '[]'
+            self.wsclean_multiscale = ''
 
 
     def set_wplanes(self, imsize):
