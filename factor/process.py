@@ -513,7 +513,7 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
 
         # Set imaging parameters
         direction.set_imaging_parameters(len(bands), parset['wsclean_nbands'],
-            initial_skymodel, test_run=test_run)
+            initial_skymodel.copy(), test_run=test_run)
 
         # Set field center
         direction.field_ra = field.ra
