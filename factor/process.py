@@ -206,7 +206,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             facet_image = DataMap.load(d.facet_image_mapfile)[0].file
             field.facet_image_filenames.append(facet_image)
             field.facet_vertices_filenames.append(d.save_file)
-        op = MakeMosaic(parset, field)
+        op = MakeMosaic(parset, field, bands=bands)
         scheduler.run(op)
 
     log.info("Factor has finished :)")
