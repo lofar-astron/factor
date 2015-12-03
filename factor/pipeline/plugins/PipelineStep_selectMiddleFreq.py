@@ -29,10 +29,16 @@ def plugin_main(args, **kwargs):
     mapfile_in = kwargs['mapfile_in']
     mapfile_dir = kwargs['mapfile_dir']
     filename = kwargs['filename']
+    fileid = os.path.join(mapfile_dir, filename)
 
     map_in = DataMap.load(mapfile_in)
     map_in.iterator = DataMap.SkipIterator
     map_out = DataMap()
+
+    # do not re-run if we already ran, and input files are deleted.
+    if os.path.exists(fileid) and  not os.path.exists(map_in[0].file):
+        print 'PipelineStep_selectMiddleFreq: Not re-running because output file exists, but input files don\'t!'
+        return  {'mapfile': fileid}
 
     #sort into frequency groups
     freq_groups = {}
@@ -68,7 +74,6 @@ def plugin_main(args, **kwargs):
     for (host,fname) in zip(hosts,freq_groups[selfreq]):
         map_out.append(DataProduct(host, fname, False))
 
-    fileid = os.path.join(mapfile_dir, filename)
     map_out.save(fileid)
     result = {'mapfile': fileid}
 
