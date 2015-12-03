@@ -82,8 +82,8 @@ class Band(object):
             if not 'SUBTRACTED_DATA_ALL' in tab.colnames():
                 self.has_sub_data = False
             self.has_sub_data_new = False
-            self.starttime = min(self.starttime,tab.getcol('TIME').min)
-            self.endtime = max(self.endtime,tab.getcol('TIME').max)
+            self.starttime = min(self.starttime,np.min(tab.getcol('TIME')))
+            self.endtime = max(self.endtime,np.min(tab.getcol('TIME')))
             for t2 in tab.iter(["ANTENNA1","ANTENNA2"]):
                 if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
                     self.timepersample = t2.col('TIME')[1] - t2.col('TIME')[0]

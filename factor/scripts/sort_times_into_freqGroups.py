@@ -63,17 +63,23 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
     if not hosts:
         hosts = ['localhost']
     numhosts = len(hosts)
+    print "sort_times_into_freqGroups: Working on",len(ms_list),"files"
 
     time_groups = {}
     # sort by time
     for i, ms in enumerate(ms_list):
-        obstable = pt.table(ms+'::OBSERVATION', ack=False)
-        timestamp = int(round(obstable.col('TIME_RANGE')[0][0]))
+        # use the slower but more reliable way:
+        obstable = pt.table(ms, ack=False)
+        timestamp = int(round(np.min(obstable.getcol('TIME'))))
+        #obstable = pt.table(ms+'::OBSERVATION', ack=False)
+        #timestamp = int(round(obstable.col('TIME_RANGE')[0][0]))
+        obstable.close()
         if timestamp in time_groups:
             time_groups[timestamp]['files'].append(ms)
         else:
             time_groups[timestamp] = {'files': [ ms ], 'basename' : os.path.splitext(ms)[0] }
-        
+    print "sort_times_into_freqGroups: found",len(time_groups),"time-groups"
+
     # sort time-groups by frequency
     timestamps = time_groups.keys()
     timestamps.sort()   # not needed now, but later
@@ -99,6 +105,7 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
         time_groups[time]['freq_names'].sort(key=lambda pair: pair[0])
         #time_groups[time]['files'] = [name for (freq,name) in freq_names]
         #time_groups[time]['freqs'] = [freq for (freq,name) in freq_names]
+    print "sort_times_into_freqGroups: Collected the frequencies for the time-groups"
 
     #the new output map
     filemap = MultiDataMap()

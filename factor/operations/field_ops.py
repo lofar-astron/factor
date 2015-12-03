@@ -119,6 +119,6 @@ class MakeMosaic(Operation):
             input_files = []
             input_files_single = []
 
-        self.parms_dict.update({'input_files_single': input_files_single,
-                                'input_files_grouped' : str(input_files),
+        self.parms_dict.update({'ms_files_single': input_files_single,
+                                'ms_files_grouped' : str(input_files),
                                 'input_dir': parset['dir_ms']})
