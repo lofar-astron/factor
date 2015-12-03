@@ -187,7 +187,8 @@ class Direction(object):
         self.casa_full_image_niter = int(2000 * (np.sqrt(np.float(nbands))))
         self.casa_full_image_threshold_mjy = "{}mJy".format(1.5 * 0.7 / (np.sqrt(np.float(nbands))))
 
-        # Set multiscale imaging mode
+        # Set multiscale imaging mode: Get source sizes and check for large
+        # sources (anything above 1 arcmin)
         x, y, midRA, midDec = initial_skymodel._getXY()
         xv, yv = radec2xy(self.vertices[0], self.vertices[1], midRA, midDec)
         xyvertices = np.array([[xp, yp] for xp, yp in zip(xv, yv)])
@@ -196,10 +197,8 @@ class Direction(object):
         for i in range(len(initial_skymodel)):
             inside[i] = bbPath.contains_point((x[i], y[i]))
         initial_skymodel.select(inside, force=True)
-
-        # Get source sizes and check for large sources (anything above 1 arcmin)
         large_size_arcmin = 1.0
-        sizes = s.getPatchSizes(units='arcmin')
+        sizes = initial_skymodel.getPatchSizes(units='arcmin')
         if any([s > large_size_arcmin for s in sizes]):
             self.mscale_field_do = True
 
