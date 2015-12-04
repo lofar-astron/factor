@@ -225,7 +225,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     if parset['make_mosaic']:
         # Reset the field direction if specified
         if 'field' in reset_directions or 'mosaic' in reset_directions:
-            field.reset_state('make_mosaic')
+            field.reset_state('makemosaic')
 
         field.facet_image_filenames = []
         field.facet_vertices_filenames = []
