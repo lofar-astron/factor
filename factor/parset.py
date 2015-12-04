@@ -69,7 +69,7 @@ def parset_read(parset_file):
         log.critical("Cannot use the working dir %s" % (parset_dict['dir_working']))
         sys.exit(1)
     set_log_file(parset_dict['dir_working']+'/factor.log')
-    log.info("\n=========================================================\n")
+    log.info("=========================================================\n")
     log.info("Working directory is {0}".format(parset_dict['dir_working']))
 
     # Get all the MS files in the input directory. These are identified by the
