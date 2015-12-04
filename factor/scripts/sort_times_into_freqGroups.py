@@ -9,7 +9,7 @@ from lofarpipe.support.data_map import DataMap
 from lofarpipe.support.data_map import DataProduct
 
 
-def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPfill=True):
+def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPfill=True, target_path=None):
     """
     Check a list of MS files for missing frequencies
 
@@ -31,6 +31,10 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
         Add dummy file-names for missing frequencies, so that NDPPP can
         fill the data with flagged dummy data.
         default = True
+    target_path : str, optional
+        Change the path of the "groups" files to this. (I.e. write output files 
+        into this directory with the subsequent NDPPP call.)
+        default = keep path of input files
 
     Returns
     -------
@@ -136,6 +140,8 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
                     skip_this = False
             filemap.append(MultiDataProduct(hosts[hostID%numhosts], files, skip_this))
             groupname = time_groups[time]['basename']+'_%Xt_%dg.ms'%(time,fgroup)
+            if type(target_path) is str:
+                groupname = os.path.join(target_path,os.path.basename(groupname))
             groupmap.append(DataProduct(hosts[hostID%numhosts],groupname, skip_this))
         assert freq==1e12
 

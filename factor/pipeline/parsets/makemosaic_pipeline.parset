@@ -80,6 +80,7 @@ sort_into_Groups.argument.flags                        =   [create_compressed_ma
 sort_into_Groups.argument.filename                     =   sorted_groups.datamap
 sort_into_Groups.argument.mapfile_dir                  =   {{ mapfile_dir }}
 sort_into_Groups.argument.hosts                        =   {{ hosts }}
+sort_into_Groups.argument.target_path                  =   input.output.working_directory/input.output.job_name
 
 # concat data in frequency, length = ntimes 
 concat_data.control.type                               =   dppp
@@ -147,9 +148,11 @@ zero_avgpb.argument.flags                              =   [avgpb,outfile]
 
 # convert primary beam image to fits, length = 1
 image2fits.control.type                                =   image2fits
-image2fits.control.mapfile_in                          =   zero_avgpb.output.mapfile
-image2fits.control.inputkey                            =   in
+#image2fits.control.mapfile_in                          =   zero_avgpb.output.mapfile
+#image2fits.control.inputkey                            =   in
 image2fits.control.outputkey                           =   out
+#image2fits.argument.dummy                              =   bla
+image2fits.argument.in                                 =   zero_avgpb.output.mapfile
 
 # correct the mosaic image with the primary beam, length = 1
 correct_mosaic.control.type                            =   pb_correct
