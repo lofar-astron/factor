@@ -188,17 +188,11 @@ class Direction(object):
         self.casa_full_image_threshold_mjy = "{}mJy".format(1.5 * 0.7 / (np.sqrt(np.float(nbands))))
 
         # Set multiscale imaging mode: Get source sizes and check for large
-        # sources (anything above 1 arcmin)
-        x, y, midRA, midDec = initial_skymodel._getXY()
-        xv, yv = radec2xy(self.vertices[0], self.vertices[1], midRA, midDec)
-        xyvertices = np.array([[xp, yp] for xp, yp in zip(xv, yv)])
-        bbPath = mplPath.Path(xyvertices)
-        inside = np.zeros(len(initial_skymodel), dtype=bool)
-        for i in range(len(initial_skymodel)):
-            inside[i] = bbPath.contains_point((x[i], y[i]))
-        initial_skymodel.select(inside, force=True)
-        large_size_arcmin = 1.0
-        sizes = initial_skymodel.getPatchSizes(units='arcmin')
+        # sources (anything above 2 arcmin -- the CC sky model was convolved
+        # with a Gaussian of 1 arcmin, so unresolved sources have sizes of ~
+        # 1 arcmin)
+        sizes = self.get_source_sizes(initial_skymodel)
+        large_size_arcmin = 2.0
         if any([s > large_size_arcmin for s in sizes]):
             self.mscale_field_do = True
 
@@ -299,6 +293,31 @@ class Direction(object):
             if ((numpy.max(prime_factors(k)) < 8)):
                 return k
         return newlarge
+
+
+    def get_source_sizes(self, skymodel):
+        """
+        Returns list of source sizes in arcmin
+
+        Parameters
+        ----------
+        skymodel : LSMTool SkyModel object
+            CC sky model used to determine source sizes. The sky model is
+            filtered to include only those sources within the direction
+            facet
+
+        """
+        x, y, midRA, midDec = skymodel._getXY()
+        xv, yv = radec2xy(self.vertices[0], self.vertices[1], midRA, midDec)
+        xyvertices = np.array([[xp, yp] for xp, yp in zip(xv, yv)])
+        bbPath = mplPath.Path(xyvertices)
+        inside = np.zeros(len(skymodel), dtype=bool)
+        for i in range(len(skymodel)):
+            inside[i] = bbPath.contains_point((x[i], y[i]))
+        initial_skymodel.select(inside, force=True)
+        sizes = skymodel.getPatchSizes(units='arcmin')
+
+        return sizes
 
 
     def set_averaging_steps_and_solution_intervals(self, chan_width_hz, nchan,
