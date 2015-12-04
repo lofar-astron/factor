@@ -137,10 +137,8 @@ class Scheduler(object):
             with Timer(log, 'operation'):
                 pool = multiprocessing.Pool(processes=self.max_procs)
                 for op in operation_list:
-                    log.debug('{}'.format(op.check_completed))
-                    if not op.check_completed:
-                        # Only run operations that have not already been
-                        # completed
+                    if not op.check_completed():
+                        # Only run operations incomplete operations
                         op.set_started()
                         pool.apply_async(call_generic_pipeline, (op.name,
                             op.direction.name, op.pipeline_parset_file,
