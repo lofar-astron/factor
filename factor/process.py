@@ -143,8 +143,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     d.transfer_nearest_solutions = True
 
         # Do selfcal on calibrator only
-        for d in direction_group:
-            log.debug('{}'.format(d.completed_operations))
         ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
         scheduler.run(ops)
         if dry_run:
