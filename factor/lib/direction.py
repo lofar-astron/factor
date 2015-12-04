@@ -67,6 +67,8 @@ class Direction(object):
         make_final_image=False, cal_size_deg=None, cal_flux_jy=None):
         # Handle input args
         self.name = name
+        self.log = logging.getLogger('factor:{0}'.format(self.name))
+
         if type(ra) is str:
             ra = Angle(ra).to('deg').value
         if type(dec) is str:
@@ -502,6 +504,8 @@ class Direction(object):
             op_names = self.completed_operations[:] + self.started_operations[:]
         elif type(op_names) is str:
             op_names = [op_names]
+        self.log.info('Resetting state of direction {0} for operations: {1}'.format(
+            self.name, ', '.join(op_names))
 
         # Reset selfcal flag
         if 'facetselfcal' in op_names:

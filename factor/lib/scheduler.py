@@ -137,6 +137,7 @@ class Scheduler(object):
             with Timer(log, 'operation'):
                 pool = multiprocessing.Pool(processes=self.max_procs)
                 for op in operation_list:
+                    log.debug('{}'.format(op.direction.completed_operations))
                     if not op.check_completed:
                         # Only run operations that have not already been
                         # completed

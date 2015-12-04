@@ -101,11 +101,14 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
         # Set up reset of any directions that need it. If the direction has
         # already been through the facetsub operation, we must undo the
-        # changes with the facetsubreset operation before we reset
+        # changes with the facetsubreset operation before we reset facetselfcal
+        # (otherwise the model data required to reset facetsub will be deleted)
         direction_group_reset = [d for d in direction_group if d.do_reset]
         direction_group_reset_facetsub = [d for d in direction_group_reset if
             'facetsub' in d.completed_operations]
         if len(direction_group_reset_facetsub) > 0:
+            for d in direction_group_reset_facetsub:
+                d.reset_state('facetsubreset')
             direction_group_reset_facetsub = factor.cluster.combine_nodes(
                 direction_group_reset_facetsub,
                 parset['cluster_specific']['node_list'],
@@ -115,7 +118,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             for op in ops:
                 scheduler.run(op)
         for d in direction_group_reset:
-            log.info('Resetting direction {}'.format(d.name))
             d.reset_state(['facetselfcal', 'facetsub'])
 
         # Divide up the nodes and cores among the directions for the parallel
@@ -141,6 +143,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     d.transfer_nearest_solutions = True
 
         # Do selfcal on calibrator only
+        for d in direction_group:
+            log.debug('{}'.format(d.completed_operations))
         ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
         scheduler.run(ops)
         if dry_run:
