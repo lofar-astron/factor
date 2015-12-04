@@ -505,7 +505,7 @@ class Direction(object):
         elif type(op_names) is str:
             op_names = [op_names]
         self.log.info('Resetting state of direction {0} for operations: {1}'.format(
-            self.name, ', '.join(op_names))
+            self.name, ', '.join(op_names)))
 
         # Reset selfcal flag
         if 'facetselfcal' in op_names:
