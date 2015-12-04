@@ -440,11 +440,14 @@ class Direction(object):
     def save_state(self):
         """
         Saves the direction state to a file
+
         """
         import pickle
 
         with open(self.save_file, 'wb') as f:
-            pickle.dump(self.__dict__, f)
+            save_dict = self.__dict__.copy()
+            save_dict.pop('log')
+            pickle.dump(save_dict, f)
 
 
     def load_state(self):
@@ -504,8 +507,7 @@ class Direction(object):
             op_names = self.completed_operations[:] + self.started_operations[:]
         elif type(op_names) is str:
             op_names = [op_names]
-        self.log.info('Resetting state of direction {0} for operations: {1}'.format(
-            self.name, ', '.join(op_names)))
+        self.log.info('Resetting state for operations: {1}'.format(', '.join(op_names)))
 
         # Reset selfcal flag
         if 'facetselfcal' in op_names:
