@@ -510,9 +510,9 @@ class Direction(object):
         # Remove operation name from lists of started and completed operations
         # and delete the results directories
         for op_name in op_names:
-            if op_name in self.completed_operations:
+            while op_name in self.completed_operations:
                 self.completed_operations.remove(op_name)
-            if op_name in self.started_operations:
+            while op_name in self.started_operations:
                 self.started_operations.remove(op_name)
 
             # Delete results directory for this operation

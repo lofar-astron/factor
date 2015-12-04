@@ -229,9 +229,12 @@ class Operation(object):
             True if operation was successfully run on this direction
 
         """
-        self.direction.load_state()
-        if self.name in self.direction.completed_operations:
-            return True
+        has_state = self.direction.load_state()
+        if has_state:
+            if self.name in self.direction.completed_operations:
+                return True
+            else:
+                return False
         else:
             return False
 
