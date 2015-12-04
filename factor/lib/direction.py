@@ -317,7 +317,7 @@ class Direction(object):
         for i in range(len(skymodel)):
             inside[i] = bbPath.contains_point((x[i], y[i]))
         skymodel.select(inside, force=True)
-        sizes = skymodel.getPatchSizes(units='arcmin')
+        sizes = skymodel.getPatchSizes(units='arcmin', weight=True)
 
         return sizes
 
