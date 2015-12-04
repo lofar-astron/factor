@@ -70,7 +70,8 @@ directions_file = /data/directions.txt
 # faceting of the field
 flux_min_Jy = 0.3
 size_max_arcmin = 2.0
-separation_max_arcmin = 6.0 max_num = 50
+separation_max_arcmin = 6.0
+max_num = 50
 
 # Check whether any sources from the initial subtract sky model fall on facet
 # edges. If any are found, the facet regions are adjusted to avoid them (default
