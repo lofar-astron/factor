@@ -106,8 +106,7 @@ class Scheduler(object):
             op_names = [op.name for op in self.operation_list]
             op = self.operation_list[op_names.index(op_name)]
             op.finalize()
-            if not self.dry_run:
-                op.set_completed()
+            op.set_completed()
         else:
             log.error('Operation {0} failed due to an error (direction: '
                 '{1})'.format(op_name, direction_name))
@@ -133,12 +132,13 @@ class Scheduler(object):
              op.setup()
 
         # Run the operation(s)
-        if not self.dry_run and len(operation_list) > 0:
+        if len(operation_list) > 0:
             with Timer(log, 'operation'):
                 pool = multiprocessing.Pool(processes=self.max_procs)
                 for op in operation_list:
-                    if not op.check_completed():
-                        # Only run operations incomplete operations
+                    if not self.dry_run and not op.check_completed():
+                        # Only run incomplete operations (and only if this is
+                        # not a dry run)
                         op.set_started()
                         pool.apply_async(call_generic_pipeline, (op.name,
                             op.direction.name, op.pipeline_parset_file,
@@ -146,8 +146,8 @@ class Scheduler(object):
                             self.genericpipeline_executable),
                             callback=self.result_callback)
                     else:
-                        # For completed operations, run finalize to be sure that
-                        # all attributes are set properly
+                        # For completed operations or dry runs, run finalize() to
+                        # be sure that all attributes are set properly
                         op.finalize()
                         if not self.dry_run:
                             op.set_completed()
