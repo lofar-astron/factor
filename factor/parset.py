@@ -207,7 +207,7 @@ def get_global_options(parset):
         'max_selfcal_loops', 'preaverage']
     for option in given_options:
         if option not in allowed_options:
-            log.warning('Option "{}" was given in the [global] section of the
+            log.warning('Option "{}" was given in the [global] section of the '
                 'parset but is not a valid global option'.format(option))
 
     return parset_dict
@@ -348,7 +348,7 @@ def get_directions_options(parset):
         'target_ra', 'target_dec', 'target_radius_arcmin', 'target_has_own_facet']
     for option in given_options:
         if option not in allowed_options:
-            log.warning('Option "{}" was given in the [directions] section of the
+            log.warning('Option "{}" was given in the [directions] section of the '
                 'parset but is not a valid directions option'.format(option))
 
     return parset_dict
@@ -435,7 +435,7 @@ def get_cluster_options(parset):
         'clusterdesc_file', 'dir_local']
     for option in given_options:
         if option not in allowed_options:
-            log.warning('Option "{}" was given in the [cluster] section of the
+            log.warning('Option "{}" was given in the [cluster] section of the '
                 'parset but is not a valid cluster option'.format(option))
 
     return parset_dict
