@@ -80,7 +80,7 @@ def parset_read(parset_file):
     for section in given_sections:
         if section not in allowed_sections:
             log.warning('Section "{}" was given in the parset but is not a valid '
-                'section name'.format(option))
+                'section name'.format(section))
 
     return parset_dict
 
