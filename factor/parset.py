@@ -322,7 +322,7 @@ def get_directions_options(parset):
 
     # Check for unused options
     given_options = parset.options('directions')
-    allowed_options = ['directions_file', 'flux_min_Jy', 'size_max_arcmin',
+    allowed_options = ['directions_file', 'flux_min_jy', 'size_max_arcmin',
         'separation_max_arcmin', 'max_num', 'check_edges', 'ndir_total',
         'ndir_selfcal', 'transfer_radius', 'groupings', 'allow_reordering',
         'target_ra', 'target_dec', 'target_radius_arcmin', 'target_has_own_facet']
@@ -433,7 +433,7 @@ def get_cluster_options(parset):
     # Check for unused options
     given_options = parset.options('cluster')
     allowed_options = ['ncpu', 'fmem', 'ndir_per_node', 'nimg_per_node',
-        'clusterdesc_file', 'dir_local']
+        'clusterdesc_file', 'dir_local', 'node_list']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [cluster] section of the '
