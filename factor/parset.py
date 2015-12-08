@@ -49,7 +49,7 @@ def parset_read(parset_file):
         os.mkdir(parset_dict['dir_working'])
     try:
         os.chdir(parset_dict['dir_working'])
-        for subdir in ['/logs', '/state', '/results', '/datamaps', '/regions']:
+        for subdir in ['/logs', '/state', '/results', '/regions']:
             if not os.path.isdir(parset_dict['dir_working']+subdir):
                 os.mkdir(parset_dict['dir_working']+subdir)
     except:

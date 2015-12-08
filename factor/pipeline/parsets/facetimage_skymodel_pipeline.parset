@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, shift_empty, copy_shifted_map, add_all_facet_sources, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, {% block full_image_steps %}concat_averaged, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, shift_empty, add_all_facet_sources, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, {% block full_image_steps %}concat_averaged, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -12,21 +12,21 @@ create_ms_map.control.type                        =   addListMapfile
 create_ms_map.control.hosts                       =   {{ hosts }}
 create_ms_map.control.files                       =   {{ ms_files }}
 create_ms_map.control.mapfile_dir                 =   input.output.mapfile_dir
-create_ms_map.control.filename                    =   input_bands.datamap
+create_ms_map.control.filename                    =   input_bands.mapfile
 
 create_parmdb_map.control.kind                    =   plugin
 create_parmdb_map.control.type                    =   addListMapfile
 create_parmdb_map.control.hosts                   =   {{ hosts }}
 create_parmdb_map.control.files                   =   {{ dir_indep_parmdbs }}
 create_parmdb_map.control.mapfile_dir             =   input.output.mapfile_dir
-create_parmdb_map.control.filename                =   dir_indep_instrument_parmdbs.datamap
+create_parmdb_map.control.filename                =   dir_indep_instrument_parmdbs.mapfile
 
 create_full_skymodels_map.control.kind            =   plugin
 create_full_skymodels_map.control.type            =   addListMapfile
 create_full_skymodels_map.control.hosts           =   {{ hosts }}
 create_full_skymodels_map.control.files           =   {{ skymodels }}
 create_full_skymodels_map.control.mapfile_dir     =   input.output.mapfile_dir
-create_full_skymodels_map.control.filename        =   full_skymodels.datamap
+create_full_skymodels_map.control.filename        =   full_skymodels.mapfile
 
 make_facet_skymodels_all.control.type             =   make_facet_skymodel
 make_facet_skymodels_all.control.mapfile_in       =   create_full_skymodels_map.output.mapfile
@@ -46,12 +46,6 @@ shift_empty.argument.steps                        =   [shift]
 shift_empty.argument.shift.type                   =   phaseshifter
 shift_empty.argument.shift.phasecenter            =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
 
-copy_shifted_map.control.kind                     =   plugin
-copy_shifted_map.control.type                     =   copyMapfile
-copy_shifted_map.control.mapfile_in               =   shift_empty.output.mapfile
-copy_shifted_map.control.mapfile_dir              =   {{ mapfile_dir }}
-copy_shifted_map.control.filename                 =   shifted_empty_final_bands.datamap
-
 add_all_facet_sources.control.type                =   calibrate-stand-alone_new
 add_all_facet_sources.argument.observation        =   shift_empty.output.mapfile
 add_all_facet_sources.argument.parset             =   {{ parset_dir }}/facet_dirindep_add_all.parset
@@ -63,10 +57,10 @@ add_all_facet_sources.argument.no-columns         =   True
 
 expand_merged_parmdb_map.control.kind             =   plugin
 expand_merged_parmdb_map.control.type             =   expandMapfile
-expand_merged_parmdb_map.control.mapfile_in       =   {{ dir_dep_parmdb_datamap }}
+expand_merged_parmdb_map.control.mapfile_in       =   {{ dir_dep_parmdb_mapfile }}
 expand_merged_parmdb_map.control.mapfile_to_match =   shift_empty.output.mapfile
-expand_merged_parmdb_map.control.mapfile_dir      =   {{ mapfile_dir }}
-expand_merged_parmdb_map.control.filename         =   expand_merged_parmdbs.datamap
+expand_merged_parmdb_map.control.mapfile_dir      =   input.output.mapfile_dir
+expand_merged_parmdb_map.control.filename         =   expand_merged_parmdbs.mapfile
 
 apply_dir_dep_fast.control.type                   =   calibrate-stand-alone_new
 apply_dir_dep_fast.control.mapfiles_in            =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
@@ -104,8 +98,8 @@ average.argument.avg.timestep                     =   {{ facetimage_timestep }}
 create_compressed_mapfile.control.kind            =   plugin
 create_compressed_mapfile.control.type            =   compressMapfile
 create_compressed_mapfile.control.mapfile_in      =   average.output.mapfile
-create_compressed_mapfile.control.mapfile_dir     =   {{ mapfile_dir }}
-create_compressed_mapfile.control.filename        =   concat_averaged_input.datamap
+create_compressed_mapfile.control.mapfile_dir     =   input.output.mapfile_dir
+create_compressed_mapfile.control.filename        =   concat_averaged_input.mapfile
 
 {% block full_image_parms %}
 concat_averaged.control.type                      =   dppp
@@ -138,15 +132,15 @@ create_imagebase_map1.control.kind                =   plugin
 create_imagebase_map1.control.type                =   trimMapfile
 create_imagebase_map1.control.mapfile_in          =   wsclean_image_full1.output.wsclean_image_full1-image.fits.mapfile
 create_imagebase_map1.control.trim                =   -
-create_imagebase_map1.control.mapfile_dir         =   {{ mapfile_dir }}
-create_imagebase_map1.control.filename            =   wsclean_image_full1_image_rootnames.datamap
+create_imagebase_map1.control.mapfile_dir         =   input.output.mapfile_dir
+create_imagebase_map1.control.filename            =   wsclean_image_full1_image_rootnames.mapfile
 
 adjust_wsclean_mapfile1.control.kind              =   plugin
 adjust_wsclean_mapfile1.control.type              =   appendMapfile
 adjust_wsclean_mapfile1.control.mapfile_in        =   create_imagebase_map1.output.mapfile
 adjust_wsclean_mapfile1.control.append            =   {{ wsclean_suffix }}
-adjust_wsclean_mapfile1.control.mapfile_dir       =   {{ mapfile_dir }}
-adjust_wsclean_mapfile1.control.filename          =   image1.datamap
+adjust_wsclean_mapfile1.control.mapfile_dir       =   input.output.mapfile_dir
+adjust_wsclean_mapfile1.control.filename          =   image1.mapfile
 
 copy_beam_info.control.type                       =   copy_beam_info
 copy_beam_info.control.mapfile_in                 =   adjust_wsclean_mapfile1.output.mapfile
@@ -189,13 +183,13 @@ create_imagebase_map2.control.kind                =   plugin
 create_imagebase_map2.control.type                =   trimMapfile
 create_imagebase_map2.control.mapfile_in          =   wsclean_image_full2.output.wsclean_image_full2-image.fits.mapfile
 create_imagebase_map2.control.trim                =   -
-create_imagebase_map2.control.mapfile_dir         =   {{ mapfile_dir }}
-create_imagebase_map2.control.filename            =   wsclean_image_full2_image_rootnames.datamap
+create_imagebase_map2.control.mapfile_dir         =   input.output.mapfile_dir
+create_imagebase_map2.control.filename            =   wsclean_image_full2_image_rootnames.mapfile
 
 adjust_wsclean_mapfile2.control.kind              =   plugin
 adjust_wsclean_mapfile2.control.type              =   appendMapfile
 adjust_wsclean_mapfile2.control.mapfile_in        =   create_imagebase_map2.output.mapfile
 adjust_wsclean_mapfile2.control.append            =   {{ wsclean_suffix }}
-adjust_wsclean_mapfile2.control.mapfile_dir       =   {{ mapfile_dir }}
-adjust_wsclean_mapfile2.control.filename          =   final_image.datamap
+adjust_wsclean_mapfile2.control.mapfile_dir       =   input.output.mapfile_dir
+adjust_wsclean_mapfile2.control.filename          =   final_image.mapfile
 {% endblock full_image_parms %}

@@ -2,7 +2,7 @@
 {% block add_sub_steps %}sub_diff_model_from_empty_data{% endblock add_sub_steps %}
 {% block add_sub_parms %}
 sub_diff_model_from_empty_data.control.type             =   add_subtract_columns
-sub_diff_model_from_empty_data.control.opts.mapfiles_in =   [{{ input_bands_datamap }},{{ diff_models_field_datamap }}]
+sub_diff_model_from_empty_data.control.opts.mapfiles_in =   [{{ input_bands_mapfile }},{{ diff_models_field_mapfile }}]
 sub_diff_model_from_empty_data.control.opts.inputkeys   =   [file1,file2]
 sub_diff_model_from_empty_data.argument.flags           =   [file1,file2,{{ subtracted_data_colname }},DATA,SUBTRACTED_DATA_ALL_NEW,subtract]
 {% endblock add_sub_parms %}

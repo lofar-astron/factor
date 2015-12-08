@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, copy_facet_skymodels_all_map, make_facet_skymodels_cal, select_single_cliplevel_cal, shift_empty, copy_empty_map, make_sourcedb_all_facet_sources, predict_all_facet_sources, copy_predict_all_model_map, corrupt_all_model_data, copy_corrupted_all_model_map, add_all_facet_sources, add_imaging_cols_empty, shift_cal, copy_cal_map, add_cal_facet_sources, {% if transfer_nearest_solutions %}expand_merged_parmdb_map_transfer, apply_dir_dep_fast_transfer, apply_dir_dep_slow_transfer, {% else %}apply_dir_indep, {% endif %}create_compressed_mapfile_data, check_for_missing_bands, concat_data, concat_corr, {% if pre_average %}pre_average, concat_blavg_data,{% endif %} copy_column1, {% if pre_average %}copy_column2, copy_column3,{% endif %} make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, {% if not transfer_nearest_solutions %}average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, {% endif %}average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, copy_merged_parmdb_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, {% block full_image_steps %}concat_averaged, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, create_expanded_model_mapfile, create_expanded_size_mapfile, wsclean_ft{% endblock full_image_steps %}, corrupt_final_model, copy_final_model_map, subtract_initial_final, shift_diff_model_to_field, copy_diff_model_field_map, create_single_band_mapfile, create_single_model_mapfile, subtract_single, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_facet_skymodels_cal, shift_empty, make_sourcedb_all_facet_sources, predict_all_facet_sources, corrupt_all_model_data, add_all_facet_sources, add_imaging_cols_empty, shift_cal, add_cal_facet_sources, {% if transfer_nearest_solutions %}expand_merged_parmdb_map_transfer, apply_dir_dep_fast_transfer, apply_dir_dep_slow_transfer, {% else %}apply_dir_indep, {% endif %}create_compressed_mapfile_data, check_for_missing_bands, concat_data, concat_corr, {% if pre_average %}pre_average, concat_blavg_data,{% endif %} copy_column1, {% if pre_average %}copy_column2, copy_column3,{% endif %} make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, {% if not transfer_nearest_solutions %}average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, {% endif %}average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, {% block full_image_steps %}concat_averaged, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, create_expanded_model_mapfile, create_expanded_size_mapfile, wsclean_ft{% endblock full_image_steps %}, corrupt_final_model, subtract_initial_final, shift_diff_model_to_field,, create_single_band_mapfile, create_single_model_mapfile, subtract_single, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -11,22 +11,22 @@ create_ms_map.control.kind                                 =   plugin
 create_ms_map.control.type                                 =   addListMapfile
 create_ms_map.control.hosts                                =   {{ hosts }}
 create_ms_map.control.files                                =   {{ ms_files }}
-create_ms_map.control.mapfile_dir                          =   {{ mapfile_dir }}
-create_ms_map.control.filename                             =   input_bands.datamap
+create_ms_map.control.mapfile_dir                          =   input.output.mapfile_dir
+create_ms_map.control.filename                             =   input_bands.mapfile
 
 create_parmdb_map.control.kind                             =   plugin
 create_parmdb_map.control.type                             =   addListMapfile
 create_parmdb_map.control.hosts                            =   {{ hosts }}
 create_parmdb_map.control.files                            =   {{ dir_indep_parmdbs }}
-create_parmdb_map.control.mapfile_dir                      =   {{ mapfile_dir }}
-create_parmdb_map.control.filename                         =   dir_indep_instrument_parmdbs.datamap
+create_parmdb_map.control.mapfile_dir                      =   input.output.mapfile_dir
+create_parmdb_map.control.filename                         =   dir_indep_instrument_parmdbs.mapfile
 
 create_full_skymodels_map.control.kind                     =   plugin
 create_full_skymodels_map.control.type                     =   addListMapfile
 create_full_skymodels_map.control.hosts                    =   {{ hosts }}
 create_full_skymodels_map.control.files                    =   {{ skymodels }}
-create_full_skymodels_map.control.mapfile_dir              =   {{ mapfile_dir }}
-create_full_skymodels_map.control.filename                 =   full_skymodels.datamap
+create_full_skymodels_map.control.mapfile_dir              =   input.output.mapfile_dir
+create_full_skymodels_map.control.filename                 =   full_skymodels.mapfile
 
 make_facet_skymodels_all.control.type                      =   make_facet_skymodel
 make_facet_skymodels_all.control.mapfile_in                =   create_full_skymodels_map.output.mapfile
@@ -34,12 +34,6 @@ make_facet_skymodels_all.control.inputkey                  =   fullmodelfile
 make_facet_skymodels_all.control.outputkey                 =   outfile
 make_facet_skymodels_all.argument.flags                    =   [fullmodelfile,outfile,{{ vertices_file }}]
 make_facet_skymodels_all.argument.cal_only                 =   False
-
-copy_facet_skymodels_all_map.control.kind                  =   plugin
-copy_facet_skymodels_all_map.control.type                  =   copyMapfile
-copy_facet_skymodels_all_map.control.mapfile_in            =   make_facet_skymodels_all.output.mapfile
-copy_facet_skymodels_all_map.control.mapfile_dir           =   {{ mapfile_dir }}
-copy_facet_skymodels_all_map.control.filename              =   facet_skymodels.datamap
 
 make_facet_skymodels_cal.control.type                      =   make_facet_skymodel
 make_facet_skymodels_cal.control.mapfile_in                =   create_full_skymodels_map.output.mapfile
@@ -51,14 +45,6 @@ make_facet_skymodels_cal.argument.facet_ra                 =   {{ ra }}
 make_facet_skymodels_cal.argument.facet_dec                =   {{ dec }}
 make_facet_skymodels_cal.argument.cal_radius_deg           =   {{ cal_radius_deg }}
 
-# Get the clip level in Jy of the lowest-freq model
-select_single_cliplevel_cal.control.kind                   =   plugin
-select_single_cliplevel_cal.control.type                   =   filterMapfile
-select_single_cliplevel_cal.control.mapfile_in             =   make_facet_skymodels_cal.output.clip_level_jy_cal.mapfile
-select_single_cliplevel_cal.control.mapfile_dir            =   {{ mapfile_dir }}
-select_single_cliplevel_cal.control.filename               =   clip_level_jy_cal.datamap
-select_single_cliplevel_cal.control.index                  =   0
-
 shift_empty.control.type                                   =   dppp
 shift_empty.control.opts.mapfile_in                        =   create_ms_map.output.mapfile
 shift_empty.control.opts.inputkey                          =   msin
@@ -69,12 +55,6 @@ shift_empty.argument.local_scratch_dir                     =   {{ local_dir }}
 shift_empty.argument.steps                                 =   [shift]
 shift_empty.argument.shift.type                            =   phaseshifter
 shift_empty.argument.shift.phasecenter                     =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
-
-copy_empty_map.control.kind                                =   plugin
-copy_empty_map.control.type                                =   copyMapfile
-copy_empty_map.control.mapfile_in                          =   shift_empty.output.mapfile
-copy_empty_map.control.mapfile_dir                         =   {{ mapfile_dir }}
-copy_empty_map.control.filename                            =   shifted_empty_bands.datamap
 
 make_sourcedb_all_facet_sources.control.type               =   make_sourcedb
 make_sourcedb_all_facet_sources.control.opts.mapfile_in    =   make_facet_skymodels_all.output.mapfile
@@ -91,12 +71,6 @@ predict_all_facet_sources.argument.steps                   =   [predict_all]
 predict_all_facet_sources.argument.predict_all.type        =   predict
 predict_all_facet_sources.argument.predict_all.sourcedb    =   sourcedb
 
-copy_predict_all_model_map.control.kind                    =   plugin
-copy_predict_all_model_map.control.type                    =   copyMapfile
-copy_predict_all_model_map.control.mapfile_in              =   predict_all_facet_sources.output.mapfile
-copy_predict_all_model_map.control.mapfile_dir             =   {{ mapfile_dir }}
-copy_predict_all_model_map.control.filename                =   predict_all_model_bands.datamap
-
 corrupt_all_model_data.control.type                        =   dppp
 corrupt_all_model_data.control.opts.mapfiles_in            =   [predict_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
 corrupt_all_model_data.control.opts.inputkeys              =   [msin,parmdb]
@@ -108,12 +82,6 @@ corrupt_all_model_data.argument.steps                      =   [corrupt]
 corrupt_all_model_data.argument.corrupt.type               =   applycal
 corrupt_all_model_data.argument.corrupt.parmdb             =   parmdb
 corrupt_all_model_data.argument.corrupt.invert             =   False
-
-copy_corrupted_all_model_map.control.kind                  =   plugin
-copy_corrupted_all_model_map.control.type                  =   copyMapfile
-copy_corrupted_all_model_map.control.mapfile_in            =   corrupt_all_model_data.output.mapfile
-copy_corrupted_all_model_map.control.mapfile_dir           =   {{ mapfile_dir }}
-copy_corrupted_all_model_map.control.filename              =   corrupted_all_model_bands.datamap
 
 add_all_facet_sources.control.type                         =   add_subtract_columns
 add_all_facet_sources.control.opts.mapfiles_in             =   [shift_empty.output.mapfile,corrupt_all_model_data.output.mapfile]
@@ -139,12 +107,6 @@ shift_cal.argument.avg.type                                =   squash
 shift_cal.argument.avg.freqstep                            =   {{ facetselfcal_freqstep }}
 shift_cal.argument.avg.timestep                            =   1
 
-copy_cal_map.control.kind                                  =   plugin
-copy_cal_map.control.type                                  =   copyMapfile
-copy_cal_map.control.mapfile_in                            =   shift_cal.output.mapfile
-copy_cal_map.control.mapfile_dir                           =   {{ mapfile_dir }}
-copy_cal_map.control.filename                              =   shifted_cal_bands.datamap
-
 add_cal_facet_sources.control.type                         =   calibrate-stand-alone_new
 add_cal_facet_sources.argument.observation                 =   shift_cal.output.mapfile
 add_cal_facet_sources.argument.parset                      =   {{ parset_dir }}/facet_dirindep_add.parset
@@ -158,10 +120,10 @@ add_cal_facet_sources.argument.no-columns                  =   True
 # Make dir-dependent parmdb mapfiles for transfer
 expand_merged_parmdb_map_transfer.control.kind             =   plugin
 expand_merged_parmdb_map_transfer.control.type             =   expandMapfile
-expand_merged_parmdb_map_transfer.control.mapfile_in       =   {{ dir_dep_parmdb_datamap }}
+expand_merged_parmdb_map_transfer.control.mapfile_in       =   {{ dir_dep_parmdb_mapfile }}
 expand_merged_parmdb_map_transfer.control.mapfile_to_match =   create_ms_map.output.mapfile
-expand_merged_parmdb_map_transfer.control.mapfile_dir      =   {{ mapfile_dir }}
-expand_merged_parmdb_map_transfer.control.filename         =   expand_merged_parmdbs_transfer.datamap
+expand_merged_parmdb_map_transfer.control.mapfile_dir      =   input.output.mapfile_dir
+expand_merged_parmdb_map_transfer.control.filename         =   expand_merged_parmdbs_transfer.mapfile
 
 apply_dir_dep_fast_transfer.control.type                   =   calibrate-stand-alone_new
 apply_dir_dep_fast_transfer.control.mapfiles_in            =   [shift_cal.output.mapfile,expand_merged_parmdb_map_transfer.output.mapfile]
@@ -197,8 +159,8 @@ apply_dir_indep.argument.no-columns                        =   True
 create_compressed_mapfile_data.control.kind                =   plugin
 create_compressed_mapfile_data.control.type                =   compressMapfile
 create_compressed_mapfile_data.control.mapfile_in          =   shift_cal.output.mapfile
-create_compressed_mapfile_data.control.mapfile_dir         =   {{ mapfile_dir }}
-create_compressed_mapfile_data.control.filename            =   concat_input.datamap
+create_compressed_mapfile_data.control.mapfile_dir         =   input.output.mapfile_dir
+create_compressed_mapfile_data.control.filename            =   concat_input.mapfile
 
 check_for_missing_bands.control.type                       =   check_for_missing_bands
 check_for_missing_bands.control.mapfile_in                 =   create_compressed_mapfile_data.output.mapfile
@@ -279,8 +241,8 @@ create_chunks_map.control.kind                             =   plugin
 create_chunks_map.control.type                             =   addListMapfile
 create_chunks_map.control.files                            =   make_chunks.output.files.mapfile
 create_chunks_map.control.hosts                            =   {{ hosts }}
-create_chunks_map.control.mapfile_dir                      =   {{ mapfile_dir }}
-create_chunks_map.control.filename                         =   chunk_files.datamap
+create_chunks_map.control.mapfile_dir                      =   input.output.mapfile_dir
+create_chunks_map.control.filename                         =   chunk_files.mapfile
 
 add_imaging_cols.control.type                              =   add_imaging_columns
 add_imaging_cols.control.mapfile_in                        =   create_chunks_map.output.mapfile
@@ -290,8 +252,8 @@ add_imaging_cols.argument.flags                            =   [msfile]
 create_chunks_compressed_mapfile.control.kind              =   plugin
 create_chunks_compressed_mapfile.control.type              =   compressMapfile
 create_chunks_compressed_mapfile.control.mapfile_in        =   create_chunks_map.output.mapfile
-create_chunks_compressed_mapfile.control.mapfile_dir       =   {{ mapfile_dir }}
-create_chunks_compressed_mapfile.control.filename          =   concat_chunks_input.datamap
+create_chunks_compressed_mapfile.control.mapfile_dir       =   input.output.mapfile_dir
+create_chunks_compressed_mapfile.control.filename          =   concat_chunks_input.mapfile
 
 concat_chunks.control.type                                 =   virtual_concat
 concat_chunks.control.mapfile_in                           =   create_chunks_compressed_mapfile.output.mapfile
@@ -315,8 +277,8 @@ average0.argument.avg.timestep                             =   {{ facetselfcal_t
 create_compressed_mapfile0.control.kind                    =   plugin
 create_compressed_mapfile0.control.type                    =   compressMapfile
 create_compressed_mapfile0.control.mapfile_in              =   average0.output.mapfile
-create_compressed_mapfile0.control.mapfile_dir             =   {{ mapfile_dir }}
-create_compressed_mapfile0.control.filename                =   concat0_input.datamap
+create_compressed_mapfile0.control.mapfile_dir             =   input.output.mapfile_dir
+create_compressed_mapfile0.control.filename                =   concat0_input.mapfile
 
 concat0.control.type                                       =   virtual_concat
 concat0.control.mapfile_in                                 =   create_compressed_mapfile0.output.mapfile
@@ -365,8 +327,8 @@ adjust_casa_mapfile0.control.kind                          =   plugin
 adjust_casa_mapfile0.control.type                          =   appendMapfile
 adjust_casa_mapfile0.control.mapfile_in                    =   casa_image01.output.casa_image01.image.mapfile
 adjust_casa_mapfile0.control.append                        =   {{ casa_suffix }}
-adjust_casa_mapfile0.control.mapfile_dir                   =   {{ mapfile_dir }}
-adjust_casa_mapfile0.control.filename                      =   mask0_input.datamap
+adjust_casa_mapfile0.control.mapfile_dir                   =   input.output.mapfile_dir
+adjust_casa_mapfile0.control.filename                      =   mask0_input.mapfile
 
 mask0.control.type                                         =   make_clean_mask
 mask0.control.mapfile_in                                   =   adjust_casa_mapfile0.output.mapfile
@@ -422,8 +384,8 @@ create_model0_map.control.kind                             =   plugin
 create_model0_map.control.type                             =   trimMapfile
 create_model0_map.control.mapfile_in                       =   casa_image02.output.casa_image02.model.mapfile
 create_model0_map.control.trim                             =   .model
-create_model0_map.control.mapfile_dir                      =   {{ mapfile_dir }}
-create_model0_map.control.filename                         =   model0_rootnames.datamap
+create_model0_map.control.mapfile_dir                      =   input.output.mapfile_dir
+create_model0_map.control.filename                         =   model0_rootnames.mapfile
 
 casa_ft0.control.type                                      =   casa
 casa_ft0.control.mapfiles_in                               =   [concat_chunks.output.mapfile,create_model0_map.output.mapfile]
@@ -469,8 +431,8 @@ average1.argument.avg.timestep                             =   {{ facetselfcal_t
 create_compressed_mapfile1.control.kind                    =   plugin
 create_compressed_mapfile1.control.type                    =   compressMapfile
 create_compressed_mapfile1.control.mapfile_in              =   average1.output.mapfile
-create_compressed_mapfile1.control.mapfile_dir             =   {{ mapfile_dir }}
-create_compressed_mapfile1.control.filename                =   concat1_input.datamap
+create_compressed_mapfile1.control.mapfile_dir             =   input.output.mapfile_dir
+create_compressed_mapfile1.control.filename                =   concat1_input.mapfile
 
 concat1.control.type                                       =   virtual_concat
 concat1.control.mapfile_in                                 =   create_compressed_mapfile1.output.mapfile
@@ -519,8 +481,8 @@ adjust_casa_mapfile1.control.kind                          =   plugin
 adjust_casa_mapfile1.control.type                          =   appendMapfile
 adjust_casa_mapfile1.control.mapfile_in                    =   casa_image11.output.casa_image11.image.mapfile
 adjust_casa_mapfile1.control.append                        =   {{ casa_suffix }}
-adjust_casa_mapfile1.control.mapfile_dir                   =   {{ mapfile_dir }}
-adjust_casa_mapfile1.control.filename                      =   mask1_input.datamap
+adjust_casa_mapfile1.control.mapfile_dir                   =   input.output.mapfile_dir
+adjust_casa_mapfile1.control.filename                      =   mask1_input.mapfile
 
 mask1.control.type                                         =   make_clean_mask
 mask1.control.mapfile_in                                   =   adjust_casa_mapfile1.output.mapfile
@@ -577,8 +539,8 @@ create_model1_map.control.kind                             =   plugin
 create_model1_map.control.type                             =   trimMapfile
 create_model1_map.control.mapfile_in                       =   casa_image12.output.casa_image12.model.mapfile
 create_model1_map.control.trim                             =   .model
-create_model1_map.control.mapfile_dir                      =   {{ mapfile_dir }}
-create_model1_map.control.filename                         =   model1_rootnames.datamap
+create_model1_map.control.mapfile_dir                      =   input.output.mapfile_dir
+create_model1_map.control.filename                         =   model1_rootnames.mapfile
 
 casa_ft1.control.type                                      =   casa
 casa_ft1.control.mapfiles_in                               =   [concat_chunks.output.mapfile,create_model1_map.output.mapfile]
@@ -625,8 +587,8 @@ average2.argument.avg.timestep                             =   {{ facetselfcal_t
 create_compressed_mapfile2.control.kind                    =   plugin
 create_compressed_mapfile2.control.type                    =   compressMapfile
 create_compressed_mapfile2.control.mapfile_in              =   average2.output.mapfile
-create_compressed_mapfile2.control.mapfile_dir             =   {{ mapfile_dir }}
-create_compressed_mapfile2.control.filename                =   concat2_input.datamap
+create_compressed_mapfile2.control.mapfile_dir             =   input.output.mapfile_dir
+create_compressed_mapfile2.control.filename                =   concat2_input.mapfile
 
 concat2.control.type                                       =   virtual_concat
 concat2.control.mapfile_in                                 =   create_compressed_mapfile2.output.mapfile
@@ -675,8 +637,8 @@ adjust_casa_mapfile2.control.kind                          =   plugin
 adjust_casa_mapfile2.control.type                          =   appendMapfile
 adjust_casa_mapfile2.control.mapfile_in                    =   casa_image21.output.casa_image21.image.mapfile
 adjust_casa_mapfile2.control.append                        =   {{ casa_suffix }}
-adjust_casa_mapfile2.control.mapfile_dir                   =   {{ mapfile_dir }}
-adjust_casa_mapfile2.control.filename                      =   mask2_input.datamap
+adjust_casa_mapfile2.control.mapfile_dir                   =   input.output.mapfile_dir
+adjust_casa_mapfile2.control.filename                      =   mask2_input.mapfile
 
 mask2.control.type                                         =   make_clean_mask
 mask2.control.mapfile_in                                   =   adjust_casa_mapfile2.output.mapfile
@@ -733,8 +695,8 @@ create_model2_map.control.kind                             =   plugin
 create_model2_map.control.type                             =   trimMapfile
 create_model2_map.control.mapfile_in                       =   casa_image22.output.casa_image22.model.mapfile
 create_model2_map.control.trim                             =   .model
-create_model2_map.control.mapfile_dir                      =   {{ mapfile_dir }}
-create_model2_map.control.filename                         =   model2_rootnames.datamap
+create_model2_map.control.mapfile_dir                      =   input.output.mapfile_dir
+create_model2_map.control.filename                         =   model2_rootnames.mapfile
 
 casa_ft2.control.type                                      =   casa
 casa_ft2.control.mapfiles_in                               =   [concat_chunks.output.mapfile,create_model2_map.output.mapfile]
@@ -790,8 +752,8 @@ expand_smoothed_amp1_parmdb_map.control.kind               =   plugin
 expand_smoothed_amp1_parmdb_map.control.type               =   expandMapfile
 expand_smoothed_amp1_parmdb_map.control.mapfile_in         =   smooth_amp1.output.mapfile
 expand_smoothed_amp1_parmdb_map.control.mapfile_to_match   =   create_chunks_map.output.mapfile
-expand_smoothed_amp1_parmdb_map.control.mapfile_dir        =   {{ mapfile_dir }}
-expand_smoothed_amp1_parmdb_map.control.filename           =   expand_amp1_smoothed_parmdbs.datamap
+expand_smoothed_amp1_parmdb_map.control.mapfile_dir        =   input.output.mapfile_dir
+expand_smoothed_amp1_parmdb_map.control.filename           =   expand_amp1_smoothed_parmdbs.mapfile
 
 apply_amp1.control.type                                    =   calibrate-stand-alone_new
 apply_amp1.control.mapfiles_in                             =   [create_chunks_map.output.mapfile,expand_smoothed_amp1_parmdb_map.output.mapfile]
@@ -818,8 +780,8 @@ average3.argument.avg.timestep                             =   {{ facetselfcal_t
 create_compressed_mapfile3.control.kind                    =   plugin
 create_compressed_mapfile3.control.type                    =   compressMapfile
 create_compressed_mapfile3.control.mapfile_in              =   average3.output.mapfile
-create_compressed_mapfile3.control.mapfile_dir             =   {{ mapfile_dir }}
-create_compressed_mapfile3.control.filename                =   concat3_input.datamap
+create_compressed_mapfile3.control.mapfile_dir             =   input.output.mapfile_dir
+create_compressed_mapfile3.control.filename                =   concat3_input.mapfile
 
 concat3.control.type                                       =   virtual_concat
 concat3.control.mapfile_in                                 =   create_compressed_mapfile3.output.mapfile
@@ -868,8 +830,8 @@ adjust_casa_mapfile3.control.kind                          =   plugin
 adjust_casa_mapfile3.control.type                          =   appendMapfile
 adjust_casa_mapfile3.control.mapfile_in                    =   casa_image31.output.casa_image31.image.mapfile
 adjust_casa_mapfile3.control.append                        =   {{ casa_suffix }}
-adjust_casa_mapfile3.control.mapfile_dir                   =   {{ mapfile_dir }}
-adjust_casa_mapfile3.control.filename                      =   mask3_input.datamap
+adjust_casa_mapfile3.control.mapfile_dir                   =   input.output.mapfile_dir
+adjust_casa_mapfile3.control.filename                      =   mask3_input.mapfile
 
 mask3.control.type                                         =   make_clean_mask
 mask3.control.mapfile_in                                   =   adjust_casa_mapfile3.output.mapfile
@@ -931,8 +893,8 @@ create_model3_map.control.kind                             =   plugin
 create_model3_map.control.type                             =   trimMapfile
 create_model3_map.control.mapfile_in                       =   casa_image32.output.casa_image32.model.mapfile
 create_model3_map.control.trim                             =   .model
-create_model3_map.control.mapfile_dir                      =   {{ mapfile_dir }}
-create_model3_map.control.filename                         =   model3_rootnames.datamap
+create_model3_map.control.mapfile_dir                      =   input.output.mapfile_dir
+create_model3_map.control.filename                         =   model3_rootnames.mapfile
 create_model3_map.control.counter                          =   loop_ampcal.output.counter
 
 casa_ft3.control.type                                      =   casa
@@ -995,8 +957,8 @@ expand_smoothed_amp2_parmdb_map.control.kind               =   plugin
 expand_smoothed_amp2_parmdb_map.control.type               =   expandMapfile
 expand_smoothed_amp2_parmdb_map.control.mapfile_in         =   smooth_amp2.output.mapfile
 expand_smoothed_amp2_parmdb_map.control.mapfile_to_match   =   create_chunks_map.output.mapfile
-expand_smoothed_amp2_parmdb_map.control.mapfile_dir        =   {{ mapfile_dir }}
-expand_smoothed_amp2_parmdb_map.control.filename           =   expand_amp2_smoothed_parmdbs.datamap
+expand_smoothed_amp2_parmdb_map.control.mapfile_dir        =   input.output.mapfile_dir
+expand_smoothed_amp2_parmdb_map.control.filename           =   expand_amp2_smoothed_parmdbs.mapfile
 
 apply_amp2.control.type                                    =   calibrate-stand-alone_new
 apply_amp2.control.mapfiles_in                             =   [create_chunks_map.output.mapfile,expand_smoothed_amp2_parmdb_map.output.mapfile]
@@ -1020,8 +982,8 @@ flag2.argument.flag.amplmax                                =   clip_level
 create_compressed_mapfile_empty.control.kind               =   plugin
 create_compressed_mapfile_empty.control.type               =   compressMapfile
 create_compressed_mapfile_empty.control.mapfile_in         =   shift_empty.output.mapfile
-create_compressed_mapfile_empty.control.mapfile_dir        =   {{ mapfile_dir }}
-create_compressed_mapfile_empty.control.filename           =   shift_empty_compressed.datamap
+create_compressed_mapfile_empty.control.mapfile_dir        =   input.output.mapfile_dir
+create_compressed_mapfile_empty.control.filename           =   shift_empty_compressed.mapfile
 
 average4.control.type                                      =   dppp
 average4.control.mapfile_in                                =   create_chunks_map.output.mapfile
@@ -1038,8 +1000,8 @@ average4.argument.avg.timestep                             =   {{ facetselfcal_t
 create_compressed_mapfile4.control.kind                    =   plugin
 create_compressed_mapfile4.control.type                    =   compressMapfile
 create_compressed_mapfile4.control.mapfile_in              =   average4.output.mapfile
-create_compressed_mapfile4.control.mapfile_dir             =   {{ mapfile_dir }}
-create_compressed_mapfile4.control.filename                =   concat4_input.datamap
+create_compressed_mapfile4.control.mapfile_dir             =   input.output.mapfile_dir
+create_compressed_mapfile4.control.filename                =   concat4_input.mapfile
 
 concat4.control.type                                       =   virtual_concat
 concat4.control.mapfile_in                                 =   create_compressed_mapfile4.output.mapfile
@@ -1093,8 +1055,8 @@ adjust_casa_mapfile4.control.kind                          =   plugin
 adjust_casa_mapfile4.control.type                          =   appendMapfile
 adjust_casa_mapfile4.control.mapfile_in                    =   casa_image41.output.casa_image41.image.mapfile
 adjust_casa_mapfile4.control.append                        =   {{ casa_suffix }}
-adjust_casa_mapfile4.control.mapfile_dir                   =   {{ mapfile_dir }}
-adjust_casa_mapfile4.control.filename                      =   mask4_input.datamap
+adjust_casa_mapfile4.control.mapfile_dir                   =   input.output.mapfile_dir
+adjust_casa_mapfile4.control.filename                      =   mask4_input.mapfile
 
 mask4.control.type                                         =   make_clean_mask
 mask4.control.mapfile_in                                   =   adjust_casa_mapfile4.output.mapfile
@@ -1151,8 +1113,8 @@ adjust_casa_mapfile5.control.kind                          =   plugin
 adjust_casa_mapfile5.control.type                          =   appendMapfile
 adjust_casa_mapfile5.control.mapfile_in                    =   casa_image42.output.casa_image42.image.mapfile
 adjust_casa_mapfile5.control.append                        =   {{ casa_suffix }}
-adjust_casa_mapfile5.control.mapfile_dir                   =   {{ mapfile_dir }}
-adjust_casa_mapfile5.control.filename                      =   compare_image_input_new.datamap
+adjust_casa_mapfile5.control.mapfile_dir                   =   input.output.mapfile_dir
+adjust_casa_mapfile5.control.filename                      =   compare_image_input_new.mapfile
 
 copy_image.control.type                                    =   copy_image
 copy_image.control.mapfile_in                              =   adjust_casa_mapfile5.output.mapfile
@@ -1170,18 +1132,12 @@ merge_selfcal_parmdbs.control.inputkeys                    =   [parmdb_p,parmdb_
 merge_selfcal_parmdbs.control.outputkey                    =   parmdb_out
 merge_selfcal_parmdbs.argument.flags                       =   [parmdb_p,parmdb_a,parmdb_out]
 
-copy_merged_parmdb_map.control.kind                        =   plugin
-copy_merged_parmdb_map.control.type                        =   copyMapfile
-copy_merged_parmdb_map.control.mapfile_in                  =   merge_selfcal_parmdbs.output.mapfile
-copy_merged_parmdb_map.control.mapfile_dir                 =   {{ mapfile_dir }}
-copy_merged_parmdb_map.control.filename                    =   dir_dep_parmdb.datamap
-
 expand_merged_parmdb_map.control.kind                      =   plugin
 expand_merged_parmdb_map.control.type                      =   expandMapfile
 expand_merged_parmdb_map.control.mapfile_in                =   merge_selfcal_parmdbs.output.mapfile
 expand_merged_parmdb_map.control.mapfile_to_match          =   shift_empty.output.mapfile
-expand_merged_parmdb_map.control.mapfile_dir               =   {{ mapfile_dir }}
-expand_merged_parmdb_map.control.filename                  =   expand_merged_parmdbs.datamap
+expand_merged_parmdb_map.control.mapfile_dir               =   input.output.mapfile_dir
+expand_merged_parmdb_map.control.filename                  =   expand_merged_parmdbs.mapfile
 
 apply_dir_dep_fast.control.type                            =   calibrate-stand-alone_new
 apply_dir_dep_fast.control.mapfiles_in                     =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
@@ -1228,8 +1184,8 @@ average5.argument.avg.timestep                             =   {{ facetimage_tim
 create_compressed_mapfile5.control.kind                    =   plugin
 create_compressed_mapfile5.control.type                    =   compressMapfile
 create_compressed_mapfile5.control.mapfile_in              =   average5.output.mapfile
-create_compressed_mapfile5.control.mapfile_dir             =   {{ mapfile_dir }}
-create_compressed_mapfile5.control.filename                =   concat_averaged_input.datamap
+create_compressed_mapfile5.control.mapfile_dir             =   input.output.mapfile_dir
+create_compressed_mapfile5.control.filename                =   concat_averaged_input.mapfile
 
 {% block full_image_parms %}
 concat_averaged.control.type                               =   dppp
@@ -1274,15 +1230,15 @@ create_imagebase_map.control.kind                          =   plugin
 create_imagebase_map.control.type                          =   trimMapfile
 create_imagebase_map.control.mapfile_in                    =   wsclean_image_full1.output.wsclean_image_full1-image.fits.mapfile
 create_imagebase_map.control.trim                          =   -
-create_imagebase_map.control.mapfile_dir                   =   {{ mapfile_dir }}
-create_imagebase_map.control.filename                      =   wsclean_image_full1_image_rootnames.datamap
+create_imagebase_map.control.mapfile_dir                   =   input.output.mapfile_dir
+create_imagebase_map.control.filename                      =   wsclean_image_full1_image_rootnames.mapfile
 
 adjust_wsclean_mapfile1.control.kind                       =   plugin
 adjust_wsclean_mapfile1.control.type                       =   appendMapfile
 adjust_wsclean_mapfile1.control.mapfile_in                 =   create_imagebase_map.output.mapfile
 adjust_wsclean_mapfile1.control.append                     =   {{ wsclean_suffix }}
-adjust_wsclean_mapfile1.control.mapfile_dir                =   {{ mapfile_dir }}
-adjust_wsclean_mapfile1.control.filename                   =   final_image.datamap
+adjust_wsclean_mapfile1.control.mapfile_dir                =   input.output.mapfile_dir
+adjust_wsclean_mapfile1.control.filename                   =   final_image.mapfile
 
 copy_beam_info.control.type                                =   copy_beam_info
 copy_beam_info.control.mapfile_in                          =   adjust_wsclean_mapfile1.output.mapfile
@@ -1326,15 +1282,15 @@ create_model4_map.control.kind                             =   plugin
 create_model4_map.control.type                             =   trimMapfile
 create_model4_map.control.mapfile_in                       =   wsclean_image_full2.output.wsclean_image_full2-model.fits.mapfile
 create_model4_map.control.trim                             =   -
-create_model4_map.control.mapfile_dir                      =   {{ mapfile_dir }}
-create_model4_map.control.filename                         =   final_model_rootnames.datamap
+create_model4_map.control.mapfile_dir                      =   input.output.mapfile_dir
+create_model4_map.control.filename                         =   final_model_rootnames.mapfile
 
 adjust_wsclean_mapfile2.control.kind                       =   plugin
 adjust_wsclean_mapfile2.control.type                       =   appendMapfile
 adjust_wsclean_mapfile2.control.mapfile_in                 =   create_model4_map.output.mapfile
 adjust_wsclean_mapfile2.control.append                     =   {{ wsclean_suffix }}
-adjust_wsclean_mapfile2.control.mapfile_dir                =   {{ mapfile_dir }}
-adjust_wsclean_mapfile2.control.filename                   =   final_image.datamap
+adjust_wsclean_mapfile2.control.mapfile_dir                =   input.output.mapfile_dir
+adjust_wsclean_mapfile2.control.filename                   =   final_image.mapfile
 
 pad_model_images.control.type                              =   pad_image
 pad_model_images.control.mapfile_in                        =   create_model4_map.output.mapfile
@@ -1345,15 +1301,15 @@ create_expanded_model_mapfile.control.kind                 =   plugin
 create_expanded_model_mapfile.control.type                 =   expandMapfile
 create_expanded_model_mapfile.control.mapfile_in           =   create_model4_map.output.mapfile
 create_expanded_model_mapfile.control.mapfile_to_match     =   shift_empty.output.mapfile
-create_expanded_model_mapfile.control.mapfile_dir          =   {{ mapfile_dir }}
-create_expanded_model_mapfile.control.filename             =   expand_wsclean_model.datamap
+create_expanded_model_mapfile.control.mapfile_dir          =   input.output.mapfile_dir
+create_expanded_model_mapfile.control.filename             =   expand_wsclean_model.mapfile
 
 create_expanded_size_mapfile.control.kind                  =   plugin
 create_expanded_size_mapfile.control.type                  =   expandMapfile
 create_expanded_size_mapfile.control.mapfile_in            =   pad_model_images.output.padsize.mapfile
 create_expanded_size_mapfile.control.mapfile_to_match      =   shift_empty.output.mapfile
-create_expanded_size_mapfile.control.mapfile_dir           =   {{ mapfile_dir }}
-create_expanded_size_mapfile.control.filename              =   expand_wsclean_model_size.datamap
+create_expanded_size_mapfile.control.mapfile_dir           =   input.output.mapfile_dir
+create_expanded_size_mapfile.control.filename              =   expand_wsclean_model_size.mapfile
 
 wsclean_ft.control.type                                    =   wsclean_ft
 wsclean_ft.control.mapfiles_in                             =   [shift_empty.output.mapfile,create_expanded_model_mapfile.output.mapfile,create_expanded_size_mapfile.output.mapfile]
@@ -1385,12 +1341,6 @@ corrupt_final_model.argument.corrupt_slow.type             =   applycal
 corrupt_final_model.argument.corrupt_slow.parmdb           =   parmdb
 corrupt_final_model.argument.corrupt_slow.invert           =   False
 
-copy_final_model_map.control.kind                          =   plugin
-copy_final_model_map.control.type                          =   copyMapfile
-copy_final_model_map.control.mapfile_in                    =   corrupt_final_model.output.mapfile
-copy_final_model_map.control.mapfile_dir                   =   {{ mapfile_dir }}
-copy_final_model_map.control.filename                      =   final_model_data_facet.datamap
-
 subtract_initial_final.control.type                        =   add_subtract_columns
 subtract_initial_final.control.opts.mapfiles_in            =   [corrupt_all_model_data.output.mapfile,corrupt_final_model.output.mapfile]
 subtract_initial_final.control.opts.inputkeys              =   [file1,file2]
@@ -1407,23 +1357,17 @@ shift_diff_model_to_field.argument.steps                   =   [shift]
 shift_diff_model_to_field.argument.shift.type              =   phaseshifter
 shift_diff_model_to_field.argument.shift.phasecenter       =   [{{ field_ra }}deg, {{ field_dec }}deg]
 
-copy_diff_model_field_map.control.kind                     =   plugin
-copy_diff_model_field_map.control.type                     =   copyMapfile
-copy_diff_model_field_map.control.mapfile_in               =   shift_diff_model_to_field.output.mapfile
-copy_diff_model_field_map.control.mapfile_dir              =   {{ mapfile_dir }}
-copy_diff_model_field_map.control.filename                 =   diff_models_field.datamap
-
 create_single_band_mapfile.control.kind                    =   plugin
 create_single_band_mapfile.control.type                    =   filterMapfile
 create_single_band_mapfile.control.mapfile_in              =   shift_empty.output.mapfile
-create_single_band_mapfile.control.mapfile_dir             =   {{ mapfile_dir }}
-create_single_band_mapfile.control.filename                =   single_band.datamap
+create_single_band_mapfile.control.mapfile_dir             =   input.output.mapfile_dir
+create_single_band_mapfile.control.filename                =   single_band.mapfile
 
 create_single_model_mapfile.control.kind                   =   plugin
 create_single_model_mapfile.control.type                   =   filterMapfile
 create_single_model_mapfile.control.mapfile_in             =   corrupt_final_model.output.mapfile
-create_single_model_mapfile.control.mapfile_dir            =   {{ mapfile_dir }}
-create_single_model_mapfile.control.filename               =   single_model.datamap
+create_single_model_mapfile.control.mapfile_dir            =   input.output.mapfile_dir
+create_single_model_mapfile.control.filename               =   single_model.mapfile
 
 subtract_single.control.type                               =   add_subtract_columns
 subtract_single.control.opts.mapfiles_in                   =   [create_single_band_mapfile.output.mapfile,create_single_model_mapfile.output.mapfile]
@@ -1498,21 +1442,3 @@ verify_subtract.control.type                               =   verify_subtract
 verify_subtract.control.mapfiles_in                        =   [wsclean_pre.output.wsclean_pre-image.fits.mapfile,wsclean_post.output.wsclean_post-image.fits.mapfile]
 verify_subtract.control.inputkeys                          =   [image_pre,image_post]
 verify_subtract.argument.flags                             =   [image_pre,image_post,0.75]
-
-copy_verify_subtract_pre_map.control.kind                  =   plugin
-copy_verify_subtract_pre_map.control.type                  =   copyMapfile
-copy_verify_subtract_pre_map.control.mapfile_in            =   verify_subtract.output.maxvalpre.mapfile
-copy_verify_subtract_pre_map.control.mapfile_dir           =   {{ mapfile_dir }}
-copy_verify_subtract_pre_map.control.filename              =   verify_subtract_maxval_pre.datamap
-
-copy_verify_subtract_post_map.control.kind                 =   plugin
-copy_verify_subtract_post_map.control.type                 =   copyMapfile
-copy_verify_subtract_post_map.control.mapfile_in           =   verify_subtract.output.maxvalpost.mapfile
-copy_verify_subtract_post_map.control.mapfile_dir          =   {{ mapfile_dir }}
-copy_verify_subtract_post_map.control.filename             =   verify_subtract_maxval_post.datamap
-
-copy_verify_subtract_break_map.control.kind                =   plugin
-copy_verify_subtract_break_map.control.type                =   copyMapfile
-copy_verify_subtract_break_map.control.mapfile_in          =   verify_subtract.output.break.mapfile
-copy_verify_subtract_break_map.control.mapfile_dir         =   {{ mapfile_dir }}
-copy_verify_subtract_break_map.control.filename            =   verify_subtract_OK.datamap

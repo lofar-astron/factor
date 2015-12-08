@@ -8,8 +8,8 @@
 create_compressed_mapfile.control.kind            =   plugin
 create_compressed_mapfile.control.type            =   compressMapfile
 create_compressed_mapfile.control.mapfile_in      =   shift_empty.output.mapfile
-create_compressed_mapfile.control.mapfile_dir     =   {{ mapfile_dir }}
-create_compressed_mapfile.control.filename        =   concat_unaveraged_input.datamap
+create_compressed_mapfile.control.mapfile_dir     =   input.output.mapfile_dir
+create_compressed_mapfile.control.filename        =   concat_unaveraged_input.mapfile
 
 concat_unaveraged.control.type                    =   virtual_concat
 concat_unaveraged.control.mapfile_in              =   create_compressed_mapfile.output.mapfile
@@ -69,8 +69,8 @@ adjust_casa_mapfile.control.kind                  =   plugin
 adjust_casa_mapfile.control.type                  =   appendMapfile
 adjust_casa_mapfile.control.mapfile_in            =   casa_image_full1.output.casa_image_full1.image.mapfile
 adjust_casa_mapfile.control.append                =   {{ casa_suffix }}
-adjust_casa_mapfile.control.mapfile_dir           =   {{ mapfile_dir }}
-adjust_casa_mapfile.control.filename              =   mask_input.datamap
+adjust_casa_mapfile.control.mapfile_dir           =   input.output.mapfile_dir
+adjust_casa_mapfile.control.filename              =   mask_input.mapfile
 
 mask.control.type                                 =   make_clean_mask
 mask.control.mapfile_in                           =   adjust_casa_mapfile.output.mapfile
@@ -124,6 +124,6 @@ adjust_casa_mapfile2.control.kind                 =   plugin
 adjust_casa_mapfile2.control.type                 =   appendMapfile
 adjust_casa_mapfile2.control.mapfile_in           =   casa_image_full2.output.casa_image_full2.image.mapfile
 adjust_casa_mapfile2.control.append               =   {{ casa_suffix }}
-adjust_casa_mapfile2.control.mapfile_dir          =   {{ mapfile_dir }}
-adjust_casa_mapfile2.control.filename             =   final_image.datamap
+adjust_casa_mapfile2.control.mapfile_dir          =   input.output.mapfile_dir
+adjust_casa_mapfile2.control.filename             =   final_image.mapfile
 {% endblock full_image_parms %}

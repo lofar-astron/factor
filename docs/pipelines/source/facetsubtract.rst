@@ -54,9 +54,6 @@ Pipeline Steps
     subtract
         Subtract the ``MODEL_DATA`` column from the ``SUBTRACTED_DATA_ALL`` (or ``SUBTRACTED_DATA_ALL_NEW``) column.
 
-    copy_shifted_map
-        Copy datamap for shifted model dataset to convenient location.
-
 
 Partial subtract operation
 --------------------------
@@ -83,6 +80,3 @@ Pipeline Steps
 
     shift_model_to_field
         Phase shift the ``MODEL_DATA`` column from self calibration back to the field center
-
-    copy_shifted_model_map
-        Copy datamap for shifted model dataset to convenient location.

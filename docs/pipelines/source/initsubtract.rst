@@ -181,9 +181,6 @@ Pipeline Steps
     merge
         Call LSMTool to merge low- and high-res sky models into a single sky model.
 
-    copy_final_model_map
-        Copy datamap for merged sky models to convenient location.
-
 
 Partial initial subtract operation
 ----------------------------------

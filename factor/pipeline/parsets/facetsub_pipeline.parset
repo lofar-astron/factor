@@ -4,17 +4,17 @@ pipeline.pluginpath                                   =   {{ pipeline_dir }}/plu
 
 update_diff_models_hosts.control.kind                 =   plugin
 update_diff_models_hosts.control.type                 =   updateHosts
-update_diff_models_hosts.control.mapfile_in           =   {{ diff_models_field_datamap }}
+update_diff_models_hosts.control.mapfile_in           =   {{ diff_models_field_mapfile }}
 update_diff_models_hosts.control.hosts                =   {{ hosts }}
 
 update_input_bands_hosts.control.kind                 =   plugin
 update_input_bands_hosts.control.type                 =   updateHosts
-update_input_bands_hosts.control.mapfile_in           =   {{ input_bands_datamap }}
+update_input_bands_hosts.control.mapfile_in           =   {{ input_bands_mapfile }}
 update_input_bands_hosts.control.hosts                =   {{ hosts }}
 
 {% block add_sub_parms %}
 add_diff_model_to_empty_data.control.type             =   add_subtract_columns
-add_diff_model_to_empty_data.control.opts.mapfiles_in =   [{{ input_bands_datamap }},{{ diff_models_field_datamap }}]
+add_diff_model_to_empty_data.control.opts.mapfiles_in =   [{{ input_bands_mapfile }},{{ diff_models_field_mapfile }}]
 add_diff_model_to_empty_data.control.opts.inputkeys   =   [file1,file2]
 add_diff_model_to_empty_data.argument.flags           =   [file1,file2,{{ subtracted_data_colname }},DATA,SUBTRACTED_DATA_ALL_NEW,add]
 {% endblock add_sub_parms %}

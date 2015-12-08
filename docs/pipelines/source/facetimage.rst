@@ -78,9 +78,6 @@ Pipeline Steps
     shift_all
         Run DPPP to split and phase shift ``FACET_DATA_ALL`` to the RA and Dec of the facet.
 
-    copy_all_map
-        Copy datamap for shifted datasets to convenient location.
-
 
 Imaging preparation
 -------------------

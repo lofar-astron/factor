@@ -138,7 +138,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 if sep < parset['direction_specific']['transfer_radius']:
                     log.debug('Initializing selfcal for direction {0} with solutions from direction {1}.'.format(
                         d.name, nearest.name))
-                    d.dir_dep_parmdb_datamap = nearest.dir_dep_parmdb_datamap
+                    d.dir_dep_parmdb_mapfile = nearest.dir_dep_parmdb_mapfile
                     d.save_state()
                     d.transfer_nearest_solutions = True
 
@@ -199,7 +199,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         nearest, sep = factor.directions.find_nearest(d, dirs_with_selfcal)
         log.debug('Using solutions from direction {0} for direction {1}.'.format(
             nearest.name, d.name))
-        d.dir_dep_parmdb_datamap = nearest.dir_dep_parmdb_datamap
+        d.dir_dep_parmdb_mapfile = nearest.dir_dep_parmdb_mapfile
         d.save_state()
     dirs_to_image.extend(dirs_to_transfer)
 

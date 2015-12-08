@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, update_input_bands_hosts, expand_merged_parmdb_map, shift_empty, {% block model_data_steps %}wsclean_ft, {% endblock model_data_steps %}corrupt_final_model, add_model_to_empty_data, copy_shifted_map, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, {% block full_image_steps %}concat_averaged, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
+pipeline.steps = [update_mapfile_hosts, update_input_bands_hosts, expand_merged_parmdb_map, shift_empty, {% block model_data_steps %}wsclean_ft, {% endblock model_data_steps %}corrupt_final_model, add_model_to_empty_data, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, {% block full_image_steps %}concat_averaged, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
 
 pipeline.pluginpath                                   =   {{ pipeline_dir }}/plugins
 
@@ -9,18 +9,18 @@ update_mapfile_hosts.control.hosts                    =   {{ hosts }}
 
 update_input_bands_hosts.control.kind                 =   plugin
 update_input_bands_hosts.control.type                 =   updateHosts
-update_input_bands_hosts.control.mapfile_in           =   {{ input_bands_datamap }}
+update_input_bands_hosts.control.mapfile_in           =   {{ input_bands_mapfile }}
 update_input_bands_hosts.control.hosts                =   {{ hosts }}
 
 expand_merged_parmdb_map.control.kind                 =   plugin
 expand_merged_parmdb_map.control.type                 =   expandMapfile
-expand_merged_parmdb_map.control.mapfile_in           =   {{ dir_dep_parmdb_datamap }}
-expand_merged_parmdb_map.control.mapfile_to_match     =   {{ input_bands_datamap }}
-expand_merged_parmdb_map.control.mapfile_dir          =   {{ mapfile_dir }}
-expand_merged_parmdb_map.control.filename             =   expand_merged_parmdbs.datamap
+expand_merged_parmdb_map.control.mapfile_in           =   {{ dir_dep_parmdb_mapfile }}
+expand_merged_parmdb_map.control.mapfile_to_match     =   {{ input_bands_mapfile }}
+expand_merged_parmdb_map.control.mapfile_dir          =   input.output.mapfile_dir
+expand_merged_parmdb_map.control.filename             =   expand_merged_parmdbs.mapfile
 
 shift_empty.control.type                              =   dppp
-shift_empty.control.opts.mapfile_in                   =   {{ input_bands_datamap }}
+shift_empty.control.opts.mapfile_in                   =   {{ input_bands_mapfile }}
 shift_empty.control.opts.inputkey                     =   msin
 shift_empty.argument.msin.datacolumn                  =   SUBTRACTED_DATA_ALL_NEW
 shift_empty.argument.msout.overwrite                  =   True
@@ -66,12 +66,6 @@ add_model_to_empty_data.control.opts.mapfiles_in      =   [shift_empty.output.ma
 add_model_to_empty_data.control.opts.inputkeys        =   [file1,file2]
 add_model_to_empty_data.argument.flags                =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
 
-copy_shifted_map.control.kind                         =   plugin
-copy_shifted_map.control.type                         =   copyMapfile
-copy_shifted_map.control.mapfile_in                   =   shift_empty.output.mapfile
-copy_shifted_map.control.mapfile_dir                  =   {{ mapfile_dir }}
-copy_shifted_map.control.filename                     =   shifted_empty_final_bands.datamap
-
 apply_dir_dep_fast.control.type                       =   calibrate-stand-alone_new
 apply_dir_dep_fast.control.mapfiles_in                =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 apply_dir_dep_fast.control.inputkeys                  =   [inputms,inputparmdb]
@@ -108,8 +102,8 @@ average.argument.avg.timestep                         =   {{ facetimage_timestep
 create_compressed_mapfile.control.kind                =   plugin
 create_compressed_mapfile.control.type                =   compressMapfile
 create_compressed_mapfile.control.mapfile_in          =   average.output.mapfile
-create_compressed_mapfile.control.mapfile_dir         =   {{ mapfile_dir }}
-create_compressed_mapfile.control.filename            =   concat_averaged_input.datamap
+create_compressed_mapfile.control.mapfile_dir         =   input.output.mapfile_dir
+create_compressed_mapfile.control.filename            =   concat_averaged_input.mapfile
 
 {% block full_image_parms %}
 concat_averaged.control.type                          =   dppp
@@ -142,15 +136,15 @@ create_imagebase_map1.control.kind                    =   plugin
 create_imagebase_map1.control.type                    =   trimMapfile
 create_imagebase_map1.control.mapfile_in              =   wsclean_image_full1.output.wsclean_image_full1-image.fits.mapfile
 create_imagebase_map1.control.trim                    =   -
-create_imagebase_map1.control.mapfile_dir             =   {{ mapfile_dir }}
-create_imagebase_map1.control.filename                =   wsclean_image_full1_image_rootnames.datamap
+create_imagebase_map1.control.mapfile_dir             =   input.output.mapfile_dir
+create_imagebase_map1.control.filename                =   wsclean_image_full1_image_rootnames.mapfile
 
 adjust_wsclean_mapfile1.control.kind                  =   plugin
 adjust_wsclean_mapfile1.control.type                  =   appendMapfile
 adjust_wsclean_mapfile1.control.mapfile_in            =   create_imagebase_map1.output.mapfile
 adjust_wsclean_mapfile1.control.append                =   {{ wsclean_suffix }}
-adjust_wsclean_mapfile1.control.mapfile_dir           =   {{ mapfile_dir }}
-adjust_wsclean_mapfile1.control.filename              =   image1.datamap
+adjust_wsclean_mapfile1.control.mapfile_dir           =   input.output.mapfile_dir
+adjust_wsclean_mapfile1.control.filename              =   image1.mapfile
 
 copy_beam_info.control.type                           =   copy_beam_info
 copy_beam_info.control.mapfile_in                     =   adjust_wsclean_mapfile1.output.mapfile
@@ -194,13 +188,13 @@ create_imagebase_map2.control.kind                    =   plugin
 create_imagebase_map2.control.type                    =   trimMapfile
 create_imagebase_map2.control.mapfile_in              =   wsclean_image_full2.output.wsclean_image_full2-image.fits.mapfile
 create_imagebase_map2.control.trim                    =   -
-create_imagebase_map2.control.mapfile_dir             =   {{ mapfile_dir }}
-create_imagebase_map2.control.filename                =   wsclean_image_full2_image_rootnames.datamap
+create_imagebase_map2.control.mapfile_dir             =   input.output.mapfile_dir
+create_imagebase_map2.control.filename                =   wsclean_image_full2_image_rootnames.mapfile
 
 adjust_wsclean_mapfile2.control.kind                  =   plugin
 adjust_wsclean_mapfile2.control.type                  =   appendMapfile
 adjust_wsclean_mapfile2.control.mapfile_in            =   create_imagebase_map2.output.mapfile
 adjust_wsclean_mapfile2.control.append                =   {{ wsclean_suffix }}
-adjust_wsclean_mapfile2.control.mapfile_dir           =   {{ mapfile_dir }}
-adjust_wsclean_mapfile2.control.filename              =   final_image.datamap
+adjust_wsclean_mapfile2.control.mapfile_dir           =   input.output.mapfile_dir
+adjust_wsclean_mapfile2.control.filename              =   final_image.mapfile
 {% endblock full_image_parms %}

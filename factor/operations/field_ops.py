@@ -43,11 +43,11 @@ class InitSubtract(Operation):
         """
         # Add skymodels to band objects if any lack them
         if any([b.skymodel_dirindep is None for b in self.bands]):
-            merged_skymodel_datamap = os.path.join(self.mapfile_dir,
-                'merged_skymodels.datamap')
-            if os.path.exists(merged_skymodel_datamap):
-                datamap = DataMap.load(merged_skymodel_datamap)
-                for band, item in zip(self.bands, datamap):
+            merged_skymodel_mapfile = os.path.join(self.pipeline_mapfile_dir,
+                'merge.mapfile')
+            if os.path.exists(merged_skymodel_mapfile):
+                datamap = DataMap.load(merged_skymodel_mapfile)
+                for band, item in zip(self.bands, mapfile):
                     band.skymodel_dirindep = item.file
                     band.skip = item.skip
             else:
@@ -55,8 +55,8 @@ class InitSubtract(Operation):
                     band.skymodel_dirindep = None
 
         # Delete averaged data as they're no longer needed
-        self.direction.cleanup_mapfiles = [os.path.join(self.mapfile_dir,
-            'averaged_data.datamap')]
+        self.direction.cleanup_mapfiles = [os.path.join(self.pipeline_mapfile_dir,
+            'average.mapfile')]
         self.direction.cleanup()
 
 

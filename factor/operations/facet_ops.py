@@ -63,33 +63,36 @@ class FacetSelfcal(Operation):
         Finalize this operation
         """
         # Add output datamaps to direction object for later use
-        self.direction.input_bands_datamap = os.path.join(self.mapfile_dir,
-            'input_bands.datamap')
-        self.direction.diff_models_field_datamap = os.path.join(self.mapfile_dir,
-            'diff_models_field.datamap')
-        self.direction.dir_indep_parmdbs_datamap = os.path.join(self.mapfile_dir,
-            'dir_indep_instrument_parmdbs.datamap')
-        self.direction.dir_indep_skymodels_datamap = os.path.join(self.mapfile_dir,
-            'full_skymodels.datamap')
-        self.direction.dir_indep_facet_skymodels_datamap = os.path.join(self.mapfile_dir,
-            'facet_skymodels.datamap')
-        self.direction.dir_dep_parmdb_datamap = os.path.join(self.mapfile_dir,
-            'dir_dep_parmdb.datamap')
-        self.direction.facet_image_mapfile = os.path.join(self.mapfile_dir,
-            'final_image.datamap')
-        self.direction.facet_model_mapfile = os.path.join(self.mapfile_dir,
-            'final_model_rootnames.datamap')
+        self.direction.input_bands_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'input_bands.mapfile')
+        self.direction.shifted_model_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'corrupt_final_model.mapfile')
+        self.direction.diff_models_field_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'shift_diff_model_to_field.mapfile')
+        self.direction.dir_indep_parmdbs_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'dir_indep_instrument_parmdbs.mapfile')
+        self.direction.dir_indep_skymodels_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'full_skymodels.mapfile')
+        self.direction.dir_indep_facet_skymodels_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'make_facet_skymodels_all.mapfile')
+        self.direction.dir_dep_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'merge_selfcal_parmdbs.mapfile')
+        self.direction.facet_image_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'final_image.mapfile')
+        self.direction.facet_model_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'final_model_rootnames.mapfile')
         self.wsclean_modelimg_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'expand_wsclean_model')
         self.wsclean_modelimg_size_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'expand_wsclean_model_size')
-        self.verify_subtract_OK_mapfile = os.path.join(self.mapfile_dir,
-            'verify_subtract_OK.datamap')
+        self.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'verify_subtract.mapfile')
 
-        # Store results of verify_subtract check
-        if os.path.exists(self.verify_subtract_OK_mapfile) and not self.parset['skip_selfcal_check']:
-            ok_datamap = DataMap.load(self.verify_subtract_OK_mapfile)
-            ok_flags = [ast.literal_eval(item.file) for item in ok_datamap]
+        # Store results of verify_subtract check. This will work if the verification
+        # was done using multiple bands although we use only one at the moment
+        if os.path.exists(self.verify_subtract_mapfile) and not self.parset['skip_selfcal_check']:
+            ok_mapfile = DataMap.load(self.verify_subtract_mapfile)
+            ok_flags = [ast.literal_eval(item.file) for item in ok_mapfile]
             if all(ok_flags):
                 self.direction.selfcal_ok = True
             else:
@@ -103,34 +106,34 @@ class FacetSelfcal(Operation):
         # Note: we keep the data if selfcal failed verification, so that the user
         # can check them for problems
         self.direction.cleanup_mapfiles = [
-            os.path.join(self.mapfile_dir, 'shifted_cal_bands.datamap'),
-            os.path.join(self.mapfile_dir, 'predict_all_model_bands.datamap'),
-            os.path.join(self.mapfile_dir, 'corrupted_all_model_bands.datamap'),
-            os.path.join(self.mapfile_dir, 'diff_models_facet.datamap'),
-            os.path.join(self.mapfile_dir, 'final_model_data_facet.datamap'),
+            os.path.join(self.pipeline_mapfile_dir, 'corrupt_all_model_data.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'corrupt_final_model.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'predict_all_facet_sources.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'shift_cal.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat_data.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat_corr.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat_blavg_data.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat_averaged.mapfile'),
-            os.path.join(self.mapfile_dir, 'chunk_files.datamap'),
-            os.path.join(self.mapfile_dir, 'concat_input.datamap'),
-            os.path.join(self.mapfile_dir, 'concat0_input.datamap'),
-            os.path.join(self.mapfile_dir, 'concat1_input.datamap'),
-            os.path.join(self.mapfile_dir, 'concat2_input.datamap'),
-            os.path.join(self.mapfile_dir, 'concat3_input.datamap'),
-            os.path.join(self.mapfile_dir, 'concat4_input.datamap')]
+            os.path.join(self.pipeline_mapfile_dir, 'chunk_files.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'concat_input.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'concat0_input.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'concat1_input.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'concat2_input.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'concat3_input.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'concat4_input.mapfile')]
         if not self.parset['keep_avg_facet_data'] and self.direction.name != 'target':
             # Add averaged calibrated data for the facet to files to be deleted.
             # These are only needed if the user wants to reimage by hand (e.g.,
             # with a different weighting). They are always kept for the target
             self.direction.cleanup_mapfiles.append(
-                os.path.join(self.mapfile_dir, 'concat_averaged_input.datamap'))
+                os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_input.mapfile'))
         if not self.parset['keep_unavg_facet_data']:
             # Add unaveraged calibrated data for the facet to files to be deleted.
             # These are only needed if the user wants to phase shift them to
-            # another direction (e.g., to combine several facets together)
+            # another direction (e.g., to combine several facets together before
+            # imaging them all at once)
             self.direction.cleanup_mapfiles.append(
-                os.path.join(self.mapfile_dir, 'shifted_empty_bands.datamap'))
+                os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'))
         if self.direction.selfcal_ok or not self.parset['exit_on_selfcal_failure']:
             self.log.info('Cleaning up files (direction: {})'.format(self.direction.name))
             self.direction.cleanup()
@@ -212,10 +215,8 @@ class FacetImage(Operation):
         Finalize this operation
         """
         # Add output datamaps to direction object for later use
-        self.direction.facet_image_mapfile = os.path.join(self.mapfile_dir,
-            'final_image.datamap')
-        self.direction.facet_model_mapfile = os.path.join(self.mapfile_dir,
-            'final_model_rootnames.datamap')
+        self.direction.facet_image_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'final_image.mapfile')
 
         # Delete temp data
         if not self.parset['keep_avg_facet_data'] and self.direction.name != 'target':
@@ -223,12 +224,13 @@ class FacetImage(Operation):
             # These are only needed if the user wants to reimage by hand (e.g.,
             # with a different weighting). They are always kept for the target
             self.direction.cleanup_mapfiles.append(
-                os.path.join(self.mapfile_dir, 'concat_averaged_input.datamap'))
+                os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_input.mapfile'))
         if not self.parset['keep_unavg_facet_data']:
             # Add unaveraged calibrated data for the facet to files to be deleted.
             # These are only needed if the user wants to phase shift them to
-            # another direction (e.g., to combine several facets together)
+            # another direction (e.g., to combine several facets together before
+            # imaging them all at once)
             self.direction.cleanup_mapfiles.append(
-                os.path.join(self.mapfile_dir, 'shifted_empty_final_bands.datamap'))
+                os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'))
         self.direction.cleanup()
 

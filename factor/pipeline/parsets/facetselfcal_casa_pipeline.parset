@@ -57,8 +57,8 @@ adjust_casa_mapfile6.control.kind                          =   plugin
 adjust_casa_mapfile6.control.type                          =   appendMapfile
 adjust_casa_mapfile6.control.mapfile_in                    =   casa_image_full1.output.casa_image_full1.image.mapfile
 adjust_casa_mapfile6.control.append                        =   {{ casa_suffix }}
-adjust_casa_mapfile6.control.mapfile_dir                   =   {{ mapfile_dir }}
-adjust_casa_mapfile6.control.filename                      =   mask5_input.datamap
+adjust_casa_mapfile6.control.mapfile_dir                   =   input.output.mapfile_dir
+adjust_casa_mapfile6.control.filename                      =   mask5_input.mapfile
 
 mask5.control.type                                         =   make_clean_mask
 mask5.control.mapfile_in                                   =   adjust_casa_mapfile6.output.mapfile
@@ -113,21 +113,21 @@ create_model4_map.control.kind                             =   plugin
 create_model4_map.control.type                             =   trimMapfile
 create_model4_map.control.mapfile_in                       =   casa_image_full2.output.casa_image_full2.model.mapfile
 create_model4_map.control.trim                             =   .model
-create_model4_map.control.mapfile_dir                      =   {{ mapfile_dir }}
-create_model4_map.control.filename                         =   final_model_rootnames.datamap
+create_model4_map.control.mapfile_dir                      =   input.output.mapfile_dir
+create_model4_map.control.filename                         =   final_model_rootnames.mapfile
 
 adjust_casa_mapfile7.control.kind                          =   plugin
 adjust_casa_mapfile7.control.type                          =   appendMapfile
 adjust_casa_mapfile7.control.mapfile_in                    =   casa_image_full2.output.casa_image_full2.image.mapfile
 adjust_casa_mapfile7.control.append                        =   {{ casa_suffix }}
-adjust_casa_mapfile7.control.mapfile_dir                   =   {{ mapfile_dir }}
-adjust_casa_mapfile7.control.filename                      =   final_image.datamap
+adjust_casa_mapfile7.control.mapfile_dir                   =   input.output.mapfile_dir
+adjust_casa_mapfile7.control.filename                      =   final_image.mapfile
 
 create_compressed_mapfile6.control.kind                    =   plugin
 create_compressed_mapfile6.control.type                    =   compressMapfile
 create_compressed_mapfile6.control.mapfile_in              =   shift_empty.output.mapfile
-create_compressed_mapfile6.control.mapfile_dir             =   {{ mapfile_dir }}
-create_compressed_mapfile6.control.filename                =   concat_unaveraged_input.datamap
+create_compressed_mapfile6.control.mapfile_dir             =   input.output.mapfile_dir
+create_compressed_mapfile6.control.filename                =   concat_unaveraged_input.mapfile
 
 concat_unaveraged.control.type                             =   virtual_concat
 concat_unaveraged.control.mapfile_in                       =   create_compressed_mapfile6.output.mapfile

@@ -47,8 +47,8 @@ adjust_casa_mapfile.control.kind                  =   plugin
 adjust_casa_mapfile.control.type                  =   appendMapfile
 adjust_casa_mapfile.control.mapfile_in            =   casa_image_full1.output.casa_image_full1.image.mapfile
 adjust_casa_mapfile.control.append                =   {{ casa_suffix }}
-adjust_casa_mapfile.control.mapfile_dir           =   {{ mapfile_dir }}
-adjust_casa_mapfile.control.filename              =   mask_input.datamap
+adjust_casa_mapfile.control.mapfile_dir           =   input.output.mapfile_dir
+adjust_casa_mapfile.control.filename              =   mask_input.mapfile
 
 mask.control.type                                 =   make_clean_mask
 mask.control.mapfile_in                           =   adjust_casa_mapfile.output.mapfile
@@ -103,6 +103,6 @@ adjust_casa_mapfile2.control.kind                 =   plugin
 adjust_casa_mapfile2.control.type                 =   appendMapfile
 adjust_casa_mapfile2.control.mapfile_in           =   casa_image_full2.output.casa_image_full2.image.mapfile
 adjust_casa_mapfile2.control.append               =   {{ casa_suffix }}
-adjust_casa_mapfile2.control.mapfile_dir          =   {{ mapfile_dir }}
-adjust_casa_mapfile2.control.filename             =   final_image.datamap
+adjust_casa_mapfile2.control.mapfile_dir          =   input.output.mapfile_dir
+adjust_casa_mapfile2.control.filename             =   final_image.mapfile
 {% endblock full_image_parms %}

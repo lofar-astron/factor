@@ -55,18 +55,11 @@ class Operation(object):
         # Working directory
         self.factor_working_dir = parset['dir_working']
 
-        # Base name of state file
-        self.statebasename = os.path.join(self.factor_working_dir,
-            'state', '{0}-{1}'.format(self.name, self.direction.name))
-
-        # Directory that holds important mapfiles in a convenient place
-        self.mapfile_dir = os.path.join(self.factor_working_dir, 'datamaps',
-            self.name, self.direction.name)
-        create_directory(self.mapfile_dir)
-
-        # Pipeline runtime dir (pipeline makes subdir here with name of direction)
+        # Pipeline runtime and working dirs (pipeline makes subdir here with
+        # name of direction)
         self.pipeline_runtime_dir = os.path.join(self.factor_working_dir, 'results',
             self.name)
+        self.pipeline_working_dir = self.pipeline_runtime_dir
         create_directory(self.pipeline_runtime_dir)
 
        # Directory that holds the mapfiles
@@ -74,15 +67,16 @@ class Operation(object):
             self.direction.name, 'mapfiles')
         create_directory(self.pipeline_mapfile_dir)
 
-        # Directory that holds parset and config files
+        # Directory in the runtime dir that holds parset and config files (also
+        # the results of the pipeline)
         self.pipeline_parset_dir = os.path.join(self.pipeline_runtime_dir,
             self.direction.name)
         create_directory(self.pipeline_parset_dir)
 
-        # Pipeline working dir (pipeline makes subdir here with name of direction)
-        self.pipeline_working_dir = os.path.join(self.factor_working_dir, 'results',
-            self.name)
-        create_directory(self.pipeline_working_dir)
+        # Directory that holds the mapfiles
+        self.pipeline_mapfile_dir = os.path.join(self.pipeline_runtime_dir,
+            self.direction.name, 'mapfiles')
+        create_directory(self.pipeline_mapfile_dir)
 
         # Local scratch directory and corresponding node recipes
         if self.parset['cluster_specific']['dir_local'] is None:
@@ -134,9 +128,6 @@ class Operation(object):
                          'nimg_per_node': self.nimg_per_node,
                          'casa_executable': parset['casa_executable'],
                          'wsclean_executable': parset['wsclean_executable'],
-#                          'losoto_executable': parset['losoto_executable'],
-#                          'H5parm_importer_executable': parset['H5parm_importer_executable'],
-#                          'H5parm_exporter_executable': parset['H5parm_exporter_executable'],
                          'image2fits_executable': parset['image2fits_executable'],
                          'dppp_nodescript': self.dppp_nodescript}
 
@@ -145,7 +136,7 @@ class Operation(object):
         # updating this dictionary
         self.parms_dict = {'parset_dir': self.factor_parset_dir,
                            'skymodel_dir': self.factor_skymodel_dir,
-                           'mapfile_dir': self.mapfile_dir,
+                           'mapfile_dir': self.pipeline_mapfile_dir,
                            'pipeline_dir': self.factor_pipeline_dir,
                            'script_dir': self.factor_script_dir,
                            'local_dir': self.local_scratch_dir,
