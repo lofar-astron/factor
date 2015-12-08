@@ -99,7 +99,7 @@ class Band(object):
                     self.log.critical('Direction-independent instument parmdb not found '
                         'for band {0}'.format(self.file))
                     sys.exit(1)
-                self.log.warn('Direction-independent instument parmdb for band {0} is '
+                self.log.debug('Direction-independent instument parmdb for band {0} is '
                     'named "instrument". Copying to "instrument_dirindep" so that BBS '
                     'will not overwrite this table...'.format(self.file))
                 os.system('cp -r {0} {1}'.format(os.path.join(self.file,
@@ -119,7 +119,7 @@ class Band(object):
             sys.exit(1)
         if 'Real' in solname or 'Imag' in solname:
             # Convert real/imag to phasors
-            self.log.warn('Direction-independent instument parmdb for band {0} contains '
+            self.log.debug('Direction-independent instument parmdb for band {0} contains '
                 'real/imaginary values. Converting to phase/amplitude...'.format(self.file))
             self.convert_parmdb_to_phasors()
 
