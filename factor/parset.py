@@ -79,8 +79,8 @@ def parset_read(parset_file):
     allowed_sections = ['global', 'directions', 'cluster'] + parset_dict['mss']
     for section in given_sections:
         if section not in allowed_sections:
-            log.warning('Section "{}" was given in the
-                'parset but is not a valid section name'.format(option))
+            log.warning('Section "{}" was given in the parset but is not a valid '
+                'section name'.format(option))
 
     return parset_dict
 
