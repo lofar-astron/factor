@@ -102,26 +102,6 @@ def get_global_options(parset):
     """
     parset_dict = parset._sections['global']
 
-    # Paths to the LOFAR software
-    if 'lofarroot' not in parset_dict:
-        if 'LOFARROOT' in os.environ:
-            parset_dict['lofarroot'] = os.environ['LOFARROOT']
-        else:
-            log.critical("The LOFAR root directory cannot be determined. Please "
-                "specify it in the parset as lofarroot")
-            sys.exit(1)
-    if 'lofarpythonpath' not in parset_dict:
-        if parset_dict['lofarroot'] in os.environ['PYTHONPATH']:
-            pypaths = os.environ['PYTHONPATH'].split(':')
-            for pypath in pypaths:
-                if parset_dict['lofarroot'] in pypath:
-                    parset_dict['lofarpythonpath'] = pypath
-                    break
-        else:
-            log.critical("The LOFAR Python root directory cannot be determined. "
-                "Please specify it in the parset as lofarpythonpath")
-            sys.exit(1)
-
     # Parmdb name for dir-indep. selfcal solutions (stored inside the input band
     # measurement sets, so path should be relative to those; default = instrument)
     if 'parmdb_name' not in parset_dict:
@@ -373,6 +353,27 @@ def get_cluster_options(parset):
         parset_dict = {'cluster_specific': parset._sections['cluster']}
     else:
         parset_dict = {'cluster_specific': {}}
+
+    # Paths to the LOFAR software
+    if 'lofarroot' not in parset_dict:
+        if 'LOFARROOT' in os.environ:
+            parset_dict['lofarroot'] = os.environ['LOFARROOT']
+        else:
+            log.critical("The LOFAR root directory cannot be determined. Please "
+                "specify it in the [cluster] section of the parset as lofarroot")
+            sys.exit(1)
+    if 'lofarpythonpath' not in parset_dict:
+        if parset_dict['lofarroot'] in os.environ['PYTHONPATH']:
+            pypaths = os.environ['PYTHONPATH'].split(':')
+            for pypath in pypaths:
+                if parset_dict['lofarroot'] in pypath:
+                    parset_dict['lofarpythonpath'] = pypath
+                    break
+        else:
+            log.critical("The LOFAR Python root directory cannot be determined. "
+                "Please specify it in the [cluster] section of the parset as "
+                "lofarpythonpath")
+            sys.exit(1)
 
     # Full path to a local disk on the nodes for I/O-intensive processing. The path
     # must be the same for all nodes. If not given, the default directory in the
