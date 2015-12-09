@@ -76,7 +76,8 @@ def parset_read(parset_file):
 
     # Check for unused sections
     given_sections = parset._sections.keys()
-    allowed_sections = ['global', 'directions', 'cluster'] + parset_dict['mss']
+    msfiles = [os.path.basename(m) for m in parset_dict['mss']]
+    allowed_sections = ['global', 'directions', 'cluster'] + msfiles
     for section in given_sections:
         if section not in allowed_sections:
             log.warning('Section "{}" was given in the parset but is not a valid '
