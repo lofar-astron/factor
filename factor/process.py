@@ -209,17 +209,24 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         for d in directions_reset:
             d.reset_state('facetimage')
 
-        # Divide up the nodes and cores among the directions for the parallel
-        # imaging operations
-        dirs_to_image = factor.cluster.divide_nodes(dirs_to_image,
-            parset['cluster_specific']['node_list'],
-            parset['cluster_specific']['ndir_per_node'],
-            parset['cluster_specific']['nimg_per_node'],
-            parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['fmem'])
+        # Group directions. This is done to ensure that multiple directions
+        # aren't competing for the same resources
+        ndir_simul = (len(parset['cluster_specific']['node_list']) *
+            parset['cluster_specific']['ndir_per_node'])
+        for i in range(int(np.ceil(len(dirs_to_image)/float(ndir_simul)))):
+            dir_group = dirs_to_image[i*ndir_simul:(i+1)*ndir_simul]
 
-        ops = [FacetImage(parset, bands, d) for d in dirs_to_image]
-        scheduler.run(ops)
+            # Divide up the nodes and cores among the directions for the parallel
+            # imaging operations
+            dir_group = factor.cluster.divide_nodes(dir_group,
+                parset['cluster_specific']['node_list'],
+                parset['cluster_specific']['ndir_per_node'],
+                parset['cluster_specific']['nimg_per_node'],
+                parset['cluster_specific']['ncpu'],
+                parset['cluster_specific']['fmem'])
+
+            ops = [FacetImage(parset, bands, d) for d in dir_group]
+            scheduler.run(ops)
 
     # Mosaic the final facet images together
     if parset['make_mosaic']:
