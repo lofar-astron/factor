@@ -446,7 +446,7 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
             # Make directions from dir-indep sky model of highest-frequency
             # band, as it has the smallest field of view
             log.info("No directions file given. Selecting directions internally...")
-            parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(initial_skymodel,
+            parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(initial_skymodel.copy(),
                 dir_parset['flux_min_jy'], dir_parset['size_max_arcmin'],
                 dir_parset['separation_max_arcmin'], directions_max_num=dir_parset['max_num'],
                 interactive=parset['interactive'])
