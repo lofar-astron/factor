@@ -139,7 +139,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             mask_im = pim.image(mask_name)
         data = mask_im.getdata()
         coordsys = mask_im.coordinates()
-        if reference_ra is not None and reference_dec is not None:
+        if reference_ra_deg is not None and reference_dec_deg is not None:
             reference_ra_deg = float(reference_ra_deg)
             reference_dec_deg = float(reference_dec_deg)
             values = coordsys.get_referencevalue()
