@@ -109,7 +109,7 @@ wsclean_ft_high.control.inputkeys          =   [msfile,name,imsize]
 wsclean_ft_high.argument.flags             =   [-predict,msfile]
 wsclean_ft_high.argument.name              =   create_model_high_map.output.mapfile
 wsclean_ft_high.argument.size              =   imsize
-wsclean_ft_high.argument.scale             =   0.00694
+wsclean_ft_high.argument.scale             =   0.00208
 wsclean_ft_high.argument.mem               =   {{ max_percent_memory }}
 wsclean_ft_high.argument.j                 =   {{ max_cpus_per_img }}
 
