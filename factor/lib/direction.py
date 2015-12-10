@@ -202,7 +202,7 @@ class Direction(object):
             self.casa_multiscale = '[0, 3, 7, 25, 60, 150]'
             self.wsclean_multiscale = '-multiscale,'
         else:
-            self.casa_multiscale = '[]'
+            self.casa_multiscale = '[0]'
             self.wsclean_multiscale = ''
 
 
