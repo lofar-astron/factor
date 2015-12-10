@@ -54,9 +54,15 @@ class InitSubtract(Operation):
                 for band in self.bands:
                     band.skymodel_dirindep = None
 
-        # Delete averaged data as they're no longer needed
-        self.direction.cleanup_mapfiles = [os.path.join(self.pipeline_mapfile_dir,
-            'average.mapfile')]
+        # Delete averaged and model data as they're no longer needed
+        self.direction.cleanup_mapfiles = [
+            os.path.join(self.pipeline_mapfile_dir, 'average.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'predict_high.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'corrupt_high.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'correct_high.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'predict_low.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'corrupt_low.mapfile')
+            ]
         self.direction.cleanup()
 
 
