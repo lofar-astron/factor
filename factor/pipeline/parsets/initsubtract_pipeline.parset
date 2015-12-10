@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_high_sizes_map, create_low_sizes_map, wsclean_high1, mask_high, wsclean_high2, fits_to_image_high, casa_to_bbs_high, subtract_high, average, wsclean_low1, mask_low, wsclean_low2, fits_to_image_low, casa_to_bbs_low, create_model_low_map, wsclean_ft_low, subtract_low, merge, copy_final_model_map]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_high_sizes_map, create_low_sizes_map, wsclean_high1, mask_high, wsclean_high2, fits_to_image_high, casa_to_bbs_high, create_model_high_map, wsclean_ft_high, subtract_high, average, wsclean_low1, mask_low, wsclean_low2, fits_to_image_low, casa_to_bbs_low, create_model_low_map, wsclean_ft_low, subtract_low, merge, copy_final_model_map]
 
 pipeline.pluginpath                        =   {{ pipeline_dir }}/plugins
 
@@ -66,13 +66,13 @@ mask_high.argument.img_format              =   fits
 mask_high.argument.atrous_jmax             =   3
 
 wsclean_high2.control.type                 =   wsclean
-wsclean_high2.control.mapfiles_in          =   [create_ms_map.output.mapfile,mask_high.output.mapfile,create_high_sizes_map.output.mapfile]
-wsclean_high2.control.inputkeys            =   [msfile,fitsmask,imsize]
-wsclean_high2.argument.flags               =   [-update-model-required,-reorder,-fitbeam,msfile]
+wsclean_high2.control.mapfiles_in          =   [create_ms_map.output.mapfile,mask_high.output.mapfile,create_high_sizes_map.output.mapfile,mask_high.output.threshold_5sig.mapfile]
+wsclean_high2.control.inputkeys            =   [msfile,fitsmask,imsize,threshold]
+wsclean_high2.argument.flags               =   [-no-update-model-required,-reorder,-fitbeam,msfile]
 wsclean_high2.argument.fitsmask            =   fitsmask
 wsclean_high2.argument.size                =   imsize
 wsclean_high2.argument.niter               =   40000
-wsclean_high2.argument.threshold           =   mask_high.output.threshold_5sig.mapfile
+wsclean_high2.argument.threshold           =   threshold
 wsclean_high2.argument.pol                 =   I
 wsclean_high2.argument.weight              =   briggs 0.0
 wsclean_high2.argument.mgain               =   0.65
@@ -95,6 +95,23 @@ casa_to_bbs_high.control.mapfile_in        =   fits_to_image_high.output.mapfile
 casa_to_bbs_high.control.inputkey          =   inputmodel
 casa_to_bbs_high.control.outputkey         =   outfile
 casa_to_bbs_high.control.arguments         =   [-n,inputmodel,outfile]
+
+create_model_high_map.control.kind         =   plugin
+create_model_high_map.control.type         =   trimMapfile
+create_model_high_map.control.mapfile_in   =   wsclean_high2.output.wsclean_high2-model.fits.mapfile
+create_model_high_map.control.trim         =   -model.fits
+create_model_high_map.control.mapfile_dir  =   {{ mapfile_dir }}
+create_model_high_map.control.filename     =   model_high_rootnames.datamap
+
+wsclean_ft_high.control.type               =   wsclean_ft
+wsclean_ft_high.control.mapfiles_in        =   [create_ms_map.output.mapfile,create_model_high_map.output.mapfile,create_high_sizes_map.output.mapfile]
+wsclean_ft_high.control.inputkeys          =   [msfile,name,imsize]
+wsclean_ft_high.argument.flags             =   [-predict,msfile]
+wsclean_ft_high.argument.name              =   create_model_high_map.output.mapfile
+wsclean_ft_high.argument.size              =   imsize
+wsclean_ft_high.argument.scale             =   0.00694
+wsclean_ft_high.argument.mem               =   {{ max_percent_memory }}
+wsclean_ft_high.argument.j                 =   {{ max_cpus_per_img }}
 
 subtract_high.control.type                 =   calibrate-stand-alone_new
 subtract_high.argument.observation         =   create_ms_map.output.mapfile
@@ -147,13 +164,13 @@ mask_low.argument.img_format               =   fits
 mask_low.argument.atrous_jmax              =   3
 
 wsclean_low2.control.type                  =   wsclean
-wsclean_low2.control.mapfiles_in           =   [average.output.mapfile,mask_low.output.mapfile,create_low_sizes_map.output.mapfile]
-wsclean_low2.control.inputkeys             =   [msfile,fitsmask,imsize]
+wsclean_low2.control.mapfiles_in           =   [average.output.mapfile,mask_low.output.mapfile,create_low_sizes_map.output.mapfile,mask_low.output.threshold_5sig.mapfile]
+wsclean_low2.control.inputkeys             =   [msfile,fitsmask,imsize,threshold]
 wsclean_low2.argument.flags                =   [-no-update-model-required,-reorder,-fitbeam,msfile]
 wsclean_low2.argument.fitsmask             =   fitsmask
 wsclean_low2.argument.size                 =   imsize
 wsclean_low2.argument.niter                =   20000
-wsclean_low2.argument.threshold            =   mask_low.output.threshold_5sig.mapfile
+wsclean_low2.argument.threshold            =   threshold
 wsclean_low2.argument.pol                  =   I
 wsclean_low2.argument.weight               =   briggs 0.0
 wsclean_low2.argument.mgain                =   0.65
