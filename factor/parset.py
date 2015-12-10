@@ -186,7 +186,7 @@ def get_global_options(parset):
         'lofarpythonpath', 'parmdb_name', 'interactive', 'make_mosaic',
         'exit_on_selfcal_failure', 'skip_selfcal_check', 'wsclean_nbands',
         'facet_imager', 'keep_avg_facet_data', 'keep_unavg_facet_data',
-        'max_selfcal_loops', 'preaverage']
+        'max_selfcal_loops', 'preaverage_flux_jy']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [global] section of the '
