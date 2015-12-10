@@ -29,7 +29,8 @@ def read_vertices(filename):
 def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, rmsbox=None,
          iterate_threshold=False, adaptive_rmsbox=False, img_format='fits',
          threshold_format='float', trim_by=0.0, vertices_file=None, atrous_jmax=6,
-         pad_to_size=None, skip_source_detection=False, region_file=None, nsig=5.0):
+         pad_to_size=None, skip_source_detection=False, region_file=None, nsig=5.0,
+         reference_ra_deg=None, reference_dec_deg=None):
     """
     Run PyBDSM to make an island clean mask
 
@@ -138,6 +139,13 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             mask_im = pim.image(mask_name)
         data = mask_im.getdata()
         coordsys = mask_im.coordinates()
+        if reference_ra_deg is not None and reference_dec_deg is not None:
+            reference_ra_deg = float(reference_ra_deg)
+            reference_dec_deg = float(reference_dec_deg)
+            values = coordsys.get_referencevalue()
+            values[2][0] = reference_dec_deg/180.0*np.pi
+            values[2][1] = reference_ra_deg/180.0*np.pi
+            coordsys.set_referencevalue(values)
         imshape = mask_im.shape()
         del(mask_im)
 

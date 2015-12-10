@@ -64,7 +64,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     field = Direction('field', bands[0].ra, bands[0].dec,
         factor_working_dir=parset['dir_working'])
     field.set_averaging_steps_and_solution_intervals(bands[0].chan_width_hz, bands[0].nchan,
-        bands[0].timepersample, bands[0].nsamples, len(bands), parset['preaverage'])
+        bands[0].timepersample, bands[0].nsamples, len(bands), parset['preaverage_flux_jy'])
 
     # Run initial sky model generation and create empty datasets
     if len(bands_initsubtract) > 0:
@@ -209,17 +209,24 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         for d in directions_reset:
             d.reset_state('facetimage')
 
-        # Divide up the nodes and cores among the directions for the parallel
-        # imaging operations
-        dirs_to_image = factor.cluster.divide_nodes(dirs_to_image,
-            parset['cluster_specific']['node_list'],
-            parset['cluster_specific']['ndir_per_node'],
-            parset['cluster_specific']['nimg_per_node'],
-            parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['fmem'])
+        # Group directions. This is done to ensure that multiple directions
+        # aren't competing for the same resources
+        ndir_simul = (len(parset['cluster_specific']['node_list']) *
+            parset['cluster_specific']['ndir_per_node'])
+        for i in range(int(np.ceil(len(dirs_to_image)/float(ndir_simul)))):
+            dir_group = dirs_to_image[i*ndir_simul:(i+1)*ndir_simul]
 
-        ops = [FacetImage(parset, bands, d) for d in dirs_to_image]
-        scheduler.run(ops)
+            # Divide up the nodes and cores among the directions for the parallel
+            # imaging operations
+            dir_group = factor.cluster.divide_nodes(dir_group,
+                parset['cluster_specific']['node_list'],
+                parset['cluster_specific']['ndir_per_node'],
+                parset['cluster_specific']['nimg_per_node'],
+                parset['cluster_specific']['ncpu'],
+                parset['cluster_specific']['fmem'])
+
+            ops = [FacetImage(parset, bands, d) for d in dir_group]
+            scheduler.run(ops)
 
     # Mosaic the final facet images together
     if parset['make_mosaic']:
@@ -446,7 +453,7 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
             # Make directions from dir-indep sky model of highest-frequency
             # band, as it has the smallest field of view
             log.info("No directions file given. Selecting directions internally...")
-            parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(initial_skymodel,
+            parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(initial_skymodel.copy(),
                 dir_parset['flux_min_jy'], dir_parset['size_max_arcmin'],
                 dir_parset['separation_max_arcmin'], directions_max_num=dir_parset['max_num'],
                 interactive=parset['interactive'])
@@ -524,7 +531,7 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
     for i, direction in enumerate(directions):
         # Set averaging steps and solution intervals for selfcal
         direction.set_averaging_steps_and_solution_intervals(bands[0].chan_width_hz, bands[0].nchan,
-            bands[0].timepersample, bands[0].nsamples, len(bands), parset['preaverage'])
+            bands[0].timepersample, bands[0].nsamples, len(bands), parset['preaverage_flux_jy'])
 
         # Set imaging parameters
         direction.set_imaging_parameters(len(bands), parset['wsclean_nbands'],

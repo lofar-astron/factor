@@ -202,7 +202,7 @@ class Direction(object):
             self.casa_multiscale = '[0, 3, 7, 25, 60, 150]'
             self.wsclean_multiscale = '-multiscale,'
         else:
-            self.casa_multiscale = '[]'
+            self.casa_multiscale = '[0]'
             self.wsclean_multiscale = ''
 
 
@@ -323,7 +323,7 @@ class Direction(object):
 
 
     def set_averaging_steps_and_solution_intervals(self, chan_width_hz, nchan,
-        timestep_sec, ntimes, nbands, pre_average=False):
+        timestep_sec, ntimes, nbands, preaverage_flux_jy=0.0):
         """
         Sets the averaging step sizes and solution intervals for selfcal
 
@@ -348,13 +348,16 @@ class Direction(object):
             Number of timeslots per band
         nbands : int
             Number of bands
-        pre_average : bool, optional
-            If True, use baseline-dependent averaging and solint_p = 1 for
-            phase-only calibration
+        preaverage_flux_jy : bool, optional
+            Use baseline-dependent averaging and solint_p = 1 for phase-only
+            calibration for sources below this flux value
 
         """
         # Set name of column to use for data and averaged weights
-        self.pre_average = pre_average
+        self.pre_average = False
+        if self.apparent_flux_mjy is not None:
+            if self.apparent_flux_mjy < preaverage_flux_jy * 1000.0:
+                self.pre_average = True
         if self.pre_average:
             self.data_column = 'BLAVG_DATA'
             self.blavg_weight_column = 'BLAVG_WEIGHT_SPECTRUM'

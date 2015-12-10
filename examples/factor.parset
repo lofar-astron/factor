@@ -52,9 +52,10 @@ keep_avg_facet_data = False
 keep_unavg_facet_data = False
 
 # Use baseline-dependent preaveraging to increase the signal-to-noise of the
-# phase-only solve (default = True). If True, averaging in time is done to
-# exploit the time coherence in the TEC solutions
-preaverage = True
+# phase-only solve for sources below this flux (default = 0.0; i.e., disabled).
+# When activated, averaging in time is done to exploit the time coherence in the
+# TEC solutions
+preaverage_flux_Jy = 1.0
 
 
 [directions]

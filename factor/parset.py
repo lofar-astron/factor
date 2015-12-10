@@ -76,7 +76,8 @@ def parset_read(parset_file):
 
     # Check for unused sections
     given_sections = parset._sections.keys()
-    allowed_sections = ['global', 'directions', 'cluster'] + parset_dict['mss']
+    msfiles = [os.path.basename(m) for m in parset_dict['mss']]
+    allowed_sections = ['global', 'directions', 'cluster'] + msfiles
     for section in given_sections:
         if section not in allowed_sections:
             log.warning('Section "{}" was given in the parset but is not a valid '
@@ -171,12 +172,13 @@ def get_global_options(parset):
         parset_dict['max_selfcal_loops'] = 10
 
     # Use baseline-dependent preaveraging to increase the signal-to-noise of the
-    # phase-only solve (default = True). If True, averaging in time is done to
-    # exploit the time coherence in the TEC solutions
-    if 'preaverage' in parset_dict:
-        parset_dict['preaverage'] = parset.getboolean('global', 'preaverage')
+    # phase-only solve for sources below this flux (default = 0.0; i.e., disabled).
+    # When activated, averaging in time is done to exploit the time coherence in the
+    # TEC solutions
+    if 'preaverage_flux_jy' in parset_dict:
+        parset_dict['preaverage_flux_jy'] = parset.getfloat('global', 'preaverage_flux_jy')
     else:
-        parset_dict['preaverage'] = True
+        parset_dict['preaverage_flux_jy'] = 0.0
 
     # Check for unused options
     given_options = parset.options('global')
@@ -184,7 +186,7 @@ def get_global_options(parset):
         'lofarpythonpath', 'parmdb_name', 'interactive', 'make_mosaic',
         'exit_on_selfcal_failure', 'skip_selfcal_check', 'wsclean_nbands',
         'facet_imager', 'keep_avg_facet_data', 'keep_unavg_facet_data',
-        'max_selfcal_loops', 'preaverage']
+        'max_selfcal_loops', 'preaverage_flux_jy']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [global] section of the '

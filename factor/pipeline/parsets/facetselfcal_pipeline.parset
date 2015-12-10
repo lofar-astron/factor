@@ -887,7 +887,7 @@ casa_image32.argument.clean.allowchunk                     =   False
 loop_ampcal.control.kind                                   =   loop
 loop_ampcal.control.type                                   =   conditional
 loop_ampcal.control.loopcount                              =   {{ loopcount }}
-loop_ampcal.control.loopsteps                              =   [create_model3_map,casa_ft3,{% if pre_average %}switch_weights_col7,{% endif %}solve_ampphase21,{% if pre_average %}switch_weights_col8,{% endif %}apply_ampphase21,merge_phase_parmdbs,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,create_compressed_mapfile_empty,average4,create_compressed_mapfile4,concat4,delete_image,casa_image41,adjust_casa_mapfile4,mask4,casa_image42,adjust_casa_mapfile5,copy_image,check_image]
+loop_ampcal.control.loopsteps                              =   [create_model3_map,casa_ft3,{% if pre_average %}switch_weights_col7,{% endif %}solve_ampphase21,{% if pre_average %}switch_weights_col8,{% endif %}apply_ampphase21,merge_phase_parmdbs,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,average4,create_compressed_mapfile4,concat4,delete_image,casa_image41,adjust_casa_mapfile4,mask4,casa_image42,adjust_casa_mapfile5,copy_image,check_image]
 
 create_model3_map.control.kind                             =   plugin
 create_model3_map.control.type                             =   trimMapfile
@@ -969,21 +969,6 @@ apply_amp2.argument.catalog                                =   {{ skymodel_dir }
 apply_amp2.argument.parmdb                                 =   inputparmdb
 apply_amp2.argument.replace-sourcedb                       =   True
 apply_amp2.argument.replace-parmdb                         =   True
-
-flag2.control.type                                         =   dppp_inplace
-flag2.control.mapfiles_in                                  =   [concat_chunks.output.mapfile,select_single_cliplevel_cal.output.mapfile]
-flag2.control.inputkeys                                    =   [msin,clip_level]
-flag2.argument.msin.datacolumn                             =   CORRECTED_DATA
-flag2.argument.msout                                       =   .
-flag2.argument.steps                                       =   [flag]
-flag2.argument.flag.type                                   =   preflagger
-flag2.argument.flag.amplmax                                =   clip_level
-
-create_compressed_mapfile_empty.control.kind               =   plugin
-create_compressed_mapfile_empty.control.type               =   compressMapfile
-create_compressed_mapfile_empty.control.mapfile_in         =   shift_empty.output.mapfile
-create_compressed_mapfile_empty.control.mapfile_dir        =   input.output.mapfile_dir
-create_compressed_mapfile_empty.control.filename           =   shift_empty_compressed.mapfile
 
 average4.control.type                                      =   dppp
 average4.control.mapfile_in                                =   create_chunks_map.output.mapfile
@@ -1206,6 +1191,8 @@ premask.argument.img_format                                =   fits
 premask.argument.pad_to_size                               =   {{ facet_imsize }}
 premask.argument.skip_source_detection                     =   True
 premask.argument.vertices_file                             =   {{ vertices_file }}
+premask.argument.reference_ra_deg                          =   {{ facet_ra }}
+premask.argument.reference_dec_deg                         =   {{ facet_dec }}
 
 wsclean_image_full1.control.type                           =   wsclean
 wsclean_image_full1.control.mapfiles_in                    =   [concat_averaged.output.mapfile,premask.output.mapfile]
