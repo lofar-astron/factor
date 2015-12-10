@@ -172,12 +172,13 @@ def get_global_options(parset):
         parset_dict['max_selfcal_loops'] = 10
 
     # Use baseline-dependent preaveraging to increase the signal-to-noise of the
-    # phase-only solve (default = True). If True, averaging in time is done to
-    # exploit the time coherence in the TEC solutions
-    if 'preaverage' in parset_dict:
-        parset_dict['preaverage'] = parset.getboolean('global', 'preaverage')
+    # phase-only solve for sources below this flux (default = 0.0; i.e., disabled).
+    # When activated, averaging in time is done to exploit the time coherence in the
+    # TEC solutions
+    if 'preaverage_flux_jy' in parset_dict:
+        parset_dict['preaverage_flux_jy'] = parset.getfloat('global', 'preaverage_flux_jy')
     else:
-        parset_dict['preaverage'] = True
+        parset_dict['preaverage_flux_jy'] = 0.0
 
     # Check for unused options
     given_options = parset.options('global')
