@@ -44,9 +44,7 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
             os.system('rm -rf {0}'.format(outparmdb))
         else:
             return
-#     os.system('cp -r {0} {1}'.format(inparmdbs[0], outparmdb))
 
-#     if len(inparmdbs) > 1:
     pdb_concat = lofar.parmdb.parmdb(outparmdb, create=True)
     for inparmdb in inparmdbs:
         pdb = lofar.parmdb.parmdb(inparmdb)
