@@ -5,7 +5,8 @@ Script to merge parmdbs in time
 import argparse
 from argparse import RawTextHelpFormatter
 import os
-import lofar.parmdb
+import pyrap.tables as pt
+import lofar.parmdb as pdb
 import sys
 
 
@@ -46,15 +47,23 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
             return
     os.system('cp -r {0} {1}'.format(inparmdbs[0], outparmdb))
 
+#    if len(inparmdbs) > 1:
+#        pdb_concat = lofar.parmdb.parmdb(outparmdb)
+#        for inparmdb in inparmdbs[1:]:
+#            pdb = lofar.parmdb.parmdb(inparmdb)
+#            for parmname in pdb.getNames():
+#                v = pdb.getValuesGrid(parmname)
+#                pdb_concat.addValues(v.copy())
+#        pdb_concat.flush()
     if len(inparmdbs) > 1:
-        pdb_concat = lofar.parmdb.parmdb(outparmdb)
         for inparmdb in inparmdbs[1:]:
-            pdb = lofar.parmdb.parmdb(inparmdb)
-            for parmname in pdb.getNames():
-                v = pdb.getValuesGrid(parmname)
-                pdb_concat.addValues(v.copy())
-        pdb_concat.flush()
-
+            pt.taql('insert into '+outparmdb+' select from '+inparmdb)
+    outdb = pt.table(outparmdb,readonly=False,ack=False)
+    errdesc = outdb.getcoldesc('ERRORS')
+    errdesc['name'] = 'ERRORS'
+    outdb.removecols('ERRORS')
+    outdb.addcols(errdesc)
+    outdb.close()
 
 if __name__ == '__main__':
     descriptiontext = "Merge parmdbs in time.\n"

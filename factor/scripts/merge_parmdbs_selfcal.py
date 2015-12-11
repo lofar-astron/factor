@@ -5,7 +5,8 @@ Script to merge selfcal parmdbs
 import argparse
 from argparse import RawTextHelpFormatter
 import os
-import lofar.parmdb
+import lofar.parmdb as pdb
+import pyrap.tables as pt
 import shutil
 
 
@@ -37,21 +38,21 @@ def main(parmdb_p, parmdb_a, parmdb_out, clobber=True):
             shutil.rmtree(parmdb_out)
         else:
             return
-    pdb_out = lofar.parmdb.parmdb(parmdb_out, create=True)
 
-    # Copy over the CommonScalar phases and TEC
-    pdb_p = lofar.parmdb.parmdb(parmdb_p)
-    for parmname in pdb_p.getNames():
-        parms = pdb_p.getValuesGrid(parmname)
-        pdb_out.addValues(parms)
-
-    # Copy over the Gains
-    pdb_a = lofar.parmdb.parmdb(parmdb_a)
+    os.system('cp -r {0} {1}'.format(parmdb_p,parmdb_out))
+    
+    ## Copy over the Gains
+    pdb_out = pdb.parmdb(parmdb_out)
+    pdb_a = pdb.parmdb(parmdb_a)
     for parmname in pdb_a.getNames():
         parms = pdb_a.getValuesGrid(parmname)
-        pdb_out.addValues(parms)
-
-    # Write values
+        ValueHolder = pdb_out.makeValue(values=parms[parmname]['values'],
+                                        sfreq=parms[parmname]['freqs'],
+                                        efreq=parms[parmname]['freqwidths'],
+                                        stime=parms[parmname]['times'],
+                                        etime=parms[parmname]['timewidths'],
+                                        asStartEnd=False)
+        pdb_out.addValues(parmname,ValueHolder)       
     pdb_out.flush()
 
 
