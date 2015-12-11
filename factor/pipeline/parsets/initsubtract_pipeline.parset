@@ -102,6 +102,7 @@ make_sourcedb_high.control.opts.inputkey     =   in
 make_sourcedb_high.argument.format           =   <
 
 predict_high.control.type                    =   dppp
+predict_high.control.environment             =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
 predict_high.control.opts.mapfiles_in        =   [create_ms_map.output.mapfile,make_sourcedb_high.output.mapfile]
 predict_high.control.opts.inputkeys          =   [msin,sourcedb]
 predict_high.argument.msout.overwrite        =   True
@@ -112,6 +113,7 @@ predict_high.argument.predict_high.type      =   predict
 predict_high.argument.predict_high.sourcedb  =   sourcedb
 
 corrupt_high.control.type                    =   dppp
+corrupt_high.control.environment             =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
 corrupt_high.control.opts.mapfiles_in        =   [predict_high.output.mapfile,create_parmdb_map.output.mapfile]
 corrupt_high.control.opts.inputkeys          =   [msin,parmdb]
 corrupt_high.argument.msin.datacolumn        =   DATA
@@ -129,6 +131,7 @@ subtract_high.control.opts.inputkeys         =   [file1,file2]
 subtract_high.argument.flags                 =   [file1,file2,DATA,DATA,SUBTRACTED_DATA,subtract]
 
 correct_high.control.type                    =   dppp
+correct_high.control.environment             =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
 correct_high.control.opts.mapfiles_in        =   [create_ms_map.output.mapfile,create_parmdb_map.output.mapfile]
 correct_high.control.opts.inputkeys          =   [msin,parmdb]
 correct_high.argument.msin.datacolumn        =   SUBTRACTED_DATA
@@ -218,6 +221,7 @@ make_sourcedb_low.control.opts.inputkey      =   in
 make_sourcedb_low.argument.format            =   <
 
 predict_low.control.type                     =   dppp
+predict_low.control.environment              =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
 predict_low.control.opts.mapfiles_in         =   [create_ms_map.output.mapfile,make_sourcedb_low.output.mapfile]
 predict_low.control.opts.inputkeys           =   [msin,sourcedb]
 predict_low.argument.msout.overwrite         =   True
@@ -228,6 +232,7 @@ predict_low.argument.predict_low.type        =   predict
 predict_low.argument.predict_low.sourcedb    =   sourcedb
 
 corrupt_low.control.type                     =   dppp
+corrupt_low.control.environment              =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
 corrupt_low.control.opts.mapfiles_in         =   [predict_low.output.mapfile,create_parmdb_map.output.mapfile]
 corrupt_low.control.opts.inputkeys           =   [msin,parmdb]
 corrupt_low.argument.msin.datacolumn         =   DATA

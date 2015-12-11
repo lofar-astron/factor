@@ -426,7 +426,7 @@ def thiessen(directions_list, bounds_scale=0.5, s=None, check_edges=False,
         log.debug('Bounds scale too low. Setting to 0.5')
         bounds_scale = 0.5
     thiessen_polys = []
-    while bounds_scale > 0.4:
+    while bounds_scale > 0.45:
         thiessen_polys_prev = thiessen_polys[:]
         try:
             x_scale, y_scale = (points.min(axis=0) - points.max(axis=0)) * bounds_scale
@@ -447,7 +447,7 @@ def thiessen(directions_list, bounds_scale=0.5, s=None, check_edges=False,
             thiessen_polys = thiessen_polys_prev
             break
 
-    # Check for vertices that are very close to each other, as this give problems
+    # Check for vertices that are very close to each other, as this gives problems
     # to the edge adjustment below
     for thiessen_poly in thiessen_polys:
         dup_ind = 0
