@@ -30,12 +30,12 @@ def main(imageroot, counter):
         images1  = glob.glob(imageroot + '.*')
         for image in images1:
             if os.path.exists(image):
-                if os.path.isdir(image)
+                if os.path.isdir(image):
                     shutil.rmtree(image)
         images2  = glob.glob(imageroot.replace('image41', 'image42') + '.*')
         for image in images2:
             if os.path.exists(image):
-                if os.path.isdir(image)
+                if os.path.isdir(image):
                     shutil.rmtree(image)
 
 
