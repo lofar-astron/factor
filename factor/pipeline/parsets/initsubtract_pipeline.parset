@@ -64,6 +64,7 @@ mask_high.argument.rmsbox                    =   (60,20)
 mask_high.argument.adaptive_rmsbox           =   True
 mask_high.argument.img_format                =   fits
 mask_high.argument.atrous_jmax               =   3
+mask_high.argument.trim_by                   =   0.1
 
 wsclean_high2.control.type                   =   wsclean
 wsclean_high2.control.mapfiles_in            =   [create_ms_map.output.mapfile,mask_high.output.mapfile,create_high_sizes_map.output.mapfile]
@@ -183,6 +184,7 @@ mask_low.argument.rmsbox                     =   (60,20)
 mask_low.argument.adaptive_rmsbox            =   True
 mask_low.argument.img_format                 =   fits
 mask_low.argument.atrous_jmax                =   3
+mask_low.argument.trim_by                    =   0.1
 
 wsclean_low2.control.type                    =   wsclean
 wsclean_low2.control.mapfiles_in             =   [average.output.mapfile,mask_low.output.mapfile,create_low_sizes_map.output.mapfile]
