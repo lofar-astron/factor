@@ -20,6 +20,7 @@ expand_merged_parmdb_map.control.mapfile_dir          =   {{ mapfile_dir }}
 expand_merged_parmdb_map.control.filename             =   expand_merged_parmdbs.datamap
 
 shift_empty.control.type                              =   dppp
+shift_empty.control.environment                       =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
 shift_empty.control.opts.mapfile_in                   =   {{ input_bands_datamap }}
 shift_empty.control.opts.inputkey                     =   msin
 shift_empty.argument.msin.datacolumn                  =   SUBTRACTED_DATA_ALL_NEW
@@ -42,6 +43,7 @@ wsclean_ft.argument.j                                 =   {{ max_cpus_per_node }
 {% endblock model_data_parms %}
 
 corrupt_final_model.control.type                      =   dppp
+corrupt_final_model.control.environment               =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
 corrupt_final_model.control.opts.mapfiles_in          =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 corrupt_final_model.control.opts.inputkeys            =   [msin,parmdb]
 corrupt_final_model.argument.msin.datacolumn          =   MODEL_DATA
@@ -94,6 +96,7 @@ apply_dir_dep_slow.argument.replace-sourcedb          =   True
 apply_dir_dep_slow.argument.replace-parmdb            =   True
 
 average.control.type                                  =   dppp
+average.control.environment                           =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
 average.control.mapfile_in                            =   shift_empty.output.mapfile
 average.control.inputkey                              =   msin
 average.argument.msin.datacolumn                      =   CORRECTED_DATA

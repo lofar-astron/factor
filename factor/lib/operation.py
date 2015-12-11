@@ -6,6 +6,7 @@ Contains the master class for all operations
 import os
 import logging
 import socket
+import numpy as np
 from factor import _logging
 from jinja2 import Environment, FileSystemLoader
 from lofarpipe.support.utilities import create_directory
@@ -48,6 +49,8 @@ class Operation(object):
         self.hostname = socket.gethostname()
         self.node_list = parset['cluster_specific']['node_list']
         self.max_cpus_per_node = parset['cluster_specific']['ncpu']
+        self.max_cpus_per_band = max(1, int(np.ceil(self.max_cpus_per_node *
+            len(self.node_list) / float(len(self.bands)))))
         self.max_percent_memory = parset['cluster_specific']['fmem'] * 100.0
         self.ndir_per_node = parset['cluster_specific']['ndir_per_node']
         self.nimg_per_node = parset['cluster_specific']['nimg_per_node']
@@ -134,9 +137,6 @@ class Operation(object):
                          'nimg_per_node': self.nimg_per_node,
                          'casa_executable': parset['casa_executable'],
                          'wsclean_executable': parset['wsclean_executable'],
-#                          'losoto_executable': parset['losoto_executable'],
-#                          'H5parm_importer_executable': parset['H5parm_importer_executable'],
-#                          'H5parm_exporter_executable': parset['H5parm_exporter_executable'],
                          'image2fits_executable': parset['image2fits_executable'],
                          'dppp_nodescript': self.dppp_nodescript}
 

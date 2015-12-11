@@ -60,6 +60,7 @@ select_single_cliplevel_cal.control.filename               =   clip_level_jy_cal
 select_single_cliplevel_cal.control.index                  =   0
 
 shift_empty.control.type                                   =   dppp
+shift_empty.control.environment                            =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
 shift_empty.control.opts.mapfile_in                        =   create_ms_map.output.mapfile
 shift_empty.control.opts.inputkey                          =   msin
 shift_empty.argument.msin.datacolumn                       =   {{ subtracted_data_colname }}
@@ -82,6 +83,7 @@ make_sourcedb_all_facet_sources.control.opts.inputkey      =   in
 make_sourcedb_all_facet_sources.argument.format            =   <
 
 predict_all_facet_sources.control.type                     =   dppp
+predict_all_facet_sources.control.environment              =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
 predict_all_facet_sources.control.opts.mapfiles_in         =   [shift_empty.output.mapfile,make_sourcedb_all_facet_sources.output.mapfile]
 predict_all_facet_sources.control.opts.inputkeys           =   [msin,sourcedb]
 predict_all_facet_sources.argument.msout.overwrite         =   True
@@ -98,6 +100,7 @@ copy_predict_all_model_map.control.mapfile_dir             =   {{ mapfile_dir }}
 copy_predict_all_model_map.control.filename                =   predict_all_model_bands.datamap
 
 corrupt_all_model_data.control.type                        =   dppp
+corrupt_all_model_data.control.environment                 =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
 corrupt_all_model_data.control.opts.mapfiles_in            =   [predict_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
 corrupt_all_model_data.control.opts.inputkeys              =   [msin,parmdb]
 corrupt_all_model_data.argument.msin.datacolumn            =   DATA
@@ -126,6 +129,7 @@ add_imaging_cols_empty.control.inputkey                    =   msfile
 add_imaging_cols_empty.argument.flags                      =   [msfile]
 
 shift_cal.control.type                                     =   dppp
+shift_cal.control.environment                              =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
 shift_cal.control.opts.mapfile_in                          =   create_ms_map.output.mapfile
 shift_cal.control.opts.inputkey                            =   msin
 shift_cal.argument.msin.datacolumn                         =   {{ subtracted_data_colname }}
