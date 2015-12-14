@@ -101,7 +101,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             xvert = []
             yvert = []
             for RAvert, Decvert in zip(RAverts, Decverts):
-                pixels = input_img.topixel([0, 1, Decvert*np.pi/180.0,
+                pixels = input_img.topixel([1, 1, Decvert*np.pi/180.0,
                     RAvert*np.pi/180.0])
                 xvert.append(pixels[2]) # x -> Dec
                 yvert.append(pixels[3]) # y -> RA
