@@ -31,6 +31,7 @@ def set_level(level):
     """
     Change verbosity of console output
     """
+    logging.root.setLevel(logging.DEBUG)
     for handler in logging.root.handlers:
         if handler.name == 'console':
             if level == 'warning':

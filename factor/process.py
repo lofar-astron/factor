@@ -20,6 +20,9 @@ from factor.lib.direction import Direction
 from factor.lib.band import Band
 
 
+log = logging.getLogger('factor')
+
+
 def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     reset_directions=[]):
     """
@@ -53,14 +56,13 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
     # Set up logger
     parset['logging_level'] = logging_level
-    log = logging.getLogger('factor')
     factor._logging.set_level(logging_level)
 
     # Set up clusterdesc, node info, scheduler, etc.
-    scheduler = _set_up_compute_parameters(parset, log, dry_run)
+    scheduler = _set_up_compute_parameters(parset, dry_run)
 
     # Prepare vis data
-    bands, bands_initsubtract = _set_up_bands(parset, log, test_run)
+    bands, bands_initsubtract = _set_up_bands(parset, test_run)
 
     # Make direction object for the field
     field = Direction('field', bands[0].ra, bands[0].dec,
@@ -92,7 +94,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     bands = [b for b in bands if not b.skip]
 
     # Define directions
-    directions, direction_groups = _set_up_directions(parset, bands, field, log,
+    directions, direction_groups = _set_up_directions(parset, bands, field,
         dry_run, test_run, reset_directions)
 
     # Run selfcal and subtract operations on directions
@@ -248,7 +250,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     log.info("Factor has finished :)")
 
 
-def _set_up_compute_parameters(parset, log, dry_run=False):
+def _set_up_compute_parameters(parset, dry_run=False):
     """
     Sets up compute parameters and operation scheduler
 
@@ -256,8 +258,6 @@ def _set_up_compute_parameters(parset, log, dry_run=False):
     ----------
     parset : dict
         Parset containing processing parameters
-    log : logging instance
-        Log for output
     dry_run : bool, optional
         If True, do not run pipelines. All parsets, etc. are made as normal
 
@@ -302,7 +302,7 @@ def _set_up_compute_parameters(parset, log, dry_run=False):
     return scheduler
 
 
-def _set_up_bands(parset, log, test_run=False):
+def _set_up_bands(parset, test_run=False):
     """
     Sets up bands for processing
 
@@ -310,8 +310,6 @@ def _set_up_bands(parset, log, test_run=False):
     ----------
     parset : dict
         Parset containing processing parameters
-    log : logging instance
-        Log for output
     test_run : bool, optional
         If True, use test settings. These settings are for testing purposes
         only and will not produce useful results
@@ -396,7 +394,7 @@ def _set_up_bands(parset, log, test_run=False):
     return bands, bands_initsubtract
 
 
-def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
+def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
     reset_directions=[]):
     """
     Sets up directions (facets)
@@ -409,8 +407,6 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         Vis data
     field : Direction instance
         Field direction object
-    log : logging instance
-        Log for output
     dry_run : bool, optional
         If True, do not run pipelines. All parsets, etc. are made as normal
     test_run : bool, optional
