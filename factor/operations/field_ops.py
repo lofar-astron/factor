@@ -47,7 +47,7 @@ class InitSubtract(Operation):
                 'merge.mapfile')
             if os.path.exists(merged_skymodel_mapfile):
                 datamap = DataMap.load(merged_skymodel_mapfile)
-                for band, item in zip(self.bands, mapfile):
+                for band, item in zip(self.bands, datamap):
                     band.skymodel_dirindep = item.file
                     band.skip = item.skip
             else:
