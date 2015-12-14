@@ -9,7 +9,7 @@ import os
 import shutil
 import sys
 import errno
-import subprocess
+import tempfile
 
 from lofarpipe.support.pipelinelogging import CatchLog4CPlus
 from lofarpipe.support.pipelinelogging import log_time
@@ -45,7 +45,7 @@ class dppp_scratch(LOFARnodeTCP):
         self.msout_original = kwargs['msout'].rstrip('/')
         kwargs.pop('msout')
         self.msout_destination_dir = os.path.dirname(self.msout_original)
-        self.scratch_dir = kwargs['local_scratch_dir'].rstrip('/')
+        self.scratch_dir =tempfile.mkdtemp(dir=kwargs['local_scratch_dir'])
         kwargs.pop('local_scratch_dir')
         self.logger.info('Using {} as scratch directory'.format(self.scratch_dir))
 
