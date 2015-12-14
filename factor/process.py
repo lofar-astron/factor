@@ -345,6 +345,8 @@ def _set_up_bands(parset, log, test_run=False):
     # Sort bands by frequency
     band_freqs = [band.freq for band in bands]
     bands = np.array(bands)[np.argsort(band_freqs)].tolist()
+    for band in bands:
+        log.debug('MS for {0} is {1}'.format(band.name, band.msname))
 
     # Check bands for problems
     nchan_list = []
