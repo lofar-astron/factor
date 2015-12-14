@@ -1149,15 +1149,6 @@ apply_dir_dep_slow.argument.parmdb                         =   inputparmdb
 apply_dir_dep_slow.argument.replace-sourcedb               =   True
 apply_dir_dep_slow.argument.replace-parmdb                 =   True
 
-flag_full.control.type                                     =   dppp_inplace
-flag_full.control.mapfiles_in                              =   [shift_empty.output.mapfile,make_facet_skymodels_all.output.clip_level_jy_all.mapfile]
-flag_full.control.inputkeys                                =   [msin,clip_level]
-flag_full.argument.msin.datacolumn                         =   CORRECTED_DATA
-flag_full.argument.msout                                   =   .
-flag_full.argument.steps                                   =   [flag]
-flag_full.argument.flag.type                               =   preflagger
-flag_full.argument.flag.amplmax                            =   clip_level
-
 average5.control.type                                      =   dppp
 average5.control.mapfile_in                                =   shift_empty.output.mapfile
 average5.control.inputkey                                  =   msin
