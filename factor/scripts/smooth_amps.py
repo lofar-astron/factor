@@ -95,13 +95,9 @@ def main(instrument_name, instrument_name_smoothed):
                 amp = median_window_filter(amp, 3, 6)
                 amp = 10**amp
 
-                # Make sure amplitude solutions do not vary from unity by more than +/-50%
-                # and phase solutions from the mean by 0.2 rad
+                # Clip "extreme" outlier solutions that weren't caught by the filter
                 low_ind = numpy.where(amp < 0.5)
                 amp[low_ind] = 0.5
-                high_ind = numpy.where(amp > 1.5)
-                amp[high_ind] = 1.5
-
                 phase = (phase + numpy.pi) % (2.0 * numpy.pi) - numpy.pi
                 low_ind = numpy.where(phase-numpy.mean(phase) < -0.2)
                 phase[low_ind] = -0.2 + numpy.mean(phase)
