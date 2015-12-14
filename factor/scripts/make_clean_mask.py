@@ -90,6 +90,41 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     nsig = float(nsig)
 
     if not skip_source_detection:
+        if vertices_file is not None:
+            # Modify the input image to blank the regions outside of the polygon
+            input_img = pim.image(image_name)
+            data = input_img.getdata()
+
+            vertices = read_vertices(vertices_file)
+            RAverts = vertices[0]
+            Decverts = vertices[1]
+            xvert = []
+            yvert = []
+            for RAvert, Decvert in zip(RAverts, Decverts):
+                pixels = input_img.topixel([0, 1, Decvert*np.pi/180.0,
+                    RAvert*np.pi/180.0])
+                xvert.append(pixels[2]) # x -> Dec
+                yvert.append(pixels[3]) # y -> RA
+            poly = Polygon(xvert, yvert)
+
+            # Find masked regions
+            masked_ind = np.where(data[0, 0])
+
+            # Find distance to nearest poly edge and set to NaN those that
+            # are outside the facet (dist < 0)
+            dist = poly.is_inside(masked_ind[0], masked_ind[1])
+            outside_ind = np.where(dist < 0.0)
+            if len(outside_ind[0]) > 0:
+                data[0, 0, masked_ind[0][outside_ind], masked_ind[1][outside_ind]] = np.nan
+
+            # Save changes
+            input_img.putdata(data)
+            if img_format == 'fits':
+                input_img.tofits(image_name, overwrite=True)
+            else:
+                input_img.saveas(image_name, overwrite=True)
+
+
         if iterate_threshold:
             # Start with given threshold and lower it until we get at least one island
             nisl = 0
