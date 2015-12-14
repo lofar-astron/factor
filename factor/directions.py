@@ -1016,7 +1016,7 @@ def mask_vertices(mask_im, vertices_file):
     new_im:  pyrap.images image() object
         Modified mask image
     bool_mask :  pyrap.images image() object
-        List of facet vertices
+        Modified mask image
 
     """
     import pyrap.images as pim
