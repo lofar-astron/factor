@@ -94,6 +94,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             # Modify the input image to blank the regions outside of the polygon
             input_img = pim.image(image_name)
             data = input_img.getdata()
+            coordsys = input_img.coordinates()
+            imshape = input_img.shape()
 
             vertices = read_vertices(vertices_file)
             RAverts = vertices[0]
@@ -118,12 +120,13 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                 data[0, 0, masked_ind[0][outside_ind], masked_ind[1][outside_ind]] = np.nan
 
             # Save changes
-            input_img.putdata(data)
+            new_img = pim.image('', shape=imshape, coordsys=coordsys)
+            new_img.putdata(data)
             image_name += '.blanked'
             if img_format == 'fits':
-                input_img.tofits(image_name, overwrite=True)
+                new_img.tofits(image_name, overwrite=True)
             else:
-                input_img.saveas(image_name, overwrite=True)
+                new_img.saveas(image_name, overwrite=True)
 
 
         if iterate_threshold:
