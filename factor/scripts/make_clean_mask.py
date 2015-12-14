@@ -119,6 +119,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
 
             # Save changes
             input_img.putdata(data)
+            image_name += '.blanked'
             if img_format == 'fits':
                 input_img.tofits(image_name, overwrite=True)
             else:
