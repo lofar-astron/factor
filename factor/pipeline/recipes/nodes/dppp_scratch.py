@@ -142,8 +142,8 @@ class dppp_scratch(LOFARnodeTCP):
 
     def cleanup(self):
         self.logger.info("Deleting scratch directory")
-        if os.path.exists(self.msout_scratch):
-            shutil.rmtree(self.msout_scratch)
+        if os.path.exists(self.scratch_dir):
+            shutil.rmtree(self.scratch_dir)
 
     def execute(self, executable, args):
         try:
