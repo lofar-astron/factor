@@ -110,6 +110,8 @@ class FacetSelfcal(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'corrupt_final_model.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'predict_all_facet_sources.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'shift_cal.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'corrupt_cal_model_data.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'predict_cal_facet_sources.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat_data.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat_corr.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat_blavg_data.mapfile'),
