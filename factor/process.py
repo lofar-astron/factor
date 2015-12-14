@@ -114,7 +114,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 parset['cluster_specific']['node_list'],
                 parset['cluster_specific']['ncpu'],
                 parset['cluster_specific']['fmem'])
-            ops = [FacetSubReset(parset, d) for d in direction_group_reset_facetsub]
+            ops = [FacetSubReset(parset, bands, d) for d in direction_group_reset_facetsub]
             for op in ops:
                 scheduler.run(op)
         for d in direction_group_reset:
@@ -164,7 +164,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             parset['cluster_specific']['fmem'])
 
         # Subtract final model(s) for directions for which selfcal went OK
-        ops = [FacetSub(parset, d) for d in direction_group_ok]
+        ops = [FacetSub(parset, bands, d) for d in direction_group_ok]
         for op in ops:
             scheduler.run(op)
 
