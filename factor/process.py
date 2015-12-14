@@ -48,11 +48,13 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         List of direction names to be reset
 
     """
-    factor._logging.set_level(logging_level)
-    log = logging.getLogger('factor')
-
+    # Read parset
     parset = factor.parset.parset_read(parset_file)
+
+    # Set up logger
     parset['logging_level'] = logging_level
+    log = logging.getLogger('factor')
+    factor._logging.set_level(logging_level)
 
     # Set up clusterdesc, node info, scheduler, etc.
     scheduler = _set_up_compute_parameters(parset, log, dry_run)
