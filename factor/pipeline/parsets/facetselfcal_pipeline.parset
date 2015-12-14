@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_facet_skymodels_cal, shift_empty, make_sourcedb_all_facet_sources, predict_all_facet_sources, corrupt_all_model_data, add_all_facet_sources, add_imaging_cols_empty, shift_cal, add_cal_facet_sources, {% if transfer_nearest_solutions %}expand_merged_parmdb_map_transfer, apply_dir_dep_fast_transfer, apply_dir_dep_slow_transfer, {% else %}apply_dir_indep, {% endif %}create_compressed_mapfile_data, check_for_missing_bands, concat_data, concat_corr, {% if pre_average %}pre_average, concat_blavg_data,{% endif %} copy_column1, {% if pre_average %}copy_column2, copy_column3,{% endif %} make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, {% if not transfer_nearest_solutions %}average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, {% endif %}average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, {% block full_image_steps %}concat_averaged, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, create_expanded_model_mapfile, create_expanded_size_mapfile, wsclean_ft{% endblock full_image_steps %}, corrupt_final_model, subtract_initial_final, shift_diff_model_to_field,, create_single_band_mapfile, create_single_model_mapfile, subtract_single, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, copy_facet_skymodels_all_map, make_facet_skymodels_cal, select_single_cliplevel_cal, shift_empty, copy_empty_map, make_sourcedb_all_facet_sources, predict_all_facet_sources, copy_predict_all_model_map, corrupt_all_model_data, copy_corrupted_all_model_map, add_all_facet_sources, add_imaging_cols_empty, shift_cal, copy_cal_map, make_sourcedb_cal_facet_sources, predict_cal_facet_sources, corrupt_cal_model_data, add_cal_facet_sources, {% if transfer_nearest_solutions %}expand_merged_parmdb_map_transfer, apply_dir_dep_fast_transfer, apply_dir_dep_slow_transfer, {% else %}apply_dir_indep, {% endif %}create_compressed_mapfile_data, check_for_missing_bands, concat_data, concat_corr, {% if pre_average %}pre_average, concat_blavg_data,{% endif %} copy_column1, {% if pre_average %}copy_column2, copy_column3,{% endif %} make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, {% if not transfer_nearest_solutions %}average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, {% endif %}average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, copy_merged_parmdb_map, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, {% block full_image_steps %}concat_averaged, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, create_expanded_model_mapfile, create_expanded_size_mapfile, wsclean_ft{% endblock full_image_steps %}, corrupt_final_model, copy_final_model_map, subtract_initial_final, shift_diff_model_to_field, copy_diff_model_field_map, create_single_band_mapfile, create_single_model_mapfile, subtract_single, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract, copy_verify_subtract_pre_map, copy_verify_subtract_post_map, copy_verify_subtract_break_map]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -111,14 +111,45 @@ shift_cal.argument.avg.type                                =   squash
 shift_cal.argument.avg.freqstep                            =   {{ facetselfcal_freqstep }}
 shift_cal.argument.avg.timestep                            =   1
 
-add_cal_facet_sources.control.type                         =   calibrate-stand-alone_new
-add_cal_facet_sources.argument.observation                 =   shift_cal.output.mapfile
-add_cal_facet_sources.argument.parset                      =   {{ parset_dir }}/facet_dirindep_add.parset
-add_cal_facet_sources.argument.catalog                     =   make_facet_skymodels_cal.output.mapfile
-add_cal_facet_sources.argument.parmdb                      =   create_parmdb_map.output.mapfile
-add_cal_facet_sources.argument.replace-sourcedb            =   True
-add_cal_facet_sources.argument.replace-parmdb              =   True
-add_cal_facet_sources.argument.no-columns                  =   True
+copy_cal_map.control.kind                                  =   plugin
+copy_cal_map.control.type                                  =   copyMapfile
+copy_cal_map.control.mapfile_in                            =   shift_cal.output.mapfile
+copy_cal_map.control.mapfile_dir                           =   {{ mapfile_dir }}
+copy_cal_map.control.filename                              =   shifted_cal_bands.datamap
+
+make_sourcedb_cal_facet_sources.control.type               =   make_sourcedb
+make_sourcedb_cal_facet_sources.control.opts.mapfile_in    =   make_facet_skymodels_cal.output.mapfile
+make_sourcedb_cal_facet_sources.control.opts.inputkey      =   in
+make_sourcedb_cal_facet_sources.argument.format            =   <
+
+predict_cal_facet_sources.control.type                     =   dppp
+predict_cal_facet_sources.control.environment              =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
+predict_cal_facet_sources.control.opts.mapfiles_in         =   [shift_cal.output.mapfile,make_sourcedb_cal_facet_sources.output.mapfile]
+predict_cal_facet_sources.control.opts.inputkeys           =   [msin,sourcedb]
+predict_cal_facet_sources.argument.msout.overwrite         =   True
+predict_cal_facet_sources.argument.msout.writefullresflag  =   False
+predict_cal_facet_sources.argument.local_scratch_dir       =   {{ local_dir }}
+predict_cal_facet_sources.argument.steps                   =   [predict_cal]
+predict_cal_facet_sources.argument.predict_cal.type        =   predict
+predict_cal_facet_sources.argument.predict_cal.sourcedb    =   sourcedb
+
+corrupt_cal_model_data.control.type                        =   dppp
+corrupt_cal_model_data.control.environment                 =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
+corrupt_cal_model_data.control.opts.mapfiles_in            =   [predict_cal_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
+corrupt_cal_model_data.control.opts.inputkeys              =   [msin,parmdb]
+corrupt_cal_model_data.argument.msin.datacolumn            =   DATA
+corrupt_cal_model_data.argument.msout.overwrite            =   True
+corrupt_cal_model_data.argument.msout.writefullresflag     =   False
+corrupt_cal_model_data.argument.local_scratch_dir          =   {{ local_dir }}
+corrupt_cal_model_data.argument.steps                      =   [corrupt]
+corrupt_cal_model_data.argument.corrupt.type               =   applycal
+corrupt_cal_model_data.argument.corrupt.parmdb             =   parmdb
+corrupt_cal_model_data.argument.corrupt.invert             =   False
+
+add_cal_facet_sources.control.type                         =   add_subtract_columns
+add_cal_facet_sources.control.opts.mapfiles_in             =   [shift_cal.output.mapfile,corrupt_cal_model_data.output.mapfile]
+add_cal_facet_sources.control.opts.inputkeys               =   [file1,file2]
+add_cal_facet_sources.argument.flags                       =   [file1,file2,DATA,DATA,DATA,add]
 
 {% if transfer_nearest_solutions %}
 # Make dir-dependent parmdb mapfiles for transfer
