@@ -10,6 +10,7 @@ try:
 except ImportError:
     from lofar import bdsm
 import pyrap.images as pim
+from astropy.io import fits as pyfits
 import pickle
 import numpy as np
 import sys
@@ -123,11 +124,21 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             new_img = pim.image('', shape=imshape, coordsys=coordsys)
             new_img.putdata(data)
             image_name += '.blanked'
-            if img_format == 'fits':
-                new_img.tofits(image_name, overwrite=True)
-            else:
-                new_img.saveas(image_name, overwrite=True)
+            new_img.tofits(image_name, overwrite=True)
 
+            # Add beam info to blanked FITS image, as it is stripped out on save
+            hduim = pyfits.open(image_name, mode='update')
+            header = hduim[0].header
+            units =  input_img.info()['imageinfo']['restoringbeam']['major']['unit']
+            if units == 'arcsec':
+                conversion = 3600.0
+            else:
+                conversion = 1.0
+            header['BMAJ'] = input_img.info()['imageinfo']['restoringbeam']['major']['value'] / conversion
+            header['BMIN'] = input_img.info()['imageinfo']['restoringbeam']['minor']['value'] / conversion
+            header['BPA'] = input_img.info()['imageinfo']['restoringbeam']['positionangle']['value']
+            hduim.flush()
+            hduim.close()
 
         if iterate_threshold:
             # Start with given threshold and lower it until we get at least one island
