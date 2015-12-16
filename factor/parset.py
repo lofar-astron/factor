@@ -280,6 +280,9 @@ def get_directions_options(parset):
     # Total number of directions to selfcal (default = all)
     if 'ndir_selfcal' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['ndir_selfcal'] = parset.getint('directions', 'ndir_selfcal')
+        if parset_dict['direction_specific']['ndir_selfcal'] < 1:
+            log.error('Total number of directions to selfcal must be 1 or more')
+            sys.exit(1)
         log.info("Self calibrating up to %s direction(s)" % (parset_dict['direction_specific']['ndir_selfcal']))
     else:
         parset_dict['direction_specific']['ndir_selfcal'] = -1
@@ -292,6 +295,9 @@ def get_directions_options(parset):
     # number of directions are processed)
     if 'ndir_total' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['ndir_total'] = parset.getint('directions', 'ndir_total')
+        if parset_dict['direction_specific']['ndir_total'] < 1:
+            log.error('Total number of directions to process must be 1 or more')
+            sys.exit(1)
         log.info("Processing up to %s direction(s) in total" % (parset_dict['direction_specific']['ndir_total']))
     else:
         parset_dict['direction_specific']['ndir_total'] = -1
