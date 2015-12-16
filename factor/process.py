@@ -181,6 +181,12 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             log.info('Exiting...')
             sys.exit(1)
 
+    # Check that at least one direction went through selfcal successfully. If
+    # not, exit
+    if len([d for d in directions if d.selfcal_ok]) == 0:
+        log.error('Selfcal verification failed for all directions. Exiting...')
+        sys.exit(1)
+
     # Make final facet images (from final empty datasets) if desired. Also image
     # any facets for which selfcal failed or no selfcal was done
     #
