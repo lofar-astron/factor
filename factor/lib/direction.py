@@ -174,7 +174,10 @@ class Direction(object):
             self.nchannels = 1
 
         if self.nchannels > 1:
-            self.nterms = 2
+            if nbands > 20:
+                self.nterms = 3
+            else:
+                self.nterms = 2
             self.casa_suffix = '.tt0'
             self.wsclean_suffix = '-MFS-image.fits'
         else:
