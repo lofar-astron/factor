@@ -79,7 +79,6 @@ add_all_facet_sources.argument.add.type                    =   predict
 add_all_facet_sources.argument.add.sourcedb                =   sourcedb
 add_all_facet_sources.argument.add.operation               =   add
 add_all_facet_sources.argument.add.applycal.parmdb         =   parmdb
-add_all_facet_sources.argument.add.applycal.invert         =   False
 
 add_imaging_cols_empty.control.type                        =   add_imaging_columns
 add_imaging_cols_empty.control.mapfile_in                  =   shift_empty.output.mapfile
@@ -101,7 +100,6 @@ shift_cal.argument.add.type                                =   predict
 shift_cal.argument.add.sourcedb                            =   sourcedb
 shift_cal.argument.add.operation                           =   add
 shift_cal.argument.add.applycal.parmdb                     =   parmdb
-shift_cal.argument.add.applycal.invert                     =   False
 shift_cal.argument.avg.type                                =   squash
 shift_cal.argument.avg.freqstep                            =   {{ facetselfcal_freqstep }}
 shift_cal.argument.avg.timestep                            =   1

@@ -62,7 +62,6 @@ add_all_facet_sources.argument.add.type                 =   predict
 add_all_facet_sources.argument.add.sourcedb             =   sourcedb
 add_all_facet_sources.argument.add.operation            =   add
 add_all_facet_sources.argument.add.applycal.parmdb      =   dir_indep_parmdb
-add_all_facet_sources.argument.add.applycal.invert      =   False
 add_all_facet_sources.argument.correct_fast1.type       =   applycal
 add_all_facet_sources.argument.correct_fast1.parmdb     =   dir_dep_parmdb
 add_all_facet_sources.argument.correct_fast1.correction =   tec
