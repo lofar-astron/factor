@@ -351,8 +351,6 @@ def _set_up_bands(parset, test_run=False):
     # Sort bands by frequency
     band_freqs = [band.freq for band in bands]
     bands = np.array(bands)[np.argsort(band_freqs)].tolist()
-    for band in bands:
-        log.debug('MS file for {0} is {1}'.format(band.name, band.msname))
 
     # Check bands for problems
     nchan_list = []
@@ -475,10 +473,8 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
                 factor_working_dir=parset['dir_working'])
 
             # Check if target is already in directions list. If so, remove it
-            nearest = factor.directions.find_nearest(target, directions)
-            dist = factor.directions.calculateSeparation(target.ra, target.dec,
-                nearest.ra, nearest.dec)
-            if dist.value < dir_parset['target_radius_arcmin']/60.0:
+            nearest, dist = factor.directions.find_nearest(target, directions)
+            if dist < dir_parset['target_radius_arcmin']/60.0:
                 directions.remove(nearest)
 
             # Add target to directions list
