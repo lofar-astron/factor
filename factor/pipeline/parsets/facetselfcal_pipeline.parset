@@ -88,7 +88,7 @@ add_imaging_cols_empty.argument.flags                      =   [msfile]
 
 shift_cal.control.type                                     =   dppp
 shift_cal.control.environment                              =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
-shift_cal.control.opts.mapfilse_in                         =   [create_ms_map.output.mapfile,make_facet_skymodels_cal.output.mapfile,create_parmdb_map.output.mapfile]
+shift_cal.control.opts.mapfiles_in                         =   [create_ms_map.output.mapfile,make_facet_skymodels_cal.output.mapfile,create_parmdb_map.output.mapfile]
 shift_cal.control.opts.inputkeys                           =   [msin,sourcedb,parmdb]
 shift_cal.argument.msin.datacolumn                         =   {{ subtracted_data_colname }}
 shift_cal.argument.msout.overwrite                         =   True
