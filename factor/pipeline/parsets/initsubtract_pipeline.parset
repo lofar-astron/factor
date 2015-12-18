@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_high_sizes_map, create_low_sizes_map, wsclean_high1, mask_high, wsclean_high2, fits_to_image_high, casa_to_bbs_high, make_sourcedb_high, subtract_high, correct_high, average, wsclean_low1, mask_low, wsclean_low2, fits_to_image_low, casa_to_bbs_low, make_sourcedb_low, subtract_low, merge]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_high_sizes_map, create_low_sizes_map, wsclean_high1, mask_high, wsclean_high2, fits_to_image_high, casa_to_bbs_high, make_sourcedb_high, subtract_high, correct_high, wsclean_low1, mask_low, wsclean_low2, fits_to_image_low, casa_to_bbs_low, make_sourcedb_low, subtract_low, merge]
 
 pipeline.pluginpath                             =   {{ pipeline_dir }}/plugins
 
