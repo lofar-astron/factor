@@ -48,8 +48,6 @@ class Operation(object):
         self.log = logging.getLogger('factor:{0}'.format(self.name))
         self.hostname = socket.gethostname()
         self.node_list = parset['cluster_specific']['node_list']
-        self.ndir_per_node = parset['cluster_specific']['ndir_per_node']
-        self.nimg_per_node = parset['cluster_specific']['nimg_per_node']
 
         # Working directory
         self.factor_working_dir = parset['dir_working']
@@ -124,8 +122,6 @@ class Operation(object):
                              parset['genericpipeline_executable']).split('/bin')[0],
                          'pipeline_working_dir': self.pipeline_working_dir,
                          'pipeline_runtime_dir': self.pipeline_runtime_dir,
-                         'max_cpus_per_node': self.max_cpus_per_node,
-                         'nimg_per_node': self.nimg_per_node,
                          'casa_executable': parset['casa_executable'],
                          'wsclean_executable': parset['wsclean_executable'],
                          'image2fits_executable': parset['image2fits_executable'],

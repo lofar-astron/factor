@@ -145,6 +145,7 @@ def divide_nodes(directions, node_list, ndir_per_node, nimg_per_node, ncpu_max,
             ndir_per_node = min(ndir_per_node, c[h[0]])
         else:
             ndir_per_node = 1
+        d.nimg_per_node = nimg_per_node
         d.max_cpus_per_node =  max(1, int(round(ncpu_max / float(ndir_per_node))))
         d.max_cpus_per_img =  max(1, int(round(ncpu_max / float(nimg_per_node))))
         nchunks_per_node = max(1, int(round(float(d.nchunks) / len(d.hosts))))
@@ -185,6 +186,7 @@ def combine_nodes(directions, node_list, nimg_per_node, ncpu_max, fmem_max, nban
     # Give each direction all resources
     for d in directions:
         d.hosts = node_list
+        d.nimg_per_node = nimg_per_node
         d.max_cpus_per_node = ncpu_max
         d.max_cpus_per_img =  max(1, int(round(ncpu_max / float(nimg_per_node))))
         nchunks_per_node = max(1, int(round(float(d.nchunks) / len(d.hosts))))
