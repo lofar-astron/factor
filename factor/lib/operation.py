@@ -48,10 +48,6 @@ class Operation(object):
         self.log = logging.getLogger('factor:{0}'.format(self.name))
         self.hostname = socket.gethostname()
         self.node_list = parset['cluster_specific']['node_list']
-        self.max_cpus_per_node = parset['cluster_specific']['ncpu']
-        self.max_cpus_per_band = max(1, int(np.ceil(self.max_cpus_per_node *
-            len(self.node_list) / float(len(self.bands)))))
-        self.max_percent_memory = parset['cluster_specific']['fmem'] * 100.0
         self.ndir_per_node = parset['cluster_specific']['ndir_per_node']
         self.nimg_per_node = parset['cluster_specific']['nimg_per_node']
 
