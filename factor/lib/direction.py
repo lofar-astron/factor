@@ -442,6 +442,7 @@ class Direction(object):
         self.chunk_width = self.solint_a - 1
         while self.chunk_width < 200:
             self.chunk_width += self.solint_a - 1
+        self.nchunks = int(np.ceil((np.float(ntimes) / np.float(self.chunk_width))))
 
         # Set frequency interval for selfcal solve steps to the number of
         # channels in a band after averaging

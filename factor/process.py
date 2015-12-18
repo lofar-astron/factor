@@ -83,7 +83,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             parset['cluster_specific']['ndir_per_node'],
             parset['cluster_specific']['nimg_per_node'],
             parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['fmem'])[0]
+            parset['cluster_specific']['fmem'],
+            len(bands_initsubtract))[0]
         op = InitSubtract(parset, bands_initsubtract, field)
         scheduler.run(op)
     else:
@@ -116,8 +117,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             direction_group_reset_facetsub = factor.cluster.combine_nodes(
                 direction_group_reset_facetsub,
                 parset['cluster_specific']['node_list'],
+                parset['cluster_specific']['nimg_per_node'],
                 parset['cluster_specific']['ncpu'],
-                parset['cluster_specific']['fmem'])
+                parset['cluster_specific']['fmem'],
+                len(bands))
             ops = [FacetSubReset(parset, bands, d) for d in direction_group_reset_facetsub]
             for op in ops:
                 scheduler.run(op)
@@ -131,7 +134,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             parset['cluster_specific']['ndir_per_node'],
             parset['cluster_specific']['nimg_per_node'],
             parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['fmem'])
+            parset['cluster_specific']['fmem'],
+            len(bands))
 
         # Check for any directions within transfer radius that have successfully
         # gone through selfcal
@@ -164,8 +168,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         # Combine the nodes and cores for the serial subtract operations
         direction_group_ok = factor.cluster.combine_nodes(direction_group_ok,
             parset['cluster_specific']['node_list'],
+            parset['cluster_specific']['nimg_per_node'],
             parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['fmem'])
+            parset['cluster_specific']['fmem'],
+            len(bands))
 
         # Subtract final model(s) for directions for which selfcal went OK
         ops = [FacetSub(parset, bands, d) for d in direction_group_ok]
@@ -233,7 +239,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 parset['cluster_specific']['ndir_per_node'],
                 parset['cluster_specific']['nimg_per_node'],
                 parset['cluster_specific']['ncpu'],
-                parset['cluster_specific']['fmem'])
+                parset['cluster_specific']['fmem'],
+                len(bands))
 
             ops = [FacetImage(parset, bands, d) for d in dir_group]
             scheduler.run(ops)

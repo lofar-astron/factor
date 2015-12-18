@@ -20,9 +20,9 @@ expand_merged_parmdb_map.control.mapfile_dir          =   input.output.mapfile_d
 expand_merged_parmdb_map.control.filename             =   expand_merged_parmdbs.mapfile
 
 shift_empty.control.type                              =   dppp
-shift_empty.control.environment                       =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
 shift_empty.control.opts.mapfile_in                   =   {{ input_bands_datamap }}
 shift_empty.control.opts.inputkey                     =   msin
+shift_empty.argument.numthreads                       =   {{ max_cpus_per_band }}
 shift_empty.argument.msin.datacolumn                  =   SUBTRACTED_DATA_ALL_NEW
 shift_empty.argument.msout.overwrite                  =   True
 shift_empty.argument.msout.writefullresflag           =   False
@@ -39,13 +39,13 @@ wsclean_ft.argument.flags                             =   [-predict,msfile]
 wsclean_ft.argument.scale                             =   0.000417
 wsclean_ft.argument.mem                               =   {{ max_percent_memory }}
 wsclean_ft.argument.channelsout                       =   {{ nchannels }}
-wsclean_ft.argument.j                                 =   {{ max_cpus_per_node }}
+wsclean_ft.argument.j                                 =   {{ max_cpus_per_img }}
 {% endblock model_data_parms %}
 
 corrupt_final_model.control.type                      =   dppp
-corrupt_final_model.control.environment               =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
 corrupt_final_model.control.opts.mapfiles_in          =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 corrupt_final_model.control.opts.inputkeys            =   [msin,parmdb]
+corrupt_final_model.argument.numthreads               =   {{ max_cpus_per_band }}
 corrupt_final_model.argument.msin.datacolumn          =   MODEL_DATA
 corrupt_final_model.argument.msout.overwrite          =   True
 corrupt_final_model.argument.msout.writefullresflag   =   False
@@ -90,9 +90,9 @@ apply_dir_dep_slow.argument.replace-sourcedb          =   True
 apply_dir_dep_slow.argument.replace-parmdb            =   True
 
 average.control.type                                  =   dppp
-average.control.environment                           =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
 average.control.mapfile_in                            =   shift_empty.output.mapfile
 average.control.inputkey                              =   msin
+average.argument.numthreads                           =   {{ max_cpus_per_band }}
 average.argument.msin.datacolumn                      =   CORRECTED_DATA
 average.argument.msout.overwrite                      =   True
 average.argument.msout.writefullresflag               =   False
@@ -112,6 +112,7 @@ create_compressed_mapfile.control.filename            =   concat_averaged_input.
 concat_averaged.control.type                          =   dppp
 concat_averaged.control.mapfile_in                    =   create_compressed_mapfile5.output.mapfile
 concat_averaged.control.inputkey                      =   msin
+concat_averaged.argument.numthreads                   =   {{ max_cpus_per_node }}
 concat_averaged.argument.msin.datacolumn              =   DATA
 concat_averaged.argument.msout.writefullresflag       =   False
 concat_averaged.argument.local_scratch_dir            =   {{ local_dir }}

@@ -105,9 +105,9 @@ make_sourcedb_high.argument.format              =   <
 # Predict, corrupt, and subtract the high-resolution model. The low-resolution
 # model will be subtracted from the output column (SUBTRACTED_DATA_HIGH) later
 subtract_high.control.type                      =   dppp_inplace
-subtract_high.control.environment               =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
 subtract_high.control.opts.mapfiles_in          =   [create_ms_map.output.mapfile,make_sourcedb_high.output.mapfile,create_parmdb_map.output.mapfile]
 subtract_high.control.opts.inputkeys            =   [msin,sourcedb,parmdb]
+subtract_high.argument.numthreads               =   {{ max_cpus_per_band }}
 subtract_high.argument.msin.datacolumn          =   DATA
 subtract_high.argument.msout                    =   .
 subtract_high.argument.msout.datacolumn         =   SUBTRACTED_DATA_HIGH
@@ -119,9 +119,9 @@ subtract_high.argument.subtract.applycal.parmdb =   parmdb
 
 # Correct the SUBTRACTED_DATA_HIGH column and average to prepare for imaging
 correct_high.control.type                       =   dppp
-correct_high.control.environment                =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
 correct_high.control.opts.mapfiles_in           =   [create_ms_map.output.mapfile,create_parmdb_map.output.mapfile]
 correct_high.control.opts.inputkeys             =   [msin,parmdb]
+correct_high.argument.numthreads                =   {{ max_cpus_per_band }}
 correct_high.argument.msin.datacolumn           =   SUBTRACTED_DATA_HIGH
 correct_high.argument.msout.overwrite           =   True
 correct_high.argument.msout.writefullresflag    =   False
@@ -202,9 +202,9 @@ make_sourcedb_low.argument.format               =   <
 
 # Predict, corrupt, and subtract the low-resolution model
 subtract_low.control.type                       =   dppp_inplace
-subtract_low.control.environment                =   {OMP_NUM_THREADS: {{ max_cpus_per_band }}}
 subtract_low.control.opts.mapfiles_in           =   [create_ms_map.output.mapfile,make_sourcedb_low.output.mapfile,create_parmdb_map.output.mapfile]
 subtract_low.control.opts.inputkeys             =   [msin,sourcedb,parmdb]
+subtract_low.argument.numthreads                =   {{ max_cpus_per_band }}
 subtract_low.argument.msin.datacolumn           =   SUBTRACTED_DATA_HIGH
 subtract_low.argument.msout                     =   .
 subtract_low.argument.msout.datacolumn          =   SUBTRACTED_DATA_ALL
