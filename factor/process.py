@@ -436,8 +436,8 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
     # First check for user-supplied directions file, then for Factor-generated
     # file from a previous run, then for parameters needed to generate it internally
     dir_parset = parset['direction_specific']
-    if 'directions_file' in parset:
-        directions = factor.directions.directions_read(parset['directions_file'],
+    if 'directions_file' in dir_parset:
+        directions = factor.directions.directions_read(dir_parset['directions_file'],
             parset['dir_working'])
     elif os.path.exists(os.path.join(parset['dir_working'], 'factor_directions.txt')):
         directions = factor.directions.directions_read(os.path.join(parset['dir_working'],
@@ -459,11 +459,11 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
             # Make directions from dir-indep sky model of highest-frequency
             # band, as it has the smallest field of view
             log.info("No directions file given. Selecting directions internally...")
-            parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(initial_skymodel.copy(),
+            dir_parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(initial_skymodel.copy(),
                 dir_parset['flux_min_jy'], dir_parset['size_max_arcmin'],
                 dir_parset['separation_max_arcmin'], directions_max_num=dir_parset['max_num'],
                 interactive=parset['interactive'])
-            directions = factor.directions.directions_read(parset['directions_file'],
+            directions = factor.directions.directions_read(dir_parset['directions_file'],
                 parset['dir_working'])
 
     # Add the target to the directions list if desired
@@ -525,10 +525,9 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
             sys.exit()
 
     # Select subset of directions to process
-    if 'ndir_total' in parset['direction_specific']:
-        if parset['direction_specific']['ndir_total'] > 0 and \
-            parset['direction_specific']['ndir_total'] <= len(directions):
-            directions = directions[:parset['direction_specific']['ndir_total']]
+    if 'ndir_total' in dir_parset:
+        if dir_parset['ndir_total'] > 0 and dir_parset['ndir_total'] <= len(directions):
+            directions = directions[:dir_parset['ndir_total']]
 
     # Set various direction attributes
     log.info("Determining imaging parameters for each direction...")
@@ -560,15 +559,13 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
         selfcal_directions = [d for d in directions if d.name != target.name]
     else:
         selfcal_directions = directions
-    if 'ndir_selfcal' in parset['direction_specific']:
-        if parset['direction_specific']['ndir_selfcal'] > 0 and \
-            parset['direction_specific']['ndir_selfcal'] <= len(selfcal_directions):
-            selfcal_directions = selfcal_directions[:parset['direction_specific']['ndir_selfcal']]
+    if 'ndir_selfcal' in dir_parset:
+        if dir_parset['ndir_selfcal'] > 0 and dir_parset['ndir_selfcal'] <= len(selfcal_directions):
+            selfcal_directions = selfcal_directions[:dir_parset['ndir_selfcal']]
 
     # Divide directions into groups for selfcal
     direction_groups = factor.directions.group_directions(selfcal_directions,
-        n_per_grouping=parset['direction_specific']['groupings'],
-        allow_reordering=parset['direction_specific']['allow_reordering'])
+        n_per_grouping=dir_parset['groupings'], allow_reordering=dir_parset['allow_reordering'])
 
     # Ensure that target is included in the directions to process if desired
     # (but not for selfcal), just in case it was excluded by one of the cuts
