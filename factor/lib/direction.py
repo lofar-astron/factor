@@ -166,28 +166,35 @@ class Direction(object):
         self.cal_wplanes = self.set_wplanes(self.cal_imsize)
         self.facet_wplanes = self.set_wplanes(self.facet_imsize)
 
-        # Set number of channels for wide-band imaging
+        # Determine whether the total bandwidth is large enough that wide-band
+        # imaging is needed
         if nbands > 5:
+            self.use_wideband = True
+        else:
+            self.use_wideband = False
+
+        # Set number of channels for wide-band imaging with WSCleanand nterms
+        # for the CASA imager. Also define the image suffixes (which depend on
+        # whether or not wide-band clean is done)
+        if self.use_wideband:
             self.nchannels = int(round(float(nbands)/
                 float(nbands_per_channel)))
-        else:
-            self.nchannels = 1
-
-        if self.nchannels > 1:
             self.nterms = 2
             self.casa_suffix = '.tt0'
             self.wsclean_suffix = '-MFS-image.fits'
         else:
+            self.nchannels = 1
             self.nterms = 1
             self.casa_suffix = None
             self.wsclean_suffix = '-image.fits'
 
-        # Set number of iterations for full facet image, scaled to the number
-        # of bands
-        self.wsclean_full_image_niter = int(5000 * (np.sqrt(np.float(nbands))))
-        self.wsclean_full_image_threshold_jy =  1.5e-3 * 0.7 / (np.sqrt(np.float(nbands)))
-        self.casa_full_image_niter = int(2000 * (np.sqrt(np.float(nbands))))
-        self.casa_full_image_threshold_mjy = "{}mJy".format(1.5 * 0.7 / (np.sqrt(np.float(nbands))))
+        # Set number of iterations and threshold for full facet image, scaled to
+        # the number of bands
+        scaling_factor = np.sqrt(np.float(nbands))
+        self.wsclean_full_image_niter = int(5000 * scaling_factor)
+        self.wsclean_full_image_threshold_jy =  1.5e-3 * 0.7 / scaling_factor
+        self.casa_full_image_niter = int(2000 * scaling_factor)
+        self.casa_full_image_threshold_mjy = "{}mJy".format(1.5 * 0.7 / scaling_factor)
 
         # Set multiscale imaging mode: Get source sizes and check for large
         # sources (anything above 2 arcmin -- the CC sky model was convolved
@@ -197,7 +204,8 @@ class Direction(object):
         large_size_arcmin = 2.0
         if any([s > large_size_arcmin for s in sizes]):
             self.mscale_field_do = True
-
+        else:
+            self.mscale_field_do = False
         if self.mscale_field_do:
             self.casa_multiscale = '[0, 3, 7, 25, 60, 150]'
             self.wsclean_multiscale = '-multiscale,'
