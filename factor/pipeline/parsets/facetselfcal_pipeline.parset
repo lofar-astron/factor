@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, shift_empty, add_all_facet_sources, add_imaging_cols_empty, shift_cal, {% if transfer_nearest_solutions %}expand_merged_parmdb_map_transfer, apply_dir_dep_fast_transfer, apply_dir_dep_slow_transfer, {% else %}apply_dir_indep, {% endif %}create_compressed_mapfile_data, check_for_missing_bands, concat_data, concat_corr, {% if pre_average %}pre_average, concat_blavg_data,{% endif %} copy_column1, {% if pre_average %}copy_column2, copy_column3,{% endif %} make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, {% if not transfer_nearest_solutions %}average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, {% endif %}average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, {% block full_image_steps %}concat_averaged, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, create_expanded_model_mapfile, create_expanded_size_mapfile, wsclean_ft{% endblock full_image_steps %}, corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_single_band_mapfile, create_single_model_mapfile, subtract_single, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, add_imaging_cols_empty, shift_cal, {% if transfer_nearest_solutions %}expand_merged_parmdb_map_transfer, apply_dir_dep_fast_transfer, apply_dir_dep_slow_transfer, {% else %}apply_dir_indep, {% endif %}create_compressed_mapfile_data, check_for_missing_bands, concat_data, concat_corr, {% if pre_average %}pre_average, concat_blavg_data,{% endif %} copy_column1, {% if pre_average %}copy_column2, copy_column3,{% endif %} make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, {% if not transfer_nearest_solutions %}average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, {% endif %}average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, {% block full_image_steps %}concat_averaged, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, create_expanded_model_mapfile, create_expanded_size_mapfile, wsclean_ft{% endblock full_image_steps %}, corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_single_band_mapfile, create_single_model_mapfile, subtract_single, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -63,22 +63,26 @@ shift_empty.argument.msin.datacolumn                       =   {{ subtracted_dat
 shift_empty.argument.msout.overwrite                       =   True
 shift_empty.argument.msout.writefullresflag                =   False
 shift_empty.argument.local_scratch_dir                     =   {{ local_dir }}
-shift_empty.argument.steps                                 =   [shift]
+shift_empty.argument.steps                                 =   [shift,predict]
 shift_empty.argument.shift.type                            =   phaseshifter
 shift_empty.argument.shift.phasecenter                     =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
 
-add_all_facet_sources.control.type                         =   dppp_inplace
-add_all_facet_sources.control.opts.mapfiles_in             =   [shift_empty.output.mapfile,make_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
-add_all_facet_sources.control.opts.inputkeys               =   [msin,sourcedb,parmdb]
-add_all_facet_sources.argument.numthreads                  =   {{ max_cpus_per_band }}
-add_all_facet_sources.argument.msin.datacolumn             =   DATA
-add_all_facet_sources.argument.msout                       =   .
-add_all_facet_sources.argument.msout.datacolumn            =   FACET_DATA_ALL
-add_all_facet_sources.argument.steps                       =   [add]
-add_all_facet_sources.argument.add.type                    =   predict
-add_all_facet_sources.argument.add.sourcedb                =   sourcedb
-add_all_facet_sources.argument.add.operation               =   add
-add_all_facet_sources.argument.add.applycal.parmdb         =   parmdb
+predict_all_model_data.control.type                        =   dppp
+predict_all_model_data.control.opts.mapfiles_in            =   [shift_empty.output.mapfile,make_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
+predict_all_model_data.control.opts.inputkeys              =   [msin,sourcedb,parmdb]
+predict_all_model_data.argument.numthreads                 =   {{ max_cpus_per_band }}
+predict_all_model_data.argument.msout.overwrite            =   True
+predict_all_model_data.argument.msout.writefullresflag     =   False
+predict_all_model_data.argument.local_scratch_dir          =   {{ local_dir }}
+predict_all_model_data.argument.steps                      =   [predict]
+predict_all_model_data.argument.predict.type               =   predict
+predict_all_model_data.argument.predict.sourcedb           =   sourcedb
+predict_all_model_data.argument.predict.applycal.parmdb    =   parmdb
+
+add_all_facet_sources.control.type                         =   add_subtract_columns
+add_all_facet_sources.control.opts.mapfiles_in             =   [shift_empty.output.mapfile,predict_all_model_data.output.mapfile]
+add_all_facet_sources.control.opts.inputkeys               =   [file1,file2]
+add_all_facet_sources.argument.flags                       =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
 
 add_imaging_cols_empty.control.type                        =   add_imaging_columns
 add_imaging_cols_empty.control.mapfile_in                  =   shift_empty.output.mapfile
@@ -1319,7 +1323,7 @@ corrupt_final_model.argument.corrupt_slow.parmdb           =   parmdb
 corrupt_final_model.argument.corrupt_slow.invert           =   False
 
 subtract_initial_final.control.type                        =   add_subtract_columns
-subtract_initial_final.control.opts.mapfiles_in            =   [corrupt_all_model_data.output.mapfile,corrupt_final_model.output.mapfile]
+subtract_initial_final.control.opts.mapfiles_in            =   [predict_all_model_data.output.mapfile,corrupt_final_model.output.mapfile]
 subtract_initial_final.control.opts.inputkeys              =   [file1,file2]
 subtract_initial_final.argument.flags                      =   [file1,file2,DATA,DATA,MODEL_DATA_DIFF,subtract]
 
