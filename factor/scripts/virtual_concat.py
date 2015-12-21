@@ -43,9 +43,11 @@ if __name__ == '__main__':
     descriptiontext = "Perform virtual concatenation.\n"
 
     parser = argparse.ArgumentParser(description=descriptiontext, formatter_class=RawTextHelpFormatter)
-    parser.add_argument('ms_files', help='list of ms files to concatenate')
+    parser.add_argument('ms_files', nargs='+', help='list of ms files to concatenate')
     parser.add_argument('outfile', help='output filename')
     parser.add_argument('-c', '--clobber', help='overwrite existing outfile?', type=bool, default=True)
 
     args = parser.parse_args()
+    print "ms_files:",args.ms_files
+    print "outfile:",args.outfile
     main(args.ms_files, args.outfile, clobber=args.clobber)
