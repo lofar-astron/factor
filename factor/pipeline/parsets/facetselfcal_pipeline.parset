@@ -74,10 +74,11 @@ predict_all_model_data.argument.numthreads                 =   {{ max_cpus_per_b
 predict_all_model_data.argument.msout.overwrite            =   True
 predict_all_model_data.argument.msout.writefullresflag     =   False
 predict_all_model_data.argument.local_scratch_dir          =   {{ local_dir }}
-predict_all_model_data.argument.steps                      =   [predict]
-predict_all_model_data.argument.predict.type               =   predict
-predict_all_model_data.argument.predict.sourcedb           =   sourcedb
-predict_all_model_data.argument.predict.applycal.parmdb    =   parmdb
+predict_all_model_data.argument.steps                      =   [pred]
+predict_all_model_data.argument.pred.type                  =   predict
+predict_all_model_data.argument.pred.sourcedb              =   sourcedb
+predict_all_model_data.argument.pred.operation             =   replace
+predict_all_model_data.argument.pred.applycal.parmdb       =   parmdb
 
 add_all_facet_sources.control.type                         =   add_subtract_columns
 add_all_facet_sources.control.opts.mapfiles_in             =   [shift_empty.output.mapfile,predict_all_model_data.output.mapfile]
