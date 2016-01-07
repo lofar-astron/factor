@@ -116,6 +116,7 @@ class Direction(object):
         self.started_operations = []
         self.completed_operations = []
         self.cleanup_mapfiles = []
+        self.do_reset = False # wether to reset this direction
 
         # Set the size of the calibrator (used to filter source lists)
         if cal_size_deg is None:
