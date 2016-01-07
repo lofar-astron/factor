@@ -110,12 +110,13 @@ class Direction(object):
         self.cellsize_selfcal_deg = 0.000417 # selfcal cell size
         self.cellsize_verify_deg = 0.00833 # verify subtract cell size
         self.target_rms_rad = 0.2 # preaverage target rms
-        self.subtracted_data_colname = 'SUBTRACTED_DATA_ALL'
-        self.pre_average = False
-        self.blavg_weight_column = 'WEIGHT_SPECTRUM'
+        self.subtracted_data_colname = 'SUBTRACTED_DATA_ALL' # name of empty data column
+        self.pre_average = False # whether to use baseline averaging
+        self.blavg_weight_column = 'WEIGHT_SPECTRUM' # name of weights column
         self.started_operations = []
         self.completed_operations = []
         self.cleanup_mapfiles = []
+        self.do_reset = False # wether to reset this direction
 
         # Set the size of the calibrator (used to filter source lists)
         if cal_size_deg is None:
