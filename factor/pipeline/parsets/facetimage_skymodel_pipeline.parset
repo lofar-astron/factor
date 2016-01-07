@@ -47,7 +47,7 @@ make_sourcedb_all_facet_sources.control.opts.mapfile_in =   make_facet_skymodels
 make_sourcedb_all_facet_sources.control.opts.inputkey   =   in
 make_sourcedb_all_facet_sources.argument.format         =   <
 
-add_all_facet_sources.control.type                      =   dppp_inplace
+add_all_facet_sources.control.type                      =   dppp
 add_all_facet_sources.control.opts.mapfiles_in          =   [create_ms_map.output.mapfile,make_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 add_all_facet_sources.control.opts.inputkeys            =   [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb]
 add_all_facet_sources.argument.numthreads               =   {{ max_cpus_per_band }}
