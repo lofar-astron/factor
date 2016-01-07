@@ -211,6 +211,7 @@ sort_into_Groups.argument.flags                            =   [create_compresse
 sort_into_Groups.argument.filename                         =   sorted_groups.datamap
 sort_into_Groups.argument.mapfile_dir                      =   {{ mapfile_dir }}
 sort_into_Groups.argument.hosts                            =   {{ hosts }}
+sort_into_Groups.argument.stepname                         =   sort_into_Groups
 
 # concat data in frequency, length = ntimes 
 concat_data.control.type                                   =   dppp
@@ -1218,6 +1219,7 @@ sort_average5.argument.flags                            =   [create_compressed_m
 sort_average5.argument.filename                         =   average5_sorted_groups.datamap
 sort_average5.argument.mapfile_dir                      =   {{ mapfile_dir }}
 sort_average5.argument.hosts                            =   {{ hosts }}
+sort_average5.argument.stepname                         =   sort_average5
 
 # concatenate data in frequency, length = ntimes
 # not sure if this is needed / useful 
