@@ -150,7 +150,7 @@ class Operation(object):
         if os.path.basename(self.parset['cluster_specific']['clusterdesc']) == 'local.clusterdesc':
             self.cfg_dict['remote'] = '[remote]\n'\
                 + 'method = local\n'\
-                + 'max_per_node = {0}\n'.format(self.max_cpus_per_node)
+                + 'max_per_node = {0}\n'.format(self.cfg_dict['max_cpus_per_node'])
         else:
             self.cfg_dict['remote'] = ''
         self.cfg_dict['clusterdesc'] = os.path.join(self.factor_working_dir,

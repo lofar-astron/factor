@@ -78,9 +78,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
         log.info('Running initsubtract operation for bands: {0}'.
             format([b.name for b in bands_initsubtract]))
-        field = factor.cluster.divide_nodes([field],
+        # Combine the nodes and cores for the serial subtract operations
+        field = factor.cluster.combine_nodes([field],
             parset['cluster_specific']['node_list'],
-            parset['cluster_specific']['ndir_per_node'],
             parset['cluster_specific']['nimg_per_node'],
             parset['cluster_specific']['ncpu'],
             parset['cluster_specific']['fmem'],
