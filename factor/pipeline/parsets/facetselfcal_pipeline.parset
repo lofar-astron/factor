@@ -1200,10 +1200,12 @@ average5.argument.msin.datacolumn                          =   CORRECTED_DATA
 average5.argument.msout.overwrite                          =   True
 average5.argument.msout.writefullresflag                   =   False
 average5.argument.local_scratch_dir                        =   {{ local_dir }}
-average5.argument.steps                                    =   [avg]
+average5.argument.steps                                    =   [flagzero,avg]
 average5.argument.avg.type                                 =   squash
 average5.argument.avg.freqstep                             =   {{ facetimage_freqstep }}
 average5.argument.avg.timestep                             =   {{ facetimage_timestep }}
+average5.argument.flagzero.type                            =   preflagger
+average5.argument.amplmin                                  =   1e-20
 
 # compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile5.control.kind                 =   plugin
