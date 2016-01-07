@@ -44,7 +44,7 @@ class Band(object):
         sw.close()
         self.name = 'Band_{0:.2f}MHz'.format(self.freq/1e6)
         self.log = logging.getLogger('factor:{}'.format(self.name))
-        self.log.debug('MS file is {}'.format(self.msname))
+        self.log.debug('MS filename is {}'.format(self.msname))
 
         # Do some checks
         self.check_freqs()
