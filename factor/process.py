@@ -33,7 +33,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     direction (depending on sucess of selfcal, the order in which they were
     processed, etc.).
 
-    It also handles the setup of the computing parameters and the generation of
+    It also handles the set up of the computing parameters and the generation of
     DDE calibrators and facets.
 
     Parameters
@@ -48,7 +48,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         If True, use test settings. These settings are for testing purposes
         only and will not produce useful results
     reset_directions : list of str, optional
-        List of direction names to be reset
+        List of names of directions to be reset
 
     """
     # Read parset
@@ -78,13 +78,16 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
         log.info('Running initsubtract operation for bands: {0}'.
             format([b.name for b in bands_initsubtract]))
-        # Combine the nodes and cores for the serial subtract operations
+
+        # Combine the nodes and cores for the subtract operation
         field = factor.cluster.combine_nodes([field],
             parset['cluster_specific']['node_list'],
             parset['cluster_specific']['nimg_per_node'],
             parset['cluster_specific']['ncpu'],
             parset['cluster_specific']['fmem'],
             len(bands_initsubtract))[0]
+
+        # Do initial subtraction
         op = InitSubtract(parset, bands_initsubtract, field)
         scheduler.run(op)
     else:
@@ -94,11 +97,11 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     # Remove bands that failed initsubtract operation
     bands = [b for b in bands if not b.skip]
 
-    # Define directions
+    # Define directions and groups
     directions, direction_groups = _set_up_directions(parset, bands, field,
         dry_run, test_run, reset_directions)
 
-    # Run selfcal and subtract operations on directions
+    # Run selfcal and subtract operations on direction groups
     set_sub_data_colname = True
     for gindx, direction_group in enumerate(direction_groups):
         log.info('Processing {0} direction(s) in Group {1}'.format(
@@ -195,16 +198,12 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
     # Make final facet images (from final empty datasets) if desired. Also image
     # any facets for which selfcal failed or no selfcal was done
-    #
-    # TODO: combine new facet sky models and adjust facet edges for new sources
-    # (but only if all facets are to be re-imaged)
-    #
     dirs_to_image = [d for d in directions if d.make_final_image and d.selfcal_ok]
     if len(dirs_to_image) > 0:
         log.info('Reimaging the following direction(s):')
         log.info('{0}'.format([d.name for d in dirs_to_image]))
 
-    # Add directions without selfcal
+    # Add directions without selfcal to those that will be imaged
     dirs_to_transfer = [d for d in directions if not d.selfcal_ok]
     if len(dirs_to_transfer) > 0:
         log.info('Imaging the following direction(s) with nearest selcal solutions:')
@@ -242,6 +241,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 parset['cluster_specific']['fmem'],
                 len(bands))
 
+            # Do facet imaging
             ops = [FacetImage(parset, bands, d) for d in dir_group]
             scheduler.run(ops)
 
@@ -257,6 +257,16 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             facet_image = DataMap.load(d.facet_image_mapfile)[0].file
             field.facet_image_filenames.append(facet_image)
             field.facet_vertices_filenames.append(d.save_file)
+
+        # Combine the nodes and cores for the mosaic operation
+        field = factor.cluster.combine_nodes([field],
+            parset['cluster_specific']['node_list'],
+            parset['cluster_specific']['nimg_per_node'],
+            parset['cluster_specific']['ncpu'],
+            parset['cluster_specific']['fmem'],
+            len(bands))[0]
+
+        # Do mosaicking
         op = MakeMosaic(parset, bands, field)
         scheduler.run(op)
 
