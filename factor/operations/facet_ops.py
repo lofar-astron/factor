@@ -62,7 +62,7 @@ class FacetSelfcal(Operation):
         """
         Finalize this operation
         """
-        # Add output datamaps to direction object for later use
+        # Add output datamaps to direction object for later reference
         self.direction.input_bands_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'input_bands.mapfile')
         self.direction.shifted_model_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
@@ -108,7 +108,7 @@ class FacetSelfcal(Operation):
         self.direction.cleanup_mapfiles = [
             os.path.join(self.pipeline_mapfile_dir, 'corrupt_all_model_data.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'corrupt_final_model.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'predict_all_facet_sources.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'predict_all_model_data.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'shift_cal.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'corrupt_cal_model_data.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'predict_cal_facet_sources.mapfile'),
