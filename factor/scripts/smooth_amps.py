@@ -95,15 +95,6 @@ def main(instrument_name, instrument_name_smoothed):
                 amp = median_window_filter(amp, 3, 6)
                 amp = 10**amp
 
-                # Clip "extreme" outlier solutions that weren't caught by the filter
-                low_ind = numpy.where(amp < 0.5)
-                amp[low_ind] = 0.5
-                phase = (phase + numpy.pi) % (2.0 * numpy.pi) - numpy.pi
-                low_ind = numpy.where(phase-numpy.mean(phase) < -0.2)
-                phase[low_ind] = -0.2 + numpy.mean(phase)
-                high_ind = numpy.where(phase-numpy.mean(phase) > +0.2)
-                phase[high_ind] = 0.2 + numpy.mean(phase)
-
                 parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = amp * numpy.cos(phase)
                 parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = amp * numpy.sin(phase)
 
@@ -123,8 +114,17 @@ def main(instrument_name, instrument_name_smoothed):
             for antenna in antenna_list:
                 real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
                 imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
-                parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = numpy.copy(real*norm_factor)
-                parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = numpy.copy(imag*norm_factor)
+                phase = numpy.arctan2(imag, real)
+                amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
+
+                # Clip extremely low amplitude solutions to prevent very high ampllitudes
+                low_ind = numpy.where(amp < 0.2)
+                amp[low_ind] = 0.2
+
+                parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = numpy.copy(amp *
+                    numpy.cos(phase) * norm_factor)
+                parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = numpy.copy(amp *
+                    numpy.sin(phase) * norm_factor)
 
     if os.path.exists(instrument_name_smoothed):
         shutil.rmtree(instrument_name_smoothed)
