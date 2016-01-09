@@ -111,8 +111,8 @@ class Scheduler(object):
 
             # Finalize the operation
             if this_op is not None:
-                op.finalize()
-                op.set_completed()
+                this_op.finalize()
+                this_op.set_completed()
             else:
                 log.error('Operation {0} (direction: {1}) not in list of active '
                     'operations'.format(op_name, direction_name))
