@@ -102,11 +102,19 @@ class Scheduler(object):
             log.info('--> Operation {0} completed (direction: '
                 '{1})'.format(op_name, direction_name))
 
-            # Finalize the operations.
-            op_names = [op.name for op in self.operation_list]
-            op = self.operation_list[op_names.index(op_name)]
-            op.finalize()
-            op.set_completed()
+            # Finalize the operation
+            this_op = None
+            for op in self.operation_list:
+                if op.name == op_name:
+                    this_op = op
+                    break
+            if this_op is not None:
+                op.finalize()
+                op.set_completed()
+            else:
+                log.error('Operation {} not in list of active '
+                    'operations'.format(op_name))
+                self.success = False
         else:
             log.error('Operation {0} failed due to an error (direction: '
                 '{1})'.format(op_name, direction_name))
