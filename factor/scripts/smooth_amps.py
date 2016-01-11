@@ -84,8 +84,7 @@ def main(instrument_name, instrument_name_smoothed):
             for chan in range(nchans):
                 real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
                 imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
-
-                phase = numpy.arctan2(imag,real)
+                phase = numpy.arctan2(imag, real)
                 amp = numpy.sqrt(imag**2 + real**2)
 
                 amp = numpy.log10(amp)
@@ -115,8 +114,17 @@ def main(instrument_name, instrument_name_smoothed):
             for antenna in antenna_list:
                 real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
                 imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
-                parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = numpy.copy(real*norm_factor)
-                parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = numpy.copy(imag*norm_factor)
+                phase = numpy.arctan2(imag, real)
+                amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
+
+                # Clip extremely low amplitude solutions to prevent very high ampllitudes
+                low_ind = numpy.where(amp < 0.2)
+                amp[low_ind] = 0.2
+
+                parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = numpy.copy(amp *
+                    numpy.cos(phase) * norm_factor)
+                parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = numpy.copy(amp *
+                    numpy.sin(phase) * norm_factor)
 
     if os.path.exists(instrument_name_smoothed):
         shutil.rmtree(instrument_name_smoothed)
