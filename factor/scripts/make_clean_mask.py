@@ -51,9 +51,6 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             os.system('cp {0} {1}'.format(region_file.strip('[]"'), mask_name))
             return {'threshold_5sig': '0.0'}
 
-    if atrous_do:
-        threshisl = 4.0
-
     if rmsbox is not None and type(rmsbox) is str:
         rmsbox = eval(rmsbox)
 
@@ -63,6 +60,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     if type(atrous_do) is str:
         if atrous_do.lower() == 'true':
             atrous_do = True
+            threshisl = 4.0 # override user setting to ensure proper source fitting
         else:
             atrous_do = False
 
