@@ -539,10 +539,17 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
             log.info('Exiting...')
             sys.exit()
 
-    # Select subset of directions to process
+    # Select subset of directions to process (excluding target direction if any)
     if 'ndir_total' in dir_parset:
-        if dir_parset['ndir_total'] > 0 and dir_parset['ndir_total'] <= len(directions):
-            directions = directions[:dir_parset['ndir_total']]
+        if target_has_own_facet:
+            directions_no_target = [d for d in directions if d.name != target.name]
+        else:
+            directions_no_target = directions
+        if dir_parset['ndir_total'] > 0 and dir_parset['ndir_total'] <= len(directions_no_target):
+            directions = directions_no_target[:dir_parset['ndir_total']]
+        if target_has_own_facet:
+            # Add target back to directions list
+            directions.append(target)
 
     # Set various direction attributes
     log.info("Determining imaging parameters for each direction...")
@@ -581,13 +588,5 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
     # Divide directions into groups for selfcal
     direction_groups = factor.directions.group_directions(selfcal_directions,
         n_per_grouping=dir_parset['groupings'], allow_reordering=dir_parset['allow_reordering'])
-
-    # Ensure that target is included in the directions to process if desired
-    # (but not for selfcal), just in case it was excluded by one of the cuts
-    # above
-    if target_has_own_facet:
-        names = [d.name for d in directions]
-        if target.name not in names:
-            directions.append(target)
 
     return directions, direction_groups
