@@ -233,6 +233,8 @@ def get_directions_options(parset):
     if 'flux_min_jy' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['flux_min_jy'] = parset.getfloat('directions',
             'flux_min_jy')
+    else:
+        parset_dict['direction_specific']['flux_min_jy'] = None
     if 'max_num' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['max_num'] = parset.getint('directions',
             'max_num')
@@ -241,9 +243,13 @@ def get_directions_options(parset):
     if 'size_max_arcmin' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['size_max_arcmin'] = parset.getfloat('directions',
             'size_max_arcmin')
+    else:
+        parset_dict['direction_specific']['size_max_arcmin'] = None
     if 'separation_max_arcmin' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['separation_max_arcmin'] = parset.getfloat('directions',
             'separation_max_arcmin')
+    else:
+        parset_dict['direction_specific']['separation_max_arcmin'] = None
 
     # Grouping of directions into groups that are selfcal-ed in parallel, defined as
     # grouping:n_total_per_grouping. For example, groupings = 1:5, 4:0 means two
@@ -285,7 +291,7 @@ def get_directions_options(parset):
             sys.exit(1)
         log.info("Self calibrating up to %s direction(s)" % (parset_dict['direction_specific']['ndir_selfcal']))
     else:
-        parset_dict['direction_specific']['ndir_selfcal'] = -1
+        parset_dict['direction_specific']['ndir_selfcal'] = None
 
     # Total number of directions to process (default = all). If this number is
     # greater than ndir_selfcal, then the remaining directions will not be selfcal-
@@ -300,7 +306,7 @@ def get_directions_options(parset):
             sys.exit(1)
         log.info("Processing up to %s direction(s) in total" % (parset_dict['direction_specific']['ndir_total']))
     else:
-        parset_dict['direction_specific']['ndir_total'] = -1
+        parset_dict['direction_specific']['ndir_total'] = None
 
     # A target can be specified to ensure that it falls entirely within a single
     # facet. The values should be those of a circular region that encloses the
