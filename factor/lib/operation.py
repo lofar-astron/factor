@@ -28,7 +28,7 @@ class Operation(object):
 
     Parameters
     ----------
-    parset : str
+    parset : dict
         Parset of operation
     bands : list of Band objects
         Bands for this operation
