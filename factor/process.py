@@ -463,9 +463,9 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
             log.warn('No directions file given. Cannot proceed beyond the '
                 'initsubtract operation. Exiting...')
             sys.exit(0)
-        elif 'flux_min_jy' not in dir_parset or \
-            'size_max_arcmin' not in dir_parset or \
-            'separation_max_arcmin' not in dir_parset:
+        elif dir_parset['flux_min_jy'] is None or \
+            dir_parset['size_max_arcmin'] is None or \
+            dir_parset['separation_max_arcmin'] is None:
                 log.critical('If no directions file is specified, you must '
                     'give values for flux_min_Jy, size_max_arcmin, and '
                     'separation_max_arcmin')
@@ -481,15 +481,24 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
             directions = factor.directions.directions_read(dir_parset['directions_file'],
                 parset['dir_working'])
 
+    # Select subset of directions to process
+    if dir_parset['ndir_total'] is not None:
+        if dir_parset['ndir_total'] < len(directions):
+            directions = directions[:dir_parset['ndir_total']]
+
     # Add the target to the directions list if desired
+    target_ra = dir_parset['target_ra']
+    target_dec = dir_parset['target_dec']
+    target_radius_arcmin = dir_parset['target_radius_arcmin']
     target_has_own_facet = dir_parset['target_has_own_facet']
     if target_has_own_facet:
-        if 'target_ra' in dir_parset and 'target_dec' in dir_parset and 'target_radius_arcmin' in dir_parset:
+        if target_ra is not None and target_dec is not None and target_radius_arcmin is not None:
             # Make target object
-            target = Direction('target', dir_parset['target_ra'], dir_parset['target_dec'],
+            target = Direction('target', target_ra, target_dec,
                 factor_working_dir=parset['dir_working'])
 
-            # Check if target is already in directions list. If so, remove it
+            # Check if target is already in directions list because it was
+            # selected as a DDE calibrator. If so, remove the duplicate
             nearest, dist = factor.directions.find_nearest(target, directions)
             if dist < dir_parset['target_radius_arcmin']/60.0:
                 directions.remove(nearest)
@@ -500,16 +509,7 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
             log.critical('target_has_own_facet = True, but target RA, Dec, or radius not found in parset')
             sys.exit(1)
 
-    if 'target_ra' in dir_parset and 'target_dec' in dir_parset and \
-        'target_radius_arcmin' in dir_parset:
-        target_ra = dir_parset['target_ra']
-        target_dec = dir_parset['target_dec']
-        target_radius_arcmin = dir_parset['target_radius_arcmin']
-    else:
-        target_ra = None
-        target_dec = None
-        target_radius_arcmin = None
-
+    # Create facets
     factor.directions.thiessen(directions, s=initial_skymodel,
         check_edges=dir_parset['check_edges'], target_ra=target_ra,
         target_dec=target_dec, target_radius_arcmin=target_radius_arcmin)
@@ -538,11 +538,6 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
         if answ.lower() in ['n', 'no']:
             log.info('Exiting...')
             sys.exit()
-
-    # Select subset of directions to process
-    if 'ndir_total' in dir_parset:
-        if dir_parset['ndir_total'] > 0 and dir_parset['ndir_total'] <= len(directions):
-            directions = directions[:dir_parset['ndir_total']]
 
     # Set various direction attributes
     log.info("Determining imaging parameters for each direction...")
@@ -574,20 +569,12 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
         selfcal_directions = [d for d in directions if d.name != target.name]
     else:
         selfcal_directions = directions
-    if 'ndir_selfcal' in dir_parset:
-        if dir_parset['ndir_selfcal'] > 0 and dir_parset['ndir_selfcal'] <= len(selfcal_directions):
+    if dir_parset['ndir_selfcal'] is not None:
+        if dir_parset['ndir_selfcal'] <= len(selfcal_directions):
             selfcal_directions = selfcal_directions[:dir_parset['ndir_selfcal']]
 
     # Divide directions into groups for selfcal
     direction_groups = factor.directions.group_directions(selfcal_directions,
         n_per_grouping=dir_parset['groupings'], allow_reordering=dir_parset['allow_reordering'])
-
-    # Ensure that target is included in the directions to process if desired
-    # (but not for selfcal), just in case it was excluded by one of the cuts
-    # above
-    if target_has_own_facet:
-        names = [d.name for d in directions]
-        if target.name not in names:
-            directions.append(target)
 
     return directions, direction_groups
