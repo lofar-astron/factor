@@ -374,9 +374,9 @@ def group_directions(directions, n_per_grouping={'1':0}, allow_reordering=True):
     return direction_groups
 
 
-def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5, s=None, check_edges=False,
-    target_ra=None, target_dec=None, target_radius_arcmin=None,
-    faceting_radius_deg=None):
+def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
+    s=None, check_edges=False, target_ra=None, target_dec=None,
+    target_radius_arcmin=None, faceting_radius_deg=None):
     """
     Return list of thiessen polygons and their widths in degrees
 

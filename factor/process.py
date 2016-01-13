@@ -487,11 +487,6 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
             directions = factor.directions.directions_read(dir_parset['directions_file'],
                 parset['dir_working'])
 
-    # Select subset of directions to process
-    if dir_parset['ndir_total'] is not None:
-        if dir_parset['ndir_total'] < len(directions):
-            directions = directions[:dir_parset['ndir_total']]
-
     # Add the target to the directions list if desired
     target_ra = dir_parset['target_ra']
     target_dec = dir_parset['target_dec']
@@ -547,6 +542,11 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
         if answ.lower() in ['n', 'no']:
             log.info('Exiting...')
             sys.exit()
+
+    # Select subset of directions to process
+    if dir_parset['ndir_total'] is not None:
+        if dir_parset['ndir_total'] < len(directions):
+            directions = directions[:dir_parset['ndir_total']]
 
     # Set various direction attributes
     log.info("Determining imaging parameters for each direction...")
