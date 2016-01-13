@@ -553,7 +553,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
     for d, poly in zip(directions_list, thiessen_polys):
         if faceting_radius_deg is not None:
             dist_deg = calculateSeparation(d.ra, d.dec, field_ra_deg, field_dec_deg)
-            if dist_deg > faceting_radius_deg:
+            if dist_deg.value > faceting_radius_deg:
                 # Replace facets with centers outside of faceting_radius_deg with simple
                 # rectangular patches
                 d.is_patch = True # set patch flag to ensure facet is not included in mosaic
