@@ -446,6 +446,8 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
         Groups of directions to be selfcal-ed
 
     """
+    dir_parset = parset['direction_specific']
+
     log.info("Building initial sky model...")
     ref_band = bands[-1]
     max_radius_deg = dir_parset['max_radius_deg']
@@ -455,7 +457,6 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
 
     # First check for user-supplied directions file, then for Factor-generated
     # file from a previous run, then for parameters needed to generate it internally
-    dir_parset = parset['direction_specific']
     if 'directions_file' in dir_parset:
         directions = factor.directions.directions_read(dir_parset['directions_file'],
             parset['dir_working'])
