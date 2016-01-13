@@ -7,6 +7,7 @@ from astropy.coordinates import Angle
 import numpy as np
 from lsmtool.operations_lib import radec2xy
 import matplotlib.path as mplPath
+from scipy.ndimage import gaussian_filter
 
 
 class Direction(object):
@@ -25,9 +26,9 @@ class Direction(object):
     name : str
         Name of direction
     ra : float
-        RA in degrees of direction center
+        RA in degrees of calibrator center
     dec : float
-        Dec in degrees of direction center
+        Dec in degrees of calibrator center
     atrous_do : bool
         Fit to wavelet images in PyBDSM?
     mscale_field_do : bool
@@ -116,7 +117,8 @@ class Direction(object):
         self.started_operations = []
         self.completed_operations = []
         self.cleanup_mapfiles = []
-        self.do_reset = False # wether to reset this direction
+        self.do_reset = False # whether to reset this direction
+        self.is_patch = False # whether direction is just a patch (not full facet)
 
         # Set the size of the calibrator (used to filter source lists)
         if cal_size_deg is None:
@@ -331,8 +333,45 @@ class Direction(object):
         return sizes
 
 
+    def get_cal_fluxes(self, skymodel, fwhmArcsec=30.0, threshold=0.1):
+        """
+        Returns total flux density in Jy and max peak flux density in
+        Jy per beam for calibrator
+
+        Parameters
+        ----------
+        skymodel : LSMTool SkyModel object
+            CC sky model used to determine source fluxes. The sky model is
+            filtered to include only those sources within the calibrator region
+
+        Returns
+        -------
+        tot_flux_jy, peak_flux_jy_bm : float, float
+            Total flux density in Jy and max peak flux density in
+            Jy per beam for calibrator
+
+        """
+        dist = skymodel.getDistance(self.ra, self.dec)
+        skymodel.select(dist < self.cal_radius_deg)
+
+        x, y, midRA, midDec  = skymodel._getXY(crdelt=fwhmArcsec/2.0/3600.0)
+        fluxes_jy = skymodel.getColValues('I', units='Jy')
+        sizeX = int(1.2 * (max(x) - min(x)))
+        sizeY = int(1.2 * (max(y) - min(y)))
+        image = np.zeros((sizeX, sizeY))
+        xint = np.array(x, dtype=int)
+        xint += -1 * min(xint) + 1
+        yint = np.array(y, dtype=int)
+        yint += -1 * min(yint) + 1
+        for xi, yi, f in zip(xint, yint, fluxes_jy):
+            image[xi, yi] = f
+        image_blur = gaussian_filter(image, [fwhmArcsec/240.0, fwhmArcsec/240.0])
+
+        return np.sum(fluxes_jy), np.max(image_blur)
+
+
     def set_averaging_steps_and_solution_intervals(self, chan_width_hz, nchan,
-        timestep_sec, ntimes, nbands, preaverage_flux_jy=0.0):
+        timestep_sec, ntimes, nbands, initial_skymodel, preaverage_flux_jy=0.0):
         """
         Sets the averaging step sizes and solution intervals for selfcal
 
@@ -341,6 +380,12 @@ class Direction(object):
         8 time slots and a slow interval of 240 time slots for a bandwidth of 4
         bands. The fast intervals are scaled with the bandwidth and flux as
         nbands^-0.5 and flux^2. The slow intervals are scaled as flux^2.
+
+        When multiple sources are combined into a single calibrator, the flux
+        density of each source is obviously lower than the total, and hence
+        the model will be less well constrained. To compensate for this effect,
+        we scale the solution intervals by the number of sources in the
+        calibrator.
 
         Note: the frequency step for averaging must be an even divisor of the
         number of channels
@@ -357,6 +402,8 @@ class Direction(object):
             Number of timeslots per band
         nbands : int
             Number of bands
+        initial_skymodel : LSMTool SkyModel object
+            Sky model used to check source sizes
         preaverage_flux_jy : bool, optional
             Use baseline-dependent averaging and solint_p = 1 for phase-only
             calibration for sources below this flux value
@@ -409,32 +456,41 @@ class Direction(object):
         self.verify_timestep = max(1, int(round(60.0 / timestep_sec)))
 
         # Set time intervals for selfcal solve steps
-        if self.apparent_flux_mjy is not None:
-            ref_flux = 1400.0 * (4.0 / nbands)**0.5
-            if self.pre_average:
-                # Set solution interval to 1 timeslot and vary the target rms per
-                # solution interval instead (which affects the width of the
-                # preaveraging Gaussian)
+        #
+        # Calculate the effective flux density. This is the one used to set the
+        # intervals. It is the peak flux density adjusted to account for cases
+        # in which the total flux density is larger than the peak flux density
+        # would indicate (either due to source being extended or to multiple
+        # calibrator sources). In these cases, we can use a higher effective
+        # flux density to set the intervals. A scaling with a power of 1/1.5
+        # seems to work well
+        total_flux_jy, peak_flux_jy_bm = self.get_cal_fluxes(initial_skymodel)
+        effective_flux_jy = peak_flux_jy_bm * (total_flux_jy / peak_flux_jy_bm)**0.667
+        ref_flux_jy = 1.4 * (4.0 / nbands)**0.5
+        if self.pre_average:
+            # Set solution interval to 1 timeslot and vary the target rms per
+            # solution interval instead (which affects the width of the
+            # preaveraging Gaussian)
+            self.solint_p = 1
+            self.target_rms_rad = int(round(0.5 * (ref_flux_jy / apparent_flux_jy)**2))
+            if self.target_rms_rad < 0.2:
+                self.target_rms_rad = 0.2
+            if self.target_rms_rad > 0.5:
+                self.target_rms_rad = 0.5
+        else:
+            self.solint_p = int(round(8 * (ref_flux_jy / apparent_flux_jy)**2))
+            if self.solint_p < 1:
                 self.solint_p = 1
-                self.target_rms_rad = int(round(0.5 * (ref_flux / self.apparent_flux_mjy)**2))
-                if self.target_rms_rad < 0.2:
-                    self.target_rms_rad = 0.2
-                if self.target_rms_rad > 0.5:
-                    self.target_rms_rad = 0.5
-            else:
-                self.solint_p = int(round(8 * (ref_flux / self.apparent_flux_mjy)**2))
-                if self.solint_p < 1:
-                    self.solint_p = 1
-                if self.solint_p > 8:
-                    self.solint_p = 8
+            if self.solint_p > 8:
+                self.solint_p = 8
 
-            # Amplitude solve is per band, so don't scale with number of bands
-            ref_flux = 1400.0
-            self.solint_a = int(round(240 * (ref_flux / self.apparent_flux_mjy)**2))
-            if self.solint_a < 30:
-                self.solint_a = 30
-            if self.solint_a > 240:
-                self.solint_a = 240
+        # Amplitude solve is per band, so don't scale with number of bands
+        ref_flux = 1400.0
+        self.solint_a = int(round(240 * (ref_flux_jy / apparent_flux_jy)**2))
+        if self.solint_a < 30:
+            self.solint_a = 30
+        if self.solint_a > 240:
+            self.solint_a = 240
 
         # Set chunk width for time chunking to the amplitude solution time
         # interval (minus one time slot to ensure that we don't get a very short
