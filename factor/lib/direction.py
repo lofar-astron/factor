@@ -333,7 +333,7 @@ class Direction(object):
         return sizes
 
 
-    def get_cal_fluxes(self, skymodel, fwhmArcsec=30.0, threshold=0.1):
+    def get_cal_fluxes(self, skymodel, fwhmArcsec=60.0, threshold=0.1):
         """
         Returns total flux density in Jy and max peak flux density in
         Jy per beam for calibrator
@@ -474,13 +474,13 @@ class Direction(object):
                 # solution interval instead (which affects the width of the
                 # preaveraging Gaussian)
                 self.solint_p = 1
-                self.target_rms_rad = int(round(0.5 * (ref_flux_jy / apparent_flux_jy)**2))
+                self.target_rms_rad = int(round(0.5 * (ref_flux_jy / effective_flux_jy)**2))
                 if self.target_rms_rad < 0.2:
                     self.target_rms_rad = 0.2
                 if self.target_rms_rad > 0.5:
                     self.target_rms_rad = 0.5
             else:
-                self.solint_p = int(round(8 * (ref_flux_jy / apparent_flux_jy)**2))
+                self.solint_p = int(round(8 * (ref_flux_jy / effective_flux_jy)**2))
                 if self.solint_p < 1:
                     self.solint_p = 1
                 if self.solint_p > 8:
@@ -488,7 +488,7 @@ class Direction(object):
 
             # Amplitude solve is per band, so don't scale with number of bands
             ref_flux = 1400.0
-            self.solint_a = int(round(240 * (ref_flux_jy / apparent_flux_jy)**2))
+            self.solint_a = int(round(240 * (ref_flux_jy / effective_flux_jy)**2))
             if self.solint_a < 30:
                 self.solint_a = 30
             if self.solint_a > 240:
