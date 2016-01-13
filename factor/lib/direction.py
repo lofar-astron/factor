@@ -360,9 +360,9 @@ class Direction(object):
         sizeY = int(1.2 * (max(y) - min(y)))
         image = np.zeros((sizeX, sizeY))
         xint = np.array(x, dtype=int)
-        xint += -1 * min(xint) + 1
+        xint += -1 * min(xint)
         yint = np.array(y, dtype=int)
-        yint += -1 * min(yint) + 1
+        yint += -1 * min(yint)
         for xi, yi, f in zip(xint, yint, fluxes_jy):
             image[xi, yi] = f
         image_blur = gaussian_filter(image, [fwhmArcsec/240.0, fwhmArcsec/240.0])
