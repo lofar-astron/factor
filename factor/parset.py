@@ -224,12 +224,20 @@ def get_directions_options(parset):
     else:
         parset_dict['direction_specific']['check_edges'] = False
 
-    # Flux and size cuts for selecting directions internally (min flux, max size of
-    # a source, and max separation between sources below which they are grouped into
-    # one direction; required if no directions_file is given). The number of
+    # Parameters for selecting directions internally (radius from phase center
+    # within which to consider sources as potential calibrators, min flux, max size
+    # of a source, and max separation between sources below which they are grouped
+    # into one direction; required if no directions_file is given). The number of
     # internally derived directions can be limited to a maximum number of directions
-    # if desired with max_num (default = all). These parameters will determine the
-    # faceting of the field
+    # if desired with max_num (default = all). Lastly, faceting_radius_deg sets the
+    # radius within which facets will be used; outside of this radius, small patches
+    # are used that do not appear in the final mosaic.  These parameters will
+    # determine the faceting of the field
+    if 'max_radius_deg' in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['max_radius_deg'] = parset.getfloat('directions',
+            'max_radius_deg')
+    else:
+        parset_dict['direction_specific']['max_radius_deg'] = None
     if 'flux_min_jy' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['flux_min_jy'] = parset.getfloat('directions',
             'flux_min_jy')
@@ -250,6 +258,11 @@ def get_directions_options(parset):
             'separation_max_arcmin')
     else:
         parset_dict['direction_specific']['separation_max_arcmin'] = None
+    if 'faceting_radius_deg' in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['faceting_radius_deg'] = parset.getfloat('directions',
+            'faceting_radius_deg')
+    else:
+        parset_dict['direction_specific']['faceting_radius_deg'] = None
 
     # Grouping of directions into groups that are selfcal-ed in parallel, defined as
     # grouping:n_total_per_grouping. For example, groupings = 1:5, 4:0 means two

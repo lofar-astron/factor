@@ -197,7 +197,7 @@ def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
     return directions_file
 
 
-def make_initial_skymodel(band):
+def make_initial_skymodel(band, max_radius_deg=None):
     """
     Makes the initial skymodel used to adjust facet edges
 
@@ -210,6 +210,9 @@ def make_initial_skymodel(band):
     -------
     s : LSMTool Skymodel object
         Resulting sky model
+    max_radius_deg : float, optional
+        Maximum radius in degrees from the phase center within which to include
+        sources. If None, it is set to the FWHM (i.e., a diameter of 2 * FWHM)
 
     """
     import lsmtool
@@ -230,13 +233,19 @@ def make_initial_skymodel(band):
     log.info('Found {0} sources through thresholding'.format(
         len(s.getPatchNames())))
 
-    # Filter out sources that lie outside of FWHM of FOV
+    # Filter out sources that lie outside of maximum specific radius from phase
+    # center
     if not hasattr(band, 'fwhm_deg'):
         band.set_image_sizes()
-    log.info('Removing sources beyond 2 * FWHM of the primary beam at {} MHz...'.
-        format(band.freq/1e6))
+    if max_radius_deg is None:
+        max_radius_deg = band.fwhm_deg # means a diameter of 2 * FWHM
+
+    log.info('Removing sources beyond a radius of {0} degrees (corresponding to '
+        'a diameter of {1} * FWHM of the primary beam at {2} MHz)...'.format(
+        max_radius_deg, round(2.0*max_radius_deg/band.fwhm_deg), band.freq/1e6))
+
     dist = s.getDistance(band.ra, band.dec, byPatch=True)
-    s.remove(dist > band.fwhm_deg, aggregate=True)
+    s.remove(dist > max_radius_deg, aggregate=True)
 
     return s
 
@@ -365,8 +374,9 @@ def group_directions(directions, n_per_grouping={'1':0}, allow_reordering=True):
     return direction_groups
 
 
-def thiessen(directions_list, bounds_scale=0.5, s=None, check_edges=False,
-    target_ra=None, target_dec=None, target_radius_arcmin=None):
+def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5, s=None, check_edges=False,
+    target_ra=None, target_dec=None, target_radius_arcmin=None,
+    faceting_radius_deg=None):
     """
     Return list of thiessen polygons and their widths in degrees
 
@@ -374,6 +384,10 @@ def thiessen(directions_list, bounds_scale=0.5, s=None, check_edges=False,
     ----------
     directions_list : list of Direction objects
         List of input directions
+    field_ra_deg : float
+        RA in degrees of field center
+    field_dec_deg : float
+        Dec in degrees of field center
     bounds_scale : int, optional
         Scale to use for bounding box
     s : LSMTool SkyModel object, optional
@@ -387,6 +401,10 @@ def thiessen(directions_list, bounds_scale=0.5, s=None, check_edges=False,
         Dec of target source. E.g., '+35d30m31.52'
     target_radius_arcmin : float, optional
         Radius in arcmin of target source
+    faceting_radius_deg : float, optional
+        Maximum radius within which faceting will be done. Direction objects
+        with postions outside this radius will get small rectangular patches
+        instead of thiessen polygons
 
     Returns
     -------
@@ -533,6 +551,21 @@ def thiessen(directions_list, bounds_scale=0.5, s=None, check_edges=False,
 
     # Convert from x, y to RA, Dec and find width of facet and facet center
     for d, poly in zip(directions_list, thiessen_polys):
+        if faceting_radius_deg is not None:
+            dist_deg = calculateSeparation(d.ra, d.dec, field_ra_deg, field_dec_deg)
+            if dist_deg > faceting_radius_deg:
+                # Replace facets with centers outside of faceting_radius_deg with simple
+                # rectangular patches
+                d.is_patch = True # set patch flag to ensure facet is not included in mosaic
+                sx, sy = radec2xy([d.ra], [d.dec], refRA=midRA, refDec=midDec)
+                patch_width = d.cal_size_deg * 1.2 / 0.066667 # size of patch in pixels
+                x0 = int(sx[0] - patch_width / 2.0)
+                y0 = int(sy[0] - patch_width / 2.0)
+                poly = [np.array([x0, y0]),
+                        np.array([x0, int(y0+patch_width)]),
+                        np.array([int(x0+patch_width), int(y0+patch_width)]),
+                        np.array([int(x0+patch_width), y0])]
+
         poly = np.vstack([poly, poly[0]])
         ra, dec = xy2radec(poly[:, 0], poly[:, 1], midRA, midDec)
         thiessen_poly_deg = [np.array(ra[0: -1]), np.array(dec[0: -1])]

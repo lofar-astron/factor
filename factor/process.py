@@ -254,9 +254,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         field.facet_image_filenames = []
         field.facet_vertices_filenames = []
         for d in directions:
-            facet_image = DataMap.load(d.facet_image_mapfile)[0].file
-            field.facet_image_filenames.append(facet_image)
-            field.facet_vertices_filenames.append(d.save_file)
+            if not d.is_patch:
+                facet_image = DataMap.load(d.facet_image_mapfile)[0].file
+                field.facet_image_filenames.append(facet_image)
+                field.facet_vertices_filenames.append(d.save_file)
 
         # Combine the nodes and cores for the mosaic operation
         field = factor.cluster.combine_nodes([field],
@@ -445,7 +446,10 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
 
     """
     log.info("Building initial sky model...")
-    initial_skymodel = factor.directions.make_initial_skymodel(bands[-1])
+    ref_band = bands[-1]
+    max_radius_deg = dir_parset['max_radius_deg']
+    initial_skymodel = factor.directions.make_initial_skymodel(ref_band,
+        max_radius_deg=max_radius_deg)
     log.info('Setting up directions...')
 
     # First check for user-supplied directions file, then for Factor-generated
@@ -509,10 +513,13 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
             log.critical('target_has_own_facet = True, but target RA, Dec, or radius not found in parset')
             sys.exit(1)
 
-    # Create facets
-    factor.directions.thiessen(directions, s=initial_skymodel,
-        check_edges=dir_parset['check_edges'], target_ra=target_ra,
-        target_dec=target_dec, target_radius_arcmin=target_radius_arcmin)
+    # Create facets and patches
+    faceting_radius_deg = dir_parset['faceting_radius_deg']
+    factor.directions.thiessen(directions, ref_band.ra, ref_band.dec,
+        s=initial_skymodel.copy(), check_edges=dir_parset['check_edges'],
+        target_ra=target_ra, target_dec=target_dec,
+        target_radius_arcmin=target_radius_arcmin,
+        faceting_radius_deg=faceting_radius_deg)
 
     # Warn user if they've specified a direction to reset that does not exist
     direction_names = [d.name for d in directions]
@@ -543,8 +550,9 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
     log.info("Determining imaging parameters for each direction...")
     for i, direction in enumerate(directions):
         # Set averaging steps and solution intervals for selfcal
-        direction.set_averaging_steps_and_solution_intervals(bands[0].chan_width_hz, bands[0].nchan,
-            bands[0].timepersample, bands[0].nsamples, len(bands), parset['preaverage_flux_jy'])
+        direction.set_averaging_steps_and_solution_intervals(bands[0].chan_width_hz,
+            bands[0].nchan, bands[0].timepersample, bands[0].nsamples, len(bands),
+            initial_skymodel.copy(), parset['preaverage_flux_jy'])
 
         # Set imaging parameters
         direction.set_imaging_parameters(len(bands), parset['wsclean_nbands'],
