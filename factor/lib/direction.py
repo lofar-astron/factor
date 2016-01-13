@@ -356,13 +356,13 @@ class Direction(object):
 
         x, y, midRA, midDec  = skymodel._getXY(crdelt=fwhmArcsec/2.0/3600.0)
         fluxes_jy = skymodel.getColValues('I', units='Jy')
-        sizeX = int(1.2 * (max(x) - min(x)))
-        sizeY = int(1.2 * (max(y) - min(y)))
+        sizeX = int(np.ceil(1.2 * (max(x) - min(x))))
+        sizeY = int(np.ceil(1.2 * (max(y) - min(y))))
         image = np.zeros((sizeX, sizeY))
         xint = np.array(x, dtype=int)
-        xint += -1 * min(xint)
+        xint += -1 * min(xint) + 1
         yint = np.array(y, dtype=int)
-        yint += -1 * min(yint)
+        yint += -1 * min(yint) + 1
         for xi, yi, f in zip(xint, yint, fluxes_jy):
             image[xi, yi] = f
         image_blur = gaussian_filter(image, [fwhmArcsec/240.0, fwhmArcsec/240.0])
