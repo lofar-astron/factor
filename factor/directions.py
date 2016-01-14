@@ -435,7 +435,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
 
     # Generate initial facets
     if faceting_radius_deg is not None:
-        radius = 1.5 * faceting_radius_deg / 0.066667 # radius in pixels
+        radius = 5.0 * faceting_radius_deg / 0.066667 # radius in pixels
     else:
         if bounds_scale < 0.5:
             log.debug('Bounds scale too low. Setting to 0.5')
@@ -451,6 +451,17 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
     thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
                       for n in range(len(points_all) - nouter)]
 
+    # Check for vertices that are very close to each other, as this gives problems
+    # to the edge adjustment below
+    for thiessen_poly in thiessen_polys:
+        dup_ind = 0
+        for i, (v1, v2) in enumerate(zip(thiessen_poly[:-1], thiessen_poly[1:])):
+            if (approx_equal(v1[0], v2[0], rel=1e-6) and
+                approx_equal(v1[1], v2[1], rel=1e-6)):
+                thiessen_poly.pop(dup_ind)
+                dup_ind -= 1
+            dup_ind += 1
+
     # Clip the facets at faceting_radius_deg
     if faceting_radius_deg is not None:
         faceting_radius_pix = faceting_radius_deg / 0.066667 # radius in pixels
@@ -462,28 +473,15 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
             p1 = shapely.geometry.Polygon(poly_tuple)
             p2 = shapely.geometry.Point((field_x[0], field_y[0]))
             p2buf = p2.buffer(faceting_radius_pix)
-            p1 = p1.union(p2buf)
+            p1 = p1.difference(p2buf)
             try:
                 xyverts = [np.array([xp, yp]) for xp, yp in
                     zip(p1.exterior.coords.xy[0].tolist(),
                     p1.exterior.coords.xy[1].tolist())]
+                thiessen_polys[i] = xyverts
             except AttributeError:
-                log.error('Facet clipping has caused a facet to be '
-                    'divided into multple parts. Please adjust the '
-                    'parameters (e.g., increase faceting_radius_deg if possible)')
-                sys.exit(1)
-            thiessen_polys[i] = xyverts
-
-    # Check for vertices that are very close to each other, as this gives problems
-    # to the edge adjustment below
-    for thiessen_poly in thiessen_polys:
-        dup_ind = 0
-        for i, (v1, v2) in enumerate(zip(thiessen_poly[:-1], thiessen_poly[1:])):
-            if (approx_equal(v1[0], v2[0], rel=1e-6) and
-                approx_equal(v1[1], v2[1], rel=1e-6)):
-                thiessen_poly.pop(dup_ind)
-                dup_ind -= 1
-            dup_ind += 1
+                # Facet is interior to the circle defined by faceting_radius_deg
+                pass
 
     # Check for sources near / on facet edges and adjust regions accordingly
     if check_edges:
