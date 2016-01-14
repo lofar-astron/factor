@@ -378,7 +378,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
     s=None, check_edges=False, target_ra=None, target_dec=None,
     target_radius_arcmin=None, faceting_radius_deg=None):
     """
-    Return list of thiessen polygons and their widths in degrees
+    Generates and add thiessen polygons or patches to input directions
 
     Parameters
     ----------
@@ -406,27 +406,32 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
         with postions outside this radius will get small rectangular patches
         instead of thiessen polygons
 
-    Returns
-    -------
-    thiessen_polys_deg : list
-        List of polygon RA and Dec vertices in degrees
-    width_deg : list
-        List of polygon bounding box width in degrees
-
     """
     import lsmtool
-    try:
-        import shapely.geometry
-        from shapely.ops import cascaded_union
-        has_shapely = True
-    except ImportError:
-        log.warn('Shapely could not be imported. Facet polygons will not be '
-            'adjusted to avoid known sources.')
-        has_shapely = False
+    import shapely.geometry
+    from shapely.ops import cascaded_union
     from itertools import combinations
     from astropy.coordinates import Angle
 
-    points, midRA, midDec = getxy(directions_list)
+    # Select directions inside faceting_radius_deg
+    if faceting_radius_deg is not None:
+        for d in directions_list:
+            dist_deg = calculateSeparation(d.ra, d.dec, field_ra_deg, field_dec_deg)
+            if dist_deg.value > faceting_radius_deg:
+                # Use simple rectangular patches
+                d.is_patch = True # set patch flag to ensure facet is not included in mosaic
+                sx, sy = radec2xy([d.ra], [d.dec], refRA=midRA, refDec=midDec)
+                patch_width = d.cal_size_deg * 1.2 / 0.066667 # size of patch in pixels
+                x0 = sx[0] - patch_width / 2.0
+                y0 = sy[0] - patch_width / 2.0
+                poly = [np.array([x0, y0]),
+                        np.array([x0, y0+patch_width]),
+                        np.array([x0+patch_width, y0+patch_width]),
+                        np.array([x0+patch_width, y0])]
+                add_facet_info(d, poly, midRA, midDec)
+
+    directions_list_thiessen = [d for d in directions_list if not d.is_patch]
+    points, midRA, midDec = getxy(directions_list_thiessen)
     points = points.T
 
     # Generate array of outer points used to constrain the outer facets
@@ -437,33 +442,43 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
     for ang in angles:
         offsets.append([np.cos(ang), np.sin(ang)])
 
-    # Reduce the scale as much as possible to minimize the size of the outer
-    # facets
-    log.info('Minimizing facet sizes...')
+    # Generate initial facets
     if bounds_scale < 0.5:
         log.debug('Bounds scale too low. Setting to 0.5')
         bounds_scale = 0.5
-    thiessen_polys = []
-    while bounds_scale > 0.45:
-        thiessen_polys_prev = thiessen_polys[:]
-        try:
-            x_scale, y_scale = (points.min(axis=0) - points.max(axis=0)) * bounds_scale
-            radius = np.sqrt(x_scale**2 + y_scale**2)
-            scale_offsets = radius * np.array(offsets)
-            outer_box = means + scale_offsets
-            points_all = np.vstack([points, outer_box])
-            tri = Delaunay(points_all)
-            circumcenters = np.array([_circumcenter(tri.points[t])
-                                      for t in tri.vertices])
-            thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
-                              for n in range(len(points_all) - nouter)]
-            bounds_scale *= 0.95
-            log.debug('Bounds scale: {}'.format(bounds_scale))
-        except IndexError:
-            # IndexError indicates problem with triangle vertices. Use previous
-            # polygons
-            thiessen_polys = thiessen_polys_prev
-            break
+    x_scale, y_scale = (points.min(axis=0) - points.max(axis=0)) * bounds_scale
+    radius = np.sqrt(x_scale**2 + y_scale**2)
+    scale_offsets = radius * np.array(offsets)
+    outer_box = means + scale_offsets
+    points_all = np.vstack([points, outer_box])
+    tri = Delaunay(points_all)
+    circumcenters = np.array([_circumcenter(tri.points[t])
+                              for t in tri.vertices])
+    thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
+                      for n in range(len(points_all) - nouter)]
+
+    # Clip the facets at faceting_radius_deg
+    if faceting_radius_deg is not None:
+        faceting_radius_pix = faceting_radius_deg * 0.066667 # radius in pixels
+        field_x, field_y = radec2xy([field_ra_deg], [field_dec_deg], refRA=midRA,
+            refDec=midDec)
+        for i, thiessen_poly in enumerate(thiessen_polys):
+            polyv = np.vstack(thiessen_poly)
+            poly_tuple = tuple([(xp, yp) for xp, yp in zip(polyv[:, 0], polyv[:, 1])])
+            p1 = shapely.geometry.Polygon(poly_tuple)
+            p2 = shapely.geometry.Point((field_x, field_y))
+            p2buf = p2.buffer(faceting_radius_pix)
+            p1 = p1.difference(p2buf)
+            try:
+                xyverts = [np.array([xp, yp]) for xp, yp in
+                    zip(p1.exterior.coords.xy[0].tolist(),
+                    p1.exterior.coords.xy[1].tolist())]
+            except AttributeError:
+                log.error('Facet clipping has caused a facet to be '
+                    'divided into multple parts. Please adjust the '
+                    'parameters (e.g., increase faceting_radius_deg if possible)')
+                sys.exit(1)
+            thiessen_polys[i] = xyverts
 
     # Check for vertices that are very close to each other, as this gives problems
     # to the edge adjustment below
@@ -477,7 +492,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
             dup_ind += 1
 
     # Check for sources near / on facet edges and adjust regions accordingly
-    if has_shapely and check_edges:
+    if check_edges:
         log.info('Adjusting facets to avoid sources...')
         RA, Dec = s.getPatchPositions(asArray=True)
         sx, sy = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
@@ -550,46 +565,64 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
                         thiessen_polys[i] = xyverts
 
     # Convert from x, y to RA, Dec and find width of facet and facet center
-    for d, poly in zip(directions_list, thiessen_polys):
-        if faceting_radius_deg is not None:
-            dist_deg = calculateSeparation(d.ra, d.dec, field_ra_deg, field_dec_deg)
-            if dist_deg.value > faceting_radius_deg:
-                # Replace facets with centers outside of faceting_radius_deg with simple
-                # rectangular patches
-                d.is_patch = True # set patch flag to ensure facet is not included in mosaic
-                sx, sy = radec2xy([d.ra], [d.dec], refRA=midRA, refDec=midDec)
-                patch_width = d.cal_size_deg * 1.2 / 0.066667 # size of patch in pixels
-                x0 = sx[0] - patch_width / 2.0
-                y0 = sy[0] - patch_width / 2.0
-                poly = [np.array([x0, y0]),
-                        np.array([x0, y0+patch_width]),
-                        np.array([x0+patch_width, y0+patch_width]),
-                        np.array([x0+patch_width, y0])]
+    for d, poly in zip(directions_list_thiessen, thiessen_polys):
+        add_facet_info(d, poly, midRA, midDec)
 
-        poly = np.vstack([poly, poly[0]])
-        ra, dec = xy2radec(poly[:, 0], poly[:, 1], midRA, midDec)
-        thiessen_poly_deg = [np.array(ra[0: -1]), np.array(dec[0: -1])]
+#         poly = np.vstack([poly, poly[0]])
+#         ra, dec = xy2radec(poly[:, 0], poly[:, 1], midRA, midDec)
+#         thiessen_poly_deg = [np.array(ra[0: -1]), np.array(dec[0: -1])]
+#
+#         # Find size and centers of regions in degrees
+#         xmin = np.min(poly[:, 0])
+#         xmax = np.max(poly[:, 0])
+#         xmid = xmin + int((xmax - xmin) / 2.0)
+#         ymin = np.min(poly[:, 1])
+#         ymax = np.max(poly[:, 1])
+#         ymid = ymin + int((ymax - ymin) / 2.0)
+#
+#         ra1, dec1 = xy2radec([xmin], [ymin], midRA, midDec)
+#         ra2, dec2 = xy2radec([xmax], [ymax], midRA, midDec)
+#         ra3, dec3 = xy2radec([xmax], [ymin], midRA, midDec)
+#         ra_center, dec_center = xy2radec([xmid], [ymid], midRA, midDec)
+#         ra_width_deg = calculateSeparation(ra1, dec1, ra3, dec3)
+#         dec_width_deg = calculateSeparation(ra3, dec3, ra2, dec2)
+#         width_deg = max(ra_width_deg.value, dec_width_deg.value)
+#
+#         d.vertices = thiessen_poly_deg
+#         d.width = width_deg
+#         d.facet_ra = ra_center[0]
+#         d.facet_dec = dec_center[0]
 
-        # Find size and centers of regions in degrees
-        xmin = np.min(poly[:, 0])
-        xmax = np.max(poly[:, 0])
-        xmid = xmin + int((xmax - xmin) / 2.0)
-        ymin = np.min(poly[:, 1])
-        ymax = np.max(poly[:, 1])
-        ymid = ymin + int((ymax - ymin) / 2.0)
 
-        ra1, dec1 = xy2radec([xmin], [ymin], midRA, midDec)
-        ra2, dec2 = xy2radec([xmax], [ymax], midRA, midDec)
-        ra3, dec3 = xy2radec([xmax], [ymin], midRA, midDec)
-        ra_center, dec_center = xy2radec([xmid], [ymid], midRA, midDec)
-        ra_width_deg = calculateSeparation(ra1, dec1, ra3, dec3)
-        dec_width_deg = calculateSeparation(ra3, dec3, ra2, dec2)
-        width_deg = max(ra_width_deg.value, dec_width_deg.value)
+def add_facet_info(d, poly, midRA, midDec):
+    """
+    Convert facet polygon from x, y to RA, Dec and find width of facet and facet center
 
-        d.vertices = thiessen_poly_deg
-        d.width = width_deg
-        d.facet_ra = ra_center[0]
-        d.facet_dec = dec_center[0]
+    """
+    poly = np.vstack([poly, poly[0]])
+    ra, dec = xy2radec(poly[:, 0], poly[:, 1], midRA, midDec)
+    thiessen_poly_deg = [np.array(ra[0: -1]), np.array(dec[0: -1])]
+
+    # Find size and centers of regions in degrees
+    xmin = np.min(poly[:, 0])
+    xmax = np.max(poly[:, 0])
+    xmid = xmin + int((xmax - xmin) / 2.0)
+    ymin = np.min(poly[:, 1])
+    ymax = np.max(poly[:, 1])
+    ymid = ymin + int((ymax - ymin) / 2.0)
+
+    ra1, dec1 = xy2radec([xmin], [ymin], midRA, midDec)
+    ra2, dec2 = xy2radec([xmax], [ymax], midRA, midDec)
+    ra3, dec3 = xy2radec([xmax], [ymin], midRA, midDec)
+    ra_center, dec_center = xy2radec([xmid], [ymid], midRA, midDec)
+    ra_width_deg = calculateSeparation(ra1, dec1, ra3, dec3)
+    dec_width_deg = calculateSeparation(ra3, dec3, ra2, dec2)
+    width_deg = max(ra_width_deg.value, dec_width_deg.value)
+
+    d.vertices = thiessen_poly_deg
+    d.width = width_deg
+    d.facet_ra = ra_center[0]
+    d.facet_dec = dec_center[0]
 
 
 def make_region_file(vertices, outputfile):
