@@ -366,8 +366,9 @@ class Direction(object):
         for xi, yi, f in zip(xint, yint, fluxes_jy):
             image[xi, yi] = f
         image_blur = gaussian_filter(image, [fwhmArcsec/240.0, fwhmArcsec/240.0])
+        beam_area_pix = 1.1331*(fwhmArcsec/3600.0/0.066667)**2 # LSMTool uses crdelt = 0.066667 deg/pix
 
-        return np.sum(fluxes_jy), np.max(image_blur)
+        return np.sum(fluxes_jy), np.max(image_blur)/(beam_area_pix)
 
 
     def set_averaging_steps_and_solution_intervals(self, chan_width_hz, nchan,
