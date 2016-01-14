@@ -434,11 +434,14 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
         offsets.append([np.cos(ang), np.sin(ang)])
 
     # Generate initial facets
-    if bounds_scale < 0.5:
-        log.debug('Bounds scale too low. Setting to 0.5')
-        bounds_scale = 0.5
-    x_scale, y_scale = (points.min(axis=0) - points.max(axis=0)) * bounds_scale
-    radius = np.sqrt(x_scale**2 + y_scale**2)
+    if faceting_radius_deg is not None:
+        radius = 1.5 * faceting_radius_deg / 0.066667 # radius in pixels
+    else:
+        if bounds_scale < 0.5:
+            log.debug('Bounds scale too low. Setting to 0.5')
+            bounds_scale = 0.5
+        x_scale, y_scale = (points.min(axis=0) - points.max(axis=0)) * bounds_scale
+        radius = np.sqrt(x_scale**2 + y_scale**2)
     scale_offsets = radius * np.array(offsets)
     outer_box = means + scale_offsets
     points_all = np.vstack([points, outer_box])
