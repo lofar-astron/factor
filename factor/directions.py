@@ -420,15 +420,6 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
             if dist_deg.value > faceting_radius_deg:
                 # Use simple rectangular patches
                 d.is_patch = True # set patch flag to ensure facet is not included in mosaic
-                sx, sy = radec2xy([d.ra], [d.dec], refRA=midRA, refDec=midDec)
-                patch_width = d.cal_size_deg * 1.2 / 0.066667 # size of patch in pixels
-                x0 = sx[0] - patch_width / 2.0
-                y0 = sy[0] - patch_width / 2.0
-                poly = [np.array([x0, y0]),
-                        np.array([x0, y0+patch_width]),
-                        np.array([x0+patch_width, y0+patch_width]),
-                        np.array([x0+patch_width, y0])]
-                add_facet_info(d, poly, midRA, midDec)
 
     directions_list_thiessen = [d for d in directions_list if not d.is_patch]
     points, midRA, midDec = getxy(directions_list_thiessen)
@@ -567,6 +558,17 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
     # Convert from x, y to RA, Dec and find width of facet and facet center
     for d, poly in zip(directions_list_thiessen, thiessen_polys):
         add_facet_info(d, poly, midRA, midDec)
+    for d in directions_list:
+        if d.is_patch:
+            sx, sy = radec2xy([d.ra], [d.dec], refRA=midRA, refDec=midDec)
+            patch_width = d.cal_size_deg * 1.2 / 0.066667 # size of patch in pixels
+            x0 = sx[0] - patch_width / 2.0
+            y0 = sy[0] - patch_width / 2.0
+            poly = [np.array([x0, y0]),
+                    np.array([x0, y0+patch_width]),
+                    np.array([x0+patch_width, y0+patch_width]),
+                    np.array([x0+patch_width, y0])]
+            add_facet_info(d, poly, midRA, midDec)
 
 #         poly = np.vstack([poly, poly[0]])
 #         ra, dec = xy2radec(poly[:, 0], poly[:, 1], midRA, midDec)
