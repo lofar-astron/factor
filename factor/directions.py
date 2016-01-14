@@ -457,7 +457,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
             polyv = np.vstack(thiessen_poly)
             poly_tuple = tuple([(xp, yp) for xp, yp in zip(polyv[:, 0], polyv[:, 1])])
             p1 = shapely.geometry.Polygon(poly_tuple)
-            p2 = shapely.geometry.Point((field_x, field_y))
+            p2 = shapely.geometry.Point((field_x[0], field_y[0]))
             p2buf = p2.buffer(faceting_radius_pix)
             p1 = p1.difference(p2buf)
             try:
@@ -555,7 +555,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
                             sys.exit(1)
                         thiessen_polys[i] = xyverts
 
-    # Convert from x, y to RA, Dec and find width of facet and facet center
+    # Add the final facet and patch info to the directions
     for d, poly in zip(directions_list_thiessen, thiessen_polys):
         add_facet_info(d, poly, midRA, midDec)
     for d in directions_list:
