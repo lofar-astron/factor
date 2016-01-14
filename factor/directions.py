@@ -242,7 +242,7 @@ def make_initial_skymodel(band, max_radius_deg=None):
 
     log.info('Removing sources beyond a radius of {0} degrees (corresponding to '
         'a diameter of {1} * FWHM of the primary beam at {2} MHz)...'.format(
-        max_radius_deg, round(2.0*max_radius_deg/band.fwhm_deg), band.freq/1e6))
+        max_radius_deg, round(2.0*max_radius_deg/band.fwhm_deg, 1), band.freq/1e6))
 
     dist = s.getDistance(band.ra, band.dec, byPatch=True)
     s.remove(dist > max_radius_deg, aggregate=True)

@@ -469,6 +469,9 @@ class Direction(object):
             total_flux_jy, peak_flux_jy_bm = self.get_cal_fluxes(initial_skymodel)
             effective_flux_jy = peak_flux_jy_bm * (total_flux_jy / peak_flux_jy_bm)**0.667
             ref_flux_jy = 1.4 * (4.0 / nbands)**0.5
+            self.log.debug('Total flux density of calibrator: {} Jy'.format(total_flux_jy))
+            self.log.debug('Peak flux density of calibrator: {} Jy/beam'.format(peak_flux_jy_bm))
+            self.log.debug('Effective flux density of calibrator: {} Jy'.format(effective_flux_jy))
             if self.pre_average:
                 # Set solution interval to 1 timeslot and vary the target rms per
                 # solution interval instead (which affects the width of the
@@ -493,6 +496,9 @@ class Direction(object):
                 self.solint_a = 30
             if self.solint_a > 240:
                 self.solint_a = 240
+
+            self.log.debug('Using solution intervals of {0} (fast) and {1} '
+                '(slow) time slots'.format(self.solint_p, self.solint_a))
 
             # Set chunk width for time chunking to the amplitude solution time
             # interval (minus one time slot to ensure that we don't get a very short
