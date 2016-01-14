@@ -354,7 +354,8 @@ class Direction(object):
         dist = skymodel.getDistance(self.ra, self.dec)
         skymodel.select(dist < self.cal_radius_deg)
 
-        x, y, midRA, midDec  = skymodel._getXY(crdelt=fwhmArcsec/2.0/3600.0)
+        # Generate image grid with 1 pix = FWHM / 4
+        x, y, midRA, midDec  = skymodel._getXY(crdelt=fwhmArcsec/4.0/3600.0)
         fluxes_jy = skymodel.getColValues('I', units='Jy')
         sizeX = int(np.ceil(1.2 * (max(x) - min(x)))) + 1
         sizeY = int(np.ceil(1.2 * (max(y) - min(y)))) + 1
@@ -365,8 +366,8 @@ class Direction(object):
         yint += -1 * min(yint)
         for xi, yi, f in zip(xint, yint, fluxes_jy):
             image[xi, yi] = f
-        image_blur = gaussian_filter(image, [fwhmArcsec/240.0, fwhmArcsec/240.0])
-        beam_area_pix = 1.1331*(fwhmArcsec/3600.0/0.066667)**2 # LSMTool uses crdelt = 0.066667 deg/pix
+        image_blur = gaussian_filter(image, [4.0/2.35482, 4.0/2.35482])
+        beam_area_pix = 1.1331*(4.0)**2
 
         return np.sum(fluxes_jy), np.max(image_blur)/(beam_area_pix)
 
