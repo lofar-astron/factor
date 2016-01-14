@@ -450,7 +450,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
 
     # Clip the facets at faceting_radius_deg
     if faceting_radius_deg is not None:
-        faceting_radius_pix = faceting_radius_deg * 0.066667 # radius in pixels
+        faceting_radius_pix = faceting_radius_deg / 0.066667 # radius in pixels
         field_x, field_y = radec2xy([field_ra_deg], [field_dec_deg], refRA=midRA,
             refDec=midDec)
         for i, thiessen_poly in enumerate(thiessen_polys):
