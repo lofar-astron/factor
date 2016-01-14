@@ -462,7 +462,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
             p1 = shapely.geometry.Polygon(poly_tuple)
             p2 = shapely.geometry.Point((field_x[0], field_y[0]))
             p2buf = p2.buffer(faceting_radius_pix)
-            p1 = p1.difference(p2buf)
+            p1 = p1.union(p2buf)
             try:
                 xyverts = [np.array([xp, yp]) for xp, yp in
                     zip(p1.exterior.coords.xy[0].tolist(),
@@ -572,31 +572,6 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
                     np.array([x0+patch_width, y0+patch_width]),
                     np.array([x0+patch_width, y0])]
             add_facet_info(d, poly, midRA, midDec)
-
-#         poly = np.vstack([poly, poly[0]])
-#         ra, dec = xy2radec(poly[:, 0], poly[:, 1], midRA, midDec)
-#         thiessen_poly_deg = [np.array(ra[0: -1]), np.array(dec[0: -1])]
-#
-#         # Find size and centers of regions in degrees
-#         xmin = np.min(poly[:, 0])
-#         xmax = np.max(poly[:, 0])
-#         xmid = xmin + int((xmax - xmin) / 2.0)
-#         ymin = np.min(poly[:, 1])
-#         ymax = np.max(poly[:, 1])
-#         ymid = ymin + int((ymax - ymin) / 2.0)
-#
-#         ra1, dec1 = xy2radec([xmin], [ymin], midRA, midDec)
-#         ra2, dec2 = xy2radec([xmax], [ymax], midRA, midDec)
-#         ra3, dec3 = xy2radec([xmax], [ymin], midRA, midDec)
-#         ra_center, dec_center = xy2radec([xmid], [ymid], midRA, midDec)
-#         ra_width_deg = calculateSeparation(ra1, dec1, ra3, dec3)
-#         dec_width_deg = calculateSeparation(ra3, dec3, ra2, dec2)
-#         width_deg = max(ra_width_deg.value, dec_width_deg.value)
-#
-#         d.vertices = thiessen_poly_deg
-#         d.width = width_deg
-#         d.facet_ra = ra_center[0]
-#         d.facet_dec = dec_center[0]
 
 
 def add_facet_info(d, poly, midRA, midDec):
