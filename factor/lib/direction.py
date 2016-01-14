@@ -333,7 +333,7 @@ class Direction(object):
         return sizes
 
 
-    def get_cal_fluxes(self, skymodel, fwhmArcsec=60.0, threshold=0.1):
+    def get_cal_fluxes(self, skymodel, fwhmArcsec=25.0, threshold=0.1):
         """
         Returns total flux density in Jy and max peak flux density in
         Jy per beam for calibrator
