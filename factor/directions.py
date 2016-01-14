@@ -473,7 +473,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
             p1 = shapely.geometry.Polygon(poly_tuple)
             p2 = shapely.geometry.Point((field_x[0], field_y[0]))
             p2buf = p2.buffer(faceting_radius_pix)
-            p1 = p1.difference(p2buf)
+            p1 = p1.union(p2buf)
             try:
                 xyverts = [np.array([xp, yp]) for xp, yp in
                     zip(p1.exterior.coords.xy[0].tolist(),
