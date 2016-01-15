@@ -119,6 +119,7 @@ class Direction(object):
         self.cleanup_mapfiles = []
         self.do_reset = False # whether to reset this direction
         self.is_patch = False # whether direction is just a patch (not full facet)
+        self.nchunks = 1
 
         # Set the size of the calibrator (used to filter source lists)
         if cal_size_deg is None:
