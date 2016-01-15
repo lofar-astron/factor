@@ -372,7 +372,7 @@ class Direction(object):
         image_blur = gaussian_filter(image, [4.0/2.35482, 4.0/2.35482])
         beam_area_pix = 1.1331*(4.0)**2
 
-        return np.sum(fluxes_jy), np.max(image_blur)/beam_area_pix
+        return np.sum(fluxes_jy), np.max(image_blur)*beam_area_pix
 
 
     def set_averaging_steps_and_solution_intervals(self, chan_width_hz, nchan,
