@@ -153,7 +153,7 @@ fmem = 0.5
 ndir_per_node = 1
 
 # Number of imager jobs to run per node (affects initsubtract and facetimage
-# operationa; default = 1). If your nodes have many CPUs and > 32 GB of memory,
+# operations; default = 1). If your nodes have many CPUs and > 32 GB of memory,
 # it may be advantageous to set this to 2 or more
 nimg_per_node = 1
 
