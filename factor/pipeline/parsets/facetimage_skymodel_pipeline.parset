@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, add_all_facet_sources, create_compressed_mapfile, {% block full_image_steps %}concat_averaged, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, add_all_facet_sources, create_compressed_mapfile, {% block full_image_steps %}wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
 
 pipeline.pluginpath                                     =   {{ pipeline_dir }}/plugins
 
@@ -84,14 +84,8 @@ create_compressed_mapfile.control.mapfile_dir           =   input.output.mapfile
 create_compressed_mapfile.control.filename              =   concat_averaged_input.mapfile
 
 {% block full_image_parms %}
-concat_averaged.control.type                            =   virtual_concat
-concat_averaged.control.mapfile_in                      =   create_compressed_mapfile.output.mapfile
-concat_averaged.control.inputkey                        =   msfiles
-concat_averaged.control.outputkey                       =   msconcat
-concat_averaged.argument.flags                          =   [msfiles,msconcat]
-
 wsclean_image_full1.control.type                        =   wsclean
-wsclean_image_full1.control.mapfile_in                  =   concat_averaged.output.mapfile
+wsclean_image_full1.control.mapfile_in                  =   create_compressed_mapfile.output.mapfile
 wsclean_image_full1.control.inputkey                    =   msfile
 wsclean_image_full1.argument.flags                      =   [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
 wsclean_image_full1.argument.size                       =   {{ facet_imsize }} {{ facet_imsize }}
@@ -141,7 +135,7 @@ mask.argument.nsig                                      =   1.0
 mask.argument.vertices_file                             =   {{ vertices_file }}
 
 wsclean_image_full2.control.type                        =   wsclean
-wsclean_image_full2.control.mapfiles_in                 =   [concat_averaged.output.mapfile,mask.output.mapfile,mask.output.threshold_5sig.mapfile]
+wsclean_image_full2.control.mapfiles_in                 =   [create_compressed_mapfile.output.mapfile,mask.output.mapfile,mask.output.threshold_5sig.mapfile]
 wsclean_image_full2.control.inputkeys                   =   [msfile,fitsmask,threshold]
 wsclean_image_full2.argument.flags                      =   [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
 wsclean_image_full2.argument.fitsmask                   =   fitsmask

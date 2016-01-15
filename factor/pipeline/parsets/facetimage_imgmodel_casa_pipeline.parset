@@ -1,18 +1,12 @@
 {% extends "facetimage_imgmodel_pipeline.parset" %}
 
-{% block model_data_steps %}create_compressed_mapfile, concat_unaveraged, casa_ft4, {% endblock model_data_steps %}
+{% block model_data_steps %}concat_unaveraged, casa_ft4, {% endblock model_data_steps %}
 
 {% block full_image_steps %}concat_averaged, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2{% endblock full_image_steps %}
 
 {% block model_data_parms %}
-create_compressed_mapfile.control.kind            =   plugin
-create_compressed_mapfile.control.type            =   compressMapfile
-create_compressed_mapfile.control.mapfile_in      =   shift_empty.output.mapfile
-create_compressed_mapfile.control.mapfile_dir     =   input.output.mapfile_dir
-create_compressed_mapfile.control.filename        =   concat_unaveraged_input.mapfile
-
 concat_unaveraged.control.type                    =   virtual_concat
-concat_unaveraged.control.mapfile_in              =   create_compressed_mapfile.output.mapfile
+concat_unaveraged.control.mapfile_in              =   create_compressed_mapfile1.output.mapfile
 concat_unaveraged.control.inputkey                =   msfiles
 concat_unaveraged.control.outputkey               =   msconcat
 concat_unaveraged.argument.flags                  =   [msfiles,msconcat]
@@ -25,7 +19,7 @@ casa_ft4.control.arguments                        =   [--nologger,--nogui,-c,{{ 
 
 {% block full_image_parms %}
 concat_averaged.control.type                      =   virtual_concat
-concat_averaged.control.mapfile_in                =   create_compressed_mapfile.output.mapfile
+concat_averaged.control.mapfile_in                =   create_compressed_mapfile2.output.mapfile
 concat_averaged.control.inputkey                  =   msfiles
 concat_averaged.control.outputkey                 =   msconcat
 concat_averaged.argument.flags                    =   [msfiles,msconcat]
