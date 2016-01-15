@@ -366,7 +366,9 @@ class Direction(object):
         yint += -1 * min(yint)
         for xi, yi, f in zip(xint, yint, fluxes_jy):
             image[xi, yi] = f
-        image_blur = gaussian_filter(image, [4.0*2.35482, 4.0*2.35482])
+
+        # Convolve with Gaussian of FWHM = 4 pixels
+        image_blur = gaussian_filter(image, [4.0/2.35482, 4.0/2.35482])
         beam_area_pix = 1.1331*(4.0)**2
 
         return np.sum(fluxes_jy), np.max(image_blur)/beam_area_pix
