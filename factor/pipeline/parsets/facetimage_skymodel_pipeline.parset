@@ -84,14 +84,11 @@ create_compressed_mapfile.control.mapfile_dir           =   input.output.mapfile
 create_compressed_mapfile.control.filename              =   concat_averaged_input.mapfile
 
 {% block full_image_parms %}
-concat_averaged.control.type                            =   dppp
+concat_averaged.control.type                            =   virtual_concat
 concat_averaged.control.mapfile_in                      =   create_compressed_mapfile.output.mapfile
-concat_averaged.control.inputkey                        =   msin
-concat_averaged.argument.numthreads                     =   {{ max_cpus_per_node }}
-concat_averaged.argument.msin.datacolumn                =   DATA
-concat_averaged.argument.msout.writefullresflag         =   False
-concat_averaged.argument.local_scratch_dir              =   {{ local_dir }}
-concat_averaged.argument.steps                          =   []
+concat_averaged.control.inputkey                        =   msfiles
+concat_averaged.control.outputkey                       =   msconcat
+concat_averaged.argument.flags                          =   [msfiles,msconcat]
 
 wsclean_image_full1.control.type                        =   wsclean
 wsclean_image_full1.control.mapfile_in                  =   concat_averaged.output.mapfile
