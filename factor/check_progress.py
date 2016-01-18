@@ -106,8 +106,8 @@ def plot_state(directions_list):
         ax.add_patch(mpl_poly)
 
         # Show facet names
-        xmid = (np.max(xverts) - np.min(xverts)) / 2.0
-        ymid = (np.max(yverts) - np.min(yverts)) / 2.0
+        xmid = (np.max(xverts) - np.min(xverts)) / 2.0 + np.min(xverts)
+        ymid = (np.max(yverts) - np.min(yverts)) / 2.0 + np.min(yverts)
         marker = ax.text(xmid, ymid, direction.name, color='k', clip_on=True)
         markers.append(marker)
 
