@@ -57,8 +57,9 @@ def plot_state(directions_list):
 
     # Plot facets
     for direction in directions_list:
-        RAverts = direction.vertices[0]
-        Decverts = direction.vertices[1]
+        vertices = read_vertices(direction.vertices_file)
+        RAverts = vertices[0]
+        Decverts = vertices[1]
         xverts, yverts = factor.directions.radec2xy(RAverts, Decverts,
             refRA=midRA, refDec=midDec)
         xyverts = [np.array([xp, yp]) for xp, yp in zip(xverts, yverts)]
@@ -71,3 +72,12 @@ def plot_state(directions_list):
 
 
 #         selfcal_images = find_selfcal_image(direction)
+
+
+def read_vertices(filename):
+    """
+    Returns facet vertices
+    """
+    with open(filename, 'r') as f:
+        direction_dict = pickle.load(f)
+    return direction_dict['vertices']
