@@ -202,6 +202,7 @@ def press(event):
     if event.key.lower() == 'u':
         log.info('Updating...')
         ax = plt.gca()
+        print(ax.artists)
         for a in ax.artists:
             for d in directions_list:
                 if d.name == a.facet_name:
