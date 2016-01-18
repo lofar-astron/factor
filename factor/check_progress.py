@@ -123,10 +123,12 @@ def on_pick(event):
     facet = event.artist
     print('Current state of reduction for {}:'.format(facet.facet_name))
     print('    Completed operations: {}'.format(facet.completed_ops))
-    print('      Started operations: {}'.format(facet.started_ops))
+    started_but_not_completed_ops = [op for op in facet.started_ops if
+        not op in facet.completed_ops]
+    print('      Started operations: {}'.format(started_but_not_completed_ops))
 
     # Open images (if any)
-    if len(facet.selfcal_images) > 0:
+    if facet.selfcal_images is not None:
         im = pim.image(selfcal_images)
         im.view()
     pl.draw()
@@ -159,7 +161,8 @@ def find_selfcal_images(direction):
     Returns the filenames of selfcal images
     """
     working_dir = direction.working_dir
-    selfcal_dir = os.path.join(working_dir, 'facetselfcal', direction.name)
+    selfcal_dir = os.path.join(working_dir, 'results', 'facetselfcal',
+        direction.name)
 
     selfcal_images = glob.glob(selfcal_dir+'/*.casa_image?2.image.tt0')
     if len(selfcal_images) == 0:
