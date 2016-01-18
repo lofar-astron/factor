@@ -10,6 +10,7 @@ import logging
 import factor
 import factor.directions
 import factor.parset
+import pyrap.images as pim
 try:
     from matplotlib import pyplot as plt
     from matplotlib.patches import Polygon
@@ -64,6 +65,8 @@ def plot_state(directions_list):
     """
     Plots the facets of a run
     """
+    global midRA, midDec
+
     # Set up coordinate system and figure
     points, midRA, midDec = factor.directions.getxy(directions_list)
     fig = plt.figure(1, figsize=(7.66,7))
@@ -82,8 +85,13 @@ def plot_state(directions_list):
         xverts, yverts = factor.directions.radec2xy(RAverts, Decverts,
             refRA=midRA, refDec=midDec)
         xyverts = [np.array([xp, yp]) for xp, yp in zip(xverts, yverts)]
-        mpl_poly = Polygon(np.array(xyverts), facecolor="g", lw=0, alpha=0.4)
-        ax.add_patch(mpl_poly)
+        mpl_poly = Polygon(np.array(xyverts), lw=0)
+#         ax.add_patch(mpl_poly)
+        ax.add_artist(mpl_poly)
+        mpl_poly.set_picker(3)
+        mpl_poly.set_clip_box(ax.bbox)
+        mpl_poly.set_edgecolor('g')
+        mpl_poly.set_alpha(0.5)
 
     ax.relim()
     ax.autoscale()
@@ -101,10 +109,40 @@ def plot_state(directions_list):
         plt.xlabel("RA (arb. units)")
         plt.ylabel("Dec (arb. units)")
 
+    # Define coodinate formater to show RA and Dec under mouse pointer
+    ax.format_coord = formatCoord
+
+    fig.canvas.mpl_connect('pick_event', on_pick)
     plt.show()
+    plt.close(fig)
 
 
-#         selfcal_images = find_selfcal_image(direction)
+def on_pick(event):
+    facet = event.artist
+    print('Current state of reduction for {}:'.format(facet.facet_name))
+    print('    Completed operations: {}'.format(get_completed_ops(facet.facet_name))
+    print('      Running operations: {}'.format(get_running_ops(facet.facet_name))
+
+    # Open images (if any)
+    selfcal_images = find_selfcal_image(direction)
+    if len(selfcal_images) > 0:
+        im = pim.image(selfcal_images)
+        im.view()
+    pl.draw()
+
+
+def find_selfcal_image(direction):
+    """
+    Returns the filenames of selfcal images
+    """
+    return []
+
+
+def formatCoord(x, y):
+    """Custom coordinate format"""
+    global midRA, midDec
+    RA, Dec = factor.directions.xy2radec([x], [y], midRA, midDec)
+    return 'RA = {0:.2f} Dec = {1:.2f}'.format(RA[0], Dec[0])
 
 
 def read_vertices(filename):
