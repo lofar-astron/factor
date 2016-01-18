@@ -189,7 +189,7 @@ def find_selfcal_images(direction):
     """
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
-    is os.path.exists(selfcal_dir):
+    if os.path.exists(selfcal_dir):
         selfcal_images = glob.glob(selfcal_dir+'/*.casa_image[0123]2.image.tt0')
         selfcal_images += glob.glob(selfcal_dir+'/*.casa_image42_iter*.image.tt0')
         if len(selfcal_images) == 0:
