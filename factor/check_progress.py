@@ -88,7 +88,7 @@ def plot_state(directions_list):
         xverts, yverts = factor.directions.radec2xy(RAverts, Decverts,
             refRA=midRA, refDec=midDec)
         xyverts = [np.array([xp, yp]) for xp, yp in zip(xverts, yverts)]
-        mpl_poly = Polygon(np.array(xyverts), edgecolor='b', facecolor='none',
+        mpl_poly = Polygon(np.array(xyverts), edgecolor='#a9a9a9', facecolor='none',
             clip_box=ax.bbox, picker=3.0, linewidth=2)
         mpl_poly.facet_name = direction.name
         mpl_poly.completed_ops = get_completed_ops(direction)
@@ -137,12 +137,12 @@ def on_pick(event):
     print('      Running operations: {}'.format(started_but_not_completed_ops))
 
     # Open images (if any)
+    if os.path.exists('/tmp/tempimage'):
+        shutil.rmtree('/tmp/tempimage')
     if len(facet.selfcal_images) > 0:
         print('Opening selfcal images...')
         im = pim.image(facet.selfcal_images)
         im.view()
-        if os.path.exists('/tmp/tempimage'):
-            shutil.rmtree('/tmp/tempimage')
     plt.draw()
 
 
@@ -174,9 +174,11 @@ def find_selfcal_images(direction):
     """
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
-    selfcal_images = glob.glob(selfcal_dir+'/*.casa_image?2.image.tt0')
+    selfcal_images = glob.glob(selfcal_dir+'/*.casa_image[0123]2.image.tt0')
+    selfcal_images += glob.glob(selfcal_dir+'/*.casa_image42_iter*.image.tt0)
     if len(selfcal_images) == 0:
-        selfcal_images = glob.glob(selfcal_dir+'/*.casa_image?2.image')
+        selfcal_images = glob.glob(selfcal_dir+'/*.casa_image[0123]2.image')
+        selfcal_images += glob.glob(selfcal_dir+'/*.casa_image42_iter*.image)
     selfcal_images.sort()
 
     return selfcal_images
