@@ -143,9 +143,8 @@ def plot_state(directions_list):
     selfcal_ok_patch = Patch(color='g', label='Facetselfcal complete')
     selfcal_not_ok_patch = Patch(color='r', label='Facetsefcal failed')
     image_ok_patch = Patch(color='b', label='Facetimage complete')
-    plt.legend(handles=[not_processed_patch, selfcal_ok_patch, image_ok_patch,
-        selfcal_not_ok_patch], labels=['Unprocessed', 'Facetselfcal complete',
-        'Facetsefcal failed', 'Facetimage complete'])
+    ax.legend(handles=[not_processed_patch, selfcal_ok_patch, image_ok_patch,
+        selfcal_not_ok_patch])
 
     # Add check for mouse clicks
     fig.canvas.mpl_connect('pick_event', on_pick)
