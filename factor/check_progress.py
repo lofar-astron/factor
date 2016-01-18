@@ -64,7 +64,7 @@ def plot_state(directions_list):
         xverts, yverts = factor.directions.radec2xy(RAverts, Decverts,
             refRA=midRA, refDec=midDec)
         xyverts = [np.array([xp, yp]) for xp, yp in zip(xverts, yverts)]
-        mpl_poly = Polygon(np.array(poly), facecolor="g", lw=0, alpha=0.4)
+        mpl_poly = Polygon(np.array(xyverts), facecolor="g", lw=0, alpha=0.4)
         ax.add_patch(mpl_poly)
 
     ax.relim()
