@@ -207,23 +207,25 @@ def on_press(event):
         log.info('Updating...')
         ax = plt.gca()
         for a in ax.artists:
-            for d in all_directions:
-                if d.name == a.facet_name:
-                    a.completed_ops = get_completed_ops(d)
-                    a.started_ops = get_started_ops(d)
-                    if 'facetselfcal' in a.completed_ops:
-                        if verify_subtract(d):
+            if hasattr(a, 'facet_name'):
+                for d in all_directions:
+                    if d.name == a.facet_name:
+                        log.info('    {}'.format(d.name))
+                        a.completed_ops = get_completed_ops(d)
+                        a.started_ops = get_started_ops(d)
+                        if 'facetselfcal' in a.completed_ops:
+                            if verify_subtract(d):
+                                a.set_edgecolor('g')
+                            else:
+                                a.set_edgecolor('r')
+                        elif 'facetselfcal' in a.started_ops:
+                            a.set_edgecolor('y')
+                        elif 'facetimage' in a.completed_ops:
                             a.set_edgecolor('g')
-                        else:
-                            a.set_edgecolor('r')
-                    elif 'facetselfcal' in a.started_ops:
-                        a.set_edgecolor('y')
-                    elif 'facetimage' in a.completed_ops:
-                        a.set_edgecolor('g')
-                    elif 'facetimage' in a.started_ops:
-                        a.set_edgecolor('y')
-                    a.selfcal_images = find_selfcal_images(d)
-                    a.facet_image = find_facet_image(d)
+                        elif 'facetimage' in a.started_ops:
+                            a.set_edgecolor('y')
+                        a.selfcal_images = find_selfcal_images(d)
+                        a.facet_image = find_facet_image(d)
 
         fig.canvas.draw()
         log.info('...done')
