@@ -16,7 +16,7 @@ import ast
 from lofarpipe.support.data_map import DataMap
 try:
     from matplotlib import pyplot as plt
-    from matplotlib.patches import Polygon
+    from matplotlib.patches import Polygon, Patch
     from matplotlib.ticker import FuncFormatter
 except Exception as e:
     raise ImportError('PyPlot could not be imported. Plotting is not '
@@ -36,6 +36,9 @@ def run(parset_file):
     """
     directions_list = load_directions(parset_file)
 
+    print('Plotting facets...')
+    print('Left-click on a facet to see its current state')
+    print('Right-click on a facet to display selfcal and full-facet images\n')
     plot_state(directions_list)
 
 
@@ -44,7 +47,7 @@ def load_directions(parset_file):
     Return directions for a run
     """
     # Read parset
-    parset = factor.parset.parset_read(parset_file)
+    parset = parset_read(parset_file)
 
     # Load directions. First check for user-supplied directions file then for
     # Factor-generated file from a previous run
@@ -101,6 +104,10 @@ def plot_state(directions_list):
                 mpl_poly.set_edgecolor('r')
         elif 'facetselfcal' in mpl_poly.started_ops:
             mpl_poly.set_edgecolor('y')
+        elif 'facetimage' in mpl_poly.completed_ops:
+            mpl_poly.set_edgecolor('b')
+        elif 'facetimage' in mpl_poly.started_ops:
+            mpl_poly.set_edgecolor('y')
         mpl_poly.selfcal_images = find_selfcal_images(direction)
         mpl_poly.facet_image = find_facet_image(direction)
         ax.add_patch(mpl_poly)
@@ -130,7 +137,18 @@ def plot_state(directions_list):
     # Define coodinate formater to show RA and Dec under mouse pointer
     ax.format_coord = formatCoord
 
+    # Show legend
+    not_processed_patch = Patch(color='#a9a9a9', label='Unprocessed')
+    selfcal_ok_patch = Patch(color='g', label='Facetselfcal complete')
+    selfcal_not_ok_patch = Patch(color='r', label='Facetsefcal failed')
+    image_ok_patch = Patch(color='b', label='Facetimage complete')
+    plt.legend(handles=[not_processed_patch, selfcal_ok_patch, image_ok_patch,
+        selfcal_not_ok_patch])
+
+    # Add check for mouse clicks
     fig.canvas.mpl_connect('pick_event', on_pick)
+
+    # Show plot
     plt.show()
     plt.close(fig)
 
@@ -141,23 +159,30 @@ def plot_state(directions_list):
 
 def on_pick(event):
     facet = event.artist
-    print('Current state of reduction for {}:'.format(facet.facet_name))
-    print('    Completed operations: {}'.format(facet.completed_ops))
-    started_but_not_completed_ops = [op for op in facet.started_ops if
-        not op in facet.completed_ops]
-    print('      Running operations: {}'.format(started_but_not_completed_ops))
+    if exent.button == 1:
+        # Print info on left click
+        print('Current state of reduction for {}:'.format(facet.facet_name))
+        print('    Completed operations: {}'.format(facet.completed_ops))
+        started_but_not_completed_ops = [op for op in facet.started_ops if
+            not op in facet.completed_ops]
+        print('      Running operations: {}'.format(started_but_not_completed_ops))
 
-    # Open images (if any)
-    if os.path.exists('/tmp/tempimage'):
-        shutil.rmtree('/tmp/tempimage')
-    if len(facet.selfcal_images) > 0:
-        print('Opening selfcal images...')
-        im = pim.image(facet.selfcal_images)
-        im.view()
+    if exent.button == 3:
+        # Open images (if any) on right click
+        if os.path.exists('/tmp/tempimage'):
+            shutil.rmtree('/tmp/tempimage')
+        if len(facet.selfcal_images) > 0:
+            print('Opening selfcal images...')
+            im = pim.image(facet.selfcal_images)
+            im.view()
+        else:
+            print('No selfcal images exist')
         if len(facet.facet_image) > 0:
             print('Opening facet image...')
             im2 = pim.image(facet.facet_image[0])
             im2.view()
+        else:
+            print('No full image of facet exists')
 
     plt.draw()
 
@@ -279,3 +304,38 @@ def resample(array, factor):
 
     return array3
 
+
+def parset_read(parset):
+    """
+    Read and return subset of parset parameters
+
+    Parameters
+    ----------
+    parset_file : str
+        Filename of Factor-formated parset file
+
+    Returns
+    -------
+    parset_dict : dict
+        Dict of parset parameters
+
+    """
+    if not os.path.isfile(parset_file):
+        print("Missing parset file (%s), I don't know what to do :'(" % (parset_file))
+        sys.exit(1)
+
+    print("Reading parset file: %s" % (parset_file))
+    parset = ConfigParser.RawConfigParser()
+    parset.read(parset_file)
+    parset_dict = parset._sections['global']
+
+    if not os.path.isdir(parset_dict['dir_working']):
+        print('Cannot find the working directory. Please check the parset')
+        sys.exit(1)
+
+    if 'directions' in parset._sections.keys():
+        parset_dict = {'direction_specific': parset._sections['directions']}
+    else:
+        parset_dict = {'direction_specific': {}}
+
+    return parset_dict
