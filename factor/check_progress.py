@@ -226,6 +226,7 @@ def on_press(event):
                     a.facet_image = find_facet_image(d)
 
         fig.canvas.draw()
+        log.info('...done')
 
 
 def get_completed_ops(direction):
