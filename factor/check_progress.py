@@ -139,7 +139,6 @@ def plot_state(directions_list):
         shutil.rmtree('/tmp/tempimage')
 
 
-
 def on_pick(event):
     facet = event.artist
     print('Current state of reduction for {}:'.format(facet.facet_name))
@@ -155,9 +154,9 @@ def on_pick(event):
         print('Opening selfcal images...')
         im = pim.image(facet.selfcal_images)
         im.view()
-        if facet.facet_image is not None:
+        if len(facet.facet_image) > 0:
             print('Opening facet image...')
-            im2 = pim.image(facet.facet_image)
+            im2 = pim.image(facet.facet_image[0])
             im2.view()
 
     plt.draw()
@@ -169,7 +168,7 @@ def get_completed_ops(direction):
     """
     has_state = direction.load_state()
     if has_state:
-        return set(direction.completed_operations)
+        return list(set(direction.completed_operations))
     else:
         return []
 
@@ -180,7 +179,7 @@ def get_started_ops(direction):
     """
     has_state = direction.load_state()
     if has_state:
-        return set(direction.started_operations)
+        return list(set(direction.started_operations))
     else:
         return []
 
@@ -215,15 +214,14 @@ def find_facet_image(direction):
 
     # Check selfcal and image directories. An image in the image directory is
     # preferred
-    for d in [selfcal_dir, image_dir]:
-        if os.path.exists(d):
+    facet_image = []
+    for d in [image_dir, selfcal_dir]:
+        if os.path.exists(d) and len(facet_image) == 0:
             facet_image = glob.glob(d+'/*.wsclean_image_full2-MFS-image.fits')
             if len(facet_image) == 0:
                 facet_image = glob.glob(d+'/*.casa_image_full2.image.tt0')
                 if len(facet_image) == 0:
                     facet_image = glob.glob(d+'/*.casa_image_full2.image')
-        else:
-            facet_image = None
 
     return facet_image
 
