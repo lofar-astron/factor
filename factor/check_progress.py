@@ -164,7 +164,7 @@ def plot_state(directions_list):
 
 def on_pick(event):
     facet = event.artist
-    if event.button == 1:
+    if event.mouseevent.button == 1:
         # Print info on left click
         print('Current state of reduction for {}:'.format(facet.facet_name))
         print('    Completed operations: {}'.format(facet.completed_ops))
@@ -172,7 +172,7 @@ def on_pick(event):
             not op in facet.completed_ops]
         print('      Running operations: {}'.format(started_but_not_completed_ops))
 
-    if event.button == 3:
+    if event.mouseevent.button == 3:
         # Open images (if any) on right click
         if os.path.exists('/tmp/tempimage'):
             shutil.rmtree('/tmp/tempimage')
