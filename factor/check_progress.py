@@ -55,14 +55,7 @@ def plot_state(directions_list):
     points, midRA, midDec = factor.directions.getxy(directions_list)
     fig, ax = plt.subplots(figsize=(8, 8))
 
-    for direction in directions_list:
-        # Check for selfcal images
-        selfcal_images = find_selfcal_image(direction)
-        if len(selfcal_images) > 0:
-            # Use WCS of first image for plotting
-            wcs_topixel = selfcal_images[0].topixel
-
-
+    # Plot facets
     for direction in directions_list:
         RAverts = direction.vertices[0]
         Decverts = direction.vertices[1]
@@ -77,3 +70,4 @@ def plot_state(directions_list):
     plt.show()
 
 
+#         selfcal_images = find_selfcal_image(direction)
