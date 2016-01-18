@@ -39,7 +39,7 @@ def run(parset_file):
 
     print('Plotting facets...')
     print('Left-click on a facet to see its current state')
-    print('Right-click on a facet to display selfcal and full-facet images\n')
+    print('Right-click on a facet to display images\n')
     plot_state(directions_list)
 
 
@@ -177,17 +177,17 @@ def on_pick(event):
         if os.path.exists('/tmp/tempimage'):
             shutil.rmtree('/tmp/tempimage')
         if len(facet.selfcal_images) > 0:
-            print('Opening selfcal images...')
+            print('Opening selfcal images for {}...'.format(facet.facet_name))
             im = pim.image(facet.selfcal_images)
             im.view()
         else:
-            print('No selfcal images exist')
+            print('No selfcal images exist for {}'.format(facet.facet_name))
         if len(facet.facet_image) > 0:
-            print('Opening facet image...')
+            print('Opening facet image for {}...'.format(facet.facet_name))
             im2 = pim.image(facet.facet_image[0])
             im2.view()
         else:
-            print('No full image of facet exists')
+            print('No full image of facet exists for {}'.format(facet.facet_name))
 
     plt.draw()
 
