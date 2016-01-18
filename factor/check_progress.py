@@ -37,9 +37,9 @@ def run(parset_file):
     """
     directions_list = load_directions(parset_file)
 
-    print('Plotting facets...')
-    print('Left-click on a facet to see its current state')
-    print('Right-click on a facet to display images\n')
+    log.info('Plotting facets...')
+    log.info('Left-click on a facet to see its current state')
+    log.info('Right-click on a facet to display its images\n')
     plot_state(directions_list)
 
 
@@ -166,28 +166,28 @@ def on_pick(event):
     facet = event.artist
     if event.mouseevent.button == 1:
         # Print info on left click
-        print('Current state of reduction for {}:'.format(facet.facet_name))
-        print('    Completed operations: {}'.format(facet.completed_ops))
+        log.info('Current state of reduction for {}:'.format(facet.facet_name))
+        log.info('    Completed operations: {}'.format(facet.completed_ops))
         started_but_not_completed_ops = [op for op in facet.started_ops if
             not op in facet.completed_ops]
-        print('      Running operations: {}'.format(started_but_not_completed_ops))
+        log.info('      Running operations: {}'.format(started_but_not_completed_ops))
 
     if event.mouseevent.button == 3:
         # Open images (if any) on right click
         if os.path.exists('/tmp/tempimage'):
             shutil.rmtree('/tmp/tempimage')
         if len(facet.selfcal_images) > 0:
-            print('Opening selfcal images for {}...'.format(facet.facet_name))
+            log.info('Opening selfcal images for {}...'.format(facet.facet_name))
             im = pim.image(facet.selfcal_images)
             im.view()
         else:
-            print('No selfcal images exist for {}'.format(facet.facet_name))
+            log.info('No selfcal images exist for {}'.format(facet.facet_name))
         if len(facet.facet_image) > 0:
-            print('Opening facet image for {}...'.format(facet.facet_name))
+            log.info('Opening facet image for {}...'.format(facet.facet_name))
             im2 = pim.image(facet.facet_image[0])
             im2.view()
         else:
-            print('No full image of facet exists for {}'.format(facet.facet_name))
+            log.info('No full image of facet exists for {}'.format(facet.facet_name))
 
     plt.draw()
 
@@ -326,16 +326,16 @@ def parset_read(parset_file):
 
     """
     if not os.path.isfile(parset_file):
-        print("Missing parset file (%s), I don't know what to do :'(" % (parset_file))
+        log.error("Missing parset file (%s), I don't know what to do :'(" % (parset_file))
         sys.exit(1)
 
-    print("Reading parset file: %s" % (parset_file))
+    log.info("Reading parset file: %s" % (parset_file))
     parset = ConfigParser.RawConfigParser()
     parset.read(parset_file)
     parset_dict = parset._sections['global']
 
     if not os.path.isdir(parset_dict['dir_working']):
-        print('Cannot find the working directory. Please check the parset')
+        log.error('Cannot find the working directory. Please check the parset')
         sys.exit(1)
 
     if 'directions' in parset._sections.keys():
