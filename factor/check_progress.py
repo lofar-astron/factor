@@ -305,7 +305,7 @@ def resample(array, factor):
     return array3
 
 
-def parset_read(parset):
+def parset_read(parset_file):
     """
     Read and return subset of parset parameters
 
