@@ -40,8 +40,6 @@ def run(parset_file):
     directions_list = load_directions(parset_file)
 
     log.info('Plotting facets...')
-    log.info('Left-click on a facet to see its current state')
-    log.info('Right-click on a facet to display its images\n')
     plot_state(directions_list)
 
 
@@ -85,6 +83,8 @@ def plot_state(directions_list):
         fig.add_axes(ax)
     else:
         ax = plt.gca()
+    ax.set_title('Left-click on a facet to see its current state\n')
+                 'Right-click on a facet to display its images')
 
     # Plot facets
     markers = []
