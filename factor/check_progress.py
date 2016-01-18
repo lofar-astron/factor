@@ -17,7 +17,7 @@ import ast
 from lofarpipe.support.data_map import DataMap
 try:
     from matplotlib import pyplot as plt
-    from matplotlib.patches import Polygon, Patch
+    from matplotlib.patches import Polygon
     from matplotlib.ticker import FuncFormatter
 except Exception as e:
     raise ImportError('PyPlot could not be imported. Plotting is not '
@@ -143,9 +143,8 @@ def plot_state(directions_list):
     selfcal_ok_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='g', linewidth=2)
     selfcal_not_ok_patch =plt.Rectangle((0, 0), 1, 1, edgecolor='r', linewidth=2)
     image_ok_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='b', linewidth=2)
-    ax.legend([not_processed_patch], ['Unprocessed', 'Facetselfcal complete', 'Facetsefcal failed', 'Facetimage complete'])
-    #, selfcal_ok_patch, image_ok_patch,
-    #    selfcal_not_ok_patch])
+    ax.legend([not_processed_patch, selfcal_ok_patch, selfcal_not_ok_patch, image_ok_patch],
+              ['Unprocessed', 'Facetselfcal complete', 'Facetsefcal failed', 'Facetimage complete'])
 
     # Add check for mouse clicks
     fig.canvas.mpl_connect('pick_event', on_pick)
