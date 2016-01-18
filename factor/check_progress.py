@@ -12,6 +12,8 @@ import factor
 import factor.directions
 import factor.parset
 import pyrap.images as pim
+import ast
+from lofarpipe.support.data_map import DataMap
 try:
     from matplotlib import pyplot as plt
     from matplotlib.patches import Polygon
@@ -195,6 +197,20 @@ def read_vertices(filename):
         direction_dict = pickle.load(f)
     return direction_dict['vertices']
 
+
+def verify_subtract(direction):
+    """
+    Checks selfcal success
+    """
+    verify_subtract_mapfile = os.path.join(direction.working_dir, 'results', 'facetselfcal',
+        direction.name, 'mapfiles', 'verify_subtract.break.mapfile')
+    if os.path.exists(verify_subtract_mapfile):
+        ok_mapfile = DataMap.load(verify_subtract_mapfile)
+        ok_flags = [ast.literal_eval(item.file) for item in ok_mapfile]
+        if all(ok_flags):
+            return True
+        else:
+            return False
 
 def resample(array, factor):
     """
