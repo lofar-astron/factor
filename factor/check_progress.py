@@ -35,6 +35,7 @@ def load_directions(parset_file):
 
     # Load directions. First check for user-supplied directions file then for
     # Factor-generated file from a previous run
+    direction_list = []
     dir_parset = parset['direction_specific']
     if 'directions_file' in dir_parset:
         directions = factor.directions.directions_read(dir_parset['directions_file'],
@@ -43,9 +44,11 @@ def load_directions(parset_file):
         directions = factor.directions.directions_read(os.path.join(parset['dir_working'],
             'factor_directions.txt'), parset['dir_working'])
     for direction in directions:
-        direction.load_state()
+        has_state = direction.load_state()
+        if has_state:
+            direction_list.append(direction)
 
-    return directions
+    return direction_list
 
 
 def plot_state(directions_list):
