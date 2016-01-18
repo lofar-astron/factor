@@ -139,7 +139,7 @@ def plot_state(directions_list):
     ax.format_coord = formatCoord
 
     # Show legend
-    not_processed_patch = Patch(color='#a9a9a9', label='Unprocessed')
+    not_processed_patch = plt.Rectangle((0, 0), 1, 1, fc='#a9a9a9', label='Unprocessed')
     selfcal_ok_patch = Patch(color='g', label='Facetselfcal complete')
     selfcal_not_ok_patch = Patch(color='r', label='Facetsefcal failed')
     image_ok_patch = Patch(color='b', label='Facetimage complete')
