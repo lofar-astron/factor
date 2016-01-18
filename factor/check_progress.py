@@ -102,7 +102,7 @@ def plot_state(directions_list):
             mpl_poly.set_edgecolor('y')
         mpl_poly.selfcal_images = find_selfcal_images(direction)
         ax.add_patch(mpl_poly)
-        ax.add_artist(mpl_poly)
+#         ax.add_artist(mpl_poly)
 
     ax.relim()
     ax.autoscale()
