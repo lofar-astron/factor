@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+# encoding: utf-8
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# The code is based on an original idea of Reinout van Weeren
+from factor._version import __version__ as version
+from factor import check_progress
+import optparse
+import sys
+
+
+if __name__ == '__main__':
+    parser = optparse.OptionParser(usage='%prog parset',
+            version='%%prog %s' % (version))
+    (options, args) = parser.parse_args()
+
+    if len(args) != 1:
+        parser.print_help()
+        sys.exit()
+
+    parset_file = args[0]
+
+    # Check the progress
+    check_progress.run(parset_file)
+

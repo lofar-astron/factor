@@ -564,8 +564,9 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
         direction.field_ra = field.ra
         direction.field_dec = field.dec
 
-        # Load previously completed operations (if any)
+        # Load previously completed operations (if any) and update the state
         direction.load_state()
+        direction.save_state()
 
         # Reset state if specified
         if direction.name in reset_directions:
