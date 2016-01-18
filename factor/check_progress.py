@@ -91,6 +91,13 @@ def plot_state(directions_list):
         mpl_poly.facet_name = direction.name
         mpl_poly.completed_ops = get_completed_ops(direction)
         mpl_poly.started_ops = get_started_ops(direction)
+        if 'facetselfcal' in mpl_poly.completed_ops:
+            if direction.selfcal_ok:
+                mpl_poly.set_edgecolor('g')
+            else:
+                mpl_poly.set_edgecolor('r')
+        elif 'facetselfcal' in mpl_poly.started_ops:
+            mpl_poly.set_edgecolor('y')
         mpl_poly.selfcal_images = find_selfcal_images(direction)
         ax.add_patch(mpl_poly)
         ax.add_artist(mpl_poly)
@@ -129,8 +136,11 @@ def on_pick(event):
 
     # Open images (if any)
     if len(facet.selfcal_images) > 0:
+        print('Opening selfcal images...')
         im = pim.image(facet.selfcal_images)
         im.view()
+        if os.path.exists('/tmp/tempimage'):
+            shutil.rmtree('/tmp/tempimage')
     plt.draw()
 
 
