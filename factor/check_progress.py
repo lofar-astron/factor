@@ -154,7 +154,7 @@ def plot_state(directions_list):
 
     # Add check for mouse clicks and key presses
     fig.canvas.mpl_connect('pick_event', on_pick)
-    fig.canvas.mpl_connect('key_press_event', press)
+    fig.canvas.mpl_connect('key_press_event', on_press)
 
     # Show plot
     plt.show()
@@ -166,6 +166,9 @@ def plot_state(directions_list):
 
 
 def on_pick(event):
+    """
+    Handle picks with the mouse
+    """
     facet = event.artist
     if event.mouseevent.button == 1:
         # Print info on left click
@@ -193,16 +196,15 @@ def on_pick(event):
             log.info('No full image of facet exists for {}'.format(facet.facet_name))
 
 
-def press(event):
+def on_press(event):
     """
     Handle key presses
     """
     global fig, directions_list
 
-    if event.key.lower() == 'u':
+    if event.key == 'u':
         log.info('Updating...')
         ax = plt.gca()
-        print(ax.artists)
         for a in ax.artists:
             for d in directions_list:
                 if d.name == a.facet_name:
