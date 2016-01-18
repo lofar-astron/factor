@@ -206,7 +206,7 @@ def on_press(event):
     if event.key == 'u':
         log.info('Updating...')
         ax = plt.gca()
-        for a in ax.artists:
+        for a in ax.patches:
             if hasattr(a, 'facet_name'):
                 for d in all_directions:
                     if d.name == a.facet_name:
