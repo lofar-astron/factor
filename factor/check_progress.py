@@ -120,18 +120,32 @@ def plot_state(directions_list):
 def on_pick(event):
     facet = event.artist
     print('Current state of reduction for {}:'.format(facet.facet_name))
-    print('    Completed operations: {}'.format(get_completed_ops(facet.facet_name))
-    print('      Running operations: {}'.format(get_running_ops(facet.facet_name))
+    print('    Completed operations: {}'.format(get_completed_ops(facet.facet_name)))
+    print('      Running operations: {}'.format(get_started_ops(facet.facet_name)))
 
     # Open images (if any)
-    selfcal_images = find_selfcal_image(direction)
+    selfcal_images = find_selfcal_images(direction)
     if len(selfcal_images) > 0:
         im = pim.image(selfcal_images)
         im.view()
     pl.draw()
 
 
-def find_selfcal_image(direction):
+def get_completed_ops(facet_name):
+    """
+    Returns list of completed operations
+    """
+    return []
+
+
+def get_started_ops(facet_name):
+    """
+    Returns list of started operations
+    """
+    return []
+
+
+def find_selfcal_images(direction):
     """
     Returns the filenames of selfcal images
     """
