@@ -7,6 +7,7 @@ import shutil
 import numpy as np
 import pickle
 import logging
+import glob
 import factor
 import factor.directions
 import factor.parset
@@ -86,7 +87,11 @@ def plot_state(directions_list):
             refRA=midRA, refDec=midDec)
         xyverts = [np.array([xp, yp]) for xp, yp in zip(xverts, yverts)]
         mpl_poly = Polygon(np.array(xyverts), edgecolor='b', facecolor='none',
-            clip_box=ax.bbox, picker=3.0, linewidth=3)
+            clip_box=ax.bbox, picker=3.0, linewidth=2)
+        mpl_poly.facet_name = direction.name
+        mpl_poly.completed_ops = get_completed_ops(direction)
+        mpl_poly.started_ops = get_started_ops(direction)
+        mpl_poly.selfcal_images = find_selfcal_images(direction)
         ax.add_patch(mpl_poly)
         ax.add_artist(mpl_poly)
 
@@ -117,36 +122,51 @@ def plot_state(directions_list):
 def on_pick(event):
     facet = event.artist
     print('Current state of reduction for {}:'.format(facet.facet_name))
-    print('    Completed operations: {}'.format(get_completed_ops(facet.facet_name)))
-    print('      Running operations: {}'.format(get_started_ops(facet.facet_name)))
+    print('    Completed operations: {}'.format(facet.completed_ops))
+    print('      Started operations: {}'.format(facet.started_ops))
 
     # Open images (if any)
-    selfcal_images = find_selfcal_images(direction)
-    if len(selfcal_images) > 0:
+    if len(facet.selfcal_images) > 0:
         im = pim.image(selfcal_images)
         im.view()
     pl.draw()
 
 
-def get_completed_ops(facet_name):
+def get_completed_ops(direction):
     """
     Returns list of completed operations
     """
-    return []
+    has_state = direction.load_state()
+    if has_state:
+        return direction.completed_operations
+    else:
+        return []
 
 
 def get_started_ops(facet_name):
     """
     Returns list of started operations
     """
-    return []
+    has_state = direction.load_state()
+    if has_state:
+        return direction.started_operations
+    else:
+        return []
 
 
 def find_selfcal_images(direction):
     """
     Returns the filenames of selfcal images
     """
-    return []
+    working_dir = direction.working_dir
+    selfcal_dir = os.path.join(working_dir, 'facetselfcal', direction.name)
+
+    if direction.use_wideband:
+        selfcal_images = glob.glob(selfcal_dir+'/*.casa_image?2.image.tt0')
+    else:
+        selfcal_images = glob.glob(selfcal_dir+'/*.casa_image?2.image')
+
+    return selfcal_images.sort()
 
 
 def formatCoord(x, y):
