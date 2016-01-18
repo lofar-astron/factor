@@ -72,7 +72,7 @@ def plot_state(directions_list):
     """
     Plots the facets of a run
     """
-    global midRA, midDec
+    global midRA, midDec, fig, directions_list
 
     # Set up coordinate system and figure
     points, midRA, midDec = factor.directions.getxy(directions_list)
@@ -152,8 +152,9 @@ def plot_state(directions_list):
     ax.legend([not_processed_patch, processing_patch, selfcal_ok_patch, selfcal_not_ok_patch],
               ['Unprocessed', 'Processing', 'Complete', 'Failed'])
 
-    # Add check for mouse clicks
+    # Add check for mouse clicks and key presses
     fig.canvas.mpl_connect('pick_event', on_pick)
+    fig.canvas.mpl_connect('key_press_event', press)
 
     # Show plot
     plt.show()
@@ -191,7 +192,37 @@ def on_pick(event):
         else:
             log.info('No full image of facet exists for {}'.format(facet.facet_name))
 
-    plt.draw()
+
+def press(event):
+    """
+    Handle key presses
+    """
+    global fig, directions_list
+
+    if event.key.lower() == 'u':
+        log.info('Updating...')
+        ax = plt.gca()
+        for a in ax.artists:
+            for d in directions_list:
+                if d.name == a.facet_name:
+                    a.completed_ops = get_completed_ops(d)
+                    a.started_ops = get_started_ops(d)
+                    if 'facetselfcal' in a.completed_ops:
+                        if verify_subtract(d):
+                            a.set_edgecolor('g')
+                        else:
+                            a.set_edgecolor('r')
+                    elif 'facetselfcal' in a.started_ops:
+                        a.set_edgecolor('y')
+                    elif 'facetimage' in a.completed_ops:
+                        a.set_edgecolor('g')
+                    elif 'facetimage' in a.started_ops:
+                        a.set_edgecolor('y')
+                    a.selfcal_images = find_selfcal_images(d)
+                    a.facet_image = find_facet_image(d)
+
+        fig.canvas.draw()
+
 
 
 def get_completed_ops(direction):
