@@ -17,11 +17,11 @@ try:
 except Exception as e:
     raise ImportError('PyPlot could not be imported. Plotting is not '
         'available: {0}'.format(e.message))
-    try:
-        from wcsaxes import WCSAxes
-        hasWCSaxes = True
-    except:
-        hasWCSaxes = False
+try:
+    from wcsaxes import WCSAxes
+    hasWCSaxes = True
+except:
+    hasWCSaxes = False
 
 log = logging.getLogger('progress')
 
