@@ -52,7 +52,7 @@ def plot_state(directions_list):
     Plots the facets of a run
     """
     # Set up coordinate system and figure
-    points, midRA, midDec = factor.directions.getxy(directions_list_thiessen)
+    points, midRA, midDec = factor.directions.getxy(directions_list)
     fig, ax = plt.subplots(figsize=(8, 8))
 
     for direction in directions_list:
