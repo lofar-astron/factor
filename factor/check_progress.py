@@ -83,7 +83,7 @@ def plot_state(directions_list):
         fig.add_axes(ax)
     else:
         ax = plt.gca()
-    ax.set_title('Left-click on a facet to see its current state\n')
+    ax.set_title('Left-click on a facet to see its current state\n'
                  'Right-click on a facet to display its images')
 
     # Plot facets
