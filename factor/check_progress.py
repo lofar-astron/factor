@@ -105,7 +105,7 @@ def plot_state(directions_list):
         mpl_poly.facet_image = find_facet_image(direction)
         ax.add_patch(mpl_poly)
 
-        marker = ax.text(N.mean(xverts), N.mean(yverts), direction.name,
+        marker = ax.text(np.mean(xverts), np.mean(yverts), direction.name,
                           color='#afeeee', clip_on=True)
         markers.append(marker)
 
