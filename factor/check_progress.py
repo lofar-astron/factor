@@ -335,8 +335,8 @@ def parset_read(parset_file):
         sys.exit(1)
 
     if 'directions' in parset._sections.keys():
-        parset_dict = {'direction_specific': parset._sections['directions']}
+        parset_dict.update({'direction_specific': parset._sections['directions']})
     else:
-        parset_dict = {'direction_specific': {}}
+        parset_dict.update({'direction_specific': {}})
 
     return parset_dict
