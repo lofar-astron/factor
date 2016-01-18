@@ -81,6 +81,7 @@ def plot_state(directions_list):
         ax = plt.gca()
 
     # Plot facets
+    markers = []
     for direction in directions_list:
         vertices = read_vertices(direction.vertices_file)
         RAverts = vertices[0]
@@ -101,8 +102,12 @@ def plot_state(directions_list):
         elif 'facetselfcal' in mpl_poly.started_ops:
             mpl_poly.set_edgecolor('y')
         mpl_poly.selfcal_images = find_selfcal_images(direction)
+        mpl_poly.facet_image = find_facet_image(direction)
         ax.add_patch(mpl_poly)
-#         ax.add_artist(mpl_poly)
+
+        marker = ax.text(N.mean(xverts), N.mean(yverts), direction.name,
+                          color='#afeeee', clip_on=True)
+        markers.append(marker)
 
     ax.relim()
     ax.autoscale()
@@ -127,6 +132,11 @@ def plot_state(directions_list):
     plt.show()
     plt.close(fig)
 
+    # Clean up any temp pyrap images
+    if os.path.exists('/tmp/tempimage'):
+        shutil.rmtree('/tmp/tempimage')
+
+
 
 def on_pick(event):
     facet = event.artist
@@ -143,6 +153,11 @@ def on_pick(event):
         print('Opening selfcal images...')
         im = pim.image(facet.selfcal_images)
         im.view()
+        if facet.facet_image is not None:
+            print('Opening facet image...')
+            im2 = pim.image(facet.facet_image)
+            im2.view()
+
     plt.draw()
 
 
@@ -152,7 +167,7 @@ def get_completed_ops(direction):
     """
     has_state = direction.load_state()
     if has_state:
-        return direction.completed_operations
+        return set(direction.completed_operations)
     else:
         return []
 
@@ -163,7 +178,7 @@ def get_started_ops(direction):
     """
     has_state = direction.load_state()
     if has_state:
-        return direction.started_operations
+        return set(direction.started_operations)
     else:
         return []
 
@@ -174,14 +189,41 @@ def find_selfcal_images(direction):
     """
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
-    selfcal_images = glob.glob(selfcal_dir+'/*.casa_image[0123]2.image.tt0')
-    selfcal_images += glob.glob(selfcal_dir+'/*.casa_image42_iter*.image.tt0')
-    if len(selfcal_images) == 0:
-        selfcal_images = glob.glob(selfcal_dir+'/*.casa_image[0123]2.image')
-        selfcal_images += glob.glob(selfcal_dir+'/*.casa_image42_iter*.image')
-    selfcal_images.sort()
+    is os.path.exists(selfcal_dir):
+        selfcal_images = glob.glob(selfcal_dir+'/*.casa_image[0123]2.image.tt0')
+        selfcal_images += glob.glob(selfcal_dir+'/*.casa_image42_iter*.image.tt0')
+        if len(selfcal_images) == 0:
+            selfcal_images = glob.glob(selfcal_dir+'/*.casa_image[0123]2.image')
+            selfcal_images += glob.glob(selfcal_dir+'/*.casa_image42_iter*.image')
+        selfcal_images.sort()
+    else:
+        selfcal_images = []
 
     return selfcal_images
+
+
+def find_facet_image(direction):
+    """
+    Returns the filename of full facet image
+    """
+    selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
+        direction.name)
+    image_dir = os.path.join(direction.working_dir, 'results', 'facetimage',
+        direction.name)
+
+    # Check selfcal and image directories. An image in the image directory is
+    # preferred
+    for d in [selfcal_dir, image_dir]:
+        if os.path.exists(d):
+            facet_image = glob.glob(d+'/*.wsclean_image_full2-MFS-image.fits')
+            if len(facet_image) == 0:
+                facet_image = glob.glob(d+'/*.casa_image_full2.image.tt0')
+                if len(facet_image) == 0:
+                    facet_image = glob.glob(d+'/*.casa_image_full2.image')
+        else:
+            facet_image = None
+
+    return facet_image
 
 
 def formatCoord(x, y):
