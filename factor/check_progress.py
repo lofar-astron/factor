@@ -10,8 +10,14 @@ import logging
 import factor
 import factor.directions
 import factor.parset
-from matplotlib import pyplot as plt
-from matplotlib.patches import Polygon
+try:
+    from matplotlib import pyplot as plt
+    from matplotlib.patches import Polygon
+    from matplotlib.ticker import FuncFormatter
+except Exception as e:
+    raise ImportError('PyPlot could not be imported. Plotting is not '
+        'available: {0}'.format(e.message))
+
 
 
 log = logging.getLogger('progress')
@@ -72,6 +78,7 @@ def plot_state(directions_list):
 
     ax.relim()
     ax.autoscale()
+    ax.set_aspect('equal')
     plt.show()
 
 
@@ -85,3 +92,25 @@ def read_vertices(filename):
     with open(filename, 'r') as f:
         direction_dict = pickle.load(f)
     return direction_dict['vertices']
+
+
+def resample(array, factor):
+    """
+    Return resampled version of an image
+    """
+
+    nx, ny = np.shape(array)
+
+    nx_new = nx // factor
+    ny_new = ny // factor
+
+    array2 = np.zeros((nx_new, ny))
+    for i in range(nx_new):
+        array2[i, :] = np.mean(array[i * factor:(i + 1) * factor, :], axis=0)
+
+    array3 = np.zeros((nx_new, ny_new))
+    for j in range(ny_new):
+        array3[:, j] = np.mean(array2[:, j * factor:(j + 1) * factor], axis=1)
+
+    return array3
+
