@@ -369,7 +369,7 @@ def group_directions(directions, n_per_grouping={'1':0}, allow_reordering=True):
 
         log.debug('Processing directions in the following groups:')
         for i, group in enumerate(direction_groups):
-            print('Group {0}: {1}'.format(i+1, [d.name for d in group]))
+            log.debug('Group {0}: {1}'.format(i+1, [d.name for d in group]))
 
     return direction_groups
 
