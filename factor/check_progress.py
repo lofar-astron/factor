@@ -143,7 +143,7 @@ def get_completed_ops(direction):
         return []
 
 
-def get_started_ops(facet_name):
+def get_started_ops(direction):
     """
     Returns list of started operations
     """
