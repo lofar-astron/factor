@@ -85,7 +85,7 @@ def plot_state(directions_list):
         xverts, yverts = factor.directions.radec2xy(RAverts, Decverts,
             refRA=midRA, refDec=midDec)
         xyverts = [np.array([xp, yp]) for xp, yp in zip(xverts, yverts)]
-        mpl_poly = Polygon(np.array(xyverts), lw=0)
+        mpl_poly = Polygon(np.array(xyverts))
 #         ax.add_patch(mpl_poly)
         ax.add_artist(mpl_poly)
         mpl_poly.set_picker(3)
