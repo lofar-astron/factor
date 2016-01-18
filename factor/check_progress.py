@@ -17,8 +17,11 @@ try:
 except Exception as e:
     raise ImportError('PyPlot could not be imported. Plotting is not '
         'available: {0}'.format(e.message))
-
-
+    try:
+        from wcsaxes import WCSAxes
+        hasWCSaxes = True
+    except:
+        hasWCSaxes = False
 
 log = logging.getLogger('progress')
 
@@ -63,7 +66,13 @@ def plot_state(directions_list):
     """
     # Set up coordinate system and figure
     points, midRA, midDec = factor.directions.getxy(directions_list)
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig = plt.figure(1, figsize=(7.66,7))
+    if hasWCSaxes:
+        wcs = factor.directions.makeWCS(midRA, midDec)
+        ax = WCSAxes(fig, [0.16, 0.1, 0.8, 0.8], wcs=wcs)
+        fig.add_axes(ax)
+    else:
+        ax = plt.gca()
 
     # Plot facets
     for direction in directions_list:
@@ -79,6 +88,19 @@ def plot_state(directions_list):
     ax.relim()
     ax.autoscale()
     ax.set_aspect('equal')
+
+    if hasWCSaxes:
+        RAAxis = ax.coords['ra']
+        RAAxis.set_axislabel('RA', minpad=0.75)
+        RAAxis.set_major_formatter('hh:mm:ss')
+        DecAxis = ax.coords['dec']
+        DecAxis.set_axislabel('Dec', minpad=0.75)
+        DecAxis.set_major_formatter('dd:mm:ss')
+        ax.coords.grid(color='black', alpha=0.5, linestyle='solid')
+    else:
+        plt.xlabel("RA (arb. units)")
+        plt.ylabel("Dec (arb. units)")
+
     plt.show()
 
 
