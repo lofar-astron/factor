@@ -94,7 +94,7 @@ def plot_state(directions_list):
         mpl_poly.completed_ops = get_completed_ops(direction)
         mpl_poly.started_ops = get_started_ops(direction)
         if 'facetselfcal' in mpl_poly.completed_ops:
-            if direction.selfcal_ok:
+            if verify_subtract(direction):
                 mpl_poly.set_edgecolor('g')
             else:
                 mpl_poly.set_edgecolor('r')
@@ -211,6 +211,9 @@ def verify_subtract(direction):
             return True
         else:
             return False
+    else:
+        return False
+
 
 def resample(array, factor):
     """
