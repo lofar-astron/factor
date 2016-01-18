@@ -314,9 +314,15 @@ def get_directions_options(parset):
     # a facet of its own. In this case, it will not go through selfcal but will
     # instead use the selfcal solutions of the nearest facet for which selfcal was
     # done
+    if 'target_ra' not in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['target_ra'] = None
+    if 'target_dec' not in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['target_dec'] = None
     if 'target_radius_arcmin' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['target_radius_arcmin'] = parset.getfloat('directions',
             'target_radius_arcmin')
+    else:
+        parset_dict['direction_specific']['target_radius_arcmin'] = None
     if 'target_has_own_facet' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['target_has_own_facet'] = parset.getboolean('directions',
             'target_has_own_facet')
