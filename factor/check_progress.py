@@ -8,6 +8,7 @@ import numpy as np
 import pickle
 import logging
 import glob
+import ConfigParser
 import factor
 import factor.directions
 import factor.parset
