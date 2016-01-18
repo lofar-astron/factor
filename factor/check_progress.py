@@ -28,7 +28,7 @@ try:
 except:
     hasWCSaxes = False
 
-log = logging.getLogger('progress')
+log = logging.getLogger('factor:progress')
 logging.root.setLevel(logging.DEBUG)
 log.setLevel(logging.DEBUG)
 
