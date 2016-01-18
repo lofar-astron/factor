@@ -161,9 +161,8 @@ def find_selfcal_images(direction):
     working_dir = direction.working_dir
     selfcal_dir = os.path.join(working_dir, 'facetselfcal', direction.name)
 
-    if direction.use_wideband:
-        selfcal_images = glob.glob(selfcal_dir+'/*.casa_image?2.image.tt0')
-    else:
+    selfcal_images = glob.glob(selfcal_dir+'/*.casa_image?2.image.tt0')
+    if len(selfcal_images) == 0:
         selfcal_images = glob.glob(selfcal_dir+'/*.casa_image?2.image')
 
     return selfcal_images.sort()
