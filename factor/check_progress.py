@@ -129,7 +129,7 @@ def on_pick(event):
 
     # Open images (if any)
     if len(facet.selfcal_images) > 0:
-        im = pim.image(selfcal_images)
+        im = pim.image(facet.selfcal_images)
         im.view()
     plt.draw()
 
