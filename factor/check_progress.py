@@ -139,10 +139,14 @@ def plot_state(directions_list):
     ax.format_coord = formatCoord
 
     # Show legend
-    not_processed_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9', linewidth=2)
-    selfcal_ok_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='g', linewidth=2)
-    selfcal_not_ok_patch =plt.Rectangle((0, 0), 1, 1, edgecolor='r', linewidth=2)
-    image_ok_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='b', linewidth=2)
+    not_processed_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9',
+        facecolor='none', linewidth=2)
+    selfcal_ok_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='g',
+        facecolor='none', linewidth=2)
+    selfcal_not_ok_patch =plt.Rectangle((0, 0), 1, 1, edgecolor='r',
+        facecolor='none', linewidth=2)
+    image_ok_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='b',
+        facecolor='none', linewidth=2)
     ax.legend([not_processed_patch, selfcal_ok_patch, selfcal_not_ok_patch, image_ok_patch],
               ['Unprocessed', 'Facetselfcal complete', 'Facetsefcal failed', 'Facetimage complete'])
 
@@ -160,7 +164,7 @@ def plot_state(directions_list):
 
 def on_pick(event):
     facet = event.artist
-    if exent.button == 1:
+    if event.button == 1:
         # Print info on left click
         print('Current state of reduction for {}:'.format(facet.facet_name))
         print('    Completed operations: {}'.format(facet.completed_ops))
@@ -168,7 +172,7 @@ def on_pick(event):
             not op in facet.completed_ops]
         print('      Running operations: {}'.format(started_but_not_completed_ops))
 
-    if exent.button == 3:
+    if event.button == 3:
         # Open images (if any) on right click
         if os.path.exists('/tmp/tempimage'):
             shutil.rmtree('/tmp/tempimage')
