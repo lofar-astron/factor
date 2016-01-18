@@ -125,13 +125,13 @@ def on_pick(event):
     print('    Completed operations: {}'.format(facet.completed_ops))
     started_but_not_completed_ops = [op for op in facet.started_ops if
         not op in facet.completed_ops]
-    print('      Started operations: {}'.format(started_but_not_completed_ops))
+    print('      Running operations: {}'.format(started_but_not_completed_ops))
 
     # Open images (if any)
-    if facet.selfcal_images is not None:
+    if len(facet.selfcal_images) > 0:
         im = pim.image(selfcal_images)
         im.view()
-    pl.draw()
+    plt.draw()
 
 
 def get_completed_ops(direction):
@@ -160,15 +160,14 @@ def find_selfcal_images(direction):
     """
     Returns the filenames of selfcal images
     """
-    working_dir = direction.working_dir
-    selfcal_dir = os.path.join(working_dir, 'results', 'facetselfcal',
+    selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
-
     selfcal_images = glob.glob(selfcal_dir+'/*.casa_image?2.image.tt0')
     if len(selfcal_images) == 0:
         selfcal_images = glob.glob(selfcal_dir+'/*.casa_image?2.image')
+    selfcal_images.sort()
 
-    return selfcal_images.sort()
+    return selfcal_images
 
 
 def formatCoord(x, y):
