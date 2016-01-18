@@ -37,10 +37,11 @@ def run(parset_file):
     """
     Displays the current progress of a run
     """
-    directions_list = load_directions(parset_file)
+    global all_directions
+    all_directions = load_directions(parset_file)
 
     log.info('Plotting facets...')
-    plot_state(directions_list)
+    plot_state(all_directions)
 
 
 def load_directions(parset_file):
@@ -72,7 +73,7 @@ def plot_state(directions_list):
     """
     Plots the facets of a run
     """
-    global midRA, midDec, fig, directions_list
+    global midRA, midDec, fig
 
     # Set up coordinate system and figure
     points, midRA, midDec = factor.directions.getxy(directions_list)
@@ -200,13 +201,13 @@ def on_press(event):
     """
     Handle key presses
     """
-    global fig, directions_list
+    global fig, all_directions
 
     if event.key == 'u':
         log.info('Updating...')
         ax = plt.gca()
         for a in ax.artists:
-            for d in directions_list:
+            for d in all_directions:
                 if d.name == a.facet_name:
                     a.completed_ops = get_completed_ops(d)
                     a.started_ops = get_started_ops(d)
@@ -225,7 +226,6 @@ def on_press(event):
                     a.facet_image = find_facet_image(d)
 
         fig.canvas.draw()
-
 
 
 def get_completed_ops(direction):
