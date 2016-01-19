@@ -104,6 +104,7 @@ def plot_state(directions_list):
     else:
         ax = plt.gca()
     ax.set_title('Left-click on a facet to see its current state\n'
+                 'Middle-click on a facet to plot its selfcal solutions\n'
                  'Right-click on a facet to display its images\n'
                  'Press "u" to update colors')
 
@@ -221,9 +222,10 @@ def on_pick(event):
                 current_step, current_index+1, num_steps))
 
     if event.mouseevent.button == 2:
-        # Open parmdbplot of selfcal instrument table
+        # Open parmdbplot of selfcal instrument table (if any) on middle click
         selfcal_parmdb = find_selfcal_parmdb(direction)
         if selfcal_parmdb is not None:
+            log.info('Opening selfcal solutions for {}...'.format(facet.facet_name))
             os.system('parmdbplot.py {} &'.format(selfcal_parmdb))
 
     if event.mouseevent.button == 3:
@@ -349,6 +351,8 @@ def find_selfcal_parmdb(direction):
         selfcal_parmdb = glob.glob(selfcal_dir+'/*..merge_selfcal_parmdbs')
         if len(selfcal_parmdb) == 0:
             selfcal_parmdb = None
+        else:
+            selfcal_parmdb = selfcal_parmdb[0]
     else:
         selfcal_parmdb = None
 
