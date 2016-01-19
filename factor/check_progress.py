@@ -15,6 +15,7 @@ import factor.parset
 import pyrap.images as pim
 import ast
 from lofarpipe.support.data_map import DataMap
+from factor.lib.direction import Direction
 try:
     from matplotlib import pyplot as plt
     from matplotlib.patches import Polygon
@@ -49,7 +50,7 @@ def load_directions(parset_file):
     Return directions for a run
     """
     # Read parset
-    parset = parset_read(parset_file)
+    parset = factor.parset.parset_read(parset_file, use_log_file=False)
 
     # Load directions. First check for user-supplied directions file then for
     # Factor-generated file from a previous run
@@ -61,6 +62,24 @@ def load_directions(parset_file):
     elif os.path.exists(os.path.join(parset['dir_working'], 'factor_directions.txt')):
         directions = factor.directions.directions_read(os.path.join(parset['dir_working'],
             'factor_directions.txt'), parset['dir_working'])
+
+    # Add the target to the directions list if desired
+    target_ra = dir_parset['target_ra']
+    target_dec = dir_parset['target_dec']
+    target_radius_arcmin = dir_parset['target_radius_arcmin']
+    target_has_own_facet = dir_parset['target_has_own_facet']
+    if target_has_own_facet:
+        if target_ra is not None and target_dec is not None and target_radius_arcmin is not None:
+            # Make target object
+            target = Direction('target', target_ra, target_dec,
+                factor_working_dir=parset['dir_working'])
+
+            # Add target to directions list
+            directions.append(target)
+        else:
+            log.critical('target_has_own_facet = True, but target RA, Dec, or radius not found in parset')
+            sys.exit(1)
+
     for direction in directions:
         has_state = direction.load_state()
         if has_state:
@@ -86,7 +105,7 @@ def plot_state(directions_list):
         ax = plt.gca()
     ax.set_title('Left-click on a facet to see its current state\n'
                  'Right-click on a facet to display its images\n'
-                 'Press "u" to update')
+                 'Press "u" to update colors')
 
     # Plot facets
     markers = []
@@ -425,39 +444,3 @@ def resample(array, factor):
         array3[:, j] = np.mean(array2[:, j * factor:(j + 1) * factor], axis=1)
 
     return array3
-
-
-def parset_read(parset_file):
-    """
-    Read and return subset of parset parameters
-
-    Parameters
-    ----------
-    parset_file : str
-        Filename of Factor-formated parset file
-
-    Returns
-    -------
-    parset_dict : dict
-        Dict of parset parameters
-
-    """
-    if not os.path.isfile(parset_file):
-        log.error("Missing parset file (%s), I don't know what to do :'(" % (parset_file))
-        sys.exit(1)
-
-    log.info("Reading parset file: %s" % (parset_file))
-    parset = ConfigParser.RawConfigParser()
-    parset.read(parset_file)
-    parset_dict = parset._sections['global']
-
-    if not os.path.isdir(parset_dict['dir_working']):
-        log.error('Cannot find the working directory. Please check the parset')
-        sys.exit(1)
-
-    if 'directions' in parset._sections.keys():
-        parset_dict.update({'direction_specific': parset._sections['directions']})
-    else:
-        parset_dict.update({'direction_specific': {}})
-
-    return parset_dict

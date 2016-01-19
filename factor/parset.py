@@ -11,7 +11,7 @@ from factor._logging import set_log_file
 log = logging.getLogger('factor:parset')
 
 
-def parset_read(parset_file):
+def parset_read(parset_file, use_log_file=True):
     """
     Read a Factor-formatted parset file and return dict of parameters
 
@@ -19,6 +19,8 @@ def parset_read(parset_file):
     ----------
     parset_file : str
         Filename of Factor-formated parset file
+    use_log_file : bool, optional
+        Use a log file as well as outputing to the screen
 
     Returns
     -------
@@ -55,7 +57,8 @@ def parset_read(parset_file):
     except:
         log.critical("Cannot use the working dir %s" % (parset_dict['dir_working']))
         sys.exit(1)
-    set_log_file(parset_dict['dir_working']+'/factor.log')
+    if use_log_file:
+        set_log_file(parset_dict['dir_working']+'/factor.log')
     log.info("=========================================================\n")
     log.info("Working directory is {0}".format(parset_dict['dir_working']))
 
