@@ -1,5 +1,5 @@
 """
-Module that checks the progress of a run
+Module that checks and displays the progress of a run
 """
 import sys
 import os
@@ -14,6 +14,7 @@ import factor.directions
 import factor.parset
 import pyrap.images as pim
 import ast
+from astropy.coordinates import Angle
 from lofarpipe.support.data_map import DataMap
 from lofarpipe.support.parset import Parset
 from factor.lib.direction import Direction
@@ -41,10 +42,11 @@ def run(parset_file):
     global all_directions
 
     log.info('Plotting facets...')
-    log.info('Left-click on a facet to see its current state.\n'
-             'Middle-click on a facet to display its image.\n'
-             'Right-click on a facet to display its selfcal solutions and images.\n'
-             'Press "u" to update display.')
+    log.info('Left-click on a facet to see its current state')
+    log.info('Middle-click on a facet to display its image')
+    log.info('Right-click on a facet to display its selfcal solutions and images')
+    log.info('Press "u" to update display')
+    log.info('(In all cases, pan/zoom mode must be off)')
 
     logging.root.setLevel(logging.ERROR)
     log.setLevel(logging.ERROR)
@@ -483,8 +485,11 @@ def get_current_op_step_names(direction):
 def formatCoord(x, y):
     """Custom coordinate format"""
     global midRA, midDec
+
     RA, Dec = factor.directions.xy2radec([x], [y], midRA, midDec)
-    return 'RA = {0:.2f} Dec = {1:.2f}'.format(RA[0], Dec[0])
+    RA_str = Angle(RA[0], unit='deg').to_string('hour')
+    Dec_str = Angle(Dec[0], unit='deg').to_string('deg')
+    return 'RA = {0:.2f} Dec = {1:.2f}'.format(RA_str, Dec_str)
 
 
 def read_vertices(filename):

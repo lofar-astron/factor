@@ -475,14 +475,10 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
             p2buf = p2.buffer(faceting_radius_pix)
             if p1.intersects(p2buf):
                 p1 = p1.intersection(p2buf)
-#             try:
                 xyverts = [np.array([xp, yp]) for xp, yp in
                     zip(p1.exterior.coords.xy[0].tolist(),
                     p1.exterior.coords.xy[1].tolist())]
                 thiessen_polys[i] = xyverts
-#             except AttributeError:
-                # Facet is interior to the circle defined by faceting_radius_deg
-#                 pass
 
     # Check for sources near / on facet edges and adjust regions accordingly
     if check_edges:
