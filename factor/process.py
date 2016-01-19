@@ -543,6 +543,11 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
             log.info('Exiting...')
             sys.exit()
 
+    # Load previously completed operations (if any) and save the state
+    for direction in directions:
+        direction.load_state()
+        direction.save_state()
+
     # Select subset of directions to process
     if dir_parset['ndir_total'] is not None:
         if dir_parset['ndir_total'] < len(directions):
@@ -563,10 +568,6 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
         # Set field center
         direction.field_ra = field.ra
         direction.field_dec = field.dec
-
-        # Load previously completed operations (if any) and update the state
-        direction.load_state()
-        direction.save_state()
 
         # Reset state if specified
         if direction.name in reset_directions:
