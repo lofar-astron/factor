@@ -85,7 +85,8 @@ def plot_state(directions_list):
     else:
         ax = plt.gca()
     ax.set_title('Left-click on a facet to see its current state\n'
-                 'Right-click on a facet to display its images')
+                 'Right-click on a facet to display its images\n'
+                 'Press "u" to update')
 
     # Plot facets
     markers = []
@@ -96,7 +97,7 @@ def plot_state(directions_list):
         xverts, yverts = factor.directions.radec2xy(RAverts, Decverts,
             refRA=midRA, refDec=midDec)
         xyverts = [np.array([xp, yp]) for xp, yp in zip(xverts, yverts)]
-        mpl_poly = Polygon(np.array(xyverts), edgecolor='#a9a9a9', facecolor='none',
+        mpl_poly = Polygon(np.array(xyverts), edgecolor='#a9a9a9', facecolor='#C0C0C0',
             clip_box=ax.bbox, picker=3.0, linewidth=2)
         mpl_poly.facet_name = direction.name
         mpl_poly.completed_ops = get_completed_ops(direction)
@@ -104,14 +105,19 @@ def plot_state(directions_list):
         if 'facetselfcal' in mpl_poly.completed_ops:
             if verify_subtract(direction):
                 mpl_poly.set_edgecolor('g')
+                mpl_poly.set_facecolor('#A9F5A9')
             else:
                 mpl_poly.set_edgecolor('r')
+                mpl_poly.set_facecolor('#F5A9A9')
         elif 'facetselfcal' in mpl_poly.started_ops:
             mpl_poly.set_edgecolor('y')
+            mpl_poly.set_facecolor('#F2F5A9')
         elif 'facetimage' in mpl_poly.completed_ops:
             mpl_poly.set_edgecolor('g')
+            mpl_poly.set_facecolor('#A9F5A9')
         elif 'facetimage' in mpl_poly.started_ops:
             mpl_poly.set_edgecolor('y')
+            mpl_poly.set_facecolor('#F2F5A9')
         mpl_poly.selfcal_images = find_selfcal_images(direction)
         mpl_poly.facet_image = find_facet_image(direction)
         ax.add_patch(mpl_poly)
@@ -216,17 +222,21 @@ def on_press(event):
                         if 'facetselfcal' in a.completed_ops:
                             if verify_subtract(d):
                                 a.set_edgecolor('g')
+                                a.set_facecolor('#A9F5A9')
                             else:
                                 a.set_edgecolor('r')
+                                a.set_facecolor('#F5A9A9')
                         elif 'facetselfcal' in a.started_ops:
                             a.set_edgecolor('y')
+                            a.set_facecolor('#F2F5A9')
                         elif 'facetimage' in a.completed_ops:
                             a.set_edgecolor('g')
+                            a.set_facecolor('#A9F5A9')
                         elif 'facetimage' in a.started_ops:
                             a.set_edgecolor('y')
+                            a.set_facecolor('#F2F5A9')
                         a.selfcal_images = find_selfcal_images(d)
                         a.facet_image = find_facet_image(d)
-
         fig.canvas.draw()
         log.info('...done')
 
