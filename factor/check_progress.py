@@ -228,13 +228,13 @@ def on_pick(event):
             log.info('            Current step: {0} (step #{1} of {2})'.format(
                 current_step, current_index+1, num_steps))
         info = 'Current state of {}:\n'.format(facet.facet_name)
-        info += '  Completed ops: {}\n'.format(get_completed_ops(direction)
+        info += '  Completed ops: {}\n'.format(get_completed_ops(direction))
         info += '     Current op: {}\n'.format(current_op)
         if current_op is not None:
             current_step, current_index, num_steps, start_time = get_current_step(direction)
-            info += '     Started at: {}\n'.format(start_time))
+            info += '     Started at: {}\n'.format(start_time)
             info += '   Current step: {0} (step {1} of {2})\n'.format(
-                current_step, current_index+1, num_steps))
+                current_step, current_index+1, num_steps)
         c = at.get_child()
         c.set_text(info)
         fig.canvas.draw()
