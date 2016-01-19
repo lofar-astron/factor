@@ -15,6 +15,7 @@ import factor.parset
 import pyrap.images as pim
 import ast
 from lofarpipe.support.data_map import DataMap
+from lofarpipe.support.parset import Parset
 from factor.lib.direction import Direction
 try:
     from matplotlib import pyplot as plt
@@ -405,6 +406,8 @@ def get_current_step(direction):
 
     current_index = len(d[1])
     current_steps = get_current_op_step_names(direction)
+    if current_index >= len(current_steps):
+        current_index = len(current_steps) - 1
     start_time = d[0]['start_time']
 
     return (current_steps[current_index], current_index, len(current_steps), start_time)
@@ -417,11 +420,12 @@ def get_current_op_step_names(direction):
     current_op = get_current_op(direction)
     parset_file = os.path.join(direction.working_dir, 'results', current_op,
         direction.name, 'pipeline.parset')
-    f = open(parset_file, 'r')
-    step_line = f.next()
-    steps = step_line.split('=')[1].split(',')
+    parset = Parset()
+    parset.adoptFile(parset_file)
+    pipeline_args = parset.makeSubset(parset.fullModuleName('pipeline') + '.')
+    step_name_list = pipeline_args.getStringVector('steps')
 
-    return [s.strip('[]\n ') for s in steps]
+    return step_name_listq
 
 
 def formatCoord(x, y):
