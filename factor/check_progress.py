@@ -404,7 +404,8 @@ def get_current_step(direction):
     d = pickle.load(f)
     f.close()
 
-    current_index = len(d[1])
+    mapfiles = set([s[1]['mapfile'] for s in d[1]])
+    current_index = len(mapfiles)
     current_steps = get_current_op_step_names(direction)
     if current_index >= len(current_steps):
         current_index = len(current_steps) - 1
