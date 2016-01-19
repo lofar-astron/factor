@@ -118,8 +118,6 @@ def plot_state(directions_list):
         elif 'facetimage' in mpl_poly.started_ops:
             mpl_poly.set_edgecolor('y')
             mpl_poly.set_facecolor('#F2F5A9')
-        mpl_poly.selfcal_images = find_selfcal_images(direction)
-        mpl_poly.facet_image = find_facet_image(direction)
         ax.add_patch(mpl_poly)
 
         # Add facet names
@@ -177,28 +175,47 @@ def on_pick(event):
     """
     Handle picks with the mouse
     """
+    global all_directions
+
     facet = event.artist
+    direction = None
+    if hasattr(facet, 'facet_name'):
+        for d in all_directions:
+            if d.name == facet.facet_name:
+                direction = d
+                break
+        if direction is None:
+            return
+    else:
+        return
+
     if event.mouseevent.button == 1:
         # Print info on left click
         log.info('Current state of reduction for {}:'.format(facet.facet_name))
-        log.info('    Completed operations: {}'.format(facet.completed_ops))
+        log.info('    Completed operations: {}'.format(get_completed_ops(direction)))
         started_but_not_completed_ops = [op for op in facet.started_ops if
             not op in facet.completed_ops]
-        log.info('      Running operations: {}'.format(started_but_not_completed_ops))
+        log.info('       Current operation: {}'.format(get_current_op(direction)))
+        current_step, current_index, num_steps, start_time = get_current_step(direction)
+        log.info('              Started at: {0}'.format(start_time))
+        log.info('            Current step: {0} (step #{1} of {2})'.format(
+            current_step, current_index+1, num_steps))
 
     if event.mouseevent.button == 3:
         # Open images (if any) on right click
         if os.path.exists('/tmp/tempimage'):
             shutil.rmtree('/tmp/tempimage')
+        selfcal_images = find_selfcal_images(direction)
         if len(facet.selfcal_images) > 0:
             log.info('Opening selfcal images for {}...'.format(facet.facet_name))
-            im = pim.image(facet.selfcal_images)
+            im = pim.image(selfcal_images)
             im.view()
         else:
             log.info('No selfcal images exist for {}'.format(facet.facet_name))
-        if len(facet.facet_image) > 0:
+        facet_image = find_facet_image(direction)
+        if len(facet_image) > 0:
             log.info('Opening facet image for {}...'.format(facet.facet_name))
-            im2 = pim.image(facet.facet_image[0])
+            im2 = pim.image(facet_image[0])
             im2.view()
         else:
             log.info('No full image of facet exists for {}'.format(facet.facet_name))
@@ -264,6 +281,17 @@ def get_started_ops(direction):
         return []
 
 
+def get_current_op(direction):
+    """
+    Returns name of current op (assumes there is just one)
+    """
+    started_ops = get_started_ops(direction)
+    completed_ops = get_completed_ops(direction)
+    started_but_not_completed_ops = [op for op in started_ops if not op in ompleted_ops]
+
+    return started_but_not_completed_ops[0]
+
+
 def find_selfcal_images(direction):
     """
     Returns the filenames of selfcal images
@@ -304,6 +332,38 @@ def find_facet_image(direction):
                     facet_image = glob.glob(d+'/*.casa_image_full2.image')
 
     return facet_image
+
+
+def get_current_step(direction):
+    """
+    Returns name and index of current step, total number of steps, and start time
+    of current operation
+    """
+    current_op = get_current_op(direction)
+    statefile = os.path.join(direction.working_dir, 'results', current_op,
+        direction.name, 'statefile')
+    f = open(statefile, 'r')
+    d = pickle.load(f)
+    f.close()
+
+    current_index = len(d[1])
+    current_steps = get_current_op_step_names(direction)
+
+    return (current_steps[current_index], current_index, len(current_steps), start_time)
+
+
+def get_current_op_step_names(direction):
+    """
+    Returns lits of step names for current operation
+    """
+    current_op = get_current_op(direction)
+    parset_file = os.path.join(direction.working_dir, 'results', current_op,
+        direction.name, 'pipeline.parset')
+    f = open(parset_file, 'r')
+    step_line = f.next()
+    steps = step_line.split('=')[1].split(',')
+
+    return [s.strip('[]\n ') for s in steps]
 
 
 def formatCoord(x, y):
