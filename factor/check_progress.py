@@ -425,7 +425,19 @@ def get_current_op_step_names(direction):
     pipeline_args = parset.makeSubset(parset.fullModuleName('pipeline') + '.')
     step_name_list = pipeline_args.getStringVector('steps')
 
-    return step_name_list
+    # Filter out plugin steps
+    filter_step_name_list = []
+    for stepname in step_name_list:
+        fullparset = parset.makeSubset(parset.fullModuleName(str(stepname)) + '.')
+        subparset = fullparset.makeSubset(fullparset.fullModuleName('control') + '.')
+        try:
+            kind_of_step = step.getString('kind')
+        except:
+            kind_of_step = 'recipe'
+        if kind_of_step != 'plugin':
+            filter_step_name_list.append(stepname)
+
+    return filter_step_name_list
 
 
 def formatCoord(x, y):
