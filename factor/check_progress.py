@@ -45,8 +45,8 @@ def run(parset_file):
     log.info('Left-click on a facet to see its current state')
     log.info('Middle-click on a facet to display its image')
     log.info('Right-click on a facet to display its selfcal solutions and images')
-    log.info('Press "u" to update display')
     log.info('(In all cases, pan/zoom mode must be off)')
+    log.info('Press "u" to update display')
 
     logging.root.setLevel(logging.ERROR)
     log.setLevel(logging.ERROR)
@@ -489,7 +489,7 @@ def formatCoord(x, y):
     RA, Dec = factor.directions.xy2radec([x], [y], midRA, midDec)
     RA_str = Angle(RA[0], unit='deg').to_string('hour')
     Dec_str = Angle(Dec[0], unit='deg').to_string('deg')
-    return 'RA = {0:.2f} Dec = {1:.2f}'.format(RA_str, Dec_str)
+    return 'RA = {0} Dec = {1}'.format(RA_str, Dec_str)
 
 
 def read_vertices(filename):
