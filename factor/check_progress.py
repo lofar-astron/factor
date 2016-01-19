@@ -21,6 +21,7 @@ try:
     from matplotlib import pyplot as plt
     from matplotlib.patches import Polygon
     from matplotlib.ticker import FuncFormatter
+    from mpl_toolkits.axes_grid.anchored_artists import AnchoredText
 except Exception as e:
     raise ImportError('PyPlot could not be imported. Plotting is not '
         'available: {0}'.format(e.message))
@@ -93,7 +94,7 @@ def plot_state(directions_list):
     """
     Plots the facets of a run
     """
-    global midRA, midDec, fig
+    global midRA, midDec, fig, at
 
     # Set up coordinate system and figure
     points, midRA, midDec = factor.directions.getxy(directions_list)
@@ -107,7 +108,7 @@ def plot_state(directions_list):
     ax.set_title('Left-click on a facet to see its current state\n'
                  'Middle-click on a facet to display its image\n'
                  'Right-click on a facet to display its selfcal solutions and images\n'
-                 'Press "u" to update colors')
+                 'Press "u" to update display')
 
     # Plot facets
     markers = []
@@ -148,6 +149,11 @@ def plot_state(directions_list):
             clip_box=ax.bbox, ha='center', va='bottom')
         markers.append(marker)
 
+    # Add info box
+    at = AnchoredText("", prop=dict(size=15), frameon=True, loc=2)
+    at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
+    ax.add_artist(at)
+
     ax.relim()
     ax.autoscale()
     ax.set_aspect('equal')
@@ -177,7 +183,7 @@ def plot_state(directions_list):
     selfcal_not_ok_patch =plt.Rectangle((0, 0), 1, 1, edgecolor='r',
         facecolor='#F5A9A9', linewidth=2)
     ax.legend([not_processed_patch, processing_patch, selfcal_ok_patch, selfcal_not_ok_patch],
-              ['Unprocessed', 'Processing', 'Complete', 'Failed'])
+              ['Unprocessed', 'Processing', 'Completed', 'Failed'])
 
     # Add check for mouse clicks and key presses
     fig.canvas.mpl_connect('pick_event', on_pick)
@@ -196,7 +202,7 @@ def on_pick(event):
     """
     Handle picks with the mouse
     """
-    global all_directions
+    global all_directions, at, fig
 
     facet = event.artist
     direction = None
@@ -211,7 +217,7 @@ def on_pick(event):
         return
 
     if event.mouseevent.button == 1: # left click
-        # Print info on
+        # Print info
         log.info('Current state of reduction for {}:'.format(facet.facet_name))
         log.info('    Completed operations: {}'.format(get_completed_ops(direction)))
         current_op = get_current_op(direction)
@@ -221,6 +227,17 @@ def on_pick(event):
             log.info('              Started at: {}'.format(start_time))
             log.info('            Current step: {0} (step #{1} of {2})'.format(
                 current_step, current_index+1, num_steps))
+        info = 'Current state of {}:\n'.format(facet.facet_name)
+        info += '  Completed ops: {}\n'.format(get_completed_ops(direction)
+        info += '     Current op: {}\n'.format(current_op)
+        if current_op is not None:
+            current_step, current_index, num_steps, start_time = get_current_step(direction)
+            info += '     Started at: {}\n'.format(start_time))
+            info += '   Current step: {0} (step {1} of {2})\n'.format(
+                current_step, current_index+1, num_steps))
+        c = at.get_child()
+        c.set_text(info)
+        fig.canvas.draw()
 
     if event.mouseevent.button == 2: # middle click
         # Open full facet image (if any)
