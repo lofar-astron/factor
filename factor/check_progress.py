@@ -32,8 +32,6 @@ except:
     hasWCSaxes = False
 
 log = logging.getLogger('factor:progress')
-logging.root.setLevel(logging.ERROR)
-log.setLevel(logging.ERROR)
 
 
 def run(parset_file):
@@ -41,13 +39,16 @@ def run(parset_file):
     Displays the current progress of a run
     """
     global all_directions
-    all_directions = load_directions(parset_file)
 
     log.info('Plotting facets...')
     log.info('Left-click on a facet to see its current state.\n'
              'Middle-click on a facet to display its image.\n'
              'Right-click on a facet to display its selfcal solutions and images.\n'
              'Press "u" to update display.')
+
+    logging.root.setLevel(logging.ERROR)
+    log.setLevel(logging.ERROR)
+    all_directions = load_directions(parset_file)
     plot_state(all_directions)
 
 
@@ -222,7 +223,11 @@ def on_pick(event):
         # Print info
         current_op = get_current_op(direction)
         info = 'Selected facet: {}\n'.format(facet.facet_name)
-        info += 'Completed ops: {}\n'.format(get_completed_ops(direction))
+        completed_ops = get_completed_ops(direction)
+        if len(completed_ops) == 0:
+            info += 'Completed ops: None\n'
+        else
+            info += 'Completed ops: {}\n'.format(', '.join(completed_ops))
         info += 'Current op: {}'.format(current_op)
         if current_op is not None:
             current_step, current_index, num_steps, start_time = get_current_step(direction)
