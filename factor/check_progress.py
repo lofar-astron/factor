@@ -436,7 +436,11 @@ def get_current_op_step_names(direction):
         except:
             kind_of_step = 'recipe'
         if kind_of_step != 'plugin':
-            filter_step_name_list.append(stepname)
+            if kind_of_step == 'loop':
+                loopsteps = subparset.getStringVector('loopsteps')
+                filter_step_name_list.append(loopsteps)
+            else:
+                filter_step_name_list.append(stepname)
 
     return filter_step_name_list
 
