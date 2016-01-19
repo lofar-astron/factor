@@ -122,10 +122,11 @@ def plot_state(directions_list):
         mpl_poly.facet_image = find_facet_image(direction)
         ax.add_patch(mpl_poly)
 
-        # Show facet names
+        # Add facet names
         xmid = (np.max(xverts) - np.min(xverts)) / 2.0 + np.min(xverts)
         ymid = (np.max(yverts) - np.min(yverts)) / 2.0 + np.min(yverts)
-        marker = ax.text(xmid, ymid, direction.name, color='k', clip_on=True)
+        marker = ax.text(xmid, ymid, direction.name, color='k', clip_on=True,
+            ha='center', va='center')
         markers.append(marker)
 
     ax.relim()
