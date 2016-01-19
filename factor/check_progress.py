@@ -71,6 +71,10 @@ def load_directions(parset_file):
     elif os.path.exists(os.path.join(parset['dir_working'], 'factor_directions.txt')):
         directions = factor.directions.directions_read(os.path.join(parset['dir_working'],
             'factor_directions.txt'), parset['dir_working'])
+    else:
+        log.error('No directions found. Please run this tool after '
+            'the directions have been defined')
+        sys.exit(1)
 
     # Add the target to the directions list if desired
     target_ra = dir_parset['target_ra']
