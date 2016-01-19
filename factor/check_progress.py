@@ -104,7 +104,8 @@ def plot_state(directions_list):
     else:
         ax = plt.gca()
     ax.set_title('Left-click on a facet to see its current state\n'
-                 'Right-click on a facet to display its images and selfcal solutions\n'
+                 'Middle-click on a facet to display its image\n'
+                 'Right-click on a facet to display its selfcal solutions and images\n'
                  'Press "u" to update colors')
 
     # Plot facets
@@ -220,17 +221,22 @@ def on_pick(event):
             log.info('            Current step: {0} (step #{1} of {2})'.format(
                 current_step, current_index+1, num_steps))
 
-    if event.mouseevent.button == 3: # right click
-        # Open images (if any)
+    if event.mouseevent.button == 2: # middle click
+        # Open full facet image (if any)
         if os.path.exists('/tmp/tempimage'):
             shutil.rmtree('/tmp/tempimage')
-        selfcal_images = find_selfcal_images(direction)
-        if len(selfcal_images) > 0:
-            log.info('Opening selfcal images for {}...'.format(facet.facet_name))
-            im = pim.image(selfcal_images)
-            im.view()
+        facet_image = find_facet_image(direction)
+        if len(facet_image) > 0:
+            log.info('Opening facet image for {}...'.format(facet.facet_name))
+            im2 = pim.image(facet_image[0])
+            im2.view()
         else:
-            log.info('No selfcal images exist for {}'.format(facet.facet_name))
+            log.info('No full image of facet exists for {}'.format(facet.facet_name))
+
+    if event.mouseevent.button == 3: # right click
+        # Open selfcal images (if any)
+        if os.path.exists('/tmp/tempimage'):
+            shutil.rmtree('/tmp/tempimage')
         facet_image = find_facet_image(direction)
         if len(facet_image) > 0:
             log.info('Opening facet image for {}...'.format(facet.facet_name))
@@ -242,8 +248,10 @@ def on_pick(event):
         # Open parmdbplot of selfcal instrument table (if any)
         selfcal_parmdb = find_selfcal_parmdb(direction)
         if selfcal_parmdb is not None:
-            log.info('Opening selfcal solutions for {}...'.format(facet.facet_name))
+            log.info('Opening final selfcal solutions for {}...'.format(facet.facet_name))
             os.system('parmdbplot.py {} &'.format(selfcal_parmdb))
+        else:
+            log.info('Final selfcal solutions do not exist for {}'.format(facet.facet_name))
 
 
 def on_press(event):
@@ -346,7 +354,7 @@ def find_selfcal_parmdb(direction):
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
     if os.path.exists(selfcal_dir):
-        selfcal_parmdb = glob.glob(selfcal_dir+'/*..merge_selfcal_parmdbs')
+        selfcal_parmdb = glob.glob(selfcal_dir+'/*.merge_selfcal_parmdbs')
         if len(selfcal_parmdb) == 0:
             selfcal_parmdb = None
         else:
