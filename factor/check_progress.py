@@ -32,8 +32,8 @@ except:
     hasWCSaxes = False
 
 log = logging.getLogger('factor:progress')
-logging.root.setLevel(logging.INFO)
-log.setLevel(logging.INFO)
+logging.root.setLevel(logging.ERROR)
+log.setLevel(logging.ERROR)
 
 
 def run(parset_file):
@@ -105,10 +105,8 @@ def plot_state(directions_list):
         fig.add_axes(ax)
     else:
         ax = plt.gca()
-    ax.set_title('Left-click on a facet to see its current state\n'
-                 'Middle-click on a facet to display its image\n'
-                 'Right-click on a facet to display its selfcal solutions and images\n'
-                 'Press "u" to update display')
+
+    ax.set_title('Overview of FACTOR run in\n{}'.format(directions_list[0].working_dir))
 
     # Plot facets
     markers = []
@@ -148,6 +146,15 @@ def plot_state(directions_list):
         marker = ax.text(xmid, ymid, direction.name, color='k', clip_on=True,
             clip_box=ax.bbox, ha='center', va='bottom')
         markers.append(marker)
+
+    # Add help box
+    help_text = ('Left-click on a facet to see its current state. '
+                 'Middle-click on a facet to display its image.\n'
+                 'Right-click on a facet to display its selfcal solutions and images. '
+                 'Press "u" to update display.')
+    at_help = AnchoredText(help_text, prop=dict(size=12), frameon=True, loc=8)
+    at_help.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
+    ax.add_artist(at_help)
 
     # Add info box
     at = AnchoredText("Selected facet: None", prop=dict(size=12), frameon=True, loc=2)
