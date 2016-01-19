@@ -220,6 +220,12 @@ def on_pick(event):
             log.info('            Current step: {0} (step #{1} of {2})'.format(
                 current_step, current_index+1, num_steps))
 
+    if event.mouseevent.button == 2:
+        # Open parmdbplot of selfcal instrument table
+        selfcal_parmdb = find_selfcal_parmdb(direction)
+        if selfcal_parmdb is not None:
+            os.system('parmdbplot.py {} &'.format(selfcal_parmdb))
+
     if event.mouseevent.button == 3:
         # Open images (if any) on right click
         if os.path.exists('/tmp/tempimage'):
@@ -331,6 +337,22 @@ def find_selfcal_images(direction):
         selfcal_images = []
 
     return selfcal_images
+
+
+def find_selfcal_parmdb(direction):
+    """
+    Returns the filename of selfcal parmdb
+    """
+    selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
+        direction.name)
+    if os.path.exists(selfcal_dir):
+        selfcal_parmdb = glob.glob(selfcal_dir+'/*..merge_selfcal_parmdbs')
+        if len(selfcal_parmdb) == 0:
+            selfcal_parmdb = None
+    else:
+        selfcal_parmdb = None
+
+    return selfcal_parmdb
 
 
 def find_facet_image(direction):
