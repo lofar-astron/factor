@@ -150,7 +150,7 @@ def plot_state(directions_list):
         markers.append(marker)
 
     # Add info box
-    at = AnchoredText("Selected facet: None", prop=dict(size=8), frameon=True, loc=2)
+    at = AnchoredText("Selected facet: None", prop=dict(size=10), frameon=True, loc=2)
     at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
     ax.add_artist(at)
 
@@ -218,15 +218,15 @@ def on_pick(event):
 
     if event.mouseevent.button == 1: # left click
         # Print info
-        log.info('Current state of reduction for {}:'.format(facet.facet_name))
-        log.info('    Completed operations: {}'.format(get_completed_ops(direction)))
-        current_op = get_current_op(direction)
-        log.info('       Current operation: {}'.format(current_op))
-        if current_op is not None:
-            current_step, current_index, num_steps, start_time = get_current_step(direction)
-            log.info('              Started at: {}'.format(start_time))
-            log.info('            Current step: {0} (step #{1} of {2})'.format(
-                current_step, current_index+1, num_steps))
+#         log.info('Current state of reduction for {}:'.format(facet.facet_name))
+#         log.info('    Completed operations: {}'.format(get_completed_ops(direction)))
+#         current_op = get_current_op(direction)
+#         log.info('       Current operation: {}'.format(current_op))
+#         if current_op is not None:
+#             current_step, current_index, num_steps, start_time = get_current_step(direction)
+#             log.info('              Started at: {}'.format(start_time))
+#             log.info('            Current step: {0} (step #{1} of {2})'.format(
+#                 current_step, current_index+1, num_steps))
         info = 'Selected facet: {}\n'.format(facet.facet_name)
         info += 'Completed ops: {}\n'.format(get_completed_ops(direction))
         info += 'Current op: {}\n'.format(current_op)
