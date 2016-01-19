@@ -439,7 +439,15 @@ def get_current_op_step_names(direction):
         if kind_of_step != 'plugin':
             if kind_of_step == 'loop':
                 loopsteps = subparset.getStringVector('loopsteps')
-                filter_step_name_list.extend(loopsteps)
+                for loopstep in loopsteps:
+                    fullparset_loop = parset.makeSubset(parset.fullModuleName(str(loopstep)) + '.')
+                    subparset_loop = fullparset_loop.makeSubset(fullparset_loop.fullModuleName('control') + '.')
+                    try:
+                        kind_of_loop_step = subparset_loop.getString('kind')
+                    except:
+                        kind_of_loop_step = 'recipe'
+                    if kind_of_loop_step != 'plugin':
+                        filter_step_name_list.append(loopstep)
             else:
                 filter_step_name_list.append(stepname)
 
