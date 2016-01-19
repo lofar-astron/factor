@@ -206,7 +206,7 @@ def on_pick(event):
         if os.path.exists('/tmp/tempimage'):
             shutil.rmtree('/tmp/tempimage')
         selfcal_images = find_selfcal_images(direction)
-        if len(facet.selfcal_images) > 0:
+        if len(selfcal_images) > 0:
             log.info('Opening selfcal images for {}...'.format(facet.facet_name))
             im = pim.image(selfcal_images)
             im.view()
