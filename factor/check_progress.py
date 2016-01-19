@@ -425,7 +425,7 @@ def get_current_op_step_names(direction):
     pipeline_args = parset.makeSubset(parset.fullModuleName('pipeline') + '.')
     step_name_list = pipeline_args.getStringVector('steps')
 
-    return step_name_listq
+    return step_name_list
 
 
 def formatCoord(x, y):
