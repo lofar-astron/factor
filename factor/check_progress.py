@@ -44,6 +44,10 @@ def run(parset_file):
     all_directions = load_directions(parset_file)
 
     log.info('Plotting facets...')
+    log.info('Left-click on a facet to see its current state.\n'
+             'Middle-click on a facet to display its image.\n'
+             'Right-click on a facet to display its selfcal solutions and images.\n'
+             'Press "u" to update display.')
     plot_state(all_directions)
 
 
@@ -147,17 +151,8 @@ def plot_state(directions_list):
             clip_box=ax.bbox, ha='center', va='bottom')
         markers.append(marker)
 
-    # Add help box
-    help_text = ('Left-click on a facet to see its current state. '
-                 'Middle-click on a facet to display its image.\n'
-                 'Right-click on a facet to display its selfcal solutions and images. '
-                 'Press "u" to update display.')
-    at_help = AnchoredText(help_text, prop=dict(size=12), frameon=True, loc=8)
-    at_help.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
-    ax.add_artist(at_help)
-
     # Add info box
-    at = AnchoredText("Selected facet: None", prop=dict(size=12), frameon=True, loc=2)
+    at = AnchoredText("Selected facet: None", prop=dict(size=12), frameon=True, loc=3)
     at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
     ax.add_artist(at)
 
