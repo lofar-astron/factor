@@ -221,11 +221,11 @@ def on_pick(event):
         current_op = get_current_op(direction)
         info = 'Selected facet: {}\n'.format(facet.facet_name)
         info += 'Completed ops: {}\n'.format(get_completed_ops(direction))
-        info += 'Current op: {}\n'.format(current_op)
+        info += 'Current op: {}'.format(current_op)
         if current_op is not None:
             current_step, current_index, num_steps, start_time = get_current_step(direction)
-            info += '- Started at: {}\n'.format(start_time)
-            info += '- Current step: {0} (step {1} of {2})\n'.format(
+            info += '\n- Started at: {}\n'.format(start_time)
+            info += '- Current step: {0} (step {1} of {2})'.format(
                 current_step, current_index+1, num_steps)
         c = at.get_child()
         c.set_text(info)
@@ -237,7 +237,7 @@ def on_pick(event):
             shutil.rmtree('/tmp/tempimage')
         facet_image = find_facet_image(direction)
         if len(facet_image) > 0:
-            info = 'Opening facet image for {}...\n'.format(facet.facet_name)
+            info = 'Opening facet image for {}...'.format(facet.facet_name)
             im2 = pim.image(facet_image[0])
             im2.view()
         else:
@@ -261,10 +261,10 @@ def on_pick(event):
         # Open parmdbplot of selfcal instrument table (if any)
         selfcal_parmdb = find_selfcal_parmdb(direction)
         if selfcal_parmdb is not None:
-            info += 'Opening final selfcal solutions for {}...'.format(facet.facet_name)
+            info += '\nOpening final selfcal solutions for {}...'.format(facet.facet_name)
             os.system('parmdbplot.py {} &'.format(selfcal_parmdb))
         else:
-            info += 'Final selfcal solutions do not exist for {}'.format(facet.facet_name)
+            info += '\nFinal selfcal solutions do not exist for {}'.format(facet.facet_name)
         c = at.get_child()
         c.set_text(info)
         fig.canvas.draw()
@@ -307,7 +307,7 @@ def on_press(event):
                         a.selfcal_images = find_selfcal_images(d)
                         a.facet_image = find_facet_image(d)
         fig.canvas.draw()
-        info += '...done'
+        info += '\n...done'
         c = at.get_child()
         c.set_text(info)
         fig.canvas.draw()
