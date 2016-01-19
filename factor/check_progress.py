@@ -226,7 +226,7 @@ def on_pick(event):
         completed_ops = get_completed_ops(direction)
         if len(completed_ops) == 0:
             info += 'Completed ops: None\n'
-        else
+        else:
             info += 'Completed ops: {}\n'.format(', '.join(completed_ops))
         info += 'Current op: {}'.format(current_op)
         if current_op is not None:
