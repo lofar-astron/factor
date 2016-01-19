@@ -231,19 +231,19 @@ def on_pick(event):
             im2 = pim.image(facet_image[0])
             im2.view()
         else:
-            log.info('No full image of facet exists for {}'.format(facet.facet_name))
+            log.info('No image of facet exists for {}'.format(facet.facet_name))
 
     if event.mouseevent.button == 3: # right click
         # Open selfcal images (if any)
         if os.path.exists('/tmp/tempimage'):
             shutil.rmtree('/tmp/tempimage')
-        facet_image = find_facet_image(direction)
-        if len(facet_image) > 0:
-            log.info('Opening facet image for {}...'.format(facet.facet_name))
-            im2 = pim.image(facet_image[0])
-            im2.view()
+        selfcal_images = find_selfcal_images(direction)
+        if len(selfcal_images) > 0:
+            log.info('Opening selfcal images for {}...'.format(facet.facet_name))
+            im = pim.image(selfcal_images)
+            im.view()
         else:
-            log.info('No full image of facet exists for {}'.format(facet.facet_name))
+            log.info('No selfcal images exist for {}'.format(facet.facet_name))
 
         # Open parmdbplot of selfcal instrument table (if any)
         selfcal_parmdb = find_selfcal_parmdb(direction)
