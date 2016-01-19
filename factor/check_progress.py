@@ -197,7 +197,7 @@ def on_pick(event):
         log.info('       Current operation: {}'.format(current_op))
         if current_op is not None:
             current_step, current_index, num_steps, start_time = get_current_step(direction)
-            log.info('              Started at: {0}'.format(start_time))
+            log.info('              Started at: {}'.format(start_time))
             log.info('            Current step: {0} (step #{1} of {2})'.format(
                 current_step, current_index+1, num_steps))
 
@@ -354,6 +354,7 @@ def get_current_step(direction):
 
     current_index = len(d[1])
     current_steps = get_current_op_step_names(direction)
+    start_time = d[0]['start_time']
 
     return (current_steps[current_index], current_index, len(current_steps), start_time)
 
