@@ -194,7 +194,7 @@ def on_pick(event):
         log.info('Current state of reduction for {}:'.format(facet.facet_name))
         log.info('    Completed operations: {}'.format(get_completed_ops(direction)))
         current_op = get_current_op(direction)
-        log.info('       Current operation: {}'.format())
+        log.info('       Current operation: {}'.format(current_op))
         if current_op is not None:
             current_step, current_index, num_steps, start_time = get_current_step(direction)
             log.info('              Started at: {0}'.format(start_time))
