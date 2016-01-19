@@ -439,7 +439,7 @@ def get_current_op_step_names(direction):
         if kind_of_step != 'plugin':
             if kind_of_step == 'loop':
                 loopsteps = subparset.getStringVector('loopsteps')
-                filter_step_name_list.append(loopsteps)
+                filter_step_name_list.extend(loopsteps)
             else:
                 filter_step_name_list.append(stepname)
 
