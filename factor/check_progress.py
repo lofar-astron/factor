@@ -104,8 +104,7 @@ def plot_state(directions_list):
     else:
         ax = plt.gca()
     ax.set_title('Left-click on a facet to see its current state\n'
-                 'Middle-click on a facet to plot its selfcal solutions\n'
-                 'Right-click on a facet to display its images\n'
+                 'Right-click on a facet to display its images and selfcal solutions\n'
                  'Press "u" to update colors')
 
     # Plot facets
@@ -209,8 +208,8 @@ def on_pick(event):
     else:
         return
 
-    if event.mouseevent.button == 1:
-        # Print info on left click
+    if event.mouseevent.button == 1: # left click
+        # Print info on
         log.info('Current state of reduction for {}:'.format(facet.facet_name))
         log.info('    Completed operations: {}'.format(get_completed_ops(direction)))
         current_op = get_current_op(direction)
@@ -221,15 +220,8 @@ def on_pick(event):
             log.info('            Current step: {0} (step #{1} of {2})'.format(
                 current_step, current_index+1, num_steps))
 
-    if event.mouseevent.button == 2:
-        # Open parmdbplot of selfcal instrument table (if any) on middle click
-        selfcal_parmdb = find_selfcal_parmdb(direction)
-        if selfcal_parmdb is not None:
-            log.info('Opening selfcal solutions for {}...'.format(facet.facet_name))
-            os.system('parmdbplot.py {} &'.format(selfcal_parmdb))
-
-    if event.mouseevent.button == 3:
-        # Open images (if any) on right click
+    if event.mouseevent.button == 3: # right click
+        # Open images (if any)
         if os.path.exists('/tmp/tempimage'):
             shutil.rmtree('/tmp/tempimage')
         selfcal_images = find_selfcal_images(direction)
@@ -246,6 +238,12 @@ def on_pick(event):
             im2.view()
         else:
             log.info('No full image of facet exists for {}'.format(facet.facet_name))
+
+        # Open parmdbplot of selfcal instrument table (if any)
+        selfcal_parmdb = find_selfcal_parmdb(direction)
+        if selfcal_parmdb is not None:
+            log.info('Opening selfcal solutions for {}...'.format(facet.facet_name))
+            os.system('parmdbplot.py {} &'.format(selfcal_parmdb))
 
 
 def on_press(event):
