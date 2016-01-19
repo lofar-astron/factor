@@ -193,13 +193,13 @@ def on_pick(event):
         # Print info on left click
         log.info('Current state of reduction for {}:'.format(facet.facet_name))
         log.info('    Completed operations: {}'.format(get_completed_ops(direction)))
-        started_but_not_completed_ops = [op for op in facet.started_ops if
-            not op in facet.completed_ops]
-        log.info('       Current operation: {}'.format(get_current_op(direction)))
-        current_step, current_index, num_steps, start_time = get_current_step(direction)
-        log.info('              Started at: {0}'.format(start_time))
-        log.info('            Current step: {0} (step #{1} of {2})'.format(
-            current_step, current_index+1, num_steps))
+        current_op = get_current_op(direction)
+        log.info('       Current operation: {}'.format())
+        if current_op is not None:
+            current_step, current_index, num_steps, start_time = get_current_step(direction)
+            log.info('              Started at: {0}'.format(start_time))
+            log.info('            Current step: {0} (step #{1} of {2})'.format(
+                current_step, current_index+1, num_steps))
 
     if event.mouseevent.button == 3:
         # Open images (if any) on right click
@@ -289,7 +289,10 @@ def get_current_op(direction):
     completed_ops = get_completed_ops(direction)
     started_but_not_completed_ops = [op for op in started_ops if not op in completed_ops]
 
-    return started_but_not_completed_ops[0]
+    if len(started_but_not_completed_ops) == 0:
+        return None
+    else:
+        return started_but_not_completed_ops[0]
 
 
 def find_selfcal_images(direction):
@@ -340,6 +343,9 @@ def get_current_step(direction):
     of current operation
     """
     current_op = get_current_op(direction)
+    if current_op is None:
+        return (None, None, None, None)
+
     statefile = os.path.join(direction.working_dir, 'results', current_op,
         direction.name, 'statefile')
     f = open(statefile, 'r')
