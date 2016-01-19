@@ -98,7 +98,7 @@ def plot_state(directions_list):
 
     # Set up coordinate system and figure
     points, midRA, midDec = factor.directions.getxy(directions_list)
-    fig = plt.figure(1, figsize=(7.66,7))
+    fig = plt.figure(1, figsize=(10,9))
     if hasWCSaxes:
         wcs = factor.directions.makeWCS(midRA, midDec)
         ax = WCSAxes(fig, [0.16, 0.1, 0.8, 0.8], wcs=wcs)
@@ -150,7 +150,7 @@ def plot_state(directions_list):
         markers.append(marker)
 
     # Add info box
-    at = AnchoredText("Selected facet: None", prop=dict(size=10), frameon=True, loc=2)
+    at = AnchoredText("Selected facet: None", prop=dict(size=12), frameon=True, loc=2)
     at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
     ax.add_artist(at)
 
@@ -218,15 +218,7 @@ def on_pick(event):
 
     if event.mouseevent.button == 1: # left click
         # Print info
-#         log.info('Current state of reduction for {}:'.format(facet.facet_name))
-#         log.info('    Completed operations: {}'.format(get_completed_ops(direction)))
         current_op = get_current_op(direction)
-#         log.info('       Current operation: {}'.format(current_op))
-#         if current_op is not None:
-#             current_step, current_index, num_steps, start_time = get_current_step(direction)
-#             log.info('              Started at: {}'.format(start_time))
-#             log.info('            Current step: {0} (step #{1} of {2})'.format(
-#                 current_step, current_index+1, num_steps))
         info = 'Selected facet: {}\n'.format(facet.facet_name)
         info += 'Completed ops: {}\n'.format(get_completed_ops(direction))
         info += 'Current op: {}\n'.format(current_op)
@@ -245,11 +237,14 @@ def on_pick(event):
             shutil.rmtree('/tmp/tempimage')
         facet_image = find_facet_image(direction)
         if len(facet_image) > 0:
-            log.info('Opening facet image for {}...'.format(facet.facet_name))
+            info = 'Opening facet image for {}...\n'.format(facet.facet_name)
             im2 = pim.image(facet_image[0])
             im2.view()
         else:
-            log.info('No image of facet exists for {}'.format(facet.facet_name))
+            info = 'No image of facet exists for {}'.format(facet.facet_name)
+        c = at.get_child()
+        c.set_text(info)
+        fig.canvas.draw()
 
     if event.mouseevent.button == 3: # right click
         # Open selfcal images (if any)
@@ -257,19 +252,22 @@ def on_pick(event):
             shutil.rmtree('/tmp/tempimage')
         selfcal_images = find_selfcal_images(direction)
         if len(selfcal_images) > 0:
-            log.info('Opening selfcal images for {}...'.format(facet.facet_name))
+            info = 'Opening selfcal images for {}...'.format(facet.facet_name)
             im = pim.image(selfcal_images)
             im.view()
         else:
-            log.info('No selfcal images exist for {}'.format(facet.facet_name))
+            info = 'No selfcal images exist for {}'.format(facet.facet_name)
 
         # Open parmdbplot of selfcal instrument table (if any)
         selfcal_parmdb = find_selfcal_parmdb(direction)
         if selfcal_parmdb is not None:
-            log.info('Opening final selfcal solutions for {}...'.format(facet.facet_name))
+            info += 'Opening final selfcal solutions for {}...'.format(facet.facet_name)
             os.system('parmdbplot.py {} &'.format(selfcal_parmdb))
         else:
-            log.info('Final selfcal solutions do not exist for {}'.format(facet.facet_name))
+            info += 'Final selfcal solutions do not exist for {}'.format(facet.facet_name)
+        c = at.get_child()
+        c.set_text(info)
+        fig.canvas.draw()
 
 
 def on_press(event):
@@ -279,13 +277,15 @@ def on_press(event):
     global fig, all_directions
 
     if event.key == 'u':
-        log.info('Updating...')
+        info = 'Updating display...'
+        c = at.get_child()
+        c.set_text(info)
+        fig.canvas.draw()
         ax = plt.gca()
         for a in ax.patches:
             if hasattr(a, 'facet_name'):
                 for d in all_directions:
                     if d.name == a.facet_name:
-                        log.info('    {}'.format(d.name))
                         a.completed_ops = get_completed_ops(d)
                         a.started_ops = get_started_ops(d)
                         if 'facetselfcal' in a.completed_ops:
@@ -307,7 +307,10 @@ def on_press(event):
                         a.selfcal_images = find_selfcal_images(d)
                         a.facet_image = find_facet_image(d)
         fig.canvas.draw()
-        log.info('...done')
+        info += '...done'
+        c = at.get_child()
+        c.set_text(info)
+        fig.canvas.draw()
 
 
 def get_completed_ops(direction):
