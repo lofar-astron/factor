@@ -149,13 +149,13 @@ def plot_state(directions_list):
 
     # Show legend
     not_processed_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9',
-        facecolor='none', linewidth=2)
+        facecolor='#C0C0C0', linewidth=2)
     processing_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='y',
-        facecolor='none', linewidth=2)
+        facecolor='#F2F5A9', linewidth=2)
     selfcal_ok_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='g',
-        facecolor='none', linewidth=2)
+        facecolor='#A9F5A9', linewidth=2)
     selfcal_not_ok_patch =plt.Rectangle((0, 0), 1, 1, edgecolor='r',
-        facecolor='none', linewidth=2)
+        facecolor='#F5A9A9', linewidth=2)
     ax.legend([not_processed_patch, processing_patch, selfcal_ok_patch, selfcal_not_ok_patch],
               ['Unprocessed', 'Processing', 'Complete', 'Failed'])
 
