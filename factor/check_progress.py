@@ -287,7 +287,7 @@ def get_current_op(direction):
     """
     started_ops = get_started_ops(direction)
     completed_ops = get_completed_ops(direction)
-    started_but_not_completed_ops = [op for op in started_ops if not op in ompleted_ops]
+    started_but_not_completed_ops = [op for op in started_ops if not op in completed_ops]
 
     return started_but_not_completed_ops[0]
 
