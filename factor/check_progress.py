@@ -126,7 +126,7 @@ def plot_state(directions_list):
         xmid = (np.max(xverts) - np.min(xverts)) / 2.0 + np.min(xverts)
         ymid = (np.max(yverts) - np.min(yverts)) / 2.0 + np.min(yverts)
         marker = ax.text(xmid, ymid, direction.name, color='k', clip_on=True,
-            ha='center', va='center')
+            ha='center', va='bottom')
         markers.append(marker)
 
     ax.relim()
