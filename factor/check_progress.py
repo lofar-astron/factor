@@ -167,7 +167,7 @@ def plot_state(directions_list):
 
     # Show legend
     not_processed_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9',
-        facecolor='#C0C0C0', linewidth=2)
+        facecolor='#F2F2F2', linewidth=2)
     processing_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='y',
         facecolor='#F2F5A9', linewidth=2)
     selfcal_ok_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='g',
