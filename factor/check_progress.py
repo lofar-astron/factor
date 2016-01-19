@@ -31,8 +31,8 @@ except:
     hasWCSaxes = False
 
 log = logging.getLogger('factor:progress')
-logging.root.setLevel(logging.DEBUG)
-log.setLevel(logging.DEBUG)
+logging.root.setLevel(logging.INFO)
+log.setLevel(logging.INFO)
 
 
 def run(parset_file):
