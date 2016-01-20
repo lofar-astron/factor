@@ -117,6 +117,24 @@ def plot_state(directions_list):
     else:
         ax = plt.gca()
 
+    # Add field direction, making sure it is not too near an existing direction
+    field_x = min(points[0])
+    field_y = max(points[1])
+    adjust_xy = True
+    while adjust_xy:
+        adjust_xy = False
+        for x, y in points:
+            dist = np.sqrt( (x - field_x)**2 + (y - field_y)**2 )
+            if dist < 10.0:
+                field_x -= 1
+                field_y += 1
+                adjust_xy = True
+                break
+    field_ra, field_dec = factor.directions.xy2radec([field_x], [field_y],
+        refRA=midRA, refDec=midDec)
+    field = Direction('field', field_ra[0], field_dec[0], factor_working_dir=parset['dir_working'])
+    directions_list.append(field)
+
     ax.set_title('Overview of FACTOR run in\n{}'.format(directions_list[0].working_dir))
 
     # Plot facets
@@ -159,7 +177,7 @@ def plot_state(directions_list):
         markers.append(marker)
 
     # Add info box
-    at = AnchoredText("Selected facet: None", prop=dict(size=12), frameon=True, loc=3)
+    at = AnchoredText("Selected direction: None", prop=dict(size=12), frameon=True, loc=3)
     at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
     ax.add_artist(at)
 
@@ -228,7 +246,7 @@ def on_pick(event):
     if event.mouseevent.button == 1: # left click
         # Print info
         current_op = get_current_op(direction)
-        info = 'Selected facet: {}\n'.format(facet.facet_name)
+        info = 'Selected direction: {}\n'.format(facet.facet_name)
         completed_ops = get_completed_ops(direction)
         if len(completed_ops) == 0:
             info += 'Completed ops: None\n'
