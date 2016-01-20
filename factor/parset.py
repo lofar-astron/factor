@@ -356,6 +356,13 @@ def get_directions_options(parset):
     else:
         parset_dict['direction_specific']['transfer_radius'] = 0.0
 
+    # Re-image directions for which selfcal was successful (default = False)
+    if 'reimage' in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['reimage'] = parset.getboolean('directions',
+            'reimage')
+    else:
+        parset_dict['direction_specific']['reimage'] = False
+
     # Check for unused options
     given_options = parset.options('directions')
     allowed_options = ['directions_file', 'max_radius_deg', 'flux_min_jy', 'size_max_arcmin',

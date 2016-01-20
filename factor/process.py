@@ -574,6 +574,9 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
         direction.field_ra = field.ra
         direction.field_dec = field.dec
 
+        # Set re-image flag
+        direction.make_final_image = dir_parset['reimage']
+
         # Reset state if specified
         if direction.name in reset_directions:
             direction.do_reset = True

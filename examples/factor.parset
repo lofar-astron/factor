@@ -126,6 +126,9 @@ target_dec = +35d30m31.52
 target_radius_arcmin = 10.2
 target_has_own_facet = False
 
+# Re-image directions for which selfcal was successful (default = False)
+reimage = True
+
 
 [cluster]
 # Full path to cluster description file. Use clusterdesc_file = PBS to use the
