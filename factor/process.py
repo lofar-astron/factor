@@ -553,6 +553,11 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
         if dir_parset['ndir_total'] < len(directions):
             directions = directions[:dir_parset['ndir_total']]
 
+            # Make sure target is still included
+            direction_names = [d.name for d in directions]
+            if target_has_own_facet and 'target' not in direction_names:
+                directions += [target]
+
     # Set various direction attributes
     log.info("Determining imaging parameters for each direction...")
     for i, direction in enumerate(directions):
