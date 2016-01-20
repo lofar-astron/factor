@@ -35,7 +35,7 @@ except:
 log = logging.getLogger('factor:progress')
 
 
-def run(parset_file):
+def run(parset_file, trim_names=True):
     """
     Displays the current progress of a run
     """
@@ -51,7 +51,7 @@ def run(parset_file):
     logging.root.setLevel(logging.ERROR)
     log.setLevel(logging.ERROR)
     all_directions = load_directions(parset_file)
-    plot_state(all_directions)
+    plot_state(all_directions, trim_names=trim_names)
 
 
 def load_directions(parset_file):
@@ -101,7 +101,7 @@ def load_directions(parset_file):
     return direction_list
 
 
-def plot_state(directions_list):
+def plot_state(directions_list, trim_names=True):
     """
     Plots the facets of a run
     """
@@ -165,7 +165,11 @@ def plot_state(directions_list):
         # Add facet names
         xmid = (np.max(xverts) - np.min(xverts)) / 2.0 + np.min(xverts)
         ymid = (np.max(yverts) - np.min(yverts)) / 2.0 + np.min(yverts)
-        marker = ax.text(xmid, ymid, direction.name, color='k', clip_on=True,
+        if trim_names:
+            name = direction.name.split('_')[-1]
+        else:
+            name = direction.name
+        marker = ax.text(xmid, ymid, name, color='k', clip_on=True,
             clip_box=ax.bbox, ha='center', va='bottom')
         markers.append(marker)
 
