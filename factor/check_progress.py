@@ -151,7 +151,8 @@ def plot_state(directions_list):
             mpl_poly = Polygon(np.array(xyverts), edgecolor='#a9a9a9', facecolor='#F2F2F2',
                 clip_box=ax.bbox, picker=3.0, linewidth=2)
         else:
-            mpl_poly = Circle((field_x, field_y), radius=2.0, edgecolor='#a9a9a9', facecolor='#F2F2F2',
+            xyverts = [np.array([field_x, field_y])]
+            mpl_poly = Circle((field_x, field_y), radius=5.0, edgecolor='#a9a9a9', facecolor='#F2F2F2',
                 clip_box=ax.bbox, picker=3.0, linewidth=2)
         mpl_poly.facet_name = direction.name
         mpl_poly.completed_ops = get_completed_ops(direction)
