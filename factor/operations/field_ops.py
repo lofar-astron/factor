@@ -79,3 +79,14 @@ class MakeMosaic(Operation):
         # direction object)
         input_bands = [b.file for b in self.bands]
         self.parms_dict.update({'input_bands': input_bands})
+
+
+    def finalize(self):
+        """
+        Finalize this operation
+        """
+        # Delete averaged data as they're no longer needed
+        self.direction.cleanup_mapfiles = [
+            os.path.join(self.pipeline_mapfile_dir, 'average.mapfile')
+            ]
+        self.direction.cleanup()

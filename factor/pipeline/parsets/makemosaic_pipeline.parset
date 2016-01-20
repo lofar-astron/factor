@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_images_map, create_vertices_map, create_compressed_mapfile_images, create_compressed_mapfile_vertices, copy_beam_info, make_mosaic, create_ms_map, create_compressed_mapfile, concat, make_pbimage, zero_avgpb, image2fits, correct_mosaic]
+pipeline.steps = [update_mapfile_hosts, create_images_map, create_vertices_map, create_compressed_mapfile_images, create_compressed_mapfile_vertices, copy_beam_info, make_mosaic, create_ms_map, average, create_compressed_mapfile, concat, make_pbimage, zero_avgpb, image2fits, correct_mosaic]
 
 pipeline.pluginpath                                    =   {{ pipeline_dir }}/plugins
 
@@ -51,9 +51,22 @@ create_ms_map.control.files                            =   {{ input_bands }}
 create_ms_map.control.mapfile_dir                      =   input.output.mapfile_dir
 create_ms_map.control.filename                         =   input_bands.mapfile
 
+average.control.type                                   =   dppp
+average.control.mapfile_in                             =   create_ms_map.output.mapfile
+average.control.inputkey                               =   msin
+average.argument.numthreads                            =   {{ max_cpus_per_band }}
+average.argument.msin.datacolumn                       =   DATA
+average.argument.msout.overwrite                       =   True
+average.argument.msout.writefullresflag                =   False
+average.argument.local_scratch_dir                     =   {{ local_dir }}
+average.argument.steps                                 =   [avg]
+average.argument.avg.type                              =   squash
+average.argument.avg.freqstep                          =   {{ facetselfcal_freqstep }}
+average.argument.avg.timestep                          =   {{ facetselfcal_timestep }}
+
 create_compressed_mapfile.control.kind                 =   plugin
 create_compressed_mapfile.control.type                 =   compressMapfile
-create_compressed_mapfile.control.mapfile_in           =   create_ms_map.output.mapfile
+create_compressed_mapfile.control.mapfile_in           =   average.output.mapfile
 create_compressed_mapfile.control.mapfile_dir          =   input.output.mapfile_dir
 create_compressed_mapfile.control.filename             =   concat_input.mapfile
 
