@@ -20,7 +20,7 @@ from lofarpipe.support.parset import Parset
 from factor.lib.direction import Direction
 try:
     from matplotlib import pyplot as plt
-    from matplotlib.patches import Polygon
+    from matplotlib.patches import Polygon, Circle
     from matplotlib.ticker import FuncFormatter
     from mpl_toolkits.axes_grid.anchored_artists import AnchoredText
 except Exception as e:
@@ -123,7 +123,7 @@ def plot_state(directions_list):
     adjust_xy = True
     while adjust_xy:
         adjust_xy = False
-        for x, y in points:
+        for (x, y) in points:
             dist = np.sqrt( (x - field_x)**2 + (y - field_y)**2 )
             if dist < 10.0:
                 field_x -= 1
@@ -140,14 +140,18 @@ def plot_state(directions_list):
     # Plot facets
     markers = []
     for direction in directions_list:
-        vertices = read_vertices(direction.vertices_file)
-        RAverts = vertices[0]
-        Decverts = vertices[1]
-        xverts, yverts = factor.directions.radec2xy(RAverts, Decverts,
-            refRA=midRA, refDec=midDec)
-        xyverts = [np.array([xp, yp]) for xp, yp in zip(xverts, yverts)]
-        mpl_poly = Polygon(np.array(xyverts), edgecolor='#a9a9a9', facecolor='#F2F2F2',
-            clip_box=ax.bbox, picker=3.0, linewidth=2)
+        if direction.name != 'field':
+            vertices = read_vertices(direction.vertices_file)
+            RAverts = vertices[0]
+            Decverts = vertices[1]
+            xverts, yverts = factor.directions.radec2xy(RAverts, Decverts,
+                refRA=midRA, refDec=midDec)
+            xyverts = [np.array([xp, yp]) for xp, yp in zip(xverts, yverts)]
+            mpl_poly = Polygon(np.array(xyverts), edgecolor='#a9a9a9', facecolor='#F2F2F2',
+                clip_box=ax.bbox, picker=3.0, linewidth=2)
+        else:
+            mpl_poly = Circle((field_x, field_y), radius=2.0, edgecolor='#a9a9a9', facecolor='#F2F2F2',
+                clip_box=ax.bbox, picker=3.0, linewidth=2)
         mpl_poly.facet_name = direction.name
         mpl_poly.completed_ops = get_completed_ops(direction)
         mpl_poly.started_ops = get_started_ops(direction)
