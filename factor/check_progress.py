@@ -258,9 +258,10 @@ def on_pick(event):
         info += 'Current op: {}'.format(current_op)
         if current_op is not None:
             current_step, current_index, num_steps, start_time = get_current_step(direction)
-            info += '\n- Started at: {}\n'.format(start_time)
-            info += '- Current step: {0} (step {1} of {2})'.format(
-                current_step, current_index+1, num_steps)
+            if current_step is not None:
+                info += '\n- Started at: {}\n'.format(start_time)
+                info += '- Current step: {0} (step {1} of {2})'.format(
+                    current_step, current_index+1, num_steps)
 
     if event.mouseevent.button == 2: # middle click
         # Open full facet image (if any)
