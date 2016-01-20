@@ -123,8 +123,8 @@ def plot_state(directions_list):
     adjust_xy = True
     while adjust_xy:
         adjust_xy = False
-        for (x, y) in points:
-            dist = np.sqrt( (x - field_x)**2 + (y - field_y)**2 )
+        for xy in points:
+            dist = np.sqrt( (xy[0] - field_x)**2 + (xy[1] - field_y)**2 )
             if dist < 10.0:
                 field_x -= 1
                 field_y += 1
