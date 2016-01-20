@@ -15,6 +15,7 @@ import factor.parset
 import pyrap.images as pim
 import ast
 from astropy.coordinates import Angle
+from shapely.geometry import Polygon as SPolygon
 from lofarpipe.support.data_map import DataMap
 from lofarpipe.support.parset import Parset
 from factor.lib.direction import Direction
@@ -163,8 +164,13 @@ def plot_state(directions_list, trim_names=True):
         ax.add_patch(mpl_poly)
 
         # Add facet names
-        xmid = (np.max(xverts) - np.min(xverts)) / 2.0 + np.min(xverts)
-        ymid = (np.max(yverts) - np.min(yverts)) / 2.0 + np.min(yverts)
+        if direction.name != 'field':
+            poly_tuple = tuple([(xp, yp) for xp, yp in zip(xverts, yverts)])
+            xmid = SPolygon(poly_tuple).centroid.x
+            ymid = SPolygon(poly_tuple).centroid.y
+        else:
+            xmid = field_x
+            ymid = field_y
         if trim_names:
             name = direction.name.split('_')[-1]
         else:

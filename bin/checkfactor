@@ -25,7 +25,7 @@ import sys
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage='%prog parset',
             version='%%prog %s' % (version))
-    parser.add_option('-f', help='Use full facet names on the plot, instead of '
+    parser.add_option('-f', help='Show full facet names on the plot, instead of '
         'triming facet names to keep only parts after the last "_" in the name',
         action='store_true', default=False)
     (options, args) = parser.parse_args()
