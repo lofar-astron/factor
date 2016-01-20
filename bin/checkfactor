@@ -35,7 +35,7 @@ if __name__ == '__main__':
         sys.exit()
 
     parset_file = args[0]
-    trim_names = not options.t
+    trim_names = not options.f
 
     # Check the progress
     check_progress.run(parset_file, trim_names=trim_names)
