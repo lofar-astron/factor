@@ -261,9 +261,6 @@ def on_pick(event):
             info += '\n- Started at: {}\n'.format(start_time)
             info += '- Current step: {0} (step {1} of {2})'.format(
                 current_step, current_index+1, num_steps)
-        c = at.get_child()
-        c.set_text(info)
-        fig.canvas.draw()
 
     if event.mouseevent.button == 2: # middle click
         # Open full facet image (if any)
@@ -276,9 +273,6 @@ def on_pick(event):
             im2.view()
         else:
             info = 'No image of facet exists for {}'.format(facet.facet_name)
-        c = at.get_child()
-        c.set_text(info)
-        fig.canvas.draw()
 
     if event.mouseevent.button == 3: # right click
         # Open selfcal images (if any)
@@ -299,9 +293,16 @@ def on_pick(event):
             os.system('parmdbplot.py {} &'.format(selfcal_parmdb))
         else:
             info += '\nFinal selfcal solutions do not exist for {}'.format(facet.facet_name)
-        c = at.get_child()
-        c.set_text(info)
-        fig.canvas.draw()
+
+    # Update text box
+    c = at.get_child()
+    c.set_text(info)
+
+    # Update patch color
+    set_patch_color(facet, direction)
+
+    # Redraw
+    fig.canvas.draw()
 
 
 def on_press(event):
