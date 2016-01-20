@@ -132,7 +132,8 @@ def plot_state(directions_list):
                 break
     field_ra, field_dec = factor.directions.xy2radec([field_x], [field_y],
         refRA=midRA, refDec=midDec)
-    field = Direction('field', field_ra[0], field_dec[0], factor_working_dir=parset['dir_working'])
+    field = Direction('field', field_ra[0], field_dec[0],
+        factor_working_dir=directions_list[0].working_dir)
     directions_list.append(field)
 
     ax.set_title('Overview of FACTOR run in\n{}'.format(directions_list[0].working_dir))
