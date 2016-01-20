@@ -55,7 +55,7 @@ average.control.type                                   =   dppp
 average.control.mapfile_in                             =   create_ms_map.output.mapfile
 average.control.inputkey                               =   msin
 average.argument.numthreads                            =   {{ max_cpus_per_band }}
-average.argument.msin.datacolumn                       =   DATA
+average.argument.msin.datacolumn                       =   CORRECTED_DATA
 average.argument.msout.overwrite                       =   True
 average.argument.msout.writefullresflag                =   False
 average.argument.local_scratch_dir                     =   {{ local_dir }}
@@ -70,11 +70,23 @@ create_compressed_mapfile.control.mapfile_in           =   average.output.mapfil
 create_compressed_mapfile.control.mapfile_dir          =   input.output.mapfile_dir
 create_compressed_mapfile.control.filename             =   concat_input.mapfile
 
-concat.control.type                                    =   virtual_concat
+# concat.control.type                                    =   virtual_concat
+# concat.control.mapfile_in                              =   create_compressed_mapfile.output.mapfile
+# concat.control.inputkey                                =   msfiles
+# concat.control.outputkey                               =   msconcat
+# concat.argument.flags                                  =   [msfiles,msconcat]
+
+concat.control.type                                    =   dppp
 concat.control.mapfile_in                              =   create_compressed_mapfile.output.mapfile
-concat.control.inputkey                                =   msfiles
-concat.control.outputkey                               =   msconcat
-concat.argument.flags                                  =   [msfiles,msconcat]
+concat.control.inputkey                                =   msin
+concat.argument.numthreads                             =   {{ max_cpus_per_node }}
+concat.argument.msin.datacolumn                        =   DATA
+concat.argument.msin.missingdata                       =   True
+concat.argument.msin.orderms                           =   False
+concat.argument.msout.overwrite                        =   True
+concat.argument.msout.writefullresflag                 =   False
+concat.argument.local_scratch_dir                      =   {{ local_dir }}
+concat.argument.steps                                  =   []
 
 make_pbimage.control.type                              =   awimager
 make_pbimage.control.opts.mapfile_in                   =   concat.output.mapfile
