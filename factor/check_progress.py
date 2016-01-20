@@ -158,22 +158,8 @@ def plot_state(directions_list):
         mpl_poly.facet_name = direction.name
         mpl_poly.completed_ops = get_completed_ops(direction)
         mpl_poly.started_ops = get_started_ops(direction)
-        if 'facetselfcal' in mpl_poly.completed_ops:
-            if verify_subtract(direction):
-                mpl_poly.set_edgecolor('g')
-                mpl_poly.set_facecolor('#A9F5A9')
-            else:
-                mpl_poly.set_edgecolor('r')
-                mpl_poly.set_facecolor('#F5A9A9')
-        elif 'facetselfcal' in mpl_poly.started_ops:
-            mpl_poly.set_edgecolor('y')
-            mpl_poly.set_facecolor('#F2F5A9')
-        elif 'facetimage' in mpl_poly.completed_ops:
-            mpl_poly.set_edgecolor('g')
-            mpl_poly.set_facecolor('#A9F5A9')
-        elif 'facetimage' in mpl_poly.started_ops:
-            mpl_poly.set_edgecolor('y')
-            mpl_poly.set_facecolor('#F2F5A9')
+        mpl_poly.current_op = get_current_op(direction)
+        set_patch_color(mpl_poly, direction)
         ax.add_patch(mpl_poly)
 
         # Add facet names
@@ -324,24 +310,7 @@ def on_press(event):
             if hasattr(a, 'facet_name'):
                 for d in all_directions:
                     if d.name == a.facet_name:
-                        a.completed_ops = get_completed_ops(d)
-                        a.started_ops = get_started_ops(d)
-                        if 'facetselfcal' in a.completed_ops:
-                            if verify_subtract(d):
-                                a.set_edgecolor('g')
-                                a.set_facecolor('#A9F5A9')
-                            else:
-                                a.set_edgecolor('r')
-                                a.set_facecolor('#F5A9A9')
-                        elif 'facetselfcal' in a.started_ops:
-                            a.set_edgecolor('y')
-                            a.set_facecolor('#F2F5A9')
-                        elif 'facetimage' in a.completed_ops:
-                            a.set_edgecolor('g')
-                            a.set_facecolor('#A9F5A9')
-                        elif 'facetimage' in a.started_ops:
-                            a.set_edgecolor('y')
-                            a.set_facecolor('#F2F5A9')
+                        set_patch_color(a, d)
                         a.selfcal_images = find_selfcal_images(d)
                         a.facet_image = find_facet_image(d)
         fig.canvas.draw()
@@ -349,6 +318,28 @@ def on_press(event):
         c = at.get_child()
         c.set_text(info)
         fig.canvas.draw()
+
+
+def set_patch_color(a, d):
+    """
+    Sets face and edge color of patch
+    """
+    a.completed_ops = get_completed_ops(d)
+    a.started_ops = get_started_ops(d)
+    a.current_op = get_current_op(d)
+    if a.current_op is not None:
+        a.set_edgecolor('y')
+        a.set_facecolor('#F2F5A9')
+    elif 'facetselfcal' in a.completed_ops:
+        if verify_subtract(d):
+            a.set_edgecolor('g')
+            a.set_facecolor('#A9F5A9')
+        else:
+            a.set_edgecolor('r')
+            a.set_facecolor('#F5A9A9')
+    elif len(a.completed_ops) > 0:
+        a.set_edgecolor('g')
+        a.set_facecolor('#A9F5A9')
 
 
 def get_completed_ops(direction):
