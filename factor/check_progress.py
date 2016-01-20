@@ -460,9 +460,12 @@ def get_current_step(direction):
 
     statefile = os.path.join(direction.working_dir, 'results', current_op,
         direction.name, 'statefile')
-    f = open(statefile, 'r')
-    d = pickle.load(f)
-    f.close()
+    if os.path.exists(statefile):
+        f = open(statefile, 'r')
+        d = pickle.load(f)
+        f.close()
+    else:
+        return (None, None, None, None)
 
     mapfiles = set([s[1]['mapfile'] for s in d[1]])
     current_index = len(mapfiles)
