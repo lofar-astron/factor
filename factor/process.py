@@ -557,7 +557,7 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
             # Make sure target is still included
             direction_names = [d.name for d in directions]
             if target_has_own_facet and 'target' not in direction_names:
-                directions += [target]
+                directions.append(target)
 
     # Set various direction attributes
     log.info("Determining imaging parameters for each direction...")
@@ -588,7 +588,7 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
     if target_has_own_facet:
         # Make sure target is not a DDE calibrator and is at end of directions list
         selfcal_directions = [d for d in directions if d.name != target.name]
-        directions = selfcal_directions + [target]
+        directions = selfcal_directions[:] + [target]
     else:
         selfcal_directions = directions
     if dir_parset['ndir_selfcal'] is not None:
