@@ -81,11 +81,9 @@ class FacetSelfcal(Operation):
             'final_image.mapfile')
         self.direction.facet_model_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'final_model_rootnames.mapfile')
-        self.wsclean_modelimg_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'expand_wsclean_model.mapfile')
-        self.wsclean_modelimg_size_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'expand_wsclean_model_size.mapfile')
-        self.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
+        self.direction.wsclean_modelimg_size_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'pad_model_images.padsize.mapfile')
+        self.direction.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'verify_subtract.break.mapfile')
 
         # Store results of verify_subtract check. This will work if the verification
