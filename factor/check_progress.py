@@ -263,7 +263,7 @@ def on_pick(event):
                 info += '- Current step: {0} (step {1} of {2})'.format(
                     current_step, current_index+1, num_steps)
 
-    if event.mouseevent.button == 2: # middle click
+    elif event.mouseevent.button == 2: # middle click
         # Open full facet image (if any)
         if os.path.exists('/tmp/tempimage'):
             shutil.rmtree('/tmp/tempimage')
@@ -275,7 +275,7 @@ def on_pick(event):
         else:
             info = 'No image of facet exists for {}'.format(facet.facet_name)
 
-    if event.mouseevent.button == 3: # right click
+    elif event.mouseevent.button == 3: # right click
         # Open selfcal images (if any)
         if os.path.exists('/tmp/tempimage'):
             shutil.rmtree('/tmp/tempimage')
@@ -294,6 +294,9 @@ def on_pick(event):
             os.system('parmdbplot.py {} &'.format(selfcal_parmdb))
         else:
             info += '\nFinal selfcal solutions do not exist for {}'.format(facet.facet_name)
+
+    else:
+        return
 
     # Update text box
     c = at.get_child()
