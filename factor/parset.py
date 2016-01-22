@@ -367,7 +367,7 @@ def get_directions_options(parset):
     given_options = parset.options('directions')
     allowed_options = ['directions_file', 'max_radius_deg', 'flux_min_jy', 'size_max_arcmin',
         'separation_max_arcmin', 'max_num', 'faceting_radius_deg', 'check_edges', 'ndir_total',
-        'ndir_selfcal', 'transfer_radius', 'groupings', 'allow_reordering',
+        'ndir_selfcal', 'transfer_radius', 'groupings', 'allow_reordering', 'reimage',
         'target_ra', 'target_dec', 'target_radius_arcmin', 'target_has_own_facet']
     for option in given_options:
         if option not in allowed_options:
