@@ -117,9 +117,10 @@ create_compressed_mapfile2.control.filename           =   concat_averaged_input.
 
 {% block full_image_parms %}
 wsclean_image_full1.control.type                      =   wsclean
-wsclean_image_full1.control.mapfile_in                =   create_compressed_mapfile2.output.mapfile
-wsclean_image_full1.control.inputkey                  =   msfile
+wsclean_image_full1.control.mapfiles_in               =   [create_compressed_mapfile2.output.mapfile,{{ facet_premask_mapfile }}]
+wsclean_image_full1.control.inputkeys                 =   [msfile,fitsmask]
 wsclean_image_full1.argument.flags                    =   [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image_full1.argument.fitsmask                 =   fitsmask
 wsclean_image_full1.argument.size                     =   {{ facet_imsize }} {{ facet_imsize }}
 wsclean_image_full1.argument.niter                    =   {{ wsclean_full_image_niter }}
 wsclean_image_full1.argument.threshold                =   {{ wsclean_full_image_threshold_jy }}

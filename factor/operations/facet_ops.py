@@ -81,6 +81,8 @@ class FacetSelfcal(Operation):
             'final_image.mapfile')
         self.direction.facet_model_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'final_model_rootnames.mapfile')
+        self.direction.facet_premask_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'premask.mapfile')
         self.direction.wsclean_modelimg_size_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'pad_model_images.padsize.mapfile')
         self.direction.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
