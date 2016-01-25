@@ -1,11 +1,23 @@
 {% extends "facetimage_skymodel_pipeline.parset" %}
-{% block full_image_steps %}concat_averaged, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2{% endblock full_image_steps %}
+{% block full_image_steps %}concat_averaged, premask, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2{% endblock full_image_steps %}
 {% block full_image_parms %}
 concat_averaged.control.type                      =   virtual_concat
 concat_averaged.control.mapfile_in                =   create_compressed_mapfile.output.mapfile
 concat_averaged.control.inputkey                  =   msfiles
 concat_averaged.control.outputkey                 =   msconcat
 concat_averaged.argument.flags                    =   [msfiles,msconcat]
+
+premask.control.type                              =   make_clean_mask
+premask.control.mapfile_in                        =   create_compressed_mapfile.output.mapfile
+premask.control.inputkey                          =   imagefile
+premask.control.outputkey                         =   maskfile
+premask.argument.flags                            =   [None,maskfile]
+premask.argument.img_format                       =   casa
+premask.argument.pad_to_size                      =   {{ facet_imsize }}
+premask.argument.skip_source_detection            =   True
+premask.argument.vertices_file                    =   {{ vertices_file }}
+premask.argument.reference_ra_deg                 =   {{ facet_ra }}
+premask.argument.reference_dec_deg                =   {{ facet_dec }}
 
 casa_image_full1.control.type                     =   casa_clean
 casa_image_full1.control.mapfile_in               =   concat_averaged.output.mapfile

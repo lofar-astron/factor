@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 """
-Script to make a clean mask from an image
+Script to make a clean mask
 """
 import argparse
 from argparse import RawTextHelpFormatter
@@ -20,11 +20,41 @@ from factor.lib.polygon import Polygon
 
 def read_vertices(filename):
     """
-    Returns facet vertices
+    Returns facet vertices stored in input file
     """
     with open(filename, 'r') as f:
         direction_dict = pickle.load(f)
     return direction_dict['vertices']
+
+
+def make_template_image(image_name, reference_ra_deg, reference_dec_deg,
+    imsize=512, cellsize_deg=0.000417):
+    """
+    Make a blank image and save it to disk
+
+    Parameters
+    ----------
+    image_name : str
+        Filename of output image
+    reference_ra_deg : float, optional
+        RA for center of output mask image
+    reference_dec_deg : float, optional
+        Dec for center of output mask image
+    imsize : int, optional
+        Size of output image
+    cellsize_deg : float, optional
+        Size of a pixel in degrees
+
+    """
+    im = pim.image('', shape=(1, 1, imsize, imsize))
+
+    # Set WCS info
+    values = coordsys.get_referencevalue()
+    values[2][0] = reference_dec_deg/180.0*np.pi
+    values[2][1] = reference_ra_deg/180.0*np.pi
+    values[?] = cellsize_deg
+    coordsys.set_referencevalue(values)
+    im.saveas(image_name, overwrite=True)
 
 
 def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, rmsbox=None,
@@ -33,18 +63,66 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
          pad_to_size=None, skip_source_detection=False, region_file=None, nsig=5.0,
          reference_ra_deg=None, reference_dec_deg=None):
     """
-    Run PyBDSM to make an island clean mask
+    Make a clean mask and return clean threshold
 
     Parameters
     ----------
-    TODO
+    image_name : str
+        Filename of input image from which mask will be made.
+        If None or 'None', a template image with center at
+        (reference_ra_deg, reference_dec_deg) will be made
+        internally
+    mask_name : str
+        Filename of output mask image
+    atrous_do : bool, optional
+        Use wavelet module of PyBDSM?
+    threshisl : float, optional
+        Value of thresh_isl PyBDSM parameter
+    threshpix : float, optional
+        Value of thresh_pix PyBDSM parameter
+    rmsbox : tuple of floats, optional
+        Value of rms_box PyBDSM parameter
+    iterate_threshold : bool, optional
+        If True, threshold will be lower in 20% steps until
+        at least one island is found
+    adaptive_rmsbox : tuple of floats, optional
+        Value of adaptive_rms_box PyBDSM parameter
+    img_format : str, optional
+        Format of output mask image (one of 'fits' or 'casa')
+    threshold_format : str, optional
+        Format of output threshold (one of 'float' or 'str_with_units')
+    trim_by : float, optional
+        Fraction by which the perimeter of the output mask will be
+        trimmed (zeroed)
+    vertices_file : str, optional
+        Filename of file with vertices (must be a pickle file containing
+        a dictionary with the vertices in the 'vertices' entry)
+    atrous_jmax : int, optional
+        Value of atrous_jmax PyBDSM parameter
+    pad_to_size : int, optional
+        Pad output mask image to a size of pad_to_size x pad_to_size
+    skip_source_detection : bool, optional
+        If True, source detection is not run on the input image
+    region_file : str, optional
+        Filename of region file in CASA format. If given, no mask image
+        is made (the region file is used as the clean mask)
+    nsig : float, optional
+        Number of sigma of returned threshold value
+    reference_ra_deg : float, optional
+        RA for center of output mask image
+    reference_dec_deg : float, optional
+        Dec for center of output mask image
 
     Returns
     -------
     result : dict
-        Dict with 5-sigma rms threshold
+        Dict with nsig-sigma rms threshold
 
     """
+    if image_name is not None:
+        if image_name.lower() == 'none':
+            image_name = None
+
     if region_file is not None:
         if region_file != '[]':
             # Copy the CASA region file (stripped of brackets, etc.) and return
@@ -81,6 +159,21 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             skip_source_detection = True
         else:
             skip_source_detection = False
+
+    if reference_ra_deg is not None and reference_dec_deg is not None:
+        reference_ra_deg = float(reference_ra_deg)
+        reference_dec_deg = float(reference_dec_deg)
+
+    if image_name is None:
+        if not skip_source_detection:
+            print('ERROR: Source detection cannot be done on an empty image')
+            sys.exit(1)
+        if reference_ra_deg is not None and reference_dec_deg is not None:
+            image_name = mask_name + '.tmp'
+            make_template_image(image_name, reference_ra_deg, reference_dec_deg)
+        else:
+            print('ERROR: if image_name is None, a refernce position must be given')
+            sys.exit(1)
 
     trim_by = float(trim_by)
     atrous_jmax = int(atrous_jmax)
@@ -188,8 +281,6 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         data = mask_im.getdata()
         coordsys = mask_im.coordinates()
         if reference_ra_deg is not None and reference_dec_deg is not None:
-            reference_ra_deg = float(reference_ra_deg)
-            reference_dec_deg = float(reference_dec_deg)
             values = coordsys.get_referencevalue()
             values[2][0] = reference_dec_deg/180.0*np.pi
             values[2][1] = reference_ra_deg/180.0*np.pi
