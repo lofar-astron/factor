@@ -579,8 +579,8 @@ def add_facet_info(d, selfcal_poly, facet_poly, midRA, midDec):
 
     """
     poly_cal = np.vstack([selfcal_poly, selfcal_poly[0]])
-    ra, dec = xy2radec(poly_cal[:, 0], poly_cal[:, 1], midRA, midDec)
-    thiessen_poly_deg_cal = [np.array(ra[0: -1]), np.array(dec[0: -1])]
+    ra_cal, dec_cal = xy2radec(poly_cal[:, 0], poly_cal[:, 1], midRA, midDec)
+    thiessen_poly_deg_cal = [np.array(ra_cal[0: -1]), np.array(dec_cal[0: -1])]
 
     poly = np.vstack([facet_poly, facet_poly[0]])
     ra, dec = xy2radec(poly[:, 0], poly[:, 1], midRA, midDec)
