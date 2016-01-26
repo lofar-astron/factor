@@ -72,10 +72,9 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     Parameters
     ----------
     image_name : str
-        Filename of input image from which mask will be made.
-        If None or 'None', a template image with center at
-        (reference_ra_deg, reference_dec_deg) will be made
-        internally
+        Filename of input image from which mask will be made. If the image does
+        not exist, a template image with center at (reference_ra_deg,
+        reference_dec_deg) will be made internally
     mask_name : str
         Filename of output mask image
     atrous_do : bool, optional
@@ -168,7 +167,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         reference_ra_deg = float(reference_ra_deg)
         reference_dec_deg = float(reference_dec_deg)
 
-    if image_name is None:
+    if not os.path.exists(image_name):
+        print('Input image not found. Making empty image...')
         if not skip_source_detection:
             print('ERROR: Source detection cannot be done on an empty image')
             sys.exit(1)
@@ -176,7 +176,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             image_name = mask_name + '.tmp'
             make_template_image(image_name, reference_ra_deg, reference_dec_deg)
         else:
-            print('ERROR: if image_name is None, a refernce position must be given')
+            print('ERROR: if image not found, a refernce position must be given')
             sys.exit(1)
 
     trim_by = float(trim_by)
