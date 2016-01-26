@@ -58,7 +58,8 @@ def make_template_image(image_name, reference_ra_deg, reference_dec_deg,
     inc_values[2][0] = cellsize_deg/180.0*np.pi
     inc_values[2][1] = -cellsize_deg/180.0*np.pi
     coordsys.set_increment(inc_values)
-    im.saveas(image_name, overwrite=True)
+    im_tmp = pim.image('', shape=(1, 1, imsize, imsize), coordsys=coordsys)
+    im_tmp.saveas(image_name, overwrite=True)
 
 
 def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, rmsbox=None,
