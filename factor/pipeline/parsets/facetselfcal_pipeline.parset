@@ -46,9 +46,6 @@ make_facet_skymodels_cal.control.inputkey                  =   fullmodelfile
 make_facet_skymodels_cal.control.outputkey                 =   outfile
 make_facet_skymodels_cal.argument.flags                    =   [fullmodelfile,outfile,{{ vertices_file }}]
 make_facet_skymodels_cal.argument.cal_only                 =   True
-make_facet_skymodels_cal.argument.facet_ra                 =   {{ ra }}
-make_facet_skymodels_cal.argument.facet_dec                =   {{ dec }}
-make_facet_skymodels_cal.argument.cal_radius_deg           =   {{ cal_radius_deg }}
 
 make_sourcedb_cal_facet_sources.control.type               =   make_sourcedb
 make_sourcedb_cal_facet_sources.control.opts.mapfile_in    =   make_facet_skymodels_cal.output.mapfile
