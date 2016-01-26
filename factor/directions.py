@@ -557,26 +557,35 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
     for d, poly in zip(directions_list_thiessen, thiessen_polys):
         add_facet_info(d, poly, midRA, midDec)
     for d in directions_list:
+        # Make calibrator patch (excluding 20% region around edge that is masked)
+        sx, sy = radec2xy([d.ra], [d.dec], refRA=midRA, refDec=midDec)
+        patch_width = 0.8 * d.cal_imsize * d.cellsize_selfcal_deg / 0.066667 # size of patch in pixels
+        x0 = sx[0] - patch_width / 2.0
+        y0 = sy[0] - patch_width / 2.0
+        selfcal_poly = [np.array([x0, y0]),
+                np.array([x0, y0+patch_width]),
+                np.array([x0+patch_width, y0+patch_width]),
+                np.array([x0+patch_width, y0])]
+
         if d.is_patch:
-            sx, sy = radec2xy([d.ra], [d.dec], refRA=midRA, refDec=midDec)
-            patch_width = d.cal_size_deg * 1.2 / 0.066667 # size of patch in pixels
-            x0 = sx[0] - patch_width / 2.0
-            y0 = sy[0] - patch_width / 2.0
-            poly = [np.array([x0, y0]),
-                    np.array([x0, y0+patch_width]),
-                    np.array([x0+patch_width, y0+patch_width]),
-                    np.array([x0+patch_width, y0])]
-            add_facet_info(d, poly, midRA, midDec)
+            # For sources beyond max radius, set facet poly to selfcal poly
+            add_facet_info(d, selfcal_poly, selfcal_poly, midRA, midDec)
+        else:
+            add_facet_info(d, selfcal_poly, poly, midRA, midDec)
 
 
-def add_facet_info(d, poly, midRA, midDec):
+def add_facet_info(d, selfcal_poly, facet_poly, midRA, midDec):
     """
     Convert facet polygon from x, y to RA, Dec and find width of facet and facet center
 
     """
-    poly = np.vstack([poly, poly[0]])
+    for poly in
+    poly = np.vstack([facet_poly, facet_poly[0]])
     ra, dec = xy2radec(poly[:, 0], poly[:, 1], midRA, midDec)
     thiessen_poly_deg = [np.array(ra[0: -1]), np.array(dec[0: -1])]
+    poly = np.vstack([selfcal_poly, selfcal_poly[0]])
+    ra, dec = xy2radec(poly[:, 0], poly[:, 1], midRA, midDec)
+    thiessen_poly_deg_cal = [np.array(ra[0: -1]), np.array(dec[0: -1])]
 
     # Find size and centers of regions in degrees
     xmin = np.min(poly[:, 0])
@@ -595,6 +604,7 @@ def add_facet_info(d, poly, midRA, midDec):
     width_deg = max(ra_width_deg.value, dec_width_deg.value)
 
     d.vertices = thiessen_poly_deg
+    d.vertices_cal = thiessen_poly_deg_cal
     d.width = width_deg
     d.facet_ra = ra_center[0]
     d.facet_dec = dec_center[0]
@@ -680,8 +690,6 @@ def make_ds9_calimage_file(directions, outputfile):
     for direction in directions:
         imsize = direction.cal_imsize * direction.cellsize_selfcal_deg * 3600 # arcsec
         imsize_unmasked = 0.8 * imsize
-        RAs = direction.vertices[0]
-        Decs = direction.vertices[1]
         lines.append('box({0}, {1}, {2}", {2}") # text={{{3}}}\n'.
             format(direction.ra, direction.dec, imsize, direction.name))
         lines.append('box({0}, {1}, {2}", {2}")\n'.
