@@ -80,7 +80,7 @@ def make_template_image(image_name, reference_ra_deg, reference_dec_deg,
     header['SPECSYS'] = 'TOPOCENT'
 
     # Add equinox
-    header['EQUINOX'] = equinox
+    header['EQUINOX'] = 2000.0
 
     # Add telescope
     header['TELESCOP'] = 'UNKNOWN'
