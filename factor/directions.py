@@ -554,8 +554,6 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
                         thiessen_polys[i] = xyverts
 
     # Add the final facet and patch info to the directions
-    for d, poly in zip(directions_list_thiessen, thiessen_polys):
-        add_facet_info(d, poly, midRA, midDec)
     for d in directions_list:
         # Make calibrator patch (excluding 20% region around edge that is masked)
         sx, sy = radec2xy([d.ra], [d.dec], refRA=midRA, refDec=midDec)
@@ -571,6 +569,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
             # For sources beyond max radius, set facet poly to selfcal poly
             add_facet_info(d, selfcal_poly, selfcal_poly, midRA, midDec)
         else:
+            poly = thiessen_polys[directions_list_thiessen.index(d)]
             add_facet_info(d, selfcal_poly, poly, midRA, midDec)
 
 
