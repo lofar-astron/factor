@@ -49,11 +49,15 @@ def make_template_image(image_name, reference_ra_deg, reference_dec_deg,
     im = pim.image('', shape=(1, 1, imsize, imsize))
 
     # Set WCS info
-    values = coordsys.get_referencevalue()
-    values[2][0] = reference_dec_deg/180.0*np.pi
-    values[2][1] = reference_ra_deg/180.0*np.pi
-    values[?] = cellsize_deg
-    coordsys.set_referencevalue(values)
+    coordsys = im.coordinates()
+    ref_values = coordsys.get_referencevalue()
+    ref_values[2][0] = reference_dec_deg/180.0*np.pi
+    ref_values[2][1] = reference_ra_deg/180.0*np.pi
+    coordsys.set_referencevalue(ref_values)
+    inc_values = coordsys.get_increment()
+    inc_values[2][0] = cellsize_deg/180.0*np.pi
+    inc_values[2][1] = -cellsize_deg/180.0*np.pi
+    coordsys.set_increment(inc_values)
     im.saveas(image_name, overwrite=True)
 
 
