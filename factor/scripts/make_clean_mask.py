@@ -46,24 +46,50 @@ def make_template_image(image_name, reference_ra_deg, reference_dec_deg,
         Size of a pixel in degrees
 
     """
-    im = pim.image('', shape=(1, 1, imsize, imsize))
+    shape_out = [1, 1, imsize, imsize]
+    hdu = pyfits.PrimaryHDU(np.zeros(shape_out, dtype=np.float32))
+    hdulist = pyfits.HDUList([hdu])
+    header = hdulist[0].header
 
-    # Set WCS info
-    coordsys = im.coordinates()
-    direction = coordsys['direction']
-    ref_values = coordsys.get_referencevalue()
+    # Add WCS info
+    header['CRVAL1'] = reference_ra_deg
+    header['CDELT1'] = -cellsize_deg
+    header['CRPIX1'] = int(imsize/2.0)
+    header['CUNIT1'] = 'deg'
+    header['CTYPE1'] = 'RA---SIN'
+    header['CRVAL2'] = reference_dec_deg
+    header['CDELT2'] = cellsize_deg
+    header['CRPIX2'] = int(imsize/2.0)
+    header['CUNIT2'] = 'deg'
+    header['CTYPE2'] = 'DEC--SIN'
 
-    # The coords are in units of arcmin by default
-    ref_values[2][0] = reference_dec_deg*60.0
-    ref_values[2][1] = reference_ra_deg*60.0
-    coordsys.set_referencevalue(ref_values)
-    inc_values = direction.get_increment()
-    inc_values[0] = cellsize_deg/180.0*np.pi
-    inc_values[1] = -cellsize_deg/180.0*np.pi
-    direction.set_increment(inc_values)
+    # Add STOKES info
+    header['CRVAL3'] = 1.0
+    header['CDELT3'] = 1.0
+    header['CRPIX3'] = 1.0
+    header['CUNIT3'] = ''
+    header['CTYPE3'] = 'STOKES'
 
-    im_tmp = pim.image('', shape=(1, 1, imsize, imsize), coordsys=coordsys)
-    im_tmp.saveas(image_name, overwrite=True)
+    # Add frequency info
+    header['RESTFRQ'] = 15036
+    header['CRVAL4'] = 150e6
+    header['CDELT4'] = 3e8
+    header['CRPIX4'] = 1.0
+    header['CUNIT4'] = 'HZ'
+    header['CTYPE4'] = 'FREQ'
+    header['SPECSYS'] = 'TOPOCENT'
+
+    # Add equinox
+    header['EQUINOX'] = equinox
+
+    # Add telescope
+    header['TELESCOP'] = 'UNKNOWN'
+
+    hdulist[0].header = header
+
+    hdulist.writeto(image_name, clobber=True)
+    hdulist.close()
+
 
 
 def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, rmsbox=None,
