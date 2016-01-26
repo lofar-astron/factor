@@ -54,8 +54,8 @@ def make_template_image(image_name, reference_ra_deg, reference_dec_deg,
     ref_values = coordsys.get_referencevalue()
 
     # The coords are in units of arcmin by default
-    ref_values[2][0] = reference_dec_deg/180.0*np.pi*60.0
-    ref_values[2][1] = reference_ra_deg/180.0*np.pi*60.0
+    ref_values[2][0] = reference_dec_deg*60.0
+    ref_values[2][1] = reference_ra_deg*60.0
     coordsys.set_referencevalue(ref_values)
     inc_values = direction.get_increment()
     inc_values[0] = cellsize_deg/180.0*np.pi
