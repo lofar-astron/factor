@@ -54,12 +54,12 @@ def make_template_image(image_name, reference_ra_deg, reference_dec_deg,
     # Add WCS info
     header['CRVAL1'] = reference_ra_deg
     header['CDELT1'] = -cellsize_deg
-    header['CRPIX1'] = int(imsize/2.0)
+    header['CRPIX1'] = imsize/2.0
     header['CUNIT1'] = 'deg'
     header['CTYPE1'] = 'RA---SIN'
     header['CRVAL2'] = reference_dec_deg
     header['CDELT2'] = cellsize_deg
-    header['CRPIX2'] = int(imsize/2.0)
+    header['CRPIX2'] = imsize/2.0
     header['CUNIT2'] = 'deg'
     header['CTYPE2'] = 'DEC--SIN'
 
