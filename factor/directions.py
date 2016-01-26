@@ -578,14 +578,15 @@ def add_facet_info(d, selfcal_poly, facet_poly, midRA, midDec):
     Convert facet polygon from x, y to RA, Dec and find width of facet and facet center
 
     """
+    poly_cal = np.vstack([selfcal_poly, selfcal_poly[0]])
+    ra, dec = xy2radec(poly_cal[:, 0], poly_cal[:, 1], midRA, midDec)
+    thiessen_poly_deg_cal = [np.array(ra[0: -1]), np.array(dec[0: -1])]
+
     poly = np.vstack([facet_poly, facet_poly[0]])
     ra, dec = xy2radec(poly[:, 0], poly[:, 1], midRA, midDec)
     thiessen_poly_deg = [np.array(ra[0: -1]), np.array(dec[0: -1])]
-    poly = np.vstack([selfcal_poly, selfcal_poly[0]])
-    ra, dec = xy2radec(poly[:, 0], poly[:, 1], midRA, midDec)
-    thiessen_poly_deg_cal = [np.array(ra[0: -1]), np.array(dec[0: -1])]
 
-    # Find size and centers of regions in degrees
+    # Find size and centers of facet regions in degrees
     xmin = np.min(poly[:, 0])
     xmax = np.max(poly[:, 0])
     xmid = xmin + int((xmax - xmin) / 2.0)
