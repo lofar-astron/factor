@@ -95,6 +95,11 @@ def main(instrument_name, instrument_name_smoothed):
                 amp = median_window_filter(amp, 3, 6)
                 amp = 10**amp
 
+                # Clip extremely high amplitude solutions to prevent biasing the
+                # normalization done below
+                high_ind = numpy.where(amp > 5.0)
+                amp[high_ind] = 5.0
+
                 parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = amp * numpy.cos(phase)
                 parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = amp * numpy.sin(phase)
 
@@ -109,6 +114,8 @@ def main(instrument_name, instrument_name_smoothed):
                 amplist.append(amp)
     norm_factor = 1./(numpy.mean(amplist))
 
+    print "smooth_amps.py: Normalization-Factor is:",norm_factor
+
     for chan in range(nchans):
         for pol in pol_list:
             for antenna in antenna_list:
@@ -117,7 +124,8 @@ def main(instrument_name, instrument_name_smoothed):
                 phase = numpy.arctan2(imag, real)
                 amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
 
-                # Clip extremely low amplitude solutions to prevent very high ampllitudes
+                # Clip extremely low amplitude solutions to prevent very high
+                # amplitudes in the corrected data
                 low_ind = numpy.where(amp < 0.2)
                 amp[low_ind] = 0.2
 
