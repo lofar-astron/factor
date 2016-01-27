@@ -416,18 +416,6 @@ class Direction(object):
             calibration for sources below this flux value
 
         """
-        # Set name of column to use for data and averaged weights
-        self.pre_average = False
-        if self.apparent_flux_mjy is not None:
-            if self.apparent_flux_mjy < preaverage_flux_jy * 1000.0:
-                self.pre_average = True
-        if self.pre_average:
-            self.data_column = 'BLAVG_DATA'
-            self.blavg_weight_column = 'BLAVG_WEIGHT_SPECTRUM'
-        else:
-            self.data_column = 'DATA'
-            self.blavg_weight_column = 'WEIGHT_SPECTRUM'
-
         # For initsubtract, average to 0.5 MHz per channel and 20 sec per time
         # slot. Since each band is imaged separately and the smearing and image
         # sizes both scale linearly with frequency, a single frequency and time
@@ -483,30 +471,41 @@ class Direction(object):
             self.log.debug('Total flux density of calibrator: {} Jy'.format(total_flux_jy))
             self.log.debug('Peak flux density of calibrator: {} Jy/beam'.format(peak_flux_jy_bm))
             self.log.debug('Effective flux density of calibrator: {} Jy'.format(effective_flux_jy))
-            if self.pre_average:
-                # Set solution interval to 1 timeslot and vary the target rms per
-                # solution interval instead (which affects the width of the
-                # preaveraging Gaussian)
-                self.solint_p = 1
-                self.target_rms_rad = int(round(0.5 * (ref_flux_jy / effective_flux_jy)**2))
-                if self.target_rms_rad < 0.2:
-                    self.target_rms_rad = 0.2
-                if self.target_rms_rad > 0.5:
-                    self.target_rms_rad = 0.5
-            else:
-                self.solint_p = int(round(8 * (ref_flux_jy / effective_flux_jy)**2))
-                if self.solint_p < 1:
-                    self.solint_p = 1
-                if self.solint_p > 8:
-                    self.solint_p = 8
 
-            # Amplitude solve is per band, so don't scale with number of bands
-            ref_flux = 1400.0
-            self.solint_a = int(round(240 * (ref_flux_jy / effective_flux_jy)**2))
-            if self.solint_a < 30:
-                self.solint_a = 30
-            if self.solint_a > 240:
-                self.solint_a = 240
+            # Set baseline-dependent pre-averaging flag
+            if effective_flux_jy < preaverage_flux_jy:
+                self.pre_average = True
+            else:
+                self.pre_average = False
+
+            # Set fast (phase-only) solution interval
+            if self.solint_p == 0:
+                if self.pre_average:
+                    # Set solution interval to 1 timeslot and vary the target rms per
+                    # solution interval instead (which affects the width of the
+                    # preaveraging Gaussian)
+                    self.solint_p = 1
+                    self.target_rms_rad = int(round(0.5 * (ref_flux_jy / effective_flux_jy)**2))
+                    if self.target_rms_rad < 0.2:
+                        self.target_rms_rad = 0.2
+                    if self.target_rms_rad > 0.5:
+                        self.target_rms_rad = 0.5
+                else:
+                    self.solint_p = int(round(8 * (ref_flux_jy / effective_flux_jy)**2))
+                    if self.solint_p < 1:
+                        self.solint_p = 1
+                    if self.solint_p > 8:
+                        self.solint_p = 8
+
+            # Set slow (gain) solution interval
+            if self.solint_a == 0:
+                # Amplitude solve is per band, so don't scale with number of bands
+                ref_flux = 1400.0
+                self.solint_a = int(round(240 * (ref_flux_jy / effective_flux_jy)**2))
+                if self.solint_a < 30:
+                    self.solint_a = 30
+                if self.solint_a > 240:
+                    self.solint_a = 240
 
             self.log.debug('Using solution intervals of {0} (fast) and {1} '
                 '(slow) time slots'.format(self.solint_p, self.solint_a))
@@ -523,6 +522,14 @@ class Direction(object):
             # Set frequency interval for selfcal solve steps to the number of
             # channels in a band after averaging
             self.solint_freq = nchan / self.facetselfcal_freqstep
+
+        # Set name of column to use for data and averaged weights
+        if self.pre_average:
+            self.data_column = 'BLAVG_DATA'
+            self.blavg_weight_column = 'BLAVG_WEIGHT_SPECTRUM'
+        else:
+            self.data_column = 'DATA'
+            self.blavg_weight_column = 'WEIGHT_SPECTRUM'
 
 
     def save_state(self):

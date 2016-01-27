@@ -88,11 +88,11 @@ def directions_read(directions_file, factor_working_dir):
                 'direction.'.format(direction['name']))
             continue
 
-        # set defaults
-        if direction['solint_a'] <= 0:
-            direction['solint_a'] = 60
-        if direction['solint_p'] <= 0:
-            direction['solint_p'] = 1
+        # Set defaults
+        if direction['solint_a'] < 0:
+            direction['solint_a'] = 0 # 0 => set internally
+        if direction['solint_p'] < 0:
+            direction['solint_p'] = 0 # 0 => set internally
         if len(direction) > 13:
             if direction['cal_size_deg'] <= 0.0 or np.isnan(direction['cal_size_deg']):
                 cal_size_deg = None
