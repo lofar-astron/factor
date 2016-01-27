@@ -48,11 +48,14 @@ def main(ms_list, num_groups=1):
     for m in reversed(missing_bands):
         ms_list.insert(m, 'dummy.ms')
 
-    # Group and convert lists to strings
-    ms_groups = np.array_split(ms_list, 3)
+    # Group and convert lists to strings. If there are more than one group,
+    # the returned mapfile will have the format:
+    # [[ms1, ms2, ms3]||[ms4, ms5, ms6]]
+    ms_groups = np.array_split(ms_list, num_groups)
     padded_list = []
     for ms_group in ms_groups:
         padded_list.append('[{}]'.format(','.join(ms_group)))
+    padded_list_joined = '||'.join(padded_list)
 
     return {'padded_list': padded_list}
 

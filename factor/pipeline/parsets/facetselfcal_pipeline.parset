@@ -160,7 +160,7 @@ create_compressed_mapfile_data.control.kind                =   plugin
 create_compressed_mapfile_data.control.type                =   compressMapfile
 create_compressed_mapfile_data.control.mapfile_in          =   shift_cal.output.mapfile
 create_compressed_mapfile_data.control.mapfile_dir         =   input.output.mapfile_dir
-create_compressed_mapfile_data.control.filename            =   concat_input.mapfile
+create_compressed_mapfile_data.control.filename            =   check_input.mapfile
 
 check_for_missing_bands.control.type                       =   check_for_missing_bands
 check_for_missing_bands.control.mapfile_in                 =   create_compressed_mapfile_data.output.mapfile
@@ -168,8 +168,14 @@ check_for_missing_bands.control.inputkey                   =   mslist
 check_for_missing_bands.argument.flags                     =   [mslist]
 check_for_missing_bands.argument.num_groups                =   {{ num_selfcal_groups }}
 
+create_groups_mapfile.control.kind                         =   plugin
+create_groups_mapfile.control.type                         =   splitMapfile
+create_groups_mapfile.control.mapfile_in                   =   check_for_missing_bands.output.mapfile
+create_groups_mapfile.control.mapfile_dir                  =   input.output.mapfile_dir
+create_groups_mapfile.control.filename                     =   concat_input.mapfile
+
 concat_data.control.type                                   =   dppp
-concat_data.control.mapfile_in                             =   check_for_missing_bands.output.padded_list.mapfile
+concat_data.control.mapfile_in                             =   create_groups_mapfile.output.padded_list.mapfile
 concat_data.control.inputkey                               =   msin
 concat_data.argument.numthreads                            =   {{ max_cpus_per_node }}
 concat_data.argument.msin.datacolumn                       =   DATA
@@ -181,7 +187,7 @@ concat_data.argument.local_scratch_dir                     =   {{ local_dir }}
 concat_data.argument.steps                                 =   []
 
 concat_corr.control.type                                   =   dppp
-concat_corr.control.mapfile_in                             =   check_for_missing_bands.output.padded_list.mapfile
+concat_corr.control.mapfile_in                             =   create_groups_mapfile.output.padded_list.mapfile
 concat_corr.control.inputkey                               =   msin
 concat_corr.argument.numthreads                            =   {{ max_cpus_per_node }}
 concat_corr.argument.msin.datacolumn                       =   CORRECTED_DATA
@@ -203,7 +209,7 @@ pre_average.argument.flags                                 =   [datafile,parmdb,
 
 # Concat the preaveraged data (and weights)
 concat_blavg_data.control.type                             =   dppp
-concat_blavg_data.control.mapfile_in                       =   check_for_missing_bands.output.padded_list.mapfile
+concat_blavg_data.control.mapfile_in                       =   create_groups_mapfile.output.padded_list.mapfile
 concat_blavg_data.control.inputkey                         =   msin
 concat_blavg_data.argument.numthreads                      =   {{ max_cpus_per_node }}
 concat_blavg_data.argument.msin.datacolumn                 =   BLAVG_DATA
