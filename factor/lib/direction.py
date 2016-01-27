@@ -124,7 +124,7 @@ class Direction(object):
 
         # Set the size of the calibrator (used to filter source lists)
         if cal_size_deg is None:
-            # Get from cal imsize assuming 50% padding
+            # Try to get from cal_imsize assuming 50% padding
             if self.cal_imsize == 0:
                 self.log.error('The cal_imsize must be specified in the directions '
                     'file')
@@ -133,6 +133,9 @@ class Direction(object):
                 self.cal_size_deg = self.cal_imsize * self.cellsize_selfcal_deg / 1.5
         else:
             self.cal_size_deg = cal_size_deg
+            if self.cal_imsize == 0:
+                self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
+                    / self.cellsize_selfcal_deg * 1.2)) # cal size has 20% padding
 
         self.cal_radius_deg = self.cal_size_deg / 2.0
         self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
@@ -162,16 +165,13 @@ class Direction(object):
 
         """
         if not test_run:
-            # Set selfcal and facet image sizes
+            # Set facet image size
             if self.facet_imsize == 0:
                 if hasattr(self, 'width'):
                     self.facet_imsize = max(512, self.get_optimum_size(self.width
                         / self.cellsize_selfcal_deg * 1.3)) # full facet has 30% padding
                 else:
                     self.facet_imsize = None
-            if self.cal_imsize == 0:
-                self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
-                    / self.cellsize_selfcal_deg * 1.2)) # cal size has 20% padding
         else:
             self.facet_imsize = self.get_optimum_size(128)
             self.cal_imsize = self.get_optimum_size(128)
