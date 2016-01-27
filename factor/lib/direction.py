@@ -101,20 +101,6 @@ class Direction(object):
         else:
             self.apparent_flux_mjy = None
 
-        # Set the size of the calibrator (used to filter source lists)
-        if cal_size_deg is None:
-            # Get from cal imsize assuming 50% padding
-            if cal_imsize == 0:
-                self.log.error('The cal_imsize must be specified in the directions '
-                    'file')
-                sys.exit(1)
-            else:
-                self.cal_size_deg = cal_imsize * self.cellsize_selfcal_deg / 1.5
-        else:
-            self.cal_size_deg = cal_size_deg
-        self.cal_radius_deg = self.cal_size_deg / 2.0
-        self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
-
         # Initialize some parameters to default/initial values
         self.loop_amp_selfcal = False
         self.selfcal_ok = False # whether selfcal succeeded
@@ -135,6 +121,20 @@ class Direction(object):
         self.is_patch = False # whether direction is just a patch (not full facet)
         self.nchunks = 1
         self.num_selfcal_groups = 1
+
+        # Set the size of the calibrator (used to filter source lists)
+        if cal_size_deg is None:
+            # Get from cal imsize assuming 50% padding
+            if cal_imsize == 0:
+                self.log.error('The cal_imsize must be specified in the directions '
+                    'file')
+                sys.exit(1)
+            else:
+                self.cal_size_deg = cal_imsize * self.cellsize_selfcal_deg / 1.5
+        else:
+            self.cal_size_deg = cal_size_deg
+        self.cal_radius_deg = self.cal_size_deg / 2.0
+        self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
 
         # Define some directories and files
         self.working_dir = factor_working_dir
