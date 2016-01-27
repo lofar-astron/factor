@@ -21,6 +21,7 @@ from lofarpipe.support.parset import Parset
 from factor.lib.direction import Direction
 try:
     from matplotlib import pyplot as plt
+    import matplotlib.image as mpimg
     from matplotlib.patches import Polygon, Circle
     from matplotlib.ticker import FuncFormatter
     from mpl_toolkits.axes_grid.anchored_artists import AnchoredText
@@ -276,7 +277,7 @@ def on_pick(event):
             info = 'No image of facet exists for {}'.format(facet.facet_name)
 
     elif event.mouseevent.button == 3: # right click
-        # Open selfcal images (if any)
+        # Open selfcal images and plots (if any)
         if os.path.exists('/tmp/tempimage'):
             shutil.rmtree('/tmp/tempimage')
         selfcal_images = find_selfcal_images(direction)
@@ -287,11 +288,13 @@ def on_pick(event):
         else:
             info = 'No selfcal images exist for {}'.format(facet.facet_name)
 
-        # Open parmdbplot of selfcal instrument table (if any)
-        selfcal_parmdb = find_selfcal_parmdb(direction)
-        if selfcal_parmdb is not None:
-            info += '\nOpening final selfcal solutions for {}...'.format(facet.facet_name)
-            os.system('parmdbplot.py {} &'.format(selfcal_parmdb))
+        # Open selfcal plots (if any)
+        selfcal_plots = find_selfcal_plots(direction)
+        if selfcal_plots is not None:
+            info += '\nOpening final selfcal plots for {}...'.format(facet.facet_name)
+            for p in selfcal_plots:
+                img = mpimg.imread(p)
+                imgplot = plt.imshow(img)
         else:
             info += '\nFinal selfcal solutions do not exist for {}'.format(facet.facet_name)
 
@@ -412,22 +415,20 @@ def find_selfcal_images(direction):
     return selfcal_images
 
 
-def find_selfcal_parmdb(direction):
+def find_selfcal_plots(direction):
     """
     Returns the filename of selfcal parmdb
     """
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
     if os.path.exists(selfcal_dir):
-        selfcal_parmdb = glob.glob(selfcal_dir+'/*.merge_selfcal_parmdbs')
-        if len(selfcal_parmdb) == 0:
-            selfcal_parmdb = None
-        else:
-            selfcal_parmdb = selfcal_parmdb[0]
+        selfcal_plots = glob.glob(selfcal_dir+'/*.png')
+        if len(selfcal_plots) == 0:
+            selfcal_plots = None
     else:
-        selfcal_parmdb = None
+        selfcal_plots = None
 
-    return selfcal_parmdb
+    return selfcal_plots
 
 
 def find_facet_image(direction):

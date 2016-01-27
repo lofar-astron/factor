@@ -77,6 +77,8 @@ class FacetSelfcal(Operation):
             'make_facet_skymodels_all.mapfile')
         self.direction.dir_dep_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'merge_selfcal_parmdbs.mapfile')
+        self.direction.selfcal_plots_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'make_selfcal_plots.mapfile')
         self.direction.facet_image_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'final_image.mapfile')
         self.direction.facet_model_mapfile = os.path.join(self.pipeline_mapfile_dir,
