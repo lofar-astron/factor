@@ -81,12 +81,6 @@ def directions_read(directions_file, factor_working_dir):
             outlier_source = True
         else:
             outlier_source = False
-        if (direction['solint_a'] <= 0 or direction['solint_p'] <= 0) and \
-            np.isnan(direction['apparent_flux']):
-            log.error('One of more of the solution intervals is invalid and no '
-                'apparent flux is specified for direction {0}. Ignoring '
-                'direction.'.format(direction['name']))
-            continue
 
         # Set defaults
         if direction['solint_a'] < 0:

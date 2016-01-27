@@ -79,8 +79,8 @@ class Direction(object):
         self.atrous_do = atrous_do
         self.mscale_field_do = mscale_field_do
         self.cal_imsize = cal_imsize
-        self.solint_p = solint_p
-        self.solint_a = solint_a
+        self.solint_time_p = solint_p
+        self.solint_time_a = solint_a
         self.facet_imsize = field_imsize * 1.15
         self.dynamic_range = dynamic_range
         if region_selfcal.lower() == 'empty':
@@ -412,7 +412,7 @@ class Direction(object):
         initial_skymodel : LSMTool SkyModel object, optional
             Sky model used to check source sizes
         preaverage_flux_jy : bool, optional
-            Use baseline-dependent averaging and solint_p = 1 for phase-only
+            Use baseline-dependent averaging and solint_time_p = 1 for phase-only
             calibration for sources below this flux value
 
         """
@@ -450,11 +450,6 @@ class Direction(object):
             self.verify_freqstep += 1
         self.verify_timestep = max(1, int(round(60.0 / timestep_sec)))
 
-        # Set number of calibration groups to use during selfcal, so that each
-        # group is no more than 20 MHz of total bandwidth
-        self.num_selfcal_groups = int(np.ceil(nchan * nbands * chan_width_hz/1e6
-            / 20.0))
-
         # Set time intervals for selfcal solve steps
         #
         # Calculate the effective flux density. This is the one used to set the
@@ -465,6 +460,8 @@ class Direction(object):
         # flux density to set the intervals. A scaling with a power of 1/1.5
         # seems to work well
         if initial_skymodel is not None:
+            # The initial skymodel is not used for field directions, so steps
+            # below are skipped
             total_flux_jy, peak_flux_jy_bm = self.get_cal_fluxes(initial_skymodel)
             effective_flux_jy = peak_flux_jy_bm * (total_flux_jy / peak_flux_jy_bm)**0.667
             ref_flux_jy = 1.4 * (4.0 / nbands)**0.5
@@ -479,49 +476,56 @@ class Direction(object):
                 self.pre_average = False
 
             # Set fast (phase-only) solution interval
-            if self.solint_p == 0:
+            if self.solint_time_p == 0:
                 if self.pre_average:
                     # Set solution interval to 1 timeslot and vary the target rms per
                     # solution interval instead (which affects the width of the
                     # preaveraging Gaussian)
-                    self.solint_p = 1
+                    self.solint_time_p = 1
                     self.target_rms_rad = int(round(0.5 * (ref_flux_jy / effective_flux_jy)**2))
                     if self.target_rms_rad < 0.2:
                         self.target_rms_rad = 0.2
                     if self.target_rms_rad > 0.5:
                         self.target_rms_rad = 0.5
                 else:
-                    self.solint_p = int(round(8 * (ref_flux_jy / effective_flux_jy)**2))
-                    if self.solint_p < 1:
-                        self.solint_p = 1
-                    if self.solint_p > 8:
-                        self.solint_p = 8
+                    self.solint_time_p = int(round(8 * (ref_flux_jy / effective_flux_jy)**2))
+                    if self.solint_time_p < 1:
+                        self.solint_time_p = 1
+                    if self.solint_time_p > 8:
+                        self.solint_time_p = 8
 
             # Set slow (gain) solution interval
-            if self.solint_a == 0:
+            if self.solint_time_a == 0:
                 # Amplitude solve is per band, so don't scale with number of bands
                 ref_flux = 1400.0
-                self.solint_a = int(round(240 * (ref_flux_jy / effective_flux_jy)**2))
-                if self.solint_a < 30:
-                    self.solint_a = 30
-                if self.solint_a > 240:
-                    self.solint_a = 240
+                self.solint_time_a = int(round(240 * (ref_flux_jy / effective_flux_jy)**2))
+                if self.solint_time_a < 30:
+                    self.solint_time_a = 30
+                if self.solint_time_a > 240:
+                    self.solint_time_a = 240
 
             self.log.debug('Using solution intervals of {0} (fast) and {1} '
-                '(slow) time slots'.format(self.solint_p, self.solint_a))
+                '(slow) time slots'.format(self.solint_time_p, self.solint_time_a))
 
             # Set chunk width for time chunking to the amplitude solution time
             # interval (minus one time slot to ensure that we don't get a very short
             # solution interval at the end of the chunk) so that it's close to
             # ~ 200 time slots (to avoid memory/performance issues)
-            self.chunk_width = self.solint_a - 1
+            self.chunk_width = self.solint_time_a - 1
             while self.chunk_width < 200:
-                self.chunk_width += self.solint_a - 1
+                self.chunk_width += self.solint_time_a - 1
             self.nchunks = int(np.ceil((np.float(ntimes) / np.float(self.chunk_width))))
 
-            # Set frequency interval for selfcal solve steps to the number of
-            # channels in a band after averaging
-            self.solint_freq = nchan / self.facetselfcal_freqstep
+            # Set frequency interval for selfcal solve steps. The interval for
+            # slow (amp) selfcal should be the number of channels in a band after
+            # averaging. The interval for fast (phase) selfcal should be the
+            # number of channels in 20 MHz or less
+            num_chan_per_band_after_avg = nchan / self.facetselfcal_freqstep
+            self.solint_freq_a = num_chan_per_band_after_avg
+            num_cal_blocks = np.ceil(nchan * nbands * chan_width_hz/1e6
+                / 20.0)
+            self.solint_freq_p = int(np.ceil(num_chan_per_band_after_avg * nbands
+                / num_cal_blocks))
 
         # Set name of column to use for data and averaged weights
         if self.pre_average:

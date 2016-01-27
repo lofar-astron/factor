@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, add_imaging_cols_empty, shift_cal, {% if transfer_nearest_solutions %}expand_merged_parmdb_map_transfer, apply_dir_dep_fast_transfer, apply_dir_dep_slow_transfer, {% else %}apply_dir_indep, {% endif %}create_compressed_mapfile_data, check_for_missing_bands, create_groups_mapfile, concat_data, concat_corr, {% if pre_average %}pre_average, concat_blavg_data,{% endif %} copy_column1, {% if pre_average %}copy_column2, copy_column3,{% endif %} make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, {% if not transfer_nearest_solutions %}average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, {% endif %}average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, {% block full_image_steps %}premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, create_compressed_mapfile6, wsclean_ft{% endblock full_image_steps %}, corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_single_band_mapfile, create_single_model_mapfile, subtract_single, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, add_imaging_cols_empty, shift_cal, {% if transfer_nearest_solutions %}expand_merged_parmdb_map_transfer, apply_dir_dep_fast_transfer, apply_dir_dep_slow_transfer, {% else %}apply_dir_indep, {% endif %}create_compressed_mapfile_data, check_for_missing_bands, concat_data, concat_corr, {% if pre_average %}pre_average, concat_blavg_data,{% endif %} copy_column1, {% if pre_average %}copy_column2, copy_column3,{% endif %} make_chunks, create_chunks_map, add_imaging_cols, create_chunks_compressed_mapfile, concat_chunks, {% if not transfer_nearest_solutions %}average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, {% endif %}average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, {% block full_image_steps %}premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, create_compressed_mapfile6, wsclean_ft{% endblock full_image_steps %}, corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_single_band_mapfile, create_single_model_mapfile, subtract_single, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -160,22 +160,15 @@ create_compressed_mapfile_data.control.kind                =   plugin
 create_compressed_mapfile_data.control.type                =   compressMapfile
 create_compressed_mapfile_data.control.mapfile_in          =   shift_cal.output.mapfile
 create_compressed_mapfile_data.control.mapfile_dir         =   input.output.mapfile_dir
-create_compressed_mapfile_data.control.filename            =   check_input.mapfile
+create_compressed_mapfile_data.control.filename            =   concat_input.mapfile
 
 check_for_missing_bands.control.type                       =   check_for_missing_bands
 check_for_missing_bands.control.mapfile_in                 =   create_compressed_mapfile_data.output.mapfile
 check_for_missing_bands.control.inputkey                   =   mslist
 check_for_missing_bands.argument.flags                     =   [mslist]
-check_for_missing_bands.argument.num_groups                =   {{ num_selfcal_groups }}
-
-create_groups_mapfile.control.kind                         =   plugin
-create_groups_mapfile.control.type                         =   splitMapfile
-create_groups_mapfile.control.mapfile_in                   =   check_for_missing_bands.output.mapfile
-create_groups_mapfile.control.mapfile_dir                  =   input.output.mapfile_dir
-create_groups_mapfile.control.filename                     =   concat_input.mapfile
 
 concat_data.control.type                                   =   dppp
-concat_data.control.mapfile_in                             =   create_groups_mapfile.output.padded_list.mapfile
+concat_data.control.mapfile_in                             =   check_for_missing_bands.output.padded_list.mapfile
 concat_data.control.inputkey                               =   msin
 concat_data.argument.numthreads                            =   {{ max_cpus_per_node }}
 concat_data.argument.msin.datacolumn                       =   DATA
@@ -187,7 +180,7 @@ concat_data.argument.local_scratch_dir                     =   {{ local_dir }}
 concat_data.argument.steps                                 =   []
 
 concat_corr.control.type                                   =   dppp
-concat_corr.control.mapfile_in                             =   create_groups_mapfile.output.padded_list.mapfile
+concat_corr.control.mapfile_in                             =   check_for_missing_bands.output.padded_list.mapfile
 concat_corr.control.inputkey                               =   msin
 concat_corr.argument.numthreads                            =   {{ max_cpus_per_node }}
 concat_corr.argument.msin.datacolumn                       =   CORRECTED_DATA
@@ -209,7 +202,7 @@ pre_average.argument.flags                                 =   [datafile,parmdb,
 
 # Concat the preaveraged data (and weights)
 concat_blavg_data.control.type                             =   dppp
-concat_blavg_data.control.mapfile_in                       =   create_groups_mapfile.output.padded_list.mapfile
+concat_blavg_data.control.mapfile_in                       =   check_for_missing_bands.output.padded_list.mapfile
 concat_blavg_data.control.inputkey                         =   msin
 concat_blavg_data.argument.numthreads                      =   {{ max_cpus_per_node }}
 concat_blavg_data.argument.msin.datacolumn                 =   BLAVG_DATA
@@ -415,7 +408,8 @@ solve_phaseonly1.argument.catalog                          =   {{ skymodel_dir }
 solve_phaseonly1.argument.replace-sourcedb                 =   True
 solve_phaseonly1.argument.replace-parmdb                   =   True
 solve_phaseonly1.argument.Strategy.InputColumn             =   {{ data_column }}
-solve_phaseonly1.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
+solve_phaseonly1.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_time_p }}
+solve_phaseonly1.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq_p }}
 
 switch_weights_col2.control.type                           =   switch_columns
 switch_weights_col2.control.mapfile_in                     =   create_chunks_map.output.mapfile
@@ -572,7 +566,8 @@ solve_phaseonly2.argument.catalog                          =   {{ skymodel_dir }
 solve_phaseonly2.argument.replace-sourcedb                 =   True
 solve_phaseonly2.argument.replace-parmdb                   =   True
 solve_phaseonly2.argument.Strategy.InputColumn             =   {{ data_column }}
-solve_phaseonly2.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
+solve_phaseonly2.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_time_p }}
+solve_phaseonly2.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq_p }}
 
 switch_weights_col4.control.type                           =   switch_columns
 switch_weights_col4.control.mapfile_in                     =   create_chunks_map.output.mapfile
@@ -730,7 +725,8 @@ solve_ampphase11.argument.catalog                          =   {{ skymodel_dir }
 solve_ampphase11.argument.replace-sourcedb                 =   True
 solve_ampphase11.argument.replace-parmdb                   =   True
 solve_ampphase11.argument.Strategy.InputColumn             =   {{ data_column }}
-solve_ampphase11.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
+solve_ampphase11.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_time_p }}
+solve_ampphase11.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq_p }}
 
 switch_weights_col6.control.type                           =   switch_columns
 switch_weights_col6.control.mapfile_in                     =   create_chunks_map.output.mapfile
@@ -748,8 +744,8 @@ solve_ampphase12.argument.parset                           =   {{ parset_dir }}/
 solve_ampphase12.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
 solve_ampphase12.argument.replace-sourcedb                 =   True
 solve_ampphase12.argument.replace-parmdb                   =   True
-solve_ampphase12.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_a }}
-solve_ampphase12.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq }}
+solve_ampphase12.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_time_a }}
+solve_ampphase12.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq_a }}
 
 merge_amp_parmdbs1.control.type                            =   merge_parmdbs_in_time
 merge_amp_parmdbs1.control.mapfile_in                      =   create_chunks_compressed_mapfile.output.mapfile
@@ -931,7 +927,8 @@ solve_ampphase21.argument.catalog                          =   {{ skymodel_dir }
 solve_ampphase21.argument.replace-sourcedb                 =   True
 solve_ampphase21.argument.replace-parmdb                   =   True
 solve_ampphase21.argument.Strategy.InputColumn             =   {{ data_column }}
-solve_ampphase21.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_p }}
+solve_ampphase21.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_time_p }}
+solve_ampphase21.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq_p }}
 
 switch_weights_col8.control.type                           =   switch_columns
 switch_weights_col8.control.mapfile_in                     =   create_chunks_map.output.mapfile
@@ -955,8 +952,8 @@ solve_ampphase22.argument.parset                           =   {{ parset_dir }}/
 solve_ampphase22.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
 solve_ampphase22.argument.replace-sourcedb                 =   True
 solve_ampphase22.argument.replace-parmdb                   =   True
-solve_ampphase22.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_a }}
-solve_ampphase22.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq }}
+solve_ampphase22.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_time_a }}
+solve_ampphase22.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq_a }}
 
 merge_amp_parmdbs2.control.type                            =   merge_parmdbs_in_time
 merge_amp_parmdbs2.control.mapfile_in                      =   create_chunks_compressed_mapfile.output.mapfile
