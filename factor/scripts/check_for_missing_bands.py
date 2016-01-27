@@ -5,10 +5,11 @@ Script to check a list of MS files for missing frequencies
 import argparse
 from argparse import RawTextHelpFormatter
 import pyrap.tables as pt
+import numpy as np
 import sys
 
 
-def main(ms_list):
+def main(ms_list, num_groups=1):
     """
     Check a list of MS files for missing frequencies
 
@@ -16,6 +17,8 @@ def main(ms_list):
     ----------
     ms_list : list
         List of MS filenames, in order of increasing frequency
+    max_per_group : int
+        Maximum number of bands per group
 
     Returns
     -------
@@ -41,10 +44,17 @@ def main(ms_list):
         ngap = int(round((freq2 - freq1)/freq_width))
         missing_bands.extend([i + j + 1 for j in range(ngap-1)])
 
+    # Insert dummy entries in gaps
     for m in reversed(missing_bands):
         ms_list.insert(m, 'dummy.ms')
 
-    return {'padded_list': '[{}]'.format(','.join(ms_list))}
+    # Group and convert lists to strings
+    ms_groups = np.array_split(ms_list, 3)
+    padded_list = []
+    for ms_group in ms_groups:
+        padded_list.append('[{}]'.format(','.join(ms_group)))
+
+    return {'padded_list': padded_list}
 
 
 if __name__ == '__main__':

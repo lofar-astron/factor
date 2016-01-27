@@ -166,6 +166,7 @@ check_for_missing_bands.control.type                       =   check_for_missing
 check_for_missing_bands.control.mapfile_in                 =   create_compressed_mapfile_data.output.mapfile
 check_for_missing_bands.control.inputkey                   =   mslist
 check_for_missing_bands.argument.flags                     =   [mslist]
+check_for_missing_bands.argument.num_groups                =   {{ num_selfcal_groups }}
 
 concat_data.control.type                                   =   dppp
 concat_data.control.mapfile_in                             =   check_for_missing_bands.output.padded_list.mapfile

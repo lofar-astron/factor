@@ -120,6 +120,7 @@ class Direction(object):
         self.do_reset = False # whether to reset this direction
         self.is_patch = False # whether direction is just a patch (not full facet)
         self.nchunks = 1
+        self.num_selfcal_groups = 1
 
         # Set the size of the calibrator (used to filter source lists)
         if cal_size_deg is None:
@@ -379,7 +380,7 @@ class Direction(object):
         timestep_sec, ntimes, nbands, initial_skymodel=None,
         preaverage_flux_jy=0.0):
         """
-        Sets the averaging step sizes and solution intervals for selfcal
+        Sets the averaging step sizes and solution intervals
 
         The solution-interval scaling is done so that sources with total flux
         densities below 1.4 Jy at the highest frequency have a fast interval of
@@ -399,7 +400,7 @@ class Direction(object):
         Parameters
         ----------
         chan_width_hz : float
-            Channel width
+            Channel width in Hz
         nchan : int
             Number of channels per band
         timestep_sec : float
@@ -460,6 +461,11 @@ class Direction(object):
         while nchan % self.verify_freqstep:
             self.verify_freqstep += 1
         self.verify_timestep = max(1, int(round(60.0 / timestep_sec)))
+
+        # Set number of calibration groups to use during selfcal, so that each
+        # group is no more than 20 MHz of total bandwidth
+        self.num_selfcal_groups = int(np.ceil(nchan * nbands * chan_width_hz/1e6
+            / 20.0))
 
         # Set time intervals for selfcal solve steps
         #
