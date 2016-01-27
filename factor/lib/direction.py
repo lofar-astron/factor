@@ -125,14 +125,15 @@ class Direction(object):
         # Set the size of the calibrator (used to filter source lists)
         if cal_size_deg is None:
             # Get from cal imsize assuming 50% padding
-            if cal_imsize == 0:
+            if self.cal_imsize == 0:
                 self.log.error('The cal_imsize must be specified in the directions '
                     'file')
                 sys.exit(1)
             else:
-                self.cal_size_deg = cal_imsize * self.cellsize_selfcal_deg / 1.5
+                self.cal_size_deg = self.cal_imsize * self.cellsize_selfcal_deg / 1.5
         else:
             self.cal_size_deg = cal_size_deg
+
         self.cal_radius_deg = self.cal_size_deg / 2.0
         self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
 
@@ -162,13 +163,15 @@ class Direction(object):
         """
         if not test_run:
             # Set selfcal and facet image sizes
-            if hasattr(self, 'width'):
-                self.facet_imsize = max(512, self.get_optimum_size(self.width
-                    / self.cellsize_selfcal_deg * 1.3)) # full facet has 30% padding
-            else:
-                self.facet_imsize = None
-            self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
-                / self.cellsize_selfcal_deg * 1.2)) # cal size has 20% padding
+            if self.facet_imsize == 0:
+                if hasattr(self, 'width'):
+                    self.facet_imsize = max(512, self.get_optimum_size(self.width
+                        / self.cellsize_selfcal_deg * 1.3)) # full facet has 30% padding
+                else:
+                    self.facet_imsize = None
+            if self.cal_imsize == 0:
+                self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
+                    / self.cellsize_selfcal_deg * 1.2)) # cal size has 20% padding
         else:
             self.facet_imsize = self.get_optimum_size(128)
             self.cal_imsize = self.get_optimum_size(128)
@@ -183,7 +186,7 @@ class Direction(object):
         else:
             self.use_wideband = False
 
-        # Set number of channels for wide-band imaging with WSCleanand nterms
+        # Set number of channels for wide-band imaging with WSClean and nterms
         # for the CASA imager. Also define the image suffixes (which depend on
         # whether or not wide-band clean is done)
         if self.use_wideband:
@@ -496,8 +499,8 @@ class Direction(object):
                     self.solint_time_p = int(round(8 * (ref_flux_jy / effective_flux_jy)**2))
                     if self.solint_time_p < 1:
                         self.solint_time_p = 1
-                    if self.solint_time_p > 8:
-                        self.solint_time_p = 8
+                    if self.solint_time_p > 2:
+                        self.solint_time_p = 2
 
             # Set slow (gain) solution interval
             if self.solint_time_a == 0:
@@ -506,8 +509,8 @@ class Direction(object):
                 self.solint_time_a = int(round(240 * (ref_flux_jy / effective_flux_jy)**2))
                 if self.solint_time_a < 30:
                     self.solint_time_a = 30
-                if self.solint_time_a > 240:
-                    self.solint_time_a = 240
+                if self.solint_time_a > 120:
+                    self.solint_time_a = 120
 
             self.log.debug('Using solution intervals of {0} (fast) and {1} '
                 '(slow) time slots'.format(self.solint_time_p, self.solint_time_a))

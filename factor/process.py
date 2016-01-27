@@ -562,14 +562,14 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
     # Set various direction attributes
     log.info("Determining imaging parameters for each direction...")
     for i, direction in enumerate(directions):
+        # Set imaging parameters
+        direction.set_imaging_parameters(len(bands), parset['wsclean_nbands'],
+            initial_skymodel.copy(), test_run=test_run)
+
         # Set averaging steps and solution intervals for selfcal
         direction.set_averaging_steps_and_solution_intervals(bands[0].chan_width_hz,
             bands[0].nchan, bands[0].timepersample, bands[0].nsamples, len(bands),
             initial_skymodel.copy(), parset['preaverage_flux_jy'])
-
-        # Set imaging parameters
-        direction.set_imaging_parameters(len(bands), parset['wsclean_nbands'],
-            initial_skymodel.copy(), test_run=test_run)
 
         # Set field center
         direction.field_ra = field.ra

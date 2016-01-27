@@ -89,7 +89,6 @@ def directions_read(directions_file, factor_working_dir):
         if direction['solint_p'] < 0:
             direction['solint_p'] = 0 # 0 => set internally
         if len(direction) > 13:
-            log.debug('cal_size_deg: {}'.format(direction['cal_size_deg']))
             if direction['cal_size_deg'] < 0.0 or np.isnan(direction['cal_size_deg']):
                 cal_size_deg = None
             else:
@@ -101,8 +100,6 @@ def directions_read(directions_file, factor_working_dir):
         else:
             cal_size_deg = None
             cal_flux_jy = None
-
-        log.debug('cal_size_deg: {}'.format(cal_size_deg))
 
         data.append(Direction(direction['name'], ra, dec, atrous_do,
         	mscale_field_do, direction['cal_imsize'], direction['solint_p'],
