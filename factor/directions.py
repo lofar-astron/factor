@@ -38,20 +38,21 @@ def directions_read(directions_file, factor_working_dir):
 
     log.info("Reading directions file: %s" % (directions_file))
     try:
-        types = np.dtype({'names': ['name', 'radec', 'atrous_do', 'mscale_field_do',
-            'cal_imsize', 'solint_p', 'solint_a', 'field_imsize', 'dynamic_range',
-            'region_selfcal', 'region_field', 'peel_skymodel', 'outlier_source',
-            'cal_size_deg', 'cal_flux_mjy'], 'formats':['S255', 'S255', 'S5',
-            'S5', int, int, int, int, 'S2', 'S255', 'S255', 'S255',
-            'S5', float, float]})
+        types = np.dtype({
+            'names': ['name', 'radec', 'atrous_do', 'mscale_field_do',
+               'cal_imsize', 'solint_p', 'solint_a', 'field_imsize', 'dynamic_range',
+                'region_selfcal', 'region_field', 'peel_skymodel', 'outlier_source',
+                'cal_size_deg', 'cal_flux_mjy'],
+            'formats':['S255', 'S255', 'S5', 'S5', int, int, int, int, 'S2',
+                'S255', 'S255', 'S255', 'S5', float, float]})
         directions = np.genfromtxt(directions_file, comments='#', dtype=types)
     except ValueError:
-        types = np.dtype({'names': ['name', 'radec', 'atrous_do', 'mscale_field_do',
-            'cal_imsize', 'solint_p', 'solint_a', 'field_imsize', 'dynamic_range',
-            'region_selfcal', 'region_field', 'peel_skymodel', 'outlier_source'],
-            'formats':['S255', 'S255', 'S5',
-            'S5', int, int, int, int, 'S2', 'S255', 'S255', 'S255',
-            'S5', float, float]})
+        types = np.dtype({
+            'names': ['name', 'radec', 'atrous_do', 'mscale_field_do',
+              'cal_imsize', 'solint_p', 'solint_a', 'field_imsize', 'dynamic_range',
+                'region_selfcal', 'region_field', 'peel_skymodel', 'outlier_source'],
+            'formats':['S255', 'S255', 'S5', 'S5', int, int, int, int, 'S2',
+                'S255', 'S255', 'S255', 'S5']})
         directions = np.genfromtxt(directions_file, comments='#', dtype=types)
 
     data = []
@@ -88,6 +89,7 @@ def directions_read(directions_file, factor_working_dir):
         if direction['solint_p'] < 0:
             direction['solint_p'] = 0 # 0 => set internally
         if len(direction) > 13:
+            log.debug('cal_size_deg: {}'.format(direction['cal_size_deg']))
             if direction['cal_size_deg'] < 0.0 or np.isnan(direction['cal_size_deg']):
                 cal_size_deg = None
             else:
@@ -100,14 +102,15 @@ def directions_read(directions_file, factor_working_dir):
             cal_size_deg = None
             cal_flux_jy = None
 
-        data.append(Direction(direction['name'], ra, dec,
-        	atrous_do, mscale_field_do,
-        	direction['cal_imsize'], direction['solint_p'],
+        log.debug('cal_size_deg: {}'.format(cal_size_deg))
+
+        data.append(Direction(direction['name'], ra, dec, atrous_do,
+        	mscale_field_do, direction['cal_imsize'], direction['solint_p'],
         	direction['solint_a'], direction['field_imsize'],
         	direction['dynamic_range'], direction['region_selfcal'],
         	direction['region_field'], direction['peel_skymodel'],
-        	outlier_source, factor_working_dir, False,
-        	cal_size_deg, cal_flux_jy))
+        	outlier_source, factor_working_dir, False, cal_size_deg,
+        	cal_flux_jy))
 
     return data
 
