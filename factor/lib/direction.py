@@ -146,17 +146,17 @@ class Direction(object):
         self.vertices_file = self.save_file
 
 
-    def set_imcal_parameters(self, nbands, nbands_per_channel, chan_width_hz,
+    def set_imcal_parameters(self, nbands_per_channel, chan_width_hz,
     	nchan, timestep_sec, ntimes, nbands, initial_skymodel=None,
     	preaverage_flux_jy=0.0):
         """
         Sets various parameters for imaging and calibration
         """
-        self.set_imaging_parameters(len(bands), nbands_per_channel, nchan,
-            initial_skymodel.copy())
-        self.set_averaging_steps_and_solution_intervals(chan_width_hz,
-            nchan, timestep_sec, ntimes, nbands,
-            initial_skymodel.copy(), preaverage_flux_jy)
+        self.set_imaging_parameters(nbands, nbands_per_channel, nchan,
+            initial_skymodel)
+        self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,
+        	timestep_sec, ntimes, nbands, initial_skymodel,
+        	preaverage_flux_jy)
 
 
     def set_imaging_parameters(self, nbands, nbands_per_channel, nchan_per_band,
@@ -226,7 +226,7 @@ class Direction(object):
         # with a Gaussian of 1 arcmin, so unresolved sources have sizes of ~
         # 1 arcmin)
         if initial_skymodel is not None and self.mscale_field_do is None:
-            sizes = self.get_source_sizes(initial_skymodel)
+            sizes = self.get_source_sizes(initial_skymodel.copy())
             large_size_arcmin = 2.0
             if any([s > large_size_arcmin for s in sizes]):
                 self.mscale_field_do = True
@@ -491,7 +491,7 @@ class Direction(object):
         if initial_skymodel is not None:
             # The initial skymodel is not used for field directions, so steps
             # below are skipped
-            total_flux_jy, peak_flux_jy_bm = self.get_cal_fluxes(initial_skymodel)
+            total_flux_jy, peak_flux_jy_bm = self.get_cal_fluxes(initial_skymodel.copy())
             effective_flux_jy = peak_flux_jy_bm * (total_flux_jy / peak_flux_jy_bm)**0.667
             ref_flux_jy = 1.4 * (4.0 / nbands)**0.5
             self.log.debug('Total flux density of calibrator: {} Jy'.format(total_flux_jy))
