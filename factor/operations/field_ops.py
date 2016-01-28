@@ -63,6 +63,7 @@ class InitSubtract(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'predict_low.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'corrupt_low.mapfile')
             ]
+        self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()
 
 
@@ -89,4 +90,5 @@ class MakeMosaic(Operation):
         self.direction.cleanup_mapfiles = [
             os.path.join(self.pipeline_mapfile_dir, 'average.mapfile')
             ]
+        self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()

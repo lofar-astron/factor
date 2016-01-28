@@ -99,8 +99,26 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     bands = [b for b in bands if not b.skip]
 
     # Define directions and groups
-    directions, direction_groups = _set_up_directions(parset, bands, field,
-        dry_run, test_run, reset_directions)
+    directions, direction_groups, outlier_directions = _set_up_directions(parset,
+        bands, field, dry_run, test_run, reset_directions)
+
+    # Run peeling and subtract operations on outlier directions
+    if len(outlier_directions) > 0:
+        # Combine the nodes and cores for the peeling and subtract operation
+        outlier_directions = factor.cluster.combine_nodes(outlier_directions,
+            parset['cluster_specific']['node_list'],
+            parset['cluster_specific']['nimg_per_node'],
+            parset['cluster_specific']['ncpu'],
+            parset['cluster_specific']['fmem'],
+            len(bands))
+
+        # Do the peeling
+        for d in outlier_directions:
+            op = FacetPeel(parset, bands, d)
+            scheduler.run(op)
+
+            op = FacetSub(parset, bands, d)
+            scheduler.run(op)
 
     # Run selfcal and subtract operations on direction groups
     set_sub_data_colname = True
@@ -488,6 +506,13 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
             directions = factor.directions.directions_read(dir_parset['directions_file'],
                 parset['dir_working'])
 
+    # Filter directions that are outlier sources
+    outlier_directions = []
+    for direction in directions[:]:
+        if direction.outlier_do:
+            outlier_directions.append(direction)
+            directions.remove(direction)
+
     # Add the target to the directions list if desired
     target_ra = dir_parset['target_ra']
     target_dec = dir_parset['target_dec']
@@ -599,4 +624,4 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
     direction_groups = factor.directions.group_directions(selfcal_directions,
         n_per_grouping=dir_parset['groupings'], allow_reordering=dir_parset['allow_reordering'])
 
-    return directions, direction_groups
+    return directions, direction_groups, outlier_directions

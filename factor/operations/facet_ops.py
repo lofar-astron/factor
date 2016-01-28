@@ -1,11 +1,13 @@
 """
-Module that holds all facet operations
+Module that holds all operations for facets/outliers/patches
 
 The facet calibration steps are divided into operations on the basis of whether
 or not they can be run in parallel or in series.
 
 Classes
 -------
+FacetPeel : Operation
+    Runs the calibration for peeling a facet. May be run in parallel
 FacetSelfcal : Operation
     Runs the selfcal and imaging of a facet. May be run in parallel
 FacetSub : Operation
@@ -19,6 +21,39 @@ import os
 import ast
 from factor.lib.operation import Operation
 from lofarpipe.support.data_map import DataMap
+
+
+class FacetPeel(Operation):
+    """
+    Operation to peel a direction
+    """
+    def __init__(self, parset, bands, direction):
+        super(FacetPeel, self).__init__(parset, bands, direction,
+            name='FacetPeel')
+
+        # Define extra parameters needed for this operation (beyond those
+        # defined in the master Operation class and as attributes of the
+        # direction object)
+        ms_files = [band.file for band in self.bands]
+        skymodels = [band.skymodel_dirindep for band in self.bands]
+        dir_indep_parmdbs = [band.dirindparmdb for band in self.bands]
+        self.parms_dict.update({'ms_files': ms_files,
+                                'skymodels': skymodels,
+                                'dir_indep_parmdbs': dir_indep_parmdbs})
+
+
+    def finalize(self):
+        """
+        Finalize this operation
+        """
+        # Add output datamaps to direction object for later reference
+        self.direction.diff_models_field_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'shift_diff_model_to_field.mapfile')
+
+        # Delete temp data
+        self.direction.cleanup_mapfiles = []
+        self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
+        self.direction.cleanup()
 
 
 class FacetSelfcal(Operation):
@@ -139,7 +174,7 @@ class FacetSelfcal(Operation):
             self.direction.cleanup_mapfiles.append(
                 os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'))
         if self.direction.selfcal_ok or not self.parset['exit_on_selfcal_failure']:
-            self.log.info('Cleaning up files (direction: {})'.format(self.direction.name))
+            self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
             self.direction.cleanup()
 
 
@@ -238,5 +273,6 @@ class FacetImage(Operation):
             # imaging them all at once)
             self.direction.cleanup_mapfiles.append(
                 os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'))
+        self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()
 

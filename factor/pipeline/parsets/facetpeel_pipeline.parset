@@ -1,0 +1,268 @@
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, average, create_compressed_mapfile, check_for_missing_bands, concat_data, {% if pre_average %}pre_average, concat_blavg_data, copy_column1, copy_column2,{% endif %} make_chunks, create_chunks_map, switch_weights_col1, solve_ampphase11, switch_weights_col2, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs, smooth_amp, merge_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, corrupt_final_model, subtract_initial_final, shift_diff_model_to_field]
+
+pipeline.pluginpath                                       =   {{ pipeline_dir }}/plugins
+
+update_mapfile_hosts.control.kind                         =   plugin
+update_mapfile_hosts.control.type                         =   updateHosts
+update_mapfile_hosts.control.mapfile_dir                  =   input.output.mapfile_dir
+update_mapfile_hosts.control.hosts                        =   {{ hosts }}
+
+create_ms_map.control.kind                                =   plugin
+create_ms_map.control.type                                =   addListMapfile
+create_ms_map.control.hosts                               =   {{ hosts }}
+create_ms_map.control.files                               =   {{ ms_files }}
+create_ms_map.control.mapfile_dir                         =   input.output.mapfile_dir
+create_ms_map.control.filename                            =   input_bands.mapfile
+
+create_parmdb_map.control.kind                            =   plugin
+create_parmdb_map.control.type                            =   addListMapfile
+create_parmdb_map.control.hosts                           =   {{ hosts }}
+create_parmdb_map.control.files                           =   {{ dir_indep_parmdbs }}
+create_parmdb_map.control.mapfile_dir                     =   input.output.mapfile_dir
+create_parmdb_map.control.filename                        =   dir_indep_instrument_parmdbs.mapfile
+
+create_full_skymodels_map.control.kind                    =   plugin
+create_full_skymodels_map.control.type                    =   addListMapfile
+create_full_skymodels_map.control.hosts                   =   {{ hosts }}
+create_full_skymodels_map.control.files                   =   {{ skymodels }}
+create_full_skymodels_map.control.mapfile_dir             =   input.output.mapfile_dir
+create_full_skymodels_map.control.filename                =   full_skymodels.mapfile
+
+make_facet_skymodels_all.control.type                     =   make_facet_skymodel
+make_facet_skymodels_all.control.mapfile_in               =   create_full_skymodels_map.output.mapfile
+make_facet_skymodels_all.control.inputkey                 =   fullmodelfile
+make_facet_skymodels_all.control.outputkey                =   outfile
+make_facet_skymodels_all.argument.flags                   =   [fullmodelfile,outfile,{{ vertices_file }}]
+make_facet_skymodels_all.argument.cal_only                =   False
+
+make_sourcedb_all_facet_sources.control.type              =   make_sourcedb
+make_sourcedb_all_facet_sources.control.opts.mapfile_in   =   make_facet_skymodels_all.output.mapfile
+make_sourcedb_all_facet_sources.control.opts.inputkey     =   in
+make_sourcedb_all_facet_sources.argument.format           =   <
+
+shift_empty.control.type                                  =   dppp
+shift_empty.control.opts.mapfile_in                       =   create_ms_map.output.mapfile
+shift_empty.control.opts.inputkey                         =   msin
+shift_empty.argument.numthreads                           =   {{ max_cpus_per_band }}
+shift_empty.argument.msin.datacolumn                      =   {{ subtracted_data_colname }}
+shift_empty.argument.msout.overwrite                      =   True
+shift_empty.argument.msout.writefullresflag               =   False
+shift_empty.argument.local_scratch_dir                    =   {{ local_dir }}
+shift_empty.argument.steps                                =   [shift] # [shift,add,output,pred]
+shift_empty.argument.shift.type                           =   phaseshifter
+shift_empty.argument.shift.phasecenter                    =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+# shift_empty.argument.add.type                             =   predict
+# shift_empty.argument.add.sourcedb                         =   sourcedb
+# shift_empty.argument.add.operation                        =   add
+# shift_empty.argument.add.applycal.parmdb                  =   parmdb
+# shift_empty.argument.output.type                          =   out
+# shift_empty.argument.output.name                          =   create_all_map.output.mapfile
+# shift_empty.argument.pred.type                            =   predict
+# shift_empty.argument.pred.sourcedb                        =   sourcedb
+# shift_empty.argument.pred.operation                       =   replace
+# shift_empty.argument.pred.applycal.parmdb                 =   parmdb
+
+predict_all_model_data.control.type                       =   dppp
+predict_all_model_data.control.opts.mapfiles_in           =   [shift_empty.output.mapfile,make_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
+predict_all_model_data.control.opts.inputkeys             =   [msin,sourcedb,parmdb]
+predict_all_model_data.argument.numthreads                =   {{ max_cpus_per_band }}
+predict_all_model_data.argument.msout.overwrite           =   True
+predict_all_model_data.argument.msout.writefullresflag    =   False
+predict_all_model_data.argument.local_scratch_dir         =   {{ local_dir }}
+predict_all_model_data.argument.steps                     =   [pred]
+predict_all_model_data.argument.pred.type                 =   predict
+predict_all_model_data.argument.pred.sourcedb             =   sourcedb
+predict_all_model_data.argument.pred.operation            =   replace
+predict_all_model_data.argument.pred.applycal.parmdb      =   parmdb
+
+add_all_facet_sources.control.type                        =   add_subtract_columns
+add_all_facet_sources.control.opts.mapfiles_in            =   [shift_empty.output.mapfile,predict_all_model_data.output.mapfile]
+add_all_facet_sources.control.opts.inputkeys              =   [file1,file2]
+add_all_facet_sources.argument.flags                      =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
+
+average.control.type                                      =   dppp
+average.control.mapfile_in                                =   shift_empty.output.mapfile
+average.control.inputkey                                  =   msin
+average.argument.numthreads                               =   {{ max_cpus_per_band }}
+average.argument.msin.datacolumn                          =   CORRECTED_DATA
+average.argument.msout.overwrite                          =   True
+average.argument.msout.writefullresflag                   =   False
+average.argument.local_scratch_dir                        =   {{ local_dir }}
+average.argument.steps                                    =   [avg]
+average.argument.avg.type                                 =   squash
+average.argument.avg.freqstep                             =   {{ facetselfcal_freqstep }}
+average.argument.avg.timestep                             =   1
+
+create_compressed_mapfile.control.kind                    =   plugin
+create_compressed_mapfile.control.type                    =   compressMapfile
+create_compressed_mapfile.control.mapfile_in              =   average0.output.mapfile
+create_compressed_mapfile.control.mapfile_dir             =   input.output.mapfile_dir
+create_compressed_mapfile.control.filename                =   concat_averaged_input.mapfile
+
+check_for_missing_bands.control.type                      =   check_for_missing_bands
+check_for_missing_bands.control.mapfile_in                =   create_compressed_mapfile.output.mapfile
+check_for_missing_bands.control.inputkey                  =   mslist
+check_for_missing_bands.argument.flags                    =   [mslist]
+
+concat_data.control.type                                  =   dppp
+concat_data.control.mapfile_in                            =   check_for_missing_bands.output.padded_list.mapfile
+concat_data.control.inputkey                              =   msin
+concat_data.argument.numthreads                           =   {{ max_cpus_per_node }}
+concat_data.argument.msin.datacolumn                      =   DATA
+concat_data.argument.msin.missingdata                     =   True
+concat_data.argument.msin.orderms                         =   False
+concat_data.argument.msout.overwrite                      =   True
+concat_data.argument.msout.writefullresflag               =   False
+concat_data.argument.local_scratch_dir                    =   {{ local_dir }}
+concat_data.argument.steps                                =   []
+
+{% if pre_average %}
+# Do the baseline-dependent preaveraging. This must be done after concatenation
+# of DATA in the previous two step so that we can safely overwrite the
+# WEIGHT_SPECTRUM column
+pre_average.control.type                                  =   pre_average
+pre_average.control.mapfiles_in                           =   [shift_cal.output.mapfile,create_parmdb_map.output.mapfile]
+pre_average.control.inputkeys                             =   [datafile,parmdb]
+pre_average.argument.flags                                =   [datafile,parmdb,DATA,BLAVG_DATA,{{ target_rms_rad }}]
+
+# Concat the preaveraged data (and weights)
+concat_blavg_data.control.type                            =   dppp
+concat_blavg_data.control.mapfile_in                      =   check_for_missing_bands.output.padded_list.mapfile
+concat_blavg_data.control.inputkey                        =   msin
+concat_blavg_data.argument.numthreads                     =   {{ max_cpus_per_node }}
+concat_blavg_data.argument.msin.datacolumn                =   BLAVG_DATA
+concat_blavg_data.argument.msin.missingdata               =   True
+concat_blavg_data.argument.msin.orderms                   =   False
+concat_blavg_data.argument.msout.overwrite                =   True
+concat_blavg_data.argument.msout.writefullresflag         =   False
+concat_blavg_data.argument.local_scratch_dir              =   {{ local_dir }}
+concat_blavg_data.argument.steps                          =   []
+
+# Copy BLAVG_DATA
+copy_column1.control.type                                 =   copy_column
+copy_column1.control.mapfiles_in                          =   [concat_blavg_data.output.mapfile,concat_data.output.mapfile]
+copy_column1.control.inputkeys                            =   [blavgfile,datafile]
+copy_column1.argument.flags                               =   [blavgfile,datafile,DATA,BLAVG_DATA]
+
+# Copy BLAVG_WEIGHT_SPECTRUM
+copy_column2.control.type                                 =   copy_column
+copy_column2.control.mapfiles_in                          =   [concat_blavg_data.output.mapfile,concat_data.output.mapfile]
+copy_column2.control.inputkeys                            =   [blavgfile,datafile]
+copy_column2.argument.flags                               =   [blavgfile,datafile,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
+{% endif %}
+
+make_chunks.control.type                                  =   chunk_by_time
+make_chunks.control.mapfile_in                            =   concat_data.output.mapfile
+make_chunks.control.inputkey                              =   msfile
+make_chunks.argument.flags                                =   [msfile,{{ chunk_width }},{{ local_dir }}]
+
+create_chunks_map.control.kind                            =   plugin
+create_chunks_map.control.type                            =   addListMapfile
+create_chunks_map.control.files                           =   make_chunks.output.files.mapfile
+create_chunks_map.control.hosts                           =   {{ hosts }}
+create_chunks_map.control.mapfile_dir                     =   input.output.mapfile_dir
+create_chunks_map.control.filename                        =   chunk_files.mapfile
+
+switch_weights_col1.control.type                          =   switch_columns
+switch_weights_col1.control.mapfile_in                    =   create_chunks_map.output.mapfile
+switch_weights_col1.control.inputkey                      =   msfiles
+switch_weights_col1.argument.flags                        =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
+
+solve_ampphase11.control.type                             =   calibrate-stand-alone_new
+solve_ampphase11.argument.observation                     =   create_chunks_map.output.mapfile
+solve_ampphase11.argument.parset                          =   {{ parset_dir }}/facet_dirdep_phaseonly_solve.parset
+solve_ampphase11.argument.catalog                         =   {{ skymodel_dir }}/empty.skymodel
+solve_ampphase11.argument.replace-sourcedb                =   True
+solve_ampphase11.argument.replace-parmdb                  =   True
+solve_ampphase11.argument.Strategy.InputColumn            =   {{ data_column }}
+solve_ampphase11.argument.Step.solve.Solve.CellSize.Time  =   {{ solint_time_p }}
+solve_ampphase11.argument.Step.solve.Solve.CellSize.Freq  =   {{ solint_freq_p }}
+
+switch_weights_col2.control.type                          =   switch_columns
+switch_weights_col2.control.mapfile_in                    =   create_chunks_map.output.mapfile
+switch_weights_col2.control.inputkey                      =   msfiles
+switch_weights_col2.argument.flags                        =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
+
+apply_ampphase11.control.type                             =   calibrate-stand-alone_new
+apply_ampphase11.argument.observation                     =   create_chunks_map.output.mapfile
+apply_ampphase11.argument.parset                          =   {{ parset_dir }}/facet_dirdep_phaseonly_apply.parset
+apply_ampphase11.argument.catalog                         =   {{ skymodel_dir }}/empty.skymodel
+
+solve_ampphase12.control.type                             =   calibrate-stand-alone_new
+solve_ampphase12.argument.observation                     =   create_chunks_map.output.mapfile
+solve_ampphase12.argument.parset                          =   {{ parset_dir }}/facet_dirdep_amponly_solve.parset
+solve_ampphase12.argument.catalog                         =   {{ skymodel_dir }}/empty.skymodel
+solve_ampphase12.argument.replace-sourcedb                =   True
+solve_ampphase12.argument.replace-parmdb                  =   True
+solve_ampphase12.argument.Step.solve.Solve.CellSize.Time  =   {{ solint_time_a }}
+solve_ampphase12.argument.Step.solve.Solve.CellSize.Freq  =   {{ solint_freq_a }}
+
+merge_amp_parmdbs.control.type                            =   merge_parmdbs_in_time
+merge_amp_parmdbs.control.mapfile_in                      =   create_chunks_compressed_mapfile.output.mapfile
+merge_amp_parmdbs.control.inputkey                        =   mslist
+merge_amp_parmdbs.control.outputkey                       =   outparmdb
+merge_amp_parmdbs.argument.flags                          =   [mslist,instrument,outparmdb]
+
+smooth_amp.control.type                                   =   smooth_amps
+smooth_amp.control.mapfile_in                             =   merge_amp_parmdbs1.output.mapfile
+smooth_amp.control.inputkey                               =   ampparmdb
+smooth_amp.control.outputkey                              =   outparmdb
+smooth_amp.control.arguments                              =   [ampparmdb,outparmdb]
+smooth_amp.control.normalize                              =   False
+
+merge_selfcal_parmdbs.control.type                        =   merge_parmdbs_selfcal
+merge_selfcal_parmdbs.control.mapfiles_in                 =   [merge_phase_parmdbs.output.mapfile,smooth_amp1.output.mapfile]
+merge_selfcal_parmdbs.control.inputkeys                   =   [parmdb_p,parmdb_a]
+merge_selfcal_parmdbs.control.outputkey                   =   parmdb_out
+merge_selfcal_parmdbs.argument.flags                      =   [parmdb_p,parmdb_a,parmdb_out]
+
+make_selfcal_plots.control.type                           =   make_selfcal_plots
+make_selfcal_plots.control.mapfile_in                     =   merge_selfcal_parmdbs.output.mapfile
+make_selfcal_plots.control.inputkeys                      =   parmdb
+make_selfcal_plots.control.outputkey                      =   plots_root
+make_selfcal_plots.argument.flags                         =   [parmdb,plots_root]
+
+expand_merged_parmdb_map.control.kind                     =   plugin
+expand_merged_parmdb_map.control.type                     =   expandMapfile
+expand_merged_parmdb_map.control.mapfile_in               =   merge_selfcal_parmdbs.output.mapfile
+expand_merged_parmdb_map.control.mapfile_to_match         =   shift_empty.output.mapfile
+expand_merged_parmdb_map.control.mapfile_dir              =   input.output.mapfile_dir
+expand_merged_parmdb_map.control.filename                 =   expand_merged_parmdbs.mapfile
+
+corrupt_final_model.control.type                          =   dppp
+corrupt_final_model.control.opts.mapfiles_in              =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+corrupt_final_model.control.opts.inputkeys                =   [msin,parmdb]
+corrupt_final_model.argument.numthreads                   =   {{ max_cpus_per_band }}
+corrupt_final_model.argument.msin.datacolumn              =   MODEL_DATA
+corrupt_final_model.argument.msout.overwrite              =   True
+corrupt_final_model.argument.msout.writefullresflag       =   False
+corrupt_final_model.argument.local_scratch_dir            =   {{ local_dir }}
+corrupt_final_model.argument.steps                        =   [corrupt_fast1,corrupt_fast2,corrupt_slow]
+corrupt_final_model.argument.corrupt_fast1.type           =   applycal
+corrupt_final_model.argument.corrupt_fast1.parmdb         =   parmdb
+corrupt_final_model.argument.corrupt_fast1.correction     =   tec
+corrupt_final_model.argument.corrupt_fast1.invert         =   False
+corrupt_final_model.argument.corrupt_fast2.type           =   applycal
+corrupt_final_model.argument.corrupt_fast2.parmdb         =   parmdb
+corrupt_final_model.argument.corrupt_fast2.correction     =   commonscalarphase
+corrupt_final_model.argument.corrupt_fast2.invert         =   False
+corrupt_final_model.argument.corrupt_slow.type            =   applycal
+corrupt_final_model.argument.corrupt_slow.parmdb          =   parmdb
+corrupt_final_model.argument.corrupt_slow.invert          =   False
+
+subtract_initial_final.control.type                       =   add_subtract_columns
+subtract_initial_final.control.opts.mapfiles_in           =   [predict_all_model_data.output.mapfile,corrupt_final_model.output.mapfile]
+subtract_initial_final.control.opts.inputkeys             =   [file1,file2]
+subtract_initial_final.argument.flags                     =   [file1,file2,DATA,DATA,MODEL_DATA_DIFF,subtract]
+
+shift_diff_model_to_field.control.type                    =   dppp
+shift_diff_model_to_field.control.opts.mapfile_in         =   predict_all_model_data.output.mapfile
+shift_diff_model_to_field.control.opts.inputkey           =   msin
+shift_diff_model_to_field.argument.numthreads             =   {{ max_cpus_per_band }}
+shift_diff_model_to_field.argument.msin.datacolumn        =   MODEL_DATA_DIFF
+shift_diff_model_to_field.argument.msout.overwrite        =   True
+shift_diff_model_to_field.argument.msout.writefullresflag =   False
+shift_diff_model_to_field.argument.local_scratch_dir      =   {{ local_dir }}
+shift_diff_model_to_field.argument.steps                  =   [shift]
+shift_diff_model_to_field.argument.shift.type             =   phaseshifter
+shift_diff_model_to_field.argument.shift.phasecenter      =   [{{ field_ra }}deg, {{ field_dec }}deg]
