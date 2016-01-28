@@ -20,8 +20,8 @@ premask.argument.reference_ra_deg                 =   {{ facet_ra }}
 premask.argument.reference_dec_deg                =   {{ facet_dec }}
 
 casa_image_full1.control.type                     =   casa_clean
-casa_image_full1.control.mapfile_in               =   concat_averaged.output.mapfile
-casa_image_full1.control.inputkey                 =   clean.vis
+casa_image_full1.control.mapfiles_in              =   [concat_averaged.output.mapfile,premask.output.mapfile]
+casa_image_full1.control.inputkeys                =   [clean.vis,clean.mask]
 casa_image_full1.control.outputkey                =   clean.imagename
 casa_image_full1.control.arguments                =   [--nologger,--nogui,-c]
 casa_image_full1.argument.clean.wprojplanes       =   {{ facet_wplanes }}
