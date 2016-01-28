@@ -64,7 +64,13 @@ def median_window_filter(ampl, half_window, threshold):
     return ampl_tot_copy
 
 
-def main(instrument_name, instrument_name_smoothed):
+def main(instrument_name, instrument_name_smoothed, normalize=False):
+    if type(normalize) is str:
+        if normalize.lower() == 'true':
+            normalize = True
+        else:
+            normalize = False
+
     pol_list = ['0:0','1:1']
     gain = 'Gain'
 
@@ -104,15 +110,18 @@ def main(instrument_name, instrument_name_smoothed):
                 parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = amp * numpy.sin(phase)
 
     # Normalize the amplitude solutions to a mean of one across all channels
-    amplist = []
-    for chan in range(nchans):
-        for pol in pol_list:
-            for antenna in antenna_list:
-                real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
-                imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
-                amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
-                amplist.append(amp)
-    norm_factor = 1./(numpy.mean(amplist))
+    if normalize:
+        amplist = []
+        for chan in range(nchans):
+            for pol in pol_list:
+                for antenna in antenna_list:
+                    real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
+                    imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
+                    amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
+                    amplist.append(amp)
+        norm_factor = 1.0/(numpy.mean(amplist))
+    else:
+        norm_factor = 1.0
 
     for chan in range(nchans):
         for pol in pol_list:
