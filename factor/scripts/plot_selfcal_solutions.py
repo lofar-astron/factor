@@ -333,10 +333,10 @@ def solplot_amp(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp=F
     times = soldict['Gain:1:1:Real:{s}'.format(s=refstation)]['times']
     times = scaletimes(times)
 
-    real11_ref = soldict['Gain:1:1:Real:{s}'.format(s=refstation)]['values'][:, chan_indx]
-    real00_ref = soldict['Gain:0:0:Real:{s}'.format(s=refstation)]['values'][:, chan_indx]
-    imag11_ref = soldict['Gain:1:1:Imag:{s}'.format(s=refstation)]['values'][:, chan_indx]
-    imag00_ref = soldict['Gain:0:0:Imag:{s}'.format(s=refstation)]['values'][:, chan_indx]
+    real11_ref = soldict['Gain:1:1:Real:{s}'.format(s=refstation)]['values']
+    real00_ref = soldict['Gain:0:0:Real:{s}'.format(s=refstation)]['values']
+    imag11_ref = soldict['Gain:1:1:Imag:{s}'.format(s=refstation)]['values']
+    imag00_ref = soldict['Gain:0:0:Imag:{s}'.format(s=refstation)]['values']
     num_channels = real11_ref.shape[1]
 
     valscorr00 = real00_ref +1.j*imag00_ref
