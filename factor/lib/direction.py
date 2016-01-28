@@ -218,19 +218,27 @@ class Direction(object):
         # sources (anything above 2 arcmin -- the CC sky model was convolved
         # with a Gaussian of 1 arcmin, so unresolved sources have sizes of ~
         # 1 arcmin)
-        if initial_skymodel is not None:
+        if initial_skymodel is not None and self.mscale_field_do is None:
             sizes = self.get_source_sizes(initial_skymodel)
             large_size_arcmin = 2.0
             if any([s > large_size_arcmin for s in sizes]):
                 self.mscale_field_do = True
             else:
                 self.mscale_field_do = False
+        if self.mscale_field_do:
+            self.casa_multiscale = '[0, 3, 7, 25, 60, 150]'
+            self.wsclean_multiscale = '-multiscale,'
+            self.wsclean_full_image_niter /= 2.0 # fewer iterations are needed
+        else:
+            self.casa_multiscale = '[0]'
+            self.wsclean_multiscale = ''
+
+        # Set wavelet source-finding mode
+        if self.atrous_do is None:
             if self.mscale_field_do:
-                self.casa_multiscale = '[0, 3, 7, 25, 60, 150]'
-                self.wsclean_multiscale = '-multiscale,'
+                self.atrous_do = True
             else:
-                self.casa_multiscale = '[0]'
-                self.wsclean_multiscale = ''
+                self.atrous_do = False
 
 
     def set_wplanes(self, imsize):

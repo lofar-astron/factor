@@ -61,7 +61,7 @@ def directions_read(directions_file, factor_working_dir):
         ra = Angle(RAstr).to('deg').value
         dec = Angle(Decstr).to('deg').value
 
-        # some checks on values
+        # Check coordinates
         if np.isnan(ra) or ra < 0 or ra > 360:
             log.error('RA %f is wrong for direction: %s. Ignoring direction.'
             	% (direction['radec'], direction['name']))
@@ -70,15 +70,27 @@ def directions_read(directions_file, factor_working_dir):
             log.error('DEC %f is wrong for direction: %s. Ignoring direction.'
                 % (direction['radec'], direction['name']))
             continue
-        if direction['atrous_do'].lower() == 'true':
+
+        # Check atrous_do (wavelet) setting
+        if direction['atrous_do'].lower() == 'empty':
+            atrous_do = None
+        elif direction['atrous_do'].lower() == 'true':
             atrous_do = True
         else:
             atrous_do = False
-        if direction['mscale_field_do'].lower() == 'true':
+
+        # Check mscale_field_do (multi-scale) setting
+        if direction['mscale_field_do'].lower() == 'empty':
+            mscale_field_do = None
+        elif direction['mscale_field_do'].lower() == 'true':
             mscale_field_do = True
         else:
             mscale_field_do = False
-        if direction['outlier_source'].lower() == 'true':
+
+        # Check outlier_source (peeling) setting
+        if direction['outlier_source'].lower() == 'empty':
+            outlier_source = None
+        elif direction['outlier_source'].lower() == 'true':
             outlier_source = True
         else:
             outlier_source = False
