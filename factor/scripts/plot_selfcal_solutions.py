@@ -64,6 +64,7 @@ def solplot_scalarphase(parmdb, imageroot, refstationi, plot_international=False
         axs = ax.reshape((Nr*Nc,1))
         for istat, station in enumerate(stationsnames):
             phase = soldict['CommonScalarPhase:{s}'.format(s=station)]['values'][:, chan_indx]
+            phase_ref_chan = phase_ref[:, chan_indx]
 
             # don't plot flagged phases
             phase = np.ma.masked_where(phase==0, phase)
@@ -75,7 +76,7 @@ def solplot_scalarphase(parmdb, imageroot, refstationi, plot_international=False
                 fmt = '.'
             ls= 'none'
 
-            axs[istat][0].plot(times, normalize(phase-phase_ref), color='b',  marker=fmt, ls=ls, label='CommonScalarPhase',mec='b')
+            axs[istat][0].plot(times, normalize(phase-phase_ref_chan), color='b',  marker=fmt, ls=ls, label='CommonScalarPhase',mec='b')
             axs[istat][0].set_ylim(-3.2, 3.2)
             axs[istat][0].set_xlim(times.min(), times.max())
             axs[istat][0].set_title(station)
