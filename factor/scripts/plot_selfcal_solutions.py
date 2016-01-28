@@ -54,34 +54,35 @@ def solplot_scalarphase(parmdb, imageroot, refstationi, plot_international=False
     refstation = stationsnames[refstationi]
     phase_ref = soldict['CommonScalarPhase:{s}'.format(s=refstation)]['values']
     times= soldict['CommonScalarPhase:{s}'.format(s=refstation)]['times']
+    num_channels = phase_ref.shape[1]
 
     Nr = int(np.ceil(np.sqrt(Nstat)))
     Nc = int(np.ceil(np.float(Nstat)/Nr))
-    f, ax = plt.subplots(Nr, Nc, sharex=True, sharey=True, figsize=(16,12))
-    axs = ax.reshape((Nr*Nc,1))
-    for istat, station in enumerate(stationsnames):
-        phase = soldict['CommonScalarPhase:{s}'.format(s=station)]['values']
 
-        # don't plot flagged phases
-        phase = np.ma.masked_where(phase==0, phase)
+    for chan_indx in range(num_channels):
+        f, ax = plt.subplots(Nr, Nc, sharex=True, sharey=True, figsize=(16,12))
+        axs = ax.reshape((Nr*Nc,1))
+        for istat, station in enumerate(stationsnames):
+            phase = soldict['CommonScalarPhase:{s}'.format(s=station)]['values'][:, chan_indx]
 
-        #try:
-        if len(phase) > 1000:
-            fmt = ','
-        else:
-            fmt = '.'
-        #except TypeError:
-          #print "no phases"
-        #fmt = '.'
-        ls= 'none'
+            # don't plot flagged phases
+            phase = np.ma.masked_where(phase==0, phase)
 
-        axs[istat][0].plot(times, normalize(phase-phase_ref), color='b',  marker=fmt, ls=ls, label='CommonScalarPhase',mec='b')
-        axs[istat][0].set_ylim(-3.2, 3.2)
-        axs[istat][0].set_xlim(times.min(), times.max())
-        axs[istat][0].set_title(station)
+            #try:
+            if len(phase) > 1000:
+                fmt = ','
+            else:
+                fmt = '.'
+            ls= 'none'
 
+            axs[istat][0].plot(times, normalize(phase-phase_ref), color='b',  marker=fmt, ls=ls, label='CommonScalarPhase',mec='b')
+            axs[istat][0].set_ylim(-3.2, 3.2)
+            axs[istat][0].set_xlim(times.min(), times.max())
+            axs[istat][0].set_title(station)
 
-    f.savefig(imageroot+"_scalarphase.png",dpi=100)
+        f.savefig(imageroot+"_scalarphase_channel{}.png".format(chan_indx),dpi=100)
+        plt.close(f)
+
     return
 
 
