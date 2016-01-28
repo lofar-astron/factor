@@ -312,7 +312,7 @@ def solplot_phase(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp
             axsp[istat][0].set_xlim(times.min(), times.max())
             axsp[istat][0].set_title(station)
 
-        fp.savefig(imageroot+"_phase.png",dpi=100)
+        fp.savefig(imageroot+"_phase_channel{}.png".format(chan_indx),dpi=100)
     return
 
 
