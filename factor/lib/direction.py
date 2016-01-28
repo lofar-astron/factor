@@ -8,6 +8,7 @@ import numpy as np
 from lsmtool.operations_lib import radec2xy
 import matplotlib.path as mplPath
 from scipy.ndimage import gaussian_filter
+import sys
 
 
 class Direction(object):
