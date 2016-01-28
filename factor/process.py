@@ -67,9 +67,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     # Make direction object for the field
     field = Direction('field', bands[0].ra, bands[0].dec,
         factor_working_dir=parset['dir_working'])
-    field.set_averaging_steps_and_solution_intervals(bands[0].chan_width_hz,
-        bands[0].nchan, bands[0].timepersample, bands[0].nsamples, len(bands),
-        preaverage_flux_jy=parset['preaverage_flux_jy'])
+    field.set_imcal_parameters(len(bands), parset['wsclean_nbands'],
+        bands[0].chan_width_hz, bands[0].nchan, bands[0].timepersample,
+        bands[0].nsamples, len(bands), initial_skymodel,
+        parset['preaverage_flux_jy'])
 
     # Run initial sky model generation and create empty datasets
     if len(bands_initsubtract) > 0:
