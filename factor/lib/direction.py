@@ -94,7 +94,7 @@ class Direction(object):
         self.peel_skymodel = peel_skymodel
         if self.peel_skymodel.lower() == 'empty':
             self.peel_skymodel = None
-        self.outlier_do = outlier_do
+        self.is_outlier = outlier_do
         self.make_final_image = make_final_image
         if cal_flux_jy is not None:
             self.apparent_flux_mjy = cal_flux_jy * 1000.0
@@ -147,8 +147,8 @@ class Direction(object):
         self.vertices_file = self.save_file
 
 
-    def set_imaging_parameters(self, nbands, nbands_per_channel, initial_skymodel,
-        test_run=False):
+    def set_imaging_parameters(self, nbands, nbands_per_channel,
+        initial_skymodel=None, test_run=False):
         """
         Sets various parameters for images in facetselfcal and facetimage pipelines
 
@@ -158,7 +158,7 @@ class Direction(object):
             Number of bands
         nbands_per_channel : int
             Number of bands per output channel (WSClean only)
-        initial_skymodel : LSMTool SkyModel object
+        initial_skymodel : LSMTool SkyModel object, optional
             Sky model used to check source sizes
         test_run : bool, optional
             If True, use test sizes
@@ -213,18 +213,19 @@ class Direction(object):
         # sources (anything above 2 arcmin -- the CC sky model was convolved
         # with a Gaussian of 1 arcmin, so unresolved sources have sizes of ~
         # 1 arcmin)
-        sizes = self.get_source_sizes(initial_skymodel)
-        large_size_arcmin = 2.0
-        if any([s > large_size_arcmin for s in sizes]):
-            self.mscale_field_do = True
-        else:
-            self.mscale_field_do = False
-        if self.mscale_field_do:
-            self.casa_multiscale = '[0, 3, 7, 25, 60, 150]'
-            self.wsclean_multiscale = '-multiscale,'
-        else:
-            self.casa_multiscale = '[0]'
-            self.wsclean_multiscale = ''
+        if initial_skymodel is not None:
+            sizes = self.get_source_sizes(initial_skymodel)
+            large_size_arcmin = 2.0
+            if any([s > large_size_arcmin for s in sizes]):
+                self.mscale_field_do = True
+            else:
+                self.mscale_field_do = False
+            if self.mscale_field_do:
+                self.casa_multiscale = '[0, 3, 7, 25, 60, 150]'
+                self.wsclean_multiscale = '-multiscale,'
+            else:
+                self.casa_multiscale = '[0]'
+                self.wsclean_multiscale = ''
 
 
     def set_wplanes(self, imsize):
