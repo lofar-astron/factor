@@ -105,7 +105,7 @@ class Direction(object):
         self.selfcal_ok = False # whether selfcal succeeded
         self.skip_add_subtract = None # whether to skip add/subtract in facetsub op
         self.max_residual_val = 0.5 # maximum residual in Jy for facet subtract test
-        self.nchannels = 1 # set number of wide-band channels
+        self.wsclean_nchannels = 1 # set number of wide-band channels
         self.use_new_sub_data = False # set flag that tells which subtracted-data column to use
         self.cellsize_selfcal_deg = 0.000417 # selfcal cell size
         self.cellsize_verify_deg = 0.00833 # verify subtract cell size
@@ -152,14 +152,14 @@ class Direction(object):
         """
         Sets various parameters for imaging and calibration
         """
-        self.set_imaging_parameters(len(bands), nbands_per_channel,
+        self.set_imaging_parameters(len(bands), nbands_per_channel, nchan,
             initial_skymodel.copy())
         self.set_averaging_steps_and_solution_intervals(chan_width_hz,
             nchan, timestep_sec, ntimes, nbands,
             initial_skymodel.copy(), preaverage_flux_jy)
 
 
-    def set_imaging_parameters(self, nbands, nbands_per_channel,
+    def set_imaging_parameters(self, nbands, nbands_per_channel, nchan_per_band,
         initial_skymodel=None):
         """
         Sets various parameters for images in facetselfcal and facetimage pipelines
@@ -170,6 +170,8 @@ class Direction(object):
             Number of bands
         nbands_per_channel : int
             Number of bands per output channel (WSClean only)
+        nchan_per_band : int
+            Number of channels per band
         initial_skymodel : LSMTool SkyModel object, optional
             Sky model used to check source sizes
 
@@ -192,16 +194,21 @@ class Direction(object):
             self.use_wideband = False
 
         # Set number of channels for wide-band imaging with WSClean and nterms
-        # for the CASA imager. Also define the image suffixes (which depend on
-        # whether or not wide-band clean is done)
+        # for the CASA imager. Note that the number of WSClean channels must be
+        # an even divisor of the total number of channels in the full bandwidth.
+        # For now, we just set the number of channels to the number of bands to
+        # avoid any issues with this setting (revisit once we switch to fitting
+        # a spectral function during deconvolution).
+        #
+        # Also define the image suffixes (which depend on whether or not
+        # wide-band clean is done)
         if self.use_wideband:
-            self.nchannels = int(round(float(nbands)/
-                float(nbands_per_channel)))
+            self.wsclean_nchannels = nbands
             self.nterms = 2
             self.casa_suffix = '.tt0'
             self.wsclean_suffix = '-MFS-image.fits'
         else:
-            self.nchannels = 1
+            self.wsclean_nchannels = 1
             self.nterms = 1
             self.casa_suffix = None
             self.wsclean_suffix = '-image.fits'
