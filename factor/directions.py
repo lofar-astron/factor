@@ -40,18 +40,18 @@ def directions_read(directions_file, factor_working_dir):
     try:
         types = np.dtype({
             'names': ['name', 'radec', 'atrous_do', 'mscale_field_do',
-               'cal_imsize', 'solint_p', 'solint_a', 'field_imsize', 'dynamic_range',
+               'cal_imsize', 'solint_p', 'solint_a', 'dynamic_range',
                 'region_selfcal', 'region_field', 'peel_skymodel', 'outlier_source',
                 'cal_size_deg', 'cal_flux_mjy'],
-            'formats':['S255', 'S255', 'S5', 'S5', int, int, int, int, 'S2',
+            'formats':['S255', 'S255', 'S5', 'S5', int, int, int, 'S2',
                 'S255', 'S255', 'S255', 'S5', float, float]})
         directions = np.genfromtxt(directions_file, comments='#', dtype=types)
     except ValueError:
         types = np.dtype({
             'names': ['name', 'radec', 'atrous_do', 'mscale_field_do',
-              'cal_imsize', 'solint_p', 'solint_a', 'field_imsize', 'dynamic_range',
+              'cal_imsize', 'solint_p', 'solint_a', 'dynamic_range',
                 'region_selfcal', 'region_field', 'peel_skymodel', 'outlier_source'],
-            'formats':['S255', 'S255', 'S5', 'S5', int, int, int, int, 'S2',
+            'formats':['S255', 'S255', 'S5', 'S5', int, int, int, 'S2',
                 'S255', 'S255', 'S255', 'S5']})
         directions = np.genfromtxt(directions_file, comments='#', dtype=types)
 
@@ -103,11 +103,10 @@ def directions_read(directions_file, factor_working_dir):
 
         data.append(Direction(direction['name'], ra, dec, atrous_do,
         	mscale_field_do, direction['cal_imsize'], direction['solint_p'],
-        	direction['solint_a'], direction['field_imsize'],
-        	direction['dynamic_range'], direction['region_selfcal'],
-        	direction['region_field'], direction['peel_skymodel'],
-        	outlier_source, factor_working_dir, False, cal_size_deg,
-        	cal_flux_jy))
+        	direction['solint_a'], direction['dynamic_range'],
+        	direction['region_selfcal'], direction['region_field'],
+        	direction['peel_skymodel'], outlier_source, factor_working_dir,
+        	False, cal_size_deg, cal_flux_jy))
 
     return data
 
