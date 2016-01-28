@@ -39,8 +39,6 @@ class Direction(object):
         Solution interval for phase calibration (# of time slots)
     solint_a : int
         Solution interval for amplitude calibration (# of time slots)
-    field_imsize : int
-        Size of facet image in 1.5 arcsec pixels
     dynamic_range : str
         LD (low dynamic range) or HD (high dynamic range)
     region_selfcal : str
@@ -62,10 +60,12 @@ class Direction(object):
         Apparent flux in Jy of calibrator source
 
     """
-    def __init__(self, name, ra, dec, atrous_do=False, mscale_field_do=False, cal_imsize=512,
-        solint_p=1, solint_a=30, field_imsize=2048, dynamic_range='LD', region_selfcal='',
-        region_field='', peel_skymodel='', outlier_do=False, factor_working_dir='',
-        make_final_image=False, cal_size_deg=None, cal_flux_jy=None):
+    def __init__(self, name, ra, dec, atrous_do=False, mscale_field_do=False,
+    	cal_imsize=512, solint_p=1, solint_a=30, dynamic_range='LD',
+    	region_selfcal='', region_field='', peel_skymodel='',
+    	outlier_do=False, factor_working_dir='', make_final_image=False,
+    	cal_size_deg=None, cal_flux_jy=None):
+
         # Handle input args
         self.name = name
         self.log = logging.getLogger('factor:{0}'.format(self.name))
@@ -81,7 +81,6 @@ class Direction(object):
         self.cal_imsize = cal_imsize
         self.solint_time_p = solint_p
         self.solint_time_a = solint_a
-        self.facet_imsize = field_imsize * 1.15
         self.dynamic_range = dynamic_range
         if region_selfcal.lower() == 'empty':
             # Set to empty list (casapy format)
@@ -122,7 +121,7 @@ class Direction(object):
         self.nchunks = 1
         self.num_selfcal_groups = 1
 
-        # Set the size of the calibrator (used to filter source lists)
+        # Set the size of the calibrator
         if cal_size_deg is None:
             # Try to get from cal_imsize assuming 50% padding
             if self.cal_imsize == 0:
@@ -147,8 +146,21 @@ class Direction(object):
         self.vertices_file = self.save_file
 
 
+    def set_imcal_parameters(self, nbands, nbands_per_channel, chan_width_hz,
+    	nchan, timestep_sec, ntimes, nbands, initial_skymodel=None,
+    	preaverage_flux_jy=0.0):
+        """
+        Sets various parameters for imaging and calibration
+        """
+        self.set_imaging_parameters(len(bands), nbands_per_channel,
+            initial_skymodel.copy())
+        self.set_averaging_steps_and_solution_intervals(chan_width_hz,
+            nchan, timestep_sec, ntimes, nbands,
+            initial_skymodel.copy(), preaverage_flux_jy)
+
+
     def set_imaging_parameters(self, nbands, nbands_per_channel,
-        initial_skymodel=None, test_run=False):
+        initial_skymodel=None):
         """
         Sets various parameters for images in facetselfcal and facetimage pipelines
 
@@ -160,21 +172,14 @@ class Direction(object):
             Number of bands per output channel (WSClean only)
         initial_skymodel : LSMTool SkyModel object, optional
             Sky model used to check source sizes
-        test_run : bool, optional
-            If True, use test sizes
 
         """
-        if not test_run:
-            # Set facet image size
-            if self.facet_imsize == 0:
-                if hasattr(self, 'width'):
-                    self.facet_imsize = max(512, self.get_optimum_size(self.width
-                        / self.cellsize_selfcal_deg * 1.3)) # full facet has 30% padding
-                else:
-                    self.facet_imsize = None
+        # Set facet image size
+        if hasattr(self, 'width'):
+            self.facet_imsize = max(512, self.get_optimum_size(self.width
+                / self.cellsize_selfcal_deg * 1.3)) # full facet has 30% padding
         else:
-            self.facet_imsize = self.get_optimum_size(128)
-            self.cal_imsize = self.get_optimum_size(128)
+            self.facet_imsize = None
 
         self.cal_wplanes = self.set_wplanes(self.cal_imsize)
         self.facet_wplanes = self.set_wplanes(self.facet_imsize)
