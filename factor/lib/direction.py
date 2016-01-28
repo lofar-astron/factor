@@ -155,8 +155,7 @@ class Direction(object):
         self.set_imaging_parameters(nbands, nbands_per_channel, nchan,
             initial_skymodel)
         self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,
-        	timestep_sec, ntimes, nbands, initial_skymodel,
-        	preaverage_flux_jy)
+        	timestep_sec, ntimes, nbands, initial_skymodel,	preaverage_flux_jy)
 
 
     def set_imaging_parameters(self, nbands, nbands_per_channel, nchan_per_band,

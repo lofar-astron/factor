@@ -67,9 +67,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     # Make direction object for the field
     field = Direction('field', bands[0].ra, bands[0].dec,
         factor_working_dir=parset['dir_working'])
-    field.set_imcal_parameters(len(bands), parset['wsclean_nbands'],
-        bands[0].chan_width_hz, bands[0].nchan, bands[0].timepersample,
-        bands[0].nsamples, len(bands))
+    field.set_imcal_parameters(parset['wsclean_nbands'],
+    	bands[0].chan_width_hz, bands[0].nchan, bands[0].timepersample,
+    	bands[0].nsamples, len(bands))
 
     # Run initial sky model generation and create empty datasets
     if len(bands_initsubtract) > 0:
@@ -582,7 +582,7 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
     log.info("Determining imaging parameters for each direction...")
     for i, direction in enumerate(directions):
         # Set imaging and calibration parameters
-        direction.set_imcal_parameters(len(bands), parset['wsclean_nbands'],
+        direction.set_imcal_parameters(parset['wsclean_nbands'],
         	bands[0].chan_width_hz, bands[0].nchan, bands[0].timepersample,
         	bands[0].nsamples, len(bands), initial_skymodel,
         	parset['preaverage_flux_jy'])
