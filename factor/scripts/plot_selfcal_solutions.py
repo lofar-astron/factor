@@ -435,7 +435,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     main(args.parmdb, args.imageroot, freq=args.freq, plot_tec=args.tec, plot_amp=args.amp,
-        plot_phase=args.pahse, plot_scalarphase=args.scalarphase, median_amp=args.median_amp,
+        plot_phase=args.phase, plot_scalarphase=args.scalarphase, median_amp=args.median_amp,
         norm_amp_lim=args.norm_amp_lim, plot_clock=args.clock, phasors=args.phasors,
         plot_international=args.plot_international, refstation=args.refstation)
 
