@@ -479,8 +479,8 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
         fx = []
         fy = []
         for th in range(0, 360, 1):
-            fx.append(faceting_radius_pix * beam_ratio * np.cos(th * np.pi / 180.0) + field_x[0])
-            fy.append(faceting_radius_pix * np.sin(th * np.pi / 180.0) + field_y[0])
+            fx.append(faceting_radius_pix * np.cos(th * np.pi / 180.0) + field_x[0])
+            fy.append(faceting_radius_pix * beam_ratio * np.sin(th * np.pi / 180.0) + field_y[0])
             fov_poly_tuple = tuple([(xp, yp) for xp, yp in zip(fx, fy)])
 
         for i, thiessen_poly in enumerate(thiessen_polys):
