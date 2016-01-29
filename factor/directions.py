@@ -379,9 +379,9 @@ def group_directions(directions, n_per_grouping={'1':0}, allow_reordering=True):
     return direction_groups
 
 
-def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
+def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
     s=None, check_edges=False, target_ra=None, target_dec=None,
-    target_radius_arcmin=None, faceting_radius_deg=None, beam_ratio=None):
+    target_radius_arcmin=None, beam_ratio=None):
     """
     Generates and add thiessen polygons or patches to input directions
 
@@ -393,8 +393,10 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
         RA in degrees of field center
     field_dec_deg : float
         Dec in degrees of field center
-    bounds_scale : int, optional
-        Scale to use for bounding box
+    faceting_radius_deg : float
+        Maximum radius within which faceting will be done. Direction objects
+        with postions outside this radius will get small rectangular patches
+        instead of thiessen polygons
     s : LSMTool SkyModel object, optional
         Band to use to check for source near facet edges
     check_edges : bool, optional
@@ -406,10 +408,6 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
         Dec of target source. E.g., '+35d30m31.52'
     target_radius_arcmin : float, optional
         Radius in arcmin of target source
-    faceting_radius_deg : float, optional
-        Maximum radius within which faceting will be done. Direction objects
-        with postions outside this radius will get small rectangular patches
-        instead of thiessen polygons
     beam_ratio : float, optional
         Ratio of semi-major (N-S) axis to semi-minor (E-W) axis for the primary
         beam
@@ -421,19 +419,32 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
     from itertools import combinations
     from astropy.coordinates import Angle
 
-    # Select directions inside faceting_radius_deg
-    if faceting_radius_deg is not None:
-        for d in directions_list:
-            dist_deg = calculateSeparation(d.ra, d.dec, field_ra_deg, field_dec_deg)
-            if dist_deg.value > faceting_radius_deg:
-                # Use simple rectangular patches
-                d.is_patch = True # set patch flag to ensure facet is not included in mosaic
+    # Select directions inside FOV (here defined as ellipse given by
+    # faceting_radius_deg and the mean elevation)
+    faceting_radius_pix = faceting_radius_deg / 0.066667 # radius in pixels
+    field_x, field_y = radec2xy([field_ra_deg], [field_dec_deg],
+        refRA=field_ra_deg, refDec=field_dec_deg)
 
+    fx = []
+    fy = []
+    for th in range(0, 360, 1):
+        fx.append(faceting_radius_pix * np.cos(th * np.pi / 180.0) + field_x[0])
+        fy.append(faceting_radius_pix * beam_ratio * np.sin(th * np.pi / 180.0) + field_y[0])
+    fov_poly_tuple = tuple([(xp, yp) for xp, yp in zip(fx, fy)])
+    fov_poly = Polygon(fx, fy)
+
+    for (x, y) in getxy(directions_list, field_ra_deg, field_dec_deg):
+        dist = fov_poly.is_inside(x, y)
+        if dist > 0:
+            # Source is outside of FOV, so use simple rectangular patches
+            d.is_patch = True
+
+    # Now do the faceting (excluding the patches)
     directions_list_thiessen = [d for d in directions_list if not d.is_patch]
-    points, midRA, midDec = getxy(directions_list_thiessen)
+    points = getxy(directions_list_thiessen, field_ra_deg, field_dec_deg)
     points = points.T
 
-    # Generate array of outer points used to constrain the outer facets
+    # Generate array of outer points used to constrain the facets
     nouter = 64
     means = np.ones((nouter, 2)) * points.mean(axis=0)
     offsets = []
@@ -442,14 +453,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
         offsets.append([np.cos(ang), np.sin(ang)])
 
     # Generate initial facets
-    if faceting_radius_deg is not None:
-        radius = 5.0 * faceting_radius_deg / 0.066667 # radius in pixels
-    else:
-        if bounds_scale < 0.5:
-            log.debug('Bounds scale too low. Setting to 0.5')
-            bounds_scale = 0.5
-        x_scale, y_scale = (points.min(axis=0) - points.max(axis=0)) * bounds_scale
-        radius = np.sqrt(x_scale**2 + y_scale**2)
+    radius = 5.0 * faceting_radius_deg / 0.066667 # radius in pixels
     scale_offsets = radius * np.array(offsets)
     outer_box = means + scale_offsets
     points_all = np.vstack([points, outer_box])
@@ -470,36 +474,24 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
                 dup_ind -= 1
             dup_ind += 1
 
-    # Clip the facets at faceting_radius_deg
-    if faceting_radius_deg is not None:
-        faceting_radius_pix = faceting_radius_deg / 0.066667 # radius in pixels
-        field_x, field_y = radec2xy([field_ra_deg], [field_dec_deg], refRA=midRA,
-            refDec=midDec)
-
-        fx = []
-        fy = []
-        for th in range(0, 360, 1):
-            fx.append(faceting_radius_pix * np.cos(th * np.pi / 180.0) + field_x[0])
-            fy.append(faceting_radius_pix * beam_ratio * np.sin(th * np.pi / 180.0) + field_y[0])
-            fov_poly_tuple = tuple([(xp, yp) for xp, yp in zip(fx, fy)])
-
-        for i, thiessen_poly in enumerate(thiessen_polys):
-            polyv = np.vstack(thiessen_poly)
-            poly_tuple = tuple([(xp, yp) for xp, yp in zip(polyv[:, 0], polyv[:, 1])])
-            p1 = shapely.geometry.Polygon(poly_tuple)
-            p2 = shapely.geometry.Polygon(fov_poly_tuple)
-            if p1.intersects(p2):
-                p1 = p1.intersection(p2)
-                xyverts = [np.array([xp, yp]) for xp, yp in
-                    zip(p1.exterior.coords.xy[0].tolist(),
-                    p1.exterior.coords.xy[1].tolist())]
-                thiessen_polys[i] = xyverts
+    # Clip the facets at FOV
+    for i, thiessen_poly in enumerate(thiessen_polys):
+        polyv = np.vstack(thiessen_poly)
+        poly_tuple = tuple([(xp, yp) for xp, yp in zip(polyv[:, 0], polyv[:, 1])])
+        p1 = shapely.geometry.Polygon(poly_tuple)
+        p2 = shapely.geometry.Polygon(fov_poly_tuple)
+        if p1.intersects(p2):
+            p1 = p1.intersection(p2)
+            xyverts = [np.array([xp, yp]) for xp, yp in
+                zip(p1.exterior.coords.xy[0].tolist(),
+                p1.exterior.coords.xy[1].tolist())]
+            thiessen_polys[i] = xyverts
 
     # Check for sources near / on facet edges and adjust regions accordingly
     if check_edges:
         log.info('Adjusting facets to avoid sources...')
         RA, Dec = s.getPatchPositions(asArray=True)
-        sx, sy = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
+        sx, sy = radec2xy(RA, Dec, refRA=field_ra_deg, refDec=field_dec_deg)
         sizes = s.getPatchSizes(units='degree').tolist()
 
         if target_ra is not None and target_dec is not None and target_radius_arcmin is not None:
@@ -507,7 +499,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
                 target_ra, target_dec))
             tra = Angle(target_ra).to('deg').value
             tdec = Angle(target_dec).to('deg').value
-            tx, ty = radec2xy([tra], [tdec], refRA=midRA, refDec=midDec)
+            tx, ty = radec2xy([tra], [tdec], refRA=field_ra_deg, refDec=field_dec_deg)
             sx.extend(tx)
             sy.extend(ty)
             sizes.append(target_radius_arcmin*2.0/1.2/60.0)
@@ -570,9 +562,9 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
 
     # Add the final facet and patch info to the directions
     for d in directions_list:
-        # Make calibrator patch (excluding 20% region around edge that is masked)
-        sx, sy = radec2xy([d.ra], [d.dec], refRA=midRA, refDec=midDec)
-        patch_width = 0.8 * d.cal_imsize * d.cellsize_selfcal_deg / 0.066667 # size of patch in pixels
+        # Make calibrator patch
+        sx, sy = radec2xy([d.ra], [d.dec], refRA=field_dec_ra, refDec=field_dec_deg)
+        patch_width = d.cal_imsize * d.cellsize_selfcal_deg / 0.066667 # size of patch in pixels
         x0 = sx[0] - patch_width / 2.0
         y0 = sy[0] - patch_width / 2.0
         selfcal_poly = [np.array([x0, y0]),
@@ -581,7 +573,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
                 np.array([x0+patch_width, y0])]
 
         if d.is_patch:
-            # For sources beyond max radius, set facet poly to selfcal poly
+            # For sources beyond max radius, set facet poly to calibrator poly
             add_facet_info(d, selfcal_poly, selfcal_poly, midRA, midDec)
         else:
             poly = thiessen_polys[directions_list_thiessen.index(d)]
@@ -713,31 +705,6 @@ def make_ds9_calimage_file(directions, outputfile):
         f.writelines(lines)
 
 
-def plot_thiessen(directions_list, bounds_scale=2):
-    """
-    Plot thiessen polygons for a given set of points
-
-    Parameters
-    ----------
-    directions_list : list of Direction objects
-        List of input directions
-    bounds_scale : int, optional
-        Scale to use for bounding box
-
-    """
-    from matplotlib import pyplot as plt
-
-    points, midRA, midDec = getxy(directions_list)
-    points = points.T
-    polys, _ = thiessen(directions_list, bounds_scale)
-    plt.scatter(points[:, 0], points[:, 1])
-    for poly in polys:
-        poly = np.vstack([poly, poly[0]])
-        plt.plot(poly[:, 0], poly[:, 1], 'r')
-        poly = np.vstack([poly, poly[0]])
-    plt.show()
-
-
 def _any_equal(arr, n):
     """for a given Mx3 array, returns a 1xM array containing indices
     of rows where any of the columns are equal to n.
@@ -848,7 +815,7 @@ def _thiessen_poly(tri, circumcenters, n):
     return [circumcenters[t] for t in triangles]
 
 
-def getxy(directions_list):
+def getxy(directions_list, midRA, midDec):
     """
     Returns array of projected x and y values.
 
@@ -856,12 +823,15 @@ def getxy(directions_list):
     ----------
     directions_list : list
         List of direction objects
+    midRA : float
+        RA for WCS reference in degrees
+    midDec : float
+        Dec for WCS reference in degrees
 
     Returns
     -------
-    x, y, midRA, midDec : numpy array, numpy array, float, float
-        arrays of x and y values and the midpoint RA and
-        Dec values
+    x, y : numpy array, numpy array, float, float
+        arrays of x and y values
 
     """
     if len(directions_list) == 0:
@@ -872,28 +842,9 @@ def getxy(directions_list):
     for direction in directions_list:
         RA.append(direction.ra)
         Dec.append(direction.dec)
-    x, y  = radec2xy(RA, Dec)
+    x, y  = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
 
-    # Refine x and y using midpoint
-    if len(x) > 1:
-        xmid = min(x) + (max(x) - min(x)) / 2.0
-        ymid = min(y) + (max(y) - min(y)) / 2.0
-        xind = np.argsort(x)
-        yind = np.argsort(y)
-        try:
-            midxind = np.where(np.array(x)[xind] > xmid)[0][0]
-            midyind = np.where(np.array(y)[yind] > ymid)[0][0]
-            midRA = RA[xind[midxind]]
-            midDec = Dec[yind[midyind]]
-            x, y  = radec2xy(RA, Dec, midRA, midDec)
-        except IndexError:
-            midRA = RA[0]
-            midDec = Dec[0]
-    else:
-        midRA = RA[0]
-        midDec = Dec[0]
-
-    return np.array([x, y]), midRA, midDec
+    return np.array([x, y])
 
 
 def radec2xy(RA, Dec, refRA=None, refDec=None):

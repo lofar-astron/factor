@@ -532,12 +532,14 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
 
     # Create facets and patches
     faceting_radius_deg = dir_parset['faceting_radius_deg']
+    if faceting_radius_deg is None:
+        faceting_radius_deg = 1.25 * ref_band.fwhm_deg / 2.0
     beam_ratio = 1.0 / np.sin(ref_band.mean_el_rad) # ratio of N-S to E-W beam
     factor.directions.thiessen(directions, ref_band.ra, ref_band.dec,
-        s=initial_skymodel.copy(), check_edges=dir_parset['check_edges'],
-        target_ra=target_ra, target_dec=target_dec,
-        target_radius_arcmin=target_radius_arcmin,
-        faceting_radius_deg=faceting_radius_deg, beam_ratio=beam_ratio)
+        s=initial_skymodel.copy(), faceting_radius_deg,
+        check_edges=dir_parset['check_edges'], target_ra=target_ra,
+        target_dec=target_dec, target_radius_arcmin=target_radius_arcmin,
+        beam_ratio=beam_ratio)
 
     # Warn user if they've specified a direction to reset that does not exist
     direction_names = [d.name for d in directions]
