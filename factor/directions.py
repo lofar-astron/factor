@@ -381,7 +381,7 @@ def group_directions(directions, n_per_grouping={'1':0}, allow_reordering=True):
 
 def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
     s=None, check_edges=False, target_ra=None, target_dec=None,
-    target_radius_arcmin=None, faceting_radius_deg=None):
+    target_radius_arcmin=None, faceting_radius_deg=None, beam_ratio=None):
     """
     Generates and add thiessen polygons or patches to input directions
 
@@ -410,6 +410,9 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
         Maximum radius within which faceting will be done. Direction objects
         with postions outside this radius will get small rectangular patches
         instead of thiessen polygons
+    beam_ratio : float, optional
+        Ratio of semi-major (N-S) axis to semi-minor (E-W) axis for the primary
+        beam
 
     """
     import lsmtool
@@ -472,14 +475,21 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
         faceting_radius_pix = faceting_radius_deg / 0.066667 # radius in pixels
         field_x, field_y = radec2xy([field_ra_deg], [field_dec_deg], refRA=midRA,
             refDec=midDec)
+
+        fx = []
+        fy = []
+        for th in range(0, 360, 1):
+            fx.append(faceting_radius_pix * beam_ratio * np.cos(th * np.pi / 180.0) + field_x[0])
+            fy.append(faceting_radius_pix * np.sin(th * np.pi / 180.0) + field_y[0])
+            fov_poly_tuple = tuple([(xp, yp) for xp, yp in zip(fx, fy)])
+
         for i, thiessen_poly in enumerate(thiessen_polys):
             polyv = np.vstack(thiessen_poly)
             poly_tuple = tuple([(xp, yp) for xp, yp in zip(polyv[:, 0], polyv[:, 1])])
             p1 = shapely.geometry.Polygon(poly_tuple)
-            p2 = shapely.geometry.Point((field_x[0], field_y[0]))
-            p2buf = p2.buffer(faceting_radius_pix)
-            if p1.intersects(p2buf):
-                p1 = p1.intersection(p2buf)
+            p2 = shapely.geometry.Polygon(fov_poly_tuple)
+            if p1.intersects(p2):
+                p1 = p1.intersection(p2)
                 xyverts = [np.array([xp, yp]) for xp, yp in
                     zip(p1.exterior.coords.xy[0].tolist(),
                     p1.exterior.coords.xy[1].tolist())]
