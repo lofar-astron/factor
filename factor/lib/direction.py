@@ -160,7 +160,7 @@ class Direction(object):
 
 
     def set_imaging_parameters(self, nbands, nbands_per_channel, nchan_per_band,
-        initial_skymodel=None):
+        initial_skymodel=None, padding=1.05):
         """
         Sets various parameters for images in facetselfcal and facetimage pipelines
 
@@ -174,12 +174,15 @@ class Direction(object):
             Number of channels per band
         initial_skymodel : LSMTool SkyModel object, optional
             Sky model used to check source sizes
+        padding : float, optional
+            Padding factor by which size of facet is multiplied to determine
+            the facet image size
 
         """
         # Set facet image size
         if hasattr(self, 'width'):
             self.facet_imsize = max(512, self.get_optimum_size(self.width
-                / self.cellsize_selfcal_deg * 1.3)) # full facet has 30% padding
+                / self.cellsize_selfcal_deg * padding))
         else:
             self.facet_imsize = None
 
