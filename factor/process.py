@@ -13,6 +13,7 @@ import factor
 import factor.directions
 import factor.parset
 import factor.cluster
+from factor.operations.outlier_ops import *
 from factor.operations.field_ops import *
 from factor.operations.facet_ops import *
 from factor.lib.scheduler import Scheduler
@@ -115,10 +116,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
         # Do the peeling
         for d in outlier_directions:
-            op = FacetPeel(parset, bands, d)
+            op = OutlierPeel(parset, bands, d)
             scheduler.run(op)
 
-            op = FacetSub(parset, bands, d)
+            op = OutlierSub(parset, bands, d)
             scheduler.run(op)
 
     # Run selfcal and subtract operations on direction groups

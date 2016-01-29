@@ -1146,6 +1146,31 @@ expand_merged_parmdb_map.control.mapfile_to_match          =   shift_empty.outpu
 expand_merged_parmdb_map.control.mapfile_dir               =   input.output.mapfile_dir
 expand_merged_parmdb_map.control.filename                  =   expand_merged_parmdbs.mapfile
 
+{% if is_patch %}
+create_compressed_mapfile_ft.control.kind                  =   plugin
+create_compressed_mapfile_ft.control.type                  =   compressMapfile
+create_compressed_mapfile_ft.control.mapfile_in            =   shift_empty.output.mapfile
+create_compressed_mapfile_ft.control.mapfile_dir           =   input.output.mapfile_dir
+create_compressed_mapfile_ft.control.filename              =   concat_unaveraged_input.mapfile
+
+concat_unaveraged.control.type                             =   virtual_concat
+concat_unaveraged.control.mapfile_in                       =   create_compressed_mapfile_ft.output.mapfile
+concat_unaveraged.control.inputkey                         =   msfiles
+concat_unaveraged.control.outputkey                        =   msconcat
+concat_unaveraged.argument.flags                           =   [msfiles,msconcat]
+
+create_model4_map.control.kind                             =   plugin
+create_model4_map.control.type                             =   trimMapfile
+create_model4_map.control.mapfile_in                       =   casa_image42.output.casa_image42.model.mapfile
+create_model4_map.control.trim                             =   .model
+create_model4_map.control.mapfile_dir                      =   input.output.mapfile_dir
+create_model4_map.control.filename                         =   mode42_rootnames.mapfile
+
+casa_ft4.control.type                                      =   casa
+casa_ft4.control.mapfiles_in                               =   [concat_unaveraged.output.mapfile,create_model4_map.output.mapfile]
+casa_ft4.control.inputkeys                                 =   [inputms,modelimg]
+casa_ft4.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft.py,inputms,modelimg,{{ nterms }},{{ facet_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
+{% else %}
 apply_dir_dep_fast.control.type                            =   calibrate-stand-alone_new
 apply_dir_dep_fast.control.mapfiles_in                     =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 apply_dir_dep_fast.control.inputkeys                       =   [inputms,inputparmdb]
@@ -1302,6 +1327,7 @@ wsclean_ft.argument.j                                      =   {{ max_cpus_per_n
 wsclean_ft.argument.tempdir                                =   {{ local_dir }}
 wsclean_ft.argument.nwlayers-for-size                      =   12288 12288
 {% endblock full_image_parms %}
+{% endif %}
 
 corrupt_final_model.control.type                           =   dppp
 corrupt_final_model.control.opts.mapfiles_in               =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
