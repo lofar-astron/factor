@@ -433,7 +433,8 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
     fov_poly_tuple = tuple([(xp, yp) for xp, yp in zip(fx, fy)])
     fov_poly = Polygon(fx, fy)
 
-    for (x, y), _, _ in getxy(directions_list, field_ra_deg, field_dec_deg):
+    points, _, _ in getxy(directions_list, field_ra_deg, field_dec_deg)
+    for x, y in (points):
         dist = fov_poly.is_inside(x, y)
         if dist > 0:
             # Source is outside of FOV, so use simple rectangular patches
@@ -864,6 +865,7 @@ def getxy(directions_list, midRA=None, midDec=None):
         else:
             midRA = RA[0]
             midDec = Dec[0]
+
     x, y  = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
 
     return np.array([x, y]), midRA, midDec

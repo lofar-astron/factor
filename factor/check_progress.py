@@ -118,7 +118,6 @@ def plot_state(directions_list, trim_names=True):
     else:
         ax = plt.gca()
 
-    # Add field direction, making sure it is not too near an existing direction
     field_x = min(points[0])
     field_y = max(points[1])
     adjust_xy = True
