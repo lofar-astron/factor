@@ -52,6 +52,9 @@ def run(parset_file, trim_names=True):
     logging.root.setLevel(logging.ERROR)
     log.setLevel(logging.ERROR)
     all_directions = load_directions(parset_file)
+    if len(all_directions) == 0:
+        log.error('No directions found. Please check parset")
+        sys.exit(1)
     plot_state(all_directions, trim_names=trim_names)
 
 
