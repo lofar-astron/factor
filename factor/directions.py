@@ -575,10 +575,10 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
 
         if d.is_patch:
             # For sources beyond max radius, set facet poly to calibrator poly
-            add_facet_info(d, selfcal_poly, selfcal_poly, midRA, midDec)
+            add_facet_info(d, selfcal_poly, selfcal_poly, field_ra_deg, field_dec_deg)
         else:
             poly = thiessen_polys[directions_list_thiessen.index(d)]
-            add_facet_info(d, selfcal_poly, poly, midRA, midDec)
+            add_facet_info(d, selfcal_poly, poly, field_ra_deg, field_dec_deg)
 
 
 def add_facet_info(d, selfcal_poly, facet_poly, midRA, midDec):
