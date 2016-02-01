@@ -537,7 +537,7 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
         faceting_radius_deg = 1.25 * ref_band.fwhm_deg / 2.0
     beam_ratio = 1.0 / np.sin(ref_band.mean_el_rad) # ratio of N-S to E-W beam
     factor.directions.thiessen(directions, ref_band.ra, ref_band.dec,
-        s=initial_skymodel.copy(), faceting_radius_deg,
+        faceting_radius_deg, s=initial_skymodel.copy(),
         check_edges=dir_parset['check_edges'], target_ra=target_ra,
         target_dec=target_dec, target_radius_arcmin=target_radius_arcmin,
         beam_ratio=beam_ratio)
