@@ -815,7 +815,7 @@ def _thiessen_poly(tri, circumcenters, n):
     return [circumcenters[t] for t in triangles]
 
 
-def getxy(directions_list, midRA, midDec):
+def getxy(directions_list, midRA=None, midDec):
     """
     Returns array of projected x and y values.
 
@@ -842,9 +842,31 @@ def getxy(directions_list, midRA, midDec):
     for direction in directions_list:
         RA.append(direction.ra)
         Dec.append(direction.dec)
+
+    if midRA is None or midDec is None:
+        x, y  = radec2xy(RA, Dec)
+
+        # Refine x and y using midpoint
+        if len(x) > 1:
+            xmid = min(x) + (max(x) - min(x)) / 2.0
+            ymid = min(y) + (max(y) - min(y)) / 2.0
+            xind = np.argsort(x)
+            yind = np.argsort(y)
+            try:
+                midxind = np.where(np.array(x)[xind] > xmid)[0][0]
+                midyind = np.where(np.array(y)[yind] > ymid)[0][0]
+                midRA = RA[xind[midxind]]
+                midDec = Dec[yind[midyind]]
+                x, y  = radec2xy(RA, Dec, midRA, midDec)
+            except IndexError:
+                midRA = RA[0]
+                midDec = Dec[0]
+        else:
+            midRA = RA[0]
+            midDec = Dec[0]
     x, y  = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
 
-    return np.array([x, y])
+    return np.array([x, y]), midRA, midDec
 
 
 def radec2xy(RA, Dec, refRA=None, refDec=None):
