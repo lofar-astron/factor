@@ -564,7 +564,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
     # Add the final facet and patch info to the directions
     for d in directions_list:
         # Make calibrator patch
-        sx, sy = radec2xy([d.ra], [d.dec], refRA=field_dec_ra, refDec=field_dec_deg)
+        sx, sy = radec2xy([d.ra], [d.dec], refRA=field_ra_deg, refDec=field_dec_deg)
         patch_width = d.cal_imsize * d.cellsize_selfcal_deg / 0.066667 # size of patch in pixels
         x0 = sx[0] - patch_width / 2.0
         y0 = sy[0] - patch_width / 2.0
