@@ -218,6 +218,9 @@ def plot_state(directions_list, trim_names=True):
     fig.canvas.mpl_connect('pick_event', on_pick)
     fig.canvas.mpl_connect('key_press_event', on_press)
 
+    # Add timer
+    fig.canvas.new_timer(interval=60000, callbacks=(update_plot, ))
+
     # Show plot
     plt.show()
     plt.close(fig)
@@ -315,24 +318,49 @@ def on_press(event):
     global fig, all_directions
 
     if event.key == 'u':
-        info = 'Updating display...'
-        c = at.get_child()
-        c.set_text(info)
-        fig.canvas.draw()
-        ax = plt.gca()
-        for a in ax.patches:
-            if hasattr(a, 'facet_name'):
-                for d in all_directions:
-                    if d.name == a.facet_name:
-                        set_patch_color(a, d)
-                        a.selfcal_images = find_selfcal_images(d)
-                        a.facet_image = find_facet_image(d)
-        fig.canvas.draw()
-        info += '\n...done'
-        c = at.get_child()
-        c.set_text(info)
-        fig.canvas.draw()
+        update_plot()
+#         info = 'Updating display...'
+#         c = at.get_child()
+#         c.set_text(info)
+#         fig.canvas.draw()
+#         ax = plt.gca()
+#         for a in ax.patches:
+#             if hasattr(a, 'facet_name'):
+#                 for d in all_directions:
+#                     if d.name == a.facet_name:
+#                         set_patch_color(a, d)
+#                         a.selfcal_images = find_selfcal_images(d)
+#                         a.facet_image = find_facet_image(d)
+#         fig.canvas.draw()
+#         info += '\n...done'
+#         c = at.get_child()
+#         c.set_text(info)
+#         fig.canvas.draw()
 
+
+def update_plot():
+    """
+    Update the plot
+    """
+    global fig, all_directions
+
+    info = 'Updating display...'
+    c = at.get_child()
+    c.set_text(info)
+    fig.canvas.draw()
+    ax = plt.gca()
+    for a in ax.patches:
+        if hasattr(a, 'facet_name'):
+            for d in all_directions:
+                if d.name == a.facet_name:
+                    set_patch_color(a, d)
+                    a.selfcal_images = find_selfcal_images(d)
+                    a.facet_image = find_facet_image(d)
+    fig.canvas.draw()
+    info += '\n...done'
+    c = at.get_child()
+    c.set_text(info)
+    fig.canvas.draw()
 
 def set_patch_color(a, d):
     """
