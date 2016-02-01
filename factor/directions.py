@@ -436,7 +436,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
     points, _, _ = getxy(directions_list, field_ra_deg, field_dec_deg)
     for x, y, d in zip(points[0], points[1], directions_list):
         dist = fov_poly.is_inside(x, y)
-        if dist > 0:
+        if dist < 0.0:
             # Source is outside of FOV, so use simple rectangular patches
             d.is_patch = True
 
