@@ -433,7 +433,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
     fov_poly_tuple = tuple([(xp, yp) for xp, yp in zip(fx, fy)])
     fov_poly = Polygon(fx, fy)
 
-    points, _, _ in getxy(directions_list, field_ra_deg, field_dec_deg)
+    points, _, _ = getxy(directions_list, field_ra_deg, field_dec_deg)
     for x, y in (points):
         dist = fov_poly.is_inside(x, y)
         if dist > 0:
