@@ -433,7 +433,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
     fov_poly_tuple = tuple([(xp, yp) for xp, yp in zip(fx, fy)])
     fov_poly = Polygon(fx, fy)
 
-    for (x, y) in getxy(directions_list, field_ra_deg, field_dec_deg):
+    for (x, y), _, _ in getxy(directions_list, field_ra_deg, field_dec_deg):
         dist = fov_poly.is_inside(x, y)
         if dist > 0:
             # Source is outside of FOV, so use simple rectangular patches
@@ -441,7 +441,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
 
     # Now do the faceting (excluding the patches)
     directions_list_thiessen = [d for d in directions_list if not d.is_patch]
-    points = getxy(directions_list_thiessen, field_ra_deg, field_dec_deg)
+    points, _, _ = getxy(directions_list_thiessen, field_ra_deg, field_dec_deg)
     points = points.T
 
     # Generate array of outer points used to constrain the facets
@@ -815,7 +815,7 @@ def _thiessen_poly(tri, circumcenters, n):
     return [circumcenters[t] for t in triangles]
 
 
-def getxy(directions_list, midRA=None, midDec):
+def getxy(directions_list, midRA=None, midDec=None):
     """
     Returns array of projected x and y values.
 
