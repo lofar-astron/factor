@@ -364,7 +364,7 @@ def update_plot():
                     a.selfcal_images = find_selfcal_images(d)
                     a.facet_image = find_facet_image(d)
                     if d.name in c.get_text():
-                        info = get_current_info(direction)
+                        info = get_current_info(d)
                         c.set_text(info)
                     break
 
