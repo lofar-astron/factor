@@ -562,6 +562,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
                         thiessen_polys[i] = xyverts
 
     # Add the final facet and patch info to the directions
+    patch_polys = []
     for d in directions_list:
         # Make calibrator patch
         sx, sy = radec2xy([d.ra], [d.dec], refRA=field_ra_deg, refDec=field_dec_deg)
@@ -573,25 +574,26 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
                 np.array([x0+patch_width, y0+patch_width]),
                 np.array([x0+patch_width, y0])]
 
-        # Clip calibrator-patch poly to facet polys
-        for facet_poly in thiessen_polys:
-            polyv = np.vstack(facet_poly)
-            poly_tuple = tuple([(xp, yp) for xp, yp in zip(polyv[:, 0], polyv[:, 1])])
-            p1 = shapely.geometry.Polygon(poly_tuple)
-            p2 = shapely.geometry.Polygon(selfcal_poly)
-            if p2.intersects(p1):
-                p2 = p2.intersection(p1)
-                xyverts = [np.array([xp, yp]) for xp, yp in
-                    zip(p1.exterior.coords.xy[0].tolist(),
-                    p1.exterior.coords.xy[1].tolist())]
-                selfcal_poly = xyverts
-
         if d.is_patch:
             # For sources beyond max radius, set facet poly to calibrator poly
-            add_facet_info(d, selfcal_poly, selfcal_poly, field_ra_deg, field_dec_deg)
+            # and clip current patch poly to facet polys and previous patch polys
+            for facet_poly in thiessen_polys + patch_ploys:
+                polyv = np.vstack(facet_poly)
+                poly_tuple = tuple([(xp, yp) for xp, yp in zip(polyv[:, 0], polyv[:, 1])])
+                p1 = shapely.geometry.Polygon(poly_tuple)
+                p2 = shapely.geometry.Polygon(selfcal_poly)
+                if p2.intersects(p1):
+                    p2 = p2.difference(p1)
+                    xyverts = [np.array([xp, yp]) for xp, yp in
+                        zip(p1.exterior.coords.xy[0].tolist(),
+                        p1.exterior.coords.xy[1].tolist())]
+                    patch_poly = xyverts
+
+            add_facet_info(d, selfcal_poly, patch_poly, field_ra_deg, field_dec_deg)
+            patch_polys.append(selfcal_poly)
         else:
-            poly = thiessen_polys[directions_list_thiessen.index(d)]
-            add_facet_info(d, selfcal_poly, poly, field_ra_deg, field_dec_deg)
+            facet_poly = thiessen_polys[directions_list_thiessen.index(d)]
+            add_facet_info(d, selfcal_poly, facet_poly, field_ra_deg, field_dec_deg)
 
 
 def add_facet_info(d, selfcal_poly, facet_poly, midRA, midDec):
