@@ -253,27 +253,12 @@ def on_pick(event):
     else:
         return
 
-    # Update text box
-    c = at.get_child()
-    c.set_text('Getting info...')
-    fig.canvas.draw()
-
     if event.mouseevent.button == 1: # left click
         # Print info
-        current_op = get_current_op(direction)
-        info = 'Selected direction: {}\n'.format(facet.facet_name)
-        completed_ops = get_completed_ops(direction)
-        if len(completed_ops) == 0:
-            info += 'Completed ops: None\n'
-        else:
-            info += 'Completed ops: {}\n'.format(', '.join(completed_ops))
-        info += 'Current op: {}'.format(current_op)
-        if current_op is not None:
-            current_step, current_index, num_steps, start_time = get_current_step(direction)
-            if current_step is not None:
-                info += '\n- Started at: {}\n'.format(start_time)
-                info += '- Current step: {0} (step {1} of {2})'.format(
-                    current_step, current_index+1, num_steps)
+        c = at.get_child()
+        c.set_text('Getting info...')
+        fig.canvas.draw()
+        info = get_current_info(direction)
 
     elif event.mouseevent.button == 2: # middle click
         # Open full facet image (if any)
@@ -299,11 +284,11 @@ def on_pick(event):
         else:
             info = 'No selfcal images exist for {}'.format(facet.facet_name)
 
-        # Open parmdbplot of selfcal instrument table (if any)
-        selfcal_parmdb = find_selfcal_parmdb(direction)
-        if selfcal_parmdb is not None:
-            info += '\nOpening final selfcal solutions for {}...'.format(facet.facet_name)
-            os.system('parmdbplot.py {} &'.format(selfcal_parmdb))
+        # Open selfcal plots (if any)
+        selfcal_plots = find_selfcal_plots(direction)
+        if len(selfcal_plots) > 0:
+            info += '\nOpening selfcal solution plots for {}...'.format(facet.facet_name)
+            os.system('display {} &'.format(' '.join(selfcal_plots)))
         else:
             info += '\nFinal selfcal solutions do not exist for {}'.format(facet.facet_name)
 
@@ -319,6 +304,28 @@ def on_pick(event):
 
     # Redraw
     fig.canvas.draw()
+
+
+def get_current_info(direction):
+    """
+    Returns string of current state info
+    """
+    current_op = get_current_op(direction)
+    info = 'Selected direction: {}\n'.format(direction.name)
+    completed_ops = get_completed_ops(direction)
+    if len(completed_ops) == 0:
+        info += 'Completed ops: None\n'
+    else:
+        info += 'Completed ops: {}\n'.format(', '.join(completed_ops))
+    info += 'Current op: {}'.format(current_op)
+    if current_op is not None:
+        current_step, current_index, num_steps, start_time = get_current_step(direction)
+        if current_step is not None:
+            info += '\n- Started at: {}\n'.format(start_time)
+            info += '- Current step: {0} (step {1} of {2})'.format(
+                current_step, current_index+1, num_steps)
+
+    return info
 
 
 def on_press(event):
@@ -346,6 +353,9 @@ def update_plot():
     global fig, all_directions, at
 
     ax = plt.gca()
+    c = at.get_child()
+
+    # Update colors and text box
     for a in ax.patches:
         if hasattr(a, 'facet_name'):
             for d in all_directions:
@@ -353,6 +363,11 @@ def update_plot():
                     set_patch_color(a, d)
                     a.selfcal_images = find_selfcal_images(d)
                     a.facet_image = find_facet_image(d)
+                    if d.name in c.get_text():
+                        info = get_current_info(direction)
+                        c.set_text(info)
+                    break
+
     fig.canvas.draw()
 
 
@@ -433,22 +448,19 @@ def find_selfcal_images(direction):
     return selfcal_images
 
 
-def find_selfcal_parmdb(direction):
+def find_selfcal_plots(direction):
     """
-    Returns the filename of selfcal parmdb
+    Returns the filenames of selfcal plots
     """
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
     if os.path.exists(selfcal_dir):
-        selfcal_parmdb = glob.glob(selfcal_dir+'/*.merge_selfcal_parmdbs')
-        if len(selfcal_parmdb) == 0:
-            selfcal_parmdb = None
-        else:
-            selfcal_parmdb = selfcal_parmdb[0]
+        selfcal_plots = glob.glob(selfcal_dir+'/*.make_selfcal_plots*.png')
+        selfcal_plots.sort()
     else:
-        selfcal_parmdb = None
+        selfcal_plots = []
 
-    return selfcal_parmdb
+    return selfcal_plots
 
 
 def find_facet_image(direction):
