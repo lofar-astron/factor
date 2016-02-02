@@ -256,9 +256,7 @@ def on_pick(event):
     # Update text box
     c = at.get_child()
     c.set_text('Getting info...')
-    fig.canvas.update()
-    fig.canvas.flush_events()
-#     fig.canvas.draw()
+    fig.canvas.draw()
 
     if event.mouseevent.button == 1: # left click
         # Print info
