@@ -253,6 +253,13 @@ def on_pick(event):
     else:
         return
 
+    # Update text box
+    c = at.get_child()
+    c.set_text('Getting info...')
+    fig.canvas.update()
+    fig.canvas.flush_events()
+#     fig.canvas.draw()
+
     if event.mouseevent.button == 1: # left click
         # Print info
         current_op = get_current_op(direction)
