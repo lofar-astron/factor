@@ -588,6 +588,8 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
                         zip(p1.exterior.coords.xy[0].tolist(),
                         p1.exterior.coords.xy[1].tolist())]
                     patch_poly = xyverts
+                else:
+                    patch_poly = selfcal_poly
 
             add_facet_info(d, selfcal_poly, patch_poly, field_ra_deg, field_dec_deg)
             patch_polys.append(selfcal_poly)
