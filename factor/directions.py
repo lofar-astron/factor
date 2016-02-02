@@ -577,7 +577,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
         if d.is_patch:
             # For sources beyond max radius, set facet poly to calibrator poly
             # and clip current patch poly to facet polys and previous patch polys
-            for facet_poly in thiessen_polys + patch_ploys:
+            for facet_poly in thiessen_polys + patch_polys:
                 polyv = np.vstack(facet_poly)
                 poly_tuple = tuple([(xp, yp) for xp, yp in zip(polyv[:, 0], polyv[:, 1])])
                 p1 = shapely.geometry.Polygon(poly_tuple)
