@@ -47,7 +47,7 @@ def run(parset_file, trim_names=True):
     log.info('Middle-click on a facet to display its image')
     log.info('Right-click on a facet to display its selfcal solutions and images')
     log.info('(In all cases, pan/zoom mode must be off)')
-    log.info('Press "u" to update display')
+    log.info('Press "u" to update display (display is updated automatically every minute)')
 
     logging.root.setLevel(logging.ERROR)
     log.setLevel(logging.ERROR)
@@ -320,12 +320,13 @@ def on_press(event):
     """
     Handle key presses
     """
-    global fig, all_directions
+    global fig, all_directions, at
 
     if event.key == 'u':
         info = 'Updating display...'
         c = at.get_child()
         c.set_text(info)
+        fig.canvas.draw()
         update_plot()
         info += '\n...done'
         c = at.get_child()
@@ -337,9 +338,8 @@ def update_plot():
     """
     Update the plot
     """
-    global fig, all_directions
+    global fig, all_directions, at
 
-    fig.canvas.draw()
     ax = plt.gca()
     for a in ax.patches:
         if hasattr(a, 'facet_name'):
@@ -455,16 +455,18 @@ def find_facet_image(direction):
     image_dir = os.path.join(direction.working_dir, 'results', 'facetimage',
         direction.name)
 
-    # Check selfcal and image directories. An image in the image directory is
-    # preferred
+    # Check selfcal and image directories. An image in the facetimage directory
+    # is preferred
     facet_image = []
     for d in [image_dir, selfcal_dir]:
         if os.path.exists(d) and len(facet_image) == 0:
             facet_image = glob.glob(d+'/*.wsclean_image_full2-MFS-image.fits')
             if len(facet_image) == 0:
-                facet_image = glob.glob(d+'/*.casa_image_full2.image.tt0')
+                facet_image = glob.glob(d+'/*.wsclean_image_full2-image.fits')
                 if len(facet_image) == 0:
-                    facet_image = glob.glob(d+'/*.casa_image_full2.image')
+                    facet_image = glob.glob(d+'/*.casa_image_full2.image.tt0')
+                    if len(facet_image) == 0:
+                        facet_image = glob.glob(d+'/*.casa_image_full2.image')
 
     return facet_image
 
