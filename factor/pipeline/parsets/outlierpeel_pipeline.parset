@@ -56,7 +56,7 @@ add_all_facet_sources.argument.add.operation             =   add
 add_all_facet_sources.argument.add.applycal.parmdb       =   parmdb
 
 # Phase shift and average in preparation for calibration
-shift_and_average.argument.avg.type                      =   squash
+shift_and_average.control.type                           =   dppp
 shift_and_average.control.mapfile_in                     =   add_all_facet_sources.output.mapfile
 shift_and_average.control.inputkey                       =   msin
 shift_and_average.argument.numthreads                    =   {{ max_cpus_per_chunk }}
@@ -67,6 +67,7 @@ shift_and_average.argument.local_scratch_dir             =   {{ local_dir }}
 shift_and_average.argument.steps                         =   [shift,avg]
 shift_and_average.argument.shift.type                    =   phaseshifter
 shift_and_average.argument.shift.phasecenter             =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+shift_and_average.argument.avg.type                      =   squash
 shift_and_average.argument.avg.freqstep                  =   {{ facetselfcal_freqstep }}
 shift_and_average.argument.avg.timestep                  =   1
 
