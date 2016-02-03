@@ -235,9 +235,16 @@ make_sourcedb_outlier_model.control.opts.mapfile_in      =   create_outlier_skym
 make_sourcedb_outlier_model.control.opts.inputkey        =   in
 make_sourcedb_outlier_model.argument.format              =   <
 
+expand_sourcedb_outlier_map.control.kind                 =   plugin
+expand_sourcedb_outlier_map.control.type                 =   expandMapfile
+expand_sourcedb_outlier_map.control.mapfile_in           =   make_sourcedb_outlier_model.output.mapfile
+expand_sourcedb_outlier_map.control.mapfile_to_match     =   add_all_facet_sources.output.mapfile
+expand_sourcedb_outlier_map.control.mapfile_dir          =   input.output.mapfile_dir
+expand_sourcedb_outlier_map.control.filename             =   expand_sourcedb_outlier.mapfile
+
 # Predict the outlier model data at the field phase center
 predict_outlier_model.control.type                       =   dppp
-predict_outlier_model.control.opts.mapfiles_in           =   [add_all_facet_sources.output.mapfile,make_sourcedb_outlier_model.output.mapfile]
+predict_outlier_model.control.opts.mapfiles_in           =   [add_all_facet_sources.output.mapfile,expand_sourcedb_outlier_map.output.mapfile]
 predict_outlier_model.control.opts.inputkeys             =   [msin,sourcedb]
 predict_outlier_model.argument.numthreads                =   {{ max_cpus_per_band }}
 predict_outlier_model.argument.msin.datacolumn           =   DATA
