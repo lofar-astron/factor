@@ -43,6 +43,8 @@ class OutlierPeel(Operation):
         Finalize this operation
         """
         # Add output datamaps to direction object for later reference
+        self.direction.input_bands_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'input_bands.mapfile')
         self.direction.subtracted_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'add_all_facet_sources.mapfile')
 
