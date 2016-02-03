@@ -88,21 +88,26 @@ class Direction(object):
             self.region_selfcal = '[]'
         else:
             if not os.path.exists(region_selfcal):
-                self.log.error('Selfcal region file {} not found.'.format(region_selfcal))
+                self.log.error('Calibrator region file {} not found.'.format(region_selfcal))
                 sys.exit(1)
             self.region_selfcal = '["{0}"]'.format(region_selfcal)
+            self.log.info('Using calibrator clean-mask region file {}'.format(self.region_field))
         self.region_field = region_field
         if self.region_field.lower() == 'empty':
             self.region_field = None
         elif not os.path.exists(self.region_field):
             self.log.error('Facet region file {} not found.'.format(self.region_field))
             sys.exit(1)
+        else:
+            self.log.info('Using facet clean-mask region file {}'.format(self.region_field))
         self.peel_skymodel = peel_skymodel
         if self.peel_skymodel.lower() == 'empty':
             self.peel_skymodel = None
         elif not os.path.exists(self.peel_skymodel):
             self.log.error('Peel sky model file {} not found.'.format(self.peel_skymodel))
             sys.exit(1)
+        else:
+            self.log.info('Using sky model file {} for selfcal'.format(self.peel_skymodel))
         self.is_outlier = outlier_do
         self.make_final_image = make_final_image
         if cal_flux_jy is not None:
