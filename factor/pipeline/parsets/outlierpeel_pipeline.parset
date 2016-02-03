@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, add_all_facet_sources, shift_and_average,  create_compressed_mapfile, check_for_missing_bands, concat_data, {% if pre_average %}pre_average, concat_blavg_data, copy_column1, copy_column2,{% endif %} make_chunks, create_chunks_map, switch_weights_col1, solve_ampphase11, switch_weights_col2, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs, smooth_amp, merge_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, create_outlier_skymodel_map, make_sourcedb_outlier_model, predict_outlier_model, corrupt_outlier_model, subtract_outlier_model]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, add_all_facet_sources, shift_and_average,  create_compressed_mapfile, check_for_missing_bands, concat_data, {% if pre_average %}pre_average, concat_blavg_data, copy_column1, copy_column2,{% endif %} make_chunks, create_chunks_map, switch_weights_col1, solve_ampphase11, switch_weights_col2, apply_ampphase11, solve_ampphase12, create_chunks_compressed_mapfile, merge_amp_parmdbs, smooth_amp, merge_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, create_outlier_skymodel_map, make_sourcedb_outlier_model, predict_outlier_model, corrupt_outlier_model, subtract_outlier_model]
 
 pipeline.pluginpath                                      =   {{ pipeline_dir }}/plugins
 
@@ -40,7 +40,9 @@ make_sourcedb_all_facet_sources.control.opts.mapfile_in  =   make_facet_skymodel
 make_sourcedb_all_facet_sources.control.opts.inputkey    =   in
 make_sourcedb_all_facet_sources.argument.format          =   <
 
-# Add sources, but don't phase shift
+# Add sources, but don't phase shift. We will use these data later
+# to subtract the outlier model using the direction-dependent calibration
+# to create improved "empty" datasets
 add_all_facet_sources.control.type                       =   dppp
 add_all_facet_sources.control.opts.mapfiles_in           =   [create_ms_map.output.mapfile,make_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
 add_all_facet_sources.control.opts.inputkeys             =   [msin,sourcedb,parmdb]
@@ -96,7 +98,7 @@ concat_data.argument.steps                               =   []
 
 {% if pre_average %}
 # Do the baseline-dependent preaveraging. This must be done after concatenation
-# of DATA in the previous two step so that we can safely overwrite the
+# of DATA in the previous step so that we can safely overwrite the
 # WEIGHT_SPECTRUM column
 pre_average.control.type                                 =   pre_average
 pre_average.control.mapfiles_in                          =   [shift_and_average.output.mapfile,create_parmdb_map.output.mapfile]
@@ -174,6 +176,12 @@ solve_ampphase12.argument.replace-sourcedb               =   True
 solve_ampphase12.argument.replace-parmdb                 =   True
 solve_ampphase12.argument.Step.solve.Solve.CellSize.Time =   {{ solint_time_a }}
 solve_ampphase12.argument.Step.solve.Solve.CellSize.Freq =   {{ solint_freq_a }}
+
+create_chunks_compressed_mapfile.control.kind            =   plugin
+create_chunks_compressed_mapfile.control.type            =   compressMapfile
+create_chunks_compressed_mapfile.control.mapfile_in      =   create_chunks_map.output.mapfile
+create_chunks_compressed_mapfile.control.mapfile_dir     =   input.output.mapfile_dir
+create_chunks_compressed_mapfile.control.filename        =   concat_chunks_input.mapfile
 
 merge_amp_parmdbs.control.type                           =   merge_parmdbs_in_time
 merge_amp_parmdbs.control.mapfile_in                     =   create_chunks_compressed_mapfile.output.mapfile
