@@ -168,6 +168,18 @@ apply_ampphase11.argument.observation                    =   create_chunks_map.o
 apply_ampphase11.argument.parset                         =   {{ parset_dir }}/facet_dirdep_phaseonly_apply.parset
 apply_ampphase11.argument.catalog                        =   {{ skymodel_dir }}/empty.skymodel
 
+create_chunks_compressed_mapfile.control.kind            =   plugin
+create_chunks_compressed_mapfile.control.type            =   compressMapfile
+create_chunks_compressed_mapfile.control.mapfile_in      =   create_chunks_map.output.mapfile
+create_chunks_compressed_mapfile.control.mapfile_dir     =   input.output.mapfile_dir
+create_chunks_compressed_mapfile.control.filename        =   concat_chunks_input.mapfile
+
+merge_phase_parmdbs.control.type                         =   merge_parmdbs_in_time
+merge_phase_parmdbs.control.mapfile_in                   =   create_chunks_compressed_mapfile.output.mapfile
+merge_phase_parmdbs.control.inputkey                     =   mslist
+merge_phase_parmdbs.control.outputkey                    =   outparmdb
+merge_phase_parmdbs.argument.flags                       =   [mslist,instrument,outparmdb]
+
 solve_ampphase12.control.type                            =   calibrate-stand-alone_new
 solve_ampphase12.argument.observation                    =   create_chunks_map.output.mapfile
 solve_ampphase12.argument.parset                         =   {{ parset_dir }}/facet_dirdep_amponly_solve.parset
@@ -177,12 +189,6 @@ solve_ampphase12.argument.replace-parmdb                 =   True
 solve_ampphase12.argument.Step.solve.Solve.CellSize.Time =   {{ solint_time_a }}
 solve_ampphase12.argument.Step.solve.Solve.CellSize.Freq =   {{ solint_freq_a }}
 
-create_chunks_compressed_mapfile.control.kind            =   plugin
-create_chunks_compressed_mapfile.control.type            =   compressMapfile
-create_chunks_compressed_mapfile.control.mapfile_in      =   create_chunks_map.output.mapfile
-create_chunks_compressed_mapfile.control.mapfile_dir     =   input.output.mapfile_dir
-create_chunks_compressed_mapfile.control.filename        =   concat_chunks_input.mapfile
-
 merge_amp_parmdbs.control.type                           =   merge_parmdbs_in_time
 merge_amp_parmdbs.control.mapfile_in                     =   create_chunks_compressed_mapfile.output.mapfile
 merge_amp_parmdbs.control.inputkey                       =   mslist
@@ -190,14 +196,14 @@ merge_amp_parmdbs.control.outputkey                      =   outparmdb
 merge_amp_parmdbs.argument.flags                         =   [mslist,instrument,outparmdb]
 
 smooth_amp.control.type                                  =   smooth_amps
-smooth_amp.control.mapfile_in                            =   merge_amp_parmdbs1.output.mapfile
+smooth_amp.control.mapfile_in                            =   merge_amp_parmdbs.output.mapfile
 smooth_amp.control.inputkey                              =   ampparmdb
 smooth_amp.control.outputkey                             =   outparmdb
 smooth_amp.control.arguments                             =   [ampparmdb,outparmdb]
 smooth_amp.control.normalize                             =   False
 
 merge_selfcal_parmdbs.control.type                       =   merge_parmdbs_selfcal
-merge_selfcal_parmdbs.control.mapfiles_in                =   [merge_phase_parmdbs.output.mapfile,smooth_amp1.output.mapfile]
+merge_selfcal_parmdbs.control.mapfiles_in                =   [merge_phase_parmdbs.output.mapfile,smooth_amp.output.mapfile]
 merge_selfcal_parmdbs.control.inputkeys                  =   [parmdb_p,parmdb_a]
 merge_selfcal_parmdbs.control.outputkey                  =   parmdb_out
 merge_selfcal_parmdbs.argument.flags                     =   [parmdb_p,parmdb_a,parmdb_out]
