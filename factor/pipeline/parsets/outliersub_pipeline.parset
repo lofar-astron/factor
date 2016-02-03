@@ -1,4 +1,4 @@
-pipeline.steps = [update_diff_models_hosts, update_input_bands_hosts, copy_to_empty_data]
+pipeline.steps = [update_subtracted_data_hosts, update_input_bands_hosts, copy_to_empty_data]
 
 pipeline.pluginpath                             =   {{ pipeline_dir }}/plugins
 
