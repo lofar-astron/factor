@@ -205,7 +205,7 @@ smooth_amps.control.arguments                            =   [ampparmdb,outparmd
 smooth_amps.argument.normalize                           =   False
 
 merge_selfcal_parmdbs.control.type                       =   merge_parmdbs_selfcal
-merge_selfcal_parmdbs.control.mapfiles_in                =   [merge_phase_parmdbs.output.mapfile,smooth_amp.output.mapfile]
+merge_selfcal_parmdbs.control.mapfiles_in                =   [merge_phase_parmdbs.output.mapfile,smooth_amps.output.mapfile]
 merge_selfcal_parmdbs.control.inputkeys                  =   [parmdb_p,parmdb_a]
 merge_selfcal_parmdbs.control.outputkey                  =   parmdb_out
 merge_selfcal_parmdbs.argument.flags                     =   [parmdb_p,parmdb_a,parmdb_out]
