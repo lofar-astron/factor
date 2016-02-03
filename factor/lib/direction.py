@@ -63,7 +63,7 @@ class Direction(object):
     """
     def __init__(self, name, ra, dec, atrous_do=False, mscale_field_do=False,
     	cal_imsize=512, solint_p=1, solint_a=30, dynamic_range='LD',
-    	region_selfcal='', region_field='', peel_skymodel='',
+    	region_selfcal='empty', region_field='empty', peel_skymodel='empty',
     	outlier_do=False, factor_working_dir='', make_final_image=False,
     	cal_size_deg=None, cal_flux_jy=None):
 
