@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, add_all_facet_sources, shift_and_average,  create_compressed_mapfile, check_for_missing_bands, concat_data, {% if pre_average %}pre_average, concat_blavg_data, copy_column1, copy_column2,{% endif %} make_chunks, create_chunks_map, switch_weights_col1, solve_ampphase11, switch_weights_col2, apply_ampphase11, create_chunks_compressed_mapfile, merge_phase_parmdbs, solve_ampphase12, merge_amp_parmdbs, smooth_amp, merge_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, create_outlier_skymodel_map, make_sourcedb_outlier_model, predict_outlier_model, corrupt_outlier_model, subtract_outlier_model]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, add_all_facet_sources, shift_and_average,  create_compressed_mapfile, check_for_missing_bands, concat_data, {% if pre_average %}pre_average, concat_blavg_data, copy_column1, copy_column2,{% endif %} make_chunks, create_chunks_map, switch_weights_col1, solve_ampphase11, switch_weights_col2, apply_ampphase11, create_chunks_compressed_mapfile, merge_phase_parmdbs, solve_ampphase12, merge_amp_parmdbs, smooth_amps, merge_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, create_outlier_skymodel_map, make_sourcedb_outlier_model, predict_outlier_model, corrupt_outlier_model, subtract_outlier_model]
 
 pipeline.pluginpath                                      =   {{ pipeline_dir }}/plugins
 
@@ -197,12 +197,12 @@ merge_amp_parmdbs.argument.flags                         =   [mslist,instrument,
 
 # Smooth the amplitude solutions, but do not normalize them as the sky model is
 # in absolute flux and not apparent flux
-smooth_amp.control.type                                  =   smooth_amps
-smooth_amp.control.mapfile_in                            =   merge_amp_parmdbs.output.mapfile
-smooth_amp.control.inputkey                              =   ampparmdb
-smooth_amp.control.outputkey                             =   outparmdb
-smooth_amp.control.arguments                             =   [ampparmdb,outparmdb]
-smooth_amp.control.normalize                             =   False
+smooth_amps.control.type                                 =   smooth_amps
+smooth_amps.control.mapfile_in                           =   merge_amp_parmdbs.output.mapfile
+smooth_amps.control.inputkey                             =   ampparmdb
+smooth_amps.control.outputkey                            =   outparmdb
+smooth_amps.control.arguments                            =   [ampparmdb,outparmdb]
+smooth_amps.argument.normalize                           =   False
 
 merge_selfcal_parmdbs.control.type                       =   merge_parmdbs_selfcal
 merge_selfcal_parmdbs.control.mapfiles_in                =   [merge_phase_parmdbs.output.mapfile,smooth_amp.output.mapfile]
