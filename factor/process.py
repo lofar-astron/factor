@@ -220,13 +220,14 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     # Make final facet images (from final empty datasets) if desired. Also image
     # any facets for which selfcal failed or no selfcal was done
     dirs_to_image = [d for d in directions if d.make_final_image and
-        d.selfcal_ok and not d.is_patch]
+        d.selfcal_ok and not d.is_patch and not d.is_outlier]
     if len(dirs_to_image) > 0:
         log.info('Reimaging the following direction(s):')
         log.info('{0}'.format([d.name for d in dirs_to_image]))
 
     # Add directions without selfcal to those that will be imaged
-    dirs_to_transfer = [d for d in directions if not d.selfcal_ok and not d.is_patch]
+    dirs_to_transfer = [d for d in directions if not d.selfcal_ok and not
+        d.is_patch and not d.is_outlier]
     if len(dirs_to_transfer) > 0:
         log.info('Imaging the following direction(s) with nearest selcal solutions:')
         log.info('{0}'.format([d.name for d in dirs_to_transfer]))
