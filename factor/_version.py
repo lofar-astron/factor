@@ -8,7 +8,7 @@ __version__ = '1.0'
 # Change log
 def changelog():
     """
-    Factor Changelog.
+    FACTOR Changelog.
     ----------------------------------------------------------------------------
     04/01/2016 - Version 1.0
 
