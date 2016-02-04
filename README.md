@@ -20,7 +20,7 @@ FACTOR requires the following:
 
 * The LOFAR offline trunk from the LOFAR software repository (version 2.15 or later)
 * [CASA](http://casa.nrao.edu) (versions *before* 4.3 or version 4.5.0 or later)
-* [WSClean](http://sourceforge.net/p/wsclean/wiki/Home) (version 1.9 or later)
+* [WSClean](http://sourceforge.net/p/wsclean/wiki/Home) (version 1.10 or later)
 * [LSMTool](https://github.com/darafferty/LSMTool) (version 1.1 or later)
 * [jinja2](http://jinja.pocoo.org/docs/dev)
 * [Shapely](https://github.com/Toblerity/Shapely)
