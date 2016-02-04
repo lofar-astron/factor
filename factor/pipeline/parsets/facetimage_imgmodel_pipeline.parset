@@ -39,9 +39,10 @@ create_compressed_mapfile1.control.filename           =   concat_unaveraged_inpu
 
 {% block model_data_parms %}
 wsclean_ft.control.type                               =   wsclean_ft
-wsclean_ft.control.mapfiles_in                        =   [create_compressed_mapfile1.output.mapfile,{{ facet_model_mapfile }},{{ wsclean_modelimg_size_mapfile }}]
-wsclean_ft.control.inputkeys                          =   [msfile,name,size]
+wsclean_ft.control.mapfiles_in                        =   [create_compressed_mapfile1.output.mapfile,{{ facet_model_mapfile }}]
+wsclean_ft.control.inputkeys                          =   [msfile,name]
 wsclean_ft.argument.flags                             =   [-predict,msfile]
+wsclean_ft.argument.size                              =   {{ facet_imsize }} {{ facet_imsize }}
 wsclean_ft.argument.scale                             =   0.000417
 wsclean_ft.argument.mem                               =   {{ max_percent_memory }}
 wsclean_ft.argument.channelsout                       =   {{ wsclean_nchannels }}
