@@ -1,5 +1,5 @@
 {% extends "facetimage_skymodel_pipeline.parset" %}
-{% block full_image_steps %}concat_averaged, premask, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2{% endblock full_image_steps %}
+{% block full_image_steps %} concat_averaged, premask, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2 {% endblock full_image_steps %}
 {% block full_image_parms %}
 concat_averaged.control.type                      =   virtual_concat
 concat_averaged.control.mapfile_in                =   create_compressed_mapfile.output.mapfile

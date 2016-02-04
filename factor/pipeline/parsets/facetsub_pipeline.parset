@@ -1,4 +1,4 @@
-pipeline.steps = [update_diff_models_hosts, update_input_bands_hosts, {% block add_sub_steps %}add_diff_model_to_empty_data{% endblock add_sub_steps %}]
+pipeline.steps = [update_diff_models_hosts, update_input_bands_hosts, {% block add_sub_steps %} add_diff_model_to_empty_data {% endblock add_sub_steps %}]
 
 pipeline.pluginpath                                   =   {{ pipeline_dir }}/plugins
 
