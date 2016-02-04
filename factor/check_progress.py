@@ -330,6 +330,8 @@ def get_current_info(direction):
             info += '\n- Started at: {}\n'.format(start_time)
             info += '- Current step: {0} (step {1} of {2})'.format(
                 current_step, current_index+1, num_steps)
+        else:
+            info += '\n- Waiting for state update...'
 
     return info
 
