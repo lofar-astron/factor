@@ -231,13 +231,15 @@ class Operation(object):
         """
         Sets the started state for the operation
         """
-        self.direction.started_operations.append(self.name)
-        self.direction.save_state()
+        if self.name not in self.direction.started_operations:
+            self.direction.started_operations.append(self.name)
+            self.direction.save_state()
 
 
     def set_completed(self):
         """
         Sets the completed state for the operation
         """
-        self.direction.completed_operations.append(self.name)
-        self.direction.save_state()
+        if self.name not in self.direction.completed_operations:
+            self.direction.completed_operations.append(self.name)
+            self.direction.save_state()
