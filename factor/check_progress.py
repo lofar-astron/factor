@@ -310,13 +310,19 @@ def get_current_info(direction):
     """
     Returns string of current state info
     """
-    current_op = get_current_op(direction)
     info = 'Selected direction: {}\n'.format(direction.name)
+
+    if not direction.load_state():
+        info += 'State not available'
+        return info
+
     completed_ops = get_completed_ops(direction)
     if len(completed_ops) == 0:
         info += 'Completed ops: None\n'
     else:
         info += 'Completed ops: {}\n'.format(', '.join(completed_ops))
+
+    current_op = get_current_op(direction)
     info += 'Current op: {}'.format(current_op)
     if current_op is not None:
         current_step, current_index, num_steps, start_time = get_current_step(direction)
@@ -375,10 +381,17 @@ def set_patch_color(a, d):
     """
     Sets face and edge color of patch
     """
+    if not d.load_state():
+        # Means that state is not available, so set to unprocessed
+        a.set_edgecolor('#a9a9a9')
+        a.set_facecolor('#F2F2F2')
+        return
+
     a.completed_ops = get_completed_ops(d)
     a.started_ops = get_started_ops(d)
     a.current_op = get_current_op(d)
     if a.current_op is not None:
+        # Means this facet is currently processing
         a.set_edgecolor('y')
         a.set_facecolor('#F2F5A9')
     elif 'facetselfcal' in a.completed_ops:
