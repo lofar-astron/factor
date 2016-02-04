@@ -363,7 +363,7 @@ def update_plot():
                     set_patch_color(a, d)
                     a.selfcal_images = find_selfcal_images(d)
                     a.facet_image = find_facet_image(d)
-                    if d.name in c.get_text():
+                    if 'Selected direction: {}'.format(d.name) in c.get_text():
                         info = get_current_info(d)
                         c.set_text(info)
                     break
