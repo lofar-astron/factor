@@ -54,34 +54,36 @@ def solplot_scalarphase(parmdb, imageroot, refstationi, plot_international=False
     refstation = stationsnames[refstationi]
     phase_ref = soldict['CommonScalarPhase:{s}'.format(s=refstation)]['values']
     times= soldict['CommonScalarPhase:{s}'.format(s=refstation)]['times']
+    num_channels = phase_ref.shape[1]
 
     Nr = int(np.ceil(np.sqrt(Nstat)))
     Nc = int(np.ceil(np.float(Nstat)/Nr))
-    f, ax = plt.subplots(Nr, Nc, sharex=True, sharey=True, figsize=(16,12))
-    axs = ax.reshape((Nr*Nc,1))
-    for istat, station in enumerate(stationsnames):
-        phase = soldict['CommonScalarPhase:{s}'.format(s=station)]['values']
 
-        # don't plot flagged phases
-        phase = np.ma.masked_where(phase==0, phase)
+    for chan_indx in range(num_channels):
+        f, ax = plt.subplots(Nr, Nc, sharex=True, sharey=True, figsize=(16,12))
+        axs = ax.reshape((Nr*Nc,1))
+        for istat, station in enumerate(stationsnames):
+            phase = soldict['CommonScalarPhase:{s}'.format(s=station)]['values'][:, chan_indx]
+            phase_ref_chan = phase_ref[:, chan_indx]
 
-        #try:
-        if len(phase) > 1000:
-            fmt = ','
-        else:
-            fmt = '.'
-        #except TypeError:
-          #print "no phases"
-        #fmt = '.'
-        ls= 'none'
+            # don't plot flagged phases
+            phase = np.ma.masked_where(phase==0, phase)
 
-        axs[istat][0].plot(times, normalize(phase-phase_ref), color='b',  marker=fmt, ls=ls, label='CommonScalarPhase',mec='b')
-        axs[istat][0].set_ylim(-3.2, 3.2)
-        axs[istat][0].set_xlim(times.min(), times.max())
-        axs[istat][0].set_title(station)
+            #try:
+            if len(phase) > 1000:
+                fmt = ','
+            else:
+                fmt = '.'
+            ls= 'none'
 
+            axs[istat][0].plot(times, normalize(phase-phase_ref_chan), color='b',  marker=fmt, ls=ls, label='CommonScalarPhase',mec='b')
+            axs[istat][0].set_ylim(-3.2, 3.2)
+            axs[istat][0].set_xlim(times.min(), times.max())
+            axs[istat][0].set_title(station)
 
-    f.savefig(imageroot+"_scalarphase.png",dpi=100)
+        f.savefig(imageroot+"_scalarphase_channel{}.png".format(chan_indx),dpi=100)
+        plt.close(f)
+
     return
 
 
@@ -109,32 +111,39 @@ def solplot_tec(parmdb, imageroot, refstationi, plot_international=False, freq=N
     times = scaletimes(times)
     phase_ref = soldict['CommonScalarPhase:{s}'.format(s=refstation)]['values']
     tec_ref = soldict['TEC:{s}'.format(s=refstation)]['values']
+    num_channels = phase_ref.shape[1]
 
     Nr = int(np.ceil(np.sqrt(Nstat)))
     Nc = int(np.ceil(np.float(Nstat)/Nr))
-    f, ax = plt.subplots(Nr, Nc, sharex=True, sharey=True, figsize=(16,12))
-    axs = ax.reshape((Nr*Nc,1))
-    ymin = 2
-    ymax = 0
-    for istat, station in enumerate(stationsnames):
-        phase = soldict['CommonScalarPhase:{s}'.format(s=station)]['values']
-        tec = soldict['TEC:{s}'.format(s=station)]['values']
-        phase = np.ma.masked_where(phase==0, phase)
-        if len(times) > 1000:
-            fmt = ','
-        else:
-            fmt = '.'
-        ls='none'
 
-        phasep = phase - phase_ref
-        tecp =  -8.44797245e9*(tec - tec_ref)/freq
+    for chan_indx in range(num_channels):
+        f, ax = plt.subplots(Nr, Nc, sharex=True, sharey=True, figsize=(16,12))
+        axs = ax.reshape((Nr*Nc,1))
+        ymin = 2
+        ymax = 0
+        for istat, station in enumerate(stationsnames):
+            phase = soldict['CommonScalarPhase:{s}'.format(s=station)]['values'][:, chan_indx]
+            tec = soldict['TEC:{s}'.format(s=station)]['values'][:, chan_indx]
+            phase_ref_chan = phase_ref[:, chan_indx]
+            tec_ref_chan = tec_ref[:, chan_indx]
 
-        axs[istat][0].plot(times, np.mod(phasep+tecp +np.pi, 2*np.pi) - np.pi, color='b',  marker=fmt, ls=ls, label='Phase+TEC', mec='b')
-        axs[istat][0].set_ylim(-np.pi, np.pi)
-        axs[istat][0].set_xlim(times.min(), times.max())
-        axs[istat][0].set_title(station)
+            phase = np.ma.masked_where(phase==0, phase)
+            if len(times) > 1000:
+                fmt = ','
+            else:
+                fmt = '.'
+            ls='none'
 
-    f.savefig(imageroot+"_tec.png",dpi=100)
+            phasep = phase - phase_ref_chan
+            tecp =  -8.44797245e9*(tec - tec_ref_chan)/freq
+
+            axs[istat][0].plot(times, np.mod(phasep+tecp +np.pi, 2*np.pi) - np.pi, color='b',  marker=fmt, ls=ls, label='Phase+TEC', mec='b')
+            axs[istat][0].set_ylim(-np.pi, np.pi)
+            axs[istat][0].set_xlim(times.min(), times.max())
+            axs[istat][0].set_title(station)
+
+        f.savefig(imageroot+"_tec_channel{}.png".format(chan_indx),dpi=100)
+        plt.close(f)
     return
 
 
@@ -200,33 +209,39 @@ def solplot_phase_phasors(parmdb, imageroot, refstationi, plot_international=Fal
     phase11_ref = soldict['Gain:1:1:Phase:{s}'.format(s=refstation)]['values']
     phase00_ref = soldict['Gain:0:0:Phase:{s}'.format(s=refstation)]['values']
     times= soldict['Gain:1:1:Phase:{s}'.format(s=refstation)]['times']
+    num_channels = phase11_ref.shape[1]
 
     Nr = int(np.ceil(np.sqrt(Nstat)))
     Nc = int(np.ceil(np.float(Nstat)/Nr))
-    f, ax = plt.subplots(Nr, Nc, sharex=True, sharey=True, figsize=(16,12))
-    axs = ax.reshape((Nr*Nc,1))
-    for istat, station in enumerate(stationsnames):
-        phase11 = soldict['Gain:1:1:Phase:{s}'.format(s=station)]['values']
-        phase00 = soldict['Gain:0:0:Phase:{s}'.format(s=station)]['values']
 
-        # don't plot flagged phases
-        phase00 = np.ma.masked_where(phase00==0, phase00)
-        phase11 = np.ma.masked_where(phase11==0, phase11)
+    for chan_indx in range(num_channels):
+        f, ax = plt.subplots(Nr, Nc, sharex=True, sharey=True, figsize=(16,12))
+        axs = ax.reshape((Nr*Nc,1))
+        for istat, station in enumerate(stationsnames):
+            phase11 = soldict['Gain:1:1:Phase:{s}'.format(s=station)]['values'][:, chan_indx]
+            phase00 = soldict['Gain:0:0:Phase:{s}'.format(s=station)]['values'][:, chan_indx]
+            phase00_ref_chan = phase00_ref[:, chan_indx]
+            phase11_ref_chan = phase11_ref[:, chan_indx]
 
-        if len(times) > 1000:
-            fmt = ','
-        else:
-            fmt = '.'
+            # don't plot flagged phases
+            phase00 = np.ma.masked_where(phase00==0, phase00)
+            phase11 = np.ma.masked_where(phase11==0, phase11)
 
-        ls='none'
+            if len(times) > 1000:
+                fmt = ','
+            else:
+                fmt = '.'
 
-        axs[istat][0].plot(times, normalize(phase00-phase00_ref), color='b',  marker=fmt, ls=ls, label='Gain:0:0:Phase',mec='b')
-        axs[istat][0].plot(times, normalize(phase11-phase11_ref), color='g',  marker=fmt, ls=ls, label='Gain:1:1:Phase',mec='g')
-        axs[istat][0].set_ylim(-3.2, 3.2)
-        axs[istat][0].set_xlim(times.min(), times.max())
-        axs[istat][0].set_title(station)
+            ls='none'
 
-    f.savefig(imageroot+"_phase.png",dpi=100)
+            axs[istat][0].plot(times, normalize(phase00-phase00_ref_chan), color='b',  marker=fmt, ls=ls, label='Gain:0:0:Phase',mec='b')
+            axs[istat][0].plot(times, normalize(phase11-phase11_ref_chan), color='g',  marker=fmt, ls=ls, label='Gain:1:1:Phase',mec='g')
+            axs[istat][0].set_ylim(-3.2, 3.2)
+            axs[istat][0].set_xlim(times.min(), times.max())
+            axs[istat][0].set_title(station)
+
+        f.savefig(imageroot+"_phase_channel{}.png".format(chan_indx),dpi=100)
+        plt.close(f)
     return
 
 
@@ -252,6 +267,7 @@ def solplot_phase(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp
     real00_ref = soldict['Gain:0:0:Real:{s}'.format(s=refstation)]['values']
     imag11_ref = soldict['Gain:1:1:Imag:{s}'.format(s=refstation)]['values']
     imag00_ref = soldict['Gain:0:0:Imag:{s}'.format(s=refstation)]['values']
+    num_channels = real11_ref.shape[1]
 
     valscorr00 = real00_ref +1.j*imag00_ref
     valscorr11 = real11_ref +1.j*imag11_ref
@@ -261,37 +277,42 @@ def solplot_phase(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp
 
     Nr = int(np.ceil(np.sqrt(Nstat)))
     Nc = int(np.ceil(np.float(Nstat)/Nr))
-    fp, axp = plt.subplots(Nr, Nc, sharex=True, sharey=True, figsize=(16,12))
-    axsp = axp.reshape((Nr*Nc,1))
-    for istat, station in enumerate(stationsnames):
 
-        real11 = soldict['Gain:1:1:Real:{s}'.format(s=station)]['values']
-        real00 = soldict['Gain:0:0:Real:{s}'.format(s=station)]['values']
-        imag11 = soldict['Gain:1:1:Imag:{s}'.format(s=station)]['values']
-        imag00 = soldict['Gain:0:0:Imag:{s}'.format(s=station)]['values']
+    for chan_indx in range(num_channels):
+        fp, axp = plt.subplots(Nr, Nc, sharex=True, sharey=True, figsize=(16,12))
+        axsp = axp.reshape((Nr*Nc,1))
+        for istat, station in enumerate(stationsnames):
 
-        valscorr00 = real00 +1.j*imag00
-        valscorr11 = real11 +1.j*imag11
+            real11 = soldict['Gain:1:1:Real:{s}'.format(s=station)]['values'][:, chan_indx]
+            real00 = soldict['Gain:0:0:Real:{s}'.format(s=station)]['values'][:, chan_indx]
+            imag11 = soldict['Gain:1:1:Imag:{s}'.format(s=station)]['values'][:, chan_indx]
+            imag00 = soldict['Gain:0:0:Imag:{s}'.format(s=station)]['values'][:, chan_indx]
 
-        if len(np.unique(real11)) > 500:
-            fmt = ','
-        else:
-            fmt = '.'
-        ls='none'
-        phase00 = np.angle(valscorr00)
-        phase11 = np.angle(valscorr11)
+            valscorr00 = real00 +1.j*imag00
+            valscorr11 = real11 +1.j*imag11
 
-        # don't plot flagged phases
-        phase00 = np.ma.masked_where(phase00==0, phase00)
-        phase11 = np.ma.masked_where(phase11==0, phase11)
+            phase00_ref_chan = phase00_ref[:, chan_indx]
+            phase11_ref_chan = phase11_ref[:, chan_indx]
 
-        axsp[istat][0].plot(times, normalize(phase00-phase00_ref), color='b',  marker=fmt, ls=ls, label='Gain:0:0:Phase',mec='b')
-        axsp[istat][0].plot(times, normalize(phase11-phase11_ref), color='g',  marker=fmt, ls=ls, label='Gain:1:1:Phase',mec='g')
-        axsp[istat][0].set_ylim(-3.2, 3.2)
-        axsp[istat][0].set_xlim(times.min(), times.max())
-        axsp[istat][0].set_title(station)
+            if len(np.unique(real11)) > 500:
+                fmt = ','
+            else:
+                fmt = '.'
+            ls='none'
+            phase00 = np.angle(valscorr00)
+            phase11 = np.angle(valscorr11)
 
-    fp.savefig(imageroot+"_phase.png",dpi=100)
+            # don't plot flagged phases
+            phase00 = np.ma.masked_where(phase00==0, phase00)
+            phase11 = np.ma.masked_where(phase11==0, phase11)
+
+            axsp[istat][0].plot(times, normalize(phase00-phase00_ref_chan), color='b',  marker=fmt, ls=ls, label='Gain:0:0:Phase',mec='b')
+            axsp[istat][0].plot(times, normalize(phase11-phase11_ref_chan), color='g',  marker=fmt, ls=ls, label='Gain:1:1:Phase',mec='g')
+            axsp[istat][0].set_ylim(-3.2, 3.2)
+            axsp[istat][0].set_xlim(times.min(), times.max())
+            axsp[istat][0].set_title(station)
+
+        fp.savefig(imageroot+"_phase_channel{}.png".format(chan_indx),dpi=100)
     return
 
 
@@ -316,6 +337,7 @@ def solplot_amp(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp=F
     real00_ref = soldict['Gain:0:0:Real:{s}'.format(s=refstation)]['values']
     imag11_ref = soldict['Gain:1:1:Imag:{s}'.format(s=refstation)]['values']
     imag00_ref = soldict['Gain:0:0:Imag:{s}'.format(s=refstation)]['values']
+    num_channels = real11_ref.shape[1]
 
     valscorr00 = real00_ref +1.j*imag00_ref
     valscorr11 = real11_ref +1.j*imag11_ref
@@ -325,63 +347,68 @@ def solplot_amp(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp=F
 
     Nr = int(np.ceil(np.sqrt(Nstat)))
     Nc = int(np.ceil(np.float(Nstat)/Nr))
-    fa, axa = plt.subplots(Nr, Nc, sharex=True, sharey=True, figsize=(16,12))
-    axsa = axa.reshape((Nr*Nc,1))
-    ymin = 2
-    ymax = 0
-    for istat, station in enumerate(stationsnames):
 
-        real11 = soldict['Gain:1:1:Real:{s}'.format(s=station)]['values']
-        real00 = soldict['Gain:0:0:Real:{s}'.format(s=station)]['values']
-        imag11 = soldict['Gain:1:1:Imag:{s}'.format(s=station)]['values']
-        imag00 = soldict['Gain:0:0:Imag:{s}'.format(s=station)]['values']
+    for chan_indx in range(num_channels):
+        fa, axa = plt.subplots(Nr, Nc, sharex=True, sharey=True, figsize=(16,12))
+        axsa = axa.reshape((Nr*Nc,1))
+        ymin = 2
+        ymax = 0
+        for istat, station in enumerate(stationsnames):
 
-        valscorr00 = real00 +1.j*imag00
-        valscorr11 = real11 +1.j*imag11
+            real11 = soldict['Gain:1:1:Real:{s}'.format(s=station)]['values'][:, chan_indx]
+            real00 = soldict['Gain:0:0:Real:{s}'.format(s=station)]['values'][:, chan_indx]
+            imag11 = soldict['Gain:1:1:Imag:{s}'.format(s=station)]['values'][:, chan_indx]
+            imag00 = soldict['Gain:0:0:Imag:{s}'.format(s=station)]['values'][:, chan_indx]
 
-        if len(np.unique(real11)) > 500:
-            fmt = ','
-        else:
-            fmt = '.'
-        ls='none'
-        amp00 = np.abs(valscorr00)
-        amp11 = np.abs(valscorr11)
+            valscorr00 = real00 +1.j*imag00
+            valscorr11 = real11 +1.j*imag11
 
-        ## for y scale: check max and min values
-        amp00m = np.ma.masked_where(amp00==1, amp00).compressed()
-        amp11m = np.ma.masked_where(amp11==1, amp11).compressed()
+            amp00_ref_chan = amp00_ref[:, chan_indx]
+            amp11_ref_chan = amp11_ref[:, chan_indx]
 
-        if len(amp00m) > 0:
-            ymax = max(np.max(amp00m),ymax)
-        if len(amp11m) > 0:
-            ymax = max(np.max(amp11m),ymax)
-        if len(amp00m) > 0:
-            ymin = min(np.min(amp00m),ymin)
-        if len(amp11m) > 0:
-            ymin = min(np.min(amp11m),ymin)
+            if len(np.unique(real11)) > 500:
+                fmt = ','
+            else:
+                fmt = '.'
+            ls='none'
+            amp00 = np.abs(valscorr00)
+            amp11 = np.abs(valscorr11)
 
-        # don't plot flagged amplitudes
-        amp00 = np.ma.masked_where(amp00==1, amp00)
-        amp11 = np.ma.masked_where(amp11==1, amp11)
+            ## for y scale: check max and min values
+            amp00m = np.ma.masked_where(amp00==1, amp00).compressed()
+            amp11m = np.ma.masked_where(amp11==1, amp11).compressed()
 
-        axsa[istat][0].plot(times, amp00, color='b', marker=fmt, ls=ls, label='Gain:0:0:Amp',mec='b')
-        axsa[istat][0].plot(times, amp11, color='g', marker=fmt, ls=ls, label='Gain:1:1:Amp',mec='g')
-        if median_amp:
-            median_amp00 = np.median(amp00)
-            median_amp11 = np.median(amp11)
+            if len(amp00m) > 0:
+                ymax = max(np.max(amp00m),ymax)
+            if len(amp11m) > 0:
+                ymax = max(np.max(amp11m),ymax)
+            if len(amp00m) > 0:
+                ymin = min(np.min(amp00m),ymin)
+            if len(amp11m) > 0:
+                ymin = min(np.min(amp11m),ymin)
 
-            axsa[istat][0].plot([times[0], times[-1]], [median_amp00,median_amp00], color='b', label='<Gain:0:0:Amp>')
-            axsa[istat][0].plot([times[0], times[-1]], [median_amp11,median_amp11], color='g', label='<Gain:1:1:Amp>')
+            # don't plot flagged amplitudes
+            amp00 = np.ma.masked_where(amp00==1, amp00)
+            amp11 = np.ma.masked_where(amp11==1, amp11)
 
-        if norm_amp_lim:
-            axsa[istat][0].set_ylim(0,2 )
-        else:
-            axsa[istat][0].set_ylim(ymin,ymax)
+            axsa[istat][0].plot(times, amp00, color='b', marker=fmt, ls=ls, label='Gain:0:0:Amp',mec='b')
+            axsa[istat][0].plot(times, amp11, color='g', marker=fmt, ls=ls, label='Gain:1:1:Amp',mec='g')
+            if median_amp:
+                median_amp00 = np.median(amp00)
+                median_amp11 = np.median(amp11)
 
-        axsa[istat][0].set_xlim(times.min(), times.max())
-        axsa[istat][0].set_title(station)
+                axsa[istat][0].plot([times[0], times[-1]], [median_amp00,median_amp00], color='b', label='<Gain:0:0:Amp>')
+                axsa[istat][0].plot([times[0], times[-1]], [median_amp11,median_amp11], color='g', label='<Gain:1:1:Amp>')
 
-    fa.savefig(imageroot+"_amp.png",dpi=100)
+            if norm_amp_lim:
+                axsa[istat][0].set_ylim(0,2 )
+            else:
+                axsa[istat][0].set_ylim(ymin,ymax)
+
+            axsa[istat][0].set_xlim(times.min(), times.max())
+            axsa[istat][0].set_title(station)
+
+        fa.savefig(imageroot+"_amp_channel{}.png".format(chan_indx),dpi=100)
     return
 
 
@@ -434,7 +461,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     main(args.parmdb, args.imageroot, freq=args.freq, plot_tec=args.tec, plot_amp=args.amp,
-        plot_phase=args.pahse, plot_scalarphase=args.scalarphase, median_amp=args.median_amp,
+        plot_phase=args.phase, plot_scalarphase=args.scalarphase, median_amp=args.median_amp,
         norm_amp_lim=args.norm_amp_lim, plot_clock=args.clock, phasors=args.phasors,
         plot_international=args.plot_international, refstation=args.refstation)
 

@@ -27,7 +27,7 @@ class PyTest(Command):
 setup(
     name='Factor',
     version=factor._version.__version__,
-    url='http://github.com/revoltek/factor/',
+    url='http://github.com/lofar-astron/factor/',
     description=description,
     long_description=long_description,
     platforms='any',

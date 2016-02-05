@@ -8,6 +8,7 @@ import numpy as np
 from lsmtool.operations_lib import radec2xy
 import matplotlib.path as mplPath
 from scipy.ndimage import gaussian_filter
+import sys
 
 
 class Direction(object):
@@ -62,7 +63,7 @@ class Direction(object):
     """
     def __init__(self, name, ra, dec, atrous_do=False, mscale_field_do=False,
     	cal_imsize=512, solint_p=1, solint_a=30, dynamic_range='LD',
-    	region_selfcal='', region_field='', peel_skymodel='',
+    	region_selfcal='empty', region_field='empty', peel_skymodel='empty',
     	outlier_do=False, factor_working_dir='', make_final_image=False,
     	cal_size_deg=None, cal_flux_jy=None):
 
@@ -86,13 +87,27 @@ class Direction(object):
             # Set to empty list (casapy format)
             self.region_selfcal = '[]'
         else:
+            if not os.path.exists(region_selfcal):
+                self.log.error('Calibrator clean-mask region file {} not found.'.format(region_selfcal))
+                sys.exit(1)
             self.region_selfcal = '["{0}"]'.format(region_selfcal)
+            self.log.info('Using calibrator clean-mask region file {}'.format(self.region_field))
         self.region_field = region_field
         if self.region_field.lower() == 'empty':
             self.region_field = None
+        elif not os.path.exists(self.region_field):
+            self.log.error('Facet region file {} not found.'.format(self.region_field))
+            sys.exit(1)
+        else:
+            self.log.info('Using facet clean-mask region file {}'.format(self.region_field))
         self.peel_skymodel = peel_skymodel
         if self.peel_skymodel.lower() == 'empty':
             self.peel_skymodel = None
+        elif not os.path.exists(self.peel_skymodel):
+            self.log.error('Peel sky model file {} not found.'.format(self.peel_skymodel))
+            sys.exit(1)
+        else:
+            self.log.info('Using sky model file {} for selfcal'.format(self.peel_skymodel))
         self.is_outlier = outlier_do
         self.make_final_image = make_final_image
         if cal_flux_jy is not None:
@@ -105,7 +120,7 @@ class Direction(object):
         self.selfcal_ok = False # whether selfcal succeeded
         self.skip_add_subtract = None # whether to skip add/subtract in facetsub op
         self.max_residual_val = 0.5 # maximum residual in Jy for facet subtract test
-        self.nchannels = 1 # set number of wide-band channels
+        self.wsclean_nchannels = 1 # set number of wide-band channels
         self.use_new_sub_data = False # set flag that tells which subtracted-data column to use
         self.cellsize_selfcal_deg = 0.000417 # selfcal cell size
         self.cellsize_verify_deg = 0.00833 # verify subtract cell size
@@ -120,6 +135,7 @@ class Direction(object):
         self.is_patch = False # whether direction is just a patch (not full facet)
         self.nchunks = 1
         self.num_selfcal_groups = 1
+        self.timeSlotsPerParmUpdate = 100
 
         # Set the size of the calibrator
         if cal_size_deg is None:
@@ -146,21 +162,20 @@ class Direction(object):
         self.vertices_file = self.save_file
 
 
-    def set_imcal_parameters(self, nbands, nbands_per_channel, chan_width_hz,
+    def set_imcal_parameters(self, nbands_per_channel, chan_width_hz,
     	nchan, timestep_sec, ntimes, nbands, initial_skymodel=None,
     	preaverage_flux_jy=0.0):
         """
         Sets various parameters for imaging and calibration
         """
-        self.set_imaging_parameters(len(bands), nbands_per_channel,
-            initial_skymodel.copy())
-        self.set_averaging_steps_and_solution_intervals(chan_width_hz,
-            nchan, timestep_sec, ntimes, nbands,
-            initial_skymodel.copy(), preaverage_flux_jy)
+        self.set_imaging_parameters(nbands, nbands_per_channel, nchan,
+            initial_skymodel)
+        self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,
+        	timestep_sec, ntimes, nbands, initial_skymodel,	preaverage_flux_jy)
 
 
-    def set_imaging_parameters(self, nbands, nbands_per_channel,
-        initial_skymodel=None):
+    def set_imaging_parameters(self, nbands, nbands_per_channel, nchan_per_band,
+        initial_skymodel=None, padding=1.05):
         """
         Sets various parameters for images in facetselfcal and facetimage pipelines
 
@@ -170,14 +185,19 @@ class Direction(object):
             Number of bands
         nbands_per_channel : int
             Number of bands per output channel (WSClean only)
+        nchan_per_band : int
+            Number of channels per band
         initial_skymodel : LSMTool SkyModel object, optional
             Sky model used to check source sizes
+        padding : float, optional
+            Padding factor by which size of facet is multiplied to determine
+            the facet image size
 
         """
         # Set facet image size
         if hasattr(self, 'width'):
             self.facet_imsize = max(512, self.get_optimum_size(self.width
-                / self.cellsize_selfcal_deg * 1.3)) # full facet has 30% padding
+                / self.cellsize_selfcal_deg * padding))
         else:
             self.facet_imsize = None
 
@@ -192,16 +212,21 @@ class Direction(object):
             self.use_wideband = False
 
         # Set number of channels for wide-band imaging with WSClean and nterms
-        # for the CASA imager. Also define the image suffixes (which depend on
-        # whether or not wide-band clean is done)
+        # for the CASA imager. Note that the number of WSClean channels must be
+        # an even divisor of the total number of channels in the full bandwidth.
+        # For now, we just set the number of channels to the number of bands to
+        # avoid any issues with this setting (revisit once we switch to fitting
+        # a spectral function during deconvolution).
+        #
+        # Also define the image suffixes (which depend on whether or not
+        # wide-band clean is done)
         if self.use_wideband:
-            self.nchannels = int(round(float(nbands)/
-                float(nbands_per_channel)))
+            self.wsclean_nchannels = nbands
             self.nterms = 2
             self.casa_suffix = '.tt0'
             self.wsclean_suffix = '-MFS-image.fits'
         else:
-            self.nchannels = 1
+            self.wsclean_nchannels = 1
             self.nterms = 1
             self.casa_suffix = None
             self.wsclean_suffix = '-image.fits'
@@ -218,19 +243,27 @@ class Direction(object):
         # sources (anything above 2 arcmin -- the CC sky model was convolved
         # with a Gaussian of 1 arcmin, so unresolved sources have sizes of ~
         # 1 arcmin)
-        if initial_skymodel is not None:
-            sizes = self.get_source_sizes(initial_skymodel)
+        if initial_skymodel is not None and self.mscale_field_do is None:
+            sizes = self.get_source_sizes(initial_skymodel.copy())
             large_size_arcmin = 2.0
             if any([s > large_size_arcmin for s in sizes]):
                 self.mscale_field_do = True
             else:
                 self.mscale_field_do = False
+        if self.mscale_field_do:
+            self.casa_multiscale = '[0, 3, 7, 25, 60, 150]'
+            self.wsclean_multiscale = '-multiscale,'
+            self.wsclean_full_image_niter /= 2.0 # fewer iterations are needed
+        else:
+            self.casa_multiscale = '[0]'
+            self.wsclean_multiscale = ''
+
+        # Set wavelet source-finding mode
+        if self.atrous_do is None:
             if self.mscale_field_do:
-                self.casa_multiscale = '[0, 3, 7, 25, 60, 150]'
-                self.wsclean_multiscale = '-multiscale,'
+                self.atrous_do = True
             else:
-                self.casa_multiscale = '[0]'
-                self.wsclean_multiscale = ''
+                self.atrous_do = False
 
 
     def set_wplanes(self, imsize):
@@ -447,25 +480,33 @@ class Direction(object):
 
         # For selfcal, average to 2 MHz per channel and 120 s per time slot for
         # an image of 512 pixels
-        target_bandwidth_mhz = 2.0 * 512.0 / self.cal_imsize
-        target_timewidth_s = 120 * 512.0 / self.cal_imsize # used for imaging only
-        self.facetselfcal_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
-        self.facetselfcal_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors-self.facetselfcal_freqstep))]
-        self.facetselfcal_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
+        if self.cal_imsize is not None:
+            target_bandwidth_mhz = 2.0 * 512.0 / self.cal_imsize
+            target_timewidth_s = 120 * 512.0 / self.cal_imsize # used for imaging only
+            self.facetselfcal_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
+            self.facetselfcal_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors-self.facetselfcal_freqstep))]
+            self.facetselfcal_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
 
         # For facet imaging, average to 0.5 MHz per channel and 30 sec per time
         # slot for an image of 2048 pixels
-        target_bandwidth_mhz = 0.5 * 2048.0 / self.facet_imsize
-        target_timewidth_s = 30 * 2048.0 / self.facet_imsize
-        self.facetimage_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
-        self.facetimage_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors-self.facetimage_freqstep))]
-        self.facetimage_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
+        if self.facet_imsize is not None:
+            target_bandwidth_mhz = 0.5 * 2048.0 / self.facet_imsize
+            target_timewidth_s = 30 * 2048.0 / self.facet_imsize
+            self.facetimage_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
+            self.facetimage_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors-self.facetimage_freqstep))]
+            self.facetimage_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
 
         # For selfcal verify, average to 2 MHz per channel and 60 sec per time
         # slot
         self.verify_freqstep = max(1, min(int(round(2.0 * 1e6 / chan_width_hz)), nchan))
         self.verify_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors-self.verify_freqstep))]
         self.verify_timestep = max(1, int(round(60.0 / timestep_sec)))
+
+        # Set timeSlotsPerParmUpdate to an even divisor of the number of time slots
+        # to work around a bug in DPPP ApplyCal
+        self.timeSlotsPerParmUpdate = 100
+        while ntimes_min % self.timeSlotsPerParmUpdate:
+            self.timeSlotsPerParmUpdate += 1
 
         # Set time intervals for selfcal solve steps
         #
@@ -479,7 +520,7 @@ class Direction(object):
         if initial_skymodel is not None:
             # The initial skymodel is not used for field directions, so steps
             # below are skipped
-            total_flux_jy, peak_flux_jy_bm = self.get_cal_fluxes(initial_skymodel)
+            total_flux_jy, peak_flux_jy_bm = self.get_cal_fluxes(initial_skymodel.copy())
             effective_flux_jy = peak_flux_jy_bm * (total_flux_jy / peak_flux_jy_bm)**0.667
             ref_flux_jy = 1.4 * (4.0 / nbands)**0.5
             self.log.debug('Total flux density of calibrator: {} Jy'.format(total_flux_jy))

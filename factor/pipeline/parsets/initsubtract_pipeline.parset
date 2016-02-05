@@ -13,40 +13,40 @@ create_ms_map.control.kind                 =   plugin
 create_ms_map.control.type                 =   addListMapfile
 create_ms_map.control.hosts                =   {{ hosts }}
 create_ms_map.control.files                =   {{ input_files_single }}
-create_ms_map.control.mapfile_dir          =   {{ mapfile_dir }}
-create_ms_map.control.filename             =   input_files_single.datamap
+create_ms_map.control.mapfile_dir          =   input.output.mapfile_dir
+create_ms_map.control.filename             =   input_files_single.mapfile
 
 # create a mapfile with the direction independent parmDBs, length = nfiles
 create_parmdb_map.control.kind             =   plugin
 create_parmdb_map.control.type             =   addListMapfile
 create_parmdb_map.control.hosts            =   {{ hosts }}
 create_parmdb_map.control.files            =   {{ dir_indep_parmDBs }}
-create_parmdb_map.control.mapfile_dir      =   {{ mapfile_dir }}
-create_parmdb_map.control.filename         =   dir_indep_instrument_parmdbs.datamap
+create_parmdb_map.control.mapfile_dir      =   input.output.mapfile_dir
+create_parmdb_map.control.filename         =   dir_indep_instrument_parmdbs.mapfile
 
 # create a multi-mapfile with the groups of MSs, length = nbands
 create_msmulti_map.control.kind            =   plugin
 create_msmulti_map.control.type            =   addListMultiMapfile
 create_msmulti_map.control.hosts           =   {{ hosts }}
 create_msmulti_map.control.files           =   {{ input_files_grouped }}
-create_msmulti_map.control.mapfile_dir     =   {{ mapfile_dir }}
-create_msmulti_map.control.filename        =   input_files_grouped.datamap
+create_msmulti_map.control.mapfile_dir     =   input.output.mapfile_dir
+create_msmulti_map.control.filename        =   input_files_grouped.mapfile
 
 # create a mapfile with the image sizes for the high-res images, length = nbands
 create_high_sizes_map.control.kind         =   plugin
 create_high_sizes_map.control.type         =   addListMapfile
 create_high_sizes_map.control.hosts        =   {{ hosts }}
 create_high_sizes_map.control.files        =   {{ highres_image_sizes }}
-create_high_sizes_map.control.mapfile_dir  =   {{ mapfile_dir }}
-create_high_sizes_map.control.filename     =   highres_image_sizes.datamap
+create_high_sizes_map.control.mapfile_dir  =   input.output.mapfile_dir
+create_high_sizes_map.control.filename     =   highres_image_sizes.mapfile
 
 # create a mapfile with the image sizes for the low-res images, length = nbands
 create_low_sizes_map.control.kind          =   plugin
 create_low_sizes_map.control.type          =   addListMapfile
 create_low_sizes_map.control.hosts         =   {{ hosts }}
 create_low_sizes_map.control.files         =   {{ lowres_image_sizes }}
-create_low_sizes_map.control.mapfile_dir   =   {{ mapfile_dir }}
-create_low_sizes_map.control.filename      =   lowres_image_sizes.datamap
+create_low_sizes_map.control.mapfile_dir   =   input.output.mapfile_dir
+create_low_sizes_map.control.filename      =   lowres_image_sizes.mapfile
 
 # first high-res imaging, length = nbands
 wsclean_high1.control.type                 =   wsclean
@@ -125,8 +125,8 @@ expand_sourcedb_high.control.kind             =   plugin
 expand_sourcedb_high.control.type             =   mapfileSingleToGroup
 expand_sourcedb_high.control.mapfile_in       =   make_sourcedb_high.output.mapfile
 expand_sourcedb_high.control.mapfile_groups   =   create_msmulti_map.output.mapfile
-expand_sourcedb_high.control.mapfile_dir      =   {{ mapfile_dir }}
-expand_sourcedb_high.control.filename         =   expand_sourcedb_high.datamap
+expand_sourcedb_high.control.mapfile_dir      =   input.output.mapfile_dir
+expand_sourcedb_high.control.filename         =   expand_sourcedb_high.mapfile
 
 # predict the high-res model, length = nfiles
 predict_high.control.type                    =   dppp
@@ -189,8 +189,8 @@ regroup_map.control.kind                   =   plugin
 regroup_map.control.type                   =   reGroupMapfile
 regroup_map.control.mapfile_in             =   average.output.mapfile
 regroup_map.control.mapfile_groups         =   create_msmulti_map.output.mapfile
-regroup_map.control.mapfile_dir            =   {{ mapfile_dir }}
-regroup_map.control.filename               =   re_grouped.datamap
+regroup_map.control.mapfile_dir            =   input.output.mapfile_dir
+regroup_map.control.filename               =   re_grouped.mapfile
 
 # first low-res imaging, length = nbands
 wsclean_low1.control.type                  =   wsclean
@@ -268,8 +268,8 @@ expand_sourcedb_low.control.kind             =   plugin
 expand_sourcedb_low.control.type             =   mapfileSingleToGroup
 expand_sourcedb_low.control.mapfile_in       =   make_sourcedb_low.output.mapfile
 expand_sourcedb_low.control.mapfile_groups   =   create_msmulti_map.output.mapfile
-expand_sourcedb_low.control.mapfile_dir      =   {{ mapfile_dir }}
-expand_sourcedb_low.control.filename         =   expand_sourcedb_low.datamap
+expand_sourcedb_low.control.mapfile_dir      =   input.output.mapfile_dir
+expand_sourcedb_low.control.filename         =   expand_sourcedb_low.mapfile
 
 # predict the low-res model, length = nfiles
 predict_low.control.type                     =   dppp

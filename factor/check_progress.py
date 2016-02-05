@@ -21,7 +21,6 @@ from lofarpipe.support.parset import Parset
 from factor.lib.direction import Direction
 try:
     from matplotlib import pyplot as plt
-    import matplotlib.image as mpimg
     from matplotlib.patches import Polygon, Circle
     from matplotlib.ticker import FuncFormatter
     from mpl_toolkits.axes_grid.anchored_artists import AnchoredText
@@ -48,11 +47,14 @@ def run(parset_file, trim_names=True):
     log.info('Middle-click on a facet to display its image')
     log.info('Right-click on a facet to display its selfcal solutions and images')
     log.info('(In all cases, pan/zoom mode must be off)')
-    log.info('Press "u" to update display')
+    log.info('Press "u" to update display (display is updated automatically every minute)')
 
     logging.root.setLevel(logging.ERROR)
     log.setLevel(logging.ERROR)
     all_directions = load_directions(parset_file)
+    if len(all_directions) == 0:
+        log.error('No directions found. Please check parset')
+        sys.exit(1)
     plot_state(all_directions, trim_names=trim_names)
 
 
@@ -119,7 +121,6 @@ def plot_state(directions_list, trim_names=True):
     else:
         ax = plt.gca()
 
-    # Add field direction, making sure it is not too near an existing direction
     field_x = min(points[0])
     field_y = max(points[1])
     adjust_xy = True
@@ -220,6 +221,11 @@ def plot_state(directions_list, trim_names=True):
     fig.canvas.mpl_connect('pick_event', on_pick)
     fig.canvas.mpl_connect('key_press_event', on_press)
 
+    # Add timer to update the plot every 60 seconds
+    timer = fig.canvas.new_timer(interval=60000)
+    timer.add_callback(update_plot)
+    timer.start()
+
     # Show plot
     plt.show()
     plt.close(fig)
@@ -249,20 +255,10 @@ def on_pick(event):
 
     if event.mouseevent.button == 1: # left click
         # Print info
-        current_op = get_current_op(direction)
-        info = 'Selected direction: {}\n'.format(facet.facet_name)
-        completed_ops = get_completed_ops(direction)
-        if len(completed_ops) == 0:
-            info += 'Completed ops: None\n'
-        else:
-            info += 'Completed ops: {}\n'.format(', '.join(completed_ops))
-        info += 'Current op: {}'.format(current_op)
-        if current_op is not None:
-            current_step, current_index, num_steps, start_time = get_current_step(direction)
-            if current_step is not None:
-                info += '\n- Started at: {}\n'.format(start_time)
-                info += '- Current step: {0} (step {1} of {2})'.format(
-                    current_step, current_index+1, num_steps)
+        c = at.get_child()
+        c.set_text('Getting info...')
+        fig.canvas.draw()
+        info = get_current_info(direction)
 
     elif event.mouseevent.button == 2: # middle click
         # Open full facet image (if any)
@@ -277,7 +273,7 @@ def on_pick(event):
             info = 'No image of facet exists for {}'.format(facet.facet_name)
 
     elif event.mouseevent.button == 3: # right click
-        # Open selfcal images and plots (if any)
+        # Open selfcal images (if any)
         if os.path.exists('/tmp/tempimage'):
             shutil.rmtree('/tmp/tempimage')
         selfcal_images = find_selfcal_images(direction)
@@ -290,11 +286,9 @@ def on_pick(event):
 
         # Open selfcal plots (if any)
         selfcal_plots = find_selfcal_plots(direction)
-        if selfcal_plots is not None:
-            info += '\nOpening final selfcal plots for {}...'.format(facet.facet_name)
-            for p in selfcal_plots:
-                img = mpimg.imread(p)
-                imgplot = plt.imshow(img)
+        if len(selfcal_plots) > 0:
+            info += '\nOpening selfcal solution plots for {}...'.format(facet.facet_name)
+            os.system('display {} &'.format(' '.join(selfcal_plots)))
         else:
             info += '\nFinal selfcal solutions do not exist for {}'.format(facet.facet_name)
 
@@ -312,40 +306,94 @@ def on_pick(event):
     fig.canvas.draw()
 
 
+def get_current_info(direction):
+    """
+    Returns string of current state info
+    """
+    info = 'Selected direction: {}\n'.format(direction.name)
+
+    if not direction.load_state():
+        info += 'State not available'
+        return info
+
+    completed_ops = get_completed_ops(direction)
+    if len(completed_ops) == 0:
+        info += 'Completed ops: None\n'
+    else:
+        info += 'Completed ops: {}\n'.format(', '.join(completed_ops))
+
+    current_op = get_current_op(direction)
+    info += 'Current op: {}'.format(current_op)
+    if current_op is not None:
+        current_step, current_index, num_steps, start_time = get_current_step(direction)
+        if current_step is not None:
+            info += '\n- Started at: {}\n'.format(start_time)
+            info += '- Current step: {0} (step {1} of {2})'.format(
+                current_step, current_index+1, num_steps)
+        else:
+            info += '\n- Waiting for state update...'
+
+    return info
+
+
 def on_press(event):
     """
     Handle key presses
     """
-    global fig, all_directions
+    global fig, all_directions, at
 
     if event.key == 'u':
         info = 'Updating display...'
         c = at.get_child()
         c.set_text(info)
         fig.canvas.draw()
-        ax = plt.gca()
-        for a in ax.patches:
-            if hasattr(a, 'facet_name'):
-                for d in all_directions:
-                    if d.name == a.facet_name:
-                        set_patch_color(a, d)
-                        a.selfcal_images = find_selfcal_images(d)
-                        a.facet_image = find_facet_image(d)
-        fig.canvas.draw()
+        update_plot()
         info += '\n...done'
         c = at.get_child()
         c.set_text(info)
         fig.canvas.draw()
 
 
+def update_plot():
+    """
+    Update the plot
+    """
+    global fig, all_directions, at
+
+    ax = plt.gca()
+    c = at.get_child()
+
+    # Update colors and text box
+    for a in ax.patches:
+        if hasattr(a, 'facet_name'):
+            for d in all_directions:
+                if d.name == a.facet_name:
+                    set_patch_color(a, d)
+                    a.selfcal_images = find_selfcal_images(d)
+                    a.facet_image = find_facet_image(d)
+                    if 'Selected direction: {}'.format(d.name) in c.get_text():
+                        info = get_current_info(d)
+                        c.set_text(info)
+                    break
+
+    fig.canvas.draw()
+
+
 def set_patch_color(a, d):
     """
     Sets face and edge color of patch
     """
+    if not d.load_state():
+        # Means that state is not available, so set to unprocessed
+        a.set_edgecolor('#a9a9a9')
+        a.set_facecolor('#F2F2F2')
+        return
+
     a.completed_ops = get_completed_ops(d)
     a.started_ops = get_started_ops(d)
     a.current_op = get_current_op(d)
     if a.current_op is not None:
+        # Means this facet is currently processing
         a.set_edgecolor('y')
         a.set_facecolor('#F2F5A9')
     elif 'facetselfcal' in a.completed_ops:
@@ -417,16 +465,15 @@ def find_selfcal_images(direction):
 
 def find_selfcal_plots(direction):
     """
-    Returns the filename of selfcal parmdb
+    Returns the filenames of selfcal plots
     """
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
     if os.path.exists(selfcal_dir):
-        selfcal_plots = glob.glob(selfcal_dir+'/*.png')
-        if len(selfcal_plots) == 0:
-            selfcal_plots = None
+        selfcal_plots = glob.glob(selfcal_dir+'/*.make_selfcal_plots*.png')
+        selfcal_plots.sort()
     else:
-        selfcal_plots = None
+        selfcal_plots = []
 
     return selfcal_plots
 
@@ -440,16 +487,18 @@ def find_facet_image(direction):
     image_dir = os.path.join(direction.working_dir, 'results', 'facetimage',
         direction.name)
 
-    # Check selfcal and image directories. An image in the image directory is
-    # preferred
+    # Check selfcal and image directories. An image in the facetimage directory
+    # is preferred
     facet_image = []
     for d in [image_dir, selfcal_dir]:
         if os.path.exists(d) and len(facet_image) == 0:
             facet_image = glob.glob(d+'/*.wsclean_image_full2-MFS-image.fits')
             if len(facet_image) == 0:
-                facet_image = glob.glob(d+'/*.casa_image_full2.image.tt0')
+                facet_image = glob.glob(d+'/*.wsclean_image_full2-image.fits')
                 if len(facet_image) == 0:
-                    facet_image = glob.glob(d+'/*.casa_image_full2.image')
+                    facet_image = glob.glob(d+'/*.casa_image_full2.image.tt0')
+                    if len(facet_image) == 0:
+                        facet_image = glob.glob(d+'/*.casa_image_full2.image')
 
     return facet_image
 

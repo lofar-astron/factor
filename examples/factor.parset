@@ -63,21 +63,24 @@ preaverage_flux_Jy = 1.0
 # are selected internally using the flux and size cuts below
 directions_file = /data/directions.txt
 
-# Parameters for selecting directions internally (radius from phase center
-# within which to consider sources as potential calibrators, min flux, max size
-# of a source, and max separation between sources below which they are grouped
-# into one direction; required if no directions_file is given). The number of
-# internally derived directions can be limited to a maximum number of directions
-# if desired with max_num (default = all). Lastly, faceting_radius_deg sets the
-# radius within which facets will be used; outside of this radius, small patches
-# are used that do not appear in the final mosaic.  These parameters will
-# determine the faceting of the field
-max_radius_deg = 2.0
+# Radius from phase center within which to consider sources as potential
+# calibrators (default = 2 * FWHM of primary beam of highest-frequency band)
+max_radius_deg = 5.0
+
+# Min flux, max size of a source, and max separation between sources below which
+# they are grouped into one direction; required if no directions_file is given
 flux_min_Jy = 0.3
 size_max_arcmin = 2.0
 separation_max_arcmin = 6.0
+
+# Number of internally derived directions can be limited to a maximum number
+# of directions if desired with max_num (default = all).
 max_num = 50
-faceting_radius_deg = 1.5
+
+# Radius within which facets will be used (default = 1.25 * FWHM of primary beam
+# of highest-frequency band); outside of this radius, small patches are used
+# that do not appear in the final mosaic.
+faceting_radius_deg = 2.5
 
 # Check whether any sources from the initial subtract sky model fall on facet
 # edges. If any are found, the facet regions are adjusted to avoid them (default
@@ -126,7 +129,7 @@ target_dec = +35d30m31.52
 target_radius_arcmin = 10.2
 target_has_own_facet = False
 
-# Re-image directions for which selfcal was successful (default = False)
+# Re-image all directions for which selfcal was successful (default = False)
 reimage = True
 
 

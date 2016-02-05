@@ -14,6 +14,7 @@ import factor
 import factor.directions
 import factor.parset
 import factor.cluster
+from factor.operations.outlier_ops import *
 from factor.operations.field_ops import *
 from factor.operations.facet_ops import *
 from factor.lib.scheduler import Scheduler
@@ -68,9 +69,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     # Make direction object for the field
     field = Direction('field', bands[0].ra, bands[0].dec,
         factor_working_dir=parset['dir_working'])
-    field.set_averaging_steps_and_solution_intervals(bands[0].chan_width_hz,
-        bands[0].nchan, bands[0].timepersample, bands[0].minSamplesPerFile, len(bands),
-        preaverage_flux_jy=parset['preaverage_flux_jy'])
+    field.set_imcal_parameters(parset['wsclean_nbands'],
+    	bands[0].chan_width_hz, bands[0].nchan, bands[0].timepersample,
+    	bands[0].minSamplesPerFile, len(bands))
 
     # Run initial sky model generation and create empty datasets
     if len(bands_initsubtract) > 0:
@@ -116,10 +117,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
         # Do the peeling
         for d in outlier_directions:
-            op = FacetPeel(parset, bands, d)
+            op = OutlierPeel(parset, bands, d)
             scheduler.run(op)
 
-            op = FacetSub(parset, bands, d)
+            op = OutlierSub(parset, bands, d)
             scheduler.run(op)
 
     # Run selfcal and subtract operations on direction groups
@@ -220,13 +221,14 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     # Make final facet images (from final empty datasets) if desired. Also image
     # any facets for which selfcal failed or no selfcal was done
     dirs_to_image = [d for d in directions if d.make_final_image and
-        d.selfcal_ok and not d.is_patch]
+        d.selfcal_ok and not d.is_patch and not d.is_outlier]
     if len(dirs_to_image) > 0:
         log.info('Reimaging the following direction(s):')
         log.info('{0}'.format([d.name for d in dirs_to_image]))
 
     # Add directions without selfcal to those that will be imaged
-    dirs_to_transfer = [d for d in directions if not d.selfcal_ok and not d.is_patch]
+    dirs_to_transfer = [d for d in directions if not d.selfcal_ok and not
+        d.is_patch and not d.is_outlier]
     if len(dirs_to_transfer) > 0:
         log.info('Imaging the following direction(s) with nearest selcal solutions:')
         log.info('{0}'.format([d.name for d in dirs_to_transfer]))
@@ -557,11 +559,14 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
 
     # Create facets and patches
     faceting_radius_deg = dir_parset['faceting_radius_deg']
+    if faceting_radius_deg is None:
+        faceting_radius_deg = 1.25 * ref_band.fwhm_deg / 2.0
+    beam_ratio = 1.0 / np.sin(ref_band.mean_el_rad) # ratio of N-S to E-W beam
     factor.directions.thiessen(directions, ref_band.ra, ref_band.dec,
-        s=initial_skymodel.copy(), check_edges=dir_parset['check_edges'],
-        target_ra=target_ra, target_dec=target_dec,
-        target_radius_arcmin=target_radius_arcmin,
-        faceting_radius_deg=faceting_radius_deg)
+        faceting_radius_deg, s=initial_skymodel.copy(),
+        check_edges=dir_parset['check_edges'], target_ra=target_ra,
+        target_dec=target_dec, target_radius_arcmin=target_radius_arcmin,
+        beam_ratio=beam_ratio)
 
     # Warn user if they've specified a direction to reset that does not exist
     direction_names = [d.name for d in directions]
@@ -607,7 +612,7 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
     log.info("Determining imaging parameters for each direction...")
     for i, direction in enumerate(directions):
         # Set imaging and calibration parameters
-        direction.set_imcal_parameters(len(bands), parset['wsclean_nbands'],
+        direction.set_imcal_parameters(parset['wsclean_nbands'],
         	bands[0].chan_width_hz, bands[0].nchan, bands[0].timepersample,
         	bands[0].nsamples, len(bands), initial_skymodel,
         	parset['preaverage_flux_jy'])

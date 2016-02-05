@@ -14,6 +14,9 @@ import logging
 from factor.lib.operation import Operation
 from lofarpipe.support.data_map import DataMap
 
+log = logging.getLogger('factor:field_ops')
+
+
 
 class InitSubtract(Operation):
     """
@@ -23,6 +26,7 @@ class InitSubtract(Operation):
         super(InitSubtract, self).__init__(parset, bands, direction,
             name='InitSubtract')
 
+        log.warn('InitSubtract operation is not maintained anymore. Please use the InitSubtract pipeline from prefactor.')
         #### specify  the image parameters here
         # cellsize in degrees, 0.00208 deg is about 7.5 arcsec
         cellsize_highres_deg = 0.00208  
