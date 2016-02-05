@@ -116,6 +116,7 @@ subtract_high.argument.subtract.type            =   predict
 subtract_high.argument.subtract.sourcedb        =   sourcedb
 subtract_high.argument.subtract.operation       =   subtract
 subtract_high.argument.subtract.applycal.parmdb =   parmdb
+subtract_high.argument.subtract.applycal.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 
 # Correct the SUBTRACTED_DATA_HIGH column and average to prepare for imaging
 correct_high.control.type                       =   dppp
@@ -130,6 +131,7 @@ correct_high.argument.steps                     =   [correct,avg]
 correct_high.argument.correct.type              =   applycal
 correct_high.argument.correct.parmdb            =   parmdb
 correct_high.argument.correct.invert            =   True
+correct_high.argument.correct.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 correct_high.argument.avg.type                  =   squash
 correct_high.argument.avg.freqstep              =   {{ initsubtract_freqstep }}
 correct_high.argument.avg.timestep              =   {{ initsubtract_timestep }}
@@ -213,6 +215,7 @@ subtract_low.argument.subtract.type             =   predict
 subtract_low.argument.subtract.sourcedb         =   sourcedb
 subtract_low.argument.subtract.operation        =   subtract
 subtract_low.argument.subtract.applycal.parmdb  =   parmdb
+subtract_low.argument.subtract.applycal.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 
 merge.control.type                              =   merge_skymodels
 merge.control.mapfiles_in                       =   [casa_to_bbs_low.output.mapfile,casa_to_bbs_high.output.mapfile]

@@ -135,6 +135,7 @@ class Direction(object):
         self.is_patch = False # whether direction is just a patch (not full facet)
         self.nchunks = 1
         self.num_selfcal_groups = 1
+        self.timeSlotsPerParmUpdate = 100
 
         # Set the size of the calibrator
         if cal_size_deg is None:
@@ -497,6 +498,12 @@ class Direction(object):
         while nchan % self.verify_freqstep:
             self.verify_freqstep += 1
         self.verify_timestep = max(1, int(round(60.0 / timestep_sec)))
+
+        # Set timeSlotsPerParmUpdate to an even divisor of the number of time slots
+        # to work around a bug in DPPP ApplyCal
+        self.timeSlotsPerParmUpdate = 100
+        while ntimes % self.timeSlotsPerParmUpdate:
+            self.timeSlotsPerParmUpdate += 1
 
         # Set time intervals for selfcal solve steps
         #
