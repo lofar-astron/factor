@@ -18,16 +18,6 @@ from lofarpipe.support.data_map import DataMap
 class InitSubtract(Operation):
     """
     Operation to create empty datasets
-
-    Two pipelines can be run, depending on whether the skymodels are present for
-    all bands or not:
-
-    initsubtract_pipeline.parset - runs the full initial subtraction when one
-        or more bands lack skymodels
-
-    initsubtract_subonly_pipeline.parset - runs only a subtract step when all
-        bands have skymodels
-
     """
     def __init__(self, parset, bands, direction):
         super(InitSubtract, self).__init__(parset, bands, direction,
@@ -81,8 +71,8 @@ class InitSubtract(Operation):
         """
         # Add skymodels to band objects if any lack them
         if any([b.skymodel_dirindep is None for b in self.bands]):
-            merged_skymodel_datamap = os.path.join(self.mapfile_dir,
-                'merged_skymodels.datamap')
+            merged_skymodel_datamap = os.path.join(self.pipeline_mapfile_dir,
+                'merge.mapfile')
             if os.path.exists(merged_skymodel_datamap):
                 datamap = DataMap.load(merged_skymodel_datamap)
                 # this should continue to work, but I'm not sure
@@ -94,7 +84,7 @@ class InitSubtract(Operation):
                 for band in self.bands:
                     band.skymodel_dirindep = None
 
-        # Delete averaged data as they're no longer needed
+        # Delete averaged and model data as they're no longer needed
         self.direction.cleanup_mapfiles = [
             ### generated sourceDBs (sourceDBs not skymodels!)
             os.path.join(self.pipeline_mapfile_dir, 'make_sourcedb_high.mapfile'),
@@ -107,6 +97,7 @@ class InitSubtract(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'predict_low.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'corrupt_low.mapfile')
             ]
+        self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()
 
 
@@ -114,7 +105,7 @@ class MakeMosaic(Operation):
     """
     Operation to mosiac facet images
     """
-    def __init__(self, parset, direction, bands=None):
+    def __init__(self, parset, bands, direction):
         super(MakeMosaic, self).__init__(parset, bands, direction,
             name='MakeMosaic')
         
@@ -129,6 +120,19 @@ class MakeMosaic(Operation):
             input_files = []
             input_files_single = []
 
+        # Define extra parameters needed for this operation (beyond those
+        # defined in the master Operation class and as attributes of the
+        # direction object)
         self.parms_dict.update({'ms_files_single': input_files_single,
-                                'ms_files_grouped' : str(input_files),
-                                'input_dir': parset['dir_ms']})
+                                'ms_files_grouped' : str(input_files) )
+
+    def finalize(self):
+        """
+        Finalize this operation
+        """
+        # Delete averaged data as they're no longer needed
+        self.direction.cleanup_mapfiles = [
+            os.path.join(self.pipeline_mapfile_dir, 'sorted_groups.datamap_groups')
+            ]
+        self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
+        self.direction.cleanup()

@@ -13,6 +13,20 @@ import numpy as np
 class Band(object):
     """
     The Band object contains parameters needed for each band (MS)
+
+    Parameters
+    ----------
+    MSfile : str
+        Filename of MS
+    factor_working_dir : str
+        Full path of working directory
+    dirindparmdb : str
+        Name of direction-independent instrument parmdb (relative to MSfile)
+    skymodel_dirindep : str
+        Full path of direction-independent sky model
+    test_run : bool, optional
+        If True, use test image sizes
+
     """
     def __init__(self, MSfiles, factor_working_dir, dirindparmdb,
         skymodel_dirindep=None, test_run=False):
@@ -48,6 +62,7 @@ class Band(object):
         sw.close()
         self.name = 'Band_{0:.2f}MHz'.format(self.freq/1e6)
         self.log = logging.getLogger('factor:{}'.format(self.name))
+        self.log.debug('MS filename is {}'.format(self.msname))
 
         # Do some checks
         self.check_freqs()
@@ -133,6 +148,11 @@ class Band(object):
                 self.log.critical('Direction-independent instument parmdb appears to be empty '
                             'for band {0}'.format(self.files[pdb_id]))
                 sys.exit(1)
+            if solname[0:4] != 'Gain':
+                self.log.critical('Direction-independent instument parmdb contains not-handled value {0} '
+                                  'for band {1}'.format(solname,self.files[pdb_id]))
+                sys.exit(1)
+
             if 'Real' in solname or 'Imag' in solname:
                 # Convert real/imag to phasors
                 self.log.warn('Direction-independent instument parmdb for band {0} contains '
@@ -163,6 +183,14 @@ class Band(object):
         phasors_parmdb_file = self.dirindparmdbs[pdb_id] + '_phasors'
         pdb_in = lofar.parmdb.parmdb(self.dirindparmdbs[pdb_id])
         pdb_out = lofar.parmdb.parmdb(phasors_parmdb_file, create=True)
+
+        # Check parmdb for non-handled values
+        solnames = pdb.getNames()
+        for name in solnames:
+            if solname[0:9] != 'Gain:0:0:' and solname[0:9] != 'Gain:1:1:':
+                self.log.critical('Direction-independent instument parmdb contains not-handled value {0} '
+                                  'for band {1}'.format(name,self.files[pdb_id]))
+                sys.exit(1)
 
         # Get station names
         stations = set([s.split(':')[-1] for s in pdb_in.getNames()])
@@ -345,7 +373,7 @@ class Band(object):
                         # RuntimeError indicates column already exists
                         pass
 
-                    # Check for SUBTRACTED_DATA_ALL column and calculate mean elevation
+                    # Calculate mean elevation
                     tab = pt.table(self.files[MS_id], ack=False)
                     if MS_id == 0:
                         global_el_values = tab.getcol('AZEL1', rowincr=10000)[:, 1]

@@ -47,6 +47,7 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
             return
     os.system('cp -r {0} {1}'.format(inparmdbs[0], outparmdb))
 
+### old copy, which puts all values into the same domain (i.e. ignoring the timestamps)
 #    if len(inparmdbs) > 1:
 #        pdb_concat = lofar.parmdb.parmdb(outparmdb)
 #        for inparmdb in inparmdbs[1:]:
@@ -55,15 +56,36 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
 #                v = pdb.getValuesGrid(parmname)
 #                pdb_concat.addValues(v.copy())
 #        pdb_concat.flush()
+
+### version with TAQL, which avoids the previous problem, but may introduce new ones
+#    if len(inparmdbs) > 1:
+#        for inparmdb in inparmdbs[1:]:
+#            pt.taql('insert into '+outparmdb+' select from '+inparmdb)
+#    outdb = pt.table(outparmdb,readonly=False,ack=False)
+#    errdesc = outdb.getcoldesc('ERRORS')
+#    errdesc['name'] = 'ERRORS'
+#    outdb.removecols('ERRORS')
+#    outdb.addcols(errdesc)
+#    outdb.close()
+
+### version which adds new data by generating a new data-holder first
     if len(inparmdbs) > 1:
+        pdb_concat = pdb.parmdb(outparmdb)
         for inparmdb in inparmdbs[1:]:
-            pt.taql('insert into '+outparmdb+' select from '+inparmdb)
-    outdb = pt.table(outparmdb,readonly=False,ack=False)
-    errdesc = outdb.getcoldesc('ERRORS')
-    errdesc['name'] = 'ERRORS'
-    outdb.removecols('ERRORS')
-    outdb.addcols(errdesc)
-    outdb.close()
+            pdb_add = pdb.parmdb(inparmdb)
+            for parmname in pdb_add.getNames():
+                parms = pdb_add.getValuesGrid(parmname)
+                ValueHolder = pdb_concat.makeValue(values=parms[parmname]['values'],
+                                                   sfreq=parms[parmname]['freqs'],
+                                                   efreq=parms[parmname]['freqwidths'],
+                                                   stime=parms[parmname]['times'],
+                                                   etime=parms[parmname]['timewidths'],
+                                                   asStartEnd=False)
+                pdb_concat.addValues(parmname,ValueHolder)       
+            pdb_concat.flush()
+            pdb_add = False 
+        pdb_concat = False
+
 
 if __name__ == '__main__':
     descriptiontext = "Merge parmdbs in time.\n"

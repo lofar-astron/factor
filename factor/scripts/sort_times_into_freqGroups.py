@@ -46,23 +46,10 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
     """
     if not filename or not mapfile_dir:
         raise ValueError('sort_times_into_freqGroups: filename and mapfile_dir are needed!')
-    if type(ms_input) is str:
-        if ms_input.startswith('[') and ms_input.endswith(']'):
-            ms_list = [f.strip(' \'\"') for f in ms_input.strip('[]').split(',')]
-        else:
-            map_in = DataMap.load(ms_input)
-            map_in.iterator = DataMap.SkipIterator
-            ms_list = []
-            for fname in map_in:
-                if fname.startswith('[') and fname.endswith(']'):
-                    for f in fname.strip('[]').split(','):
-                        ms_list.append(f.strip(' \'\"'))
-                else:
-                    ms_list.append(fname.strip(' \'\"'))  
-    elif type(ms_input) is list:
-        ms_list = [str(f).strip(' \'\"') for f in ms_input]
-    else:
-        raise TypeError('sort_times_into_freqGroups: type of "ms_input" unknown!')
+
+    # convert input to needed types
+    ms_list = input2strlist(ms_input)
+    NDPPPfill = input2bool(NDPPPfill)
 
     if type(hosts) is str:
         hosts = [h.strip(' \'\"') for h in hosts.strip('[]').split(',')]
@@ -156,6 +143,41 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
     result = {'mapfile': filemapname, 'groupmapfile': groupmapname}
     return result
 
+def input2bool(invar):
+    if isinstsance(invar, bool):
+        return invar
+    elif isinstsance(invar, str):
+        if invar.upper() == 'TRUE' or invar == '1':
+            return True
+        elif invar.upper() == 'FALSE' or invar == '0': 
+            return False
+        else:
+            raise ValueError('input2bool: Cannot convert string "'+invar+'" to boolean!')
+    elif isinstsance(invar, int) or isinstsance(invar, float):
+        return bool(invar)
+    else:
+        raise TypeError('input2bool: Unsupported data type:'+str(type(invar)))
+
+def input2strlist(invar):
+    str_list = None
+    if type(invar) is str:
+        if invar.startswith('[') and invar.endswith(']'):
+            str_list = [f.strip(' \'\"') for f in invar.strip('[]').split(',')]
+        else:
+            map_in = DataMap.load(invar)
+            map_in.iterator = DataMap.SkipIterator
+            str_list = []
+            for fname in map_in:
+                if fname.startswith('[') and fname.endswith(']'):
+                    for f in fname.strip('[]').split(','):
+                        str_list.append(f.strip(' \'\"'))
+                else:
+                    str_list.append(fname.strip(' \'\"'))  
+    elif type(invar) is list:
+        str_list = [str(f).strip(' \'\"') for f in invar]
+    else:
+        raise TypeError('input2strlist: Type '+str(type(invar))+' unknown!')
+    return str_list
 
 class MultiDataProduct(DataProduct):
     """

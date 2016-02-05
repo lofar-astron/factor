@@ -16,54 +16,75 @@ import lofar.parmdb
 from astropy.stats import median_absolute_deviation
 
 
-def main(ms_file, parmdb_file, input_colname, output_colname, minutes_per_block=10.0,
-    baseline_file=None, verbose=True):
+def main(ms_file, parmdb_file, input_colname, output_colname, target_rms_rad,
+    pre_average=True, minutes_per_block=10.0, baseline_file=None, verbose=True):
     """
     Pre-average data using a sliding Gaussian kernel on the weights
     """
-    if baseline_file is None:
-        if verbose:
-            print('Calculating baseline lengths...')
-        baseline_dict = get_baseline_lengths(ms_file)
-    elif os.path.exists(baseline_file):
-        f = open('baseline_file', 'r')
-        baseline_dict = pickle.load(f)
-        f.close()
+    if type(pre_average) is str:
+        if pre_average.lower() == 'true':
+            pre_average = True
+        else:
+            pre_average = False
+    if type(target_rms_rad) is str:
+        target_rms_rad = float(target_rms_rad)
+
+    if not pre_average:
+        # Just copy input column to output column
+        ms = pt.table(ms_file, readonly=False, ack=False)
+        if output_colname not in ms.colnames():
+            desc = ms.getcoldesc(input_colname)
+            desc['name'] = output_colname
+            ms.addcols(desc)
+        data = ms.getcol(input_colname)
+        ms.putcol(output_colname, data)
+        ms.flush()
+        ms.close()
     else:
-        print('Cannot find baseline_file. Exiting...')
-        sys.exit(1)
+        # Do the BL averaging
+        if baseline_file is None:
+            if verbose:
+                print('Calculating baseline lengths...')
+            baseline_dict = get_baseline_lengths(ms_file)
+        elif os.path.exists(baseline_file):
+            f = open('baseline_file', 'r')
+            baseline_dict = pickle.load(f)
+            f.close()
+        else:
+            print('Cannot find baseline_file. Exiting...')
+            sys.exit(1)
 
-    # Iterate through time chunks and find the lowest ionfactor
-    tab = pt.table(ms_file, ack=False)
-    start_time = tab[0]['TIME']
-    end_time = tab[-1]['TIME']
-    remaining_time = end_time - start_time # seconds
-    tab.close()
-    ionfactors = []
-    t_delta = minutes_per_block * 60.0 # seconds
-    t1 = 0.0
-    if verbose:
-        print('Determining ionfactors...')
-    while remaining_time > 0.0:
-        if remaining_time < 1.5 * t_delta:
-            # If remaining time is too short, just include it all in this chunk
-            t_delta = remaining_time + 10.0
-        remaining_time -= t_delta
-
-        # Find ionfactor for this period
-        ionfactors.append(find_ionfactor(parmdb_file, baseline_dict, t1+start_time,
-            t1+start_time+t_delta))
+        # Iterate through time chunks and find the lowest ionfactor
+        tab = pt.table(ms_file, ack=False)
+        start_time = tab[0]['TIME']
+        end_time = tab[-1]['TIME']
+        remaining_time = end_time - start_time # seconds
+        tab.close()
+        ionfactors = []
+        t_delta = minutes_per_block * 60.0 # seconds
+        t1 = 0.0
         if verbose:
-            print('    ionfactor (for timerange {0}-{1} sec) = {2}'.format(t1,
-                t1+t_delta, ionfactors[-1]))
-        t1 += t_delta
+            print('Determining ionfactors...')
+        while remaining_time > 0.0:
+            if remaining_time < 1.5 * t_delta:
+                # If remaining time is too short, just include it all in this chunk
+                t_delta = remaining_time + 10.0
+            remaining_time -= t_delta
 
-    # Do pre-averaging using lowest ionfactor
-    ionfactor_min = min(ionfactors)
-    if verbose:
-        print('Using ionfactor = {}'.format(ionfactor_min))
-        print('Averaging...')
-    BLavg(ms_file, baseline_dict, input_colname, output_colname, ionfactor_min)
+            # Find ionfactor for this period
+            ionfactors.append(find_ionfactor(parmdb_file, baseline_dict, t1+start_time,
+                t1+start_time+t_delta, target_rms_rad=target_rms_rad))
+            if verbose:
+                print('    ionfactor (for timerange {0}-{1} sec) = {2}'.format(t1,
+                    t1+t_delta, ionfactors[-1]))
+            t1 += t_delta
+
+        # Do pre-averaging using lowest ionfactor
+        ionfactor_min = min(ionfactors)
+        if verbose:
+            print('Using ionfactor = {}'.format(ionfactor_min))
+            print('Averaging...')
+        BLavg(ms_file, baseline_dict, input_colname, output_colname, ionfactor_min)
 
 
 def get_baseline_lengths(ms_file):
@@ -94,7 +115,7 @@ def get_baseline_lengths(ms_file):
     return baseline_dict
 
 
-def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
+def find_ionfactor(parmdb_file, baseline_dict, t1, t2, target_rms_rad=0.2):
     """
     Finds ionospheric scaling factor
     """
@@ -106,7 +127,7 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
     stations_ms = set([s for s in baseline_dict.itervalues() if type(s) is str])
     stations = sorted(list(stations_pbd.intersection(stations_ms)))
 
-    # Select long baselines only, as they will set the ionfactor scaling
+    # Select long baselines only (BL > 10 km), as they will set the ionfactor scaling
     ant1 = []
     ant2 = []
     dist = []
@@ -124,8 +145,8 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
                     dist.append(v)
 
     # Find correlation times
-    target_rms_rad = 0.2
     rmstimes = []
+    dists = []
     freq = None
     for a1, a2, d in zip(ant1, ant2, dist):
         if freq is None:
@@ -136,8 +157,13 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
         ph1 = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['values'])[time_ind]
         ph2 = np.copy(parms['Gain:0:0:Phase:{}'.format(a2)]['values'])[time_ind]
 
+        # Filter flagged solutions
+        good = np.where((~np.isnan(ph1)) & (~np.isnan(ph2)))[0]
+        if len(good) == 0:
+            continue
+
         rmstime = None
-        ph = unwrap_fft(ph2 - ph1)
+        ph = unwrap_fft(ph2[good] - ph1[good])
 
         step = 1
         for i in range(1, len(ph)/2, step):
@@ -152,13 +178,14 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2):
         if rmstime is None:
             rmstime = len(ph)/2
         rmstimes.append(rmstime)
+        dists.append(d)
 
     # Find the mean ionfactor assuming that the correlation time goes as
     # t_corr ~ 1/sqrt(BL). The ionfactor is defined in BLavg() as:
     #
     #     ionfactor = (t_corr / 30.0 sec) / ( np.sqrt((25.0 / dist_km)) * (freq_hz / 60.e6) )
     #
-    ionfactor = np.mean(np.array(rmstimes) / 30.0 / (np.sqrt(25.0 / np.array(dist))
+    ionfactor = np.mean(np.array(rmstimes) / 30.0 / (np.sqrt(25.0 / np.array(dists))
         * freq / 60.0e6)) * timepersolution
 
     return ionfactor
@@ -188,6 +215,14 @@ def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor,
     all_weights = ms.getcol('WEIGHT_SPECTRUM')
     all_flags = ms.getcol('FLAG')
 
+    all_flags[ np.isnan(all_data) ] = True # flag NaNs
+    all_weights = all_weights * ~all_flags # set weight of flagged data to 0
+
+    # Check that all NaNs are flagged
+    if np.count_nonzero(np.isnan(all_data[~all_flags])) > 0:
+        logging.error('NaNs in unflagged data!')
+        sys.exit(1)
+
     # iteration on baseline combination
     for ant in itertools.product(set(ant1), set(ant2)):
 
@@ -208,11 +243,12 @@ def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor,
         #    That's basically the equivalent of a running weighted average with
         #    a Gaussian window function.
 
-        # get weights
-        flags = all_flags[sel,:,:]
-        weights = all_weights[sel,:,:]*~flags # set flagged data weight to 0
-        # get data
-        data = all_data[sel,:,:]*weights
+        # get weights and data
+        weights = all_weights[sel,:,:]
+        data = all_data[sel,:,:]
+
+        # set bad data to 0 so nans do not propagate
+        data = np.nan_to_num(data*weights)
 
         # smear weighted data and weights
         dataR = gfilter(np.real(data), stddev, axis=0)#, truncate=4.)
@@ -220,21 +256,19 @@ def BLavg(msfile, baseline_dict, input_colname, output_colname, ionfactor,
         weights = gfilter(weights, stddev, axis=0)#, truncate=4.)
 
         # re-create data
-        # NOTE: both data and/or weight might be 0
-        d = (dataR + 1j * dataI)
-        weights[np.where(data == 0)] = np.nan # prevent 0/0 exception
-        d = d/weights # when weights == 0 or nan -> data is nan
-        # if data is nan, put data to 0 (anyway they must be flagged)
-        all_data[sel,:,:] = np.nan_to_num(d)
-        all_weights[sel,:,:] = np.nan_to_num(weights)
+        data = (dataR + 1j * dataI)
+        data[(weights != 0)] /= weights[(weights != 0)] # avoid divbyzero
+        all_data[sel,:,:] = data
+        all_weights[sel,:,:] = weights
 
-    # Add the output column if needed
+    # Add the output columns if needed
     if output_colname not in ms.colnames():
         desc = ms.getcoldesc(input_colname)
         desc['name'] = output_colname
         ms.addcols(desc)
 
     ms.putcol(output_colname, all_data)
+    ms.putcol('FLAG', all_flags) # this saves flags of nans, which is always good
     ms.putcol('WEIGHT_SPECTRUM', all_weights)
     ms.close()
 

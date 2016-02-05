@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_images_map, create_vertices_map, create_compressed_mapfile_images, create_compressed_mapfile_vertices, copy_beam_info, make_mosaic, create_ms_map, create_compressed_mapfile_ms, sort_into_Groups, concat_data, create_compressed_mapfile, concat, make_pbimage, zero_avgpb, image2fits, correct_mosaic, copy_final_mosaic_map1, copy_final_mosaic_map2]
+pipeline.steps = [update_mapfile_hosts, create_images_map, create_vertices_map, create_compressed_mapfile_images, create_compressed_mapfile_vertices, copy_beam_info, make_mosaic, create_ms_map, create_compressed_mapfile_ms, sort_into_Groups, sort_into_Groups_maps, concat_data, create_compressed_mapfile, concat, make_pbimage, zero_avgpb, image2fits, correct_mosaic]
 
 pipeline.pluginpath                                    =   {{ pipeline_dir }}/plugins
 
@@ -12,7 +12,7 @@ create_images_map.control.kind                         =   plugin
 create_images_map.control.type                         =   addListMapfile
 create_images_map.control.hosts                        =   {{ hosts }}
 create_images_map.control.files                        =   {{ facet_image_filenames }}
-create_images_map.control.mapfile_dir                  =   {{ mapfile_dir }}
+create_images_map.control.mapfile_dir                  =   input.output.mapfile_dir
 create_images_map.control.filename                     =   facet_images.datamap
 
 # create a mapfile with the existing vertices, length = unknown / nfacets
@@ -20,21 +20,21 @@ create_vertices_map.control.kind                       =   plugin
 create_vertices_map.control.type                       =   addListMapfile
 create_vertices_map.control.hosts                      =   {{ hosts }}
 create_vertices_map.control.files                      =   {{ facet_vertices_filenames }}
-create_vertices_map.control.mapfile_dir                =   {{ mapfile_dir }}
+create_vertices_map.control.mapfile_dir                =   input.output.mapfile_dir
 create_vertices_map.control.filename                   =   facet_vertices.datamap
 
 # compress mapfile so that all images are in one group, length = 1
 create_compressed_mapfile_images.control.kind          =   plugin
 create_compressed_mapfile_images.control.type          =   compressMapfile
 create_compressed_mapfile_images.control.mapfile_in    =   create_images_map.output.mapfile
-create_compressed_mapfile_images.control.mapfile_dir   =   {{ mapfile_dir }}
+create_compressed_mapfile_images.control.mapfile_dir   =   input.output.mapfile_dir
 create_compressed_mapfile_images.control.filename      =   mosaic_images_input.datamap
 
 # compress mapfile so that all vertices are in one group, length = 1
 create_compressed_mapfile_vertices.control.kind        =   plugin
 create_compressed_mapfile_vertices.control.type        =   compressMapfile
 create_compressed_mapfile_vertices.control.mapfile_in  =   create_vertices_map.output.mapfile
-create_compressed_mapfile_vertices.control.mapfile_dir =   {{ mapfile_dir }}
+create_compressed_mapfile_vertices.control.mapfile_dir =   input.output.mapfile_dir
 create_compressed_mapfile_vertices.control.filename    =   mosaic_vertices_input.datamap
 
 # copy the beam information from WSClean out files to the images, length = nfacets
@@ -55,7 +55,7 @@ create_ms_map.control.kind                             =   plugin
 create_ms_map.control.type                             =   addListMapfile
 create_ms_map.control.hosts                            =   {{ hosts }}
 create_ms_map.control.files                            =   {{ ms_files_single }}
-create_ms_map.control.mapfile_dir                      =   {{ mapfile_dir }}
+create_ms_map.control.mapfile_dir                      =   input.output.mapfile_dir
 create_ms_map.control.filename                         =   input_MSs_single.datamap
 
 # create a multi-mapfile with the groups of MSs from supplied list, length = nbands
@@ -64,7 +64,7 @@ create_msmulti_map.control.kind                        =   plugin
 create_msmulti_map.control.type                        =   addListMultiMapfile
 create_msmulti_map.control.hosts                       =   {{ hosts }}
 create_msmulti_map.control.files                       =   {{ ms_files_grouped }}
-create_msmulti_map.control.mapfile_dir                 =   {{ mapfile_dir }}
+create_msmulti_map.control.mapfile_dir                 =   input.output.mapfile_dir
 create_msmulti_map.control.filename                    =   input_files_grouped.datamap
 
 # compress mapfile so that all MSs are in one group, length = 1
@@ -78,14 +78,20 @@ create_compressed_mapfile_ms.control.filename          =   compressed_MSs_all.da
 sort_into_Groups.control.type                          =   sort_times_into_freqGroups
 sort_into_Groups.argument.flags                        =   [create_compressed_mapfile_ms.output.mapfile]
 sort_into_Groups.argument.filename                     =   sorted_groups.datamap
-sort_into_Groups.argument.mapfile_dir                  =   {{ mapfile_dir }}
+sort_into_Groups.argument.mapfile_dir                  =   input.output.mapfile_dir
 sort_into_Groups.argument.hosts                        =   {{ hosts }}
 sort_into_Groups.argument.target_path                  =   input.output.working_directory/input.output.job_name
 
+# convert the output of sort_into_Groups into usable mapfiles, len = 1 / ntimes
+sort_into_Groups_maps.control.kind                     =   plugin
+sort_into_Groups_maps.control.type                     =   mapfilenamesFromMapfiles
+sort_into_Groups_maps.control.mapfile_groupmap         =   sort_into_Groups.output.groupmapfile.mapfile
+sort_into_Groups_maps.control.mapfile_filesmap         =   sort_into_Groups.output.mapfile.mapfile
+
 # concat data in frequency, length = ntimes 
 concat_data.control.type                               =   dppp
-concat_data.control.mapfile_out                        =   {{ mapfile_dir }}/sorted_groups.datamap_groups
-concat_data.control.mapfile_in                         =   {{ mapfile_dir }}/sorted_groups.datamap
+concat_data.control.mapfile_out                        =   sort_into_Groups_map.output.groupmap
+concat_data.control.mapfile_in                         =   sort_into_Groups_map.output.filesmap
 concat_data.control.inputkey                           =   msin
 concat_data.argument.msin.datacolumn                   =   DATA
 concat_data.argument.msin.missingdata                  =   True
@@ -160,17 +166,3 @@ correct_mosaic.control.mapfiles_in                     =   [make_mosaic.output.m
 correct_mosaic.control.inputkeys                       =   [mosaic,avgpbz]
 correct_mosaic.control.outputkey                       =   outroot
 correct_mosaic.argument.flags                          =   [mosaic,avgpbz,outroot]
-
-# copy the primary beam corrected image to safety, length = 1
-copy_final_mosaic_map1.control.kind                    =   plugin
-copy_final_mosaic_map1.control.type                    =   copyMapfile
-copy_final_mosaic_map1.control.mapfile_in              =   correct_mosaic.output.correct_mosaic.pbcor.fits.mapfile
-copy_final_mosaic_map1.control.mapfile_dir             =   {{ mapfile_dir }}
-copy_final_mosaic_map1.control.filename                =   final_pbcor_mosaic.datamap
-
-# copy the primary beam cut image to safety, length = 1
-copy_final_mosaic_map2.control.kind                    =   plugin
-copy_final_mosaic_map2.control.type                    =   copyMapfile
-copy_final_mosaic_map2.control.mapfile_in              =   correct_mosaic.output.correct_mosaic.pbcut.fits.mapfile
-copy_final_mosaic_map2.control.mapfile_dir             =   {{ mapfile_dir }}
-copy_final_mosaic_map2.control.filename                =   final_pbcut_mosaic.datamap

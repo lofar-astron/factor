@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_msmulti_map, create_high_sizes_map, create_low_sizes_map, wsclean_high1, mask_high, wsclean_high2, fits_to_image_high, casa_to_bbs_high, make_sourcedb_high, expand_sourcedb_high, predict_high, corrupt_high, subtract_high, correct_high, average, regroup_map, wsclean_low1, mask_low, wsclean_low2, fits_to_image_low, casa_to_bbs_low, make_sourcedb_low, expand_sourcedb_low, predict_low, corrupt_low, subtract_low, merge, copy_final_model_map]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_msmulti_map, create_high_sizes_map, create_low_sizes_map, wsclean_high1, mask_high, wsclean_high2, fits_to_image_high, casa_to_bbs_high, make_sourcedb_high, expand_sourcedb_high, predict_high, corrupt_high, subtract_high, correct_high, average, regroup_map, wsclean_low1, mask_low, wsclean_low2, fits_to_image_low, casa_to_bbs_low, make_sourcedb_low, expand_sourcedb_low, predict_low, corrupt_low, subtract_low, merge]
 
 pipeline.pluginpath                        =   {{ pipeline_dir }}/plugins
 
@@ -307,10 +307,3 @@ merge.control.mapfiles_in                  =   [casa_to_bbs_low.output.mapfile,c
 merge.control.inputkeys                    =   [modellow,modelhigh]
 merge.control.outputkey                    =   modelmerged
 merge.argument.flags                       =   [modellow,modelhigh,modelmerged]
-
-# copy the map with the merged skymodels to a known name, length = nbands
-copy_final_model_map.control.kind          =   plugin
-copy_final_model_map.control.type          =   copyMapfile
-copy_final_model_map.control.mapfile_in    =   merge.output.mapfile
-copy_final_model_map.control.mapfile_dir   =   {{ mapfile_dir }}
-copy_final_model_map.control.filename      =   merged_skymodels.datamap

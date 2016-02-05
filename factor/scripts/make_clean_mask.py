@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 """
-Script to make a clean mask from an image
+Script to make a clean mask
 """
 import argparse
 from argparse import RawTextHelpFormatter
@@ -10,47 +10,158 @@ try:
 except ImportError:
     from lofar import bdsm
 import pyrap.images as pim
+from astropy.io import fits as pyfits
 import pickle
 import numpy as np
 import sys
 import os
-from factor.directions import Polygon
+from factor.lib.polygon import Polygon
 
 
 def read_vertices(filename):
     """
-    Returns facet vertices
+    Returns facet vertices stored in input file
     """
     with open(filename, 'r') as f:
         direction_dict = pickle.load(f)
     return direction_dict['vertices']
 
 
-def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, rmsbox=None,
-         iterate_threshold=False, adaptive_rmsbox=False, img_format='fits',
-         threshold_format='float', trim_by=0.0, vertices_file=None, atrous_jmax=6,
-         pad_to_size=None, skip_source_detection=False, region_file=None):
+def make_template_image(image_name, reference_ra_deg, reference_dec_deg,
+    imsize=512, cellsize_deg=0.000417):
     """
-    Run PyBDSM to make an island clean mask
+    Make a blank image and save it to disk
 
     Parameters
     ----------
-    TODO
+    image_name : str
+        Filename of output image
+    reference_ra_deg : float, optional
+        RA for center of output mask image
+    reference_dec_deg : float, optional
+        Dec for center of output mask image
+    imsize : int, optional
+        Size of output image
+    cellsize_deg : float, optional
+        Size of a pixel in degrees
+
+    """
+    shape_out = [1, 1, imsize, imsize]
+    hdu = pyfits.PrimaryHDU(np.zeros(shape_out, dtype=np.float32))
+    hdulist = pyfits.HDUList([hdu])
+    header = hdulist[0].header
+
+    # Add WCS info
+    header['CRVAL1'] = reference_ra_deg
+    header['CDELT1'] = -cellsize_deg
+    header['CRPIX1'] = imsize/2.0
+    header['CUNIT1'] = 'deg'
+    header['CTYPE1'] = 'RA---SIN'
+    header['CRVAL2'] = reference_dec_deg
+    header['CDELT2'] = cellsize_deg
+    header['CRPIX2'] = imsize/2.0
+    header['CUNIT2'] = 'deg'
+    header['CTYPE2'] = 'DEC--SIN'
+
+    # Add STOKES info
+    header['CRVAL3'] = 1.0
+    header['CDELT3'] = 1.0
+    header['CRPIX3'] = 1.0
+    header['CUNIT3'] = ''
+    header['CTYPE3'] = 'STOKES'
+
+    # Add frequency info
+    header['RESTFRQ'] = 15036
+    header['CRVAL4'] = 150e6
+    header['CDELT4'] = 3e8
+    header['CRPIX4'] = 1.0
+    header['CUNIT4'] = 'HZ'
+    header['CTYPE4'] = 'FREQ'
+    header['SPECSYS'] = 'TOPOCENT'
+
+    # Add equinox
+    header['EQUINOX'] = 2000.0
+
+    # Add telescope
+    header['TELESCOP'] = 'UNKNOWN'
+
+    hdulist[0].header = header
+
+    hdulist.writeto(image_name, clobber=True)
+    hdulist.close()
+
+
+
+def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, rmsbox=None,
+         iterate_threshold=False, adaptive_rmsbox=False, img_format='fits',
+         threshold_format='float', trim_by=0.0, vertices_file=None, atrous_jmax=6,
+         pad_to_size=None, skip_source_detection=False, region_file=None, nsig=5.0,
+         reference_ra_deg=None, reference_dec_deg=None):
+    """
+    Make a clean mask and return clean threshold
+
+    Parameters
+    ----------
+    image_name : str
+        Filename of input image from which mask will be made. If the image does
+        not exist, a template image with center at (reference_ra_deg,
+        reference_dec_deg) will be made internally
+    mask_name : str
+        Filename of output mask image
+    atrous_do : bool, optional
+        Use wavelet module of PyBDSM?
+    threshisl : float, optional
+        Value of thresh_isl PyBDSM parameter
+    threshpix : float, optional
+        Value of thresh_pix PyBDSM parameter
+    rmsbox : tuple of floats, optional
+        Value of rms_box PyBDSM parameter
+    iterate_threshold : bool, optional
+        If True, threshold will be lower in 20% steps until
+        at least one island is found
+    adaptive_rmsbox : tuple of floats, optional
+        Value of adaptive_rms_box PyBDSM parameter
+    img_format : str, optional
+        Format of output mask image (one of 'fits' or 'casa')
+    threshold_format : str, optional
+        Format of output threshold (one of 'float' or 'str_with_units')
+    trim_by : float, optional
+        Fraction by which the perimeter of the output mask will be
+        trimmed (zeroed)
+    vertices_file : str, optional
+        Filename of file with vertices (must be a pickle file containing
+        a dictionary with the vertices in the 'vertices' entry)
+    atrous_jmax : int, optional
+        Value of atrous_jmax PyBDSM parameter
+    pad_to_size : int, optional
+        Pad output mask image to a size of pad_to_size x pad_to_size
+    skip_source_detection : bool, optional
+        If True, source detection is not run on the input image
+    region_file : str, optional
+        Filename of region file in CASA format. If given, no mask image
+        is made (the region file is used as the clean mask)
+    nsig : float, optional
+        Number of sigma of returned threshold value
+    reference_ra_deg : float, optional
+        RA for center of output mask image
+    reference_dec_deg : float, optional
+        Dec for center of output mask image
 
     Returns
     -------
     result : dict
-        Dict with 5-sigma rms threshold
+        Dict with nsig-sigma rms threshold
 
     """
+    if image_name is not None:
+        if image_name.lower() == 'none':
+            image_name = None
+
     if region_file is not None:
         if region_file != '[]':
             # Copy the CASA region file (stripped of brackets, etc.) and return
             os.system('cp {0} {1}'.format(region_file.strip('[]"'), mask_name))
             return {'threshold_5sig': '0.0'}
-
-    if atrous_do:
-        threshisl = 4.0
 
     if rmsbox is not None and type(rmsbox) is str:
         rmsbox = eval(rmsbox)
@@ -61,6 +172,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     if type(atrous_do) is str:
         if atrous_do.lower() == 'true':
             atrous_do = True
+            threshisl = 4.0 # override user setting to ensure proper source fitting
         else:
             atrous_do = False
 
@@ -82,12 +194,78 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         else:
             skip_source_detection = False
 
+    if reference_ra_deg is not None and reference_dec_deg is not None:
+        reference_ra_deg = float(reference_ra_deg)
+        reference_dec_deg = float(reference_dec_deg)
+
+    if not os.path.exists(image_name):
+        print('Input image not found. Making empty image...')
+        if not skip_source_detection:
+            print('ERROR: Source detection cannot be done on an empty image')
+            sys.exit(1)
+        if reference_ra_deg is not None and reference_dec_deg is not None:
+            image_name = mask_name + '.tmp'
+            make_template_image(image_name, reference_ra_deg, reference_dec_deg)
+        else:
+            print('ERROR: if image not found, a refernce position must be given')
+            sys.exit(1)
+
     trim_by = float(trim_by)
     atrous_jmax = int(atrous_jmax)
     threshpix = float(threshpix)
     threshisl = float(threshisl)
+    nsig = float(nsig)
 
     if not skip_source_detection:
+        if vertices_file is not None:
+            # Modify the input image to blank the regions outside of the polygon
+            input_img = pim.image(image_name)
+            data = input_img.getdata()
+            coordsys = input_img.coordinates()
+            imshape = input_img.shape()
+
+            vertices = read_vertices(vertices_file)
+            RAverts = vertices[0]
+            Decverts = vertices[1]
+            xvert = []
+            yvert = []
+            for RAvert, Decvert in zip(RAverts, Decverts):
+                pixels = input_img.topixel([1, 1, Decvert*np.pi/180.0,
+                    RAvert*np.pi/180.0])
+                xvert.append(pixels[2]) # x -> Dec
+                yvert.append(pixels[3]) # y -> RA
+            poly = Polygon(xvert, yvert)
+
+            # Find masked regions
+            masked_ind = np.where(data[0, 0])
+
+            # Find distance to nearest poly edge and set to NaN those that
+            # are outside the facet (dist < 0)
+            dist = poly.is_inside(masked_ind[0], masked_ind[1])
+            outside_ind = np.where(dist < 0.0)
+            if len(outside_ind[0]) > 0:
+                data[0, 0, masked_ind[0][outside_ind], masked_ind[1][outside_ind]] = np.nan
+
+            # Save changes
+            new_img = pim.image('', shape=imshape, coordsys=coordsys)
+            new_img.putdata(data)
+            image_name += '.blanked'
+            new_img.tofits(image_name, overwrite=True)
+
+            # Add beam info to blanked FITS image, as it is stripped out on save
+            hduim = pyfits.open(image_name, mode='update')
+            header = hduim[0].header
+            units =  input_img.info()['imageinfo']['restoringbeam']['major']['unit']
+            if units == 'arcsec':
+                conversion = 3600.0
+            else:
+                conversion = 1.0
+            header['BMAJ'] = input_img.info()['imageinfo']['restoringbeam']['major']['value'] / conversion
+            header['BMIN'] = input_img.info()['imageinfo']['restoringbeam']['minor']['value'] / conversion
+            header['BPA'] = input_img.info()['imageinfo']['restoringbeam']['positionangle']['value']
+            hduim.flush()
+            hduim.close()
+
         if iterate_threshold:
             # Start with given threshold and lower it until we get at least one island
             nisl = 0
@@ -118,6 +296,15 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
                          img_format=img_format, clobber=True)
 
+        # Check if there are large islands preset (indicating that multi-scale
+        # clean is needed)
+        has_large_isl = False
+        for isl in img.islands:
+            if isl.size_active > 100:
+                # Assuming normal sampling, a size of 100 pixels would imply
+                # a source of ~ 10 beams
+                has_large_isl = True
+
     if vertices_file is not None or trim_by > 0 or pad_to_size is not None or skip_source_detection:
         # Alter the mask in various ways
         if skip_source_detection:
@@ -128,6 +315,11 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             mask_im = pim.image(mask_name)
         data = mask_im.getdata()
         coordsys = mask_im.coordinates()
+        if reference_ra_deg is not None and reference_dec_deg is not None:
+            values = coordsys.get_referencevalue()
+            values[2][0] = reference_dec_deg/180.0*np.pi
+            values[2][1] = reference_ra_deg/180.0*np.pi
+            coordsys.set_referencevalue(values)
         imshape = mask_im.shape()
         del(mask_im)
 
@@ -194,11 +386,12 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
 
     if not skip_source_detection:
         if threshold_format == 'float':
-            return {'threshold_5sig': 5.0 * img.clipped_rms}
+            return {'threshold_5sig': nsig * img.clipped_rms, 'multiscale': has_large_isl}
         elif threshold_format == 'str_with_units':
             # This is done to get around the need for quotes around strings in casapy scripts
             # 'casastr/' is removed by the generic pipeline
-            return {'threshold_5sig': 'casastr/{0}Jy'.format(5.0 * img.clipped_rms)}
+            return {'threshold_5sig': 'casastr/{0}Jy'.format(nsig * img.clipped_rms),
+                'multiscale': has_large_isl}
     else:
         return {'threshold_5sig': '0.0'}
 

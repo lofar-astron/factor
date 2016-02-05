@@ -5,6 +5,7 @@ import os
 import numpy as np
 import logging
 from factor.lib.direction import Direction
+from factor.lib.polygon import Polygon
 import sys
 from scipy.spatial import Delaunay
 
@@ -37,20 +38,21 @@ def directions_read(directions_file, factor_working_dir):
 
     log.info("Reading directions file: %s" % (directions_file))
     try:
-        types = np.dtype({'names': ['name', 'radec', 'atrous_do', 'mscale_field_do',
-            'cal_imsize', 'solint_p', 'solint_a', 'field_imsize', 'dynamic_range',
-            'region_selfcal', 'region_field', 'peel_skymodel', 'outlier_source',
-            'cal_size_deg', 'cal_flux_mjy'], 'formats':['S255', 'S255', 'S5',
-            'S5', int, int, int, int, 'S2', 'S255', 'S255', 'S255',
-            'S5', float, float]})
+        types = np.dtype({
+            'names': ['name', 'radec', 'atrous_do', 'mscale_field_do',
+               'cal_imsize', 'solint_p', 'solint_a', 'dynamic_range',
+                'region_selfcal', 'region_field', 'peel_skymodel', 'outlier_source',
+                'cal_size_deg', 'cal_flux_mjy'],
+            'formats':['S255', 'S255', 'S5', 'S5', int, int, int, 'S2',
+                'S255', 'S255', 'S255', 'S5', float, float]})
         directions = np.genfromtxt(directions_file, comments='#', dtype=types)
     except ValueError:
-        types = np.dtype({'names': ['name', 'radec', 'atrous_do', 'mscale_field_do',
-            'cal_imsize', 'solint_p', 'solint_a', 'field_imsize', 'dynamic_range',
-            'region_selfcal', 'region_field', 'peel_skymodel', 'outlier_source'],
-            'formats':['S255', 'S255', 'S5',
-            'S5', int, int, int, int, 'S2', 'S255', 'S255', 'S255',
-            'S5', float, float]})
+        types = np.dtype({
+            'names': ['name', 'radec', 'atrous_do', 'mscale_field_do',
+              'cal_imsize', 'solint_p', 'solint_a', 'dynamic_range',
+                'region_selfcal', 'region_field', 'peel_skymodel', 'outlier_source'],
+            'formats':['S255', 'S255', 'S5', 'S5', int, int, int, 'S2',
+                'S255', 'S255', 'S255', 'S5']})
         directions = np.genfromtxt(directions_file, comments='#', dtype=types)
 
     data = []
@@ -80,20 +82,14 @@ def directions_read(directions_file, factor_working_dir):
             outlier_source = True
         else:
             outlier_source = False
-        if (direction['solint_a'] <= 0 or direction['solint_p'] <= 0) and \
-            np.isnan(direction['apparent_flux']):
-            log.error('One of more of the solution intervals is invalid and no '
-                'apparent flux is specified for direction {0}. Ignoring '
-                'direction.'.format(direction['name']))
-            continue
 
-        # set defaults
-        if direction['solint_a'] <= 0:
-            direction['solint_a'] = 60
-        if direction['solint_p'] <= 0:
-            direction['solint_p'] = 1
+        # Set defaults
+        if direction['solint_a'] < 0:
+            direction['solint_a'] = 0 # 0 => set internally
+        if direction['solint_p'] < 0:
+            direction['solint_p'] = 0 # 0 => set internally
         if len(direction) > 13:
-            if direction['cal_size_deg'] <= 0.0 or np.isnan(direction['cal_size_deg']):
+            if direction['cal_size_deg'] < 0.0 or np.isnan(direction['cal_size_deg']):
                 cal_size_deg = None
             else:
                 cal_size_deg = direction['cal_size_deg']
@@ -105,19 +101,17 @@ def directions_read(directions_file, factor_working_dir):
             cal_size_deg = None
             cal_flux_jy = None
 
-        data.append(Direction(direction['name'], ra, dec,
-        	atrous_do, mscale_field_do,
-        	direction['cal_imsize'], direction['solint_p'],
-        	direction['solint_a'], direction['field_imsize'],
-        	direction['dynamic_range'], direction['region_selfcal'],
-        	direction['region_field'], direction['peel_skymodel'],
-        	outlier_source, factor_working_dir, False,
-        	cal_size_deg, cal_flux_jy))
+        data.append(Direction(direction['name'], ra, dec, atrous_do,
+        	mscale_field_do, direction['cal_imsize'], direction['solint_p'],
+        	direction['solint_a'], direction['dynamic_range'],
+        	direction['region_selfcal'], direction['region_field'],
+        	direction['peel_skymodel'], outlier_source, factor_working_dir,
+        	False, cal_size_deg, cal_flux_jy))
 
     return data
 
 
-def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
+def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
     directions_separation_max_arcmin, directions_max_num=None,
     interactive=False):
     """
@@ -125,8 +119,8 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
 
     Parameters
     ----------
-    bands : list of Band objects
-        Input Bands with dir-indep skymodels
+    s : LSMTool SkyModel object
+        Skymodel made by grouping clean components of dir-independent model
     flux_min_Jy : float
         Minimum flux for a calibrator in Jy
     size_max_arcmin : float
@@ -147,15 +141,6 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     """
     directions_file = 'factor_directions.txt'
     ds9_directions_file = 'factor_directions_ds9.reg'
-
-    # Use sky model of highest-frequency band, as it has the smallest field of
-    # view.
-    freqs = [band.freq for band in bands]
-    max_freq_indx = np.argmax(freqs)
-    band = bands[max_freq_indx]
-
-    # Load sky model and filter it
-    s = make_initial_skymodel(band)
 
     # Filter larger patches
     sizes = s.getPatchSizes(units='arcmin', weight=True)
@@ -205,7 +190,7 @@ def make_directions_file_from_skymodel(bands, flux_min_Jy, size_max_arcmin,
     return directions_file
 
 
-def make_initial_skymodel(band):
+def make_initial_skymodel(band, max_radius_deg=None):
     """
     Makes the initial skymodel used to adjust facet edges
 
@@ -218,16 +203,21 @@ def make_initial_skymodel(band):
     -------
     s : LSMTool Skymodel object
         Resulting sky model
+    max_radius_deg : float, optional
+        Maximum radius in degrees from the phase center within which to include
+        sources. If None, it is set to the FWHM (i.e., a diameter of 2 * FWHM)
 
     """
     import lsmtool
+
+    # Set LSMTool logging level
     lsmtool._logging.setLevel('debug')
 
-    # Load sky model and filter it
+    # Load sky model
     s = lsmtool.load(band.skymodel_dirindep)
 
-    # Group to clean components by thresholding after convolving model with
-    # 1 arcmin beam
+    # Group clean components by thresholding after convolving model with
+    # 1-arcmin beam
     s.group('threshold', FWHM='60.0 arcsec', root='facet')
     s.remove('Patch = patch_*', force=True) # Remove sources that did not threshold
     if len(s) == 0:
@@ -236,22 +226,24 @@ def make_initial_skymodel(band):
     log.info('Found {0} sources through thresholding'.format(
         len(s.getPatchNames())))
 
-    # Filter out sources that lie outside of FWHM of FOV
+    # Filter out sources that lie outside of maximum specific radius from phase
+    # center
     if not hasattr(band, 'fwhm_deg'):
         band.set_image_sizes()
-    log.info('Removing sources beyond 2 * FWHM of the primary beam at {} MHz...'.
-        format(band.freq/1e6))
-    dist = s.getDistance(band.ra, band.dec, byPatch=True)
-    s.remove(dist > band.fwhm_deg, aggregate=True)
+    if max_radius_deg is None:
+        max_radius_deg = band.fwhm_deg # means a diameter of 2 * FWHM
 
-    # Save this sky model for later checks of sources falling on facet edges
-    s.write(fileName='results/initial.skymodel', clobber=True)
+    log.info('Removing sources beyond a radius of {0} degrees (corresponding to '
+        'a diameter of {1} * FWHM of the primary beam at {2} MHz)...'.format(
+        max_radius_deg, round(2.0*max_radius_deg/band.fwhm_deg, 1), band.freq/1e6))
+
+    dist = s.getDistance(band.ra, band.dec, byPatch=True)
+    s.remove(dist > max_radius_deg, aggregate=True)
 
     return s
 
 
-def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
-    allow_reordering=True):
+def group_directions(directions, n_per_grouping={'1':0}, allow_reordering=True):
     """
     Sorts directions into groups that can be selfcaled simultaneously
 
@@ -262,8 +254,6 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
     ----------
     directions : list of Direction objects
         List of input directions to group
-    one_at_a_time : bool, optional
-        If True, run one direction at a time
     n_per_grouping : dict, optional
         Dict specifying the total number of sources at each grouping level. The
         sources at each grouping level can be reordered to maximize the
@@ -278,10 +268,8 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
         List of direction groups
 
     """
-    from random import shuffle
-
     direction_groups = []
-    if one_at_a_time or n_per_grouping == {'1': 0}:
+    if n_per_grouping == {'1': 0}:
         for d in directions:
             direction_groups.append([d])
         log.debug('Processing each direction in series')
@@ -371,25 +359,31 @@ def group_directions(directions, one_at_a_time=True, n_per_grouping={'1':0},
                             wsep_new.pop(np.argmax(wsep_new))
                             wsep_prev = [p+n for p, n in zip(wsep_prev, wsep_new)]
                     direction_groups[i] = new_group
+
         log.debug('Processing directions in the following groups:')
         for i, group in enumerate(direction_groups):
-            print('Group {0}: {1}'.format(i+1, [d.name for d in group]))
+            log.debug('Group {0}: {1}'.format(i+1, [d.name for d in group]))
 
     return direction_groups
 
 
-def thiessen(directions_list, bounds_scale=0.52, band=None, check_edges=False,
-    target_ra=None, target_dec=None, target_radius_arcmin=None):
+def thiessen(directions_list, field_ra_deg, field_dec_deg, bounds_scale=0.5,
+    s=None, check_edges=False, target_ra=None, target_dec=None,
+    target_radius_arcmin=None, faceting_radius_deg=None):
     """
-    Return list of thiessen polygons and their widths in degrees
+    Generates and add thiessen polygons or patches to input directions
 
     Parameters
     ----------
     directions_list : list of Direction objects
         List of input directions
+    field_ra_deg : float
+        RA in degrees of field center
+    field_dec_deg : float
+        Dec in degrees of field center
     bounds_scale : int, optional
         Scale to use for bounding box
-    band : Band object, optional
+    s : LSMTool SkyModel object, optional
         Band to use to check for source near facet edges
     check_edges : bool, optional
         If True, check whether any know source falls on a facet edge. If sources
@@ -400,59 +394,88 @@ def thiessen(directions_list, bounds_scale=0.52, band=None, check_edges=False,
         Dec of target source. E.g., '+35d30m31.52'
     target_radius_arcmin : float, optional
         Radius in arcmin of target source
-
-    Returns
-    -------
-    thiessen_polys_deg : list
-        List of polygon RA and Dec vertices in degrees
-    width_deg : list
-        List of polygon bounding box width in degrees
+    faceting_radius_deg : float, optional
+        Maximum radius within which faceting will be done. Direction objects
+        with postions outside this radius will get small rectangular patches
+        instead of thiessen polygons
 
     """
     import lsmtool
-    try:
-        import shapely.geometry
-        from shapely.ops import cascaded_union
-        has_shapely = True
-    except ImportError:
-        log.warn('Shapely could not be imported. Facet polygons will not be '
-            'adjusted to avoid known sources.')
-        has_shapely = False
+    import shapely.geometry
+    from shapely.ops import cascaded_union
     from itertools import combinations
     from astropy.coordinates import Angle
 
-    points, midRA, midDec = getxy(directions_list)
+    # Select directions inside faceting_radius_deg
+    if faceting_radius_deg is not None:
+        for d in directions_list:
+            dist_deg = calculateSeparation(d.ra, d.dec, field_ra_deg, field_dec_deg)
+            if dist_deg.value > faceting_radius_deg:
+                # Use simple rectangular patches
+                d.is_patch = True # set patch flag to ensure facet is not included in mosaic
+
+    directions_list_thiessen = [d for d in directions_list if not d.is_patch]
+    points, midRA, midDec = getxy(directions_list_thiessen)
     points = points.T
 
-    x_scale, y_scale = (points.min(axis=0) - points.max(axis=0)) * bounds_scale
-
-    means = np.ones((32, 2)) * points.mean(axis=0)
-
-    radius = np.sqrt(x_scale**2 + y_scale**2)
-    angles = [np.pi/16.0*i for i in range(0, 32)]
+    # Generate array of outer points used to constrain the outer facets
+    nouter = 64
+    means = np.ones((nouter, 2)) * points.mean(axis=0)
     offsets = []
+    angles = [np.pi/(nouter/2.0)*i for i in range(0, nouter)]
     for ang in angles:
         offsets.append([np.cos(ang), np.sin(ang)])
+
+    # Generate initial facets
+    if faceting_radius_deg is not None:
+        radius = 5.0 * faceting_radius_deg / 0.066667 # radius in pixels
+    else:
+        if bounds_scale < 0.5:
+            log.debug('Bounds scale too low. Setting to 0.5')
+            bounds_scale = 0.5
+        x_scale, y_scale = (points.min(axis=0) - points.max(axis=0)) * bounds_scale
+        radius = np.sqrt(x_scale**2 + y_scale**2)
     scale_offsets = radius * np.array(offsets)
     outer_box = means + scale_offsets
-
-    points = np.vstack([points, outer_box])
-    tri = Delaunay(points)
+    points_all = np.vstack([points, outer_box])
+    tri = Delaunay(points_all)
     circumcenters = np.array([_circumcenter(tri.points[t])
                               for t in tri.vertices])
     thiessen_polys = [_thiessen_poly(tri, circumcenters, n)
-                      for n in range(len(points) - 32)]
+                      for n in range(len(points_all) - nouter)]
+
+    # Check for vertices that are very close to each other, as this gives problems
+    # to the edge adjustment below
+    for thiessen_poly in thiessen_polys:
+        dup_ind = 0
+        for i, (v1, v2) in enumerate(zip(thiessen_poly[:-1], thiessen_poly[1:])):
+            if (approx_equal(v1[0], v2[0], rel=1e-6) and
+                approx_equal(v1[1], v2[1], rel=1e-6)):
+                thiessen_poly.pop(dup_ind)
+                dup_ind -= 1
+            dup_ind += 1
+
+    # Clip the facets at faceting_radius_deg
+    if faceting_radius_deg is not None:
+        faceting_radius_pix = faceting_radius_deg / 0.066667 # radius in pixels
+        field_x, field_y = radec2xy([field_ra_deg], [field_dec_deg], refRA=midRA,
+            refDec=midDec)
+        for i, thiessen_poly in enumerate(thiessen_polys):
+            polyv = np.vstack(thiessen_poly)
+            poly_tuple = tuple([(xp, yp) for xp, yp in zip(polyv[:, 0], polyv[:, 1])])
+            p1 = shapely.geometry.Polygon(poly_tuple)
+            p2 = shapely.geometry.Point((field_x[0], field_y[0]))
+            p2buf = p2.buffer(faceting_radius_pix)
+            if p1.intersects(p2buf):
+                p1 = p1.intersection(p2buf)
+                xyverts = [np.array([xp, yp]) for xp, yp in
+                    zip(p1.exterior.coords.xy[0].tolist(),
+                    p1.exterior.coords.xy[1].tolist())]
+                thiessen_polys[i] = xyverts
 
     # Check for sources near / on facet edges and adjust regions accordingly
-    if has_shapely and check_edges:
+    if check_edges:
         log.info('Adjusting facets to avoid sources...')
-        if os.path.exists('results/initial.skymodel'):
-            s = lsmtool.load('results/initial.skymodel')
-        elif band is not None:
-            s = make_initial_skymodel(band)
-        else:
-            log.error('A band must be given for edge checking')
-            sys.exit(1)
         RA, Dec = s.getPatchPositions(asArray=True)
         sx, sy = radec2xy(RA, Dec, refRA=midRA, refDec=midDec)
         sizes = s.getPatchSizes(units='degree').tolist()
@@ -523,32 +546,60 @@ def thiessen(directions_list, bounds_scale=0.52, band=None, check_edges=False,
                             sys.exit(1)
                         thiessen_polys[i] = xyverts
 
-    # Convert from x, y to RA, Dec and find width of facet and facet center
-    for d, poly in zip(directions_list, thiessen_polys):
-        poly = np.vstack([poly, poly[0]])
-        ra, dec = xy2radec(poly[:, 0], poly[:, 1], midRA, midDec)
-        thiessen_poly_deg = [np.array(ra[0: -1]), np.array(dec[0: -1])]
+    # Add the final facet and patch info to the directions
+    for d in directions_list:
+        # Make calibrator patch (excluding 20% region around edge that is masked)
+        sx, sy = radec2xy([d.ra], [d.dec], refRA=midRA, refDec=midDec)
+        patch_width = 0.8 * d.cal_imsize * d.cellsize_selfcal_deg / 0.066667 # size of patch in pixels
+        x0 = sx[0] - patch_width / 2.0
+        y0 = sy[0] - patch_width / 2.0
+        selfcal_poly = [np.array([x0, y0]),
+                np.array([x0, y0+patch_width]),
+                np.array([x0+patch_width, y0+patch_width]),
+                np.array([x0+patch_width, y0])]
 
-        # Find size and centers of regions in degrees
-        xmin = np.min(poly[:, 0])
-        xmax = np.max(poly[:, 0])
-        xmid = xmin + int((xmax - xmin) / 2.0)
-        ymin = np.min(poly[:, 1])
-        ymax = np.max(poly[:, 1])
-        ymid = ymin + int((ymax - ymin) / 2.0)
+        if d.is_patch:
+            # For sources beyond max radius, set facet poly to selfcal poly
+            add_facet_info(d, selfcal_poly, selfcal_poly, midRA, midDec)
+        else:
+            poly = thiessen_polys[directions_list_thiessen.index(d)]
+            add_facet_info(d, selfcal_poly, poly, midRA, midDec)
 
-        ra1, dec1 = xy2radec([xmin], [ymin], midRA, midDec)
-        ra2, dec2 = xy2radec([xmax], [ymax], midRA, midDec)
-        ra3, dec3 = xy2radec([xmax], [ymin], midRA, midDec)
-        ra_center, dec_center = xy2radec([xmid], [ymid], midRA, midDec)
-        ra_width_deg = calculateSeparation(ra1, dec1, ra3, dec3)
-        dec_width_deg = calculateSeparation(ra3, dec3, ra2, dec2)
-        width_deg = max(ra_width_deg.value, dec_width_deg.value)
 
-        d.vertices = thiessen_poly_deg
-        d.width = width_deg
-        d.facet_ra = ra_center[0]
-        d.facet_dec = dec_center[0]
+def add_facet_info(d, selfcal_poly, facet_poly, midRA, midDec):
+    """
+    Convert facet polygon from x, y to RA, Dec and find width of facet and facet center
+
+    """
+    poly_cal = np.vstack([selfcal_poly, selfcal_poly[0]])
+    ra_cal, dec_cal = xy2radec(poly_cal[:, 0], poly_cal[:, 1], midRA, midDec)
+    thiessen_poly_deg_cal = [np.array(ra_cal[0: -1]), np.array(dec_cal[0: -1])]
+
+    poly = np.vstack([facet_poly, facet_poly[0]])
+    ra, dec = xy2radec(poly[:, 0], poly[:, 1], midRA, midDec)
+    thiessen_poly_deg = [np.array(ra[0: -1]), np.array(dec[0: -1])]
+
+    # Find size and centers of facet regions in degrees
+    xmin = np.min(poly[:, 0])
+    xmax = np.max(poly[:, 0])
+    xmid = xmin + int((xmax - xmin) / 2.0)
+    ymin = np.min(poly[:, 1])
+    ymax = np.max(poly[:, 1])
+    ymid = ymin + int((ymax - ymin) / 2.0)
+
+    ra1, dec1 = xy2radec([xmin], [ymin], midRA, midDec)
+    ra2, dec2 = xy2radec([xmax], [ymax], midRA, midDec)
+    ra3, dec3 = xy2radec([xmax], [ymin], midRA, midDec)
+    ra_center, dec_center = xy2radec([xmid], [ymid], midRA, midDec)
+    ra_width_deg = calculateSeparation(ra1, dec1, ra3, dec3)
+    dec_width_deg = calculateSeparation(ra3, dec3, ra2, dec2)
+    width_deg = max(ra_width_deg.value, dec_width_deg.value)
+
+    d.vertices = thiessen_poly_deg
+    d.vertices_cal = thiessen_poly_deg_cal
+    d.width = width_deg
+    d.facet_ra = ra_center[0]
+    d.facet_dec = dec_center[0]
 
 
 def make_region_file(vertices, outputfile):
@@ -631,8 +682,6 @@ def make_ds9_calimage_file(directions, outputfile):
     for direction in directions:
         imsize = direction.cal_imsize * direction.cellsize_selfcal_deg * 3600 # arcsec
         imsize_unmasked = 0.8 * imsize
-        RAs = direction.vertices[0]
-        Decs = direction.vertices[1]
         lines.append('box({0}, {1}, {2}", {2}") # text={{{3}}}\n'.
             format(direction.ra, direction.dec, imsize, direction.name))
         lines.append('box({0}, {1}, {2}", {2}")\n'.
@@ -793,8 +842,6 @@ def getxy(directions_list):
         Dec values
 
     """
-    import numpy as np
-
     if len(directions_list) == 0:
         return np.array([0, 0]), 0, 0
 
@@ -853,8 +900,6 @@ def radec2xy(RA, Dec, refRA=None, refDec=None):
         values
 
     """
-    import numpy as np
-
     x = []
     y = []
     if refRA is None:
@@ -899,8 +944,6 @@ def xy2radec(x, y, refRA=0.0, refDec=0.0):
         values
 
     """
-    import numpy as np
-
     RA = []
     Dec = []
 
@@ -933,7 +976,6 @@ def makeWCS(refRA, refDec):
 
     """
     from astropy.wcs import WCS
-    import numpy as np
 
     w = WCS(naxis=2)
     w.wcs.crpix = [1000, 1000]
@@ -975,180 +1017,21 @@ def calculateSeparation(ra1, dec1, ra2, dec2):
     return coord1.separation(coord2)
 
 
-# The following taken from
-# http://code.activestate.com/recipes/578381-a-point-in-polygon-program-sw-sloan-algorithm/
-def _det(xvert, yvert):
-    """
-    Compute twice the area of the triangle defined by points with using
-    determinant formula.
-
-    Parameters
-    ----------
-    xvert : array
-        A vector of nodal x-coords (array-like).
-    yvert : array
-        A vector of nodal y-coords (array-like).
-
-    Returns
-    -------
-    area : float
-        Twice the area of the triangle defined by the points.
-        _det is positive if points define polygon in anticlockwise order.
-        _det is negative if points define polygon in clockwise order.
-        _det is zero if at least two of the points are concident or if
-        all points are collinear.
-
-    """
-    xvert = np.asfarray(xvert)
-    yvert = np.asfarray(yvert)
-    x_prev = np.concatenate(([xvert[-1]], xvert[:-1]))
-    y_prev = np.concatenate(([yvert[-1]], yvert[:-1]))
-    return np.sum(yvert * x_prev - xvert * y_prev, axis=0)
-
-
-class Polygon:
-    """
-    Polygon object.
-
-    Parameters
-    ----------
-    x : array
-        A sequence of nodal x-coords.
-    y : array
-        A sequence of nodal y-coords.
-
-    """
-
-    def __init__(self, x, y):
-        if len(x) != len(y):
-            raise IndexError('x and y must be equally sized.')
-        self.x = np.asfarray(x)
-        self.y = np.asfarray(y)
-        # Closes the polygon if were open
-        x1, y1 = x[0], y[0]
-        xn, yn = x[-1], y[-1]
-        if x1 != xn or y1 != yn:
-            self.x = np.concatenate((self.x, [x1]))
-            self.y = np.concatenate((self.y, [y1]))
-        # Anti-clockwise coordinates
-        if _det(self.x, self.y) < 0:
-            self.x = self.x[::-1]
-            self.y = self.y[::-1]
-
-    def is_inside(self, xpoint, ypoint, smalld=1e-12):
-        '''Check if point is inside a general polygon.
-
-        Input parameters:
-
-        xpoint -- The x-coord of the point to be tested.
-        ypoint -- The y-coords of the point to be tested.
-        smalld -- A small float number.
-
-        xpoint and ypoint could be scalars or array-like sequences.
-
-        Output parameters:
-
-        mindst -- The distance from the point to the nearest point of the
-                  polygon.
-                  If mindst < 0 then point is outside the polygon.
-                  If mindst = 0 then point in on a side of the polygon.
-                  If mindst > 0 then point is inside the polygon.
-
-        Notes:
-
-        An improved version of the algorithm of Nordbeck and Rydstedt.
-
-        REF: SLOAN, S.W. (1985): A point-in-polygon program. Adv. Eng.
-             Software, Vol 7, No. 1, pp 45-47.
-
-        '''
-        xpoint = np.asfarray(xpoint)
-        ypoint = np.asfarray(ypoint)
-        # Scalar to array
-        if xpoint.shape is tuple():
-            xpoint = np.array([xpoint], dtype=float)
-            ypoint = np.array([ypoint], dtype=float)
-            scalar = True
-        else:
-            scalar = False
-        # Check consistency
-        if xpoint.shape != ypoint.shape:
-            raise IndexError('x and y has different shapes')
-        # If snear = True: Dist to nearest side < nearest vertex
-        # If snear = False: Dist to nearest vertex < nearest side
-        snear = np.ma.masked_all(xpoint.shape, dtype=bool)
-        # Initialize arrays
-        mindst = np.ones_like(xpoint, dtype=float) * np.inf
-        j = np.ma.masked_all(xpoint.shape, dtype=int)
-        x = self.x
-        y = self.y
-        n = len(x) - 1  # Number of sides/vertices defining the polygon
-        # Loop over each side defining polygon
-        for i in range(n):
-            d = np.ones_like(xpoint, dtype=float) * np.inf
-            # Start of side has coords (x1, y1)
-            # End of side has coords (x2, y2)
-            # Point has coords (xpoint, ypoint)
-            x1 = x[i]
-            y1 = y[i]
-            x21 = x[i + 1] - x1
-            y21 = y[i + 1] - y1
-            x1p = x1 - xpoint
-            y1p = y1 - ypoint
-            # Points on infinite line defined by
-            #     x = x1 + t * (x1 - x2)
-            #     y = y1 + t * (y1 - y2)
-            # where
-            #     t = 0    at (x1, y1)
-            #     t = 1    at (x2, y2)
-            # Find where normal passing through (xpoint, ypoint) intersects
-            # infinite line
-            t = -(x1p * x21 + y1p * y21) / (x21 ** 2 + y21 ** 2)
-            tlt0 = t < 0
-            tle1 = (0 <= t) & (t <= 1)
-            # Normal intersects side
-            d[tle1] = ((x1p[tle1] + t[tle1] * x21) ** 2 +
-                       (y1p[tle1] + t[tle1] * y21) ** 2)
-            # Normal does not intersects side
-            # Point is closest to vertex (x1, y1)
-            # Compute square of distance to this vertex
-            d[tlt0] = x1p[tlt0] ** 2 + y1p[tlt0] ** 2
-            # Store distances
-            mask = d < mindst
-            mindst[mask] = d[mask]
-            j[mask] = i
-            # Point is closer to (x1, y1) than any other vertex or side
-            snear[mask & tlt0] = False
-            # Point is closer to this side than to any other side or vertex
-            snear[mask & tle1] = True
-        if np.ma.count(snear) != snear.size:
-            raise IndexError('Error computing distances')
-        mindst **= 0.5
-        # Point is closer to its nearest vertex than its nearest side, check if
-        # nearest vertex is concave.
-        # If the nearest vertex is concave then point is inside the polygon,
-        # else the point is outside the polygon.
-        jo = j.copy()
-        jo[j == 0] -= 1
-        area = _det([x[j + 1], x[j], x[jo - 1]], [y[j + 1], y[j], y[jo - 1]])
-        mindst[~snear] = np.copysign(mindst, area)[~snear]
-        # Point is closer to its nearest side than to its nearest vertex, check
-        # if point is to left or right of this side.
-        # If point is to left of side it is inside polygon, else point is
-        # outside polygon.
-        area = _det([x[j], x[j + 1], xpoint], [y[j], y[j + 1], ypoint])
-        mindst[snear] = np.copysign(mindst, area)[snear]
-        # Point is on side of polygon
-        mindst[np.fabs(mindst) < smalld] = 0
-        # If input values were scalar then the output should be too
-        if scalar:
-            mindst = float(mindst)
-        return mindst
-
-
 def read_vertices(filename):
     """
     Returns facet vertices
+
+    Parameters
+    ----------
+    filename : str
+        Filename of pickle file that contains direction dictionary with
+        vertices
+
+    Returns
+    -------
+    vertices : list
+        List of facet vertices
+
     """
     import pickle
 
@@ -1160,6 +1043,22 @@ def read_vertices(filename):
 def mask_vertices(mask_im, vertices_file):
     """
     Modify the input image to exclude regions outside of the polygon
+
+    Parameters
+    ----------
+    mask_im : pyrap.images image() object
+        Mask image to modify
+    vertices_file: str
+        Filename of pickle file that contains direction dictionary with
+        vertices
+
+    Returns
+    -------
+    new_im:  pyrap.images image() object
+        Modified mask image
+    bool_mask :  pyrap.images image() object
+        Modified mask image
+
     """
     import pyrap.images as pim
 
@@ -1213,6 +1112,8 @@ def find_nearest(direction1, directions):
     -------
     direction : Direction object
         Nearest direction
+    sep : float
+        Separation in degrees
 
     """
     sep = []
@@ -1220,5 +1121,63 @@ def find_nearest(direction1, directions):
         sep.append(calculateSeparation(direction1.ra, direction1.dec,
                             direction2.ra, direction2.dec).value)
 
-    return directions[np.argmin(sep)]
+    return directions[np.argmin(sep)], sep[np.argmin(sep)]
+
+
+def _float_approx_equal(x, y, tol=1e-18, rel=1e-7):
+    if tol is rel is None:
+        raise TypeError('cannot specify both absolute and relative errors are None')
+    tests = []
+    if tol is not None: tests.append(tol)
+    if rel is not None: tests.append(rel*abs(x))
+    assert tests
+    return abs(x - y) <= max(tests)
+
+
+def approx_equal(x, y, *args, **kwargs):
+    """approx_equal(float1, float2[, tol=1e-18, rel=1e-7]) -> True|False
+    approx_equal(obj1, obj2[, *args, **kwargs]) -> True|False
+
+    Return True if x and y are approximately equal, otherwise False.
+
+    If x and y are floats, return True if y is within either absolute error
+    tol or relative error rel of x. You can disable either the absolute or
+    relative check by passing None as tol or rel (but not both).
+
+    For any other objects, x and y are checked in that order for a method
+    __approx_equal__, and the result of that is returned as a bool. Any
+    optional arguments are passed to the __approx_equal__ method.
+
+    __approx_equal__ can return NotImplemented to signal that it doesn't know
+    how to perform that specific comparison, in which case the other object is
+    checked instead. If neither object have the method, or both defer by
+    returning NotImplemented, approx_equal falls back on the same numeric
+    comparison used for floats.
+
+    >>> almost_equal(1.2345678, 1.2345677)
+    True
+    >>> almost_equal(1.234, 1.235)
+    False
+
+    """
+    if not (type(x) is type(y) is float):
+        # Skip checking for __approx_equal__ in the common case of two floats.
+        methodname = '__approx_equal__'
+        # Allow the objects to specify what they consider "approximately equal",
+        # giving precedence to x. If either object has the appropriate method, we
+        # pass on any optional arguments untouched.
+        for a,b in ((x, y), (y, x)):
+            try:
+                method = getattr(a, methodname)
+            except AttributeError:
+                continue
+            else:
+                result = method(b, *args, **kwargs)
+                if result is NotImplemented:
+                    continue
+                return bool(result)
+    # If we get here without returning, then neither x nor y knows how to do an
+    # approximate equal comparison (or are both floats). Fall back to a numeric
+    # comparison.
+    return _float_approx_equal(x, y, *args, **kwargs)
 

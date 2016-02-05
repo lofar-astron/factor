@@ -7,7 +7,7 @@ Installation
 Factor is currently installed on the LOFAR CEP3 cluster. Users on CEP3
 should run the following commands before using Factor:
 
-    use Lofar
+    use LofIm
     source ~rafferty/init_factor
     use Casa
     use Pythonlibs
@@ -18,8 +18,8 @@ If you want to install Factor yourself, follow the instructions below.
 
 Beyond the standard LOFAR software packages, Factor requires the following:
 
-* [CASA](http://casa.nrao.org) (versions *before* 4.3)
-* [WSClean](http://sourceforge.net/p/wsclean/wiki/Home)
+* [CASA](http://casa.nrao.edu) (versions *before* 4.3 or version 4.5.0 or later)
+* [WSClean](http://sourceforge.net/p/wsclean/wiki/Home) (version 1.9 or later)
 * [LSMTool](https://github.com/darafferty/LSMTool)
 * [jinja2](http://jinja.pocoo.org/docs/dev)
 * [Shapely](https://github.com/Toblerity/Shapely)

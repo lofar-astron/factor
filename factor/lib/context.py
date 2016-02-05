@@ -8,18 +8,16 @@ import logging
 class Timer(object):
     """
     Context manager used to time operations
+
+    Parameters
+    ----------
+    log : logging instance
+        The logging instance to use. If None, root is used
+    type : str, optional
+        Type of operation
+
     """
     def __init__(self, log=None, type='operation'):
-        """
-        Create object
-
-        Parameters
-        ----------
-        log : logging instance
-            The logging instance to use. If None, root is used
-        type : str, optional
-            Type of operation
-        """
         if log is None:
             self.log = logging
         else:
@@ -43,6 +41,14 @@ class Timer(object):
 class RedirectStdStreams(object):
     """
     Context manager used to redirect streams
+
+    Parameters
+    ----------
+    stdout : file or stream object
+        stdout stream
+    stderr : file or stream object
+        stderr stream
+
     """
     def __init__(self, stdout=None, stderr=None):
         import sys

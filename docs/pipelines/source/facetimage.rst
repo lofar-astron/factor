@@ -6,10 +6,10 @@ Facet Imaging Operation
 This section describes the facet imaging operation of Factor, denoted
 ``facetimage``, which performs imaging of the entire facet when either the facet did not successfully go through selfcal or reimaging is desired. There are two possible pipeline parsets for this operation:
 
-``facetimage_imgmodel_pipeline.parset``
+Reimaging pipeline
     For use when the facet under consideration has successfully gone through self calibration and reimaging is desired.
 
-``facetimage_skymodel_pipeline.parset``
+Non-reimaging pipeline
     For use when the facet under consideration has not successfully gone through self calibration. In this case, the self-calibration solutions from the nearset facet should be used instead.
 
 .. note::
@@ -22,7 +22,7 @@ Add sources from CC model
 
 .. note::
 
-    This step is done only for the ``facetimage_skymodel_pipeline.parset`` or ``facetimage_skymodel_casa_pipeline.parset`` pipelines.
+    This step is done only for non-reimaging pipeline.
 
 Input
 	MS files from the :ref:`initial_subtract_operation` with
@@ -43,16 +43,13 @@ Pipeline Steps
     add_all_facet_sources
         Run BBS to add sources to the data using the sky models above.
 
-Test data
-    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the sky model ``NEP_SB070-079.2ch10s.wsclean_low2-model.make_facet_skymodels_all`` in ``Test_run/results/facetadd/facet_patch_543/``, which in turn is used to make the ``FACET_DATA_ALL`` column in this MS file.
-
 
 Add sources from ``MODEL_DATA``
 -------------------------------
 
 .. note::
 
-    This step is done only for the ``facetimage_imgmodel_pipeline.parset`` or ``facetimage_imgmodel_casa_pipeline.parset`` pipelines.
+    This step is done only for the reimaging pipeline.
 
 Input
 	MS files from the :ref:`initial_subtract_operation` with ``SUBTRACTED_DATA_ALL_NEW`` column, their dir-dependent parmdbs, and the dataset with the self-calibration facet model phase shifted back to the field center.
@@ -67,9 +64,6 @@ Pipeline Steps
     expand_parmdb_map, add_all_facet_sources
         Run BBS to add sources to the data using the sky models above and the dir-dependent parmdbs.
 
-Test data
-    With ``Test_data/RX42_SB070-079.2ch10s.ms`` and the phase-shifted facet all-source MS files (e.g., ``NEP_SB070-079.2ch10s.shift_all``) in ``Test_run/results/facetselfcal/facet_patch_543/``, this step produces the ``FACET_DATA_ALL`` column in the ``Test_data/RX42_SB070-079.2ch10s.ms`` file.
-
 
 Split and phase shift data
 --------------------------
@@ -83,12 +77,6 @@ Output
 Pipeline Steps
     shift_all
         Run DPPP to split and phase shift ``FACET_DATA_ALL`` to the RA and Dec of the facet.
-
-    copy_all_map
-        Copy datamap for shifted datasets to convenient location.
-
-Test data
-    With ``Test_data/RX42_SB070-079.2ch10s.ms``, this step produces the MS files ``Test_run/results/facetaddfinal/facet_patch_543/NEP_SB070-079.2ch10s.shift_all``.
 
 
 Imaging preparation
@@ -106,10 +94,6 @@ Pipeline Steps
 
     average, create_compressed_mapfile, concat_averaged
         Average ``CORRECTED_DATA`` column in time and frequency and concatenate in frequency in preparation for imaging.
-
-Test data
-    With the phase-shifted facet all-source MS files (e.g., ``NEP_SB070-079.2ch10s.shift_all``) in ``Test_run/results/facetaddfinal/facet_patch_543/``, this step produces the MS file ``NEP_SB070-079.2ch10s.concat_averaged`` in ``Test_run/results/facetimagefinal/facet_patch_543/`` with averaged, concatenated (in frequency) ``DATA`` column.
-
 
 
 Make image of entire facet
@@ -137,9 +121,6 @@ Output
 
 Pipeline Steps
     wsclean1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean2, create_imagebase_map2
-        WSClean imaging run. Imaging is done with a cell size of 1.5". Wide-band imaging is done if more than 5 bands are used. Multi-scale clean is not used, as WSClean does not currently support clean masks for this mode.
-
-Test data
-    With the the averaged, virtually-concatenated MS file ``RX42_SB070-079.2ch10s.concat_averaged``, this step produces the image ``NEP_SB070-079.2ch10s.wsclean2-image.fits`` (or ``NEP_SB070-079.2ch10s.wsclean2-MFS-image.fits`` if wide-band clean was used). All of these files are in ``Test_run/results/facetselfcal/facet_patch_543/``.
+        WSClean imaging run. Imaging is done with a cell size of 1.5". Wide-band imaging is done if more than 5 bands are used.
 
 

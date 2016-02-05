@@ -113,9 +113,8 @@ def main(instrument_name, instrument_name_smoothed):
                 amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
                 amplist.append(amp)
     norm_factor = 1./(numpy.mean(amplist))
-
     print "smooth_amps.py: Normalization-Factor is:",norm_factor
-
+    
     for chan in range(nchans):
         for pol in pol_list:
             for antenna in antenna_list:
@@ -123,12 +122,12 @@ def main(instrument_name, instrument_name_smoothed):
                 imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
                 phase = numpy.arctan2(imag, real)
                 amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
-
+                
                 # Clip extremely low amplitude solutions to prevent very high
                 # amplitudes in the corrected data
                 low_ind = numpy.where(amp < 0.2)
                 amp[low_ind] = 0.2
-
+                
                 parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = numpy.copy(amp *
                     numpy.cos(phase) * norm_factor)
                 parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = numpy.copy(amp *

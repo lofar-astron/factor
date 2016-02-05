@@ -2,30 +2,29 @@
 
 
 [global]
-# Full path to working dir where Factor will run (required). All output will
-# be placed in this directory
+# Full path to working dir where Factor will run (required). All output will be
+# placed in this directory
 dir_working = /data/wdir
 
-# Full path to directory containing selfcal-ed bands, will be scanned for all .MS
-# and .ms files (required). Note that these files will be modified by Factor, so
-# please keep a copy of these data elsewhere
+# Full path to directory containing selfcal-ed bands, will be scanned for all
+# .MS and .ms files (required). Note that these files will be modified by
+# Factor, so please keep a copy of these data elsewhere
 dir_ms = /data/bands
 
-# Parmdb name for dir-indep. selfcal solutions (stored inside the input
-# band measurement sets, so path should be relative to those; default =
-# instrument)
+# Parmdb name for dir-indep. selfcal solutions (stored inside the input band
+# measurement sets, so path should be relative to those; default = instrument)
 parmdb_name = instrument_ap_smoothed
 
 # Make final mosaic (default = True)
 make_mosaic = True
 
-# Use interactive mode (default = False). Factor will ask for confirmation
-# of internally derived DDE calibrators and facets
+# Use interactive mode (default = False). Factor will ask for confirmation of
+# internally derived DDE calibrators and facets
 interactive = False
 
-# Max number of bands per WSClean image when wide-band clean is used (default = 5).
-# Smaller values produce better results but require longer run times. Wide-band
-# clean is activated when there are more than 5 bands
+# Max number of bands per WSClean image when wide-band clean is used (default =
+# 5). Smaller values produce better results but require longer run times.
+# Wide-band clean is activated when there are more than 5 bands
 wsclean_nbands = 2
 
 # Exit if selfcal fails for any direction (default = True). If False, processing
@@ -45,15 +44,18 @@ max_selfcal_loops = 10
 # bandwidths, the CASA imager is typically faster
 facet_imager = casa
 
-# Re-image the facets after selfcal has been completed for all directions
-# (default = False). If True, all facets are re-imaged with the final empty
-# datasets, potentially resulting in lower noise
-reimage = False
-
 # Keep calibrated data for each facet to allow re-imaging by hand (default =
-# True). If a target is specified (see below), the calibrated data for the
-# target is always kept, regardless of this setting
-keep_facet_data = False
+# True for averaged data and False for unaveraged data). If a target is
+# specified (see below), the averaged data for the target is always kept,
+# regardless of this setting
+keep_avg_facet_data = False
+keep_unavg_facet_data = False
+
+# Use baseline-dependent preaveraging to increase the signal-to-noise of the
+# phase-only solve for sources below this flux (default = 0.0; i.e., disabled).
+# When activated, averaging in time is done to exploit the time coherence in the
+# TEC solutions
+preaverage_flux_Jy = 1.0
 
 
 [directions]
@@ -61,16 +63,21 @@ keep_facet_data = False
 # are selected internally using the flux and size cuts below
 directions_file = /data/directions.txt
 
-# Flux and size cuts for selecting directions internally (min flux, max size
+# Parameters for selecting directions internally (radius from phase center
+# within which to consider sources as potential calibrators, min flux, max size
 # of a source, and max separation between sources below which they are grouped
 # into one direction; required if no directions_file is given). The number of
-# internally derived directions can be limited to a maximum number
-# of directions if desired with max_num (default = all). These parameters will
+# internally derived directions can be limited to a maximum number of directions
+# if desired with max_num (default = all). Lastly, faceting_radius_deg sets the
+# radius within which facets will be used; outside of this radius, small patches
+# are used that do not appear in the final mosaic.  These parameters will
 # determine the faceting of the field
+max_radius_deg = 2.0
 flux_min_Jy = 0.3
 size_max_arcmin = 2.0
 separation_max_arcmin = 6.0
 max_num = 50
+faceting_radius_deg = 1.5
 
 # Check whether any sources from the initial subtract sky model fall on facet
 # edges. If any are found, the facet regions are adjusted to avoid them (default
@@ -80,11 +87,20 @@ check_edges = False
 # Total number of directions to process (default = all). If this number is
 # greater than ndir_selfcal, then the remaining directions will not be selfcal-
 # ed but will instead be imaged with the selfcal solutions from the nearest
-# direction for which selfcal was done
+# direction for which selfcal succeeded (if a target is specified and
+# target_has_own_facet = True, it will be imaged in this way after ndir_total
+# number of directions are processed)
 ndir_total = 10
 
 # Total number of directions to selfcal (default = all)
 ndir_selfcal = 5
+
+# Radius in degrees within which the direction-dependent solutions will be
+# transferred before starting selfcal (default = 0; i.e., disabled). If a
+# direction is within this distance of a calibrator for which selfcal was
+# successful, the dir-dep selfcal solutions from this calibrator will be used
+# instead of the dir-indep ones
+transfer_radius = 1.0
 
 # Grouping of directions into groups that are selfcal-ed in parallel, defined as
 # grouping:n_total_per_grouping. For example, groupings = 1:5, 4:0 means two
@@ -95,20 +111,23 @@ ndir_selfcal = 5
 groupings = 1:5, 4:0
 
 # If groups are used to process more than one direction in parallel, reordering
-# of the directions in the groups can be done to maximize the separation
-# between directions in each group (default = True)
+# of the directions in the groups can be done to maximize the flux-weighted
+# separation between directions in each group (default = True)
 allow_reordering = True
 
 # A target can be specified to ensure that it falls entirely within a single
 # facet. The values should be those of a circular region that encloses the
-# source and not those of the target itself. Lastly, the target can be placed
-# in a facet of its own. In this case, it will not go through selfcal but will
+# source and not those of the target itself. Lastly, the target can be placed in
+# a facet of its own. In this case, it will not go through selfcal but will
 # instead use the selfcal solutions of the nearest facet for which selfcal was
 # done
 target_ra = 14h41m01.884
 target_dec = +35d30m31.52
 target_radius_arcmin = 10.2
 target_has_own_facet = False
+
+# Re-image directions for which selfcal was successful (default = False)
+reimage = True
 
 
 [cluster]
@@ -119,9 +138,8 @@ target_has_own_facet = False
 clusterdesc_file = PBS
 
 # Full path to a local disk on the nodes for I/O-intensive processing. The path
-# must be the same for all nodes. At the moment, the local disk is only used by
-# WSClean jobs. If not given, the default directory in the working directory is
-# used
+# must be the same for all nodes. If not given, the default directory in the
+# working directory is used
 dir_local = /tmp
 
 # Maximum number of CPUs per node to use (default = all)
@@ -138,13 +156,14 @@ fmem = 0.5
 # ncpu parameter) will be divided among the directions on each node
 ndir_per_node = 1
 
-# Number of imager jobs to run per node (affects initsubtract operation and
-# facetimage; default = 1). If your nodes have many CPUs and > 32 GB of memory,
+# Number of imager jobs to run per node (affects initsubtract and facetimage
+# operations; default = 1). If your nodes have many CPUs and > 32 GB of memory,
 # it may be advantageous to set this to 2 or more
 nimg_per_node = 1
 
 
-# MS-specific parameters (optional)
+# MS-specific parameters (optional). Currently, only the initial sky model can
+# be specified here
 [ms1.ms]
 init_skymodel = /data/ms1.sky
 

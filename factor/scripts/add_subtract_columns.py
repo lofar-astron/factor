@@ -43,7 +43,7 @@ def main(ms1, ms2, column1, column2, column_out, op='add'):
     t1 = pt.table(ms1, readonly=False, ack=False)
     data1 = t1.getcol(column1)
     if ms2 is not None:
-        t2 = pt.table(ms2, readonly=False, ack=False)
+        t2 = pt.table(ms2, ack=False)
         data2 = t2.getcol(column2)
     else:
         data2 = t1.getcol(column2)

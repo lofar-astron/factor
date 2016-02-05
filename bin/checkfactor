@@ -17,7 +17,7 @@
 #
 # The code is based on an original idea of Reinout van Weeren
 from factor._version import __version__ as version
-from factor import process
+from factor import check_progress
 import optparse
 import sys
 
@@ -25,12 +25,9 @@ import sys
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage='%prog parset',
             version='%%prog %s' % (version))
-    parser.add_option('-d', help='enable dry-run mode', action='store_true', default=False)
-    parser.add_option('-q', help='enable quiet mode', action='store_true', default=False)
-    parser.add_option('-r', '--reset', help='comma-separated list of directions to reset',
-        type=str, default=None)
-    parser.add_option('-t', help='enable test mode', action='store_true', default=False)
-    parser.add_option('-v', help='enable verbose mode', action='store_true', default=False)
+    parser.add_option('-f', help='Show full facet names on the plot, instead of '
+        'triming facet names to keep only parts after the last "_" in the name',
+        action='store_true', default=False)
     (options, args) = parser.parse_args()
 
     if len(args) != 1:
@@ -38,22 +35,8 @@ if __name__ == '__main__':
         sys.exit()
 
     parset_file = args[0]
+    trim_names = not options.f
 
-    # Prepare logger
-    if options.q:
-        logging_level = 'warning'
-    elif options.v:
-        logging_level = 'debug'
-    else:
-        logging_level = 'info'
+    # Check the progress
+    check_progress.run(parset_file, trim_names=trim_names)
 
-    # Construct list of directions to reset
-    if options.reset is not None:
-        parts = options.reset.split(',')
-        reset_directions = [p.strip() for p in parts]
-    else:
-        reset_directions = []
-
-    # Process the field
-    process.run(parset_file, logging_level=logging_level, dry_run=options.d,
-        test_run=options.t, reset_directions=reset_directions)

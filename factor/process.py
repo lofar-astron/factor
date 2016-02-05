@@ -21,6 +21,9 @@ from factor.lib.direction import Direction
 from factor.lib.band import Band
 
 
+log = logging.getLogger('factor')
+
+
 def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     reset_directions=[]):
     """
@@ -31,7 +34,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     direction (depending on sucess of selfcal, the order in which they were
     processed, etc.).
 
-    It also handles the setup of the computing parameters and the generation of
+    It also handles the set up of the computing parameters and the generation of
     DDE calibrators and facets.
 
     Parameters
@@ -46,37 +49,47 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         If True, use test settings. These settings are for testing purposes
         only and will not produce useful results
     reset_directions : list of str, optional
-        List of direction names to be reset
+        List of names of directions to be reset
 
     """
-    factor._logging.set_level(logging_level)
-    log = logging.getLogger('factor')
-
+    # Read parset
     parset = factor.parset.parset_read(parset_file)
+
+    # Set up logger
     parset['logging_level'] = logging_level
+    factor._logging.set_level(logging_level)
 
     # Set up clusterdesc, node info, scheduler, etc.
-    scheduler = _set_up_compute_parameters(parset, log, dry_run)
+    scheduler = _set_up_compute_parameters(parset, dry_run)
 
     # Prepare vis data
-    bands, bands_initsubtract = _set_up_bands(parset, log, test_run)
+    bands, bands_initsubtract = _set_up_bands(parset, test_run)
 
     # Make direction object for the field
     field = Direction('field', bands[0].ra, bands[0].dec,
         factor_working_dir=parset['dir_working'])
-    field.set_averaging_steps(bands[0].chan_width_hz, bands[0].nchan,
-        bands[0].timepersample)
+    field.set_averaging_steps_and_solution_intervals(bands[0].chan_width_hz,
+        bands[0].nchan, bands[0].timepersample, bands[0].minSamplesPerFile, len(bands),
+        preaverage_flux_jy=parset['preaverage_flux_jy'])
 
     # Run initial sky model generation and create empty datasets
     if len(bands_initsubtract) > 0:
-        log.debug('Running full initial subtract operation for bands: {0}'.
-                  format([b.name for b in bands_initsubtract]))
-        field = factor.cluster.divide_nodes([field],
-                                            parset['cluster_specific']['node_list'],
-                                            parset['cluster_specific']['ndir_per_node'],
-                                            parset['cluster_specific']['nimg_per_node'],
-                                            parset['cluster_specific']['ncpu'],
-                                            parset['cluster_specific']['fmem'])[0]
+        # Reset the field direction if specified
+        if 'field' in reset_directions:
+            field.reset_state('initsubtract')
+
+        log.info('Running initsubtract operation for bands: {0}'.
+            format([b.name for b in bands_initsubtract]))
+
+        # Combine the nodes and cores for the subtract operation
+        field = factor.cluster.combine_nodes([field],
+            parset['cluster_specific']['node_list'],
+            parset['cluster_specific']['nimg_per_node'],
+            parset['cluster_specific']['ncpu'],
+            parset['cluster_specific']['fmem'],
+            len(bands_initsubtract))[0]
+
+        # Do initial subtraction
         op = InitSubtract(parset, bands_initsubtract, field)
         scheduler.run(op)
     else:
@@ -86,34 +99,57 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     # Remove bands that failed initsubtract operation
     bands = [b for b in bands if not b.skip]
 
-    # Define directions
-    directions, direction_groups = _set_up_directions(parset, bands, field, log,
-        dry_run, test_run, reset_directions)
+    # Define directions and groups
+    directions, direction_groups = _set_up_directions(parset, bands, field,
+    	dry_run, test_run, reset_directions)
 
-    # Run selfcal and subtract operations on directions
-    first_pass = True
+    # Run peeling and subtract operations on outlier directions
+    outlier_directions = [d for d in directions if d.is_outlier]
+    if len(outlier_directions) > 0:
+        # Combine the nodes and cores for the peeling and subtract operation
+        outlier_directions = factor.cluster.combine_nodes(outlier_directions,
+            parset['cluster_specific']['node_list'],
+            parset['cluster_specific']['nimg_per_node'],
+            parset['cluster_specific']['ncpu'],
+            parset['cluster_specific']['fmem'],
+            len(bands))
+
+        # Do the peeling
+        for d in outlier_directions:
+            op = FacetPeel(parset, bands, d)
+            scheduler.run(op)
+
+            op = FacetSub(parset, bands, d)
+            scheduler.run(op)
+
+    # Run selfcal and subtract operations on direction groups
+    set_sub_data_colname = True
     for gindx, direction_group in enumerate(direction_groups):
         log.info('Processing {0} direction(s) in Group {1}'.format(
             len(direction_group), gindx+1))
 
         # Set up reset of any directions that need it. If the direction has
         # already been through the facetsub operation, we must undo the
-        # changes with the facetsubreset operation before we reset
+        # changes with the facetsubreset operation before we reset facetselfcal
+        # (otherwise the model data required to reset facetsub will be deleted)
         direction_group_reset = [d for d in direction_group if d.do_reset]
         direction_group_reset_facetsub = [d for d in direction_group_reset if
             'facetsub' in d.completed_operations]
         if len(direction_group_reset_facetsub) > 0:
+            for d in direction_group_reset_facetsub:
+                d.reset_state('facetsubreset')
             direction_group_reset_facetsub = factor.cluster.combine_nodes(
                 direction_group_reset_facetsub,
                 parset['cluster_specific']['node_list'],
+                parset['cluster_specific']['nimg_per_node'],
                 parset['cluster_specific']['ncpu'],
-                parset['cluster_specific']['fmem'])
-            ops = [FacetSubReset(parset, d) for d in direction_group_reset_facetsub]
+                parset['cluster_specific']['fmem'],
+                len(bands))
+            ops = [FacetSubReset(parset, bands, d) for d in direction_group_reset_facetsub]
             for op in ops:
                 scheduler.run(op)
         for d in direction_group_reset:
-            log.info('Resetting direction {}'.format(d.name))
-            d.reset_state()
+            d.reset_state(['facetselfcal', 'facetsub'])
 
         # Divide up the nodes and cores among the directions for the parallel
         # selfcal operations
@@ -122,7 +158,21 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             parset['cluster_specific']['ndir_per_node'],
             parset['cluster_specific']['nimg_per_node'],
             parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['fmem'])
+            parset['cluster_specific']['fmem'],
+            len(bands))
+
+        # Check for any directions within transfer radius that have successfully
+        # gone through selfcal
+        dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
+        if len(dirs_with_selfcal) > 0:
+            for d in direction_group:
+                nearest, sep = factor.directions.find_nearest(d, dirs_with_selfcal)
+                if sep < parset['direction_specific']['transfer_radius']:
+                    log.debug('Initializing selfcal for direction {0} with solutions from direction {1}.'.format(
+                        d.name, nearest.name))
+                    d.dir_dep_parmdb_mapfile = nearest.dir_dep_parmdb_mapfile
+                    d.save_state()
+                    d.transfer_nearest_solutions = True
 
         # Do selfcal on calibrator only
         ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
@@ -132,21 +182,23 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             for d in direction_group:
                 d.selfcal_ok = True
         direction_group_ok = [d for d in direction_group if d.selfcal_ok]
-        if first_pass:
+        if set_sub_data_colname:
             if len(direction_group_ok) > 0:
                 for d in directions:
                     if d.name != direction_group_ok[0].name:
                         d.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
-                first_pass = False
+                set_sub_data_colname = False
 
         # Combine the nodes and cores for the serial subtract operations
         direction_group_ok = factor.cluster.combine_nodes(direction_group_ok,
             parset['cluster_specific']['node_list'],
+            parset['cluster_specific']['nimg_per_node'],
             parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['fmem'])
+            parset['cluster_specific']['fmem'],
+            len(bands))
 
         # Subtract final model(s) for directions for which selfcal went OK
-        ops = [FacetSub(parset, d) for d in direction_group_ok]
+        ops = [FacetSub(parset, bands, d) for d in direction_group_ok]
         for op in ops:
             scheduler.run(op)
 
@@ -159,60 +211,92 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             log.info('Exiting...')
             sys.exit(1)
 
+    # Check that at least one direction went through selfcal successfully. If
+    # not, exit
+    if len([d for d in directions if d.selfcal_ok]) == 0:
+        log.error('Selfcal verification failed for all directions. Exiting...')
+        sys.exit(1)
+
     # Make final facet images (from final empty datasets) if desired. Also image
     # any facets for which selfcal failed or no selfcal was done
-    #
-    # TODO: combine new facet sky models and adjust facet edges for new sources
-    # (but only if all facets are to be re-imaged)
-    #
-    dirs_to_image = [d for d in directions if d.make_final_image and d.selfcal_ok]
+    dirs_to_image = [d for d in directions if d.make_final_image and
+        d.selfcal_ok and not d.is_patch]
     if len(dirs_to_image) > 0:
         log.info('Reimaging the following direction(s):')
         log.info('{0}'.format([d.name for d in dirs_to_image]))
 
-    # Add directions without selfcal
-    dirs_to_transfer = [d for d in directions if not d.selfcal_ok]
+    # Add directions without selfcal to those that will be imaged
+    dirs_to_transfer = [d for d in directions if not d.selfcal_ok and not d.is_patch]
     if len(dirs_to_transfer) > 0:
         log.info('Imaging the following direction(s) with nearest selcal solutions:')
         log.info('{0}'.format([d.name for d in dirs_to_transfer]))
     dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
     for d in dirs_to_transfer:
         # Search for nearest direction with successful selfcal
-        nearest = factor.directions.find_nearest(d, dirs_with_selfcal)
+        nearest, sep = factor.directions.find_nearest(d, dirs_with_selfcal)
         log.debug('Using solutions from direction {0} for direction {1}.'.format(
             nearest.name, d.name))
-        d.dir_dep_parmdb_datamap = nearest.dir_dep_parmdb_datamap
+        d.dir_dep_parmdb_mapfile = nearest.dir_dep_parmdb_mapfile
         d.save_state()
     dirs_to_image.extend(dirs_to_transfer)
 
     if len(dirs_to_image) > 0:
-        # Divide up the nodes and cores among the directions for the parallel
-        # imaging operations
-        dirs_to_image = factor.cluster.divide_nodes(dirs_to_image,
-            parset['cluster_specific']['node_list'],
-            parset['cluster_specific']['ndir_per_node'],
-            parset['cluster_specific']['nimg_per_node'],
-            parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['fmem'])
+        # Set up reset of any directions that need it
+        directions_reset = [d for d in dirs_to_image if d.do_reset]
+        for d in directions_reset:
+            d.reset_state('facetimage')
 
-        ops = [FacetImage(parset, bands, d) for d in dirs_to_image]
-        scheduler.run(ops)
+        # Group directions. This is done to ensure that multiple directions
+        # aren't competing for the same resources
+        ndir_simul = (len(parset['cluster_specific']['node_list']) *
+            parset['cluster_specific']['ndir_per_node'])
+        for i in range(int(np.ceil(len(dirs_to_image)/float(ndir_simul)))):
+            dir_group = dirs_to_image[i*ndir_simul:(i+1)*ndir_simul]
+
+            # Divide up the nodes and cores among the directions for the parallel
+            # imaging operations
+            dir_group = factor.cluster.divide_nodes(dir_group,
+                parset['cluster_specific']['node_list'],
+                parset['cluster_specific']['ndir_per_node'],
+                parset['cluster_specific']['nimg_per_node'],
+                parset['cluster_specific']['ncpu'],
+                parset['cluster_specific']['fmem'],
+                len(bands))
+
+            # Do facet imaging
+            ops = [FacetImage(parset, bands, d) for d in dir_group]
+            scheduler.run(ops)
 
     # Mosaic the final facet images together
     if parset['make_mosaic']:
+        # Reset the field direction if specified
+        if 'field' in reset_directions or 'mosaic' in reset_directions:
+            field.reset_state('makemosaic')
+
         field.facet_image_filenames = []
         field.facet_vertices_filenames = []
         for d in directions:
-            facet_image = DataMap.load(d.facet_image_mapfile)[0].file
-            field.facet_image_filenames.append(facet_image)
-            field.facet_vertices_filenames.append(d.save_file)
-        op = MakeMosaic(parset, field, bands=bands)
+            if not d.is_patch:
+                facet_image = DataMap.load(d.facet_image_mapfile)[0].file
+                field.facet_image_filenames.append(facet_image)
+                field.facet_vertices_filenames.append(d.save_file)
+
+        # Combine the nodes and cores for the mosaic operation
+        field = factor.cluster.combine_nodes([field],
+            parset['cluster_specific']['node_list'],
+            parset['cluster_specific']['nimg_per_node'],
+            parset['cluster_specific']['ncpu'],
+            parset['cluster_specific']['fmem'],
+            len(bands))[0]
+
+        # Do mosaicking
+        op = MakeMosaic(parset, bands, field)
         scheduler.run(op)
 
     log.info("Factor has finished :)")
 
 
-def _set_up_compute_parameters(parset, log, dry_run=False):
+def _set_up_compute_parameters(parset, dry_run=False):
     """
     Sets up compute parameters and operation scheduler
 
@@ -220,8 +304,6 @@ def _set_up_compute_parameters(parset, log, dry_run=False):
     ----------
     parset : dict
         Parset containing processing parameters
-    log : logging instance
-        Log for output
     dry_run : bool, optional
         If True, do not run pipelines. All parsets, etc. are made as normal
 
@@ -278,7 +360,7 @@ def _set_up_compute_parameters(parset, log, dry_run=False):
     return scheduler
 
 
-def _set_up_bands(parset, log, test_run=False):
+def _set_up_bands(parset, test_run=False):
     """
     Sets up bands for processing
 
@@ -286,8 +368,6 @@ def _set_up_bands(parset, log, test_run=False):
     ----------
     parset : dict
         Parset containing processing parameters
-    log : logging instance
-        Log for output
     test_run : bool, optional
         If True, use test settings. These settings are for testing purposes
         only and will not produce useful results
@@ -295,9 +375,11 @@ def _set_up_bands(parset, log, test_run=False):
     Returns
     -------
     bands : List of Band instances
-        All bands to be used by the run() function
+        All bands to be used by the run() function, ordered from low to high
+        frequency
     bands_initsubtract : List of Band instances
-        Subset of bands for InitSubtract operation
+        Subset of bands for InitSubtract operation, ordered from low to high
+        frequency
 
     """
     log.info('Checking input bands...')
@@ -380,7 +462,7 @@ def _set_up_bands(parset, log, test_run=False):
     return bands, bands_initsubtract
 
 
-def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
+def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
     reset_directions=[]):
     """
     Sets up directions (facets)
@@ -393,8 +475,6 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         Vis data
     field : Direction instance
         Field direction object
-    log : logging instance
-        Log for output
     dry_run : bool, optional
         If True, do not run pipelines. All parsets, etc. are made as normal
     test_run : bool, optional
@@ -411,11 +491,17 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
         Groups of directions to be selfcal-ed
 
     """
+    dir_parset = parset['direction_specific']
+
+    log.info("Building initial sky model...")
+    ref_band = bands[-1]
+    max_radius_deg = dir_parset['max_radius_deg']
+    initial_skymodel = factor.directions.make_initial_skymodel(ref_band,
+        max_radius_deg=max_radius_deg)
     log.info('Setting up directions...')
 
     # First check for user-supplied directions file, then for Factor-generated
     # file from a previous run, then for parameters needed to generate it internally
-    dir_parset = parset['direction_specific']
     if 'directions_file' in dir_parset:
         directions = factor.directions.directions_read(dir_parset['directions_file'],
             parset['dir_working'])
@@ -428,36 +514,39 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
             log.warn('No directions file given. Cannot proceed beyond the '
                 'initsubtract operation. Exiting...')
             sys.exit(0)
-        elif 'flux_min_jy' not in dir_parset or \
-            'size_max_arcmin' not in dir_parset or \
-            'separation_max_arcmin' not in dir_parset:
+        elif dir_parset['flux_min_jy'] is None or \
+            dir_parset['size_max_arcmin'] is None or \
+            dir_parset['separation_max_arcmin'] is None:
                 log.critical('If no directions file is specified, you must '
                     'give values for flux_min_Jy, size_max_arcmin, and '
                     'separation_max_arcmin')
                 sys.exit(1)
         else:
-            # Make directions from dir-indep sky models using flux and size parameters
+            # Make directions from dir-indep sky model of highest-frequency
+            # band, as it has the smallest field of view
             log.info("No directions file given. Selecting directions internally...")
-            parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(bands,
+            dir_parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(initial_skymodel.copy(),
                 dir_parset['flux_min_jy'], dir_parset['size_max_arcmin'],
                 dir_parset['separation_max_arcmin'], directions_max_num=dir_parset['max_num'],
                 interactive=parset['interactive'])
-            directions = factor.directions.directions_read(parset['directions_file'],
+            directions = factor.directions.directions_read(dir_parset['directions_file'],
                 parset['dir_working'])
 
     # Add the target to the directions list if desired
+    target_ra = dir_parset['target_ra']
+    target_dec = dir_parset['target_dec']
+    target_radius_arcmin = dir_parset['target_radius_arcmin']
     target_has_own_facet = dir_parset['target_has_own_facet']
     if target_has_own_facet:
-        if 'target_ra' in dir_parset and 'target_dec' in dir_parset and 'target_radius_arcmin' in dir_parset:
+        if target_ra is not None and target_dec is not None and target_radius_arcmin is not None:
             # Make target object
-            target = Direction('target', dir_parset['target_ra'], dir_parset['target_dec'],
+            target = Direction('target', target_ra, target_dec,
                 factor_working_dir=parset['dir_working'])
 
-            # Check if target is already in directions list. If so, remove it
-            nearest = factor.directions.find_nearest(target, directions)
-            dist = factor.directions.calculateSeparation(target.ra, target.dec,
-                nearest.ra, nearest.dec)
-            if dist.value < dir_parset['target_radius_arcmin']/60.0:
+            # Check if target is already in directions list because it was
+            # selected as a DDE calibrator. If so, remove the duplicate
+            nearest, dist = factor.directions.find_nearest(target, directions)
+            if dist < dir_parset['target_radius_arcmin']/60.0:
                 directions.remove(nearest)
 
             # Add target to directions list
@@ -466,58 +555,18 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
             log.critical('target_has_own_facet = True, but target RA, Dec, or radius not found in parset')
             sys.exit(1)
 
-    if 'target_ra' in dir_parset and 'target_dec' in dir_parset and \
-        'target_radius_arcmin' in dir_parset:
-        target_ra = dir_parset['target_ra']
-        target_dec = dir_parset['target_dec']
-        target_radius_arcmin = dir_parset['target_radius_arcmin']
-    else:
-        target_ra = None
-        target_dec = None
-        target_radius_arcmin = None
-
-    factor.directions.thiessen(directions, band=bands[0],
-        check_edges=dir_parset['check_edges'], target_ra=target_ra,
-        target_dec=target_dec, target_radius_arcmin=target_radius_arcmin)
-
-    # Set various direction attributes
-    for i, direction in enumerate(directions):
-        # Set averaging steps
-        direction.set_averaging_steps(bands[0].chan_width_hz, bands[0].nchan,
-            bands[0].timepersample)
-
-        # Set image sizes
-        direction.set_image_sizes(test_run=test_run)
-
-        # Set number of bands and channels for images
-        direction.nbands = len(bands)
-        if direction.nbands > 5:
-            direction.nchannels = int(round(float(direction.nbands)/
-                float(parset['wsclean_nbands'])))
-        else:
-            direction.nchannels = 1
-
-        # Set field center
-        direction.field_ra = field.ra
-        direction.field_dec = field.dec
-
-        # Set reimage flag
-        if parset['reimage']:
-            direction.make_final_image = True
-
-        # Load previously completed steps (if any)
-        direction.load_state()
-
-        # Reset state if specified
-        if direction.name in reset_directions:
-            direction.do_reset = True
-        else:
-            direction.do_reset = False
+    # Create facets and patches
+    faceting_radius_deg = dir_parset['faceting_radius_deg']
+    factor.directions.thiessen(directions, ref_band.ra, ref_band.dec,
+        s=initial_skymodel.copy(), check_edges=dir_parset['check_edges'],
+        target_ra=target_ra, target_dec=target_dec,
+        target_radius_arcmin=target_radius_arcmin,
+        faceting_radius_deg=faceting_radius_deg)
 
     # Warn user if they've specified a direction to reset that does not exist
     direction_names = [d.name for d in directions]
     for name in reset_directions:
-        if name not in direction_names:
+        if name not in direction_names and name != 'field':
             log.warn('Direction {} was specified for resetting but does not '
                 'exist in current list of directions'.format(name))
 
@@ -539,35 +588,56 @@ def _set_up_directions(parset, bands, field, log, dry_run=False, test_run=False,
             log.info('Exiting...')
             sys.exit()
 
+    # Load previously completed operations (if any) and save the state
+    for direction in directions:
+        direction.load_state()
+        direction.save_state()
+
     # Select subset of directions to process
-    if 'ndir_total' in parset['direction_specific']:
-        if parset['direction_specific']['ndir_total'] > 0 and \
-            parset['direction_specific']['ndir_total'] <= len(directions):
-            directions = directions[:parset['direction_specific']['ndir_total']]
+    if dir_parset['ndir_total'] is not None:
+        if dir_parset['ndir_total'] < len(directions):
+            directions = directions[:dir_parset['ndir_total']]
+
+            # Make sure target is still included
+            direction_names = [d.name for d in directions]
+            if target_has_own_facet and 'target' not in direction_names:
+                directions.append(target)
+
+    # Set various direction attributes
+    log.info("Determining imaging parameters for each direction...")
+    for i, direction in enumerate(directions):
+        # Set imaging and calibration parameters
+        direction.set_imcal_parameters(len(bands), parset['wsclean_nbands'],
+        	bands[0].chan_width_hz, bands[0].nchan, bands[0].timepersample,
+        	bands[0].nsamples, len(bands), initial_skymodel,
+        	parset['preaverage_flux_jy'])
+
+        # Set field center
+        direction.field_ra = field.ra
+        direction.field_dec = field.dec
+
+        # Set global re-image flag
+        direction.make_final_image = dir_parset['reimage']
+
+        # Reset state if specified
+        if direction.name in reset_directions:
+            direction.do_reset = True
+        else:
+            direction.do_reset = False
 
     # Select subset of directions to selfcal
     if target_has_own_facet:
-        # Make sure target is not a DDE calibrator
+        # Make sure target is not a DDE calibrator and is at end of directions list
         selfcal_directions = [d for d in directions if d.name != target.name]
+        directions = selfcal_directions[:] + [target]
     else:
         selfcal_directions = directions
-    if 'ndir_selfcal' in parset['direction_specific']:
-        if parset['direction_specific']['ndir_selfcal'] > 0 and \
-            parset['direction_specific']['ndir_selfcal'] <= len(selfcal_directions):
-            selfcal_directions = selfcal_directions[:parset['direction_specific']['ndir_selfcal']]
+    if dir_parset['ndir_selfcal'] is not None:
+        if dir_parset['ndir_selfcal'] <= len(selfcal_directions):
+            selfcal_directions = selfcal_directions[:dir_parset['ndir_selfcal']]
 
     # Divide directions into groups for selfcal
     direction_groups = factor.directions.group_directions(selfcal_directions,
-        one_at_a_time=parset['direction_specific']['one_at_a_time'],
-        n_per_grouping=parset['direction_specific']['groupings'],
-        allow_reordering=parset['direction_specific']['allow_reordering'])
-
-    # Ensure that target is included in the directions to process if desired
-    # (but not for selfcal), just in case it was excluded by one of the cuts
-    # above
-    if target_has_own_facet:
-        names = [d.name for d in directions]
-        if target.name not in names:
-            directions.append(target)
+        n_per_grouping=dir_parset['groupings'], allow_reordering=dir_parset['allow_reordering'])
 
     return directions, direction_groups

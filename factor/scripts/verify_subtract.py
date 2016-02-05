@@ -9,7 +9,7 @@ import pyrap.images as pim
 import os
 
 
-def main(image_pre, image_post, res_val, max_factor=0.8):
+def main(image_pre, image_post, res_val, max_factor=0.5):
     """
     Verify subtraction by checking quantities in residual images
 

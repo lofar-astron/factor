@@ -1,5 +1,5 @@
 """
-Module that holds all compute cluster-related functions
+Module that holds all compute-cluster-related functions
 """
 import os
 import logging
@@ -84,9 +84,6 @@ def find_executables(parset):
     executables = {'genericpipeline_executable': ['genericpipeline2.py', 'genericpipeline.py'],
                    'casa_executable': ['casapy', 'casa'],
                    'wsclean_executable': ['wsclean'],
-#                    'losoto_executable': ['losoto.py'],
-#                    'H5parm_importer_executable': ['H5parm_importer.py'],
-#                    'H5parm_exporter_executable': ['H5parm_exporter.py'],
                    'image2fits_executable': ['image2fits']}
     for key, names in executables.iteritems():
         for name in names:
@@ -101,7 +98,7 @@ def find_executables(parset):
 
 
 def divide_nodes(directions, node_list, ndir_per_node, nimg_per_node, ncpu_max,
-    fmem_max):
+    fmem_max, nbands):
     """
     Divide up nodes and cpus for parallel operations
 
@@ -113,10 +110,14 @@ def divide_nodes(directions, node_list, ndir_per_node, nimg_per_node, ncpu_max,
         List of node names to divide among the directions
     ndir_per_node : int
         Number of directions per node
+    nimg_per_node : int
+        Number of images per node
     ncpu_max : int
         Max number of CPUs per node
     fmem_max : float
         Max fraction of memory per node
+    nbands : int
+        Number of bands
 
     Returns
     -------
@@ -144,15 +145,20 @@ def divide_nodes(directions, node_list, ndir_per_node, nimg_per_node, ncpu_max,
             ndir_per_node = min(ndir_per_node, c[h[0]])
         else:
             ndir_per_node = 1
-        d.max_cpus_per_node = int(round(ncpu_max / float(ndir_per_node)))
-        d.max_cpus_per_img = int(round(ncpu_max / float(nimg_per_node)))
+        d.nimg_per_node = nimg_per_node
+        d.max_cpus_per_node =  max(1, int(round(ncpu_max / float(ndir_per_node))))
+        d.max_cpus_per_img =  max(1, int(round(ncpu_max / float(nimg_per_node))))
+        nchunks_per_node = max(1, int(round(float(d.nchunks) / len(d.hosts))))
+        d.max_cpus_per_chunk = int(round(d.max_cpus_per_node / nchunks_per_node))
+        d.max_cpus_per_band = max(1, int(round(d.max_cpus_per_node *
+            len(d.hosts) / float(nbands))))
         d.max_percent_memory = fmem_max / float(ndir_per_node) / float(nimg_per_node) * 100.0
         d.save_state()
 
     return directions
 
 
-def combine_nodes(directions, node_list, ncpu_max, fmem_max):
+def combine_nodes(directions, node_list, nimg_per_node, ncpu_max, fmem_max, nbands):
     """
     Conbine nodes and cpus for serial operations
 
@@ -162,10 +168,14 @@ def combine_nodes(directions, node_list, ncpu_max, fmem_max):
         List of Direction objects
     node_list : list
         List of node names
+    nimg_per_node : int
+        Number of images per node
     ncpu_max : int
         Max number of CPUs per node
     fmem_max : float
         Max fraction of memory per node
+    nbands : int
+        Number of bands
 
     Returns
     -------
@@ -176,8 +186,14 @@ def combine_nodes(directions, node_list, ncpu_max, fmem_max):
     # Give each direction all resources
     for d in directions:
         d.hosts = node_list
+        d.nimg_per_node = nimg_per_node
         d.max_cpus_per_node = ncpu_max
-        d.max_percent_memory = fmem_max * 100.0
+        d.max_cpus_per_img =  max(1, int(round(ncpu_max / float(nimg_per_node))))
+        nchunks_per_node = max(1, int(round(float(d.nchunks) / len(d.hosts))))
+        d.max_cpus_per_chunk = max(1, int(round(d.max_cpus_per_node /
+            float(nchunks_per_node))))
+        d.max_cpus_per_band = max(1, int(round(ncpu_max * len(d.hosts) / float(nbands))))
+        d.max_percent_memory = fmem_max / float(nimg_per_node) * 100.0
         d.save_state()
 
     return directions

@@ -4,13 +4,7 @@ Subtract Facet Sources Operation
 ================================
 
 This section describes the facet subtract operation of Factor, denoted
-``facetsub``, which subtracts all facet sources from the data. There are two possible pipeline parsets for this operation:
-
-``facetsub_pipeline.parset``
-    Full subtract operation. Facet sources are added to the empty data and then subtracted with the improved model and calibration from self calibration.
-
-``facetsub_single_pipeline.parset``
-    For use when the facet under consideration has been run singly (not in parallel) or is the first of a group of facets run in parallel. In this case, the full-res subtracted column from self calibration can be subtracted from the original data after phase shifting it back to the field center. For the other facets in a group, the facet sources have to be added and subtracted to pick up the improved subtracted data from the other directions in the group.
+``facetsub``, which subtracts all facet sources from the data.
 
 .. note::
 
@@ -37,9 +31,6 @@ Pipeline Steps
     add_all_facet_sources
         Add all facet sources to the ``SUBTRACTED_DATA_ALL`` (or ``SUBTRACTED_DATA_ALL_NEW``) columns to make a ``FACET_DATA_ALL`` column.
 
-Test data
-    With ``Test_data/RX42_SB070-079.2ch10s.ms`` and  ``NEP_SB070-079.2ch10s.wsclean_low2-model.make_facet_skymodels_all`` in ``Test_run/results/facetadd/facet_patch_543/``, this step produces the ``FACET_DATA_ALL`` column in this MS file.
-
 
 Subtract sources
 ----------------
@@ -62,13 +53,6 @@ Pipeline Steps
 
     subtract
         Subtract the ``MODEL_DATA`` column from the ``SUBTRACTED_DATA_ALL`` (or ``SUBTRACTED_DATA_ALL_NEW``) column.
-
-    copy_shifted_map
-        Copy datamap for shifted model dataset to convenient location.
-
-Test data
-    With the phase-shifted facet all-source MS files (e.g., ``NEP_SB070-079.2ch10s.shift_all``) in ``Test_run/results/facetselfcal/facet_patch_543/``, this step produces the ``SUBTRACTED_DATA_ALL`` column
-    in ``Test_data/RX42_SB070-079.2ch10s.ms``.
 
 
 Partial subtract operation
@@ -96,13 +80,3 @@ Pipeline Steps
 
     shift_model_to_field
         Phase shift the ``MODEL_DATA`` column from self calibration back to the field center
-
-    copy_shifted_model_map
-        Copy datamap for shifted model dataset to convenient location.
-
-Test data
-    With the phase-shifted facet all-source MS files (e.g., ``NEP_SB070-079.2ch10s.shift_all``) in ``Test_run/results/facetselfcal/facet_patch_543/``, this step produces the ``SUBTRACTED_DATA_ALL`` column
-    in ``Test_data/RX42_SB070-079.2ch10s.ms``.
-
-
-

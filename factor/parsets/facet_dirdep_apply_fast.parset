@@ -1,4 +1,3 @@
-Strategy.InputColumn                        = FACET_DATA_ALL
 Strategy.ChunkSize                          = 200
 Strategy.Steps                              = [correct]
 

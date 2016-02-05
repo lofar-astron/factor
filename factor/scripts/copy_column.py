@@ -109,8 +109,8 @@ if __name__ == '__main__':
     descriptiontext = "Copy a column between MS files.\n"
 
     parser = argparse.ArgumentParser(description=descriptiontext, formatter_class=RawTextHelpFormatter)
-    parser.add_argument('ms_from', help='name of the MS file from copy from')
-    parser.add_argument('ms_to', help='name of the MS file from copy to')
+    parser.add_argument('ms_from', help='name of the MS file to copy from')
+    parser.add_argument('ms_to', help='name of the MS file to copy to')
     parser.add_argument('column_from', help='name of the column to copy from')
     parser.add_argument('column_to', help='name of the column to copy to')
     args = parser.parse_args()

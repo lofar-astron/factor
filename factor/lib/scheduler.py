@@ -8,6 +8,8 @@ import sys
 import imp
 from factor.lib.context import Timer
 
+log = logging.getLogger('factor:scheduler')
+
 
 def call_generic_pipeline(op_name, direction_name, parset, config, logbasename,
     genericpipeline_executable):
@@ -54,6 +56,8 @@ def call_generic_pipeline(op_name, direction_name, parset, config, logbasename,
         handler.setLevel(logging.DEBUG)
 
     # Run the pipeline, redirecting screen output to log files
+    log.info('<-- Operation {0} started (direction: {1})'.format(op_name,
+        direction_name))
     with open("{0}.out.log".format(logbasename), "wb") as out, \
         open("{0}.err.log".format(logbasename), "wb") as err:
         with RedirectStdStreams(stdout=out, stderr=err):
@@ -65,30 +69,26 @@ def call_generic_pipeline(op_name, direction_name, parset, config, logbasename,
 class Scheduler(object):
     """
     The scheduler runs all jobs sent to it in parallel
+
+    Parameters
+    ----------
+    genericpipeline_executable : str
+        Path to genericpipeline.py executable
+    max_procs : int, optional
+        Limit the number of parallel processes to this number
+    name : str, optional
+        Name of the scheduler
+    dry_run : bool, optional
+        If True, the pipelines are not run but all parsets and config files
+        are made as normal
+
     """
     def __init__(self, genericpipeline_executable, max_procs=1, name='scheduler',
         dry_run=False):
-        """
-        Create Scheduler object
-
-        Parameters
-        ----------
-        genericpipeline_executable : str
-            Path to genericpipeline.py executable
-        max_procs : int, optional
-            Limit the number of parallel processes to this number
-        name : str, optional
-            Name of the scheduler
-        dry_run : bool, optional
-            If True, the pipelines are not run but all parsets and config files
-            are made as normal
-
-        """
         self.genericpipeline_executable = genericpipeline_executable
         self.max_procs = max_procs
         self.name = name
         self.dry_run = dry_run
-        self.log = logging.getLogger('factor:{0}'.format(name))
         self.success = True
 
 
@@ -99,10 +99,26 @@ class Scheduler(object):
         op_name, direction_name, status = result
 
         if status == 0:
-            self.log.info('--> Operation {0} completed (direction: '
+            log.info('--> Operation {0} completed (direction: '
                 '{1})'.format(op_name, direction_name))
+
+            # Identify the current operation from the direction name
+            this_op = None
+            for op in self.operation_list:
+                if op.direction.name == direction_name:
+                    this_op = op
+                    break
+
+            # Finalize the operation
+            if this_op is not None:
+                this_op.finalize()
+                this_op.set_completed()
+            else:
+                log.error('Operation {0} (direction: {1}) not in list of active '
+                    'operations'.format(op_name, direction_name))
+                self.success = False
         else:
-            self.log.error('Operation {0} failed due to an error (direction: '
+            log.error('Operation {0} failed due to an error (direction: '
                 '{1})'.format(op_name, direction_name))
             self.success = False
 
@@ -121,30 +137,33 @@ class Scheduler(object):
             operation_list = [operation_list]
 
         # Set up the operation(s)
+        self.operation_list = operation_list
         for op in operation_list:
              op.setup()
 
         # Run the operation(s)
-        if not self.dry_run and len(operation_list) > 0:
-            with Timer(self.log, 'operation'):
+        if len(operation_list) > 0:
+            with Timer(log, 'operation'):
                 pool = multiprocessing.Pool(processes=self.max_procs)
                 for op in operation_list:
-                    self.log.info('<-- Operation {0} started (direction: {1})'.
-                        format(op.name, op.direction.name))
-                    pool.apply_async(call_generic_pipeline, (op.name,
-                    	op.direction.name, op.pipeline_parset_file,
-                    	op.pipeline_config_file, op.logbasename,
-                    	self.genericpipeline_executable),
-                    	callback=self.result_callback)
+                    if not self.dry_run and not op.check_completed():
+                        # Only run incomplete operations (and only if this is
+                        # not a dry run)
+                        op.set_started()
+                        pool.apply_async(call_generic_pipeline, (op.name,
+                            op.direction.name, op.pipeline_parset_file,
+                            op.pipeline_config_file, op.logbasename,
+                            self.genericpipeline_executable),
+                            callback=self.result_callback)
+                    else:
+                        # For completed operations or dry runs, run finalize() to
+                        # be sure that all attributes are set properly
+                        op.finalize()
+                        if not self.dry_run:
+                            op.set_completed()
                 pool.close()
                 pool.join()
 
             if not self.success:
-                self.log.error('One or more operations failed due to an error. Exiting...')
+                log.error('One or more operations failed due to an error. Exiting...')
                 sys.exit(1)
-
-        # Finalize the operations.
-        for op in operation_list:
-            op.finalize()
-            if not self.dry_run:
-                op.set_completed()

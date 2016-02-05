@@ -8,9 +8,10 @@ import pyrap.tables as pt
 import numpy as np
 import sys
 import os
+import shutil
 
 
-def main(dataset, blockl, clobber=True):
+def main(dataset, blockl, local_dir=None, clobber=True):
     """
     Split dataset into time chunks
 
@@ -20,6 +21,9 @@ def main(dataset, blockl, clobber=True):
         Name of MS file to split
     blockl : int
         Number of time slots per chunk
+    local_dir : str, optional
+        Path to local directory for output of t1.copy(). The file is then
+        copied to the original output directory
     clobber : bool, optional
         If True, existing files are overwritten
 
@@ -44,12 +48,24 @@ def main(dataset, blockl, clobber=True):
     t.close()
 
     nchunks = int(np.ceil((np.float(nsamples) / np.float(blockl))))
+
+    # Don't allow more than 15 chunks for performance reasons
+    while nchunks > 15:
+        blockl *= 2
+        nchunks = int(np.ceil((np.float(nsamples) / np.float(blockl))))
+
     tlen = timepersample * np.float(blockl) / 3600.0 # length of block in hours
     tobs = timepersample * nsamples / 3600.0 # length of obs in hours
 
+    # Copy to local directory if needed
+    dataset_original = dataset
+    if local_dir is not None:
+        dataset = os.path.join(local_dir, os.path.basename(dataset_original))
+        os.system('/usr/bin/rsync -a {0} {1}'.format(dataset_original, local_dir))
+
     files = []
     for c in range(nchunks):
-        chunk_file = '{0}_chunk{1}.ms'.format(os.path.splitext(dataset)[0], c)
+        chunk_file = '{0}_chunk{1}.ms'.format(os.path.splitext(dataset_original)[0], c)
         files.append(chunk_file)
         t0 = tlen * np.float(c) # hours
         t1 = t0 + tlen # hours
@@ -57,12 +73,15 @@ def main(dataset, blockl, clobber=True):
             t0 = -0.1 # make sure first chunk gets first slot
         if c == nchunks-1 and t1 < tobs:
             t1 = tobs + 0.1 # make sure last chunk gets all that remains
-        split_ms(dataset, chunk_file, t0, t1, clobber=clobber)
+        split_ms(dataset, chunk_file, t0, t1, local_dir, clobber=clobber)
+
+    if local_dir is not None and not os.path.samefile(dataset, dataset_original):
+        shutil.rmtree(dataset)
 
     return {'files': '[{0}]'.format(','.join(files))}
 
 
-def split_ms(msin, msout, start_out, end_out, clobber=True):
+def split_ms(msin, msout, start_out, end_out, local_dir, clobber=True):
     """
     Splits an MS between start and end times in hours relative to first time
 
@@ -76,6 +95,9 @@ def split_ms(msin, msout, start_out, end_out, clobber=True):
         Start time in hours relative to first time
     end_out : float
         End time in hours relative to first time
+    local_dir : str
+        Path to local directory for output of t1.copy(). The file is then
+        copied to the original output directory
     clobber : bool, optional
         If True, existing files are overwritten
 
@@ -86,6 +108,12 @@ def split_ms(msin, msout, start_out, end_out, clobber=True):
         else:
             return
 
+    msout_original = msout
+    if local_dir is not None:
+        msout = os.path.join(local_dir, os.path.basename(msout_original))
+        if os.path.exists(msout):
+            os.system('rm -rf {0}'.format(msout))
+
     t = pt.table(msin, ack=False)
     starttime = t[0]['TIME']
 
@@ -95,6 +123,12 @@ def split_ms(msin, msout, start_out, end_out, clobber=True):
     t1.copy(msout, True)
     t1.close()
     t.close()
+
+    if local_dir is not None:
+        msout_destination_dir = os.path.dirname(msout_original)
+        os.system('/usr/bin/rsync -a {0} {1}'.format(msout, msout_destination_dir))
+        if not os.path.samefile(msout, msout_original):
+            shutil.rmtree(msout)
 
 
 if __name__ == '__main__':
