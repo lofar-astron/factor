@@ -93,7 +93,7 @@ def make_template_image(image_name, reference_ra_deg, reference_dec_deg,
 
 
 def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, rmsbox=None,
-         iterate_threshold=False, adaptive_rmsbox=False, img_format='fits',
+         rmsbox_bright=(35, 7), iterate_threshold=False, adaptive_rmsbox=False, img_format='fits',
          threshold_format='float', trim_by=0.0, vertices_file=None, atrous_jmax=6,
          pad_to_size=None, skip_source_detection=False, region_file=None, nsig=5.0,
          reference_ra_deg=None, reference_dec_deg=None):
@@ -116,6 +116,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         Value of thresh_pix PyBDSM parameter
     rmsbox : tuple of floats, optional
         Value of rms_box PyBDSM parameter
+    rmsbox_bright : tuple of floats, optional
+        Value of rms_box_bright PyBDSM parameter
     iterate_threshold : bool, optional
         If True, threshold will be lower in 20% steps until
         at least one island is found
@@ -165,6 +167,9 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
 
     if rmsbox is not None and type(rmsbox) is str:
         rmsbox = eval(rmsbox)
+
+    if type(rmsbox_bright) is str:
+        rmsbox_bright = eval(rmsbox_bright)
 
     if pad_to_size is not None and type(pad_to_size) is str:
         pad_to_size = int(pad_to_size)
@@ -274,7 +279,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                                          thresh_pix=threshpix, thresh_isl=threshisl,
                                          atrous_do=atrous_do, ini_method='curvature', thresh='hard',
                                          adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150,
-                                         rms_box_bright=(35,7), rms_map=True, quiet=True,
+                                         rms_box_bright=rmsbox_bright, rms_map=True, quiet=True,
                                          atrous_jmax=atrous_jmax)
                 nisl = img.nisl
                 threshpix /= 1.2
@@ -286,7 +291,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                                      thresh_pix=threshpix, thresh_isl=threshisl,
                                      atrous_do=atrous_do, ini_method='curvature', thresh='hard',
                                      adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150,
-                                     rms_box_bright=(35,7), rms_map=True, quiet=True,
+                                     rms_box_bright=rmsbox_bright, rms_map=True, quiet=True,
                                      atrous_jmax=atrous_jmax)
 
         if img.nisl == 0:
