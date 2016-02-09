@@ -128,7 +128,7 @@ class MakeMosaic(Operation):
         # defined in the master Operation class and as attributes of the
         # direction object)
         self.parms_dict.update({'ms_files_single': input_files_single,
-                                'ms_files_grouped' : str(input_files) )
+                                'ms_files_grouped' : str(input_files) })
 
     def finalize(self):
         """

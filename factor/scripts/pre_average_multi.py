@@ -110,7 +110,7 @@ def main(ms_input, parmdb_input, input_colname, output_colname, target_rms_rad,
 
         sorted_ms_tuples = sorted(zip(start_times,end_times,range(len(ms_list)),ms_list))
         sorted_ms_dict = { 'msnames' :[ms for starttime,endtime,index,ms in sorted_ms_tuples],
-                           'starttimes' : [starttime for starttime,endtime,index,ms in sorted_ms_tuples]
+                           'starttimes' : [starttime for starttime,endtime,index,ms in sorted_ms_tuples],
                            'endtimes' : [endtime for starttime,endtime,index,ms in sorted_ms_tuples] }
 
         # Do pre-averaging using lowest ionfactor
