@@ -40,7 +40,7 @@ setup(
         'Topic :: Scientific/Engineering :: Astronomy',
         'Topic :: Software Development :: Libraries :: Python Modules',
         ],
-    install_requires=['numpy', 'scipy', 'astropy', 'jinja2', 'LSMTool', ],
+    install_requires=['numpy', 'scipy', 'astropy', 'jinja2', 'LSMTool>=1.1', ],
     dependency_links=['https://github.com/darafferty/LSMTool'],
     scripts = ['bin/runfactor'],
     packages=['factor', 'factor.operations', 'factor.lib'],
