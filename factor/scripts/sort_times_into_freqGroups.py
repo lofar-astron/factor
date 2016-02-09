@@ -144,16 +144,16 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
     return result
 
 def input2bool(invar):
-    if isinstsance(invar, bool):
+    if isinstance(invar, bool):
         return invar
-    elif isinstsance(invar, str):
+    elif isinstance(invar, str):
         if invar.upper() == 'TRUE' or invar == '1':
             return True
         elif invar.upper() == 'FALSE' or invar == '0': 
             return False
         else:
             raise ValueError('input2bool: Cannot convert string "'+invar+'" to boolean!')
-    elif isinstsance(invar, int) or isinstsance(invar, float):
+    elif isinstance(invar, int) or isinstance(invar, float):
         return bool(invar)
     else:
         raise TypeError('input2bool: Unsupported data type:'+str(type(invar)))

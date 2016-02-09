@@ -91,7 +91,7 @@ class Direction(object):
                 self.log.error('Calibrator clean-mask region file {} not found.'.format(region_selfcal))
                 sys.exit(1)
             self.region_selfcal = '["{0}"]'.format(region_selfcal)
-            self.log.info('Using calibrator clean-mask region file {}'.format(self.region_field))
+            self.log.info('Using calibrator clean-mask region file {}'.format(self.region_selfcal))
         self.region_field = region_field
         if self.region_field.lower() == 'empty':
             self.region_field = None

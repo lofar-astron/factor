@@ -614,7 +614,7 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
         # Set imaging and calibration parameters
         direction.set_imcal_parameters(parset['wsclean_nbands'],
         	bands[0].chan_width_hz, bands[0].nchan, bands[0].timepersample,
-        	bands[0].nsamples, len(bands), initial_skymodel,
+        	bands[0].minSamplesPerFile, len(bands), initial_skymodel,
         	parset['preaverage_flux_jy'])
 
         # Set field center

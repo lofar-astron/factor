@@ -476,7 +476,7 @@ def get_cluster_options(parset):
     # Check for unused options
     given_options = parset.options('cluster')
     allowed_options = ['ncpu', 'fmem', 'ndir_per_node', 'nimg_per_node',
-        'clusterdesc_file', 'dir_local', 'node_list']
+        'clusterdesc_file', 'cluster_type', 'dir_local', 'node_list']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [cluster] section of the '
