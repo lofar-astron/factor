@@ -1,5 +1,5 @@
 {% extends "facetselfcal_pipeline.parset" %}
-{% block full_image_steps %}concat_pre_averaged, premask, casa_image_full1, adjust_casa_mapfile6, mask5, casa_image_full2, create_model4_map, adjust_casa_mapfile7, regroup_shift_empty_map, concat_unaveraged, create_compressed_mapfile6, casa_ft4{% endblock full_image_steps %}
+{% block full_image_steps %}concat_pre_averaged, premask, casa_image_full1, adjust_casa_mapfile6, mask5, casa_image_full2, create_model4_map, adjust_casa_mapfile7, regroup_shift_empty_map, concat_unaveraged, create_compressed_mapfile6, casa_ft4,{% endblock full_image_steps %}
 {% block full_image_parms %}
 # virtaully concat the pre-averaged data, length = 1
 # pre-concatenating is needed so that the virtual_concat doesn't try to open too many files
