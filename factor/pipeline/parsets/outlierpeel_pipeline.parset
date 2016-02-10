@@ -151,7 +151,7 @@ switch_weights_col1.argument.flags                       =   [msfiles,WEIGHT_SPE
 
 solve_ampphase11.control.type                            =   calibrate-stand-alone_new
 solve_ampphase11.argument.observation                    =   create_chunks_map.output.mapfile
-solve_ampphase11.argument.parset                         =   {{ parset_dir }}/facet_dirdep_phaseonly_solve.parset
+solve_ampphase11.argument.parset                         =   {{ parset_dir }}/facet_dirdep_phaseonly_solve_skymodel.parset
 solve_ampphase11.argument.catalog                        =   {{ peel_skymodel }}
 solve_ampphase11.argument.replace-sourcedb               =   True
 solve_ampphase11.argument.replace-parmdb                 =   True
@@ -183,7 +183,7 @@ merge_phase_parmdbs.argument.flags                       =   [mslist,instrument,
 
 solve_ampphase12.control.type                            =   calibrate-stand-alone_new
 solve_ampphase12.argument.observation                    =   create_chunks_map.output.mapfile
-solve_ampphase12.argument.parset                         =   {{ parset_dir }}/facet_dirdep_amponly_solve.parset
+solve_ampphase12.argument.parset                         =   {{ parset_dir }}/facet_dirdep_amponly_solve_skymodel.parset
 solve_ampphase12.argument.catalog                        =   {{ peel_skymodel }}
 solve_ampphase12.argument.replace-sourcedb               =   True
 solve_ampphase12.argument.replace-parmdb                 =   True
