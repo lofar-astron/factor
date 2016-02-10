@@ -50,8 +50,6 @@ def main(mosaicfits, pbfits, outroot):
     ra0out = mosaichead.get('OBSRA')
     dec0out = mosaichead.get('OBSDEC')
 
-    #ncout,nfout,
-    #nc,nf,
     S = mosaicdat.shape
     if len(S) == 4:
         print "dim 4"
@@ -72,11 +70,7 @@ def main(mosaicfits, pbfits, outroot):
     pbcordat = pf.getdata(pbfits)
     pbhdulist = pf.open(pbfits)
     pbwcs = pywcs.WCS(pbhead)
-    #pbra0 = pbhead.get('OBSRA')
-    #pbdec0 = pbhead.get('OBSDEC')
 
-    #ncin,nfin,
-    #pbnc,pbnf,
     pbS = pbcordat.shape
     if len(pbS) == 4:
         print "dim 4"
@@ -91,19 +85,13 @@ def main(mosaicfits, pbfits, outroot):
 
     rescale = False
     if pbnx != nx:
-        #raise Exception, "coordinate mismatch"
         rescale = True
     if pbny != ny:
-        #raise Exception, "coordinate mismatch"
         rescale = True
 
     rescale = True
 
     if rescale:
-        #tt[[0,0,1,1,2,2],:][:,[0,0,1,1,2,2]]
-        print nx,ny
-        print pbnx, pbny
-
         # resample the pb image on the input image grid
         pbcordat_resampled = np.nan*np.ones_like(mosaicdat)
 
@@ -136,15 +124,9 @@ def main(mosaicfits, pbfits, outroot):
                 for i in range(ny):
                     # outside the pb coverage
                     if (pbx[i] < 0) or (pby[i] < 0 ) or (pbx[i] >= pbnx ) or (pby[i] >= pbny):
-                        #pbcordat_resampled[0,0,x[i],y[i]] = np.nan
                         pass
                     else:
-                        #pbcordat_resampled[0,0,x[i],y[i]] = pbcordat[0,0,pbx[i],pby[i]]
-                        #pbcordat_resampled[0,0,x[i],y[i]] = pbcordat[0,0,pbx[i],pby[i]]
                         pbcordat_resampled[0,0,y[i],x[i]] = pbcordat[0,0,pby[i],pbx[i]]
-                        # odd pixels are transposed? dont fully understand, seems to work but may be problematic later
-                        # not actually - was a bug
-                        # still a bug... pby and pbx should be transposed
 
         elif ndim == 2:
             print "resampling pb image... this may take a while"
@@ -154,11 +136,9 @@ def main(mosaicfits, pbfits, outroot):
                 if 100*xi/nx > prog:
                     prog = 100*xi/nx
                     if prog%10 == 0:
-                        #print prog ,
                         sys.stdout.write(str(prog))
                         sys.stdout.flush()
                     else:
-                        #print '.',
                         sys.stdout.write('.')
                         sys.stdout.flush()
                 x = xi*np.ones(ny)
@@ -173,14 +153,12 @@ def main(mosaicfits, pbfits, outroot):
                 for i in range(ny):
                     # outside the pb coverage
                     if (pbx[i] < 0) or (pby[i] < 0 ) or (pbx[i] >= pbnx ) or (pby[i] >= pbny):
-                        #pbcordat_resampled[0,0,x[i],y[i]] = np.nan
                         pass
                     else:
                         pbcordat_resampled[y[i],x[i]] = pbcordat[pbx[i],pby[i]]
 
     Pcut = 0.4  # cut at Pcut power point of PB
     if rescale:
-        #pbcordat_resampled[pbcordat_resampled<0.025] = np.nan  # set nan beyond
         pbcordat_resampled[pbcordat_resampled**0.5<Pcut] = np.nan  # set nan beyond
         mosaiccut[pbcordat_resampled**0.5<Pcut] = np.nan  # set nan beyond
         mosaiccut[np.isnan(pbcordat_resampled)] = np.nan  # set nan beyond
