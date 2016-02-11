@@ -104,6 +104,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     	dry_run, test_run, reset_directions)
 
     # Run peeling and subtract operations on outlier directions
+    set_sub_data_colname = True
     outlier_directions = [d for d in directions if d.is_outlier]
     if len(outlier_directions) > 0:
         # Combine the nodes and cores for the peeling and subtract operation
@@ -122,8 +123,15 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             op = OutlierSub(parset, bands, d)
             scheduler.run(op)
 
+            if set_sub_data_colname:
+                # Set the name of the subtracted data column for remaining
+                # directions
+                for direction in directions:
+                    if direction.name != d.name:
+                        direction.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
+                set_sub_data_colname = False
+
     # Run selfcal and subtract operations on direction groups
-    set_sub_data_colname = True
     for gindx, direction_group in enumerate(direction_groups):
         log.info('Processing {0} direction(s) in Group {1}'.format(
             len(direction_group), gindx+1))
@@ -183,6 +191,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 d.selfcal_ok = True
         direction_group_ok = [d for d in direction_group if d.selfcal_ok]
         if set_sub_data_colname:
+            # Set the name of the subtracted data column for remaining
+            # directions (if needed)
             if len(direction_group_ok) > 0:
                 for d in directions:
                     if d.name != direction_group_ok[0].name:
@@ -605,13 +615,15 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
         else:
             direction.do_reset = False
 
-    # Select subset of directions to selfcal
+    # Select directions to selfcal, excluding outliers and target
     if target_has_own_facet:
         # Make sure target is not a DDE calibrator and is at end of directions list
-        selfcal_directions = [d for d in directions if d.name != target.name]
-        directions = selfcal_directions[:] + [target]
+        selfcal_directions = [d for d in directions if d.name != target.name and
+                              not d.is_outlier]
+        directions = [d for d in directions if d.name != target.name] + [target]
     else:
-        selfcal_directions = directions
+        selfcal_directions = [d for d in directions if not d.is_outlier]
+
     if dir_parset['ndir_selfcal'] is not None:
         if dir_parset['ndir_selfcal'] <= len(selfcal_directions):
             selfcal_directions = selfcal_directions[:dir_parset['ndir_selfcal']]
