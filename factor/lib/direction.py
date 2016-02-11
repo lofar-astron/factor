@@ -167,6 +167,29 @@ class Direction(object):
     	preaverage_flux_jy=0.0):
         """
         Sets various parameters for imaging and calibration
+
+        Parameters
+        ----------
+        nbands_per_channel : int
+            Number of bands per output channel (WSClean only)
+        nchan_per_band : int
+            Number of channels per band
+        chan_width_hz : float
+            Channel width in Hz
+        nchan : int
+            Number of channels per band
+        timestep_sec : float
+            Time step
+        ntimes : int
+            Number of timeslots per band
+        nbands : int
+            Number of bands
+        initial_skymodel : LSMTool SkyModel object, optional
+            Sky model used to check source sizes
+        preaverage_flux_jy : bool, optional
+            Use baseline-dependent averaging and solint_time_p = 1 for phase-only
+            calibration for sources below this flux value
+
         """
         self.set_imaging_parameters(nbands, nbands_per_channel, nchan,
             initial_skymodel)
