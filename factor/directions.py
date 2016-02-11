@@ -134,7 +134,7 @@ def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
     s : LSMTool SkyModel object
         Skymodel made by grouping clean components of dir-independent model
     flux_min_Jy : float
-        Minimum flux for a calibrator in Jy
+        Minimum flux density for a calibrator in Jy
     size_max_arcmin : float
         Maximum size for a calibrator in arcmin
     directions_separation_max_arcmin : float
@@ -166,9 +166,9 @@ def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
     # Filter fainter patches
     s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='sum', force=True)
     if len(s) == 0:
-        log.critical("No sources found that meet the specified min flux criteria.")
+        log.critical("No sources found that meet the specified min flux density criteria.")
         sys.exit(1)
-    log.info('Found {0} sources with fluxes above {1} Jy'.format(
+    log.info('Found {0} sources with flux densities above {1} Jy'.format(
         len(s.getPatchNames()), flux_min_Jy))
 
     # Look for nearby pairs
@@ -567,9 +567,11 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
         # Make calibrator patch
         sx, sy = radec2xy([d.ra], [d.dec], refRA=field_ra_deg, refDec=field_dec_deg)
 
-        # Compute size of patch in pixels, with a factor of 1 / 1.2 so that
-        # sources are not added along the edges
-        patch_width = d.cal_imsize / 1.2 * d.cellsize_selfcal_deg / 0.066667
+        # Compute size of patch in pixels, with a factor of 0.8 so that
+        # sources are not added along the edges (the areas outside of this 80%
+        # region are masked during imaging in the make_clean_mask() call with
+        # trim_by = 0.2
+        patch_width = d.cal_imsize * 0.8 * d.cellsize_selfcal_deg / 0.066667
         x0 = sx[0] - patch_width / 2.0
         y0 = sy[0] - patch_width / 2.0
         selfcal_poly = [np.array([x0, y0]),
