@@ -4,11 +4,7 @@ Script to make a clean mask
 """
 import argparse
 from argparse import RawTextHelpFormatter
-try:
-    # Temp version of PyBDSM that uses faster fftconvolve
-    from lofar2 import bdsm
-except ImportError:
-    from lofar import bdsm
+from lofar import bdsm
 import pyrap.images as pim
 from astropy.io import fits as pyfits
 import pickle
@@ -386,8 +382,11 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         new_mask.putdata(data)
         if img_format == 'fits':
             new_mask.tofits(mask_name, overwrite=True)
-        else:
+        elif img_format == 'casa':
             new_mask.saveas(mask_name, overwrite=True)
+        else:
+            print('Output image format "{}" not understood.'.format(img_format))
+            sys.exit(1)
 
     if not skip_source_detection:
         if threshold_format == 'float':
