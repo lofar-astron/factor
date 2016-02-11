@@ -1726,7 +1726,7 @@ wsclean_pre.argument.j                                     =   {{ max_cpus_per_n
 # make compressed mapfile of new empty data, length = 1
 average_post_compressed_map.control.kind                   =   plugin
 average_post_compressed_map.control.type                   =   compressMapfile
-average_post_compressed_map.control.mapfile_in             =   average_pre.output.mapfile
+average_post_compressed_map.control.mapfile_in             =   average_post.output.mapfile
 average_post_compressed_map.control.mapfile_dir            =   input.output.mapfile_dir
 average_post_compressed_map.control.filename               =   average_post_compressed.mapfile
 

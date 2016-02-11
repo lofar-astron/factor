@@ -73,7 +73,7 @@ class FacetSelfcal(Operation):
 
         # Add output datamaps to direction object for later use
         self.direction.input_files_single_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'input_files_single.datamap')
+            'input_files_single.mapfile')
         self.direction.shifted_model_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'corrupt_final_model.mapfile')
         self.direction.diff_models_field_mapfile = os.path.join(self.pipeline_mapfile_dir,
