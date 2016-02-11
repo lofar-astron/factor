@@ -58,7 +58,7 @@ class Direction(object):
     cal_size_deg : float, optional
         Size in degrees of calibrator source(s)
     cal_flux_jy : float, optional
-        Apparent flux in Jy of calibrator source
+        Apparent flux density in Jy of calibrator source
 
     """
     def __init__(self, name, ra, dec, atrous_do=False, mscale_field_do=False,

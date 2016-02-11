@@ -52,23 +52,24 @@ keep_avg_facet_data = False
 keep_unavg_facet_data = False
 
 # Use baseline-dependent preaveraging to increase the signal-to-noise of the
-# phase-only solve for sources below this flux (default = 0.0; i.e., disabled).
-# When activated, averaging in time is done to exploit the time coherence in the
-# TEC solutions
+# phase-only solve for sources below this flux density (default = 0.0; i.e.,
+# disabled). When activated, averaging in time is done to exploit the time
+# coherence in the TEC solutions
 preaverage_flux_Jy = 1.0
 
 
 [directions]
 # Full path to file containing calibrator directions. If not given, directions
-# are selected internally using the flux and size cuts below
+# are selected internally using the flux density and size cuts below
 directions_file = /data/directions.txt
 
 # Radius from phase center within which to consider sources as potential
 # calibrators (default = 2 * FWHM of primary beam of highest-frequency band)
 max_radius_deg = 5.0
 
-# Min flux, max size of a source, and max separation between sources below which
-# they are grouped into one direction; required if no directions_file is given
+# Min flux density, max size of a source, and max separation between sources
+# below which they are grouped into one direction; required if no
+# directions_file is given
 flux_min_Jy = 0.3
 size_max_arcmin = 2.0
 separation_max_arcmin = 6.0
