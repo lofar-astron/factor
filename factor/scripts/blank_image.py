@@ -112,8 +112,6 @@ def main(input_image_file, vertices_file, output_image_file, blank_value='zero',
 
         # Save changes
         new_im.putdata(data)
-        if image_is_casa_model:
-
         if img_format == 'fits':
             new_im.tofits(output_image, overwrite=True)
         elif img_format == 'casa':
