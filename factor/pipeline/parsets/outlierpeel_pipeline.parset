@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, add_all_facet_sources, shift_and_average,  create_compressed_mapfile, check_for_missing_bands, concat_data, {% if pre_average %} pre_average, concat_blavg_data, copy_column1, copy_column2, {% endif %} make_chunks, create_chunks_map, switch_weights_col1, solve_ampphase11, switch_weights_col2, apply_ampphase11, create_chunks_compressed_mapfile, merge_phase_parmdbs, solve_ampphase12, merge_amp_parmdbs, smooth_amps, merge_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, create_outlier_skymodel_map, make_sourcedb_outlier_model, expand_sourcedb_outlier_map, predict_outlier_model, corrupt_outlier_model, subtract_outlier_model, create_single_pre_band_mapfile, create_single_post_band_mapfile, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, add_all_facet_sources, shift_and_average,  create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_data, concat_data_compressed_mapfile, {% if pre_average %} regroup_shift_and_average, regroup_parmdb, pre_average, make_blavg_data_mapfile, concat_blavg_data, copy_column1, copy_column2, {% endif %} switch_weights_col1, solve_ampphase11, switch_weights_col2, apply_ampphase11, merge_phase_parmdbs, solve_ampphase12, merge_amp_parmdbs, smooth_amps, merge_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, create_outlier_skymodel_map, make_sourcedb_outlier_model, expand_sourcedb_outlier_map, predict_outlier_model, corrupt_outlier_model, subtract_outlier_model, create_middle_pre_band_mapfile, create_middle_post_mapfile, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                      =   {{ pipeline_dir }}/plugins
 
@@ -131,20 +131,51 @@ concat_data.argument.msout.writefullresflag              =   False
 concat_data.argument.local_scratch_dir                   =   {{ local_dir }}
 concat_data.argument.steps                               =   []
 
+# make compressed mapfile for concatenated data MSs, length = 1
+concat_data_compressed_mapfile.control.kind              =   plugin
+concat_data_compressed_mapfile.control.type              =   compressMapfile
+concat_data_compressed_mapfile.control.mapfile_in        =   concat_data.output.mapfile
+concat_data_compressed_mapfile.control.mapfile_dir       =   input.output.mapfile_dir
+concat_data_compressed_mapfile.control.filename          =   concat_chunks_input.mapfile
+
 {% if pre_average %}
+# re-group shift_and_average mapfile to have one group per band, length = nbands
+regroup_shift_and_average.control.kind                   =   plugin
+regroup_shift_and_average.control.type                   =   reGroupMapfile
+regroup_shift_and_average.control.mapfile_in             =   shift_and_average.output.mapfile
+regroup_shift_and_average.control.mapfile_groups         =   create_msmulti_map.output.mapfile
+regroup_shift_and_average.control.mapfile_dir            =   input.output.mapfile_dir
+regroup_shift_and_average.control.filename               =   re_grouped_shift_and_average.mapfile
 
+# re-group dir-independent parmdb mapfile to have one group per band, length = nbands
+regroup_parmdb.control.kind                              =   plugin
+regroup_parmdb.control.type                              =   reGroupMapfile
+regroup_parmdb.control.mapfile_in                        =   create_parmdb_map.output.mapfile
+regroup_parmdb.control.mapfile_groups                    =   create_msmulti_map.output.mapfile
+regroup_parmdb.control.mapfile_dir                       =   input.output.mapfile_dir
+regroup_parmdb.control.filename                          =   re_grouped_parmdb.mapfile
 
-# Do the baseline-dependent preaveraging. This must be done after concatenation
+# Do the baseline-dependent preaveraging. This must be done after concatenation  // length = nbands
 # of DATA in the previous step so that we can safely overwrite the
 # WEIGHT_SPECTRUM column
 pre_average.control.type                                 =   pre_average
-pre_average.control.mapfiles_in                          =   [shift_and_average.output.mapfile,create_parmdb_map.output.mapfile]
+pre_average.control.mapfiles_in                          =   [regroup_shift_and_average.output.mapfile,regroup_parmdb.output.mapfile]
 pre_average.control.inputkeys                            =   [datafile,parmdb]
 pre_average.argument.flags                               =   [datafile,parmdb,DATA,BLAVG_DATA,{{ target_rms_rad }}]
 
-# Concat the preaveraged data (and weights)
+# make mapfile for concatenated corrected data, length = ntimes
+make_blavg_data_mapfile.control.kind                     =  plugin
+make_blavg_data_mapfile.control.type                     =  createMapfile
+make_blavg_data_mapfile.control.method                   =  add_suffix_to_file
+make_blavg_data_mapfile.control.mapfile_in               =  sort_into_Groups_maps.output.groupmap
+make_blavg_data_mapfile.control.add_suffix_to_file       =  "_blavg.ms"     
+make_blavg_data_mapfile.control.mapfile_dir              =  input.output.mapfile_dir
+make_blavg_data_mapfile.control.filename                 =  make_blavg_data.mapfile
+
+# Concat the preaveraged data (and weights), len = ntimes
 concat_blavg_data.control.type                           =   dppp
-concat_blavg_data.control.mapfile_in                     =   check_for_missing_bands.output.padded_list.mapfile
+concat_blavg_data.control.mapfile_out                    =   make_blavg_data_mapfile.output.mapfile
+concat_blavg_data.control.mapfile_in                     =   sort_into_Groups_maps.output.filesmap
 concat_blavg_data.control.inputkey                       =   msin
 concat_blavg_data.argument.numthreads                    =   {{ max_cpus_per_node }}
 concat_blavg_data.argument.msin.datacolumn               =   BLAVG_DATA
@@ -155,38 +186,28 @@ concat_blavg_data.argument.msout.writefullresflag        =   False
 concat_blavg_data.argument.local_scratch_dir             =   {{ local_dir }}
 concat_blavg_data.argument.steps                         =   []
 
-# Copy BLAVG_DATA
+# Copy BLAVG_DATA, length = ntimes
 copy_column1.control.type                                =   copy_column
 copy_column1.control.mapfiles_in                         =   [concat_blavg_data.output.mapfile,concat_data.output.mapfile]
 copy_column1.control.inputkeys                           =   [blavgfile,datafile]
 copy_column1.argument.flags                              =   [blavgfile,datafile,DATA,BLAVG_DATA]
 
-# Copy BLAVG_WEIGHT_SPECTRUM
+# Copy BLAVG_WEIGHT_SPECTRUM, length = ntimes
 copy_column2.control.type                                =   copy_column
 copy_column2.control.mapfiles_in                         =   [concat_blavg_data.output.mapfile,concat_data.output.mapfile]
 copy_column2.control.inputkeys                           =   [blavgfile,datafile]
 copy_column2.argument.flags                              =   [blavgfile,datafile,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 {% endif %}
 
-make_chunks.control.type                                 =   chunk_by_time
-make_chunks.control.mapfile_in                           =   concat_data.output.mapfile
-make_chunks.control.inputkey                             =   msfile
-make_chunks.argument.flags                               =   [msfile,{{ chunk_width }},{{ local_dir }}]
-
-create_chunks_map.control.kind                           =   plugin
-create_chunks_map.control.type                           =   addListMapfile
-create_chunks_map.control.files                          =   make_chunks.output.files.mapfile
-create_chunks_map.control.hosts                          =   {{ hosts }}
-create_chunks_map.control.mapfile_dir                    =   input.output.mapfile_dir
-create_chunks_map.control.filename                       =   chunk_files.mapfile
-
+# switch "normal" weights with block-average weigthts, length = ntimes
 switch_weights_col1.control.type                         =   switch_columns
-switch_weights_col1.control.mapfile_in                   =   create_chunks_map.output.mapfile
+switch_weights_col1.control.mapfile_in                   =   concat_data.output.mapfile
 switch_weights_col1.control.inputkey                     =   msfiles
 switch_weights_col1.argument.flags                       =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
+# run BBS on freq-concatenated files to solve for (fast) phases, length = ntimes
 solve_ampphase11.control.type                            =   calibrate-stand-alone_new
-solve_ampphase11.argument.observation                    =   create_chunks_map.output.mapfile
+solve_ampphase11.argument.observation                    =   concat_data.output.mapfile
 solve_ampphase11.argument.parset                         =   {{ parset_dir }}/facet_dirdep_phaseonly_solve_skymodel.parset
 solve_ampphase11.argument.catalog                        =   {{ peel_skymodel }}
 solve_ampphase11.argument.replace-sourcedb               =   True
@@ -195,28 +216,26 @@ solve_ampphase11.argument.Strategy.InputColumn           =   {{ data_column }}
 solve_ampphase11.argument.Step.solve.Solve.CellSize.Time =   {{ solint_time_p }}
 solve_ampphase11.argument.Step.solve.Solve.CellSize.Freq =   {{ solint_freq_p }}
 
+# switch the weights back, length = ntimes
 switch_weights_col2.control.type                         =   switch_columns
-switch_weights_col2.control.mapfile_in                   =   create_chunks_map.output.mapfile
+switch_weights_col2.control.mapfile_in                   =   concat_data.output.mapfile
 switch_weights_col2.control.inputkey                     =   msfiles
 switch_weights_col2.argument.flags                       =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
+# apply the phase-only solutions from the previous BBS-run, length = ntimes
 apply_ampphase11.control.type                            =   calibrate-stand-alone_new
-apply_ampphase11.argument.observation                    =   create_chunks_map.output.mapfile
+apply_ampphase11.argument.observation                    =   concat_data.output.mapfile
 apply_ampphase11.argument.parset                         =   {{ parset_dir }}/facet_dirdep_phaseonly_apply.parset
 apply_ampphase11.argument.catalog                        =   {{ skymodel_dir }}/empty.skymodel
 
-create_chunks_compressed_mapfile.control.kind            =   plugin
-create_chunks_compressed_mapfile.control.type            =   compressMapfile
-create_chunks_compressed_mapfile.control.mapfile_in      =   create_chunks_map.output.mapfile
-create_chunks_compressed_mapfile.control.mapfile_dir     =   input.output.mapfile_dir
-create_chunks_compressed_mapfile.control.filename        =   concat_chunks_input.mapfile
-
+# merge the parmDBs with the phase solutions into one, length = 1
 merge_phase_parmdbs.control.type                         =   merge_parmdbs_in_time
-merge_phase_parmdbs.control.mapfile_in                   =   create_chunks_compressed_mapfile.output.mapfile
+merge_phase_parmdbs.control.mapfile_in                   =   concat_data_compressed_mapfile.output.mapfile
 merge_phase_parmdbs.control.inputkey                     =   mslist
 merge_phase_parmdbs.control.outputkey                    =   outparmdb
 merge_phase_parmdbs.argument.flags                       =   [mslist,instrument,outparmdb]
 
+# run BBS on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
 solve_ampphase12.control.type                            =   calibrate-stand-alone_new
 solve_ampphase12.argument.observation                    =   create_chunks_map.output.mapfile
 solve_ampphase12.argument.parset                         =   {{ parset_dir }}/facet_dirdep_amponly_solve_skymodel.parset
@@ -226,13 +245,14 @@ solve_ampphase12.argument.replace-parmdb                 =   True
 solve_ampphase12.argument.Step.solve.Solve.CellSize.Time =   {{ solint_time_a }}
 solve_ampphase12.argument.Step.solve.Solve.CellSize.Freq =   {{ solint_freq_a }}
 
+# merge the parmDBs with the amplitude solutions into one, length = 1
 merge_amp_parmdbs.control.type                           =   merge_parmdbs_in_time
-merge_amp_parmdbs.control.mapfile_in                     =   create_chunks_compressed_mapfile.output.mapfile
+merge_amp_parmdbs.control.mapfile_in                     =   concat_data_compressed_mapfile.output.mapfile
 merge_amp_parmdbs.control.inputkey                       =   mslist
 merge_amp_parmdbs.control.outputkey                      =   outparmdb
 merge_amp_parmdbs.argument.flags                         =   [mslist,instrument,outparmdb]
 
-# Smooth the amplitude solutions, but do not normalize them as the sky model is
+# Smooth the amplitude solutions, but do not normalize them as the sky model is  // length = 1
 # in absolute flux and not apparent flux
 smooth_amps.control.type                                 =   smooth_amps
 smooth_amps.control.mapfile_in                           =   merge_amp_parmdbs.output.mapfile
@@ -241,18 +261,21 @@ smooth_amps.control.outputkey                            =   outparmdb
 smooth_amps.control.arguments                            =   [ampparmdb,outparmdb]
 smooth_amps.argument.normalize                           =   False
 
+# merge the phases and amplitudes parmDBs, length = 1
 merge_selfcal_parmdbs.control.type                       =   merge_parmdbs_selfcal
 merge_selfcal_parmdbs.control.mapfiles_in                =   [merge_phase_parmdbs.output.mapfile,smooth_amps.output.mapfile]
 merge_selfcal_parmdbs.control.inputkeys                  =   [parmdb_p,parmdb_a]
 merge_selfcal_parmdbs.control.outputkey                  =   parmdb_out
 merge_selfcal_parmdbs.argument.flags                     =   [parmdb_p,parmdb_a,parmdb_out]
 
+# make plots of the selfcal results from the marged parmDB, length = 1
 make_selfcal_plots.control.type                          =   make_selfcal_plots
 make_selfcal_plots.control.mapfile_in                    =   merge_selfcal_parmdbs.output.mapfile
 make_selfcal_plots.control.inputkeys                     =   parmdb
 make_selfcal_plots.control.outputkey                     =   plots_root
 make_selfcal_plots.argument.flags                        =   [parmdb,plots_root]
 
+# expand the merged parmDB to all files, length = nfiles
 expand_merged_parmdb_map.control.kind                    =   plugin
 expand_merged_parmdb_map.control.type                    =   expandMapfile
 expand_merged_parmdb_map.control.mapfile_in              =   merge_selfcal_parmdbs.output.mapfile
@@ -260,6 +283,7 @@ expand_merged_parmdb_map.control.mapfile_to_match        =   add_all_facet_sourc
 expand_merged_parmdb_map.control.mapfile_dir             =   input.output.mapfile_dir
 expand_merged_parmdb_map.control.filename                =   expand_merged_parmdbs.mapfile
 
+# create a mapfile with the outlier skymodel, length = 1
 create_outlier_skymodel_map.control.kind                 =   plugin
 create_outlier_skymodel_map.control.type                 =   addListMapfile
 create_outlier_skymodel_map.control.hosts                =   {{ hosts }}
@@ -267,12 +291,14 @@ create_outlier_skymodel_map.control.files                =   [{{ peel_skymodel }
 create_outlier_skymodel_map.control.mapfile_dir          =   input.output.mapfile_dir
 create_outlier_skymodel_map.control.filename             =   outlier_skymodel.mapfile
 
+# convert the outlier skymodel into a sourcedb, length = 1
 make_sourcedb_outlier_model.control.type                 =   make_sourcedb
 make_sourcedb_outlier_model.control.opts.mapfile_in      =   create_outlier_skymodel_map.output.mapfile
 make_sourcedb_outlier_model.control.opts.inputkey        =   in
 make_sourcedb_outlier_model.argument.format              =   <
 make_sourcedb_outlier_model.argument.outtype             =   blob
 
+# expand the sourcedb to all files, length = nfiles
 expand_sourcedb_outlier_map.control.kind                 =   plugin
 expand_sourcedb_outlier_map.control.type                 =   expandMapfile
 expand_sourcedb_outlier_map.control.mapfile_in           =   make_sourcedb_outlier_model.output.mapfile
@@ -280,7 +306,7 @@ expand_sourcedb_outlier_map.control.mapfile_to_match     =   add_all_facet_sourc
 expand_sourcedb_outlier_map.control.mapfile_dir          =   input.output.mapfile_dir
 expand_sourcedb_outlier_map.control.filename             =   expand_sourcedb_outlier.mapfile
 
-# Predict the outlier model data at the field phase center
+# Predict the outlier model data at the field phase center, length = nfiles
 predict_outlier_model.control.type                       =   dppp
 predict_outlier_model.control.opts.mapfiles_in           =   [add_all_facet_sources.output.mapfile,expand_sourcedb_outlier_map.output.mapfile]
 predict_outlier_model.control.opts.inputkeys             =   [msin,sourcedb]
@@ -294,7 +320,7 @@ predict_outlier_model.argument.predict.type              =   predict
 predict_outlier_model.argument.predict.sourcedb          =   sourcedb
 predict_outlier_model.argument.predict.operation         =   replace
 
-# Corrupt the outlier model data with new calibration tables
+# Corrupt the outlier model data with new calibration tables, length = nfiles
 corrupt_outlier_model.control.type                       =   dppp
 corrupt_outlier_model.control.opts.mapfiles_in           =   [predict_outlier_model.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 corrupt_outlier_model.control.opts.inputkeys             =   [msin,parmdb]
@@ -319,26 +345,30 @@ corrupt_outlier_model.argument.corrupt_slow.parmdb       =   parmdb
 corrupt_outlier_model.argument.corrupt_slow.invert       =   False
 corrupt_outlier_model.argument.correct_slow.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 
-# Subtract the corrupted model from the data to make improved subtracted datasets
+# Subtract the corrupted model from the data to make improved subtracted datasets, length = nfiles
 subtract_outlier_model.control.type                      =   add_subtract_columns
 subtract_outlier_model.control.opts.mapfiles_in          =   [add_all_facet_sources.output.mapfile,corrupt_outlier_model.output.mapfile]
 subtract_outlier_model.control.opts.inputkeys            =   [file1,file2]
 subtract_outlier_model.argument.flags                    =   [file1,file2,DATA,DATA,SUBTRACTED_DATA_ALL,subtract]
 
-create_single_pre_band_mapfile.control.kind              =   plugin
-create_single_pre_band_mapfile.control.type              =   filterMapfile
-create_single_pre_band_mapfile.control.mapfile_in        =   create_ms_map.output.mapfile
-create_single_pre_band_mapfile.control.mapfile_dir       =   input.output.mapfile_dir
-create_single_pre_band_mapfile.control.filename          =   single_band.mapfile
+# make a map with original data of only the central frequency band, length = ntimes
+create_middle_pre_band_mapfile.control.kind              =   plugin
+create_middle_pre_band_mapfile.control.type              =   selectMiddleFreq
+create_middle_pre_band_mapfile.control.mapfile_in        =   create_ms_map.output.mapfile
+create_middle_pre_band_mapfile.control.mapfile_dir       =   input.output.mapfile_dir
+create_middle_pre_band_mapfile.control.filename          =   single_pre.mapfile
 
-create_single_post_band_mapfile.control.kind             =   plugin
-create_single_post_band_mapfile.control.type             =   filterMapfile
-create_single_post_band_mapfile.control.mapfile_in       =   add_all_facet_sources.output.mapfile
-create_single_post_band_mapfile.control.mapfile_dir      =   input.output.mapfile_dir
-create_single_post_band_mapfile.control.filename         =   single_band.mapfile
+# make a map with new data of only the central frequency band, length = ntimes
+create_middle_post_mapfile.control.kind                  =   plugin
+create_middle_post_mapfile.control.type                  =   selectMatching
+create_middle_post_mapfile.control.mapfile_in            =   add_all_facet_sources.output.mapfile
+create_middle_post_mapfile.control.mapfile_reference     =   create_middle_pre_band_mapfile.output.mapfile
+create_middle_post_mapfile.control.mapfile_dir           =   input.output.mapfile_dir
+create_middle_post_mapfile.control.filename              =   single_post.mapfile
 
+# average old empty data, length = ntimes
 average_pre.control.type                                 =   dppp
-average_pre.control.mapfile_in                           =   create_single_pre_band_mapfile.output.mapfile
+average_pre.control.mapfile_in                           =   create_middle_pre_band_mapfile.output.mapfile
 average_pre.control.inputkey                             =   msin
 average_pre.argument.numthreads                          =   {{ max_cpus_per_node }}
 average_pre.argument.msin.datacolumn                     =   SUBTRACTED_DATA_ALL
@@ -352,8 +382,9 @@ average_pre.argument.avg.type                            =   squash
 average_pre.argument.avg.freqstep                        =   {{ verify_freqstep }}
 average_pre.argument.avg.timestep                        =   {{ verify_timestep }}
 
+# average "old minus new" facet data (= new empty data), length = ntimes
 average_post.control.type                                =   dppp
-average_post.control.mapfile_in                          =   create_single_post_band_mapfile.output.mapfile
+average_post.control.mapfile_in                          =   create_middle_post_mapfile.output.mapfile
 average_post.control.inputkey                            =   msin
 average_post.argument.numthreads                         =   {{ max_cpus_per_node }}
 average_post.argument.msin.datacolumn                    =   SUBTRACTED_DATA_ALL
@@ -367,8 +398,16 @@ average_post.argument.avg.type                           =   squash
 average_post.argument.avg.freqstep                       =   {{ verify_freqstep }}
 average_post.argument.avg.timestep                       =   {{ verify_timestep }}
 
+# make compressed mapfile of old empty data, length = 1
+average_pre_compressed_map.control.kind                  =   plugin
+average_pre_compressed_map.control.type                  =   compressMapfile
+average_pre_compressed_map.control.mapfile_in            =   average_pre.output.mapfile
+average_pre_compressed_map.control.mapfile_dir           =   input.output.mapfile_dir
+average_pre_compressed_map.control.filename              =   average_pre_compressed.mapfile
+
+# image the of old empty data, length = 1
 wsclean_pre.control.type                                 =   wsclean
-wsclean_pre.control.mapfile_in                           =   average_pre.output.mapfile
+wsclean_pre.control.mapfile_in                           =   average_pre_compressed_map.output.mapfile
 wsclean_pre.control.inputkey                             =   msfile
 wsclean_pre.argument.flags                               =   [-no-update-model-required,msfile]
 wsclean_pre.argument.size                                =   2048 2048
@@ -385,8 +424,16 @@ wsclean_pre.argument.scale                               =   0.00833
 wsclean_pre.argument.mem                                 =   {{ max_percent_memory }}
 wsclean_pre.argument.j                                   =   {{ max_cpus_per_node }}
 
+# make compressed mapfile of new empty data, length = 1
+average_post_compressed_map.control.kind                 =   plugin
+average_post_compressed_map.control.type                 =   compressMapfile
+average_post_compressed_map.control.mapfile_in           =   average_post.output.mapfile
+average_post_compressed_map.control.mapfile_dir          =   input.output.mapfile_dir
+average_post_compressed_map.control.filename             =   average_post_compressed.mapfile
+
+# image the of new empty data, length = 1
 wsclean_post.control.type                                =   wsclean
-wsclean_post.control.mapfile_in                          =   average_post.output.mapfile
+wsclean_post.control.mapfile_in                          =   average_post_compressed_map.output.mapfile
 wsclean_post.control.inputkey                            =   msfile
 wsclean_post.argument.flags                              =   [-no-update-model-required,msfile]
 wsclean_post.argument.size                               =   2048 2048
@@ -403,6 +450,7 @@ wsclean_post.argument.scale                              =   0.00833
 wsclean_post.argument.mem                                =   {{ max_percent_memory }}
 wsclean_post.argument.j                                  =   {{ max_cpus_per_node }}
 
+# do a "verify_subtract" on the two "empty" images, length = 1
 verify_subtract.control.type                             =   verify_subtract
 verify_subtract.control.mapfiles_in                      =   [wsclean_pre.output.wsclean_pre-image.fits.mapfile,wsclean_post.output.wsclean_post-image.fits.mapfile]
 verify_subtract.control.inputkeys                        =   [image_pre,image_post]

@@ -30,17 +30,24 @@ class OutlierPeel(Operation):
         super(OutlierPeel, self).__init__(parset, bands, direction,
             name='OutlierPeel')
 
-        log.warn('Outlier operations are not yet supported in multi-epoch Factor!\n Exiting!')
-        sys.exit(1)
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
-        ms_files = [band.file for band in self.bands]
+        ms_files = [band.files for band in self.bands]
+        ms_files_single = []
+        for bandfiles in ms_files:
+            for filename in bandfiles:
+                ms_files_single.append(filename)
+        dir_indep_parmDBs = []
+        for band in self.bands:
+            for parmdb in band.dirindparmdbs:
+                dir_indep_parmDBs.append(parmdb)
         skymodels = [band.skymodel_dirindep for band in self.bands]
-        dir_indep_parmdbs = [band.dirindparmdb for band in self.bands]
-        self.parms_dict.update({'ms_files': ms_files,
+
+        self.parms_dict.update({'ms_files_single': ms_files_single,
+                                'ms_files_grouped' : str(ms_files),
                                 'skymodels': skymodels,
-                                'dir_indep_parmdbs': dir_indep_parmdbs})
+                                'dir_indep_parmDBs': dir_indep_parmDBs})
 
 
     def finalize(self):
@@ -48,8 +55,8 @@ class OutlierPeel(Operation):
         Finalize this operation
         """
         # Add output datamaps to direction object for later reference
-        self.direction.input_bands_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'input_bands.mapfile')
+        self.direction.input_files_single_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'input_files_single.mapfile')
         self.direction.subtracted_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'add_all_facet_sources.mapfile')
         self.direction.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
@@ -71,12 +78,13 @@ class OutlierPeel(Operation):
 
         # Delete temp data
         self.direction.cleanup_mapfiles = [
-            os.path.join(self.pipeline_mapfile_dir, 'corrupt_outlier_model.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'shift_and_average.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat_data.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat_blavg_data.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'chunk_files.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'predict_outlier_model.mapfile')]
+            os.path.join(self.pipeline_mapfile_dir, 'predict_outlier_model.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'corrupt_outlier_model.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'average_pre.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'average_post.mapfile')]
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()
 
@@ -89,6 +97,8 @@ class OutlierSub(Operation):
         super(OutlierSub, self).__init__(parset, bands, direction,
             name='OutlierSub')
 
+        log.warn('OutlierSub is not yet supported in multi-epoch Factor!\n Exiting!')
+        sys.exit(1)
         # Delete temp data
         self.direction.cleanup_mapfiles = [self.direction.subtracted_data_mapfile]
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
