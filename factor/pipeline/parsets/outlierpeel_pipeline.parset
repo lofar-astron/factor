@@ -293,13 +293,13 @@ create_single_pre_band_mapfile.control.kind              =   plugin
 create_single_pre_band_mapfile.control.type              =   filterMapfile
 create_single_pre_band_mapfile.control.mapfile_in        =   create_ms_map.output.mapfile
 create_single_pre_band_mapfile.control.mapfile_dir       =   input.output.mapfile_dir
-create_single_pre_band_mapfile.control.filename          =   single_band.mapfile
+create_single_pre_band_mapfile.control.filename          =   single_pre_band.mapfile
 
 create_single_post_band_mapfile.control.kind             =   plugin
 create_single_post_band_mapfile.control.type             =   filterMapfile
 create_single_post_band_mapfile.control.mapfile_in       =   add_all_facet_sources.output.mapfile
 create_single_post_band_mapfile.control.mapfile_dir      =   input.output.mapfile_dir
-create_single_post_band_mapfile.control.filename         =   single_band.mapfile
+create_single_post_band_mapfile.control.filename         =   single_post_band.mapfile
 
 average_pre.control.type                                 =   dppp
 average_pre.control.mapfile_in                           =   create_single_pre_band_mapfile.output.mapfile
