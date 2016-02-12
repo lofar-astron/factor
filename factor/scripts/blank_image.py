@@ -8,6 +8,7 @@ import pyrap.images as pim
 import numpy as np
 import sys
 import os
+import pickle
 from factor.lib.polygon import Polygon
 
 
