@@ -582,7 +582,12 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
         if d.is_patch:
             # For sources beyond max radius, set facet poly to calibrator poly
             # and clip to facet polys and previous patch polys
-            patch_poly = selfcal_poly
+            #
+            # First, make a copy of the calibrator poly so that it is not
+            # altered by the clipping
+            patch_poly = [np.copy(vert) for vert in selfcal_poly]
+
+            # Now loop over the facets and patches and clip
             for facet_poly in thiessen_polys + patch_polys:
                 polyv = np.vstack(facet_poly)
                 poly_tuple = tuple([(xp, yp) for xp, yp in zip(polyv[:, 0], polyv[:, 1])])
