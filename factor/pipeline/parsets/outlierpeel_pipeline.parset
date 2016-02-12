@@ -235,6 +235,7 @@ make_sourcedb_outlier_model.control.type                 =   make_sourcedb
 make_sourcedb_outlier_model.control.opts.mapfile_in      =   create_outlier_skymodel_map.output.mapfile
 make_sourcedb_outlier_model.control.opts.inputkey        =   in
 make_sourcedb_outlier_model.argument.format              =   <
+make_sourcedb_outlier_model.argument.outtype             =   blob
 
 expand_sourcedb_outlier_map.control.kind                 =   plugin
 expand_sourcedb_outlier_map.control.type                 =   expandMapfile
