@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, regroup_shift_empty_map, {% block model_data_steps %}expand_facet_model_map, expand_modelimg_size_map, wsclean_ft, {% endblock model_data_steps %} corrupt_final_model, add_model_to_empty_data, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %}wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, copy_beam_info, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, regroup_shift_empty_map, {% block model_data_steps %}expand_facet_model_map, expand_modelimg_size_map, wsclean_ft, {% endblock model_data_steps %} corrupt_final_model, add_model_to_empty_data, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %}wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -233,21 +233,17 @@ adjust_wsclean_mapfile1.control.append                =   {{ wsclean_suffix }}
 adjust_wsclean_mapfile1.control.mapfile_dir           =   input.output.mapfile_dir
 adjust_wsclean_mapfile1.control.filename              =   image1.mapfile
 
-# copy the beam information from one WSClean out file to the image, length = 1
-copy_beam_info.control.type                           =   copy_beam_info
-copy_beam_info.control.mapfile_in                     =   adjust_wsclean_mapfile1.output.mapfile
-copy_beam_info.control.inputkey                       =   imagefile
-copy_beam_info.argument.flags                         =   [imagefile]
-
 # make a mask from the image, length = 1
 mask.control.type                                     =   make_clean_mask
 mask.control.mapfile_in                               =   adjust_wsclean_mapfile1.output.mapfile
 mask.control.inputkey                                 =   imagefile
 mask.control.outputkey                                =   maskfile
 mask.argument.flags                                   =   [imagefile,maskfile]
-mask.argument.threshisl                               =   5
+mask.argument.threshisl                               =   3
 mask.argument.threshpix                               =   5
-mask.argument.rmsbox                                  =   (80,20)
+mask.argument.rmsbox                                  =   (300,100)
+mask.argument.rmsbox_bright                           =   (70,10)
+mask.argument.atrous_jmax                             =   3
 mask.argument.adaptive_rmsbox                         =   True
 mask.argument.atrous_do                               =   True
 mask.argument.img_format                              =   fits

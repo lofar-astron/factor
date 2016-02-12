@@ -74,7 +74,6 @@ class OutlierSub(Operation):
             name='OutlierSub')
 
         # Delete temp data
-        self.direction.cleanup_mapfiles = [
-            os.path.join(self.pipeline_mapfile_dir, 'add_all_facet_sources.mapfile')]
+        self.direction.cleanup_mapfiles = [self.direction.subtracted_data_mapfile]
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()

@@ -1,5 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, add_imaging_cols_empty, shift_cal, {% if transfer_nearest_solutions %}expand_merged_parmdb_map_transfer, apply_dir_dep_fast_transfer, apply_dir_dep_slow_transfer, {% else %}apply_dir_indep, {% endif %}create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, make_concat_corr_mapfile, concat_corr, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, concat_blavg_data, {% endif %} copy_column1, {% if pre_average %} copy_column2, copy_column3, {% endif %} add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, {% if not transfer_nearest_solutions %} average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, {% endif %} average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_compressed_mapfile_ft, create_model4_map, casa_ft4, {% else %} apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, sort_average5, sort_average5_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, copy_beam_info, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, regroup_shift_empty_map, create_expanded_model_mapfile, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
-
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, {% if not is_patch %} predict_all_model_data, add_all_facet_sources, {% endif %} add_imaging_cols_empty, shift_cal, {% if transfer_nearest_solutions %}expand_merged_parmdb_map_transfer, apply_dir_dep_fast_transfer, apply_dir_dep_slow_transfer, {% else %}apply_dir_indep, {% endif %}create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, make_concat_corr_mapfile, concat_corr, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, concat_blavg_data, {% endif %} copy_column1, {% if pre_average %} copy_column2, copy_column3, {% endif %} add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, {% if not transfer_nearest_solutions %} average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, {% endif %} average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_compressed_mapfile_ft, create_model4_map, blank_model, casa_ft4, {% else %} apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, sort_average5, sort_average5_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, regroup_shift_empty_map, create_expanded_model_mapfile, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -95,10 +94,11 @@ shift_empty.argument.msin.datacolumn                       =   {{ subtracted_dat
 shift_empty.argument.msout.overwrite                       =   True
 shift_empty.argument.msout.writefullresflag                =   False
 shift_empty.argument.local_scratch_dir                     =   {{ local_dir }}
-shift_empty.argument.steps                                 =   [shift] # [shift,add,output,pred]
+shift_empty.argument.steps                                 =   [shift]
 shift_empty.argument.shift.type                            =   phaseshifter
 shift_empty.argument.shift.phasecenter                     =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
 
+{% if not is_patch %}
 # predict the skymodel data for the full facet into the phase-shifted measurement sets, length = nfiles
 predict_all_model_data.control.type                        =   dppp
 predict_all_model_data.control.opts.mapfiles_in            =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
@@ -119,6 +119,7 @@ add_all_facet_sources.control.type                         =   add_subtract_colu
 add_all_facet_sources.control.opts.mapfiles_in             =   [shift_empty.output.mapfile,predict_all_model_data.output.mapfile]
 add_all_facet_sources.control.opts.inputkeys               =   [file1,file2]
 add_all_facet_sources.argument.flags                       =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
+{% endif %}
 
 # add the imaging columns to the phase-shifted data, length = nfiles
 add_imaging_cols_empty.control.type                        =   add_imaging_columns
@@ -428,6 +429,7 @@ mask0.argument.iterate_threshold                           =   True
 mask0.argument.atrous_do                                   =   {{ atrous_do }}
 mask0.argument.rmsbox                                      =   (80,20)
 mask0.argument.adaptive_rmsbox                             =   True
+mask1.argument.trim_by                                     =   0.2
 mask0.argument.img_format                                  =   casa
 mask0.argument.threshold_format                            =   str_with_units
 
@@ -491,8 +493,8 @@ switch_weights_col1.argument.flags                         =   [msfiles,WEIGHT_S
 # run BBS with model column on freq-concatenated files, length = ntimes
 solve_phaseonly1.control.type                              =   calibrate-stand-alone_new
 solve_phaseonly1.argument.observation                      =   concat_data.output.mapfile
-solve_phaseonly1.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_solve.parset
-solve_phaseonly1.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
+solve_phaseonly1.argument.parset                           =   {{ initial_selfcal_parset }}
+solve_phaseonly1.argument.catalog                          =   {{ initial_selfcal_skymodel }}
 solve_phaseonly1.argument.replace-sourcedb                 =   True
 solve_phaseonly1.argument.replace-parmdb                   =   True
 solve_phaseonly1.argument.Strategy.InputColumn             =   {{ data_column }}
@@ -1362,13 +1364,22 @@ create_model4_map.control.trim                             =   .model
 create_model4_map.control.mapfile_dir                      =   input.output.mapfile_dir
 create_model4_map.control.filename                         =   mode42_rootnames.mapfile
 
+# Blank (with zeros) regions of the model image that lie outside of the patch region, length = 1
+blank_model.control.type                                   =   blank_image
+blank_model.control.mapfile_in                             =   create_model4_map.output.mapfile
+blank_model.control.inputkey                               =   infile
+blank_model.control.outputkey                              =   outfile
+blank_model.argument.flags                                 =   [infile,{{ vertices_file }},outfile]
+blank_model.argument.img_format                            =   casa
+
 # make model visibilities on the unaveraged data, length = 1
 # can run only once, because (may) create files in the directory of input data
 casa_ft4.control.type                                      =   casa
-casa_ft4.control.mapfiles_in                               =   [create_compressed_mapfile_ft.output.mapfile,create_model4_map.output.mapfile]
+casa_ft4.control.mapfiles_in                               =   [create_compressed_mapfile_ft.output.mapfile,blank_model.output.mapfile]
 casa_ft4.control.inputkeys                                 =   [inputms,modelimg]
 casa_ft4.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft_multi.py,modelimg,{{ nterms }},{{ facet_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py,inputms]
 {% else %}
+
 # apply the fast part of the gain solutions, length = nfiles
 apply_dir_dep_fast.control.type                            =   calibrate-stand-alone_new
 apply_dir_dep_fast.control.mapfiles_in                     =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
@@ -1503,12 +1514,6 @@ adjust_wsclean_mapfile1.control.append                     =   {{ wsclean_suffix
 adjust_wsclean_mapfile1.control.mapfile_dir                =   input.output.mapfile_dir
 adjust_wsclean_mapfile1.control.filename                   =   final_image.mapfile
 
-# copy the beam information from one WSClean out file to the image, length = 1
-copy_beam_info.control.type                                =   copy_beam_info
-copy_beam_info.control.mapfile_in                          =   adjust_wsclean_mapfile1.output.mapfile
-copy_beam_info.control.inputkey                            =   imagefile
-copy_beam_info.argument.flags                              =   [imagefile]
-
 # make a mask from the updated image, length = 1
 mask5.control.type                                         =   make_clean_mask
 mask5.control.mapfile_in                                   =   adjust_wsclean_mapfile1.output.mapfile
@@ -1516,9 +1521,11 @@ mask5.control.inputkey                                     =   imagefile
 mask5.control.outputkey                                    =   maskfile
 mask5.argument.flags                                       =   [imagefile,maskfile]
 mask5.argument.region_file                                 =   {{ region_field }}
-mask5.argument.threshisl                                   =   5
+mask5.argument.threshisl                                   =   3
 mask5.argument.threshpix                                   =   5
-mask5.argument.rmsbox                                      =   (80,20)
+mask5.argument.rmsbox                                      =   (300,100)
+mask5.argument.rmsbox_bright                               =   (70,10)
+mask5.argument.atrous_jmax                                 =   3
 mask5.argument.adaptive_rmsbox                             =   True
 mask5.argument.atrous_do                                   =   True
 mask5.argument.img_format                                  =   fits

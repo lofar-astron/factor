@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_images_map, create_vertices_map, create_compressed_mapfile_images, create_compressed_mapfile_vertices, copy_beam_info, make_mosaic, create_ms_map, create_compressed_mapfile_ms, sort_into_Groups, sort_into_Groups_maps, concat_data, create_compressed_mapfile, concat, make_pbimage, zero_avgpb, image2fits, correct_mosaic]
+pipeline.steps = [update_mapfile_hosts, create_images_map, create_vertices_map, create_compressed_mapfile_images, create_compressed_mapfile_vertices, make_mosaic, create_ms_map, create_compressed_mapfile_ms, sort_into_Groups, sort_into_Groups_maps, concat_data, create_compressed_mapfile, concat, make_pbimage, zero_avgpb, image2fits, correct_mosaic]
 
 pipeline.pluginpath                                    =   {{ pipeline_dir }}/plugins
 
@@ -36,12 +36,6 @@ create_compressed_mapfile_vertices.control.type        =   compressMapfile
 create_compressed_mapfile_vertices.control.mapfile_in  =   create_vertices_map.output.mapfile
 create_compressed_mapfile_vertices.control.mapfile_dir =   input.output.mapfile_dir
 create_compressed_mapfile_vertices.control.filename    =   mosaic_vertices_input.datamap
-
-# copy the beam information from WSClean out files to the images, length = nfacets
-copy_beam_info.control.type                            =   copy_beam_info
-copy_beam_info.control.mapfile_in                      =   create_images_map.output.mapfile
-copy_beam_info.control.inputkey                        =   imagefile
-copy_beam_info.argument.flags                          =   [imagefile]
 
 # make the mosaic image, length = 1
 make_mosaic.control.type                               =   mosaic_images
