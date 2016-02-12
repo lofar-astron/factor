@@ -1161,14 +1161,17 @@ create_model4_map.control.trim                             =   .model
 create_model4_map.control.mapfile_dir                      =   input.output.mapfile_dir
 create_model4_map.control.filename                         =   mode42_rootnames.mapfile
 
-# Blank (with zeros) regions of the model image that lie outside of
+# Blank (with zeros) regions of the model image(s) that lie outside of
 # the patch region
 blank_model.control.type                                   =   blank_image
 blank_model.control.mapfile_in                             =   create_model4_map.output.mapfile
 blank_model.control.inputkey                               =   infile
 blank_model.control.outputkey                              =   outfile
 blank_model.argument.flags                                 =   [infile,{{ vertices_file }},outfile]
+blank_model.argument.blank_value                           =   zero
 blank_model.argument.img_format                            =   casa
+blank_model.argument.image_is_casa_model                   =   True
+blank_model.argument.nterms                                =   {{ nterms }}
 
 casa_ft4.control.type                                      =   casa
 casa_ft4.control.mapfiles_in                               =   [concat_unaveraged.output.mapfile,blank_model.output.mapfile]
