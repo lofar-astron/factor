@@ -7,13 +7,23 @@ update_mapfile_hosts.control.type                        =   updateHosts
 update_mapfile_hosts.control.mapfile_dir                 =   input.output.mapfile_dir
 update_mapfile_hosts.control.hosts                       =   {{ hosts }}
 
+# create a mapfile with all single MSs from supplied list, length = nfiles
 create_ms_map.control.kind                               =   plugin
 create_ms_map.control.type                               =   addListMapfile
 create_ms_map.control.hosts                              =   {{ hosts }}
-create_ms_map.control.files                              =   {{ ms_files }}
+create_ms_map.control.files                              =   {{ ms_files_single }}
 create_ms_map.control.mapfile_dir                        =   input.output.mapfile_dir
-create_ms_map.control.filename                           =   input_bands.mapfile
+create_ms_map.control.filename                           =   input_files_single.mapfile
 
+# create a multi-mapfile with the groups of MSs from supplied list, length = nbands
+create_msmulti_map.control.kind                          =   plugin
+create_msmulti_map.control.type                          =   addListMultiMapfile
+create_msmulti_map.control.hosts                         =   {{ hosts }}
+create_msmulti_map.control.files                         =   {{ ms_files_grouped }}
+create_msmulti_map.control.mapfile_dir                   =   input.output.mapfile_dir
+create_msmulti_map.control.filename                      =   input_files_grouped.mapfile
+
+# create a mapfile with the direction-independent parmDBs from supplied list, length = nfiles
 create_parmdb_map.control.kind                           =   plugin
 create_parmdb_map.control.type                           =   addListMapfile
 create_parmdb_map.control.hosts                          =   {{ hosts }}
@@ -21,6 +31,7 @@ create_parmdb_map.control.files                          =   {{ dir_indep_parmdb
 create_parmdb_map.control.mapfile_dir                    =   input.output.mapfile_dir
 create_parmdb_map.control.filename                       =   dir_indep_instrument_parmdbs.mapfile
 
+# create a mapfile with the current skymodels from supplied list, length = nbands
 create_full_skymodels_map.control.kind                   =   plugin
 create_full_skymodels_map.control.type                   =   addListMapfile
 create_full_skymodels_map.control.hosts                  =   {{ hosts }}
@@ -28,6 +39,7 @@ create_full_skymodels_map.control.files                  =   {{ skymodels }}
 create_full_skymodels_map.control.mapfile_dir            =   input.output.mapfile_dir
 create_full_skymodels_map.control.filename               =   full_skymodels.mapfile
 
+# extract the skymodel for this facet from global skymodel, length = nbands
 make_facet_skymodels_all.control.type                    =   make_facet_skymodel
 make_facet_skymodels_all.control.mapfile_in              =   create_full_skymodels_map.output.mapfile
 make_facet_skymodels_all.control.inputkey                =   fullmodelfile
@@ -35,16 +47,26 @@ make_facet_skymodels_all.control.outputkey               =   outfile
 make_facet_skymodels_all.argument.flags                  =   [fullmodelfile,outfile,{{ vertices_file }}]
 make_facet_skymodels_all.argument.cal_only               =   False
 
+# convert the facet skymodel into a sourcedb, length = nbands
 make_sourcedb_all_facet_sources.control.type             =   make_sourcedb
 make_sourcedb_all_facet_sources.control.opts.mapfile_in  =   make_facet_skymodels_all.output.mapfile
 make_sourcedb_all_facet_sources.control.opts.inputkey    =   in
 make_sourcedb_all_facet_sources.argument.format          =   <
+make_sourcedb_all_facet_sources.argument.outtype         =   blob
 
-# Add sources, but don't phase shift. We will use these data later
+# expand the sourcedb mapfile so that there is one entry for every file, length = nfiles
+expand_sourcedb_all_facet_sources.control.kind           =   plugin
+expand_sourcedb_all_facet_sources.control.type           =   mapfileSingleToGroup
+expand_sourcedb_all_facet_sources.control.mapfile_in     =   make_sourcedb_all_facet_sources.output.mapfile
+expand_sourcedb_all_facet_sources.control.mapfile_groups =   create_msmulti_map.output.mapfile
+expand_sourcedb_all_facet_sources.control.mapfile_dir    =   input.output.mapfile_dir
+expand_sourcedb_all_facet_sources.control.filename       =   expand_sourcedb_all_facet_sources.mapfile
+
+# Add sources, but don't phase shift. We will use these data later        / length = nfiles
 # to subtract the outlier model using the direction-dependent calibration
 # to create improved "empty" datasets
 add_all_facet_sources.control.type                       =   dppp
-add_all_facet_sources.control.opts.mapfiles_in           =   [create_ms_map.output.mapfile,make_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
+add_all_facet_sources.control.opts.mapfiles_in           =   [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
 add_all_facet_sources.control.opts.inputkeys             =   [msin,sourcedb,parmdb]
 add_all_facet_sources.argument.numthreads                =   {{ max_cpus_per_band }}
 add_all_facet_sources.argument.msin.datacolumn           =   {{ subtracted_data_colname }}
@@ -58,7 +80,7 @@ add_all_facet_sources.argument.add.operation             =   add
 add_all_facet_sources.argument.add.applycal.parmdb       =   parmdb
 add_all_facet_sources.argument.add.applycal.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 
-# Phase shift and average in preparation for calibration
+# Phase shift and average in preparation for calibration, length = nfiles
 shift_and_average.control.type                           =   dppp
 shift_and_average.control.mapfile_in                     =   add_all_facet_sources.output.mapfile
 shift_and_average.control.inputkey                       =   msin
@@ -74,19 +96,31 @@ shift_and_average.argument.avg.type                      =   squash
 shift_and_average.argument.avg.freqstep                  =   {{ facetselfcal_freqstep }}
 shift_and_average.argument.avg.timestep                  =   1
 
+# compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile.control.kind                   =   plugin
 create_compressed_mapfile.control.type                   =   compressMapfile
 create_compressed_mapfile.control.mapfile_in             =   shift_and_average.output.mapfile
 create_compressed_mapfile.control.mapfile_dir            =   input.output.mapfile_dir
 create_compressed_mapfile.control.filename               =   concat_averaged_input.mapfile
 
-check_for_missing_bands.control.type                     =   check_for_missing_bands
-check_for_missing_bands.control.mapfile_in               =   create_compressed_mapfile.output.mapfile
-check_for_missing_bands.control.inputkey                 =   mslist
-check_for_missing_bands.argument.flags                   =   [mslist]
+# sort compressed mapfile so that there is one group per timestamp, length = ntimes
+sort_into_Groups.control.type                            =   sort_times_into_freqGroups
+sort_into_Groups.argument.flags                          =   [create_compressed_mapfile.output.mapfile]
+sort_into_Groups.argument.filename                       =   sorted_groups.mapfile
+sort_into_Groups.argument.mapfile_dir                    =   input.output.mapfile_dir
+sort_into_Groups.argument.hosts                          =   {{ hosts }}
+sort_into_Groups.argument.stepname                       =   sort_into_Groups
 
+# convert the output of sort_into_Groups into usable mapfiles, len = ntimes
+sort_into_Groups_maps.control.kind                       =   plugin
+sort_into_Groups_maps.control.type                       =   mapfilenamesFromMapfiles
+sort_into_Groups_maps.control.mapfile_groupmap           =   sort_into_Groups.output.groupmapfile.mapfile
+sort_into_Groups_maps.control.mapfile_filesmap           =   sort_into_Groups.output.mapfile.mapfile
+
+# concat data in frequency, length = ntimes 
 concat_data.control.type                                 =   dppp
-concat_data.control.mapfile_in                           =   check_for_missing_bands.output.padded_list.mapfile
+concat_data.control.mapfile_out                          =   sort_into_Groups_maps.output.groupmap
+concat_data.control.mapfile_in                           =   sort_into_Groups_maps.output.filesmap
 concat_data.control.inputkey                             =   msin
 concat_data.argument.numthreads                          =   {{ max_cpus_per_node }}
 concat_data.argument.msin.datacolumn                     =   DATA
@@ -98,6 +132,8 @@ concat_data.argument.local_scratch_dir                   =   {{ local_dir }}
 concat_data.argument.steps                               =   []
 
 {% if pre_average %}
+
+
 # Do the baseline-dependent preaveraging. This must be done after concatenation
 # of DATA in the previous step so that we can safely overwrite the
 # WEIGHT_SPECTRUM column
