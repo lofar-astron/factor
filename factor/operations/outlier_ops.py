@@ -52,6 +52,22 @@ class OutlierPeel(Operation):
             'input_bands.mapfile')
         self.direction.subtracted_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'add_all_facet_sources.mapfile')
+        self.direction.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'verify_subtract.break.mapfile')
+
+        # Store results of verify_subtract check. This will work if the verification
+        # was done using multiple bands although we use only one at the moment
+        if os.path.exists(self.direction.verify_subtract_mapfile) and not self.parset['skip_selfcal_check']:
+            ok_mapfile = DataMap.load(self.direction.verify_subtract_mapfile)
+            ok_flags = [ast.literal_eval(item.file) for item in ok_mapfile]
+            if all(ok_flags):
+                self.direction.selfcal_ok = True
+            else:
+                self.direction.selfcal_ok = False
+        elif self.parset['skip_selfcal_check']:
+            self.direction.selfcal_ok = True
+        else:
+            self.direction.selfcal_ok = False
 
         # Delete temp data
         self.direction.cleanup_mapfiles = [

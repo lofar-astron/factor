@@ -121,16 +121,24 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             op = OutlierPeel(parset, bands, d)
             scheduler.run(op)
 
-            op = OutlierSub(parset, bands, d)
-            scheduler.run(op)
+            # Check whether direction went through selfcal successfully. If
+            # not, exit
+            if d.selfcal_ok:
+                op = OutlierSub(parset, bands, d)
+                scheduler.run(op)
 
-            if set_sub_data_colname:
                 # Set the name of the subtracted data column for remaining
                 # directions
-                for direction in directions:
-                    if direction.name != d.name:
-                        direction.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
-                set_sub_data_colname = False
+                if set_sub_data_colname:
+                    for direction in directions:
+                        if direction.name != d.name:
+                            direction.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
+                    set_sub_data_colname = False
+            else:
+                log.warn('Selfcal verification failed for direction {0}.'.format(d.name))
+                if parset['exit_on_selfcal_failure']:
+                    log.info('Exiting...')
+                    sys.exit(1)
 
     # Run selfcal and subtract operations on direction groups
     for gindx, direction_group in enumerate(direction_groups):

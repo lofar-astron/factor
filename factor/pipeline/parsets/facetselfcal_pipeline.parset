@@ -1370,7 +1370,10 @@ blank_model.control.mapfile_in                             =   create_model4_map
 blank_model.control.inputkey                               =   infile
 blank_model.control.outputkey                              =   outfile
 blank_model.argument.flags                                 =   [infile,{{ vertices_file }},outfile]
+blank_model.argument.blank_value                           =   zero
 blank_model.argument.img_format                            =   casa
+blank_model.argument.image_is_casa_model                   =   True
+blank_model.argument.nterms                                =   {{ nterms }}
 
 # make model visibilities on the unaveraged data, length = 1
 # can run only once, because (may) create files in the directory of input data
