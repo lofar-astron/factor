@@ -1,5 +1,5 @@
 {% extends "facetselfcal_pipeline.parset" %}
-{% block full_image_steps %}concat_averaged, premask, casa_image_full1, adjust_casa_mapfile6, mask5, casa_image_full2, create_model4_map, adjust_casa_mapfile7, create_compressed_mapfile6, concat_unaveraged, casa_ft4{% endblock full_image_steps %}
+{% block full_image_steps %} concat_averaged, premask, casa_image_full1, adjust_casa_mapfile6, mask5, casa_image_full2, create_model4_map, adjust_casa_mapfile7, create_compressed_mapfile6, concat_unaveraged, casa_ft4, {% endblock full_image_steps %}
 {% block full_image_parms %}
 concat_averaged.control.type                               =   virtual_concat
 concat_averaged.control.mapfile_in                         =   create_compressed_mapfile5.output.mapfile
