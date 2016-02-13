@@ -7,10 +7,8 @@ or not they can be run in parallel or in series.
 Classes
 -------
 OutlierPeel : Operation
-    Runs the calibration for peeling an outlier source. May be run in parallel
-OutlierSub : Operation
-    Subtracts outlier sources from data. Must be run in series as writes are
-    made to original datasets
+    Runs the calibration for peeling an outlier source. Must be run in series
+    as writes are made to original datasets
 
 """
 import os
@@ -45,8 +43,6 @@ class OutlierPeel(Operation):
         # Add output datamaps to direction object for later reference
         self.direction.input_bands_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'input_bands.mapfile')
-        self.direction.subtracted_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'add_all_facet_sources.mapfile')
         self.direction.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'verify_subtract.break.mapfile')
 
@@ -71,20 +67,7 @@ class OutlierPeel(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'concat_data.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat_blavg_data.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'chunk_files.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'predict_outlier_model.mapfile')]
-        self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
-        self.direction.cleanup()
-
-
-class OutlierSub(Operation):
-    """
-    Operation to subtract improved model
-    """
-    def __init__(self, parset, bands, direction):
-        super(OutlierSub, self).__init__(parset, bands, direction,
-            name='OutlierSub')
-
-        # Delete temp data
-        self.direction.cleanup_mapfiles = [self.direction.subtracted_data_mapfile]
+            os.path.join(self.pipeline_mapfile_dir, 'predict_outlier_model.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'add_all_facet_sources.mapfile')]
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()

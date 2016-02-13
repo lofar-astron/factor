@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, add_all_facet_sources, shift_and_average,  create_compressed_mapfile, check_for_missing_bands, concat_data, {% if pre_average %} pre_average, concat_blavg_data, copy_column1, copy_column2, {% endif %} make_chunks, create_chunks_map, switch_weights_col1, solve_ampphase11, switch_weights_col2, apply_ampphase11, create_chunks_compressed_mapfile, merge_phase_parmdbs, solve_ampphase12, merge_amp_parmdbs, smooth_amps, merge_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, create_outlier_skymodel_map, make_sourcedb_outlier_model, expand_sourcedb_outlier_map, predict_outlier_model, corrupt_outlier_model, subtract_outlier_model, create_single_pre_band_mapfile, create_single_post_band_mapfile, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, add_all_facet_sources, shift_and_average,  create_compressed_mapfile, check_for_missing_bands, concat_data, {% if pre_average %} pre_average, concat_blavg_data, copy_column1, copy_column2, {% endif %} make_chunks, create_chunks_map, switch_weights_col1, solve_ampphase11, switch_weights_col2, apply_ampphase11, create_chunks_compressed_mapfile, merge_phase_parmdbs, solve_ampphase12, merge_amp_parmdbs, smooth_amps, merge_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, create_outlier_skymodel_map, make_sourcedb_outlier_model, expand_sourcedb_outlier_map, predict_outlier_model, corrupt_outlier_model, subtract_outlier_model, create_single_pre_band_mapfile, create_single_post_band_mapfile, average_pre, average_post, wsclean_pre, wsclean_post, verify_subtract, copy_to_empty_data]
 
 pipeline.pluginpath                                      =   {{ pipeline_dir }}/plugins
 
@@ -371,3 +371,9 @@ verify_subtract.control.type                             =   verify_subtract
 verify_subtract.control.mapfiles_in                      =   [wsclean_pre.output.wsclean_pre-image.fits.mapfile,wsclean_post.output.wsclean_post-image.fits.mapfile]
 verify_subtract.control.inputkeys                        =   [image_pre,image_post]
 verify_subtract.argument.flags                           =   [image_pre,image_post,0.75]
+
+copy_to_empty_data.control.type                          =   copy_column
+copy_to_empty_data.control.opts.mapfiles_in              =   [add_all_facet_sources,create_ms_map,verify_subtract.output.break.mapfile]
+copy_to_empty_data.control.opts.inputkeys                =   [file1,file2,do_copy]
+copy_to_empty_data.argument.flags                        =   [file1,file2,SUBTRACTED_DATA_ALL,SUBTRACTED_DATA_ALL_NEW]
+copy_to_empty_data.argument.do_copy                      =   do_copy

@@ -107,7 +107,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     set_sub_data_colname = True
     outlier_directions = [d for d in directions if d.is_outlier]
     if len(outlier_directions) > 0:
-        # Combine the nodes and cores for the peeling and subtract operation
+        # Combine the nodes and cores for the peeling operation
         outlier_directions = factor.cluster.combine_nodes(outlier_directions,
             parset['cluster_specific']['node_list'],
             parset['cluster_specific']['nimg_per_node'],
@@ -123,9 +123,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             # Check whether direction went through selfcal successfully. If
             # not, exit
             if d.selfcal_ok:
-                op = OutlierSub(parset, bands, d)
-                scheduler.run(op)
-
                 # Set the name of the subtracted data column for remaining
                 # directions
                 if set_sub_data_colname:
