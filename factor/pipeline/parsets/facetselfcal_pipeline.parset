@@ -1320,6 +1320,8 @@ create_compressed_mapfile6.control.mapfile_in              =   shift_empty.outpu
 create_compressed_mapfile6.control.mapfile_dir             =   input.output.mapfile_dir
 create_compressed_mapfile6.control.filename                =   concat_unaveraged_input.mapfile
 
+# For WSClean predict, we need to increase the number of wplanes so that the
+# effective model image size is larger than the FOV (to prevent aliasing issues)
 wsclean_ft.control.type                                    =   wsclean_ft
 wsclean_ft.control.mapfiles_in                             =   [create_compressed_mapfile6.output.mapfile,create_model4_map.output.mapfile]
 wsclean_ft.control.inputkeys                               =   [msfile,name]
@@ -1330,7 +1332,7 @@ wsclean_ft.argument.mem                                    =   {{ max_percent_me
 wsclean_ft.argument.channelsout                            =   {{ wsclean_nchannels }}
 wsclean_ft.argument.j                                      =   {{ max_cpus_per_node }}
 wsclean_ft.argument.tempdir                                =   {{ local_dir }}
-wsclean_ft.argument.nwlayers-for-size                      =   12288 12288
+wsclean_ft.argument.nwlayers-for-size                      =   49152 49152
 {% endblock full_image_parms %}
 {% endif %}
 

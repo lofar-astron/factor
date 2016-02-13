@@ -38,6 +38,9 @@ create_compressed_mapfile1.control.mapfile_dir        =   input.output.mapfile_d
 create_compressed_mapfile1.control.filename           =   concat_unaveraged_input.mapfile
 
 {% block model_data_parms %}
+# For WSClean predict, we do not need to increase the number of wplanes (as is
+# done for the predict step used for subtraction), as we do not care about
+# regions outside of the facet image
 wsclean_ft.control.type                               =   wsclean_ft
 wsclean_ft.control.mapfiles_in                        =   [create_compressed_mapfile1.output.mapfile,{{ facet_model_mapfile }}]
 wsclean_ft.control.inputkeys                          =   [msfile,name]
