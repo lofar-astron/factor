@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, {% if not is_patch %} predict_all_model_data, add_all_facet_sources, {% endif %} add_imaging_cols_empty, shift_cal, {% if transfer_nearest_solutions %}expand_merged_parmdb_map_transfer, apply_dir_dep_fast_transfer, apply_dir_dep_slow_transfer, {% else %}apply_dir_indep, {% endif %}create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, make_concat_corr_mapfile, concat_corr, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, concat_blavg_data, {% endif %} copy_column1, {% if pre_average %} copy_column2, copy_column3, {% endif %} add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, {% if not transfer_nearest_solutions %} average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, {% endif %} average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_compressed_mapfile_ft, create_model4_map, blank_model, casa_ft4, {% else %} apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, sort_average5, sort_average5_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, regroup_shift_empty_map, create_expanded_model_mapfile, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, add_imaging_cols_empty, shift_cal, {% if transfer_nearest_solutions %}expand_merged_parmdb_map_transfer, apply_dir_dep_fast_transfer, apply_dir_dep_slow_transfer, {% else %}apply_dir_indep, {% endif %}create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, make_concat_corr_mapfile, concat_corr, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, concat_blavg_data, {% endif %} copy_column1, {% if pre_average %} copy_column2, copy_column3, {% endif %} add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, {% if not transfer_nearest_solutions %} average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, {% endif %} average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_compressed_mapfile_ft, create_model4_map, blank_model, casa_ft4, {% else %} apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, sort_average5, sort_average5_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, regroup_shift_empty_map, create_expanded_model_mapfile, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -98,7 +98,6 @@ shift_empty.argument.steps                                 =   [shift]
 shift_empty.argument.shift.type                            =   phaseshifter
 shift_empty.argument.shift.phasecenter                     =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
 
-{% if not is_patch %}
 # predict the skymodel data for the full facet into the phase-shifted measurement sets, length = nfiles
 predict_all_model_data.control.type                        =   dppp
 predict_all_model_data.control.opts.mapfiles_in            =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
@@ -119,13 +118,16 @@ add_all_facet_sources.control.type                         =   add_subtract_colu
 add_all_facet_sources.control.opts.mapfiles_in             =   [shift_empty.output.mapfile,predict_all_model_data.output.mapfile]
 add_all_facet_sources.control.opts.inputkeys               =   [file1,file2]
 add_all_facet_sources.argument.flags                       =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
-{% endif %}
 
 # add the imaging columns to the phase-shifted data, length = nfiles
 add_imaging_cols_empty.control.type                        =   add_imaging_columns
 add_imaging_cols_empty.control.mapfile_in                  =   shift_empty.output.mapfile
 add_imaging_cols_empty.control.inputkey                    =   msfile
 add_imaging_cols_empty.argument.flags                      =   [msfile]
+
+{% if not is_patch %}
+# For normal (non-patch) facets, we need to phase shift the empty data, add the
+# calibrator source, and average
 
 # shift full-res data to calibrator position and average in frequency, length = nfiles
 shift_cal.control.type                                     =   dppp
@@ -147,6 +149,26 @@ shift_cal.argument.add.applycal.timeslotsperparmupdate = {{ timeSlotsPerParmUpda
 shift_cal.argument.avg.type                                =   squash
 shift_cal.argument.avg.freqstep                            =   {{ facetselfcal_freqstep }}
 shift_cal.argument.avg.timestep                            =   1
+
+{% else %}
+
+# For patches, we simply need to average the FACET_DATA_ALL column of the        // length = nfiles
+# shift_empty datasets (since a patch has the same region for all sources as for
+# the calibrator). Even though we don't phase shift here, we reuse the step name
+# for simplicity
+shift_cal.control.type                                     =   dppp
+shift_cal.control.opts.mapfile_in                          =   shift_empty.output.mapfile
+shift_cal.control.opts.inputkey                            =   msin
+shift_cal.argument.numthreads                              =   {{ max_cpus_per_band }}
+shift_cal.argument.msin.datacolumn                         =   FACET_DATA_ALL
+shift_cal.argument.msout.overwrite                         =   True
+shift_cal.argument.msout.writefullresflag                  =   False
+shift_cal.argument.local_scratch_dir                       =   {{ local_dir }}
+shift_cal.argument.steps                                   =   [avg]
+shift_cal.argument.avg.type                                =   squash
+shift_cal.argument.avg.freqstep                            =   {{ facetselfcal_freqstep }}
+shift_cal.argument.avg.timestep                            =   1
+{% endif %}
 
 {% if transfer_nearest_solutions %}
 # expand mapfile of the dir-dependent parmDB to all files, length = nfiles
@@ -1591,6 +1613,8 @@ create_expanded_model_mapfile.control.mapfile_dir          =   input.output.mapf
 create_expanded_model_mapfile.control.filename             =   expand_wsclean_model.mapfile
 
 # make model visibilities, length = some
+# For WSClean predict, we need to increase the number of wplanes so that the
+# effective model image size is larger than the FOV (to prevent aliasing issues)
 wsclean_ft.control.type                                    =   wsclean_ft
 wsclean_ft.control.mapfiles_in                             =   [regroup_shift_empty_map.output.mapfile,create_expanded_model_mapfile.output.mapfile]
 wsclean_ft.control.inputkeys                               =   [msfile,name]
@@ -1601,7 +1625,7 @@ wsclean_ft.argument.mem                                    =   {{ max_percent_me
 wsclean_ft.argument.channelsout                            =   {{ wsclean_nchannels }}
 wsclean_ft.argument.j                                      =   {{ max_cpus_per_node }}
 wsclean_ft.argument.tempdir                                =   {{ local_dir }}
-wsclean_ft.argument.nwlayers-for-size                      =   12288 12288
+wsclean_ft.argument.nwlayers-for-size                      =   49152 49152
 {% endblock full_image_parms %}
 ########## end of a block that can be replaced by another imager.
 {% endif %}

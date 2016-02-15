@@ -42,6 +42,21 @@ def run(parset_file, trim_names=True):
     """
     global all_directions
 
+    # Set logging level to ERROR to suppress extraneous info from parset read
+    logging.root.setLevel(logging.ERROR)
+    log.setLevel(logging.ERROR)
+
+    # Read in parset and get directions
+    all_directions = load_directions(parset_file)
+    if len(all_directions) == 0:
+        log.error('No directions found. Please check parset')
+        sys.exit(1)
+
+    # Set logging level to normal
+    logging.root.setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
+
+    # Plot field
     log.info('Plotting facets...')
     log.info('Left-click on a facet to see its current state')
     log.info('Middle-click on a facet to display its image')
@@ -49,12 +64,6 @@ def run(parset_file, trim_names=True):
     log.info('(In all cases, pan/zoom mode must be off)')
     log.info('Press "u" to update display (display is updated automatically every minute)')
 
-    logging.root.setLevel(logging.ERROR)
-    log.setLevel(logging.ERROR)
-    all_directions = load_directions(parset_file)
-    if len(all_directions) == 0:
-        log.error('No directions found. Please check parset')
-        sys.exit(1)
     plot_state(all_directions, trim_names=trim_names)
 
 
@@ -469,8 +478,15 @@ def find_selfcal_plots(direction):
     """
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
+    peel_dir = os.path.join(direction.working_dir, 'results', 'outlierpeel',
+        direction.name)
+
+    # Check selfcal and peel directories
     if os.path.exists(selfcal_dir):
         selfcal_plots = glob.glob(selfcal_dir+'/*.make_selfcal_plots*.png')
+        selfcal_plots.sort()
+    elif os.path.exists(peel_dir):
+        selfcal_plots = glob.glob(peel_dir+'/*.make_selfcal_plots*.png')
         selfcal_plots.sort()
     else:
         selfcal_plots = []
@@ -515,9 +531,14 @@ def get_current_step(direction):
     statefile = os.path.join(direction.working_dir, 'results', current_op,
         direction.name, 'statefile')
     if os.path.exists(statefile):
-        f = open(statefile, 'r')
-        d = pickle.load(f)
-        f.close()
+        # FACTOR may be writing to the statefile while we try to read from it,
+        # so catch EOFError
+        try:
+            f = open(statefile, 'r')
+            d = pickle.load(f)
+            f.close()
+        except EOFError:
+            return (None, None, None, None)
     else:
         return (None, None, None, None)
 

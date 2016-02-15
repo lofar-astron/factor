@@ -74,7 +74,7 @@ def copy_column_to_bands(mslist, ms_from, inputcol, outputcol):
             dataout.close()
 
 
-def main(ms_from, ms_to, column_from, column_to):
+def main(ms_from, ms_to, column_from, column_to, do_copy=True):
     """
     Copy a column between MS files
 
@@ -89,8 +89,20 @@ def main(ms_from, ms_to, column_from, column_to):
         Name of column to copy from
     column_to : str
         Name of column to copy to
+    do_copy : bool, optional
+        If False, the copy is NOT done (used to skip a copy step in a pipeline)
 
     """
+    if type(do_copy) is str:
+        if do_copy.lower() == 'true':
+            do_copy = True
+        else:
+            do_copy = False
+
+    if not do_copy:
+        print('Copy skipped (do_copy = False)')
+        return
+
     if type(ms_to) is str:
         if '[' in ms_to:
             ms_to = ms_to.strip('[]').split(',')
@@ -113,9 +125,11 @@ if __name__ == '__main__':
     parser.add_argument('ms_to', help='name of the MS file to copy to')
     parser.add_argument('column_from', help='name of the column to copy from')
     parser.add_argument('column_to', help='name of the column to copy to')
+    parser.add_argument('do_copy', help='Copy is done only if True')
     args = parser.parse_args()
 
-    main(args.ms_from, args.ms_to, args.column_from, args.column_to)
+    main(args.ms_from, args.ms_to, args.column_from, args.column_to,
+        do_copy=args.do_copy)
 
 
 

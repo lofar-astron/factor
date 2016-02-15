@@ -7,10 +7,8 @@ or not they can be run in parallel or in series.
 Classes
 -------
 OutlierPeel : Operation
-    Runs the calibration for peeling an outlier source. May be run in parallel
-OutlierSub : Operation
-    Subtracts outlier sources from data. Must be run in series as writes are
-    made to original datasets
+    Runs the calibration for peeling an outlier source. Must be run in series
+    as writes are made to original datasets
 
 """
 import os
@@ -57,8 +55,6 @@ class OutlierPeel(Operation):
         # Add output datamaps to direction object for later reference
         self.direction.input_files_single_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'input_files_single.mapfile')
-        self.direction.subtracted_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'add_all_facet_sources.mapfile')
         self.direction.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'verify_subtract.break.mapfile')
 
@@ -78,6 +74,7 @@ class OutlierPeel(Operation):
 
         # Delete temp data
         self.direction.cleanup_mapfiles = [
+            os.path.join(self.pipeline_mapfile_dir, 'add_all_facet_sources.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'shift_and_average.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat_data.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat_blavg_data.mapfile'),
@@ -85,19 +82,5 @@ class OutlierPeel(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'corrupt_outlier_model.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'average_pre.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'average_post.mapfile')]
-        self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
-        self.direction.cleanup()
-
-
-class OutlierSub(Operation):
-    """
-    Operation to subtract improved model
-    """
-    def __init__(self, parset, bands, direction):
-        super(OutlierSub, self).__init__(parset, bands, direction,
-            name='OutlierSub')
-
-        # Delete temp data
-        self.direction.cleanup_mapfiles = [self.direction.subtracted_data_mapfile]
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()
