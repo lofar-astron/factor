@@ -237,7 +237,7 @@ merge_phase_parmdbs.argument.flags                       =   [mslist,instrument,
 
 # run BBS on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
 solve_ampphase12.control.type                            =   calibrate-stand-alone_new
-solve_ampphase12.argument.observation                    =   create_chunks_map.output.mapfile
+solve_ampphase12.argument.observation                    =   concat_data.output.mapfile
 solve_ampphase12.argument.parset                         =   {{ parset_dir }}/facet_dirdep_amponly_solve_skymodel.parset
 solve_ampphase12.argument.catalog                        =   {{ peel_skymodel }}
 solve_ampphase12.argument.replace-sourcedb               =   True
