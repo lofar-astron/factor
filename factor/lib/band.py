@@ -185,9 +185,9 @@ class Band(object):
         pdb_out = lofar.parmdb.parmdb(phasors_parmdb_file, create=True)
 
         # Check parmdb for non-handled values
-        solnames = pdb.getNames()
+        solnames = pdb_in.getNames()
         for name in solnames:
-            if solname[0:9] != 'Gain:0:0:' and solname[0:9] != 'Gain:1:1:':
+            if name[0:9] != 'Gain:0:0:' and name[0:9] != 'Gain:1:1:':
                 self.log.critical('Direction-independent instument parmdb contains not-handled value {0} '
                                   'for band {1}'.format(name,self.files[pdb_id]))
                 sys.exit(1)
