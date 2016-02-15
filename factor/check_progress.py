@@ -42,19 +42,23 @@ def run(parset_file, trim_names=True):
     """
     global all_directions
 
+    # Set up logging
+    logging.root.setLevel(logging.ERROR)
+    log.setLevel(logging.ERROR)
+
+    # Read in parset and get directions
+    all_directions = load_directions(parset_file)
+    if len(all_directions) == 0:
+        log.error('No directions found. Please check parset')
+        sys.exit(1)
+
+    # Plot field
     log.info('Plotting facets...')
     log.info('Left-click on a facet to see its current state')
     log.info('Middle-click on a facet to display its image')
     log.info('Right-click on a facet to display its selfcal solutions and images')
     log.info('(In all cases, pan/zoom mode must be off)')
     log.info('Press "u" to update display (display is updated automatically every minute)')
-
-    logging.root.setLevel(logging.ERROR)
-    log.setLevel(logging.ERROR)
-    all_directions = load_directions(parset_file)
-    if len(all_directions) == 0:
-        log.error('No directions found. Please check parset')
-        sys.exit(1)
     plot_state(all_directions, trim_names=trim_names)
 
 
