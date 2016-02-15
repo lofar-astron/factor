@@ -469,8 +469,15 @@ def find_selfcal_plots(direction):
     """
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
+    peel_dir = os.path.join(direction.working_dir, 'results', 'outlierpeel',
+        direction.name)
+
+    # Check selfcal and peel directories
     if os.path.exists(selfcal_dir):
         selfcal_plots = glob.glob(selfcal_dir+'/*.make_selfcal_plots*.png')
+        selfcal_plots.sort()
+    elif os.path.exists(peel_dir):
+        selfcal_plots = glob.glob(peel_dir+'/*.make_selfcal_plots*.png')
         selfcal_plots.sort()
     else:
         selfcal_plots = []
