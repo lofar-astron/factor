@@ -9,10 +9,10 @@ update_subtracted_data_hosts.control.hosts      =   {{ hosts }}
 
 update_input_bands_hosts.control.kind           =   plugin
 update_input_bands_hosts.control.type           =   updateHosts
-update_input_bands_hosts.control.mapfile_in     =   {{ input_bands_mapfile }}
+update_input_bands_hosts.control.mapfile_in     =   {{ input_files_single_mapfile }}
 update_input_bands_hosts.control.hosts          =   {{ hosts }}
 
 copy_to_empty_data.control.type                 =   copy_column
-copy_to_empty_data.control.opts.mapfiles_in     =   [{{ subtracted_data_mapfile }},{{ input_bands_mapfile }}]
+copy_to_empty_data.control.opts.mapfiles_in     =   [{{ subtracted_data_mapfile }},{{ input_files_single_mapfile }}]
 copy_to_empty_data.control.opts.inputkeys       =   [file1,file2]
 copy_to_empty_data.argument.flags               =   [file1,file2,SUBTRACTED_DATA_ALL,SUBTRACTED_DATA_ALL_NEW]

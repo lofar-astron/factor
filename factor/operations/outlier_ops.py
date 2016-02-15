@@ -97,8 +97,6 @@ class OutlierSub(Operation):
         super(OutlierSub, self).__init__(parset, bands, direction,
             name='OutlierSub')
 
-        log.warn('OutlierSub is not yet supported in multi-epoch Factor!\n Exiting!')
-        sys.exit(1)
         # Delete temp data
         self.direction.cleanup_mapfiles = [self.direction.subtracted_data_mapfile]
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
