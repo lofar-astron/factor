@@ -272,16 +272,16 @@ corrupt_outlier_model.argument.corrupt_fast1.type        =   applycal
 corrupt_outlier_model.argument.corrupt_fast1.parmdb      =   parmdb
 corrupt_outlier_model.argument.corrupt_fast1.correction  =   tec
 corrupt_outlier_model.argument.corrupt_fast1.invert      =   False
-corrupt_outlier_model.argument.correct_fast1.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
+corrupt_outlier_model.argument.corrupt_fast1.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 corrupt_outlier_model.argument.corrupt_fast2.type        =   applycal
 corrupt_outlier_model.argument.corrupt_fast2.parmdb      =   parmdb
 corrupt_outlier_model.argument.corrupt_fast2.correction  =   commonscalarphase
 corrupt_outlier_model.argument.corrupt_fast2.invert      =   False
-corrupt_outlier_model.argument.correct_fast2.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
+corrupt_outlier_model.argument.corrupt_fast2.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 corrupt_outlier_model.argument.corrupt_slow.type         =   applycal
 corrupt_outlier_model.argument.corrupt_slow.parmdb       =   parmdb
 corrupt_outlier_model.argument.corrupt_slow.invert       =   False
-corrupt_outlier_model.argument.correct_slow.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
+corrupt_outlier_model.argument.corrupt_slow.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 
 # Subtract the corrupted model from the data to make improved subtracted datasets
 subtract_outlier_model.control.type                      =   add_subtract_columns
