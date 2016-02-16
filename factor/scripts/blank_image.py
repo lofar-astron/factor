@@ -65,13 +65,13 @@ def main(input_image_file, vertices_file, output_image_file, blank_value='zero',
         if nterms == 2:
             input_image_files = [input_image_file+'.model.tt0',
                 input_image_file+'.model.tt1']
-            output_image_files = [output_image_files+'.model.tt0',
-                output_image_files+'.model.tt1']
+            output_image_files = [output_image_file+'.model.tt0',
+                output_image_file+'.model.tt1']
         if nterms == 3:
             input_image_files = [input_image_file+'.model.tt0',
                 input_image_file+'.model.tt1', input_image_file+'.model.tt2']
-            output_image_files = [output_image_files+'.model.tt0',
-                output_image_files+'.model.tt1', output_image_files+'.model.tt2']
+            output_image_files = [output_image_file+'.model.tt0',
+                output_image_file+'.model.tt1', output_image_file+'.model.tt2']
     else:
         input_image_files = [input_image_file]
         output_image_files = [output_image_file]
