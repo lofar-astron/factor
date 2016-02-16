@@ -66,7 +66,7 @@ def parset_read(parset_file, use_log_file=True):
     # extensions 'ms', 'MS', 'dpppconcat' or 'dpppcopycol' (both used by the
     # pre-facet pipeline)
     ms_files = []
-    for exten in ['MS', 'ms', 'dpppconcat', 'dpppcopycol']:
+    for exten in ['MS', 'ms', 'dpppaverage']:
         ms_files += glob.glob(os.path.join(parset_dict['dir_ms'], '*.{}'.format(exten)))
     parset_dict['mss'] = sorted(ms_files)
     if len(parset_dict['mss']) == 0:
