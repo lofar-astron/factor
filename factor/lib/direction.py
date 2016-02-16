@@ -94,7 +94,7 @@ class Direction(object):
             self.log.info('Using calibrator clean-mask region file {}'.format(self.region_selfcal))
         self.region_field = region_field
         if self.region_field.lower() == 'empty':
-            self.region_field = None
+            self.region_field = '[]'
         elif not os.path.exists(self.region_field):
             self.log.error('Facet region file {} not found.'.format(self.region_field))
             sys.exit(1)
