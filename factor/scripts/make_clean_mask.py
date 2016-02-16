@@ -155,12 +155,6 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         if image_name.lower() == 'none':
             image_name = None
 
-    if region_file is not None:
-        if region_file != '[]':
-            # Copy the CASA region file (stripped of brackets, etc.) and return
-            os.system('cp {0} {1}'.format(region_file.strip('[]"'), mask_name))
-            return {'threshold_5sig': '0.0'}
-
     if rmsbox is not None and type(rmsbox) is str:
         rmsbox = eval(rmsbox)
 
@@ -294,9 +288,6 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             print('No islands found. Clean mask cannot be made.')
             sys.exit(1)
 
-        img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
-                         img_format=img_format, clobber=True)
-
         # Check if there are large islands preset (indicating that multi-scale
         # clean is needed)
         has_large_isl = False
@@ -305,6 +296,23 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                 # Assuming normal sampling, a size of 100 pixels would imply
                 # a source of ~ 10 beams
                 has_large_isl = True
+
+    if (region_file is not None) and (region_file != '[]'):
+        # Copy the CASA region file (stripped of brackets, etc.) and return
+        os.system('cp {0} {1}'.format(region_file.strip('[]"'), mask_name))
+        if not skip_source_detection:
+            if threshold_format == 'float':
+                return {'threshold_5sig': nsig * img.clipped_rms, 'multiscale': has_large_isl}
+            elif threshold_format == 'str_with_units':
+                # This is done to get around the need for quotes around strings in casapy scripts
+                # 'casastr/' is removed by the generic pipeline
+                return {'threshold_5sig': 'casastr/{0}Jy'.format(nsig * img.clipped_rms),
+                        'multiscale': has_large_isl}
+        else:
+            return {'threshold_5sig': '0.0'}
+    elif not skip_source_detection:
+        img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
+                         img_format=img_format, clobber=True)
 
     if vertices_file is not None or trim_by > 0 or pad_to_size is not None or skip_source_detection:
         # Alter the mask in various ways
@@ -411,6 +419,8 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--threshpix', help='', type=float, default=5.0)
     parser.add_argument('-r', '--rmsbox', help='rms box width and step (e.g., "(60, 20)")',
         type=str, default='(60, 20)')
+    parser.add_argument('--rmsbox_bright', help='rms box for bright sources(?) width and step (e.g., "(60, 20)")',
+        type=str, default='(60, 20)')
     parser.add_argument('-t', '--iterate_threshold', help='iteratively decrease threshold until at least '
         'one island is found', type=bool, default=False)
     parser.add_argument('-o', '--adaptive_rmsbox', help='use an adaptive rms box', type=bool, default=False)
@@ -423,10 +433,12 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--skip_source_detection', help='skip source detection', type=bool, default=False)
 
     args = parser.parse_args()
-    main(args.image_name, args.mask_name, atrous_do=args.atrous_do,
-         threshisl=args.threshisl, threshpix=args.threshpix, rmsbox=args.rmsbox,
-         iterate_threshold=args.iterate_threshold,
-         adaptive_rmsbox=args.adaptive_rmsbox, img_format=args.img_format,
-         threshold_format=args.threshold_format, trim_by=args.trim_by,
-         vertices_file=args.vertices_file, atrous_jmax=args.atrous_jmax,
-         pad_to_size=args.pad_to_size, skip_source_detection=args.skip_source_detection)
+    erg = main(args.image_name, args.mask_name, atrous_do=args.atrous_do,
+               threshisl=args.threshisl, threshpix=args.threshpix, rmsbox=args.rmsbox,
+               rmsbox_bright=args.rmsbox_bright,
+               iterate_threshold=args.iterate_threshold,
+               adaptive_rmsbox=args.adaptive_rmsbox, img_format=args.img_format,
+               threshold_format=args.threshold_format, trim_by=args.trim_by,
+               vertices_file=args.vertices_file, atrous_jmax=args.atrous_jmax,
+               pad_to_size=args.pad_to_size, skip_source_detection=args.skip_source_detection)
+    print erg
