@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from lofarpipe.support.data_map import DataMap
 from lofarpipe.support.data_map import DataProduct
 
@@ -126,7 +127,7 @@ def plugin_main(args, **kwargs):
            hosts = []
            for group in map_out:
                hosts.append(group.host)
-               groupidxs = np.np.array_split(np.arange(len(group.file)),num_groups_out)
+               groupidxs = np.array_split(np.arange(len(group.file)),num_groups_out)
                for i in xrange(num_groups_out):
                    for j in groupidxs[i]:
                        outgroups[i].append(group.file[j])
