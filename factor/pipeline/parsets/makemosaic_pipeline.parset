@@ -84,8 +84,8 @@ sort_into_Groups_maps.control.mapfile_filesmap         =   sort_into_Groups.outp
 
 # concat data in frequency, length = ntimes 
 concat_data.control.type                               =   dppp
-concat_data.control.mapfile_out                        =   sort_into_Groups_map.output.groupmap
-concat_data.control.mapfile_in                         =   sort_into_Groups_map.output.filesmap
+concat_data.control.mapfile_out                        =   sort_into_Groups_maps.output.groupmap
+concat_data.control.mapfile_in                         =   sort_into_Groups_maps.output.filesmap
 concat_data.control.inputkey                           =   msin
 concat_data.argument.msin.datacolumn                   =   DATA
 concat_data.argument.msin.missingdata                  =   True
