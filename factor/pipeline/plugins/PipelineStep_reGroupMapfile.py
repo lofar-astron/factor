@@ -113,7 +113,7 @@ def plugin_main(args, **kwargs):
                     grouplist.extend(map_out[gindex].file)
             # add the final (partial?) group to the map
             newmap.data.append(MultiDataProduct(grouphost, grouplist, False))
-        map_out = newmap
+            map_out = newmap
     else:
        if 'join_groups' in kwargs or 'join_max_files' in kwargs:
            if 'join_groups' in kwargs:

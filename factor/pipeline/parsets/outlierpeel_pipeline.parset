@@ -152,6 +152,7 @@ regroup_parmdb.control.kind                              =   plugin
 regroup_parmdb.control.type                              =   reGroupMapfile
 regroup_parmdb.control.mapfile_in                        =   create_parmdb_map.output.mapfile
 regroup_parmdb.control.mapfile_groups                    =   create_msmulti_map.output.mapfile
+regroup_parmdb.control.check_basename                    =   False
 regroup_parmdb.control.mapfile_dir                       =   input.output.mapfile_dir
 regroup_parmdb.control.filename                          =   re_grouped_parmdb.mapfile
 
