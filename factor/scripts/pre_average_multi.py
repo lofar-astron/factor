@@ -255,6 +255,7 @@ def BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_colname, io
         else:
             newgroup.append(sorted_ms_dict['msnames'][msindex])
 
+    print "BLavg_multi: Working on",len(ms_groups),"groups of measurement sets."
     #### loop over all groups
     msindex = 0
     for ms_names in ms_groups:
@@ -304,7 +305,7 @@ def BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_colname, io
                 sys.exit(1)
 
         ### iteration on baseline combination
-        for ant in itertools.product(set(ant1), set(ant2)):
+        for ant in itertools.product(set(ant1_list[0]), set(ant2_list[0])):
             if ant[0] >= ant[1]:
                 continue
             sel_list = []
@@ -312,8 +313,8 @@ def BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_colname, io
             data_list = []
             # select data from all MSs
             for msindex in xrange(len(ms_names)):                
-                sel1 = np.where(ant1 == ant[0])[0]
-                sel2 = np.where(ant2 == ant[1])[0]
+                sel1 = np.where(ant1_list[msindex] == ant[0])[0]
+                sel2 = np.where(ant2_list[msindex] == ant[1])[0]
                 sel_list.append( sorted(list(frozenset(sel1).intersection(sel2))) )
 
                 # # get weights and data
@@ -327,14 +328,13 @@ def BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_colname, io
             endidx = [data.shape[0]]
             for msindex in xrange(1,len(ms_names)):
                 #pad gap between obs
-                numfill = np.max(all_time_list[msindex-1]) - np.min(all_time_list[msindex])
-                filltimes = np.arange(np.min(all_time_list[msindex]),np.max(all_time_list[msindex-1]),timepersample)
+                filltimes = np.arange(np.max(all_time_list[msindex-1]),np.min(all_time_list[msindex]),timepersample)
                 fillshape[0] = len(filltimes)
-                data.concatenate( (data,np.zeros(fillshape)) )
-                weights.concatenate( (weights,np.zeros(fillshape)) )
+                data = np.concatenate( (data,np.zeros(fillshape)), axis=0 )
+                weights = np.concatenate( (weights,np.zeros(fillshape)), axis=0  )
                 startidx.append(data.shape[0])
-                data.concatenate( (data,all_data_list[msindex][sel_list[msindex],:,:]) )
-                weights.concatenate( (weights,all_weights_list[msindex][sel_list[msindex],:,:]) )
+                data = np.concatenate( (data,all_data_list[msindex][sel_list[msindex],:,:]), axis=0  )
+                weights = np.concatenate( (weights,all_weights_list[msindex][sel_list[msindex],:,:]), axis=0  )
                 endidx.append(data.shape[0])
 
             # compute the FWHM
@@ -376,7 +376,7 @@ def BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_colname, io
             ms.putcol('FLAG', all_flags_list[msindex]) # this saves flags of nans, which is always good
             ms.putcol('WEIGHT_SPECTRUM', all_weights_list[msindex])
             ms.close()
-        print "Finished one group of measurement sets."
+        print "BLavg_multi: Finished one group of measurement sets."
 
 
 def smooth(x, window_len=10, window='hanning'):
