@@ -528,8 +528,11 @@ class Direction(object):
         # Set timeSlotsPerParmUpdate to an even divisor of the number of time slots
         # to work around a bug in DPPP ApplyCal
         self.timeSlotsPerParmUpdate = 100
-        while ntimes_min % self.timeSlotsPerParmUpdate:
-            self.timeSlotsPerParmUpdate += 1
+        if ntimes_min<self.timeSlotsPerParmUpdate:
+            self.timeSlotsPerParmUpdate = ntimes_min
+        else:
+            while ntimes_min % self.timeSlotsPerParmUpdate:
+                self.timeSlotsPerParmUpdate += 1
 
         # Set time intervals for selfcal solve steps
         #
