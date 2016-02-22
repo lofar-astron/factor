@@ -362,7 +362,7 @@ mask0.argument.iterate_threshold                           =   True
 mask0.argument.atrous_do                                   =   {{ atrous_do }}
 mask0.argument.rmsbox                                      =   (80,20)
 mask0.argument.adaptive_rmsbox                             =   True
-mask1.argument.trim_by                                     =   0.2
+mask0.argument.trim_by                                     =   0.2
 mask0.argument.img_format                                  =   casa
 mask0.argument.threshold_format                            =   str_with_units
 
