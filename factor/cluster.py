@@ -152,7 +152,8 @@ def divide_nodes(directions, node_list, ndir_per_node, nimg_per_node, ncpu_max,
         d.max_cpus_per_chunk = int(round(d.max_cpus_per_node / nchunks_per_node))
         d.max_cpus_per_band = max(1, int(round(d.max_cpus_per_node *
             len(d.hosts) / float(nbands))))
-        d.max_percent_memory = fmem_max / float(ndir_per_node) / float(nimg_per_node) * 100.0
+        d.max_percent_memory = fmem_max / float(ndir_per_node) * 100.0
+        d.max_percent_memory_per_img = fmem_max / float(ndir_per_node) / float(nimg_per_node) * 100.0
         d.save_state()
 
     return directions
@@ -193,7 +194,8 @@ def combine_nodes(directions, node_list, nimg_per_node, ncpu_max, fmem_max, nban
         d.max_cpus_per_chunk = max(1, int(round(d.max_cpus_per_node /
             float(nchunks_per_node))))
         d.max_cpus_per_band = max(1, int(round(ncpu_max * len(d.hosts) / float(nbands))))
-        d.max_percent_memory = fmem_max / float(nimg_per_node) * 100.0
+        d.max_percent_memory = fmem_max * 100.0
+        d.max_percent_memory_per_img = fmem_max / float(nimg_per_node) * 100.0
         d.save_state()
 
     return directions
