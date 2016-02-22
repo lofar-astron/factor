@@ -6,6 +6,7 @@ import argparse
 from argparse import RawTextHelpFormatter
 import pyrap.tables as pt
 import sys
+import os
 
 
 def main(ms1, ms2, column1, column2, column_out, op='add'):
@@ -45,7 +46,7 @@ def main(ms1, ms2, column1, column2, column_out, op='add'):
     else:
         print('Operation not understood. Must be either "add" or "subtract"')
         sys.exit(1)
-    pt.taql('update {0}, {1} t2 set {2} = {3} {4} t2.{5}'.format(
+    os.system('update {0}, {1} t2 set {2}={3}{4}t2.{5}'.format(
         ms1, ms2, column_out, column1, op_sym, column2))
 
 
