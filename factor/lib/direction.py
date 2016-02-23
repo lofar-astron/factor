@@ -496,15 +496,19 @@ class Direction(object):
         # For selfcal, average to 1 MHz per channel and 120 s per time slot for
         # an image of 512 pixels. Here we use the size of the calibrator to
         # set the averaging steps since the minimum selfcal image size is set
-        # to 512 pixels
+        # to 512 pixels (and therefore the true size of the calibrator may be
+        # much smaller). However, we limit the amount of averaging to no more
+        # than 2 Hz per channel and 120 s per time slot
         if self.cal_size_deg is not None:
             cal_size_pix = self.cal_size_deg / self.cellsize_selfcal_deg
             target_bandwidth_mhz = min(2.0, 1.0 * 512.0 / cal_size_pix)
-            target_timewidth_s = min(120, 120 * 512.0 / cal_size_pix) # used for imaging only
+            target_timewidth_s = min(120.0, 120.0 * 512.0 / cal_size_pix) # used for imaging only
             self.facetselfcal_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
             while nchan % self.facetselfcal_freqstep:
                 self.facetselfcal_freqstep += 1
             self.facetselfcal_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
+            self.log.debug('Using averaging steps of {0} channels and {1} time slots '
+                'for selfcal'.format(self.facetselfcal_freqstep, self.facetselfcal_timestep))
 
         # For facet imaging, average to 0.25 MHz per channel and 30 sec per time
         # slot for an image of 2048 pixels
@@ -515,6 +519,8 @@ class Direction(object):
             while nchan % self.facetimage_freqstep:
                 self.facetimage_freqstep += 1
             self.facetimage_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
+            self.log.debug('Using averaging steps of {0} channels and {1} time slots '
+                'for facet imaging'.format(self.facetimage_freqstep, self.facetimage_timestep))
 
         # For selfcal verify, average to 2 MHz per channel and 120 sec per time
         # slot
