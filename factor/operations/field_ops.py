@@ -27,6 +27,8 @@ class InitSubtract(Operation):
             name='InitSubtract')
 
         log.warn('InitSubtract operation is not maintained anymore. Please use the InitSubtract pipeline from prefactor.')
+        log.warn('  If you did this already, then either the skymodel or the SUBTRACTED_DATA column wasn\'t found in one of the frequency bands.')
+        log.warn('  Please specify the skymodel for one input MS of each frequency band.')
         #### specify  the image parameters here
         # cellsize in degrees, 0.00208 deg is about 7.5 arcsec
         cellsize_highres_deg = 0.00208  

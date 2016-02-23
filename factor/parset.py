@@ -72,7 +72,7 @@ def parset_read(parset_file, use_log_file=True):
     if len(parset_dict['mss']) == 0:
         log.error('No MS files found in {0}!'.format(parset_dict['dir_ms']))
         sys.exit(1)
-    log.info("Working on %i band(s)" % (len(parset_dict['mss'])))
+    log.info("Working on %i input files." % (len(parset_dict['mss'])))
 
     # Handle MS-specific parameters
     parset_dict.update(get_ms_options(parset, parset_dict['mss']))
