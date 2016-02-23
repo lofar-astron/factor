@@ -150,7 +150,7 @@ class Direction(object):
             self.cal_size_deg = cal_size_deg
             if self.cal_imsize == 0:
                 self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
-                    / self.cellsize_selfcal_deg * 1.2)) # cal size has 20% padding
+                    / self.cellsize_selfcal_deg * 1.2)) # cal imsize has 20% padding
 
         self.cal_radius_deg = self.cal_size_deg / 2.0
         self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
@@ -452,17 +452,15 @@ class Direction(object):
         """
         Sets the averaging step sizes and solution intervals
 
+        The averaging is set by the need to keep bandwidth and time smearing
+        below ~ 0.5%, hence 1 MHz per channel and 120 s per time slot for
+        an image of 512 pixels.
+
         The solution-interval scaling is done so that sources with total flux
         densities below 1.4 Jy at the highest frequency have a fast interval of
         8 time slots and a slow interval of 240 time slots for a bandwidth of 4
         bands. The fast intervals are scaled with the bandwidth and flux as
         nbands^-0.5 and flux^2. The slow intervals are scaled as flux^2.
-
-        When multiple sources are combined into a single calibrator, the flux
-        density of each source is obviously lower than the total, and hence
-        the model will be less well constrained. To compensate for this effect,
-        we scale the solution intervals by the number of sources in the
-        calibrator.
 
         Note: the frequency step for averaging must be an even divisor of the
         number of channels
@@ -496,10 +494,13 @@ class Direction(object):
         self.initsubtract_timestep = max(1, int(round(20.0 / timestep_sec)))
 
         # For selfcal, average to 1 MHz per channel and 120 s per time slot for
-        # an image of 512 pixels
-        if self.cal_imsize is not None:
-            target_bandwidth_mhz = 1.0 * 512.0 / self.cal_imsize
-            target_timewidth_s = 120 * 512.0 / self.cal_imsize # used for imaging only
+        # an image of 512 pixels. Here we use the size of the calibrator to
+        # set the averaging steps since the minimum selfcal image size is set
+        # to 512 pixels
+        if self.cal_size_deg is not None:
+            cal_size_pix = self.cal_size_deg / self.cellsize_selfcal_deg
+            target_bandwidth_mhz = min(2.0, 1.0 * 512.0 / cal_size_pix)
+            target_timewidth_s = min(120, 120 * 512.0 / cal_size_pix) # used for imaging only
             self.facetselfcal_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
             while nchan % self.facetselfcal_freqstep:
                 self.facetselfcal_freqstep += 1
