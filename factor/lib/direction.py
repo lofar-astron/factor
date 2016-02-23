@@ -495,32 +495,32 @@ class Direction(object):
             self.initsubtract_freqstep += 1
         self.initsubtract_timestep = max(1, int(round(20.0 / timestep_sec)))
 
-        # For selfcal, average to 2 MHz per channel and 120 s per time slot for
+        # For selfcal, average to 1 MHz per channel and 120 s per time slot for
         # an image of 512 pixels
         if self.cal_imsize is not None:
-            target_bandwidth_mhz = 2.0 * 512.0 / self.cal_imsize
+            target_bandwidth_mhz = 1.0 * 512.0 / self.cal_imsize
             target_timewidth_s = 120 * 512.0 / self.cal_imsize # used for imaging only
             self.facetselfcal_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
             while nchan % self.facetselfcal_freqstep:
                 self.facetselfcal_freqstep += 1
             self.facetselfcal_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
 
-        # For facet imaging, average to 0.5 MHz per channel and 30 sec per time
+        # For facet imaging, average to 0.25 MHz per channel and 30 sec per time
         # slot for an image of 2048 pixels
         if self.facet_imsize is not None:
-            target_bandwidth_mhz = 0.5 * 2048.0 / self.facet_imsize
-            target_timewidth_s = 30 * 2048.0 / self.facet_imsize
+            target_bandwidth_mhz = 0.25 * 2048.0 / self.facet_imsize
+            target_timewidth_s = 30.0 * 2048.0 / self.facet_imsize
             self.facetimage_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
             while nchan % self.facetimage_freqstep:
                 self.facetimage_freqstep += 1
             self.facetimage_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
 
-        # For selfcal verify, average to 2 MHz per channel and 60 sec per time
+        # For selfcal verify, average to 2 MHz per channel and 120 sec per time
         # slot
         self.verify_freqstep = max(1, min(int(round(2.0 * 1e6 / chan_width_hz)), nchan))
         while nchan % self.verify_freqstep:
             self.verify_freqstep += 1
-        self.verify_timestep = max(1, int(round(60.0 / timestep_sec)))
+        self.verify_timestep = max(1, int(round(120.0 / timestep_sec)))
 
         # Set timeSlotsPerParmUpdate to an even divisor of the number of time slots
         # to work around a bug in DPPP ApplyCal
