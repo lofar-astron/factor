@@ -263,12 +263,12 @@ class Direction(object):
         self.casa_full_image_threshold_mjy = "{}mJy".format(1.5 * 0.7 / scaling_factor)
 
         # Set multiscale imaging mode: Get source sizes and check for large
-        # sources (anything above 2 arcmin -- the CC sky model was convolved
+        # sources (anything above 4 arcmin -- the CC sky model was convolved
         # with a Gaussian of 1 arcmin, so unresolved sources have sizes of ~
         # 1 arcmin)
         if initial_skymodel is not None and self.mscale_field_do is None:
             sizes = self.get_source_sizes(initial_skymodel.copy())
-            large_size_arcmin = 2.0
+            large_size_arcmin = 4.0
             if any([s > large_size_arcmin for s in sizes]):
                 self.mscale_field_do = True
             else:
