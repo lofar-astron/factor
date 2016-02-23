@@ -75,6 +75,7 @@ mask5.argument.atrous_jmax                                 =   3
 mask5.argument.adaptive_rmsbox                             =   True
 mask5.argument.atrous_do                                   =   True
 mask5.argument.img_format                                  =   casa
+mask5.argument.nsig                                        =   2.0
 mask5.argument.vertices_file                               =   {{ vertices_file }}
 mask5.argument.threshold_format                            =   str_with_units
 
