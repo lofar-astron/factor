@@ -19,7 +19,7 @@ If you want to install FACTOR yourself, follow the instructions below.
 FACTOR requires the following:
 
 * The LOFAR offline trunk from the LOFAR software repository (version 2.15 or later)
-* [CASA](http://casa.nrao.edu) (versions *before* 4.3 or version 4.5.0 or later)
+* [CASA](http://casa.nrao.edu) (versions *before* 4.3 or version 4.5.0 or later; note that CASA requires Java for the buildmytasks script that is needed by FACTOR, so you will need Java as well)
 * [WSClean](http://sourceforge.net/p/wsclean/wiki/Home) (version 1.10 or later)
 * [LSMTool](https://github.com/darafferty/LSMTool) (version 1.1 or later)
 * [jinja2](http://jinja.pocoo.org/docs/dev)
@@ -74,10 +74,9 @@ a parset that defines the parameters of the run. E.g.:
 
     $ runfactor factor.parset
 
-Alternatively, you can run factor from Python scripts with:
+You can check the progress of a run with `checkfactor`:
 
-    from factor import process
-    process.run('factor.parset')
+    $ checkfactor factor.parset
 
 The parset defines the data and working directories, various options, etc.
 FACTOR handles all the initialization and sets up the directories, pipeline
