@@ -179,7 +179,7 @@ wsclean_image_full1.argument.minuv-l                    =   80
 wsclean_image_full1.argument.scale                      =   0.000417
 wsclean_image_full1.argument.channelsout                =   {{ wsclean_nchannels }}
 wsclean_image_full1.argument.mem                        =   {{ max_percent_memory }}
-wsclean_image_full1.argument.j                          =   {{ max_cpus_per_img }}
+wsclean_image_full1.argument.j                          =   {{ max_cpus_per_node }}
 wsclean_image_full1.argument.tempdir                    =   {{ local_dir }}
 
 # make a mapfile with the root-name of the WSClean images, length = 1
@@ -231,7 +231,7 @@ wsclean_image_full2.argument.minuv-l                    =   80
 wsclean_image_full2.argument.scale                      =   0.000417
 wsclean_image_full2.argument.channelsout                =   {{ wsclean_nchannels }}
 wsclean_image_full2.argument.mem                        =   {{ max_percent_memory }}
-wsclean_image_full2.argument.j                          =   {{ max_cpus_per_img }}
+wsclean_image_full2.argument.j                          =   {{ max_cpus_per_node }}
 wsclean_image_full2.argument.tempdir                    =   {{ local_dir }}
 
 # make a mapfile with the root-name of the WSClean images, length = 1

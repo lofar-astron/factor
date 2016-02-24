@@ -150,7 +150,7 @@ class Direction(object):
             self.cal_size_deg = cal_size_deg
             if self.cal_imsize == 0:
                 self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
-                    / self.cellsize_selfcal_deg * 1.2)) # cal size has 20% padding
+                    / self.cellsize_selfcal_deg * 1.2)) # cal imsize has 20% padding
 
         self.cal_radius_deg = self.cal_size_deg / 2.0
         self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
@@ -263,12 +263,12 @@ class Direction(object):
         self.casa_full_image_threshold_mjy = "{}mJy".format(1.5 * 0.7 / scaling_factor)
 
         # Set multiscale imaging mode: Get source sizes and check for large
-        # sources (anything above 2 arcmin -- the CC sky model was convolved
+        # sources (anything above 4 arcmin -- the CC sky model was convolved
         # with a Gaussian of 1 arcmin, so unresolved sources have sizes of ~
         # 1 arcmin)
         if initial_skymodel is not None and self.mscale_field_do is None:
             sizes = self.get_source_sizes(initial_skymodel.copy())
-            large_size_arcmin = 2.0
+            large_size_arcmin = 4.0
             if any([s > large_size_arcmin for s in sizes]):
                 self.mscale_field_do = True
             else:
@@ -452,17 +452,15 @@ class Direction(object):
         """
         Sets the averaging step sizes and solution intervals
 
+        The averaging is set by the need to keep bandwidth and time smearing
+        below ~ 0.5%, hence 1 MHz per channel and 120 s per time slot for
+        an image of 512 pixels.
+
         The solution-interval scaling is done so that sources with total flux
         densities below 1.4 Jy at the highest frequency have a fast interval of
         8 time slots and a slow interval of 240 time slots for a bandwidth of 4
         bands. The fast intervals are scaled with the bandwidth and flux as
         nbands^-0.5 and flux^2. The slow intervals are scaled as flux^2.
-
-        When multiple sources are combined into a single calibrator, the flux
-        density of each source is obviously lower than the total, and hence
-        the model will be less well constrained. To compensate for this effect,
-        we scale the solution intervals by the number of sources in the
-        calibrator.
 
         Note: the frequency step for averaging must be an even divisor of the
         number of channels
@@ -501,29 +499,38 @@ class Direction(object):
         self.initsubtract_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors-self.initsubtract_freqstep))]
         self.initsubtract_timestep = max(1, int(round(20.0 / timestep_sec)))
 
-        # For selfcal, average to 2 MHz per channel and 120 s per time slot for
-        # an image of 512 pixels
-        if self.cal_imsize is not None:
-            target_bandwidth_mhz = 2.0 * 512.0 / self.cal_imsize
-            target_timewidth_s = 120 * 512.0 / self.cal_imsize # used for imaging only
+        # For selfcal, average to 1 MHz per channel and 120 s per time slot for
+        # an image of 512 pixels. Here we use the size of the calibrator to
+        # set the averaging steps since the minimum selfcal image size is set
+        # to 512 pixels (and therefore the true size of the calibrator may be
+        # much smaller). However, we limit the amount of averaging to no more
+        # than 2 Hz per channel and 120 s per time slot
+        if self.cal_size_deg is not None:
+            cal_size_pix = self.cal_size_deg / self.cellsize_selfcal_deg
+            target_bandwidth_mhz = min(2.0, 1.0 * 512.0 / cal_size_pix)
+            target_timewidth_s = min(120.0, 120.0 * 512.0 / cal_size_pix) # used for imaging only
             self.facetselfcal_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
             self.facetselfcal_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors-self.facetselfcal_freqstep))]
             self.facetselfcal_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
+            self.log.debug('Using averaging steps of {0} channels and {1} time slots '
+                'for selfcal'.format(self.facetselfcal_freqstep, self.facetselfcal_timestep))
 
-        # For facet imaging, average to 0.5 MHz per channel and 30 sec per time
+        # For facet imaging, average to 0.25 MHz per channel and 30 sec per time
         # slot for an image of 2048 pixels
         if self.facet_imsize is not None:
-            target_bandwidth_mhz = 0.5 * 2048.0 / self.facet_imsize
-            target_timewidth_s = 30 * 2048.0 / self.facet_imsize
+            target_bandwidth_mhz = 0.25 * 2048.0 / self.facet_imsize
+            target_timewidth_s = 30.0 * 2048.0 / self.facet_imsize
             self.facetimage_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
             self.facetimage_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors-self.facetimage_freqstep))]
             self.facetimage_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
+            self.log.debug('Using averaging steps of {0} channels and {1} time slots '
+                'for facet imaging'.format(self.facetimage_freqstep, self.facetimage_timestep))
 
-        # For selfcal verify, average to 2 MHz per channel and 60 sec per time
+        # For selfcal verify, average to 2 MHz per channel and 120 sec per time
         # slot
         self.verify_freqstep = max(1, min(int(round(2.0 * 1e6 / chan_width_hz)), nchan))
         self.verify_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors-self.verify_freqstep))]
-        self.verify_timestep = max(1, int(round(60.0 / timestep_sec)))
+        self.verify_timestep = max(1, int(round(120.0 / timestep_sec)))
 
         # Set timeSlotsPerParmUpdate to an even divisor of the number of time slots
         # to work around a bug in DPPP ApplyCal

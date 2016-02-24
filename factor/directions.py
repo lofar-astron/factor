@@ -595,10 +595,13 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
                 p2 = shapely.geometry.Polygon(patch_poly)
                 if p2.intersects(p1):
                     p2 = p2.difference(p1)
-                    xyverts = [np.array([xp, yp]) for xp, yp in
-                        zip(p2.exterior.coords.xy[0].tolist(),
-                        p2.exterior.coords.xy[1].tolist())]
-                    patch_poly = xyverts
+                    try:
+                        xyverts = [np.array([xp, yp]) for xp, yp in
+                            zip(p2.exterior.coords.xy[0].tolist(),
+                            p2.exterior.coords.xy[1].tolist())]
+                        patch_poly = xyverts
+                    except AttributeError:
+                        pass
 
             add_facet_info(d, selfcal_poly, patch_poly, field_ra_deg, field_dec_deg)
             patch_polys.append(patch_poly)

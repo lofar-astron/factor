@@ -6,17 +6,12 @@ import argparse
 from argparse import RawTextHelpFormatter
 import pyrap.tables as pt
 import sys
+import os
 
 
 def main(ms1, ms2, column1, column2, column_out, op='add'):
     """
     Add/subtract columns (column_out = column1 +/- column2)
-
-    Note: we could also use TaQL to do this. E.g.:
-
-        taql 'update ms1, ms2 t2 set column_out = column1 + t2.column2'
-
-    but we have to create the output column first.
 
     Parameters
     ----------
@@ -24,8 +19,7 @@ def main(ms1, ms2, column1, column2, column_out, op='add'):
         Name of MS file from which column 1 will be taken. This MS file will
         also receive the output column
     ms2 : str or list
-        Name of MS file from which column 2 will be taken. Can be the same as
-        ms1
+        Name of MS file from which column 2 will be taken.
     column1 : str
         Name of column 1
     column2 : str
@@ -36,34 +30,24 @@ def main(ms1, ms2, column1, column2, column_out, op='add'):
         Operation to perform: 'add' or 'subtract'
 
     """
-    if ms1 == ms2:
-        ms2 = None
-
-    # Read in the data
+    # Add the output column to ms1 if needed
     t1 = pt.table(ms1, readonly=False, ack=False)
-    data1 = t1.getcol(column1)
-    if ms2 is not None:
-        t2 = pt.table(ms2, ack=False)
-        data2 = t2.getcol(column2)
-    else:
-        data2 = t1.getcol(column2)
-
-    # Add the output column if needed
     if column_out not in t1.colnames():
         desc = t1.getcoldesc(column1)
         desc['name'] = column_out
         t1.addcols(desc)
+    t1.close()
 
-    # Add or subtract columns
+    # Add or subtract columns with TaQL
     if op.lower() == 'add':
-        t1.putcol(column_out, data1 + data2)
+        op_sym = '+'
     elif op.lower() == 'subtract':
-        t1.putcol(column_out, data1 - data2)
+        op_sym = '-'
     else:
         print('Operation not understood. Must be either "add" or "subtract"')
         sys.exit(1)
-    t1.flush()
-    t1.close()
+    os.system("taql 'update {0}, {1} t2 set {2}={3}{4}t2.{5}'".format(
+        ms1, ms2, column_out, column1, op_sym, column2))
 
 
 if __name__ == '__main__':

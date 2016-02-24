@@ -214,10 +214,11 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     if not skip_source_detection:
         if vertices_file is not None:
             # Modify the input image to blank the regions outside of the polygon
+            temp_img = pim.image(image_name)
+            image_name += '.blanked'
+            temp_img.saveas(image_name, overwrite=True)
             input_img = pim.image(image_name)
             data = input_img.getdata()
-            coordsys = input_img.coordinates()
-            imshape = input_img.shape()
 
             vertices = read_vertices(vertices_file)
             RAverts = vertices[0]
@@ -242,24 +243,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                 data[0, 0, masked_ind[0][outside_ind], masked_ind[1][outside_ind]] = np.nan
 
             # Save changes
-            new_img = pim.image('', shape=imshape, coordsys=coordsys)
-            new_img.putdata(data)
-            image_name += '.blanked'
-            new_img.tofits(image_name, overwrite=True)
-
-            # Add beam info to blanked FITS image, as it is stripped out on save
-            hduim = pyfits.open(image_name, mode='update')
-            header = hduim[0].header
-            units =  input_img.info()['imageinfo']['restoringbeam']['major']['unit']
-            if units == 'arcsec':
-                conversion = 3600.0
-            else:
-                conversion = 1.0
-            header['BMAJ'] = input_img.info()['imageinfo']['restoringbeam']['major']['value'] / conversion
-            header['BMIN'] = input_img.info()['imageinfo']['restoringbeam']['minor']['value'] / conversion
-            header['BPA'] = input_img.info()['imageinfo']['restoringbeam']['positionangle']['value']
-            hduim.flush()
-            hduim.close()
+            input_img.putdata(data)
 
         if iterate_threshold:
             # Start with given threshold and lower it until we get at least one island
@@ -362,8 +346,12 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             xvert = []
             yvert = []
             for RAvert, Decvert in zip(RAverts, Decverts):
-                pixels = new_mask.topixel([0, 1, Decvert*np.pi/180.0,
-                    RAvert*np.pi/180.0])
+                try:
+                    pixels = new_mask.topixel([0, 1, Decvert*np.pi/180.0,
+                                               RAvert*np.pi/180.0])
+                except:
+                    pixels = new_mask.topixel([1, 1, Decvert*np.pi/180.0,
+                                               RAvert*np.pi/180.0])
                 xvert.append(pixels[2]) # x -> Dec
                 yvert.append(pixels[3]) # y -> RA
             poly = Polygon(xvert, yvert)
