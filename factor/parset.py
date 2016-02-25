@@ -288,7 +288,8 @@ def get_directions_options(parset):
     else:
         parset_dict['direction_specific']['groupings'] = [{'1':0}]
     log.info("Using the following groupings for directions: {}"
-        .format(', '.join(['{0}:{1}'.format(n.keys()[0], n.values()[0]) for n in n_per_grouping])))
+        .format(', '.join(['{0}:{1}'.format(n.keys()[0], n.values()[0])
+        for n in parset_dict['direction_specific']['groupings']])))
 
     # If groups are used to process more than one direction in parallel, reordering
     # of the directions in the groups can be done to maximize the flux-weighted
