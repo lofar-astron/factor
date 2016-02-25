@@ -47,6 +47,12 @@ def parset_read(parset_file, use_log_file=True):
     parset_dict.update(get_cluster_options(parset))
 
     # Set up working directory. All output will be placed in this directory
+    if '+' in parset_dict['dir_working']:
+        # Check if "+" is in path, as as casapy buildmytasks will not work
+        # correctly (due to its use of sed)
+        log.critical("A '+' appears in the working dir path {}. CASA ft will "
+            "not work correctly".format(parset_dict['dir_working']))
+        sys.exit(1)
     if not os.path.isdir(parset_dict['dir_working']):
         os.mkdir(parset_dict['dir_working'])
     try:
@@ -54,8 +60,8 @@ def parset_read(parset_file, use_log_file=True):
         for subdir in ['/logs', '/state', '/results', '/regions']:
             if not os.path.isdir(parset_dict['dir_working']+subdir):
                 os.mkdir(parset_dict['dir_working']+subdir)
-    except:
-        log.critical("Cannot use the working dir %s" % (parset_dict['dir_working']))
+    except Exception as e:
+        log.critical("Cannot use the working dir {0}: {1}" % (parset_dict['dir_working'], e))
         sys.exit(1)
     if use_log_file:
         set_log_file(parset_dict['dir_working']+'/factor.log')
