@@ -255,7 +255,7 @@ def make_initial_skymodel(band, max_radius_deg=None):
     return s
 
 
-def group_directions(directions, n_per_grouping={'1':0}, allow_reordering=True):
+def group_directions(directions, n_per_grouping=[{'1':0}], allow_reordering=True):
     """
     Sorts directions into groups that can be selfcaled simultaneously
 
@@ -266,10 +266,10 @@ def group_directions(directions, n_per_grouping={'1':0}, allow_reordering=True):
     ----------
     directions : list of Direction objects
         List of input directions to group
-    n_per_grouping : dict, optional
-        Dict specifying the total number of sources at each grouping level. The
-        sources at each grouping level can be reordered to maximize the
-        minimum separation between sources within a group
+    n_per_grouping : list of dicts, optional
+        List of dicts specifying the total number of sources at each grouping
+        level. The sources at each grouping level can be reordered to maximize
+        the minimum separation between sources within a group
     allow_reordering : bool, optional
         If True, allow sources in neighboring groups to be reordered to increase
         the minimum separation between sources within a group
@@ -281,7 +281,7 @@ def group_directions(directions, n_per_grouping={'1':0}, allow_reordering=True):
 
     """
     direction_groups = []
-    if n_per_grouping == {'1': 0}:
+    if n_per_grouping[0] == {'1': 0}:
         for d in directions:
             direction_groups.append([d])
         log.debug('Processing each direction in series')
@@ -303,19 +303,19 @@ def group_directions(directions, n_per_grouping={'1':0}, allow_reordering=True):
 
         # Divide based on flux (assuming order is decreasing flux)
         log.info('Dividing directions into groups...')
-        grouping_levels = [int(g) for g in n_per_grouping.iterkeys()]
-        grouping_levels.sort()
+        grouping_levels = [int(n.items()[0][0]) for n in n_per_grouping]
+        n_per_level = [int(n.items()[0][1]) for n in n_per_grouping]
         for i, g in enumerate(grouping_levels):
             if i == 0:
                 start = 0
             else:
                 start = end
             if i < len(grouping_levels)-1:
-                if n_per_grouping[str(g)] <= 0:
+                if n_per_level[i] <= 0:
                     # check for 0 as indicator of "take all the rest"
                     end = len(directions)
                 else:
-                    end = start + n_per_grouping[str(g)]
+                    end = start + n_per_level[i]
             else:
                 end = len(directions)
             if end > len(directions):
@@ -328,7 +328,6 @@ def group_directions(directions, n_per_grouping={'1':0}, allow_reordering=True):
                         gend = end
                     if j == 0:
                         direction_groups = [directions[gstart: gend]]
-
                     else:
                         direction_groups += [directions[gstart: gend]]
 

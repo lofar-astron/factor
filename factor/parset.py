@@ -274,7 +274,7 @@ def get_directions_options(parset):
     # into groups of 4 (i.e., 4 directions processed in parallel). Default is one at
     # a time (i.e., groupings = 1:0)
     if 'groupings' in parset_dict['direction_specific']:
-        groupings={}
+        groupings=[]
         keys = []
         vals = []
         kvs = parset_dict['direction_specific']['groupings'].split(',')
@@ -283,12 +283,12 @@ def get_directions_options(parset):
             keys.append(key.strip())
             vals.append(val.strip())
         for key, val in zip(keys, vals):
-            groupings[key] = int(val)
+            groupings.append({key: int(val)})
         parset_dict['direction_specific']['groupings'] = groupings
     else:
-        parset_dict['direction_specific']['groupings'] = {'1':0}
-    log.info("Using the following groupings for directions: {0}"
-        .format(parset_dict['direction_specific']['groupings']))
+        parset_dict['direction_specific']['groupings'] = [{'1':0}]
+    log.info("Using the following groupings for directions: {}"
+        .format(', '.join(['{0}:{1}'.format(n.keys()[0], n.values()[0]) for n in n_per_grouping])))
 
     # If groups are used to process more than one direction in parallel, reordering
     # of the directions in the groups can be done to maximize the flux-weighted
