@@ -363,7 +363,8 @@ def _set_up_compute_parameters(parset, dry_run=False):
     ndir_simul = len(parset['cluster_specific']['node_list']) * \
         parset['cluster_specific']['ndir_per_node']
     if parset['direction_specific']['groupings'] is not None:
-        ngroup_max = int(max(parset['direction_specific']['groupings'].keys()))
+        ngroup_max = int(max([int(n.items()[0][0]) for n in
+            parset['direction_specific']['groupings']]))
     else:
         ngroup_max = 1
     if ndir_simul < ngroup_max:
