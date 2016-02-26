@@ -104,7 +104,7 @@ ndir_selfcal = 5
 # direction is within this distance of a calibrator for which selfcal was
 # successful, the dir-dep selfcal solutions from this calibrator will be used
 # instead of the dir-indep ones
-transfer_radius = 1.0
+transfer_radius = 0.5
 
 # Grouping of directions into groups that are selfcal-ed in parallel, defined as
 # grouping:n_total_per_grouping. For example, groupings = 1:5, 4:0 means two
