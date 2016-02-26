@@ -61,7 +61,7 @@ def parset_read(parset_file, use_log_file=True):
             if not os.path.isdir(parset_dict['dir_working']+subdir):
                 os.mkdir(parset_dict['dir_working']+subdir)
     except Exception as e:
-        log.critical("Cannot use the working dir {0}: {1}" % (parset_dict['dir_working'], e))
+        log.critical("Cannot use the working dir {0}: {1}".format(parset_dict['dir_working'], e))
         sys.exit(1)
     if use_log_file:
         set_log_file(parset_dict['dir_working']+'/factor.log')
