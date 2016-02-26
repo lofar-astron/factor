@@ -48,7 +48,7 @@ def parset_read(parset_file, use_log_file=True):
 
     # Set up working directory. All output will be placed in this directory
     if '+' in parset_dict['dir_working']:
-        # Check if "+" is in path, as as casapy buildmytasks will not work
+        # Check if "+" is in path, as casapy buildmytasks will not work
         # correctly (due to its use of sed)
         log.critical("A '+' appears in the working dir path {}. CASA ft will "
             "not work correctly".format(parset_dict['dir_working']))
