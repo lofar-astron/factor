@@ -21,8 +21,8 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
         Name of output mapfile
     mapfile_dir : str
         Directory for output mapfile
-    numSB : int, optional 
-        How many files should go into one frequency group. Values <= 0 mean put 
+    numSB : int, optional
+        How many files should go into one frequency group. Values <= 0 mean put
         all files of the same time-step into one group.
         default = -1
     hosts : list or str
@@ -32,7 +32,7 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
         fill the data with flagged dummy data.
         default = True
     target_path : str, optional
-        Change the path of the "groups" files to this. (I.e. write output files 
+        Change the path of the "groups" files to this. (I.e. write output files
         into this directory with the subsequent NDPPP call.)
         default = keep path of input files
     stepname : str, optional
@@ -134,6 +134,7 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
             if type(target_path) is str:
                 groupname = os.path.join(target_path,os.path.basename(groupname))
             groupmap.append(DataProduct(hosts[hostID%numhosts],groupname, skip_this))
+            hostID += 1
         assert freq==1e12
 
     filemapname = os.path.join(mapfile_dir, filename)
@@ -149,7 +150,7 @@ def input2bool(invar):
     elif isinstance(invar, str):
         if invar.upper() == 'TRUE' or invar == '1':
             return True
-        elif invar.upper() == 'FALSE' or invar == '0': 
+        elif invar.upper() == 'FALSE' or invar == '0':
             return False
         else:
             raise ValueError('input2bool: Cannot convert string "'+invar+'" to boolean!')
@@ -172,7 +173,7 @@ def input2strlist(invar):
                     for f in fname.strip('[]').split(','):
                         str_list.append(f.strip(' \'\"'))
                 else:
-                    str_list.append(fname.strip(' \'\"'))  
+                    str_list.append(fname.strip(' \'\"'))
     elif type(invar) is list:
         str_list = [str(f).strip(' \'\"') for f in invar]
     else:
@@ -298,7 +299,7 @@ if __name__ == '__main__':
 
     groupmap = DataMap.load(ergdict['groupmapfile'])
     filemap = MultiDataMap.load(ergdict['mapfile'])
-    print "len(groupmap) : %d , len(filemap) : %d " % (len(groupmap),len(filemap)) 
+    print "len(groupmap) : %d , len(filemap) : %d " % (len(groupmap),len(filemap))
     if len(groupmap) != len(filemap):
         print "groupmap and filemap have different length!"
         sys.exit(1)
