@@ -1,5 +1,5 @@
 """
-Definition of the band class
+Definition of the band class and a few related functions
 """
 import os
 import sys
@@ -8,11 +8,13 @@ import logging
 import pyrap.tables as pt
 import lofar.parmdb
 import numpy as np
+import multiprocessing
+import itertools
 
 
 class Band(object):
     """
-    The Band object contains parameters needed for each band (MS)
+    The Band object contains parameters needed for each band
 
     Parameters
     ----------
@@ -24,31 +26,19 @@ class Band(object):
         Name of direction-independent instrument parmdb (relative to MSfile)
     skymodel_dirindep : str
         Full path of direction-independent sky model
+    local_dir : str
+        Path to local scratch directory for temp output. The file is then
+        copied to the original output directory
     test_run : bool, optional
         If True, use test image sizes
 
     """
     def __init__(self, MSfiles, factor_working_dir, dirindparmdb,
-        skymodel_dirindep=None, test_run=False):
-        """
-        Create Band object
+        skymodel_dirindep=None, local_dir=None, test_run=False):
 
-        Parameters
-        ----------
-        MSfiles : list of str
-            Filenames of MSs for the same frequency band
-        factor_working_dir : str
-            Full path of working directory
-        dirindparmdb : str
-            Name of direction-independent instrument parmdb (relative to MSfile)
-        skymodel_dirindep : str
-            Full path of direction-independent sky model
-        test_run : bool, optional
-            If True, use test image sizes
-
-        """
         self.files = MSfiles
         self.msnames = [ MS.split('/')[-1] for MS in self.files ]
+        self.working_dir = factor_working_dir
         self.dirindparmdbs = [ os.path.join(MS, dirindparmdb) for MS in self.files ]
         self.skymodel_dirindep = skymodel_dirindep
         self.numMS = len(self.files)
@@ -63,6 +53,7 @@ class Band(object):
         self.name = 'Band_{0:.2f}MHz'.format(self.freq/1e6)
         self.log = logging.getLogger('factor:{}'.format(self.name))
         self.log.debug('Band name is {}'.format(self.name))
+        self.chunks_dir = os.path.join(factor_working_dir, 'chunks', self.name)
 
         # Do some checks
         self.check_freqs()
@@ -81,22 +72,55 @@ class Band(object):
         self.diam = float(ant.col('DISH_DIAMETER')[0])
         ant.close()
 
+        # Find mean elevation and FOV
+        for MS_id in xrange(self.numMS):
+            # Add (virtual) elevation column to MS
+            try:
+                pt.addDerivedMSCal(self.files[MS_id])
+            except RuntimeError:
+                # RuntimeError indicates column already exists
+                pass
+
+            # Calculate mean elevation
+            tab = pt.table(self.files[MS_id], ack=False)
+            if MS_id == 0:
+                global_el_values = tab.getcol('AZEL1', rowincr=10000)[:, 1]
+            else:
+                global_el_values = np.hstack( (global_el_values, tab.getcol('AZEL1', rowincr=10000)[:, 1]) )
+            tab.close()
+
+            # Remove (virtual) elevation column from MS
+            pt.removeDerivedMSCal(self.files[MS_id])
+        self.mean_el_rad = np.mean(global_el_values)
+        sec_el = 1.0 / np.sin(self.mean_el_rad)
+        self.fwhm_deg = 1.1 * ((3.0e8 / self.freq) / self.diam) * 180. / np.pi * sec_el
+
+        # Check for SUBTRACTED_DATA_ALL column in original datasets
+        self.has_sub_data = True
+        self.has_sub_data_new = False
+        for MSid in xrange(self.numMS):
+            tab = pt.table(self.files[MSid], ack=False)
+            if not 'SUBTRACTED_DATA_ALL' in tab.colnames():
+                self.log.error('SUBTRACTED_DATA_ALL column not found in file '
+                    '{}'.format(self.files[MSid]))
+                self.has_sub_data = False
+            tab.close()
+        if not self.has_sub_data:
+            self.log.info('Exiting...')
+            sys.exit(1)
+
         # cut input files into chunks if needed
         chunksize = 2400. # in seconds -> 40min
-        self.chunk_input_files(chunksize, dirindparmdb, clobber=True, test_run=test_run)
+        self.chunk_input_files(chunksize, dirindparmdb, local_dir=local_dir,
+            clobber=True, test_run=test_run)
 
-        # Check for SUBTRACTED_DATA_ALL column and calculate times and number
-        # of samples
-        self.has_sub_data = True
+        # Calculate times and number of samples
         self.sumsamples = 0
         self.minSamplesPerFile = 4294967295  # If LOFAR lasts that many seconds then I buy you a beer.
         self.starttime = np.finfo('d').max
         self.endtime = 0.
         for MSid in xrange(self.numMS):
             tab = pt.table(self.files[MSid], ack=False)
-            if not 'SUBTRACTED_DATA_ALL' in tab.colnames():
-                self.has_sub_data = False
-            self.has_sub_data_new = False
             self.starttime = min(self.starttime,np.min(tab.getcol('TIME')))
             self.endtime = max(self.endtime,np.min(tab.getcol('TIME')))
             for t2 in tab.iter(["ANTENNA1","ANTENNA2"]):
@@ -105,15 +129,9 @@ class Band(object):
                     numsamples = t2.nrows()
                     self.sumsamples += numsamples
                     self.minSamplesPerFile = min(self.minSamplesPerFile,numsamples)
-                    break            
+                    break
             tab.close()
 
-        # Set the initsubtract cell sizes to default / dummy values
-        self.cellsize_highres_deg = 0.00208 # initsubtract high-res cell size
-        self.cellsize_lowres_deg = 0.00694 # initsubtract low-res cell size
-
-        self.completed_operations = []
-        self.skip = False
         self.log.debug("Using {0} files.".format(len(self.files)))
 
 
@@ -171,7 +189,7 @@ class Band(object):
             pdb.flush()
 
 
-    def convert_parmdb_to_phasors_id(self,pdb_id=0):
+    def convert_parmdb_to_phasors_id(self, pdb_id=0):
         """
         Converts a single instrument parmdb from real/imag to phasors
 
@@ -244,6 +262,7 @@ class Band(object):
                                   'Exiting!'.format(self.files[MS_id],self.files[0]))
                 sys.exit(1)
             sw.close()
+
         # check for gaps in the frequency channels
         self.missing_channels = []
         for i, (freq1, freq2) in enumerate(zip(self.chan_freqs_hz[:-1], self.chan_freqs_hz[1:])):
@@ -252,13 +271,13 @@ class Band(object):
         self.log.debug('Missing channels: {}'.format(self.missing_channels))
 
 
-
-    def chunk_input_files(self, chunksize, dirindparmdb, clobber=True, test_run=False):
+    def chunk_input_files(self, chunksize, dirindparmdb, local_dir=None,
+        clobber=True, test_run=False):
         """
         Make copies of input files that are smaller than 2*chunksize
 
         Chops off chunk of chunksize length until remainder is smaller than 2*chunksize
-        Generates new self.files, self.msnames, and self.dirindparmdbs 
+        Generates new self.files, self.msnames, and self.dirindparmdbs
         The direction independent parmDBs are fully copied into the new MSs
 
         Parameters
@@ -267,19 +286,33 @@ class Band(object):
             length of a chunk in seconds
         dirindparmdb : str
             Name of direction-independent instrument parmdb inside the new chunk files
+        local_dir : str
+            Path to local scratch directory for temp output. The file is then
+            copied to the original output directory
         clobber : bool, optional
-            If True, remove existing files if needed.      
+            If True, remove existing files if needed.
         test_run : bool, optional
-            If True, don't actually do the choping.
+            If True, don't actually do the chopping.
+
         """
         newfiles = []
         newdirindparmdbs = []
         for MS_id in xrange(self.numMS):
             nchunks = 1
-            tab = pt.table(self.files[MS_id], ack=False)            
+            tab = pt.table(self.files[MS_id], ack=False)
+
+            # Make filter for data columns that we don't need. These include imaging
+            # columns and those made during initial subtraction
+            colnames = tab.colnames()
+            colnames_to_remove = ['MODEL_DATA', 'CORRECTED_DATA', 'IMAGING_WEIGHT',
+                'SUBTRACTED_DATA_HIGH', 'SUBTRACTED_DATA_ALL_NEW', 'SUBTRACTED_DATA']
+            colnames_to_keep = [c for c in colnames if c not in colnames_to_remove]
+
             timepersample = tab.getcell('EXPOSURE',0)
             timetab = tab.sort('unique desc TIME')
+            tab.close()
             timearray = timetab.getcol('TIME')
+            timetab.close()
             numsamples = len(timearray)
             mystarttime = np.min(timearray)
             myendtime = np.max(timearray)
@@ -287,176 +320,53 @@ class Band(object):
             if (myendtime-mystarttime) > (2.*chunksize):
                 nchunks = int((numsamples*timepersample)/chunksize)
             if test_run:
-                self.log.debug('Would split (or not) {0} into {1} chunks. '.format(self.files[MS_id],nchunks))
+                self.log.debug('Would split (or not) {0} into {1} chunks. '.format(self.files[MS_id], nchunks))
                 tab.close()
                 continue
+
+            # Define directory where chunks are stored
+            newdirname = self.chunks_dir
+            if not os.path.exists(newdirname):
+                os.mkdir(newdirname)
+
             if nchunks > 1:
-                newdirname = os.path.join(os.path.dirname(self.files[MS_id]),'chunks')
-                if not os.path.exists(newdirname):
-                    os.mkdir(newdirname)
-                for chunkid in range(nchunks):
-                    chunk_name = '{0}_chunk{1}.ms'.format(os.path.splitext(os.path.basename(self.files[MS_id]))[0], chunkid)
-                    chunk_file = os.path.join(newdirname,chunk_name)
-                    newdirindparmdb = os.path.join(chunk_file, dirindparmdb)
-                    starttime = mystarttime+chunkid*chunksize
-                    endtime = mystarttime+(chunkid+1)*chunksize
-                    if chunkid == 0: 
-                        starttime -= chunksize
-                    if chunkid == (nchunks-1):
-                        endtime += 2.*chunksize
-                    seltab = tab.query('TIME >= ' + str(starttime) + ' && '
-                                       'TIME < ' + str(endtime), sortlist='TIME,ANTENNA1,ANTENNA2')
-                    self.log.debug('Going to copy {0} samples to file {1}'.format(str(len(seltab)),chunk_file))
-                    if os.path.exists(chunk_file):
-                        try:
-                            newtab = pt.table(chunk_file, ack=False)
-                            if len(newtab) == len(seltab):
-                                self.log.debug('Found existing file of correct length, not copying!')
-                                copy = False
-                            newtab.close()
-                        except:
-                            copy = True
-                            os.shutil.rmtree(chunk_file)
-                    else:
-                        copy = True
-                    if copy:
-                        seltab.copy(chunk_file, True)
-                        shutil.copytree(self.dirindparmdbs[MS_id],newdirindparmdb)
-                    seltab.close()
+                self.log.debug('Spliting {0} into {1} chunks...'.format(self.files[MS_id], nchunks))
+
+                pool = multiprocessing.Pool()
+                results = pool.map(process_chunk_star,
+                    itertools.izip(itertools.repeat(self.files[MS_id]),
+                    itertools.repeat(self.dirindparmdbs[MS_id]),
+                    range(nchunks), itertools.repeat(nchunks),
+                    itertools.repeat(mystarttime),
+                    itertools.repeat(myendtime), itertools.repeat(chunksize),
+                    itertools.repeat(dirindparmdb),
+                    itertools.repeat(colnames_to_keep),
+                    itertools.repeat(newdirname),
+                    itertools.repeat(local_dir), itertools.repeat(clobber)))
+                pool.close()
+                pool.join()
+
+                for chunk_file, chunk_parmdb in results:
                     newfiles.append(chunk_file)
-                    newdirindparmdbs.append(newdirindparmdb)
+                    newdirindparmdbs.append(chunk_parmdb)
             else:
-               newfiles.append(self.files[MS_id])
-               newdirindparmdbs.append(self.dirindparmdbs[MS_id])
-            tab.close()            
+                # Just copy the original files
+                chunk_name = '{0}_chunk0.ms'.format(os.path.splitext(os.path.basename(self.files[MS_id]))[0])
+                chunk_file = os.path.join(newdirname, chunk_name)
+                shutil.copytree(self.files[MS_id], chunk_file)
+
+                newdirindparmdb = os.path.join(chunk_file, dirindparmdb)
+                shutil.copytree(self.dirindparmdbs[MS_id], newdirindparmdb)
+
+                newfiles.append(chunk_file)
+                newdirindparmdbs.append(newdirindparmdb)
+
         if test_run:
             return
         self.files = newfiles
-        self.msnames = [ MS.split('/')[-1] for MS in self.files ]
+        self.msnames = [ os.path.basename(MS) for MS in self.files ]
         self.dirindparmdbs = newdirindparmdbs
         self.numMS = len(self.files)
-
-  
-
-    def set_image_sizes(self, test_run=False,cellsize_highres_deg=None,cellsize_lowres_deg=None,
-                        fieldsize_highres=2.5,fieldsize_lowres=6.5):
-        """
-        Sets sizes for initsubtract images
-
-        The image sizes are scaled from the mean primary-beam FWHM. For
-        the high-res image, we use 2.5 * FWHM; for low-res, we use 6.5 * FHWM.
-
-        Parameters
-        ----------
-        test_run : bool, optional
-            If True, use test sizes
-        cellsize_highres_deg : float, optional
-            cellsize for the high-res images in deg
-        cellsize_lowres_deg : float, optional
-            cellsize for the low-res images in deg
-        fieldsize_highres : float, optional
-            How many FWHM's shall the high-res images be.
-        fieldsize_lowres : float, optional
-            How many FWHM's shall the low-res images be.
-        """
-        if cellsize_highres_deg:
-            self.cellsize_highres_deg = cellsize_highres_deg
-        if cellsize_lowres_deg:
-            self.cellsize_lowres_deg = cellsize_lowres_deg
-        if not test_run:
-            if not hasattr(self, 'mean_el_rad'):
-                for MS_id in xrange(self.numMS):
-                    # Add (virtual) elevation column to MS
-                    try:
-                        pt.addDerivedMSCal(self.files[MS_id])
-                    except RuntimeError:
-                        # RuntimeError indicates column already exists
-                        pass
-
-                    # Calculate mean elevation
-                    tab = pt.table(self.files[MS_id], ack=False)
-                    if MS_id == 0:
-                        global_el_values = tab.getcol('AZEL1', rowincr=10000)[:, 1]
-                    else:
-                        global_el_values = np.hstack( (global_el_values, tab.getcol('AZEL1', rowincr=10000)[:, 1]) )
-                    tab.close()
-
-                    # Remove (virtual) elevation column from MS
-                    pt.removeDerivedMSCal(self.files[MS_id])
-                self.mean_el_rad = np.mean(global_el_values)
-
-            # Calculate mean FOV
-            sec_el = 1.0 / np.sin(self.mean_el_rad)
-            self.fwhm_deg = 1.1 * ((3.0e8 / self.freq) / self.diam) * 180. / np.pi * sec_el
-            self.imsize_high_res = self.get_optimum_size(self.fwhm_deg
-                /self.cellsize_highres_deg * fieldsize_highres)
-            self.imsize_low_res = self.get_optimum_size(self.fwhm_deg
-                /self.cellsize_lowres_deg * fieldsize_lowres)
-        else:
-            self.imsize_high_res = self.get_optimum_size(128)
-            self.imsize_low_res = self.get_optimum_size(128)
-
-
-    def get_optimum_size(self, size):
-        """
-        Gets the nearest optimum image size
-
-        Taken from the casa source code (cleanhelper.py)
-
-        Parameters
-        ----------
-        size : int
-            Target image size in pixels
-
-        Returns
-        -------
-        optimum_size : int
-            Optimum image size nearest to target size
-
-        """
-        import numpy
-
-        def prime_factors(n, douniq=True):
-            """ Return the prime factors of the given number. """
-            factors = []
-            lastresult = n
-            sqlast=int(numpy.sqrt(n))+1
-            if n == 1:
-                return [1]
-            c=2
-            while 1:
-                 if (lastresult == 1) or (c > sqlast):
-                     break
-                 sqlast=int(numpy.sqrt(lastresult))+1
-                 while 1:
-                     if(c > sqlast):
-                         c=lastresult
-                         break
-                     if lastresult % c == 0:
-                         break
-                     c += 1
-
-                 factors.append(c)
-                 lastresult /= c
-
-            if (factors==[]): factors=[n]
-            return  numpy.unique(factors).tolist() if douniq else factors
-
-        n = int(size)
-        if (n%2 != 0):
-            n+=1
-        fac=prime_factors(n, False)
-        for k in range(len(fac)):
-            if (fac[k] > 7):
-                val=fac[k]
-                while (numpy.max(prime_factors(val)) > 7):
-                    val +=1
-                fac[k]=val
-        newlarge=numpy.product(fac)
-        for k in range(n, newlarge, 2):
-            if ((numpy.max(prime_factors(k)) < 8)):
-                return k
-        return newlarge
 
 
     def get_nearest_frequstep(self, freqstep):
@@ -483,3 +393,107 @@ class Band(object):
             self.freq_divisors = np.array(tmp_divisors)
         idx = np.argmin(np.abs(self.freq_divisors-freqstep))
         return self.freq_divisors[idx]
+
+
+def process_chunk_star(inputs):
+    """
+    Simple helper function for pool.map
+    """
+    return process_chunk(*inputs)
+
+
+def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, chunksize, dirindparmdb,
+    colnames_to_keep, newdirname, local_dir=None, clobber=True):
+    """
+    Processes one time chunk of input ms_file
+
+    Parameters
+    ----------
+    ms_file : str
+        Input MS file to chunk
+    ms_parmdb : str
+        Input dir-independent parmdb for input MS file
+    chunkid : int
+        ID of chunk
+    nchunks : int
+        Total number of chunks
+    mystarttime : float
+        Start time of MS file
+    myendtime : float
+        End time of MS file
+    chunksize : float
+        length of a chunk in seconds
+    dirindparmdb : str
+        Name of direction-independent instrument parmdb inside the new chunk files
+    colnames_to_keep : list
+        List of column names to keep in output chunk
+    newdirname : str
+        Name of output directory
+    local_dir : str
+        Path to local scratch directory for temp output. The file is then
+        copied to the original output directory
+    clobber : bool, optional
+        If True, remove existing files if needed.
+
+    """
+    chunk_name = '{0}_chunk{1}.ms'.format(os.path.splitext(os.path.basename(ms_file))[0], chunkid)
+    chunk_file = os.path.join(newdirname, chunk_name)
+    old_chunk_file = os.path.join(os.path.dirname(ms_file), 'chunks', chunk_name)
+
+    starttime = mystarttime+chunkid*chunksize
+    endtime = mystarttime+(chunkid+1)*chunksize
+    if chunkid == 0:
+        starttime -= chunksize
+    if chunkid == (nchunks-1):
+        endtime += 2.*chunksize
+    tab = pt.table(ms_file, ack=False)
+    seltab = tab.query('TIME >= ' + str(starttime) + ' && TIME < ' + str(endtime),
+        sortlist='TIME,ANTENNA1,ANTENNA2', columns=','.join(colnames_to_keep))
+
+    if os.path.exists(chunk_file):
+        try:
+            newtab = pt.table(chunk_file, ack=False)
+            if len(newtab) == len(seltab):
+                copy = False
+            newtab.close()
+        except:
+            copy = True
+            os.shutil.rmtree(chunk_file)
+    elif os.path.exists(old_chunk_file):
+        # For compatibility, also search in old location
+        try:
+            newtab = pt.table(old_chunk_file, ack=False)
+            if len(newtab) == len(seltab):
+                copy = False
+                chunk_file = old_chunk_file
+            newtab.close()
+        except:
+            copy = True
+    else:
+        copy = True
+
+    newdirindparmdb = os.path.join(chunk_file, dirindparmdb)
+
+    if copy:
+        if local_dir is not None:
+            # Set output to temp directory
+            chunk_file_original = chunk_file
+            chunk_file = os.path.join(local_dir, os.path.basename(chunk_file_original))
+            if os.path.exists(chunk_file):
+                shutil.rmtree(chunk_file)
+
+        seltab.copy(chunk_file, True)
+
+        if local_dir is not None:
+            # Copy temp file to original output location and clean up
+            chunk_file_destination_dir = os.path.dirname(chunk_file_original)
+            os.system('/usr/bin/rsync -a {0} {1}'.format(chunk_file, chunk_file_destination_dir))
+            if not os.path.samefile(chunk_file, chunk_file_original):
+                shutil.rmtree(chunk_file)
+            chunk_file = chunk_file_original
+
+        shutil.copytree(ms_parmdb, newdirindparmdb)
+    seltab.close()
+    tab.close()
+
+    return (chunk_file, newdirindparmdb)

@@ -6,9 +6,9 @@
 # placed in this directory
 dir_working = /data/wdir
 
-# Full path to directory containing selfcal-ed bands, will be scanned for all
-# .MS and .ms files (required). Note that these files will be modified by
-# Factor, so please keep a copy of these data elsewhere
+# Full path to directory containing input bands. It will be scanned for all
+# .MS and .ms files (required). Note that FACTOR works on a copy of these files,
+# and will therefore not modify them
 dir_ms = /data/bands
 
 # Parmdb name for dir-indep. selfcal solutions (stored inside the input band
@@ -137,13 +137,14 @@ reimage = True
 [cluster]
 # Full path to cluster description file. Use clusterdesc_file = PBS to use the
 # PBS / torque reserved nodes, or use  clusterdesc_file = JUROPA_slurm to use
-# multiple nodes in a slurm reservation on JUROPA. 
+# multiple nodes in a slurm reservation on JUROPA.
 # If not given, the clusterdesc file for a single (i.e., local) node is used
 clusterdesc_file = PBS
 
 # Full path to a local disk on the nodes for I/O-intensive processing. The path
-# must be the same for all nodes. If not given, the default directory in the
-# working directory is used
+# must be the same for all nodes. Note: do not specify this parameter if you are
+# running on a single machine, as it will cause conflicts between directions
+# that are processed in parallel
 dir_local = /tmp
 
 # Maximum number of CPUs per node to use (default = all)

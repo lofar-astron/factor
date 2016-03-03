@@ -490,7 +490,7 @@ class Direction(object):
             if (nchan % step) == 0:
                 tmp_divisors.append(step)
         freq_divisors = np.array(tmp_divisors)
-  
+
         # For initsubtract, average to 0.5 MHz per channel and 20 sec per time
         # slot. Since each band is imaged separately and the smearing and image
         # sizes both scale linearly with frequency, a single frequency and time
@@ -597,15 +597,6 @@ class Direction(object):
 
             self.log.debug('Using solution intervals of {0} (fast) and {1} '
                 '(slow) time slots'.format(self.solint_time_p, self.solint_time_a))
-
-#            # Set chunk width for time chunking to the amplitude solution time
-#            # interval (minus one time slot to ensure that we don't get a very short
-#            # solution interval at the end of the chunk) so that it's close to
-#            # ~ 200 time slots (to avoid memory/performance issues)
-#            self.chunk_width = self.solint_time_a - 1
-#            while self.chunk_width < 200:
-#                self.chunk_width += self.solint_time_a - 1
-#            self.nchunks = int(np.ceil((np.float(ntimes) / np.float(self.chunk_width))))
 
             # Set frequency interval for selfcal solve steps. The interval for
             # slow (amp) selfcal should be the number of channels in a band after

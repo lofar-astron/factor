@@ -1,9 +1,6 @@
 """
 Module that holds all operations for outlier sources
 
-The outlier calibration steps are divided into operations on the basis of whether
-or not they can be run in parallel or in series.
-
 Classes
 -------
 OutlierPeel : Operation
@@ -22,7 +19,7 @@ log = logging.getLogger('factor:outlier_ops')
 
 class OutlierPeel(Operation):
     """
-    Operation to peel a direction
+    Operation to peel an outlier direction
     """
     def __init__(self, parset, bands, direction):
         super(OutlierPeel, self).__init__(parset, bands, direction,

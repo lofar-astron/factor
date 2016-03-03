@@ -29,10 +29,10 @@ def parset_read(parset_file, use_log_file=True):
 
     """
     if not os.path.isfile(parset_file):
-        log.critical("Missing parset file (%s), I don't know what to do :'(" % (parset_file))
+        log.critical("Missing parset file ({}), I don't know what to do :'(".format(parset_file))
         sys.exit(1)
 
-    log.info("Reading parset file: %s" % (parset_file))
+    log.info("Reading parset file: {}".format(parset_file))
     parset = ConfigParser.RawConfigParser()
     parset.read(parset_file)
     parset_dict = {}
@@ -50,35 +50,36 @@ def parset_read(parset_file, use_log_file=True):
     if '+' in parset_dict['dir_working']:
         # Check if "+" is in path, as casapy buildmytasks will not work
         # correctly (due to its use of sed)
-        log.critical("A '+' appears in the working dir path {}. CASA ft will "
-            "not work correctly".format(parset_dict['dir_working']))
+        log.critical("A '+' appears in the working dir path {}. FACTOR's custom "
+            "CASA ft task will not work correctly".format(parset_dict['dir_working']))
         sys.exit(1)
     if not os.path.isdir(parset_dict['dir_working']):
         os.mkdir(parset_dict['dir_working'])
     try:
         os.chdir(parset_dict['dir_working'])
-        for subdir in ['/logs', '/state', '/results', '/regions']:
-            if not os.path.isdir(parset_dict['dir_working']+subdir):
-                os.mkdir(parset_dict['dir_working']+subdir)
+        for subdir in ['logs', 'state', 'results', 'regions', 'chunks']:
+            subdir_path = os.path.join(parset_dict['dir_working'], subdir)
+            if not os.path.isdir(subdir_path):
+                os.mkdir(subdir_path)
     except Exception as e:
         log.critical("Cannot use the working dir {0}: {1}".format(parset_dict['dir_working'], e))
         sys.exit(1)
     if use_log_file:
-        set_log_file(parset_dict['dir_working']+'/factor.log')
+        set_log_file(os.path.join(parset_dict['dir_working'], 'factor.log'))
     log.info("=========================================================\n")
     log.info("Working directory is {0}".format(parset_dict['dir_working']))
 
     # Get all the MS files in the input directory. These are identified by the
-    # extensions 'ms', 'MS', 'dpppconcat' or 'dpppcopycol' (both used by the
-    # pre-facet pipeline)
+    # extensions 'ms', 'MS', 'dpppaverage' or 'ndppp_prep_target' (both used by
+    # various versions of the pre-facet pipeline)
     ms_files = []
-    for exten in ['MS', 'ms', 'dpppaverage']:
+    for exten in ['MS', 'ms', 'dpppaverage', 'ndppp_prep_target']:
         ms_files += glob.glob(os.path.join(parset_dict['dir_ms'], '*.{}'.format(exten)))
     parset_dict['mss'] = sorted(ms_files)
     if len(parset_dict['mss']) == 0:
-        log.error('No MS files found in {0}!'.format(parset_dict['dir_ms']))
+        log.error('No MS files found in {}!'.format(parset_dict['dir_ms']))
         sys.exit(1)
-    log.info("Working on %i input files." % (len(parset_dict['mss'])))
+    log.info("Working on {} input files.".format(len(parset_dict['mss'])))
 
     # Handle MS-specific parameters
     parset_dict.update(get_ms_options(parset, parset_dict['mss']))
@@ -479,6 +480,12 @@ def get_cluster_options(parset):
     # working directory is used
     if 'dir_local' not in parset_dict['cluster_specific']:
         parset_dict['cluster_specific']['dir_local'] = None
+    elif parset_dict['cluster_specific']['clusterdesc_file'] != 'PBS':
+        # The local directory only works when the dppp_scratch.py node recipe is
+        # used, which is only done when clusterdesc_file = PBS, so exit if not
+        log.critical('A local scratch directory can only be used when '
+            'clusterdesc_file = PBS (i.e., on a cluster with many nodes)')
+        sys.exit(1)
 
     # Check for unused options
     given_options = parset.options('cluster')

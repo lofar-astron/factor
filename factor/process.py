@@ -64,45 +64,11 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     scheduler = _set_up_compute_parameters(parset, dry_run)
 
     # Prepare vis data
-    bands, bands_initsubtract = _set_up_bands(parset, test_run)
-
-    # Make direction object for the field
-    field = Direction('field', bands[0].ra, bands[0].dec,
-        factor_working_dir=parset['dir_working'])
-    field.set_imcal_parameters(parset['wsclean_nbands'],
-    	bands[0].chan_width_hz, bands[0].nchan, bands[0].timepersample,
-    	bands[0].minSamplesPerFile, len(bands))
-
-    # Run initial sky model generation and create empty datasets
-    if len(bands_initsubtract) > 0:
-        # Reset the field direction if specified
-        if 'field' in reset_directions:
-            field.reset_state('initsubtract')
-
-        log.info('Running initsubtract operation for bands: {0}'.
-            format([b.name for b in bands_initsubtract]))
-
-        # Combine the nodes and cores for the subtract operation
-        field = factor.cluster.combine_nodes([field],
-            parset['cluster_specific']['node_list'],
-            parset['cluster_specific']['nimg_per_node'],
-            parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['fmem'],
-            len(bands_initsubtract))[0]
-
-        # Do initial subtraction
-        op = InitSubtract(parset, bands_initsubtract, field)
-        scheduler.run(op)
-    else:
-        log.info("Sky models and SUBTRACTED_DATA_ALL found for all bands. "
-            "Skipping initsubtract operation...")
-
-    # Remove bands that failed initsubtract operation
-    bands = [b for b in bands if not b.skip]
+    bands = _set_up_bands(parset, test_run)
 
     # Define directions and groups
-    directions, direction_groups = _set_up_directions(parset, bands, field,
-    	dry_run, test_run, reset_directions)
+    directions, direction_groups = _set_up_directions(parset, bands, dry_run,
+    test_run, reset_directions)
 
     # Run peeling and subtract operations on outlier directions
     set_sub_data_colname = True
@@ -286,8 +252,13 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
     # Mosaic the final facet images together
     if parset['make_mosaic']:
+        # Make direction object for the field and load previous state (if any)
+        field = Direction('field', bands[0].ra, bands[0].dec,
+            factor_working_dir=parset['dir_working'])
+        field.load_state()
+
         # Reset the field direction if specified
-        if 'field' in reset_directions or 'mosaic' in reset_directions:
+        if 'field' in reset_directions:
             field.reset_state('makemosaic')
 
         field.facet_image_filenames = []
@@ -395,9 +366,6 @@ def _set_up_bands(parset, test_run=False):
     bands : List of Band instances
         All bands to be used by the run() function, ordered from low to high
         frequency
-    bands_initsubtract : List of Band instances
-        Subset of bands for InitSubtract operation, ordered from low to high
-        frequency
 
     """
     log.info('Checking input bands...')
@@ -427,7 +395,7 @@ def _set_up_bands(parset, test_run=False):
                         sys.exit(1)
                     break
         band = Band(msdict[MSkey], parset['dir_working'], parset['parmdb_name'], skymodel_dirindep,
-            test_run=test_run)
+            local_dir=parset['cluster_specific']['dir_local'], test_run=test_run)
         bands.append(band)
 
     # Sort bands by frequency
@@ -469,20 +437,28 @@ def _set_up_bands(parset, test_run=False):
         log.warn('Number of channels per band is {}. Averaging will '
             'not work well (too few divisors)'.format(nchans))
 
-    # Determine whether any bands need to be run through the initsubract operation.
-    # This operation is only needed if band lacks an initial skymodel or
-    # the SUBTRACTED_DATA_ALL column
-    bands_initsubtract = []
-    for band in bands:
-        if band.skymodel_dirindep is None or not band.has_sub_data:
-            # Set image sizes for initsubtract operation
-            band.set_image_sizes(test_run)
-            bands_initsubtract.append(band)
+    # Check that phase center is the same for all bands
+    pos_tol_deg = 1.0 / 3600.0 # positional tolerance
+    for ra, dec in zip(ra_list[1:], dec_list[1:]):
+        if (not factor.directions.approx_equal(ra, ra_list[0], tol=pos_tol_deg) or
+            not factor.directions.approx_equal(dec, dec_list[0], tol=pos_tol_deg)):
+            log.error('Input bands do not have a common phase center. Exiting...')
+            sys.exit(1)
 
-    return bands, bands_initsubtract
+    # Determine whether any bands lack an initial skymodel
+    bands_no_skymodel = [b for b in bands if b.skymodel_dirindep is None]
+    if len(bands_no_skymodel) > 0:
+        if len(bands_no_skymodel) > 0:
+            band_names = ', '.join([b.name for b in bands_no_skymodel])
+            log.error('A direction-indpendent sky model was not found for the '
+                'following bands: {}'.format(band_names))
+        log.info('Exiting...')
+        sys.exit(1)
+
+    return bands
 
 
-def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
+def _set_up_directions(parset, bands, dry_run=False, test_run=False,
     reset_directions=[]):
     """
     Sets up directions (facets)
@@ -493,8 +469,6 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
         Parset containing processing parameters
     bands : list of Band instances
         Vis data
-    field : Direction instance
-        Field direction object
     dry_run : bool, optional
         If True, do not run pipelines. All parsets, etc. are made as normal
     test_run : bool, optional
@@ -635,9 +609,10 @@ def _set_up_directions(parset, bands, field, dry_run=False, test_run=False,
         	bands[0].minSamplesPerFile, len(bands), initial_skymodel,
         	parset['preaverage_flux_jy'])
 
-        # Set field center
-        direction.field_ra = field.ra
-        direction.field_dec = field.dec
+        # Set field center to that of first band (all bands have the same phase
+        # center)
+        direction.field_ra = bands[0].ra
+        direction.field_dec = bands[0].dec
 
         # Set global re-image flag
         direction.make_final_image = dir_parset['reimage']

@@ -45,7 +45,7 @@ class dppp_scratch(LOFARnodeTCP):
         self.msout_original = kwargs['msout'].rstrip('/')
         kwargs.pop('msout')
         self.msout_destination_dir = os.path.dirname(self.msout_original)
-        self.scratch_dir =tempfile.mkdtemp(dir=kwargs['local_scratch_dir'])
+        self.scratch_dir = tempfile.mkdtemp(dir=kwargs['local_scratch_dir'])
         kwargs.pop('local_scratch_dir')
         self.logger.info('Using {} as scratch directory'.format(self.scratch_dir))
 
