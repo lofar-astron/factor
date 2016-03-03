@@ -234,7 +234,7 @@ sort_into_Groups_maps.control.type                         =   mapfilenamesFromM
 sort_into_Groups_maps.control.mapfile_groupmap             =   sort_into_Groups.output.groupmapfile.mapfile
 sort_into_Groups_maps.control.mapfile_filesmap             =   sort_into_Groups.output.mapfile.mapfile
 
-# concat data in frequency, length = ntimes 
+# concat data in frequency, length = ntimes
 concat_data.control.type                                   =   dppp
 concat_data.control.mapfile_out                            =   sort_into_Groups_maps.output.groupmap
 concat_data.control.mapfile_in                             =   sort_into_Groups_maps.output.filesmap
@@ -253,11 +253,11 @@ make_concat_corr_mapfile.control.kind                      =  plugin
 make_concat_corr_mapfile.control.type                      =  createMapfile
 make_concat_corr_mapfile.control.method                    =  add_suffix_to_file
 make_concat_corr_mapfile.control.mapfile_in                =  sort_into_Groups_maps.output.groupmap
-make_concat_corr_mapfile.control.add_suffix_to_file        =  "_corrdata.ms"     
+make_concat_corr_mapfile.control.add_suffix_to_file        =  "_corrdata.ms"
 make_concat_corr_mapfile.control.mapfile_dir               =  input.output.mapfile_dir
 make_concat_corr_mapfile.control.filename                  =  make_concat_corr.mapfile
 
-# concat corrected data in frequency, length = ntimes 
+# concat corrected data in frequency, length = ntimes
 concat_corr.control.type                                   =   dppp
 concat_corr.control.mapfile_out                            =   make_concat_corr_mapfile.output.mapfile
 concat_corr.control.mapfile_in                             =   sort_into_Groups_maps.output.filesmap
@@ -302,7 +302,7 @@ make_blavg_data_mapfile.control.kind                       =  plugin
 make_blavg_data_mapfile.control.type                       =  createMapfile
 make_blavg_data_mapfile.control.method                     =  add_suffix_to_file
 make_blavg_data_mapfile.control.mapfile_in                 =  sort_into_Groups_maps.output.groupmap
-make_blavg_data_mapfile.control.add_suffix_to_file         =  "_blavg.ms"     
+make_blavg_data_mapfile.control.add_suffix_to_file         =  "_blavg.ms"
 make_blavg_data_mapfile.control.mapfile_dir                =  input.output.mapfile_dir
 make_blavg_data_mapfile.control.filename                   =  make_blavg_data.mapfile
 
@@ -430,6 +430,8 @@ casa_image01.argument.clean.chaniter                       =   False
 casa_image01.argument.clean.flatnoise                      =   True
 casa_image01.argument.clean.allowchunk                     =   False
 casa_image01.argument.clean.mask                           =   {{ region_selfcal }}
+casa_image01.argument.clean.uvtaper                        =   True
+casa_image01.argument.clean.outertaper                     =   ['20arcsec']
 
 # fiddle with the casa mapfiles, length = 1
 adjust_casa_mapfile0.control.kind                          =   plugin
@@ -491,6 +493,8 @@ casa_image02.argument.clean.cyclespeedup                   =   -1
 casa_image02.argument.clean.chaniter                       =   False
 casa_image02.argument.clean.flatnoise                      =   True
 casa_image02.argument.clean.allowchunk                     =   False
+casa_image02.argument.clean.uvtaper                        =   True
+casa_image02.argument.clean.outertaper                     =   ['20arcsec']
 
 # create a mapfile with the model image, length = 1
 create_model0_map.control.kind                             =   plugin
@@ -604,6 +608,8 @@ casa_image11.argument.clean.chaniter                       =   False
 casa_image11.argument.clean.flatnoise                      =   True
 casa_image11.argument.clean.allowchunk                     =   False
 casa_image11.argument.clean.mask                           =   {{ region_selfcal }}
+casa_image11.argument.clean.uvtaper                        =   True
+casa_image11.argument.clean.outertaper                     =   ['10arcsec']
 
 # fiddle with the casa mapfiles, length = 1
 adjust_casa_mapfile1.control.kind                          =   plugin
@@ -666,6 +672,8 @@ casa_image12.argument.clean.cyclespeedup                   =   -1
 casa_image12.argument.clean.chaniter                       =   False
 casa_image12.argument.clean.flatnoise                      =   True
 casa_image12.argument.clean.allowchunk                     =   False
+casa_image12.argument.clean.uvtaper                        =   True
+casa_image12.argument.clean.outertaper                     =   ['10arcsec']
 
 # create a mapfile with the model image, length = 1
 create_model1_map.control.kind                             =   plugin
@@ -1062,7 +1070,7 @@ casa_image32.argument.clean.chaniter                       =   False
 casa_image32.argument.clean.flatnoise                      =   True
 casa_image32.argument.clean.allowchunk                     =   False
 
-########## start of selfcal loop 
+########## start of selfcal loop
 
 # loop step
 loop_ampcal.control.kind                                   =   loop
@@ -1327,7 +1335,7 @@ check_image.control.mapfiles_in                            =   [adjust_casa_mapf
 check_image.control.inputkeys                              =   [image_new,image_prev]
 check_image.argument.flags                                 =   [image_new,image_prev]
 
-########## end of selfcal loop 
+########## end of selfcal loop
 
 # merge the phases and amplitudes parmDBs, length = 1
 merge_selfcal_parmdbs.control.type                         =   merge_parmdbs_selfcal
@@ -1371,7 +1379,7 @@ concat_unaveraged_ft.control.inputkey                      =   msfiles
 concat_unaveraged_ft.control.outputkey                     =   msconcat
 concat_unaveraged_ft.argument.flags                        =   [msfiles,msconcat]
 
-# create a compressed mapfile with the virtual concated files, length = 1 
+# create a compressed mapfile with the virtual concated files, length = 1
 # needed because the following casa-step can run only once.
 create_compressed_mapfile_ft.control.kind                  =   plugin
 create_compressed_mapfile_ft.control.type                  =   compressMapfile
@@ -1468,7 +1476,7 @@ sort_average5_maps.control.mapfile_groupmap                =   sort_average5.out
 sort_average5_maps.control.mapfile_filesmap                =   sort_average5.output.mapfile.mapfile
 
 # concatenate data in frequency, length = ntimes
-# not sure if this is needed / useful 
+# not sure if this is needed / useful
 concat_averaged.control.type                               =   dppp
 concat_averaged.control.mapfile_out                        =   sort_average5_maps.output.groupmap
 concat_averaged.control.mapfile_in                         =   sort_average5_maps.output.filesmap
