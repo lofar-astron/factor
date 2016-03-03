@@ -118,8 +118,6 @@ class Operation(object):
         self.cfg_dict = {'lofarroot': parset['lofarroot'],
                          'pythonpath': parset['lofarpythonpath'],
                          'factorroot': self.factor_root_dir,
-                         'genericpiperoot': os.path.dirname(
-                             parset['genericpipeline_executable']).split('/bin')[0],
                          'pipeline_working_dir': self.pipeline_working_dir,
                          'pipeline_runtime_dir': self.pipeline_runtime_dir,
                          'casa_executable': parset['casa_executable'],
@@ -160,7 +158,7 @@ class Operation(object):
         else:
             self.log.error('Could not determine the nature of your cluster!')
             sys.exit(1)
-            
+
         # an absolute path in ...['clusterdesc'] will overrule the the "working_dir"
         self.cfg_dict['clusterdesc'] = os.path.join(self.factor_working_dir,
             self.parset['cluster_specific']['clusterdesc'])

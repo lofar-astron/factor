@@ -81,7 +81,7 @@ def find_executables(parset):
     """
     from distutils import spawn
 
-    executables = {'genericpipeline_executable': ['genericpipeline2.py', 'genericpipeline.py'],
+    executables = {'genericpipeline_executable': ['genericpipeline.py'],
                    'casa_executable': ['casapy', 'casa'],
                    'wsclean_executable': ['wsclean'],
                    'image2fits_executable': ['image2fits']}
