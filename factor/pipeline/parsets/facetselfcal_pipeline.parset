@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, add_imaging_cols_empty, shift_cal, {% if transfer_nearest_solutions %}expand_merged_parmdb_map_transfer, apply_dir_dep_fast_transfer, apply_dir_dep_slow_transfer, {% else %}apply_dir_indep, {% endif %}create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, make_concat_corr_mapfile, concat_corr, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, concat_blavg_data, {% endif %} copy_column1, {% if pre_average %} copy_column2, copy_column3, {% endif %} add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, {% if not transfer_nearest_solutions %} average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, {% endif %} average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_compressed_mapfile_ft, create_model4_map, blank_model, casa_ft4, {% else %} apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, sort_average5, sort_average5_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, regroup_shift_empty_map, create_expanded_model_mapfile, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, add_imaging_cols_empty, shift_cal, {% if transfer_nearest_solutions %}expand_merged_parmdb_map_transfer, apply_dir_dep_fast_transfer, apply_dir_dep_slow_transfer, {% else %}apply_dir_indep, {% endif %}create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, make_concat_corr_mapfile, concat_corr, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, concat_blavg_data, {% endif %} copy_column1, {% if pre_average %} copy_column2, copy_column3, {% endif %} add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, {% if not transfer_nearest_solutions %} average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, {% endif %} loop_phasecal, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_compressed_mapfile_ft, create_model4_map, blank_model, casa_ft4, {% else %} apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, sort_average5, sort_average5_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, regroup_shift_empty_map, create_expanded_model_mapfile, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -362,7 +362,7 @@ concat_chunks.control.inputkey                             =   msfiles
 concat_chunks.control.outputkey                            =   msconcat
 concat_chunks.argument.flags                               =   [msfiles,msconcat]
 
-########## start of first round of selfcal
+########## start of first round of selfcal (20" resolution)
 
 {% if not transfer_nearest_solutions %}
 # average concatenated data, length = ntimes
@@ -452,7 +452,7 @@ mask0.argument.threshpix                                   =   10
 mask0.argument.threshisl                                   =   6
 mask0.argument.iterate_threshold                           =   True
 mask0.argument.atrous_do                                   =   {{ atrous_do }}
-mask0.argument.rmsbox                                      =   (80,20)
+mask0.argument.rmsbox                                      =   (320,80)
 mask0.argument.adaptive_rmsbox                             =   True
 mask0.argument.trim_by                                     =   0.2
 mask0.argument.img_format                                  =   casa
@@ -540,8 +540,8 @@ apply_phaseonly1.argument.observation                      =   concat_data.outpu
 apply_phaseonly1.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_apply.parset
 apply_phaseonly1.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
 
-########## end of first round of selfcal
-########## start of second round of selfcal
+########## end of first round of selfcal (20" resolution)
+########## start of second round selfcal (10" resolution)
 
 # average the output pf the previous BBS step, length = ntimes
 average1.control.type                                      =   dppp
@@ -630,7 +630,7 @@ mask1.argument.threshpix                                   =   15
 mask1.argument.threshisl                                   =   15
 mask1.argument.iterate_threshold                           =   True
 mask1.argument.atrous_do                                   =   {{ atrous_do }}
-mask1.argument.rmsbox                                      =   (80,20)
+mask1.argument.rmsbox                                      =   (160,40)
 mask1.argument.adaptive_rmsbox                             =   True
 mask1.argument.trim_by                                     =   0.2
 mask1.argument.img_format                                  =   casa
@@ -720,8 +720,14 @@ apply_phaseonly2.argument.parset                           =   {{ parset_dir }}/
 apply_phaseonly2.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
 {% endif %}
 
-########## end of second round of selfcal
-########## start of third round of selfcal
+########## end of second round of selfcal (10" resolution)
+########## start of phase-only selfcal loop
+
+# loop step
+loop_phasecal.control.kind                                 =   loop
+loop_phasecal.control.type                                 =   conditional
+loop_phasecal.control.loopcount                            =   {{ loopcount }}
+loop_phasecal.control.loopsteps                            =   [average2,create_compressed_mapfile2,concat2,casa_image21,adjust_casa_mapfile2,mask2,casa_image22,create_model2_map,casa_ft2,{% if pre_average %}switch_weights_col5,{% endif %}solve_ampphase11,{% if pre_average %}switch_weights_col6,{% endif %}apply_ampphase11,adjust_casa_mapfile_phaseloop,copy_image1,check_image1]
 
 # average the output pf the previous BBS step, length = ntimes
 average2.control.type                                      =   dppp
@@ -894,6 +900,29 @@ apply_ampphase11.control.type                              =   calibrate-stand-a
 apply_ampphase11.argument.observation                      =   concat_data.output.mapfile
 apply_ampphase11.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_apply.parset
 apply_ampphase11.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
+
+# fiddle with the casa mapfiles, length = 1
+adjust_casa_mapfile_phaseloop.control.kind                 =   plugin
+adjust_casa_mapfile_phaseloop.control.type                 =   appendMapfile
+adjust_casa_mapfile_phaseloop.control.mapfile_in           =   casa_image42.output.casa_image42.image.mapfile
+adjust_casa_mapfile_phaseloop.control.append               =   {{ casa_suffix }}
+adjust_casa_mapfile_phaseloop.control.mapfile_dir          =   input.output.mapfile_dir
+adjust_casa_mapfile_phaseloop.control.filename             =   compare_image_input_new.mapfile
+
+# copy the output image so that we can compare it later, length = 1
+copy_image1.control.type                                   =   copy_image
+copy_image1.control.mapfile_in                             =   adjust_casa_mapfile_phaseloop.output.mapfile
+copy_image1.control.inputkey                               =   image
+copy_image1.argument.flags                                 =   [image,loop_phasecal.output.counter]
+
+# compare the current and the previous image to see if we can stop the loop, length = 1
+check_image1.control.type                                  =   compare_image_stats
+check_image1.control.mapfiles_in                           =   [adjust_casa_mapfile_phaseloop.output.mapfile,copy_image1.output.previous_image.mapfile]
+check_image1.control.inputkeys                             =   [image_new,image_prev]
+check_image1.argument.flags                                =   [image_new,image_prev]
+
+###### end of phase-only selfcal loop
+###### continue to amplitude calibration
 
 # run BBS with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
 solve_ampphase12.control.type                              =   calibrate-stand-alone_new
@@ -1070,13 +1099,13 @@ casa_image32.argument.clean.chaniter                       =   False
 casa_image32.argument.clean.flatnoise                      =   True
 casa_image32.argument.clean.allowchunk                     =   False
 
-########## start of selfcal loop
+########## start of phase+amp selfcal loop
 
 # loop step
 loop_ampcal.control.kind                                   =   loop
 loop_ampcal.control.type                                   =   conditional
 loop_ampcal.control.loopcount                              =   {{ loopcount }}
-loop_ampcal.control.loopsteps                              =   [create_model3_map,casa_ft3,{% if pre_average %}switch_weights_col7,{% endif %}solve_ampphase21,{% if pre_average %}switch_weights_col8,{% endif %}apply_ampphase21,merge_phase_parmdbs,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,average4,create_compressed_mapfile4,concat4,delete_image,casa_image41,adjust_casa_mapfile4,mask4,casa_image42,adjust_casa_mapfile5,copy_image,check_image]
+loop_ampcal.control.loopsteps                              =   [create_model3_map,casa_ft3,{% if pre_average %}switch_weights_col7,{% endif %}solve_ampphase21,{% if pre_average %}switch_weights_col8,{% endif %}apply_ampphase21,merge_phase_parmdbs,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,average4,create_compressed_mapfile4,concat4,delete_image,casa_image41,adjust_casa_mapfile4,mask4,casa_image42,adjust_casa_mapfile5,copy_image2,check_image2]
 
 # create a mapfile with the model image, length = 1
 create_model3_map.control.kind                             =   plugin
@@ -1176,9 +1205,9 @@ apply_amp2.argument.parmdb                                 =   inputparmdb
 apply_amp2.argument.replace-sourcedb                       =   True
 apply_amp2.argument.replace-parmdb                         =   True
 
-########## end of fourth or of the looped round of selfcal
+########## end of fourth or of the looped round of phase+amp selfcal
 
-########## start of looped round of selfcal
+########## start of looped round of phase+amp selfcal
 ########## make image to check if we can stop the loop, or as new model
 
 # average the output pf the previous selfcal step, length = ntimes
@@ -1324,18 +1353,18 @@ adjust_casa_mapfile5.control.mapfile_dir                   =   input.output.mapf
 adjust_casa_mapfile5.control.filename                      =   compare_image_input_new.mapfile
 
 # copy the output image so that we can compare it later, length = 1
-copy_image.control.type                                    =   copy_image
-copy_image.control.mapfile_in                              =   adjust_casa_mapfile5.output.mapfile
-copy_image.control.inputkey                                =   image
-copy_image.argument.flags                                  =   [image,loop_ampcal.output.counter]
+copy_image2.control.type                                   =   copy_image
+copy_image2.control.mapfile_in                             =   adjust_casa_mapfile5.output.mapfile
+copy_image2.control.inputkey                               =   image
+copy_image2.argument.flags                                 =   [image,loop_ampcal.output.counter]
 
 # compare the current and the previous image to see if we can stop the loop, length = 1
-check_image.control.type                                   =   compare_image_stats
-check_image.control.mapfiles_in                            =   [adjust_casa_mapfile5.output.mapfile,copy_image.output.previous_image.mapfile]
-check_image.control.inputkeys                              =   [image_new,image_prev]
-check_image.argument.flags                                 =   [image_new,image_prev]
+check_image2.control.type                                  =   compare_image_stats
+check_image2.control.mapfiles_in                           =   [adjust_casa_mapfile5.output.mapfile,copy_image2.output.previous_image.mapfile]
+check_image2.control.inputkeys                             =   [image_new,image_prev]
+check_image2.argument.flags                                =   [image_new,image_prev]
 
-########## end of selfcal loop
+########## end of phase+amp selfcal loop
 
 # merge the phases and amplitudes parmDBs, length = 1
 merge_selfcal_parmdbs.control.type                         =   merge_parmdbs_selfcal
