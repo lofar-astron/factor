@@ -7,10 +7,7 @@ Installation
 FACTOR is currently installed on the LOFAR CEP3 cluster. Users on CEP3
 should run the following commands before using FACTOR:
 
-    use LofIm
     source ~rafferty/init_factor
-    use Casa
-    use Pythonlibs
 
 If you want to install FACTOR yourself, follow the instructions below.
 
