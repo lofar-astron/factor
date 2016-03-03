@@ -21,7 +21,7 @@ def plugin_main(args, **kwargs):
 
     """
     if 'mapfile_dir' in kwargs:
-        mapfiles_in = glob.glob(os.path.join(kwargs['mapfile_dir'], '*.mapfile'))
+        mapfiles_in = glob.glob(os.path.join(kwargs['mapfile_dir'], '*'))
     else:
         mapfiles_in = [kwargs['mapfile_in']]
 
@@ -33,11 +33,14 @@ def plugin_main(args, **kwargs):
         hosts = [h.strip() for h in hosts]
 
     for mapfile_in in mapfiles_in:
-        map = DataMap.load(mapfile_in)
-        for i in range(len(map)-len(hosts)):
-            hosts.append(hosts[i])
+        try:
+            map = DataMap.load(mapfile_in)
+            for i in range(len(map)-len(hosts)):
+                hosts.append(hosts[i])
 
-        for item, host in zip(map, hosts):
-            item.host = host
+            for item, host in zip(map, hosts):
+                item.host = host
 
-        map.save(mapfile_in)
+            map.save(mapfile_in)
+        except:
+            print('File {} does not appear to be a mapfile. Skipping it.'.format(mapfile_in))
