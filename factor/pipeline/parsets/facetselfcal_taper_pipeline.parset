@@ -923,9 +923,9 @@ copy_image1.argument.flags                                 =   [image,loop_phase
 
 # compare the current and the previous image to see if we can stop the loop, length = 1
 check_image1.control.type                                  =   compare_image_stats
-check_image1.control.mapfiles_in                           =   [adjust_casa_mapfile_phaseloop.output.mapfile,copy_image1.output.previous_image.mapfile,loop_phasecal.output.counter]
-check_image1.control.inputkeys                             =   [image_new,image_prev,count]
-check_image1.argument.flags                                =   [image_new,image_prev,count,1.05]
+check_image1.control.mapfiles_in                           =   [adjust_casa_mapfile_phaseloop.output.mapfile,copy_image1.output.previous_image.mapfile]
+check_image1.control.inputkeys                             =   [image_new,image_prev]
+check_image1.argument.flags                                =   [image_new,image_prev,loop_phasecal.output.counter,1.05]
 
 ###### end of phase-only selfcal loop
 ###### continue to amplitude calibration
