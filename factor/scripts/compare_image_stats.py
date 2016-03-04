@@ -197,7 +197,7 @@ def find_imagenoise(imagename):
     return rms, numpy.abs(numpy.max(image)/rms)
 
 
-def main(im1, im2, factor=1.0125):
+def main(im1, im2, count=-1, factor=1.0125):
     """
     Compare the dynamic range of two images and check whether:
         dynamic_range1 / factor > dynamic_range2
@@ -208,6 +208,9 @@ def main(im1, im2, factor=1.0125):
         Name of image #1
     im2 : str
         Name of image #2
+    count : int, optional
+        Loop index. If nonzero, the dynamic range check is skipped for count = 0
+        only and break is set to False
     factor : float
         Required improvement factor for success (i.e., break = True)
 
@@ -227,10 +230,14 @@ def main(im1, im2, factor=1.0125):
     print('Image 1: rms = {0} Jy/beam; dynamic range = {1}'.format(rms1, dynamic_range1))
     print('Image 2: rms = {0} Jy/beam; dynamic range = {1}'.format(rms2, dynamic_range2))
 
-    if dynamic_range1 / factor > dynamic_range2:
+    if count == 0:
+        # For count = 0 only, always return False so that loop continues
         return {'break': False}
     else:
-        return {'break': True}
+        if dynamic_range1 / factor > dynamic_range2:
+            return {'break': False}
+        else:
+            return {'break': True}
 
 
 if __name__ == '__main__':

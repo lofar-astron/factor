@@ -9,7 +9,7 @@ import shutil
 import os
 
 
-def main(image, counter):
+def main(image, counter, indx):
     """
     Copy an image
 
@@ -19,6 +19,8 @@ def main(image, counter):
         Name of image to copy
     counter : int
         Index of loop
+    indx : int
+        Index of imaging step (e.g., 4)
 
     Returns
     -------
@@ -27,16 +29,19 @@ def main(image, counter):
 
     """
     counter = int(counter)
+    indx = int(indx)
 
-    image_copy = image.replace('image42', 'image42_iter{}'.format(counter))
+    image_copy = image.replace('image{0}2'.format(indx), 'image{0}2_iter{1}'.format(indx, counter))
     if os.path.exists(image_copy):
         shutil.rmtree(image_copy)
     shutil.copytree(image, image_copy)
 
     if counter > 0:
-        image_prev = image.replace('image42', 'image42_iter{}'.format(counter-1))
+        # Use image from previous iteration of the current imaging step
+        image_prev = image.replace('image{0}2'.format(indx), 'image{0}2_iter{1}'.format(indx, counter-1))
     else:
-        image_prev = image.replace('image42', 'image32')
+        # Use image from previous imaging step
+        image_prev = image.replace('image{0}2'.format(indx), 'image{0}2'.format(indx-1))
 
     return {'previous_image': image_prev}
 

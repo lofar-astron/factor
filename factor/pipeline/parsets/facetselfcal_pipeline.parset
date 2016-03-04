@@ -727,7 +727,7 @@ apply_phaseonly2.argument.catalog                          =   {{ skymodel_dir }
 loop_phasecal.control.kind                                 =   loop
 loop_phasecal.control.type                                 =   conditional
 loop_phasecal.control.loopcount                            =   {{ loopcount }}
-loop_phasecal.control.loopsteps                            =   [average2,create_compressed_mapfile2,concat2,casa_image21,adjust_casa_mapfile2,mask2,casa_image22,create_model2_map,casa_ft2,{% if pre_average %}switch_weights_col5,{% endif %}solve_ampphase11,{% if pre_average %}switch_weights_col6,{% endif %}apply_ampphase11,adjust_casa_mapfile_phaseloop,copy_image1,check_image1]
+loop_phasecal.control.loopsteps                            =   [average2,create_compressed_mapfile2,concat2,delete_image1,casa_image21,adjust_casa_mapfile2,mask2,casa_image22,create_model2_map,casa_ft2,{% if pre_average %}switch_weights_col5,{% endif %}solve_ampphase11,{% if pre_average %}switch_weights_col6,{% endif %}apply_ampphase11,adjust_casa_mapfile_phaseloop,copy_image1,check_image1]
 
 # average the output pf the previous BBS step, length = ntimes
 average2.control.type                                      =   dppp
@@ -756,6 +756,12 @@ concat2.control.mapfile_in                                 =   create_compressed
 concat2.control.inputkey                                   =   msfiles
 concat2.control.outputkey                                  =   msconcat
 concat2.argument.flags                                     =   [msfiles,msconcat]
+
+# delete image from previous selfcal step, length = 1
+delete_image1.control.type                                 =   delete_image
+delete_image1.control.mapfile_in                           =   create_model1_map.output.mapfile
+delete_image1.control.inputkey                             =   imageroot
+delete_image1.argument.flags                               =   [imageroot,loop_phasecal.output.counter,2]
 
 # image with casa, length = 1
 casa_image21.control.type                                  =   casa_clean
@@ -907,19 +913,19 @@ adjust_casa_mapfile_phaseloop.control.type                 =   appendMapfile
 adjust_casa_mapfile_phaseloop.control.mapfile_in           =   casa_image22.output.casa_image22.image.mapfile
 adjust_casa_mapfile_phaseloop.control.append               =   {{ casa_suffix }}
 adjust_casa_mapfile_phaseloop.control.mapfile_dir          =   input.output.mapfile_dir
-adjust_casa_mapfile_phaseloop.control.filename             =   compare_image_input_new.mapfile
+adjust_casa_mapfile_phaseloop.control.filename             =   compare_image_input_new1.mapfile
 
 # copy the output image so that we can compare it later, length = 1
 copy_image1.control.type                                   =   copy_image
 copy_image1.control.mapfile_in                             =   adjust_casa_mapfile_phaseloop.output.mapfile
 copy_image1.control.inputkey                               =   image
-copy_image1.argument.flags                                 =   [image,loop_phasecal.output.counter]
+copy_image1.argument.flags                                 =   [image,loop_phasecal.output.counter,2]
 
 # compare the current and the previous image to see if we can stop the loop, length = 1
 check_image1.control.type                                  =   compare_image_stats
-check_image1.control.mapfiles_in                           =   [adjust_casa_mapfile_phaseloop.output.mapfile,copy_image1.output.previous_image.mapfile]
-check_image1.control.inputkeys                             =   [image_new,image_prev]
-check_image1.argument.flags                                =   [image_new,image_prev]
+check_image1.control.mapfiles_in                           =   [adjust_casa_mapfile_phaseloop.output.mapfile,copy_image1.output.previous_image.mapfile,loop_phasecal.output.counter]
+check_image1.control.inputkeys                             =   [image_new,image_prev,count]
+check_image1.argument.flags                                =   [image_new,image_prev,count,1.05]
 
 ###### end of phase-only selfcal loop
 ###### continue to amplitude calibration
@@ -1105,7 +1111,7 @@ casa_image32.argument.clean.allowchunk                     =   False
 loop_ampcal.control.kind                                   =   loop
 loop_ampcal.control.type                                   =   conditional
 loop_ampcal.control.loopcount                              =   {{ loopcount }}
-loop_ampcal.control.loopsteps                              =   [create_model3_map,casa_ft3,{% if pre_average %}switch_weights_col7,{% endif %}solve_ampphase21,{% if pre_average %}switch_weights_col8,{% endif %}apply_ampphase21,merge_phase_parmdbs,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,average4,create_compressed_mapfile4,concat4,delete_image,casa_image41,adjust_casa_mapfile4,mask4,casa_image42,adjust_casa_mapfile5,copy_image2,check_image2]
+loop_ampcal.control.loopsteps                              =   [create_model3_map,casa_ft3,{% if pre_average %}switch_weights_col7,{% endif %}solve_ampphase21,{% if pre_average %}switch_weights_col8,{% endif %}apply_ampphase21,merge_phase_parmdbs,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,average4,create_compressed_mapfile4,concat4,delete_image2,casa_image41,adjust_casa_mapfile4,mask4,casa_image42,adjust_casa_mapfile5,copy_image2,check_image2]
 
 # create a mapfile with the model image, length = 1
 create_model3_map.control.kind                             =   plugin
@@ -1205,10 +1211,7 @@ apply_amp2.argument.parmdb                                 =   inputparmdb
 apply_amp2.argument.replace-sourcedb                       =   True
 apply_amp2.argument.replace-parmdb                         =   True
 
-########## end of fourth or of the looped round of phase+amp selfcal
-
-########## start of looped round of phase+amp selfcal
-########## make image to check if we can stop the loop, or as new model
+########## make image to check if we can stop the loop
 
 # average the output pf the previous selfcal step, length = ntimes
 average4.control.type                                      =   dppp
@@ -1239,10 +1242,10 @@ concat4.control.outputkey                                  =   msconcat
 concat4.argument.flags                                     =   [msfiles,msconcat]
 
 # delete image from previous selfcal step, length = 1
-delete_image.control.type                                  =   delete_image
-delete_image.control.mapfile_in                            =   create_model3_map.output.mapfile
-delete_image.control.inputkey                              =   imageroot
-delete_image.argument.flags                                =   [imageroot,loop_ampcal.output.counter]
+delete_image2.control.type                                 =   delete_image
+delete_image2.control.mapfile_in                           =   create_model3_map.output.mapfile
+delete_image2.control.inputkey                             =   imageroot
+delete_image2.argument.flags                               =   [imageroot,loop_ampcal.output.counter]
 
 # image with casa, length = 1
 casa_image41.control.type                                  =   casa_clean
@@ -1350,7 +1353,7 @@ adjust_casa_mapfile5.control.type                          =   appendMapfile
 adjust_casa_mapfile5.control.mapfile_in                    =   casa_image42.output.casa_image42.image.mapfile
 adjust_casa_mapfile5.control.append                        =   {{ casa_suffix }}
 adjust_casa_mapfile5.control.mapfile_dir                   =   input.output.mapfile_dir
-adjust_casa_mapfile5.control.filename                      =   compare_image_input_new.mapfile
+adjust_casa_mapfile5.control.filename                      =   compare_image_input_new2.mapfile
 
 # copy the output image so that we can compare it later, length = 1
 copy_image2.control.type                                   =   copy_image
