@@ -1205,7 +1205,7 @@ concat4.argument.flags                                     =   [msfiles,msconcat
 delete_image.control.type                                  =   delete_image
 delete_image.control.mapfile_in                            =   create_model3_map.output.mapfile
 delete_image.control.inputkey                              =   imageroot
-delete_image.argument.flags                                =   [imageroot,loop_ampcal.output.counter]
+delete_image.argument.flags                                =   [imageroot,loop_ampcal.output.counter,4]
 
 # image with casa, length = 1
 casa_image41.control.type                                  =   casa_clean
