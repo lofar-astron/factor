@@ -83,6 +83,9 @@ class Direction(object):
         self.solint_time_p = solint_p
         self.solint_time_a = solint_a
         self.dynamic_range = dynamic_range
+        if self.dynamic_range.lower() not in ['ld', 'hd']:
+            self.log.error('Dynamic range is "{}" but must be either "LD" or "HD".'.format(self.dynamic_range))
+            sys.exit(1)
         if region_selfcal.lower() == 'empty':
             # Set to empty list (casapy format)
             self.region_selfcal = '[]'
@@ -504,10 +507,15 @@ class Direction(object):
         # set the averaging steps since the minimum selfcal image size is set
         # to 512 pixels (and therefore the true size of the calibrator may be
         # much smaller). However, we limit the amount of averaging to no more
-        # than 2 Hz per channel and 120 s per time slot
+        # than 2 MHz per channel and 120 s per time slot
+        #
+        # For high-dynamic range calibration, we use 0.2 MHz per channel.
         if self.cal_size_deg is not None:
             cal_size_pix = self.cal_size_deg / self.cellsize_selfcal_deg
-            target_bandwidth_mhz = min(2.0, 1.0 * 512.0 / cal_size_pix)
+            if self.dynamic_range.lower() == 'hd':
+                target_bandwidth_mhz = 0.2
+            else:
+                target_bandwidth_mhz = min(2.0, 1.0 * 512.0 / cal_size_pix)
             target_timewidth_s = min(120.0, 120.0 * 512.0 / cal_size_pix) # used for imaging only
             self.facetselfcal_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
             self.facetselfcal_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors-self.facetselfcal_freqstep))]
@@ -602,8 +610,14 @@ class Direction(object):
             # slow (amp) selfcal should be the number of channels in a band after
             # averaging. The interval for fast (phase) selfcal should be the
             # number of channels in 20 MHz or less
-            num_chan_per_band_after_avg = nchan / self.facetselfcal_freqstep
-            self.solint_freq_a = num_chan_per_band_after_avg
+            #
+            # For high-dynamic range solve, the interval for slow (amp) selfcal
+            # should be 1 (every channel)
+            if self.dynamic_range.lower() == 'hd':
+                self.solint_freq_a = 1
+            else:
+                num_chan_per_band_after_avg = nchan / self.facetselfcal_freqstep
+                self.solint_freq_a = num_chan_per_band_after_avg
             num_cal_blocks = np.ceil(nchan * nbands * chan_width_hz/1e6
                 / 20.0)
             self.solint_freq_p = int(np.ceil(num_chan_per_band_after_avg * nbands
