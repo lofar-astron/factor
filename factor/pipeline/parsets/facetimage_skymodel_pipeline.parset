@@ -73,7 +73,7 @@ expand_sourcedb_all_facet_sources.control.filename      =   expand_sourcedb_all_
 
 # "do nearly everything" call to NDPPP: phaseshift, add, correct, and average in one NDPPP call, length = nfiles
 add_all_facet_sources.control.type                      =   dppp
-add_all_facet_sources.control.opts.mapfiles_in          =   [create_ms_map.output.mapfile, expand_sourcedb_all_facet_sources.output.mapfile, create_parmdb_map.output.mapfile, expand_merged_parmdb_map.output.mapfile]
+add_all_facet_sources.control.opts.mapfiles_in          =   [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 add_all_facet_sources.control.opts.inputkeys            =   [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb]
 add_all_facet_sources.argument.numthreads               =   {{ max_cpus_per_band }}
 add_all_facet_sources.argument.msin.datacolumn          =   SUBTRACTED_DATA_ALL_NEW
