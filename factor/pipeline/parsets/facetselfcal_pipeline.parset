@@ -1319,7 +1319,7 @@ adjust_casa_mapfile5.control.filename                      =   compare_image_inp
 copy_image.control.type                                    =   copy_image
 copy_image.control.mapfile_in                              =   adjust_casa_mapfile5.output.mapfile
 copy_image.control.inputkey                                =   image
-copy_image.argument.flags                                  =   [image,loop_ampcal.output.counter]
+copy_image.argument.flags                                  =   [image,loop_ampcal.output.counter,4]
 
 # compare the current and the previous image to see if we can stop the loop, length = 1
 check_image.control.type                                   =   compare_image_stats
