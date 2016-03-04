@@ -49,11 +49,10 @@ if ntermsi == 2:
 if ntermsi == 3:
     mod = [modimage+'.tt0', modimage+'.tt1', modimage+'.tt2']
 
-for ms in mslist:    
+for ms in mslist:
     if wplanes > 1:
         ftw(vis=ms, field="", spw="", model=mod, nterms=ntermsi, reffreq="",
-            wprojplanes=wplanes, complist="", incremental=False, usescratch=True,
-            async=False)
+            wprojplanes=wplanes, complist="", incremental=False, usescratch=True)
     else:
         ft(vis=ms, field="", spw="", model=mod, nterms=ntermsi, reffreq="",
-           complist="", incremental=False, usescratch=True, async=False)
+           complist="", incremental=False, usescratch=True)
