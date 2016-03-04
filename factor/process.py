@@ -32,7 +32,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
     This function runs the operations in the correct order and handles all the
     bookkeeping for the processing: e.g., which operations are needed for each
-    direction (depending on sucess of selfcal, the order in which they were
+    direction (depending on success of selfcal, the order in which they were
     processed, etc.).
 
     It also handles the set up of the computing parameters and the generation of
@@ -445,7 +445,7 @@ def _set_up_bands(parset, test_run=False):
             log.error('Input bands do not have a common phase center. Exiting...')
             sys.exit(1)
 
-    # Determine whether any bands lack an initial skymodel
+    # Determine whether any bands lack an initial sky model
     bands_no_skymodel = [b for b in bands if b.skymodel_dirindep is None]
     if len(bands_no_skymodel) > 0:
         if len(bands_no_skymodel) > 0:

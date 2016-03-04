@@ -5,7 +5,7 @@ Installation
 ------------
 
 FACTOR is currently installed on the LOFAR CEP3 cluster. Users on CEP3
-should run the following commands before using FACTOR:
+should run the following command before using FACTOR:
 
     source ~rafferty/init_factor
 
