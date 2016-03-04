@@ -190,13 +190,21 @@ def get_global_options(parset):
     else:
         parset_dict['preaverage_flux_jy'] = 0.0
 
+    # Use multi-scale selfcal that starts at 20 arcsec resolution and increases the
+    # resolution in stages to the full resolution (default = False). This method may
+    # improve convergence, especially when the starting model is poor
+    if 'multiscale_selfcal' in parset_dict:
+        parset_dict['multiscale_selfcal'] = parset.getboolean('global', 'multiscale_selfcal')
+    else:
+        parset_dict['multiscale_selfcal'] = False
+
     # Check for unused options
     given_options = parset.options('global')
     allowed_options = ['dir_working', 'dir_ms', 'lofarroot',
         'lofarpythonpath', 'parmdb_name', 'interactive', 'make_mosaic',
         'exit_on_selfcal_failure', 'skip_selfcal_check', 'wsclean_nbands',
         'facet_imager', 'keep_avg_facet_data', 'keep_unavg_facet_data',
-        'max_selfcal_loops', 'preaverage_flux_jy']
+        'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [global] section of the '

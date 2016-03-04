@@ -7,8 +7,8 @@
 dir_working = /data/wdir
 
 # Full path to directory containing input bands. It will be scanned for all
-# .MS and .ms files (required). Note that FACTOR works on a copy of these files,
-# and will therefore not modify them
+# .MS and .ms files (required). Note that FACTOR works on a copy of these files
+# and does not modify the originals in any way
 dir_ms = /data/bands
 
 # Parmdb name for dir-indep. selfcal solutions (stored inside the input band
@@ -56,6 +56,11 @@ keep_unavg_facet_data = False
 # disabled). When activated, averaging in time is done to exploit the time
 # coherence in the TEC solutions
 preaverage_flux_Jy = 1.0
+
+# Use multi-scale selfcal that starts at 20 arcsec resolution and increases
+# the resolution in stages to the full resolution. This method may improve
+# convergence, especially when the starting model is poor
+multiscale_selfcal = True
 
 
 [directions]
