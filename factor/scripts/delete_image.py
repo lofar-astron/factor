@@ -35,22 +35,27 @@ def main(imageroot, counter, indx):
     # match the current index (given by indx) due to the need to run this
     # script with an existing mapfile from a previous imaging step. Therefore,
     # we find the root index in imageroot and replace it with the current one
+    root_indx = None
     for i in range(5):
         if imageroot.find('image{}2'.format(i)) >= 0:
             root_indx = i
             break
-    imageroot.replace('image{}2'.format(root_indx), 'image{}2'.format(indx))
+    if root_indx is None:
+        print('ERROR: Could not determine image index from imageroot')
+        sys.exit(1)
+
+    imageroot_current_step = imageroot.replace('image{}2'.format(root_indx), 'image{}2'.format(indx))
 
     if counter > 0:
         # First delete the "image?2" images
-        images1  = glob.glob(imageroot + '.*')
+        images1  = glob.glob(imageroot_current_step + '.*')
         for image in images1:
             if os.path.exists(image):
                 if os.path.isdir(image):
                     shutil.rmtree(image)
 
         # Next delete the "image?1" images
-        images2  = glob.glob(imageroot.replace('image{}2'.format(indx), 'image{}1'.format(indx)) + '.*')
+        images2  = glob.glob(imageroot_current_step.replace('image{}2'.format(indx), 'image{}1'.format(indx)) + '.*')
         for image in images2:
             if os.path.exists(image):
                 if os.path.isdir(image):
