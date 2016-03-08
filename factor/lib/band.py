@@ -371,7 +371,7 @@ class Band(object):
                 newfiles.remove(f)
                 newdirindparmdbs.remove(p)
                 self.log.debug('Skipping file {0} in further processing '
-                    '(unflagged fraction < {1}%)'.format(f, min_fraction*100.0)
+                    '(unflagged fraction < {1}%)'.format(f, min_fraction*100.0))
 
         if test_run:
             return
