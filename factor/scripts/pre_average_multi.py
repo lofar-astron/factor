@@ -37,7 +37,7 @@ def main(ms_input, parmdb_input, input_colname, output_colname, target_rms_rad,
     pre_average : bool (str)
         Actually do the pre-averaging. (If False: just copy the data.)
     """
-    
+
     # convert input to needed types
     ms_list = input2strlist(ms_input)
     parmdb_list = input2strlist(parmdb_input)
@@ -77,7 +77,7 @@ def main(ms_input, parmdb_input, input_colname, output_colname, target_rms_rad,
         else:
             print('Cannot find baseline_file. Exiting...')
             sys.exit(1)
-    
+
         # Iterate through time chunks and find the lowest ionfactor
         start_times = []
         end_times = []
@@ -131,7 +131,7 @@ def get_baseline_lengths(ms_list, check_antennas=True):
     if check_antennas:
         for ms_file in ms_list[1:]:
             anttab = pt.table(ms_file+'::ANTENNA', ack=False)
-            if  not np.array_equal(antnames,anttab.getcol('NAME')):
+            if not all([a == b for a, b in zip(antnames, anttab.getcol('NAME'))]):
                 raise ValueError('pre_average_multi: Measurement sets "'+ms_list[0]+'" and "'+ms_file+'" have different ANTENNA tables!')
             anttab.close()
     # concatenate the UW-data from all MSs
@@ -242,7 +242,7 @@ def BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_colname, io
     """
     Averages data using a sliding Gaussian kernel on the weights
     """
-    
+
     #### sort msnames into groups with gaps < maxgap_sec
     nfiles = len(sorted_ms_dict['msnames'])
     ms_groups = []
@@ -268,7 +268,7 @@ def BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_colname, io
         ant2_list        = []
         all_time_list    = []
         all_data_list    = []
-        all_weights_list = [] 
+        all_weights_list = []
         all_flags_list   = []
         for msfile in ms_names:
             if not os.path.exists(msfile):
@@ -283,7 +283,7 @@ def BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_colname, io
                     sys.exit(1)
                 freqtab.close()
             #wav = 299792458. / freq
-            if timepersample is None:                
+            if timepersample is None:
                 timepersample = ms.getcell('INTERVAL',0)
             elif check_files:
                 if timepersample != ms.getcell('INTERVAL',0):
@@ -312,7 +312,7 @@ def BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_colname, io
             weights_list = []
             data_list = []
             # select data from all MSs
-            for msindex in xrange(len(ms_names)):                
+            for msindex in xrange(len(ms_names)):
                 sel1 = np.where(ant1_list[msindex] == ant[0])[0]
                 sel2 = np.where(ant2_list[msindex] == ant[1])[0]
                 sel_list.append( sorted(list(frozenset(sel1).intersection(sel2))) )
@@ -363,7 +363,7 @@ def BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_colname, io
                 all_data_list[msindex][sel_list[msindex],:,:] = data[startidx[msindex]:endidx[msindex],:,:]
                 all_weights_list[msindex][sel_list[msindex],:,:] = weights[startidx[msindex]:endidx[msindex],:,:]
 
-        ### write the data back to the files 
+        ### write the data back to the files
         for msindex in xrange(len(ms_names)):
             ms = pt.table(ms_names[msindex], readonly=False, ack=False)
             # Add the output columns if needed
@@ -481,7 +481,7 @@ def input2bool(invar):
     elif isinstance(invar, str):
         if invar.upper() == 'TRUE' or invar == '1':
             return True
-        elif invar.upper() == 'FALSE' or invar == '0': 
+        elif invar.upper() == 'FALSE' or invar == '0':
             return False
         else:
             raise ValueError('input2bool: Cannot convert string "'+invar+'" to boolean!')
@@ -504,7 +504,7 @@ def input2strlist(invar):
                     for f in fname.strip('[]').split(','):
                         str_list.append(f.strip(' \'\"'))
                 else:
-                    str_list.append(fname.strip(' \'\"'))  
+                    str_list.append(fname.strip(' \'\"'))
     elif type(invar) is list:
         str_list = [str(f).strip(' \'\"') for f in invar]
     else:
@@ -537,7 +537,7 @@ def find_ionfactor(parmdb_files, baseline_dict, t1, t2, target_rms_rad=0.2):
     # Filter any stations not in both the instrument table and the ms
     stations_set = set([s for s in baseline_dict.itervalues() if type(s) is str])
     for pdb_file in parmdb_files:
-        pdb_in = lofar.parmdb.parmdb(pdb_file)        
+        pdb_in = lofar.parmdb.parmdb(pdb_file)
         stations_pbd = set([s.split(':')[-1] for s in pdb_in.getNames()])
         stations_set.intersection_update(stations_pbd)
         pdb_in = False
