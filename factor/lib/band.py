@@ -353,10 +353,12 @@ class Band(object):
                 # Just copy the original files
                 chunk_name = '{0}_chunk0.ms'.format(os.path.splitext(os.path.basename(self.files[MS_id]))[0])
                 chunk_file = os.path.join(newdirname, chunk_name)
-                shutil.copytree(self.files[MS_id], chunk_file)
+                if not os.path.exists(chunk_file):
+                    shutil.copytree(self.files[MS_id], chunk_file)
 
                 newdirindparmdb = os.path.join(chunk_file, dirindparmdb)
-                shutil.copytree(self.dirindparmdbs[MS_id], newdirindparmdb)
+                if not os.path.exists(newdirindparmdb):
+                    shutil.copytree(self.dirindparmdbs[MS_id], newdirindparmdb)
 
                 newfiles.append(chunk_file)
                 newdirindparmdbs.append(newdirindparmdb)
@@ -368,6 +370,8 @@ class Band(object):
             if self.find_unflagged_fraction(f) < min_fraction:
                 newfiles.remove(f)
                 newdirindparmdbs.remove(p)
+                self.log.debug('Skipping file {0} in further processing '
+                    '(unflagged fraction < {1}%)'.format(f, min_fraction*100.0)
 
         if test_run:
             return
