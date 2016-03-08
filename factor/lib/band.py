@@ -361,6 +361,14 @@ class Band(object):
                 newfiles.append(chunk_file)
                 newdirindparmdbs.append(newdirindparmdb)
 
+        # Check that each file has at least 10% unflagged data. If not, remove
+        # it from the file list
+        min_fraction = 0.1
+        for f, p in zip(newfiles[:], newdirindparmdbs[:]):
+            if self.find_unflagged_fraction(f) < min_fraction:
+                newfiles.remove(f)
+                newdirindparmdbs.remove(p)
+
         if test_run:
             return
         self.files = newfiles
@@ -395,6 +403,29 @@ class Band(object):
         return self.freq_divisors[idx]
 
 
+    def find_unflagged_fraction(self, ms_file):
+        """
+        Finds the fraction of data that is unflagged
+
+        Parameters
+        ----------
+        ms_file : str
+            Filename of input MS
+
+        Returns
+        -------
+        unflagged_fraction : float
+            Fraction of unflagged data
+
+        """
+        tab = pt.table(ms_file, ack=False)
+        seltab = tab.query('any(FLAG)')
+        unflagged_fraction = 1.0 - float(len(seltab)) / float(len(tab))
+
+        return unflagged_fraction
+
+
+
 def process_chunk_star(inputs):
     """
     Simple helper function for pool.map
@@ -405,7 +436,7 @@ def process_chunk_star(inputs):
 def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, chunksize, dirindparmdb,
     colnames_to_keep, newdirname, local_dir=None, clobber=True):
     """
-    Processes one time chunk of input ms_file
+    Processes one time chunk of input ms_file and returns new file names
 
     Parameters
     ----------
@@ -434,6 +465,13 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
         copied to the original output directory
     clobber : bool, optional
         If True, remove existing files if needed.
+
+    Returns
+    -------
+    chunk_file : str
+        Filename of chunk MS.
+    newdirindparmdb : str
+        Filename of direction-independent instrument parmdb for chunk_file
 
     """
     chunk_name = '{0}_chunk{1}.ms'.format(os.path.splitext(os.path.basename(ms_file))[0], chunkid)
