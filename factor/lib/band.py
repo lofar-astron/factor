@@ -422,9 +422,8 @@ class Band(object):
             Fraction of unflagged data
 
         """
-        tab = pt.table(ms_file, ack=False)
-        seltab = tab.query('any(FLAG)')
-        unflagged_fraction = 1.0 - float(len(seltab)) / float(len(tab))
+        unflagged_fraction = pt.taql('CALC sum([select nfalse(FLAG) from {0}]) '
+            '/ sum([select nelements(FLAG) from {0}])'.format(ms_file))[0]
 
         return unflagged_fraction
 
