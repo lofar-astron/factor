@@ -422,11 +422,17 @@ class Band(object):
             Fraction of unflagged data
 
         """
-        unflagged_fraction = pt.taql('CALC sum([select nfalse(FLAG) from {0}]) '
-            '/ sum([select nelements(FLAG) from {0}])'.format(ms_file))[0]
+        import subprocess
+
+        # Call taql. Note that we do not use pt.taql(), as pt.taql() can cause
+        # hanging/locking issues on some systems
+        p = subprocess.Popen("taql 'CALC sum([select nfalse(FLAG) from {0}]) / "
+            "sum([select nelements(FLAG) from {0}])'".format(ms_file),
+            shell=True, stdout=subprocess.PIPE)
+        r = p.communicate()
+        unflagged_fraction = float(r[0])
 
         return unflagged_fraction
-
 
 
 def process_chunk_star(inputs):
@@ -487,7 +493,7 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
         starttime -= chunksize
     if chunkid == (nchunks-1):
         endtime += 2.*chunksize
-    tab = pt.table(ms_file, ack=False)
+    tab = pt.table(ms_file, lockoptions='autonoread', ack=False)
     seltab = tab.query('TIME >= ' + str(starttime) + ' && TIME < ' + str(endtime),
         sortlist='TIME,ANTENNA1,ANTENNA2', columns=','.join(colnames_to_keep))
 
@@ -499,7 +505,8 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
             newtab.close()
         except:
             copy = True
-            os.shutil.rmtree(chunk_file)
+        if copy:
+            shutil.rmtree(chunk_file)
     elif os.path.exists(old_chunk_file):
         # For compatibility, also search in old location
         try:
