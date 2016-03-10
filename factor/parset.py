@@ -407,7 +407,7 @@ def get_directions_options(parset):
     # Check for unused options
     given_options = parset.options('directions')
     allowed_options = ['directions_file', 'max_radius_deg',
-        'flux_min_for_merging_Jy', 'flux_min_jy', 'size_max_arcmin',
+        'flux_min_for_merging_jy', 'flux_min_jy', 'size_max_arcmin',
         'separation_max_arcmin', 'max_num', 'faceting_radius_deg',
         'check_edges', 'ndir_total', 'ndir_selfcal', 'transfer_radius',
         'groupings', 'allow_reordering', 'reimage', 'target_ra',
