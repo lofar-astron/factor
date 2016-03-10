@@ -83,7 +83,7 @@ def parset_read(parset_file, use_log_file=True):
     log.info("Working on {} input files.".format(len(parset_dict['mss'])))
 
     # Handle MS-specific parameters
-    parset_dict.update(get_ms_options(parset, parset_dict['mss']))
+    parset_dict.update(get_ms_options(parset, parset_dict['mss'], parset_dict['skymodel_extension']) )
 
     # Check for unused sections
     given_sections = parset._sections.keys()
@@ -118,6 +118,11 @@ def get_global_options(parset):
     # measurement sets, so path should be relative to those; default = instrument)
     if 'parmdb_name' not in parset_dict:
         parset_dict['parmdb_name'] = 'instrument'
+
+    # Extension that when concatenated with the 'extension-stripped' MS path gives
+    # a path that is checked if it contains a skymodel
+    if 'skymodel_extension' not in parset_dict:
+        parset_dict['skymodel_extension'] = '.wsclean_low2-model.merge'
 
     # Use interactive mode (default = False). Factor will ask for confirmation of
     # internally derived DDE calibrators and facets
@@ -205,7 +210,8 @@ def get_global_options(parset):
         'lofarpythonpath', 'parmdb_name', 'interactive', 'make_mosaic',
         'exit_on_selfcal_failure', 'skip_selfcal_check', 'wsclean_nbands',
         'facet_imager', 'keep_avg_facet_data', 'keep_unavg_facet_data',
-        'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal']
+        'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal',
+        'skymodel_extension' ]
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [global] section of the '
@@ -534,7 +540,7 @@ def get_cluster_options(parset):
     return parset_dict
 
 
-def get_ms_options(parset, ms_files):
+def get_ms_options(parset, ms_files, skymodel_extension = '.wsclean_low2-model.merge'):
     """
     Handle the ms-specific options
 
@@ -544,6 +550,8 @@ def get_ms_options(parset, ms_files):
         Input parset
     ms_files : list of str
         MS filenames
+    skymodel_extension : str, optional
+        search for skymodels that may have this extension
 
     Returns
     -------
@@ -553,9 +561,14 @@ def get_ms_options(parset, ms_files):
     """
     parset_dict = {'ms_specific': {}}
     for ms in ms_files:
-        ms = os.path.basename(ms)
-        if not ms in parset._sections.keys():
-            continue
-        parset_dict['ms_specific'][ms] = parset._sections[ms]
-
+        msbase = os.path.basename(ms)
+        if msbase in parset._sections.keys():
+            parset_dict['ms_specific'][msbase] = parset._sections[msbase]
+        default_skymodel = os.path.splitext(ms)[0]+skymodel_extension
+        if os.path.exists(default_skymodel):
+            if msbase in parset_dict['ms_specific'].keys():
+                if not 'init_skymodel' in parset_dict['ms_specific'][msbase].keys():
+                    parset_dict['ms_specific'][msbase]['init_skymodel'] = default_skymodel
+            elif msbase not in parset_dict['ms_specific'].keys():
+                parset_dict['ms_specific'][msbase] = {'init_skymodel': default_skymodel}
     return parset_dict

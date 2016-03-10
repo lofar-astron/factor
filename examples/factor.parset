@@ -15,6 +15,12 @@ dir_ms = /data/bands
 # measurement sets, so path should be relative to those; default = instrument)
 parmdb_name = instrument_ap_smoothed
 
+# Extension that when concatenated with the 'extension-stripped' MS path gives
+# a path that is checked if it contains a skymodel. The default finds the skymodel
+# files from the standard prefactor Initial-Subtract.parset
+# (default = .wsclean_low2-model.merge ; notice the leading ".")
+# skymodel_extension = .wsclean_low2-model.merge
+
 # Make final mosaic (default = True)
 make_mosaic = True
 
