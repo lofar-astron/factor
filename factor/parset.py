@@ -79,6 +79,7 @@ def parset_read(parset_file, use_log_file=True):
     if len(parset_dict['mss']) == 0:
         log.error('No MS files found in {}!'.format(parset_dict['dir_ms']))
         sys.exit(1)
+    log.info("Input MS directory is {0}".format(parset_dict['dir_ms']))
     log.info("Working on {} input files.".format(len(parset_dict['mss'])))
 
     # Handle MS-specific parameters
@@ -251,21 +252,28 @@ def get_directions_options(parset):
     # radius within which facets will be used; outside of this radius, small patches
     # are used that do not appear in the final mosaic.  These parameters will
     # determine the faceting of the field
+
+    # Radius from phase center within which to consider sources as potential
+    # calibrators (default = 2 * FWHM of primary beam of highest-frequency band)
     if 'max_radius_deg' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['max_radius_deg'] = parset.getfloat('directions',
             'max_radius_deg')
     else:
         parset_dict['direction_specific']['max_radius_deg'] = None
-    if 'flux_min_jy' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['flux_min_jy'] = parset.getfloat('directions',
-            'flux_min_jy')
+
+    # If no directions_file is given, the selection criteria for calibrator sources
+    # that follow must be given. For merging of multiple sources into one calibrator
+    # group, flux_min_for_merging_Jy (default = 0.1 Jy) and size_max_arcmin set the min
+    # flux density and max size of individual sources to be considered for grouping,
+    # and separation_max_arcmin sets the max separation between sources below which
+    # they are grouped into one calibrator. After grouping, flux_min_Jy sets the
+    # min total flux density of a source (or group) to be considered as a DDE
+    # calibrator
+    if 'flux_min_for_merging_jy' in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['flux_min_for_merging_jy'] = parset.getfloat('directions',
+            'flux_min_for_merging_jy')
     else:
-        parset_dict['direction_specific']['flux_min_jy'] = None
-    if 'max_num' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['max_num'] = parset.getint('directions',
-            'max_num')
-    else:
-        parset_dict['direction_specific']['max_num'] = None
+        parset_dict['direction_specific']['flux_min_for_merging_jy'] = 0.1
     if 'size_max_arcmin' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['size_max_arcmin'] = parset.getfloat('directions',
             'size_max_arcmin')
@@ -276,6 +284,23 @@ def get_directions_options(parset):
             'separation_max_arcmin')
     else:
         parset_dict['direction_specific']['separation_max_arcmin'] = None
+    if 'flux_min_jy' in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['flux_min_jy'] = parset.getfloat('directions',
+            'flux_min_jy')
+    else:
+        parset_dict['direction_specific']['flux_min_jy'] = None
+
+    # Number of internally derived directions can be limited to a maximum number
+    # of directions if desired with max_num (default = all).
+    if 'max_num' in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['max_num'] = parset.getint('directions',
+            'max_num')
+    else:
+        parset_dict['direction_specific']['max_num'] = None
+
+    # Radius within which facets will be used (default = 1.25 * FWHM of primary beam
+    # of highest-frequency band); outside of this radius, small patches are used
+    # that do not appear in the final mosaic.
     if 'faceting_radius_deg' in parset_dict['direction_specific']:
         parset_dict['direction_specific']['faceting_radius_deg'] = parset.getfloat('directions',
             'faceting_radius_deg')
@@ -381,10 +406,12 @@ def get_directions_options(parset):
 
     # Check for unused options
     given_options = parset.options('directions')
-    allowed_options = ['directions_file', 'max_radius_deg', 'flux_min_jy', 'size_max_arcmin',
-        'separation_max_arcmin', 'max_num', 'faceting_radius_deg', 'check_edges', 'ndir_total',
-        'ndir_selfcal', 'transfer_radius', 'groupings', 'allow_reordering', 'reimage',
-        'target_ra', 'target_dec', 'target_radius_arcmin', 'target_has_own_facet']
+    allowed_options = ['directions_file', 'max_radius_deg',
+        'flux_min_for_merging_Jy', 'flux_min_jy', 'size_max_arcmin',
+        'separation_max_arcmin', 'max_num', 'faceting_radius_deg',
+        'check_edges', 'ndir_total', 'ndir_selfcal', 'transfer_radius',
+        'groupings', 'allow_reordering', 'reimage', 'target_ra',
+        'target_dec', 'target_radius_arcmin', 'target_has_own_facet']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [directions] section of the '

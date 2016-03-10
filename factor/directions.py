@@ -124,8 +124,8 @@ def directions_read(directions_file, factor_working_dir):
 
 
 def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
-    directions_separation_max_arcmin, directions_max_num=None,
-    interactive=False):
+    directions_separation_max_arcmin, directions_max_num=None, interactive=False,
+    flux_min_for_merging_Jy=0.1):
     """
     Selects appropriate calibrators from sky models and makes the directions file
 
@@ -144,6 +144,8 @@ def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
         Limit total number of directions to this value
     interactive : bool, optional
         If True, plot the directions and ask for approval
+    flux_min_for_merging_Jy : float, optional
+        Minimum flux density for a source to be considered for merging
 
     Returns
     -------
@@ -163,13 +165,13 @@ def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
     log.info('Found {0} sources with sizes below {1} '
         'arcmin'.format(len(s.getPatchNames()), size_max_arcmin))
 
-    # Filter fainter patches
-    s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='sum', force=True)
+    # Filter fainter patches on merge flux-density limit
+    s.select('I > {0} Jy'.format(flux_min_for_merging_Jy), aggregate='sum', force=True)
     if len(s) == 0:
-        log.critical("No sources found that meet the specified min flux density criteria.")
+        log.critical("No sources found above {} Jy.".format(flux_min_for_merging_Jy))
         sys.exit(1)
     log.info('Found {0} sources with flux densities above {1} Jy'.format(
-        len(s.getPatchNames()), flux_min_Jy))
+        len(s.getPatchNames()), flux_min_for_merging_Jy))
 
     # Look for nearby pairs
     log.info('Merging sources within {0} arcmin of each other...'.format(
@@ -181,6 +183,15 @@ def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
         if len(nearby[0]) > 1:
             patches = s.getPatchNames()[nearby]
             s.merge(patches.tolist())
+
+    # Filter fainter patches on user flux-density limit
+    s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='sum', force=True)
+    if len(s) == 0:
+        log.critical("No sources or merged groups found that meet the specified "
+            "min total flux density criteria.")
+        sys.exit(1)
+    log.info('Found {0} sources or merged groups with total flux densities above {1} Jy'.format(
+        len(s.getPatchNames()), flux_min_Jy))
 
     # Trim directions list to get directions_max_num of directions
     if directions_max_num is not None:

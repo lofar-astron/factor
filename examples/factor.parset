@@ -72,12 +72,18 @@ directions_file = /data/directions.txt
 # calibrators (default = 2 * FWHM of primary beam of highest-frequency band)
 max_radius_deg = 5.0
 
-# Min flux density, max size of a source, and max separation between sources
-# below which they are grouped into one direction; required if no
-# directions_file is given
-flux_min_Jy = 0.3
+# If no directions_file is given, the selection criteria for calibrator sources
+# that follow must be given. For merging of multiple sources into one calibrator
+# group, merge_flux_min_Jy (default = 0.1 Jy) and size_max_arcmin set the min
+# flux density and max size of individual sources to be considered for grouping,
+# and separation_max_arcmin sets the max separation between sources below which
+# they are grouped into one calibrator. After grouping, flux_min_Jy sets the
+# min total flux density of a source (or group) to be considered as a DDE
+# calibrator
+flux_min_for_merging_Jy = 0.1
 size_max_arcmin = 2.0
 separation_max_arcmin = 6.0
+flux_min_Jy = 0.3
 
 # Number of internally derived directions can be limited to a maximum number
 # of directions if desired with max_num (default = all).

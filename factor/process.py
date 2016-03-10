@@ -487,7 +487,7 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
     """
     dir_parset = parset['direction_specific']
 
-    log.info("Building initial sky model...")
+    log.info("Building local sky model...")
     ref_band = bands[-1]
     max_radius_deg = dir_parset['max_radius_deg']
     initial_skymodel = factor.directions.make_initial_skymodel(ref_band,
@@ -519,10 +519,13 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
             # Make directions from dir-indep sky model of highest-frequency
             # band, as it has the smallest field of view
             log.info("No directions file given. Selecting directions internally...")
-            dir_parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(initial_skymodel.copy(),
-                dir_parset['flux_min_jy'], dir_parset['size_max_arcmin'],
-                dir_parset['separation_max_arcmin'], directions_max_num=dir_parset['max_num'],
-                interactive=parset['interactive'])
+            dir_parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(
+                initial_skymodel.copy(), dir_parset['flux_min_jy'],
+                dir_parset['size_max_arcmin'],
+                dir_parset['separation_max_arcmin'],
+                directions_max_num=dir_parset['max_num'],
+                interactive=parset['interactive'],
+                flux_min_for_merging_Jy=dir_parset['flux_min_for_merging_jy'])
             directions = factor.directions.directions_read(dir_parset['directions_file'],
                 parset['dir_working'])
 
