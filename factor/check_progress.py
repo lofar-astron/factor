@@ -535,13 +535,13 @@ def get_current_step(direction):
     statefile = os.path.join(direction.working_dir, 'results', current_op,
         direction.name, 'statefile')
     if os.path.exists(statefile):
-        # FACTOR may be writing to the statefile while we try to read from it,
-        # so catch EOFError
         try:
             f = open(statefile, 'r')
             d = pickle.load(f)
             f.close()
-        except EOFError:
+        except (EOFError, ValueError):
+            # Catch errors related to the statefile being written to by the
+            # pipeline when we're trying to read from it
             return (None, None, None, None)
     else:
         return (None, None, None, None)
