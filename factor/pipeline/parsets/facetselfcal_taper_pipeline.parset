@@ -1666,9 +1666,9 @@ wsclean_ft.control.inputkeys                               =   [msfile,name]
 wsclean_ft.argument.flags                                  =   [-predict,msfile]
 wsclean_ft.argument.size                                   =   {{ facet_imsize }} {{ facet_imsize }}
 wsclean_ft.argument.scale                                  =   0.000417
-wsclean_ft.argument.mem                                    =   {{ max_percent_memory }}
+wsclean_ft.argument.mem                                    =   {{ max_percent_memory_per_img }}
 wsclean_ft.argument.channelsout                            =   {{ wsclean_nchannels }}
-wsclean_ft.argument.j                                      =   {{ max_cpus_per_node }}
+wsclean_ft.argument.j                                      =   {{ max_cpus_per_img }}
 wsclean_ft.argument.tempdir                                =   {{ local_dir }}
 wsclean_ft.argument.nwlayers-for-size                      =   49152 49152
 {% endblock full_image_parms %}
