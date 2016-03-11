@@ -494,25 +494,16 @@ class Direction(object):
                 tmp_divisors.append(step)
         freq_divisors = np.array(tmp_divisors)
 
-        # For initsubtract, average to 0.5 MHz per channel and 20 sec per time
-        # slot. Since each band is imaged separately and the smearing and image
-        # sizes both scale linearly with frequency, a single frequency and time
-        # step is valid for all bands
-        self.initsubtract_freqstep = max(1, min(int(round(0.5 * 1e6 / chan_width_hz)), nchan))
-        self.initsubtract_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors-self.initsubtract_freqstep))]
-        self.initsubtract_timestep = max(1, int(round(20.0 / timestep_sec)))
-
         # For selfcal, average to 1 MHz per channel and 120 s per time slot for
         # an image of 512 pixels. Here we use the size of the calibrator to
         # set the averaging steps since the minimum selfcal image size is set
         # to 512 pixels (and therefore the true size of the calibrator may be
         # much smaller). However, we limit the amount of averaging to no more
         # than 2 MHz per channel and 120 s per time slot
-        #
-        # For high-dynamic range calibration, we use 0.2 MHz per channel.
         if self.cal_size_deg is not None:
             cal_size_pix = self.cal_size_deg / self.cellsize_selfcal_deg
             if self.dynamic_range.lower() == 'hd':
+                # For high-dynamic range calibration, we use 0.2 MHz per channel
                 target_bandwidth_mhz = 0.2
             else:
                 target_bandwidth_mhz = min(2.0, 1.0 * 512.0 / cal_size_pix)
@@ -549,18 +540,16 @@ class Direction(object):
             while ntimes_min % self.timeSlotsPerParmUpdate:
                 self.timeSlotsPerParmUpdate += 1
 
-        # Set time intervals for selfcal solve steps
-        #
-        # Calculate the effective flux density. This is the one used to set the
-        # intervals. It is the peak flux density adjusted to account for cases
-        # in which the total flux density is larger than the peak flux density
-        # would indicate (either due to source being extended or to multiple
-        # calibrator sources). In these cases, we can use a higher effective
-        # flux density to set the intervals. A scaling with a power of 1/1.5
-        # seems to work well
+        # Set time intervals for selfcal solve steps. The initial skymodel is
+        # None for field-type directions, so the steps below are skipped
         if initial_skymodel is not None:
-            # The initial skymodel is not used for field directions, so steps
-            # below are skipped
+            # Calculate the effective flux density. This is the one used to set the
+            # intervals. It is the peak flux density adjusted to account for cases
+            # in which the total flux density is larger than the peak flux density
+            # would indicate (either due to source being extended or to multiple
+            # calibrator sources). In these cases, we can use a higher effective
+            # flux density to set the intervals. A scaling with a power of 1/1.5
+            # seems to work well
             total_flux_jy, peak_flux_jy_bm = self.get_cal_fluxes(initial_skymodel.copy())
             effective_flux_jy = peak_flux_jy_bm * (total_flux_jy / peak_flux_jy_bm)**0.667
             ref_flux_jy = 1.4 * (4.0 / nbands)**0.5
@@ -574,7 +563,7 @@ class Direction(object):
             else:
                 self.pre_average = False
 
-            # Set fast (phase-only) solution interval
+            # Set fast (phase-only) solution time interval
             if self.solint_time_p == 0:
                 if self.pre_average:
                     # Set solution interval to 1 timeslot and vary the target rms per
@@ -587,33 +576,33 @@ class Direction(object):
                     if self.target_rms_rad > 0.5:
                         self.target_rms_rad = 0.5
                 else:
-                    self.solint_time_p = int(round(8 * (ref_flux_jy / effective_flux_jy)**2))
-                    if self.solint_time_p < 1:
-                        self.solint_time_p = 1
-                    if self.solint_time_p > 2:
-                        self.solint_time_p = 2
+                    target_timewidth_s = 16.0 * (ref_flux_jy / effective_flux_jy)**2
+                    if target_timewidth_s > 16.0:
+                        target_timewidth_s = 16.0
+                    self.solint_time_p = max(1, int(round(target_timewidth_s / timestep_sec)))
 
-            # Set slow (gain) solution interval
+            # Set slow (gain) solution time interval
             if self.solint_time_a == 0:
-                # Amplitude solve is per band, so don't scale with number of bands
-                ref_flux = 1400.0
-                self.solint_time_a = int(round(240 * (ref_flux_jy / effective_flux_jy)**2))
-                if self.solint_time_a < 30:
-                    self.solint_time_a = 30
-                if self.solint_time_a > 120:
-                    self.solint_time_a = 120
+                # Slow gain solve is per band, so don't scale the interval with
+                # the number of bands but only with the effective flux
+                ref_flux_jy = 1.4
+                target_timewidth_s = 1200.0 * (ref_flux_jy / effective_flux_jy)**2
+                if target_timewidth_s < 240.0:
+                    target_timewidth_s = 240.0
+                if target_timewidth_s > 1200.0:
+                    target_timewidth_s = 1200.0
+                self.solint_time_a = int(round(target_timewidth_s / timestep_sec))
 
             self.log.debug('Using solution intervals of {0} (fast) and {1} '
                 '(slow) time slots'.format(self.solint_time_p, self.solint_time_a))
 
-            # Set frequency interval for selfcal solve steps. The interval for
+            # Set frequency intervals for selfcal solve steps. The interval for
             # slow (amp) selfcal should be the number of channels in a band after
             # averaging. The interval for fast (phase) selfcal should be the
             # number of channels in 20 MHz or less
-            #
-            # For high-dynamic range solve, the interval for slow (amp) selfcal
-            # should be 1 (every channel)
             if self.dynamic_range.lower() == 'hd':
+                # For high-dynamic range solve, the interval for slow (amp) selfcal
+                # should be 1 (every channel)
                 self.solint_freq_a = 1
             else:
                 num_chan_per_band_after_avg = nchan / self.facetselfcal_freqstep
