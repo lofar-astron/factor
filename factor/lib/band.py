@@ -112,7 +112,7 @@ class Band(object):
         # cut input files into chunks if needed
         chunksize = 2400. # in seconds -> 40min
         self.chunk_input_files(chunksize, dirindparmdb, local_dir=local_dir,
-            clobber=True, test_run=test_run)
+                               test_run=test_run)
 
         # Calculate times and number of samples
         self.sumsamples = 0
@@ -274,7 +274,7 @@ class Band(object):
 
 
     def chunk_input_files(self, chunksize, dirindparmdb, local_dir=None,
-        clobber=True, test_run=False):
+        test_run=False, min_fraction=0.1):
         """
         Make copies of input files that are smaller than 2*chunksize
 
@@ -291,11 +291,11 @@ class Band(object):
         local_dir : str
             Path to local scratch directory for temp output. The file is then
             copied to the original output directory
-        clobber : bool, optional
-            If True, remove existing files if needed.
         test_run : bool, optional
             If True, don't actually do the chopping.
-
+        min_fraction : float, optional
+            Minimum fraction of unflaggged data in a time-chunk needed for the chunk 
+            to be kept. Only used whn chunking large files. (default = 0.1)
         """
         newfiles = []
         newdirindparmdbs = []
@@ -344,36 +344,41 @@ class Band(object):
                     itertools.repeat(dirindparmdb),
                     itertools.repeat(colnames_to_keep),
                     itertools.repeat(newdirname),
-                    itertools.repeat(local_dir), itertools.repeat(clobber)))
+                    itertools.repeat(local_dir),
+                    itertools.repeat(min_fraction)  ))
                 pool.close()
                 pool.join()
 
                 for chunk_file, chunk_parmdb in results:
-                    newfiles.append(chunk_file)
-                    newdirindparmdbs.append(chunk_parmdb)
+                    if bool(chunk_file) and bool(chunk_parmdb) :
+                        newfiles.append(chunk_file)
+                        newdirindparmdbs.append(chunk_parmdb)
             else:
-                # Just copy the original files
+                # Make symlinks for the files
                 chunk_name = '{0}_chunk0.ms'.format(os.path.splitext(os.path.basename(self.files[MS_id]))[0])
                 chunk_file = os.path.join(newdirname, chunk_name)
-                if not os.path.exists(chunk_file):
-                    shutil.copytree(self.files[MS_id], chunk_file)
-
                 newdirindparmdb = os.path.join(chunk_file, dirindparmdb)
+
+                if not os.path.exists(chunk_file):
+                    os.symlink(self.files[MS_id], chunk_file)
+
                 if not os.path.exists(newdirindparmdb):
-                    shutil.copytree(self.dirindparmdbs[MS_id], newdirindparmdb)
+                    os.symlink(self.dirindparmdbs[MS_id], newdirindparmdb)
 
                 newfiles.append(chunk_file)
                 newdirindparmdbs.append(newdirindparmdb)
 
-        # Check that each file has at least 10% unflagged data. If not, remove
-        # it from the file list
-        min_fraction = 0.1
-        for f, p in zip(newfiles[:], newdirindparmdbs[:]):
-            if self.find_unflagged_fraction(f) < min_fraction:
-                newfiles.remove(f)
-                newdirindparmdbs.remove(p)
-                self.log.debug('Skipping file {0} in further processing '
-                    '(unflagged fraction < {1}%)'.format(f, min_fraction*100.0))
+        # Check that each file has at least min_fraction unflagged data. If not, remove
+        # it from the file list. 
+        # This may be come an option, so I kept the code for the time being. AH 14.3.2016
+        check_all_unflagged = False
+        if check_all_unflagged: 
+            for f, p in zip(newfiles[:], newdirindparmdbs[:]):
+                if self.find_unflagged_fraction(f) < min_fraction:
+                    newfiles.remove(f)
+                    newdirindparmdbs.remove(p)
+                    self.log.debug('Skipping file {0} in further processing '
+                        '(unflagged fraction < {1}%)'.format(f, min_fraction*100.0))
 
         if test_run:
             return
@@ -445,7 +450,7 @@ def process_chunk_star(inputs):
 
 
 def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, chunksize, dirindparmdb,
-    colnames_to_keep, newdirname, local_dir=None, clobber=True):
+    colnames_to_keep, newdirname, local_dir=None, min_fraction=0.1):
     """
     Processes one time chunk of input ms_file and returns new file names
 
@@ -474,17 +479,19 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
     local_dir : str
         Path to local scratch directory for temp output. The file is then
         copied to the original output directory
-    clobber : bool, optional
-        If True, remove existing files if needed.
+    min_fraction : float, optional
+        Minimum fraction of unflaggged data in a time-chunk needed for the chunk 
+        to be kept. 
 
     Returns
     -------
     chunk_file : str
-        Filename of chunk MS.
+        Filename of chunk MS or None
     newdirindparmdb : str
-        Filename of direction-independent instrument parmdb for chunk_file
+        Filename of direction-independent instrument parmdb for chunk_file or None
 
     """
+    log = logging.getLogger('factor:MS-chunker')
     chunk_name = '{0}_chunk{1}.ms'.format(os.path.splitext(os.path.basename(ms_file))[0], chunkid)
     chunk_file = os.path.join(newdirname, chunk_name)
     old_chunk_file = os.path.join(os.path.dirname(ms_file), 'chunks', chunk_name)
@@ -498,6 +505,14 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
     tab = pt.table(ms_file, lockoptions='autonoread', ack=False)
     seltab = tab.query('TIME >= ' + str(starttime) + ' && TIME < ' + str(endtime),
         sortlist='TIME,ANTENNA1,ANTENNA2', columns=','.join(colnames_to_keep))
+
+    # Check that the chunk has at least min_fraction unflagged data. 
+    # If not, then return (None, None)
+    flagged = seltab.query('any(FLAG)')
+    unflagged_fraction = 1.0 - float(len(flagged)) / float(len(seltab))
+    if unflagged_fraction < min_fraction:
+        log.debug('Chunk {} not generated because it would contain too little unflagged data'.format(chunk_name))
+        return (None, None)
 
     if os.path.exists(chunk_file):
         try:
