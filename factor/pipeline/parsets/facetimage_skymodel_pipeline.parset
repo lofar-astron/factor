@@ -132,8 +132,8 @@ sort_into_Groups_maps.control.mapfile_filesmap          =   sort_into_Groups.out
 
 # concat data in frequency, length = ntimes
 concat_averaged.control.type                            =   dppp
-concat_averaged.control.mapfile_out                     =   sort_into_Groups_map.output.groupmap
-concat_averaged.control.mapfile_in                      =   sort_into_Groups_map.output.filesmap
+concat_averaged.control.mapfile_out                     =   sort_into_Groups_maps.output.groupmap
+concat_averaged.control.mapfile_in                      =   sort_into_Groups_maps.output.filesmap
 concat_averaged.control.inputkey                        =   msin
 concat_averaged.argument.msin.datacolumn                =   DATA
 concat_averaged.argument.msout.writefullresflag         =   False
