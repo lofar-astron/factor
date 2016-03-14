@@ -520,6 +520,7 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
             if len(newtab) == len(seltab):
                 copy = False
             newtab.close()
+            log.debug('Chunk {} exists with correct length, not copying!'.format(chunk_name))
         except:
             copy = True
         if copy:
@@ -532,6 +533,7 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
                 copy = False
                 chunk_file = old_chunk_file
             newtab.close()
+            log.debug('Chunk {} exists with correct length in old directory, not copying!'.format(chunk_name))
         except:
             copy = True
     else:
@@ -547,6 +549,7 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
             if os.path.exists(chunk_file):
                 shutil.rmtree(chunk_file)
 
+        log.debug('Going to copy {0} samples to file {1}'.format(str(len(seltab)),chunk_file))
         seltab.copy(chunk_file, True)
 
         if local_dir is not None:
