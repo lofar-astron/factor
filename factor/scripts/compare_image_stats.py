@@ -221,8 +221,8 @@ def main(im1, im2, count=-1, factor=1.0125):
         True otherwise)
 
     """
-    if type(factor) is str:
-        factor = float(factor)
+    factor = float(factor)
+    count = int(count)
 
     rms1, dynamic_range1 =  find_imagenoise(im1)
     rms2, dynamic_range2 =  find_imagenoise(im2)
