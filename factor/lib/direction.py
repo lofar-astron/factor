@@ -600,12 +600,12 @@ class Direction(object):
             # slow (amp) selfcal should be the number of channels in a band after
             # averaging. The interval for fast (phase) selfcal should be the
             # number of channels in 20 MHz or less
+            num_chan_per_band_after_avg = nchan / self.facetselfcal_freqstep
             if self.dynamic_range.lower() == 'hd':
                 # For high-dynamic range solve, the interval for slow (amp) selfcal
                 # should be 1 (every channel)
                 self.solint_freq_a = 1
             else:
-                num_chan_per_band_after_avg = nchan / self.facetselfcal_freqstep
                 self.solint_freq_a = num_chan_per_band_after_avg
             num_cal_blocks = np.ceil(nchan * nbands * chan_width_hz/1e6
                 / 20.0)
