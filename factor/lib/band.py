@@ -508,8 +508,7 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
 
     # Check that the chunk has at least min_fraction unflagged data.
     # If not, then return (None, None)
-    flagged = seltab.select('nfalse(FLAG)')
-    flags_per_element = flagged.calc('sum(Col_1)')
+    flags_per_element = seltab.calc('nfalse(FLAG)')
     nelements = seltab.calc('nelements(FLAG)')[0] # = number of channels * number of pols
     unflagged_fraction = float(np.sum(flags_per_element)) / nelements / len(seltab)
     if unflagged_fraction < min_fraction:
