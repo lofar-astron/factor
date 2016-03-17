@@ -294,7 +294,7 @@ class Band(object):
         test_run : bool, optional
             If True, don't actually do the chopping.
         min_fraction : float, optional
-            Minimum fraction of unflaggged data in a time-chunk needed for the chunk 
+            Minimum fraction of unflaggged data in a time-chunk needed for the chunk
             to be kept. Only used whn chunking large files. (default = 0.1)
         """
         newfiles = []
@@ -369,10 +369,10 @@ class Band(object):
                 newdirindparmdbs.append(newdirindparmdb)
 
         # Check that each file has at least min_fraction unflagged data. If not, remove
-        # it from the file list. 
+        # it from the file list.
         # This may be come an option, so I kept the code for the time being. AH 14.3.2016
         check_all_unflagged = False
-        if check_all_unflagged: 
+        if check_all_unflagged:
             for f, p in zip(newfiles[:], newdirindparmdbs[:]):
                 if self.find_unflagged_fraction(f) < min_fraction:
                     newfiles.remove(f)
@@ -480,8 +480,8 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
         Path to local scratch directory for temp output. The file is then
         copied to the original output directory
     min_fraction : float, optional
-        Minimum fraction of unflaggged data in a time-chunk needed for the chunk 
-        to be kept. 
+        Minimum fraction of unflaggged data in a time-chunk needed for the chunk
+        to be kept.
 
     Returns
     -------
@@ -506,10 +506,12 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
     seltab = tab.query('TIME >= ' + str(starttime) + ' && TIME < ' + str(endtime),
         sortlist='TIME,ANTENNA1,ANTENNA2', columns=','.join(colnames_to_keep))
 
-    # Check that the chunk has at least min_fraction unflagged data. 
+    # Check that the chunk has at least min_fraction unflagged data.
     # If not, then return (None, None)
-    flagged = seltab.query('any(FLAG)')
-    unflagged_fraction = 1.0 - float(len(flagged)) / float(len(seltab))
+    flagged = seltab.select('nfalse(FLAG)')
+    flags_per_element = flagged.calc('sum(Col_1)')
+    nelements = seltab.calc('nelements(FLAG)')[0] # = number of channels * number of pols
+    unflagged_fraction = float(np.sum(flags_per_element)) / nelements / len(seltab)
     if unflagged_fraction < min_fraction:
         log.debug('Chunk {} not generated because it would contain too little unflagged data'.format(chunk_name))
         return (None, None)
