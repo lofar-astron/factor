@@ -414,32 +414,32 @@ class Band(object):
         return self.freq_divisors[idx]
 
 
-    def find_unflagged_fraction(self, ms_file):
-        """
-        Finds the fraction of data that is unflagged
+def find_unflagged_fraction(ms_file):
+    """
+    Finds the fraction of data that is unflagged
 
-        Parameters
-        ----------
-        ms_file : str
-            Filename of input MS
+    Parameters
+    ----------
+    ms_file : str
+        Filename of input MS
 
-        Returns
-        -------
-        unflagged_fraction : float
-            Fraction of unflagged data
+    Returns
+    -------
+    unflagged_fraction : float
+        Fraction of unflagged data
 
-        """
-        import subprocess
+    """
+    import subprocess
 
-        # Call taql. Note that we do not use pt.taql(), as pt.taql() can cause
-        # hanging/locking issues on some systems
-        p = subprocess.Popen("taql 'CALC sum([select nfalse(FLAG) from {0}]) / "
-            "sum([select nelements(FLAG) from {0}])'".format(ms_file),
-            shell=True, stdout=subprocess.PIPE)
-        r = p.communicate()
-        unflagged_fraction = float(r[0])
+    # Call taql. Note that we do not use pt.taql(), as pt.taql() can cause
+    # hanging/locking issues on some systems
+    p = subprocess.Popen("taql 'CALC sum([select nfalse(FLAG) from {0}]) / "
+        "sum([select nelements(FLAG) from {0}])'".format(ms_file),
+        shell=True, stdout=subprocess.PIPE)
+    r = p.communicate()
+    unflagged_fraction = float(r[0])
 
-        return unflagged_fraction
+    return unflagged_fraction
 
 
 def process_chunk_star(inputs):
@@ -506,15 +506,6 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
     seltab = tab.query('TIME >= ' + str(starttime) + ' && TIME < ' + str(endtime),
         sortlist='TIME,ANTENNA1,ANTENNA2', columns=','.join(colnames_to_keep))
 
-    # Check that the chunk has at least min_fraction unflagged data.
-    # If not, then return (None, None)
-    flags_per_element = seltab.calc('nfalse(FLAG)')
-    nelements = seltab.calc('nelements(FLAG)')[0] # = number of channels * number of pols
-    unflagged_fraction = float(np.sum(flags_per_element)) / nelements / len(seltab)
-    if unflagged_fraction < min_fraction:
-        log.debug('Chunk {} not generated because it would contain too little unflagged data'.format(chunk_name))
-        return (None, None)
-
     if os.path.exists(chunk_file):
         try:
             newtab = pt.table(chunk_file, ack=False)
@@ -564,5 +555,13 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
         shutil.copytree(ms_parmdb, newdirindparmdb)
     seltab.close()
     tab.close()
+
+    # Check that the chunk has at least min_fraction unflagged data.
+    # If not, then return (None, None)
+    if find_unflagged_fraction(chunk_file) < min_fraction:
+        log.debug('Chunk {} not used because it contains too little unflagged data'.format(chunk_name))
+        seltab.close()
+        tab.close()
+        return (None, None)
 
     return (chunk_file, newdirindparmdb)
