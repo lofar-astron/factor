@@ -360,6 +360,14 @@ class Band(object):
                 newdirindparmdb = os.path.join(chunk_file, dirindparmdb)
 
                 if not os.path.exists(chunk_file):
+                    # It's a "new" file, check that the chunk has at least min_fraction 
+                    # unflagged data. If not, then continue with the for loop over MSs
+                    # This will re-run for bad files every time factor is started, but the 
+                    # user could just remove the file from the input directory.
+                    if find_unflagged_fraction(chunk_file) < min_fraction:
+                        log.debug('File {} not used because it contains too little unflagged'
+                                  ' data'.format(os.path.basename(self.files[MS_id])))
+                        continue
                     os.symlink(self.files[MS_id], chunk_file)
 
                 if not os.path.exists(newdirindparmdb):
