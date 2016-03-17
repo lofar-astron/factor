@@ -364,7 +364,7 @@ class Band(object):
                     # unflagged data. If not, then continue with the for loop over MSs
                     # This will re-run for bad files every time factor is started, but the 
                     # user could just remove the file from the input directory.
-                    if find_unflagged_fraction(chunk_file) < min_fraction:
+                    if find_unflagged_fraction(self.files[MS_id]) < min_fraction:
                         log.debug('File {} not used because it contains too little unflagged'
                                   ' data'.format(os.path.basename(self.files[MS_id])))
                         continue
