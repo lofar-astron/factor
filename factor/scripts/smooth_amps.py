@@ -64,7 +64,7 @@ def median_window_filter(ampl, half_window, threshold):
     return ampl_tot_copy
 
 
-def main(instrument_name, instrument_name_smoothed, normalize=False):
+def main(instrument_name, instrument_name_smoothed, normalize=True):
     if type(normalize) is str:
         if normalize.lower() == 'true':
             normalize = True
