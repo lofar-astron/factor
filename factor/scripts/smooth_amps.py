@@ -64,7 +64,7 @@ def median_window_filter(ampl, half_window, threshold):
     return ampl_tot_copy
 
 
-def main(instrument_name, instrument_name_smoothed, normalize=False):
+def main(instrument_name, instrument_name_smoothed, normalize=True):
     if type(normalize) is str:
         if normalize.lower() == 'true':
             normalize = True
@@ -131,12 +131,12 @@ def main(instrument_name, instrument_name_smoothed, normalize=False):
                 imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
                 phase = numpy.arctan2(imag, real)
                 amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
-                
+
                 # Clip extremely low amplitude solutions to prevent very high
                 # amplitudes in the corrected data
                 low_ind = numpy.where(amp < 0.2)
                 amp[low_ind] = 0.2
-                
+
                 parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = numpy.copy(amp *
                     numpy.cos(phase) * norm_factor)
                 parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = numpy.copy(amp *
