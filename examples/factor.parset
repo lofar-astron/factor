@@ -68,6 +68,12 @@ preaverage_flux_Jy = 1.0
 # convergence, especially when the starting model is poor
 multiscale_selfcal = True
 
+# Max desired peak flux density reduction at center of the facet edges due to
+# bandwidth smearing (at the mean frequency) and time smearing (default = 0.15 =
+# 15% reduction in peak flux). Higher values result in shorter run times but
+# more smearing away from the facet centers. This value only applies to the
+# facet imaging (selfcal always uses a value of 0.15)
+max_peak_smearing = 0.05
 
 [directions]
 # Full path to file containing calibrator directions. If not given, directions
