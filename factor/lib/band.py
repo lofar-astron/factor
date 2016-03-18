@@ -274,7 +274,7 @@ class Band(object):
 
 
     def chunk_input_files(self, chunksize, dirindparmdb, local_dir=None,
-        test_run=False, min_fraction=0.1):
+        test_run=False, min_fraction=0.5):
         """
         Make copies of input files that are smaller than 2*chunksize
 
