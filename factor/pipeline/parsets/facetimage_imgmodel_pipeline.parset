@@ -154,7 +154,7 @@ average.argument.avg.timestep                         =   {{ facetimage_timestep
 create_compressed_mapfile.control.kind                =   plugin
 create_compressed_mapfile.control.type                =   compressMapfile
 create_compressed_mapfile.control.mapfile_in          =   average.output.mapfile
-create_compressed_mapfile.control.mapfile_dir         =   {{ mapfile_dir }}
+create_compressed_mapfile.control.mapfile_dir         =   input.output.mapfile_dir
 create_compressed_mapfile.control.filename            =   concat_averaged_input.mapfile
 
 #############################
@@ -164,8 +164,8 @@ create_compressed_mapfile.control.filename            =   concat_averaged_input.
 # sort compressed mapfile so that there is one group per timestamp, length = ntimes
 sort_into_Groups.control.type                         =   sort_times_into_freqGroups
 sort_into_Groups.argument.flags                       =   [create_compressed_mapfile.output.mapfile]
-sort_into_Groups.argument.filename                    =   sorted_groups.datamap
-sort_into_Groups.argument.mapfile_dir                 =   {{ mapfile_dir }}
+sort_into_Groups.argument.filename                    =   sorted_groups.mapfile
+sort_into_Groups.argument.mapfile_dir                 =   input.output.mapfile_dir
 sort_into_Groups.argument.hosts                       =   {{ hosts }}
 
 # convert the output of sort_into_Groups into usable mapfiles, len = ntimes
@@ -188,7 +188,7 @@ concat_averaged.argument.steps                        =   []
 concat_averaged_compressed_map.control.kind           =   plugin
 concat_averaged_compressed_map.control.type           =   compressMapfile
 concat_averaged_compressed_map.control.mapfile_in     =   concat_averaged.output.mapfile
-concat_averaged_compressed_map.control.mapfile_dir    =   {{ mapfile_dir }}
+concat_averaged_compressed_map.control.mapfile_dir    =   input.output.mapfile_dir
 concat_averaged_compressed_map.control.filename       =   concat_averaged_compressed.mapfile
 
 {% block full_image_parms %}
