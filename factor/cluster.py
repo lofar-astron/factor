@@ -4,6 +4,7 @@ Module that holds all compute-cluster-related functions
 import os
 import logging
 import sys
+import numpy as np
 from collections import Counter
 import factor._logging
 
@@ -145,9 +146,20 @@ def divide_nodes(directions, node_list, ndir_per_node, nimg_per_node, ncpu_max,
             ndir_per_node = min(ndir_per_node, c[h[0]])
         else:
             ndir_per_node = 1
+        # What the values mean:
+        # nimg_per_node : number of imagers per node 
+        # max_cpus_per_node : maximum number of cores that the pipeline should used
+        # max_cpus_per_img : maximum number of threads per multi-process imager call
+        # max_io_proc_per_node : maximum number of IO-intensive processes
+        # nchunks_per_node : I guess that's always 1, but probably shouldn't be
+        # max_cpus_per_chunk : number of threads in NDPPP calls that are run "ntimes" times
+        # max_cpus_per_band : number of threads in NDPPP calls that are run "nfiles" times
+        # max_percent_memory : percentage of memory to use in imagers that are only run once (e.g. imaging the full facet)
+        # max_percent_memory_per_img : percentage of memory to use in multi-process imager calls
         d.nimg_per_node = nimg_per_node
         d.max_cpus_per_node =  max(1, int(round(ncpu_max / float(ndir_per_node))))
         d.max_cpus_per_img =  max(1, int(round(ncpu_max / float(nimg_per_node))))
+        d.max_io_proc_per_node = int(np.ceil(np.sqrt(ncpu_max)))
         nchunks_per_node = max(1, int(round(float(d.nchunks) / len(d.hosts))))
         d.max_cpus_per_chunk = int(round(d.max_cpus_per_node / nchunks_per_node))
         d.max_cpus_per_band = max(1, int(round(d.max_cpus_per_node *
@@ -190,6 +202,7 @@ def combine_nodes(directions, node_list, nimg_per_node, ncpu_max, fmem_max, nban
         d.nimg_per_node = nimg_per_node
         d.max_cpus_per_node = ncpu_max
         d.max_cpus_per_img =  max(1, int(round(ncpu_max / float(nimg_per_node))))
+        d.max_io_proc_per_node = int(np.ceil(np.sqrt(ncpu_max)))
         nchunks_per_node = max(1, int(round(float(d.nchunks) / len(d.hosts))))
         d.max_cpus_per_chunk = max(1, int(round(d.max_cpus_per_node /
             float(nchunks_per_node))))
