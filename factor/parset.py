@@ -204,6 +204,16 @@ def get_global_options(parset):
     else:
         parset_dict['multiscale_selfcal'] = False
 
+    # Max desired peak flux density reduction at center of the facet edges due to
+    # bandwidth smearing (at the mean frequency) and time smearing (default = 0.15 =
+    # 15% reduction in peak flux). Higher values result in shorter run times but
+    # more smearing away from the facet centers. This value only applies to the
+    # facet imaging (selfcal always uses a value of 0.15)
+    if 'max_peak_smearing' in parset_dict:
+        parset_dict['max_peak_smearing'] = parset.getfloat('global', 'max_peak_smearing')
+    else:
+        parset_dict['max_peak_smearing'] = 0.15
+
     # Check for unused options
     given_options = parset.options('global')
     allowed_options = ['dir_working', 'dir_ms', 'lofarroot',
@@ -211,7 +221,7 @@ def get_global_options(parset):
         'exit_on_selfcal_failure', 'skip_selfcal_check', 'wsclean_nbands',
         'facet_imager', 'keep_avg_facet_data', 'keep_unavg_facet_data',
         'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal',
-        'skymodel_extension' ]
+        'skymodel_extension', 'max_peak_smearing']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [global] section of the '
@@ -531,7 +541,8 @@ def get_cluster_options(parset):
     # Check for unused options
     given_options = parset.options('cluster')
     allowed_options = ['ncpu', 'fmem', 'ndir_per_node', 'nimg_per_node',
-        'clusterdesc_file', 'cluster_type', 'dir_local', 'node_list']
+        'clusterdesc_file', 'cluster_type', 'dir_local', 'node_list',
+        'lofarroot', 'lofarpythonpath']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [cluster] section of the '

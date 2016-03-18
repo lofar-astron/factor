@@ -57,11 +57,14 @@ def run(parset_file, trim_names=True):
     log.setLevel(logging.INFO)
 
     # Plot field
-    log.info('Plotting facets...')
-    log.info('Left-click on a facet to see its current state')
-    log.info('Middle-click on a facet to display its image')
-    log.info('Right-click on a facet to display its selfcal solutions and images')
-    log.info('(In all cases, pan/zoom mode must be off)')
+    log.info('Plotting directions...')
+    log.info('Left-click on a direction to select it and see its current state')
+    log.info('Right-click on a direction to deselect it')
+    log.info('(In both cases, pan/zoom mode must be off)')
+    log.info('Press "c" to display calibrator selfcal images for selected direction')
+    log.info('Press "f" to display facet image for selected direction')
+    log.info('Press "t" to display TEC solutions for selected direction')
+    log.info('Press "g" to display Gain solutions for selected direction')
     log.info('Press "u" to update display (display is updated automatically every minute)')
 
     plot_state(all_directions, trim_names=trim_names)
@@ -118,7 +121,8 @@ def plot_state(directions_list, trim_names=True):
     """
     Plots the facets of a run
     """
-    global midRA, midDec, fig, at
+    global midRA, midDec, fig, at, selected_direction
+    selected_direction = None
 
     # Set up coordinate system and figure
     points, midRA, midDec = factor.directions.getxy(directions_list)
@@ -188,11 +192,14 @@ def plot_state(directions_list, trim_names=True):
             name = direction.name
         marker = ax.text(xmid, ymid, name, color='k', clip_on=True,
             clip_box=ax.bbox, ha='center', va='bottom')
+        marker.set_zorder(1001)
         markers.append(marker)
 
     # Add info box
-    at = AnchoredText("Selected direction: None", prop=dict(size=12), frameon=True, loc=3)
+    at = AnchoredText("Selected direction: None", prop=dict(size=12), frameon=True,
+        loc=3)
     at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
+    at.set_zorder(1002)
     ax.add_artist(at)
 
     ax.relim()
@@ -217,14 +224,15 @@ def plot_state(directions_list, trim_names=True):
     # Show legend
     not_processed_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9',
         facecolor='#F2F2F2', linewidth=2)
-    processing_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='y',
+    processing_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9',
         facecolor='#F2F5A9', linewidth=2)
-    selfcal_ok_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='g',
+    selfcal_ok_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9',
         facecolor='#A9F5A9', linewidth=2)
-    selfcal_not_ok_patch =plt.Rectangle((0, 0), 1, 1, edgecolor='r',
+    selfcal_not_ok_patch =plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9',
         facecolor='#F5A9A9', linewidth=2)
-    ax.legend([not_processed_patch, processing_patch, selfcal_ok_patch, selfcal_not_ok_patch],
+    l = ax.legend([not_processed_patch, processing_patch, selfcal_ok_patch, selfcal_not_ok_patch],
               ['Unprocessed', 'Processing', 'Completed', 'Failed'])
+    l.set_zorder(1002)
 
     # Add check for mouse clicks and key presses
     fig.canvas.mpl_connect('pick_event', on_pick)
@@ -248,7 +256,7 @@ def on_pick(event):
     """
     Handle picks with the mouse
     """
-    global all_directions, at, fig
+    global all_directions, at, fig, selected_direction
 
     facet = event.artist
     direction = None
@@ -258,61 +266,42 @@ def on_pick(event):
                 direction = d
                 break
         if direction is None:
+            selected_direction = None
             return
     else:
+        selected_direction = None
         return
 
     if event.mouseevent.button == 1: # left click
-        # Print info
+        # Print info and set current selection to this direction
         c = at.get_child()
         c.set_text('Getting info...')
+        if selected_direction is not None:
+            if direction.name != selected_direction.name:
+                unset_highlight()
+        selected_direction = direction
+        set_highlight()
         fig.canvas.draw()
         info = get_current_info(direction)
 
-    elif event.mouseevent.button == 2: # middle click
-        # Open full facet image (if any)
-        if os.path.exists('/tmp/tempimage'):
-            shutil.rmtree('/tmp/tempimage')
-        facet_image = find_facet_image(direction)
-        if len(facet_image) > 0:
-            info = 'Opening facet image for {}...'.format(facet.facet_name)
-            im2 = pim.image(facet_image[0])
-            im2.view()
-        else:
-            info = 'No image of facet exists for {}'.format(facet.facet_name)
+        # Update text box
+        c = at.get_child()
+        c.set_text(info)
 
+        # Redraw
+        fig.canvas.draw()
     elif event.mouseevent.button == 3: # right click
-        # Open selfcal images (if any)
-        if os.path.exists('/tmp/tempimage'):
-            shutil.rmtree('/tmp/tempimage')
-        selfcal_images = find_selfcal_images(direction)
-        if len(selfcal_images) > 0:
-            info = 'Opening selfcal images for {}...'.format(facet.facet_name)
-            im = pim.image(selfcal_images)
-            im.view()
-        else:
-            info = 'No selfcal images exist for {}'.format(facet.facet_name)
+        # Deselect selected direction (if any)
+        if selected_direction is not None:
+            unset_highlight()
+            selected_direction = None
 
-        # Open selfcal plots (if any)
-        selfcal_plots = find_selfcal_plots(direction)
-        if len(selfcal_plots) > 0:
-            info += '\nOpening selfcal solution plots for {}...'.format(facet.facet_name)
-            os.system('display {} &'.format(' '.join(selfcal_plots)))
-        else:
-            info += '\nFinal selfcal solutions do not exist for {}'.format(facet.facet_name)
+            # Update text box
+            c = at.get_child()
+            c.set_text("Selected direction: None")
 
-    else:
-        return
-
-    # Update text box
-    c = at.get_child()
-    c.set_text(info)
-
-    # Update patch color
-    set_patch_color(facet, direction)
-
-    # Redraw
-    fig.canvas.draw()
+            # Redraw
+            fig.canvas.draw()
 
 
 def get_current_info(direction):
@@ -349,7 +338,7 @@ def on_press(event):
     """
     Handle key presses
     """
-    global fig, all_directions, at
+    global fig, all_directions, at, selected_direction
 
     if event.key == 'u':
         info = 'Updating display...'
@@ -357,17 +346,71 @@ def on_press(event):
         c.set_text(info)
         fig.canvas.draw()
         update_plot()
-        info += '\n...done'
-        c = at.get_child()
-        c.set_text(info)
-        fig.canvas.draw()
+        if selected_direction is None:
+            # Print "done" only if there is no selection, as otherwise it will
+            # overwrite the direction state info text
+            info += '\n...done'
+            c = at.get_child()
+            c.set_text(info)
+            fig.canvas.draw()
+        return
+
+    elif event.key == 'c':
+        # Open selfcal images (if any)
+        if os.path.exists('/tmp/tempimage'):
+            shutil.rmtree('/tmp/tempimage')
+        selfcal_images = find_selfcal_images(selected_direction)
+        if len(selfcal_images) > 0:
+            info = 'Opening selfcal images for {}...'.format(selected_direction.name)
+            im = pim.image(selfcal_images)
+            im.view()
+        else:
+            info = 'No selfcal images exist for {}'.format(selected_direction.name)
+
+    elif event.key == 'f':
+        # Open full facet image (if any)
+        if os.path.exists('/tmp/tempimage'):
+            shutil.rmtree('/tmp/tempimage')
+        facet_image = find_facet_image(selected_direction)
+        if len(facet_image) > 0:
+            info = 'Opening facet image for {}...'.format(selected_direction.name)
+            im2 = pim.image(facet_image[0])
+            im2.view()
+        else:
+            info = 'No image of facet exists for {}'.format(selected_direction.name)
+
+    elif event.key == 't':
+        # Open fast TEC selfcal plots (if any)
+        selfcal_plots = find_selfcal_tec_plots(selected_direction)
+        if len(selfcal_plots) > 0:
+            info = 'Opening selfcal TEC solution plots for {}...'.format(selected_direction.name)
+            os.system('display {} &'.format(' '.join(selfcal_plots)))
+        else:
+            info = 'Final selfcal solutions do not exist for {}'.format(selected_direction.name)
+
+    elif event.key == 'g':
+        # Open slow Gain selfcal plots (if any)
+        selfcal_plots = find_selfcal_gain_plots(selected_direction)
+        if len(selfcal_plots) > 0:
+            info = 'Opening selfcal Gain solution plots for {}...'.format(selected_direction.name)
+            os.system('display {} &'.format(' '.join(selfcal_plots)))
+        else:
+            info = 'Final selfcal solutions do not exist for {}'.format(selected_direction.name)
+
+    else:
+        return
+
+    # Update info box
+    c = at.get_child()
+    c.set_text(info)
+    fig.canvas.draw()
 
 
 def update_plot():
     """
     Update the plot
     """
-    global fig, all_directions, at
+    global fig, all_directions, at, selected_direction
 
     ax = plt.gca()
     c = at.get_child()
@@ -380,9 +423,11 @@ def update_plot():
                     set_patch_color(a, d)
                     a.selfcal_images = find_selfcal_images(d)
                     a.facet_image = find_facet_image(d)
-                    if 'Selected direction: {}'.format(d.name) in c.get_text():
-                        info = get_current_info(d)
-                        c.set_text(info)
+                    if selected_direction is not None:
+                        if d.name == selected_direction.name:
+                            info = get_current_info(d)
+                            c.set_text(info)
+                            set_highlight()
                     break
 
     fig.canvas.draw()
@@ -390,8 +435,10 @@ def update_plot():
 
 def set_patch_color(a, d):
     """
-    Sets face and edge color of patch
+    Sets face and edge color of patch depending on its state
     """
+    global selected_direction
+
     if not d.load_state():
         # Means that state is not available, so set to unprocessed
         a.set_edgecolor('#a9a9a9')
@@ -403,18 +450,48 @@ def set_patch_color(a, d):
     a.current_op = get_current_op(d)
     if a.current_op is not None:
         # Means this facet is currently processing
-        a.set_edgecolor('y')
+        a.set_edgecolor('#a9a9a9')
         a.set_facecolor('#F2F5A9')
     elif 'facetselfcal' in a.completed_ops:
         if verify_subtract(d):
-            a.set_edgecolor('g')
+            a.set_edgecolor('#a9a9a9')
             a.set_facecolor('#A9F5A9')
         else:
-            a.set_edgecolor('r')
+            a.set_edgecolor('#a9a9a9')
             a.set_facecolor('#F5A9A9')
     elif len(a.completed_ops) > 0:
-        a.set_edgecolor('g')
+        a.set_edgecolor('#a9a9a9')
         a.set_facecolor('#A9F5A9')
+
+
+def set_highlight():
+    """
+    Highlights selected direction border
+    """
+    global selected_direction
+
+    ax = plt.gca()
+    for a in ax.patches:
+        if hasattr(a, 'facet_name'):
+            if selected_direction.name == a.facet_name:
+                a.set_zorder(1000)
+                a.set_edgecolor('#FFFF00')
+                a.set_linewidth(4)
+
+
+def unset_highlight():
+    """
+    Unhighlights selected direction border
+    """
+    global selected_direction
+
+    ax = plt.gca()
+    for a in ax.patches:
+        if hasattr(a, 'facet_name'):
+            if selected_direction.name == a.facet_name:
+                a.set_zorder(1)
+                a.set_edgecolor('#a9a9a9')
+                a.set_linewidth(2)
 
 
 def get_completed_ops(direction):
@@ -476,9 +553,9 @@ def find_selfcal_images(direction):
     return selfcal_images
 
 
-def find_selfcal_plots(direction):
+def find_selfcal_tec_plots(direction):
     """
-    Returns the filenames of selfcal plots
+    Returns the filenames of selfcal TEC plots
     """
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
@@ -487,10 +564,34 @@ def find_selfcal_plots(direction):
 
     # Check selfcal and peel directories
     if os.path.exists(selfcal_dir):
-        selfcal_plots = glob.glob(selfcal_dir+'/*.make_selfcal_plots*.png')
+        selfcal_plots = glob.glob(selfcal_dir+'/*.make_selfcal_plots_tec*.png')
         selfcal_plots.sort()
     elif os.path.exists(peel_dir):
-        selfcal_plots = glob.glob(peel_dir+'/*.make_selfcal_plots*.png')
+        selfcal_plots = glob.glob(peel_dir+'/*.make_selfcal_plots_tec*.png')
+        selfcal_plots.sort()
+    else:
+        selfcal_plots = []
+
+    return selfcal_plots
+
+
+def find_selfcal_gain_plots(direction):
+    """
+    Returns the filenames of selfcal Gain plots
+    """
+    selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
+        direction.name)
+    peel_dir = os.path.join(direction.working_dir, 'results', 'outlierpeel',
+        direction.name)
+
+    # Check selfcal and peel directories
+    if os.path.exists(selfcal_dir):
+        selfcal_plots = glob.glob(selfcal_dir+'/*.make_selfcal_plots_amp*.png')
+        selfcal_plots.extend(glob.glob(selfcal_dir+'/*.make_selfcal_plots_phase*.png'))
+        selfcal_plots.sort()
+    elif os.path.exists(peel_dir):
+        selfcal_plots = glob.glob(peel_dir+'/*.make_selfcal_plots_amp*.png')
+        selfcal_plots.extend(glob.glob(peel_dir+'/*.make_selfcal_plots_phase*.png'))
         selfcal_plots.sort()
     else:
         selfcal_plots = []

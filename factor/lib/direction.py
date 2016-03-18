@@ -8,6 +8,7 @@ import numpy as np
 from lsmtool.operations_lib import radec2xy
 import matplotlib.path as mplPath
 from scipy.ndimage import gaussian_filter
+from scipy.special import erf
 import sys
 
 
@@ -126,6 +127,7 @@ class Direction(object):
         self.wsclean_nchannels = 1 # set number of wide-band channels
         self.use_new_sub_data = False # set flag that tells which subtracted-data column to use
         self.cellsize_selfcal_deg = 0.000417 # selfcal cell size
+        self.cellsize_facet_deg = 0.000417 # facet image cell size
         self.cellsize_verify_deg = 0.00833 # verify subtract cell size
         self.target_rms_rad = 0.2 # preaverage target rms
         self.subtracted_data_colname = 'SUBTRACTED_DATA_ALL' # name of empty data column
@@ -166,8 +168,8 @@ class Direction(object):
 
 
     def set_imcal_parameters(self, nbands_per_channel, chan_width_hz,
-    	nchan, timestep_sec, ntimes, nbands, initial_skymodel=None,
-    	preaverage_flux_jy=0.0):
+    	nchan, timestep_sec, ntimes, nbands, mean_freq_mhz, initial_skymodel=None,
+    	preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95):
         """
         Sets various parameters for imaging and calibration
 
@@ -187,17 +189,23 @@ class Direction(object):
             Number of timeslots per band
         nbands : int
             Number of bands
+        mean_freq_mhz : float
+            Mean frequency in MHz of full bandwidth
         initial_skymodel : LSMTool SkyModel object, optional
             Sky model used to check source sizes
         preaverage_flux_jy : bool, optional
             Use baseline-dependent averaging and solint_time_p = 1 for phase-only
             calibration for sources below this flux value
+        min_peak_smearing_factor : float, optional
+            Min allowed peak flux density reduction due to smearing at the mean
+            frequency (facet imaging only)
 
         """
         self.set_imaging_parameters(nbands, nbands_per_channel, nchan,
             initial_skymodel)
         self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,
-        	timestep_sec, ntimes, nbands, initial_skymodel,	preaverage_flux_jy)
+            timestep_sec, ntimes, nbands, mean_freq_mhz, initial_skymodel,
+            preaverage_flux_jy, min_peak_smearing_factor)
 
 
     def set_imaging_parameters(self, nbands, nbands_per_channel, nchan_per_band,
@@ -450,14 +458,14 @@ class Direction(object):
 
 
     def set_averaging_steps_and_solution_intervals(self, chan_width_hz, nchan,
-        timestep_sec, ntimes_min, nbands, initial_skymodel=None,
-        preaverage_flux_jy=0.0):
+        timestep_sec, ntimes_min, nbands, mean_freq_mhz, initial_skymodel=None,
+        preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95):
         """
         Sets the averaging step sizes and solution intervals
 
-        The averaging is set by the need to keep bandwidth and time smearing
-        below ~ 0.5%, hence 1 MHz per channel and 120 s per time slot for
-        an image of 512 pixels.
+        The averaging is set by the need to keep product of bandwidth and time
+        smearing below 1 - min_peak_smearing_factor. Averaging is limited to
+        a maximum of ~ 120 sec and ~ 2 MHz.
 
         The solution-interval scaling is done so that sources with total flux
         densities below 1.4 Jy at the highest frequency have a fast interval of
@@ -480,47 +488,77 @@ class Direction(object):
             Minimum number of timeslots per band, currently not used
         nbands : int
             Number of bands
+        mean_freq_mhz : float
+            Mean frequency in MHz of full bandwidth
         initial_skymodel : LSMTool SkyModel object, optional
             Sky model used to check source sizes
         preaverage_flux_jy : bool, optional
             Use baseline-dependent averaging and solint_time_p = 1 for phase-only
             calibration for sources below this flux value
+        min_peak_smearing_factor : float, optional
+            Min allowed peak flux density reduction due to smearing at the mean
+            frequency (facet imaging only)
 
         """
         # generate a (numpy-)array with the divisors of nchan
         tmp_divisors = []
-        for step in range(nchan,0,-1):
+        for step in range(nchan, 0, -1):
             if (nchan % step) == 0:
                 tmp_divisors.append(step)
         freq_divisors = np.array(tmp_divisors)
 
-        # For selfcal, average to 1 MHz per channel and 120 s per time slot for
-        # an image of 512 pixels. Here we use the size of the calibrator to
-        # set the averaging steps since the minimum selfcal image size is set
-        # to 512 pixels (and therefore the true size of the calibrator may be
-        # much smaller). However, we limit the amount of averaging to no more
-        # than 2 MHz per channel and 120 s per time slot
+        # For selfcal, use the size of the calibrator to set the averaging
+        # steps
         if self.cal_size_deg is not None:
-            cal_size_pix = self.cal_size_deg / self.cellsize_selfcal_deg
+            # Set min allowable smearing reduction factor for bandwidth and time
+            # smearing so that they are equal and their product is 0.85
+            min_peak_smearing_factor_selfcal = 0.85
+            peak_smearing_factor = np.sqrt(min_peak_smearing_factor_selfcal)
+
+            # Get target time and frequency averaging steps
+            delta_theta_deg = self.cal_size_deg / 2.0
+            self.log.debug('Calibrator is {} deg across'.format(delta_theta_deg*2.0))
+            resolution_deg = 3.0 * self.cellsize_selfcal_deg # assume normal sampling of restoring beam
+            target_timewidth_s = min(120.0, self.get_target_timewidth(delta_theta_deg,
+                resolution_deg, peak_smearing_factor))
             if self.dynamic_range.lower() == 'hd':
                 # For high-dynamic range calibration, we use 0.2 MHz per channel
                 target_bandwidth_mhz = 0.2
             else:
-                target_bandwidth_mhz = min(2.0, 1.0 * 512.0 / cal_size_pix)
-            target_timewidth_s = min(120.0, 120.0 * 512.0 / cal_size_pix) # used for imaging only
+                target_bandwidth_mhz = min(2.0, self.get_target_bandwidth(mean_freq_mhz,
+                    delta_theta_deg, resolution_deg, peak_smearing_factor))
+            self.log.debug('Target timewidth for selfcal is {} s'.format(target_timewidth_s))
+            self.log.debug('Target bandwidth for selfcal is {} MHz'.format(target_bandwidth_mhz))
+
+            # Find averaging steps for given target values
             self.facetselfcal_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
-            self.facetselfcal_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors-self.facetselfcal_freqstep))]
+            self.facetselfcal_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors - self.facetselfcal_freqstep))]
             self.facetselfcal_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
             self.log.debug('Using averaging steps of {0} channels and {1} time slots '
                 'for selfcal'.format(self.facetselfcal_freqstep, self.facetselfcal_timestep))
 
-        # For facet imaging, average to 0.25 MHz per channel and 30 sec per time
-        # slot for an image of 2048 pixels
+        # For facet imaging, use the facet image size to set the averaging steps
         if self.facet_imsize is not None:
-            target_bandwidth_mhz = 0.25 * 2048.0 / self.facet_imsize
-            target_timewidth_s = 30.0 * 2048.0 / self.facet_imsize
+            # Set min allowable smearing reduction factor for bandwidth and time
+            # smearing so that they are equal and their product is
+            # min_peak_smearing_factor
+            peak_smearing_factor = np.sqrt(min_peak_smearing_factor)
+
+            # Get target time and frequency averaging steps
+            delta_theta_deg = self.facet_imsize * self.cellsize_facet_deg / 2.0
+            self.log.debug('Facet image is {0} x {0} pixels ({1} x {1} deg)'.format(
+                self.facet_imsize, delta_theta_deg*2.0))
+            resolution_deg = 3.0 * self.cellsize_facet_deg # assume normal sampling of restoring beam
+            target_timewidth_s = min(120.0, self.get_target_timewidth(delta_theta_deg,
+                resolution_deg, peak_smearing_factor))
+            target_bandwidth_mhz = min(2.0, self.get_target_bandwidth(mean_freq_mhz,
+                delta_theta_deg, resolution_deg, peak_smearing_factor))
+            self.log.debug('Target timewidth for facet imaging is {} s'.format(target_timewidth_s))
+            self.log.debug('Target bandwidth for facet imaging is {} MHz'.format(target_bandwidth_mhz))
+
+            # Find averaging steps for given target values
             self.facetimage_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
-            self.facetimage_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors-self.facetimage_freqstep))]
+            self.facetimage_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors - self.facetimage_freqstep))]
             self.facetimage_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
             self.log.debug('Using averaging steps of {0} channels and {1} time slots '
                 'for facet imaging'.format(self.facetimage_freqstep, self.facetimage_timestep))
@@ -528,7 +566,7 @@ class Direction(object):
         # For selfcal verify, average to 2 MHz per channel and 120 sec per time
         # slot
         self.verify_freqstep = max(1, min(int(round(2.0 * 1e6 / chan_width_hz)), nchan))
-        self.verify_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors-self.verify_freqstep))]
+        self.verify_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors - self.verify_freqstep))]
         self.verify_timestep = max(1, int(round(120.0 / timestep_sec)))
 
         # Set timeSlotsPerParmUpdate to an even divisor of the number of time slots
@@ -619,6 +657,88 @@ class Direction(object):
         else:
             self.data_column = 'DATA'
             self.blavg_weight_column = 'WEIGHT_SPECTRUM'
+
+
+    def get_target_timewidth(self, delta_theta, resolution, reduction_factor):
+        """
+        Returns the time width for given peak flux density reduction factor
+
+        Parameters
+        ----------
+        delta_theta : float
+            Distance from phase center
+        resolution : float
+            Resolution of restoring beam
+        reduction_factor : float
+            Ratio of pre-to-post averaging peak flux density
+
+        Returns
+        -------
+        delta_time : float
+            Time width in seconds for target reduction_factor
+
+        """
+        delta_time = np.sqrt( (1.0 - reduction_factor) /
+            (1.22E-9 * (delta_theta / resolution)**2.0) )
+
+        return delta_time
+
+
+    def get_bandwidth_smearing_factor(self, freq, delta_freq, delta_theta, resolution):
+        """
+        Returns peak flux density reduction factor due to bandwidth smearing
+
+        Parameters
+        ----------
+        freq : float
+            Frequency at which averaging will be done
+        delta_freq : float
+            Bandwidth over which averaging will be done
+        delta_theta : float
+            Distance from phase center
+        resolution : float
+            Resolution of restoring beam
+
+        Returns
+        -------
+        reduction_factor : float
+            Ratio of pre-to-post averaging peak flux density
+
+        """
+        beta = (delta_freq/freq) * (delta_theta/resolution)
+        gamma = 2*(np.log(2)**0.5)
+        reduction_factor = ((np.pi**0.5)/(gamma * beta)) * (erf(beta*gamma/2.0))
+
+        return reduction_factor
+
+
+    def get_target_bandwidth(self, freq, delta_theta, resolution, reduction_factor):
+        """
+        Returns the bandwidth for given peak flux density reduction factor
+
+        Parameters
+        ----------
+        freq : float
+            Frequency at which averaging will be done
+        delta_theta : float
+            Distance from phase center
+        resolution : float
+            Resolution of restoring beam
+        reduction_factor : float
+            Ratio of pre-to-post averaging peak flux density
+
+        Returns
+        -------
+        delta_freq : float
+            Bandwidth over which averaging will be done
+        """
+        # Increase delta_freq until we drop below target reduction_factor
+        delta_freq = 1e-3 * freq
+        while self.get_bandwidth_smearing_factor(freq, delta_freq, delta_theta,
+            resolution) > reduction_factor:
+            delta_freq *= 1.1
+
+        return delta_freq
 
 
     def save_state(self):

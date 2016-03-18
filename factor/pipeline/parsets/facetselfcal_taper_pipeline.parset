@@ -541,7 +541,7 @@ apply_phaseonly1.argument.catalog                          =   {{ skymodel_dir }
 {% endif %}
 
 ########## end of first round of selfcal (20" resolution)
-########## start of second round selfcal (10" resolution)
+########## start of second round of selfcal (10" resolution)
 
 # average the output pf the previous BBS step, length = ntimes
 average1.control.type                                      =   dppp
@@ -727,7 +727,7 @@ loop_phasecal.control.type                                 =   conditional
 loop_phasecal.control.loopcount                            =   {{ loopcount }}
 loop_phasecal.control.loopsteps                            =   [average2,create_compressed_mapfile2,concat2,delete_image1,casa_image21,adjust_casa_mapfile2,mask2,casa_image22,create_model2_map,casa_ft2,{% if pre_average %}switch_weights_col5,{% endif %}solve_ampphase11,{% if pre_average %}switch_weights_col6,{% endif %}apply_ampphase11,adjust_casa_mapfile_phaseloop,copy_image1,check_image1]
 
-# average the output pf the previous BBS step, length = ntimes
+# average the output of the previous BBS step, length = ntimes
 average2.control.type                                      =   dppp
 average2.control.mapfile_in                                =   concat_data.output.mapfile
 average2.control.inputkey                                  =   msin

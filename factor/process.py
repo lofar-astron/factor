@@ -605,12 +605,15 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
 
     # Set various direction attributes
     log.info("Determining imaging parameters for each direction...")
+    mean_freq_mhz = np.mean([b.freq for b in bands]) / 1e6
+    min_peak_smearing_factor = 1.0 - parset['max_peak_smearing']
     for i, direction in enumerate(directions):
         # Set imaging and calibration parameters
         direction.set_imcal_parameters(parset['wsclean_nbands'],
-        	bands[0].chan_width_hz, bands[0].nchan, bands[0].timepersample,
-        	bands[0].minSamplesPerFile, len(bands), initial_skymodel,
-        	parset['preaverage_flux_jy'])
+            bands[0].chan_width_hz, bands[0].nchan, bands[0].timepersample,
+            bands[0].minSamplesPerFile, len(bands), mean_freq_mhz,
+            initial_skymodel, parset['preaverage_flux_jy'],
+            min_peak_smearing_factor=min_peak_smearing_factor)
 
         # Set field center to that of first band (all bands have the same phase
         # center)
