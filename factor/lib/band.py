@@ -113,6 +113,11 @@ class Band(object):
         chunksize = 2400. # in seconds -> 40min
         self.chunk_input_files(chunksize, dirindparmdb, local_dir=local_dir,
                                test_run=test_run)
+        if len(self.files) == 0:
+            self.log.error('No data left after checking input files for band: {}. '
+                           'Probably too little unflagged data.'.format(self.name))
+            self.log.info('Exiting!')
+            sys.exit(1)
 
         # Calculate times and number of samples
         self.sumsamples = 0
