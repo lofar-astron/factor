@@ -63,6 +63,13 @@ keep_unavg_facet_data = False
 # coherence in the TEC solutions
 preaverage_flux_Jy = 1.0
 
+# Peel the calibrator for sources above this flux density (default = 25.0).
+# When activated, the calibrator is peeled using a supplied sky model and
+# the facet is then imaged as normal. Note: a sky model must be specified in the
+# directions file in the peel_skymodel column for each source that should be
+# peeled
+peel_flux_Jy = 30.0
+
 # Use multi-scale selfcal that starts at 20 arcsec resolution and increases
 # the resolution in stages to the full resolution. This method may improve
 # convergence, especially when the starting model is poor

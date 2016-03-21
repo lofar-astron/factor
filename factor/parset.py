@@ -196,6 +196,16 @@ def get_global_options(parset):
     else:
         parset_dict['preaverage_flux_jy'] = 0.0
 
+    # Peel the calibrator for sources above this flux density (default = 25.0).
+    # When activated, the calibrator is peeled using a supplied sky model and
+    # the facet is then imaged as normal. Note: a sky model must be specified in the
+    # directions file in the peel_skymodel column for each source that should be
+    # peeled
+    if 'peel_flux_jy' in parset_dict:
+        parset_dict['peel_flux_jy'] = parset.getfloat('global', 'peel_flux_jy')
+    else:
+        parset_dict['peel_flux_jy'] = 25.0
+
     # Use multi-scale selfcal that starts at 20 arcsec resolution and increases the
     # resolution in stages to the full resolution (default = False). This method may
     # improve convergence, especially when the starting model is poor
@@ -220,7 +230,7 @@ def get_global_options(parset):
         'lofarpythonpath', 'parmdb_name', 'interactive', 'make_mosaic',
         'exit_on_selfcal_failure', 'skip_selfcal_check', 'wsclean_nbands',
         'facet_imager', 'keep_avg_facet_data', 'keep_unavg_facet_data',
-        'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal',
+        'max_selfcal_loops', 'preaverage_flux_jy', 'peel_flux_jy', 'multiscale_selfcal',
         'skymodel_extension', 'max_peak_smearing']
     for option in given_options:
         if option not in allowed_options:

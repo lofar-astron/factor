@@ -8,6 +8,8 @@ Classes
 -------
 FacetSelfcal : Operation
     Runs the selfcal and imaging of a facet. May be run in parallel
+FacetPeel : Operation
+    Runs the peeling and imaging of a facet. May be run in parallel
 FacetSub : Operation
     Subtracts all facet sources from data. Must be run in series as writes are
     made to original datasets
@@ -18,12 +20,13 @@ FacetImage : Operation
 import os
 import ast
 from factor.lib.operation import Operation
+from factor.operations.outlier_ops import OutlierPell
 from lofarpipe.support.data_map import DataMap
 
 
 class FacetSelfcal(Operation):
     """
-    Operation to selfcal a direction
+    Operation to selfcal a facet
 
     Two pipelines can be run, depending on whether casapy or wsclean is used
     for the full facet imaging:
@@ -169,9 +172,18 @@ class FacetSelfcal(Operation):
             self.direction.cleanup()
 
 
+class FacetPeel(OutlierPell):
+    """
+    Operation to peel a facet
+    """
+    def __init__(self, parset, bands, direction):
+        super(FacetPeel, self).__init__(parset, bands, direction,
+            name='FacetPeel')
+
+
 class FacetSub(Operation):
     """
-    Operation to subtract improved model
+    Operation to subtract improved model of a facet
     """
     def __init__(self, parset, bands, direction):
         super(FacetSub, self).__init__(parset, bands, direction,
@@ -180,7 +192,7 @@ class FacetSub(Operation):
 
 class FacetSubReset(Operation):
     """
-    Operation to reset the subtraction of improved model
+    Operation to reset the subtraction of improved model of a facet
     """
     def __init__(self, parset, bands, direction):
         super(FacetSubReset, self).__init__(parset, bands, direction,
@@ -189,7 +201,7 @@ class FacetSubReset(Operation):
 
 class FacetImage(Operation):
     """
-    Operation to make the full facet image
+    Operation to make the full image of a facet
 
     Four pipelines can be run, depending on whether casapy or wsclean is used
     for imaging and on whether an improved model (from selfcal) exists:

@@ -6,6 +6,8 @@ Classes
 OutlierPeel : Operation
     Runs the calibration for peeling an outlier source. Must be run in series
     as writes are made to original datasets
+FacetPeel : Operation
+    Runs the peeling and imaging of a facet. May be run in parallel
 
 """
 import os
@@ -81,3 +83,13 @@ class OutlierPeel(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'average_post.mapfile')]
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()
+
+
+class FacetPeel(OutlierPeel):
+    """
+    Operation to peel a facet direction
+    """
+    def __init__(self, parset, bands, direction):
+        super(FacetPeel, self).__init__(parset, bands, direction,
+            name='FacetPeel')
+

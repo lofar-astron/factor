@@ -70,12 +70,14 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     directions, direction_groups = _set_up_directions(parset, bands, dry_run,
     test_run, reset_directions)
 
-    # Run peeling and subtract operations on outlier directions
+    # Run peeling operations on outlier directions and any facets
+    # for which the calibrator is to be peeled
     set_sub_data_colname = True
-    outlier_directions = [d for d in directions if d.is_outlier]
-    if len(outlier_directions) > 0:
+    peel_directions = [d for d in directions if d.is_outlier]
+    peel_directions.extend([d for d in directions if d.peel_calibrator])
+    if len(peel_directions) > 0:
         # Combine the nodes and cores for the peeling operation
-        outlier_directions = factor.cluster.combine_nodes(outlier_directions,
+        outlier_directions = factor.cluster.combine_nodes(peel_directions,
             parset['cluster_specific']['node_list'],
             parset['cluster_specific']['nimg_per_node'],
             parset['cluster_specific']['ncpu'],
@@ -83,8 +85,11 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             len(bands))
 
         # Do the peeling
-        for d in outlier_directions:
-            op = OutlierPeel(parset, bands, d)
+        for d in peel_directions:
+            if d.is_outlier:
+                op = OutlierPeel(parset, bands, d)
+            else:
+                op = FacetPeel(parset, bands, d)
             scheduler.run(op)
 
             # Check whether direction went through selfcal successfully. If
@@ -98,10 +103,20 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                             direction.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
                     set_sub_data_colname = False
             else:
-                log.warn('Selfcal verification failed for direction {0}.'.format(d.name))
+                log.warn('Calibration verification failed for direction {0}.'.format(d.name))
                 if parset['exit_on_selfcal_failure']:
                     log.info('Exiting...')
                     sys.exit(1)
+
+            if d.peel_calibrator:
+                # Do the imaging of the facet if calibrator was peeled
+                op = FacetImage(parset, bands, d)
+                scheduler.run(op)
+
+                # Do the subtraction of the full facet model
+                op = FacetSub(parset, bands, d)
+                scheduler.run(op)
+
 
     # Run selfcal and subtract operations on direction groups
     for gindx, direction_group in enumerate(direction_groups):
@@ -154,7 +169,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     d.save_state()
                     d.transfer_nearest_solutions = True
 
-        # Do selfcal on calibrator only
+        # Do selfcal or peeling on calibrator only
+        to_peel = [d for d in direction_group if d.peel_calibrator]
+        to_selfcal = [d for d in direction_group if not d.peel_calibrator]
         ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
         scheduler.run(ops)
         if dry_run:
