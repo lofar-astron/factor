@@ -647,9 +647,14 @@ def get_current_step(direction):
     else:
         return (None, None, None, None)
 
-    mapfiles = set([s[1]['mapfile'] for s in d[1]])
-    current_index = len(mapfiles)
+    # Get the last step in the statefile (the previous step to the current one)
+    # and use it to determine the current step. This won't work quite right for
+    # loops (if the previous step was the last step of the loop, we will get the
+    # next step after the loop instead of the first step in the loop if it is
+    # still looping), but is the best we can do currently
+    previous_step_name = os.path.splitext(os.path.basename(d[1][-1][1]['mapfile']))[0]
     current_steps = get_current_op_step_names(direction)
+    current_index = current_steps.index(previous_step_name) + 1
     if current_index >= len(current_steps):
         current_index = len(current_steps) - 1
     start_time = d[0]['start_time']
