@@ -591,10 +591,11 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
     if target_has_own_facet:
         # Make sure target is not a DDE calibrator and is at end of directions list
         selfcal_directions = [d for d in directions if d.name != target.name and
-                              not d.is_outlier]
+                              not d.is_outlier and not d.peel_calibrator]
         directions = [d for d in directions if d.name != target.name] + [target]
     else:
-        selfcal_directions = [d for d in directions if not d.is_outlier]
+        selfcal_directions = [d for d in directions if not d.is_outlier and
+            not d.peel_calibrator]
 
     if dir_parset['ndir_selfcal'] is not None:
         if dir_parset['ndir_selfcal'] <= len(selfcal_directions):
@@ -639,12 +640,7 @@ def _initialize_directions(parset, initial_skymodel, ref_band, dry_run=False):
         directions = factor.directions.directions_read(os.path.join(parset['dir_working'],
             'factor_directions.txt'), parset['dir_working'])
     else:
-        if dry_run:
-            # Stop here if dry_run is True but no directions file was given
-            log.warn('No directions file given. Cannot proceed beyond the '
-                'initsubtract operation. Exiting...')
-            sys.exit(0)
-        elif dir_parset['flux_min_jy'] is None or \
+        if dir_parset['flux_min_jy'] is None or \
             dir_parset['size_max_arcmin'] is None or \
             dir_parset['separation_max_arcmin'] is None:
                 log.critical('If no directions file is specified, you must '
