@@ -307,7 +307,8 @@ class Band(object):
             # columns and those made during initial subtraction
             colnames = tab.colnames()
             colnames_to_remove = ['MODEL_DATA', 'CORRECTED_DATA', 'IMAGING_WEIGHT',
-                'SUBTRACTED_DATA_HIGH', 'SUBTRACTED_DATA_ALL_NEW', 'SUBTRACTED_DATA']
+                'SUBTRACTED_DATA_HIGH', 'SUBTRACTED_DATA_ALL_NEW', 'SUBTRACTED_DATA',
+                'LOFAR_FULL_RES_FLAG']
             colnames_to_keep = [c for c in colnames if c not in colnames_to_remove]
 
             timepersample = tab.getcell('EXPOSURE',0)
@@ -360,9 +361,9 @@ class Band(object):
                 newdirindparmdb = os.path.join(chunk_file, dirindparmdb)
 
                 if not os.path.exists(chunk_file):
-                    # It's a "new" file, check that the chunk has at least min_fraction 
+                    # It's a "new" file, check that the chunk has at least min_fraction
                     # unflagged data. If not, then continue with the for loop over MSs
-                    # This will re-run for bad files every time factor is started, but the 
+                    # This will re-run for bad files every time factor is started, but the
                     # user could just remove the file from the input directory.
                     if find_unflagged_fraction(self.files[MS_id]) < min_fraction:
                         log.debug('File {} not used because it contains too little unflagged'
