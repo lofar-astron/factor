@@ -487,12 +487,131 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
     """
     dir_parset = parset['direction_specific']
 
-    log.info("Building local sky model...")
+    log.info("Building local sky model for source avoidance and DDE calibrator "
+        "selection (if desired)...")
     ref_band = bands[-1]
     max_radius_deg = dir_parset['max_radius_deg']
     initial_skymodel = factor.directions.make_initial_skymodel(ref_band,
         max_radius_deg=max_radius_deg)
     log.info('Setting up directions...')
+    directions = _initialize_directions(parset, initial_skymodel, ref_band, dry_run)
+
+    # Check with user
+    if parset['interactive']:
+        print("\nFacet and DDE calibrator regions saved. Please check that they\n"
+            "are OK before continuing. You can edit the directions file and\n"
+            "continue; FACTOR will pick up any changes to it. Note: if you\n"
+            "choose not to continue and you let FACTOR generate the directions\n"
+            "internally, you must delete the FACTOR-made directions file\n"
+            "(dir_working/factor_directions.txt) before restarting if you want\n"
+            "to FACTOR to regenerate it\n")
+        prompt = "Continue processing (y/n)? "
+        answ = raw_input(prompt)
+        while answ.lower() not in  ['y', 'n', 'yes', 'no']:
+            answ = raw_input(prompt)
+        if answ.lower() in ['n', 'no']:
+            log.info('Exiting...')
+            sys.exit(0)
+        else:
+            # Continue processing, but first re-initialize the directions to
+            # pick up any changes the user made to the directions file
+            directions = _initialize_directions(parset, initial_skymodel,
+                ref_band, dry_run)
+
+    # Warn user if they've specified a direction to reset that does not exist
+    direction_names = [d.name for d in directions]
+    for name in reset_directions:
+        if name not in direction_names and name != 'field':
+            log.warn('Direction {} was specified for resetting but does not '
+                'exist in current list of directions'.format(name))
+
+    # Load previously completed operations (if any) and save the state
+    for direction in directions:
+        direction.load_state()
+        direction.save_state()
+
+    # Select subset of directions to process
+    target_has_own_facet = dir_parset['target_has_own_facet']
+    if target_has_own_facet:
+        direction_names = [d.name for d in directions]
+        target = directions[direction_names.index('target')]
+    if dir_parset['ndir_total'] is not None:
+        if dir_parset['ndir_total'] < len(directions):
+            directions = directions[:dir_parset['ndir_total']]
+
+            # Make sure target is still included
+            direction_names = [d.name for d in directions]
+            if target_has_own_facet and 'target' not in direction_names:
+                directions.append(target)
+
+    # Set various direction attributes
+    log.info("Determining imaging parameters for each direction...")
+    mean_freq_mhz = np.mean([b.freq for b in bands]) / 1e6
+    min_peak_smearing_factor = 1.0 - parset['max_peak_smearing']
+    for i, direction in enumerate(directions):
+        # Set imaging and calibration parameters
+        direction.set_imcal_parameters(parset['wsclean_nbands'],
+            bands[0].chan_width_hz, bands[0].nchan, bands[0].timepersample,
+            bands[0].minSamplesPerFile, len(bands), mean_freq_mhz,
+            initial_skymodel, parset['preaverage_flux_jy'],
+            min_peak_smearing_factor=min_peak_smearing_factor)
+
+        # Set field center to that of first band (all bands have the same phase
+        # center)
+        direction.field_ra = bands[0].ra
+        direction.field_dec = bands[0].dec
+
+        # Set global re-image flag
+        direction.make_final_image = dir_parset['reimage']
+
+        # Reset state if specified
+        if direction.name in reset_directions:
+            direction.do_reset = True
+        else:
+            direction.do_reset = False
+
+    # Select directions to selfcal, excluding outliers and target
+    if target_has_own_facet:
+        # Make sure target is not a DDE calibrator and is at end of directions list
+        selfcal_directions = [d for d in directions if d.name != target.name and
+                              not d.is_outlier]
+        directions = [d for d in directions if d.name != target.name] + [target]
+    else:
+        selfcal_directions = [d for d in directions if not d.is_outlier]
+
+    if dir_parset['ndir_selfcal'] is not None:
+        if dir_parset['ndir_selfcal'] <= len(selfcal_directions):
+            selfcal_directions = selfcal_directions[:dir_parset['ndir_selfcal']]
+
+    # Divide directions into groups for selfcal
+    direction_groups = factor.directions.group_directions(selfcal_directions,
+        n_per_grouping=dir_parset['groupings'], allow_reordering=dir_parset['allow_reordering'])
+
+    return directions, direction_groups
+
+
+def _initialize_directions(parset, initial_skymodel, ref_band, dry_run=False):
+    """
+    Read in directions file and initialize resulting directions
+
+    Parameters
+    ----------
+    parset : dict
+        Parset containing processing parameters
+    initial_skymodel : SkyModel object
+        Local sky model
+    ref_band : Band object
+        Reference band
+    dry_run : bool, optional
+        If True, do not run pipelines. All parsets, etc. are made as normal
+
+    Returns
+    -------
+    directions : List of Direction instances
+        All directions to be used
+
+    """
+    dir_parset = parset['direction_specific']
 
     # First check for user-supplied directions file, then for Factor-generated
     # file from a previous run, then for parameters needed to generate it internally
@@ -563,87 +682,10 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
         target_dec=target_dec, target_radius_arcmin=target_radius_arcmin,
         beam_ratio=beam_ratio)
 
-    # Warn user if they've specified a direction to reset that does not exist
-    direction_names = [d.name for d in directions]
-    for name in reset_directions:
-        if name not in direction_names and name != 'field':
-            log.warn('Direction {} was specified for resetting but does not '
-                'exist in current list of directions'.format(name))
-
     # Make DS9 region files so user can check the facets, etc.
     ds9_facet_reg_file = os.path.join(parset['dir_working'], 'regions', 'facets_ds9.reg')
     factor.directions.make_ds9_region_file(directions, ds9_facet_reg_file)
     ds9_calimage_reg_file = os.path.join(parset['dir_working'], 'regions', 'calimages_ds9.reg')
     factor.directions.make_ds9_calimage_file(directions, ds9_calimage_reg_file)
 
-    # Check with user
-    if parset['interactive']:
-        print("Facet and DDE calibrator regions saved. Please check that they "
-            "are OK before continuing.")
-        prompt = "Continue processing (y/n)? "
-        answ = raw_input(prompt)
-        while answ.lower() not in  ['y', 'n', 'yes', 'no']:
-            answ = raw_input(prompt)
-        if answ.lower() in ['n', 'no']:
-            log.info('Exiting...')
-            sys.exit()
-
-    # Load previously completed operations (if any) and save the state
-    for direction in directions:
-        direction.load_state()
-        direction.save_state()
-
-    # Select subset of directions to process
-    if dir_parset['ndir_total'] is not None:
-        if dir_parset['ndir_total'] < len(directions):
-            directions = directions[:dir_parset['ndir_total']]
-
-            # Make sure target is still included
-            direction_names = [d.name for d in directions]
-            if target_has_own_facet and 'target' not in direction_names:
-                directions.append(target)
-
-    # Set various direction attributes
-    log.info("Determining imaging parameters for each direction...")
-    mean_freq_mhz = np.mean([b.freq for b in bands]) / 1e6
-    min_peak_smearing_factor = 1.0 - parset['max_peak_smearing']
-    for i, direction in enumerate(directions):
-        # Set imaging and calibration parameters
-        direction.set_imcal_parameters(parset['wsclean_nbands'],
-            bands[0].chan_width_hz, bands[0].nchan, bands[0].timepersample,
-            bands[0].minSamplesPerFile, len(bands), mean_freq_mhz,
-            initial_skymodel, parset['preaverage_flux_jy'],
-            min_peak_smearing_factor=min_peak_smearing_factor)
-
-        # Set field center to that of first band (all bands have the same phase
-        # center)
-        direction.field_ra = bands[0].ra
-        direction.field_dec = bands[0].dec
-
-        # Set global re-image flag
-        direction.make_final_image = dir_parset['reimage']
-
-        # Reset state if specified
-        if direction.name in reset_directions:
-            direction.do_reset = True
-        else:
-            direction.do_reset = False
-
-    # Select directions to selfcal, excluding outliers and target
-    if target_has_own_facet:
-        # Make sure target is not a DDE calibrator and is at end of directions list
-        selfcal_directions = [d for d in directions if d.name != target.name and
-                              not d.is_outlier]
-        directions = [d for d in directions if d.name != target.name] + [target]
-    else:
-        selfcal_directions = [d for d in directions if not d.is_outlier]
-
-    if dir_parset['ndir_selfcal'] is not None:
-        if dir_parset['ndir_selfcal'] <= len(selfcal_directions):
-            selfcal_directions = selfcal_directions[:dir_parset['ndir_selfcal']]
-
-    # Divide directions into groups for selfcal
-    direction_groups = factor.directions.group_directions(selfcal_directions,
-        n_per_grouping=dir_parset['groupings'], allow_reordering=dir_parset['allow_reordering'])
-
-    return directions, direction_groups
+    return directions
