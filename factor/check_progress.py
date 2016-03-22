@@ -527,7 +527,7 @@ def get_current_op(direction):
     if len(started_but_not_completed_ops) == 0:
         return None
     else:
-        return started_but_not_completed_ops[0]
+        return started_but_not_completed_ops[-1]
 
 
 def find_selfcal_images(direction):
