@@ -11,6 +11,8 @@ import lofar.parmdb
 import math
 import scipy.signal
 import shutil
+import multiprocessing
+import itertools
 
 
 def median_window_filter(ampl, half_window, threshold):
@@ -64,6 +66,41 @@ def median_window_filter(ampl, half_window, threshold):
     return ampl_tot_copy
 
 
+def smooth_star(inputs):
+    """
+    Simple helper function for pool.map
+    """
+    return smooth(*inputs)
+
+
+def smooth(chan, parms, gain, pol, antenna, window):
+    """
+    Smooth solutions for a single channel
+    """
+    real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
+    imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
+    phase = numpy.arctan2(imag, real)
+    amp = numpy.sqrt(imag**2 + real**2)
+
+    amp = numpy.log10(amp)
+    amp = median_window_filter(amp, window, 6)
+    amp = median_window_filter(amp, window, 6)
+    amp = median_window_filter(amp, 7, 6)
+    amp = median_window_filter(amp, 4, 6)
+    amp = median_window_filter(amp, 3, 6)
+    amp = 10**amp
+
+    # Clip extremely high amplitude solutions to prevent biasing the
+    # normalization done later
+    high_ind = numpy.where(amp > 5.0)
+    amp[high_ind] = 5.0
+
+    real_smoothed = amp * numpy.cos(phase)
+    imag_smoothed = amp * numpy.sin(phase)
+
+    return (real_smoothed, imag_smoothed)
+
+
 def main(instrument_name, instrument_name_smoothed, normalize=True):
     if type(normalize) is str:
         if normalize.lower() == 'true':
@@ -87,27 +124,17 @@ def main(instrument_name, instrument_name_smoothed, normalize=True):
     # Smooth
     for pol in pol_list:
         for antenna in antenna_list:
-            for chan in range(nchans):
-                real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
-                imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
-                phase = numpy.arctan2(imag, real)
-                amp = numpy.sqrt(imag**2 + real**2)
+            pool = multiprocessing.Pool()
+            results = pool.map(smooth_star,
+                itertools.izip(range(nchans), itertools.repeat(parms),
+                itertools.repeat(gain), itertools.repeat(pol),
+                itertools.repeat(antenna), itertools.repeat(window)))
+            pool.close()
+            pool.join()
 
-                amp = numpy.log10(amp)
-                amp = median_window_filter(amp, window, 6)
-                amp = median_window_filter(amp, window, 6)
-                amp = median_window_filter(amp, 7, 6)
-                amp = median_window_filter(amp, 4, 6)
-                amp = median_window_filter(amp, 3, 6)
-                amp = 10**amp
-
-                # Clip extremely high amplitude solutions to prevent biasing the
-                # normalization done below
-                high_ind = numpy.where(amp > 5.0)
-                amp[high_ind] = 5.0
-
-                parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = amp * numpy.cos(phase)
-                parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = amp * numpy.sin(phase)
+            for chan, (real, imag) in enumerate(results):
+                parms[gain + ':' + pol + ':Real:' + antenna]['values'][:, chan] = real
+                parms[gain + ':' + pol + ':Imag:' + antenna]['values'][:, chan] = imag
 
     # Normalize the amplitude solutions to a mean of one across all channels
     if normalize:
@@ -120,7 +147,7 @@ def main(instrument_name, instrument_name_smoothed, normalize=True):
                     amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
                     amplist.append(amp)
         norm_factor = 1.0/(numpy.mean(amplist))
-        print "smooth_amps.py: Normalization-Factor is:",norm_factor
+        print "smooth_amps.py: Normalization-Factor is:", norm_factor
     else:
         norm_factor = 1.0
 
