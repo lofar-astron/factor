@@ -111,7 +111,7 @@ class Direction(object):
             self.log.error('Peel sky model file {} not found.'.format(self.peel_skymodel))
             sys.exit(1)
         else:
-            self.log.info('Using sky model file {} for selfcal'.format(self.peel_skymodel))
+            self.log.info('Using sky model file {} for selfcal/peeling'.format(self.peel_skymodel))
         self.is_outlier = outlier_do
         self.make_final_image = make_final_image
         if cal_flux_jy is not None:
@@ -607,7 +607,7 @@ class Direction(object):
                 self.pre_average = False
 
             # Set peeling flag
-            if (effective_flux_jy < peel_flux_jy and not self.is_outlier and
+            if (effective_flux_jy > peel_flux_jy and not self.is_outlier and
                 self.peel_skymodel is not None):
                 self.peel_calibrator = True
             else:
