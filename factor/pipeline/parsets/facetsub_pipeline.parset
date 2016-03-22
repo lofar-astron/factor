@@ -21,12 +21,3 @@ add_diff_model_to_empty_data.control.opts.mapfiles_in =   [{{ input_files_single
 add_diff_model_to_empty_data.control.opts.inputkeys   =   [file1,file2]
 add_diff_model_to_empty_data.argument.flags           =   [file1,file2,{{ subtracted_data_colname }},DATA,SUBTRACTED_DATA_ALL_NEW,add]
 {% endblock add_sub_parms %}
-
-{% if peel_calibrator %}
-# subtract model difference from facet imaging to original data, length = nfiles
-copy_to_empty_data.control.type                          =   copy_column
-copy_to_empty_data.control.mapfiles_in                   =   [{{ subtracted_data_new_mapfile }},{{ input_files_single_mapfile }}]
-copy_to_empty_data.control.inputkeys                     =   [file1,file2]
-copy_to_empty_data.argument.flags                        =   [file1,file2,SUBTRACTED_DATA_ALL,SUBTRACTED_DATA_ALL_NEW]
-copy_to_empty_data.argument.do_copy                      =   do_copy
-{% endif %}

@@ -133,6 +133,7 @@ class Direction(object):
         self.subtracted_data_colname = 'SUBTRACTED_DATA_ALL' # name of empty data column
         self.pre_average = False # whether to use baseline averaging
         self.blavg_weight_column = 'WEIGHT_SPECTRUM' # name of weights column
+        self.peel_calibrator = False # whether to peel calibrator before imaging
         self.started_operations = []
         self.completed_operations = []
         self.cleanup_mapfiles = []
