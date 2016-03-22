@@ -20,7 +20,7 @@ FacetImage : Operation
 import os
 import ast
 from factor.lib.operation import Operation
-from factor.operations.outlier_ops import OutlierPell
+from factor.operations.outlier_ops import OutlierPeel
 from lofarpipe.support.data_map import DataMap
 
 
