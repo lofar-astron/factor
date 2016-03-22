@@ -569,7 +569,8 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
             bands[0].chan_width_hz, bands[0].nchan, bands[0].timepersample,
             bands[0].minSamplesPerFile, len(bands), mean_freq_mhz,
             initial_skymodel, parset['preaverage_flux_jy'],
-            min_peak_smearing_factor=min_peak_smearing_factor)
+            min_peak_smearing_factor=min_peak_smearing_factor,
+            peel_flux_jy=parset['peel_flux_jy'])
 
         # Set field center to that of first band (all bands have the same phase
         # center)

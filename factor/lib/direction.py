@@ -170,7 +170,7 @@ class Direction(object):
 
     def set_imcal_parameters(self, nbands_per_channel, chan_width_hz,
     	nchan, timestep_sec, ntimes, nbands, mean_freq_mhz, initial_skymodel=None,
-    	preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95):
+    	preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95, peel_flux_jy=25.0):
         """
         Sets various parameters for imaging and calibration
 
@@ -200,13 +200,15 @@ class Direction(object):
         min_peak_smearing_factor : float, optional
             Min allowed peak flux density reduction due to smearing at the mean
             frequency (facet imaging only)
+        peel_flux_jy : float, optional
+            Peel cailbrators with fluxes above this value
 
         """
         self.set_imaging_parameters(nbands, nbands_per_channel, nchan,
             initial_skymodel)
         self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,
             timestep_sec, ntimes, nbands, mean_freq_mhz, initial_skymodel,
-            preaverage_flux_jy, min_peak_smearing_factor)
+            preaverage_flux_jy, min_peak_smearing_factor, peel_flux_jy)
 
 
     def set_imaging_parameters(self, nbands, nbands_per_channel, nchan_per_band,
@@ -460,7 +462,7 @@ class Direction(object):
 
     def set_averaging_steps_and_solution_intervals(self, chan_width_hz, nchan,
         timestep_sec, ntimes_min, nbands, mean_freq_mhz, initial_skymodel=None,
-        preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95):
+        preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95, peel_flux_jy=25.0):
         """
         Sets the averaging step sizes and solution intervals
 
@@ -499,6 +501,8 @@ class Direction(object):
         min_peak_smearing_factor : float, optional
             Min allowed peak flux density reduction due to smearing at the mean
             frequency (facet imaging only)
+        peel_flux_jy : float, optional
+            Peel cailbrators with fluxes above this value
 
         """
         # generate a (numpy-)array with the divisors of nchan
@@ -601,6 +605,12 @@ class Direction(object):
                 self.pre_average = True
             else:
                 self.pre_average = False
+
+            # Set peeling flag
+            if effective_flux_jy < peel_flux_jy:
+                self.peel_calibrator = True
+            else:
+                self.peel_calibrator = False
 
             # Set fast (phase-only) solution time interval
             if self.solint_time_p == 0:
