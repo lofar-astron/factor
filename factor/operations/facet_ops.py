@@ -180,8 +180,8 @@ class FacetPeel(OutlierPeel):
         super(FacetPeel, self).__init__(parset, bands, direction,
             name='FacetPeel')
 
-    # Set the pipeline parset to use (the outlierpeel one)
-    self.pipeline_parset_template = 'outlierpeel_pipeline.parset'
+        # Set the pipeline parset to use (the outlierpeel one)
+        self.pipeline_parset_template = 'outlierpeel_pipeline.parset'
 
 
 class FacetSub(Operation):
