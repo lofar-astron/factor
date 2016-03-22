@@ -172,13 +172,16 @@ class FacetSelfcal(Operation):
             self.direction.cleanup()
 
 
-class FacetPeel(OutlierPell):
+class FacetPeel(OutlierPeel):
     """
     Operation to peel a facet
     """
     def __init__(self, parset, bands, direction):
         super(FacetPeel, self).__init__(parset, bands, direction,
             name='FacetPeel')
+
+    # Set the pipeline parset to use (the outlierpeel one)
+    self.pipeline_parset_template = 'outlierpeel_pipeline.parset'.format(self.name)
 
 
 class FacetSub(Operation):
@@ -188,6 +191,13 @@ class FacetSub(Operation):
     def __init__(self, parset, bands, direction):
         super(FacetSub, self).__init__(parset, bands, direction,
             name='FacetSub')
+
+        # Set the pipeline parset to use
+        if self.direction.peel_calibrator:
+            # Set parset template to replace parset
+            self.pipeline_parset_template = '{0}_replace_pipeline.parset'.format(self.name)
+        else:
+            self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
 
 
 class FacetSubReset(Operation):
@@ -267,6 +277,8 @@ class FacetImage(Operation):
         # Add output datamaps to direction object for later use
         self.direction.facet_image_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'final_image.mapfile')
+        self.direction.subtracted_data_new_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'subtract_facet_model.mapfile'),
 
         # Delete temp data
         self.direction.cleanup_mapfiles = [

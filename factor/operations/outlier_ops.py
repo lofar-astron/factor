@@ -56,6 +56,8 @@ class OutlierPeel(Operation):
             'input_files_single.mapfile')
         self.direction.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'verify_subtract.break.mapfile')
+        self.direction.dir_dep_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'merge_normalized_selfcal_parmdbs.mapfile')
 
         # Store results of verify_subtract check. This will work if the verification
         # was done using multiple bands although we use only one at the moment

@@ -1,0 +1,12 @@
+{% extends "facetsub_pipeline.parset" %}
+{% block add_sub_steps %}copy_to_empty_data{% endblock add_sub_steps %}
+{% block add_sub_parms %}
+
+# copy improved empty data from facet imaging to original data, length = nfiles
+copy_to_empty_data.control.type                          =   copy_column
+copy_to_empty_data.control.mapfiles_in                   =   [{{ subtracted_data_new_mapfile }},{{ input_files_single_mapfile }}]
+copy_to_empty_data.control.inputkeys                     =   [file1,file2]
+copy_to_empty_data.argument.flags                        =   [file1,file2,SUBTRACTED_DATA_ALL,SUBTRACTED_DATA_ALL_NEW]
+copy_to_empty_data.argument.do_copy                      =   do_copy
+{% endblock add_sub_parms %}
+

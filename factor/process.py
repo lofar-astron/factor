@@ -104,19 +104,17 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     set_sub_data_colname = False
             else:
                 log.warn('Calibration verification failed for direction {0}.'.format(d.name))
-                if parset['exit_on_selfcal_failure']:
-                    log.info('Exiting...')
-                    sys.exit(1)
+                log.info('Exiting...')
+                sys.exit(1)
 
             if d.peel_calibrator:
-                # Do the imaging of the facet if calibrator was peeled
+                # Do the imaging of the facet if calibrator was peeled and
+                # subtract the improved model
                 op = FacetImage(parset, bands, d)
                 scheduler.run(op)
 
-                # Do the subtraction of the full facet model
                 op = FacetSub(parset, bands, d)
                 scheduler.run(op)
-
 
     # Run selfcal and subtract operations on direction groups
     for gindx, direction_group in enumerate(direction_groups):
