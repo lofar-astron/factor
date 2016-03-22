@@ -500,7 +500,7 @@ def get_completed_ops(direction):
     """
     has_state = direction.load_state()
     if has_state:
-        return list(set(direction.completed_operations))
+        return direction.completed_operations
     else:
         return []
 
@@ -511,7 +511,7 @@ def get_started_ops(direction):
     """
     has_state = direction.load_state()
     if has_state:
-        return list(set(direction.started_operations))
+        return direction.started_operations
     else:
         return []
 
