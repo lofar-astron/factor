@@ -23,9 +23,9 @@ class OutlierPeel(Operation):
     """
     Operation to peel an outlier direction
     """
-    def __init__(self, parset, bands, direction):
+    def __init__(self, parset, bands, direction, name='OutlierPeel'):
         super(OutlierPeel, self).__init__(parset, bands, direction,
-            name='OutlierPeel')
+            name=name)
 
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
