@@ -233,23 +233,24 @@ class FacetImage(Operation):
         super(FacetImage, self).__init__(parset, bands, direction,
             name='FacetImage')
 
-        # Set the pipeline parset to use
+        # Set imager infix for pipeline parset names
         if self.parset['facet_imager'].lower() == 'casa':
-            # Set parset template to casa parset
-            if not self.direction.selfcal_ok:
-                # Set parset template to sky-model parset
-                self.pipeline_parset_template = '{0}_skymodel_casa_pipeline.parset'.format(self.name)
-            else:
-                # Set parset template to facet model-image parset
-                self.pipeline_parset_template = '{0}_imgmodel_casa_pipeline.parset'.format(self.name)
+            infix = '_casa'
         else:
-            # Set parset template to wsclean parset
-            if not self.direction.selfcal_ok:
-                # Set parset template to sky-model parset
-                self.pipeline_parset_template = '{0}_skymodel_pipeline.parset'.format(self.name)
+            infix = ''
+
+        # Set the pipeline parset to use
+        if not self.direction.selfcal_ok:
+            # Set parset template to sky-model parset
+            self.pipeline_parset_template = '{0}_skymodel{1}_pipeline.parset'.format(self.name, infix)
+        else:
+            if self.direction.peel_calibrator:
+                # For peeled calibrators, set parset template to sky-model parset,
+                # since we don't have a model of the facet yet
+                self.pipeline_parset_template = '{0}_skymodel{1}_pipeline.parset'.format(self.name, infix)
             else:
                 # Set parset template to facet model-image parset
-                self.pipeline_parset_template = '{0}_imgmodel_pipeline.parset'.format(self.name)
+                self.pipeline_parset_template = '{0}_imgmodel{1}_pipeline.parset'.format(self.name, infix)
 
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
