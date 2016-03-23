@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources,  add_all_facet_sources, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources,  add_all_facet_sources, {% if peel_calibrator %} shift_and_average, {% endif %} create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2 {% endblock full_image_steps %} {% if peel_calibrator %}, create_model_map, regroup_shift_empty_map, create_expanded_model_mapfile, {% block ft_steps %}wsclean_ft{% endblock ft_steps %}, corrupt_final_model, subtract_facet_model {% endif %}]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -327,6 +327,7 @@ create_expanded_model_mapfile.control.mapfile_to_match  =   regroup_shift_empty_
 create_expanded_model_mapfile.control.mapfile_dir       =   input.output.mapfile_dir
 create_expanded_model_mapfile.control.filename          =   expand_wsclean_model.mapfile
 
+{% block ft_parms %}
 # make model visibilities, length = some
 # For WSClean predict, we need to increase the number of wplanes so that the
 # effective model image size is larger than the FOV (to prevent aliasing issues)
@@ -341,6 +342,7 @@ wsclean_ft.argument.channelsout                         =   {{ wsclean_nchannels
 wsclean_ft.argument.j                                   =   {{ max_cpus_per_img }}
 wsclean_ft.argument.tempdir                             =   {{ local_dir }}
 wsclean_ft.argument.nwlayers-for-size                   =   49152 49152
+{% endblock ft_parms %}
 
 # corrupt the model visibilities, length = nfiles
 corrupt_final_model.control.type                        =   dppp
