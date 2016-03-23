@@ -73,12 +73,10 @@ def smooth_star(inputs):
     return smooth(*inputs)
 
 
-def smooth(chan, parms, gain, pol, antenna, window):
+def smooth(chan, real, imag, window):
     """
     Smooth solutions for a single channel
     """
-    real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
-    imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
     phase = numpy.arctan2(imag, real)
     amp = numpy.sqrt(imag**2 + real**2)
 
@@ -124,11 +122,11 @@ def main(instrument_name, instrument_name_smoothed, normalize=True):
     # Smooth
     for pol in pol_list:
         for antenna in antenna_list:
+            channel_parms_real = [parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] for chan in range(nchans)]
+            channel_parms_imag = [parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] for chan in range(nchans)]
             pool = multiprocessing.Pool()
-            results = pool.map(smooth_star,
-                itertools.izip(range(nchans), itertools.repeat(parms),
-                itertools.repeat(gain), itertools.repeat(pol),
-                itertools.repeat(antenna), itertools.repeat(window)))
+            results = pool.map(smooth_star, itertools.izip(range(nchans),
+                channel_parms_real, channel_parms_imag, itertools.repeat(window)))
             pool.close()
             pool.join()
 
