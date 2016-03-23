@@ -310,9 +310,7 @@ class Direction(object):
             Image size in pixels
 
         """
-        wplanes = 1
-        if imsize > 512:
-            wplanes = 64
+        wplanes = 64
         if imsize > 799:
             wplanes = 96
         if imsize > 1023:
