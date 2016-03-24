@@ -54,6 +54,12 @@ class OutlierPeel(Operation):
             'input_files_single.mapfile')
         self.direction.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'verify_subtract.break.mapfile')
+        self.direction.dir_indep_skymodels_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'full_skymodels.mapfile')
+        self.direction.dir_dep_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'merge_selfcal_parmdbs.mapfile')
+        self.direction.selfcal_plots_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'make_selfcal_plots.mapfile')
 
         # Store results of verify_subtract check. This will work if the verification
         # was done using multiple bands although we use only one at the moment
