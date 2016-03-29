@@ -169,7 +169,7 @@ class Direction(object):
 
     def set_imcal_parameters(self, nbands_per_channel, chan_width_hz,
     	nchan, timestep_sec, ntimes, nbands, mean_freq_mhz, initial_skymodel=None,
-    	preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95):
+    	preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95, tec_block_mhz=10.0):
         """
         Sets various parameters for imaging and calibration
 
@@ -199,13 +199,16 @@ class Direction(object):
         min_peak_smearing_factor : float, optional
             Min allowed peak flux density reduction due to smearing at the mean
             frequency (facet imaging only)
+        tec_block_mhz : float, optional
+            Size of frequency block in MHz over which a single TEC solution is
+            fit
 
         """
         self.set_imaging_parameters(nbands, nbands_per_channel, nchan,
             initial_skymodel)
         self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,
             timestep_sec, ntimes, nbands, mean_freq_mhz, initial_skymodel,
-            preaverage_flux_jy, min_peak_smearing_factor)
+            preaverage_flux_jy, min_peak_smearing_factor, tec_block_mhz)
 
 
     def set_imaging_parameters(self, nbands, nbands_per_channel, nchan_per_band,
@@ -457,7 +460,7 @@ class Direction(object):
 
     def set_averaging_steps_and_solution_intervals(self, chan_width_hz, nchan,
         timestep_sec, ntimes_min, nbands, mean_freq_mhz, initial_skymodel=None,
-        preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95):
+        preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95, tec_block_mhz=10.0):
         """
         Sets the averaging step sizes and solution intervals
 
@@ -496,6 +499,9 @@ class Direction(object):
         min_peak_smearing_factor : float, optional
             Min allowed peak flux density reduction due to smearing at the mean
             frequency (facet imaging only)
+        tec_block_mhz : float, optional
+            Size of frequency block in MHz over which a single TEC solution is
+            fit
 
         """
         # generate a (numpy-)array with the divisors of nchan
@@ -634,8 +640,7 @@ class Direction(object):
 
             # Set frequency intervals for selfcal solve steps. The interval for
             # slow (amp) selfcal should be the number of channels in a band after
-            # averaging. The interval for fast (phase) selfcal should be the
-            # number of channels in 20 MHz or less
+            # averaging.
             num_chan_per_band_after_avg = nchan / self.facetselfcal_freqstep
             if self.dynamic_range.lower() == 'hd':
                 # For high-dynamic range solve, the interval for slow (amp) selfcal
@@ -643,10 +648,27 @@ class Direction(object):
                 self.solint_freq_a = 1
             else:
                 self.solint_freq_a = num_chan_per_band_after_avg
-            num_cal_blocks = np.ceil(nchan * nbands * chan_width_hz/1e6
-                / 20.0)
-            self.solint_freq_p = int(np.ceil(num_chan_per_band_after_avg * nbands
-                / num_cal_blocks))
+
+            # The interval for fast (phase) selfcal should be the number of
+            # channels in tec_block_mhz, but no less than 8 MHz if possible
+            min_block_mhz = 8.0
+            mhz_per_chan_after_avg = self.facetselfcal_freqstep * chan_width_hz / 1e6
+            total_bandwidth_mhz = nchan * nbands * chan_width_hz / 1e6
+            num_cal_blocks = np.ceil(total_bandwidth_mhz / tec_block_mhz)
+            nchan_per_block = np.ceil(num_chan_per_band_after_avg * nbands /
+                num_cal_blocks)
+            partial_block_mhz = (num_chan_per_band_after_avg * nbands %
+                nchan_per_block) * mhz_per_chan_after_avg
+            while (partial_block_mhz > 0.0 and partial_block_mhz < min_block_mhz):
+                num_cal_blocks -= 1
+                nchan_per_block = np.ceil(num_chan_per_band_after_avg * nbands /
+                    num_cal_blocks)
+                partial_block_mhz = (num_chan_per_band_after_avg * nbands %
+                    nchan_per_block) * mhz_per_chan_after_avg
+            if nchan_per_block * mhz_per_chan_after_avg < min_block_mhz:
+                num_cal_blocks = 1
+            self.solint_freq_p = int(np.ceil(num_chan_per_band_after_avg * nbands /
+                num_cal_blocks))
 
         # Set name of column to use for data and averaged weights
         if self.pre_average:

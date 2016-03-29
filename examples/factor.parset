@@ -75,6 +75,11 @@ multiscale_selfcal = True
 # facet imaging (selfcal always uses a value of 0.15)
 max_peak_smearing = 0.05
 
+# Size of frequency block in MHz over which a single TEC solution is fit
+# (default = 10)
+TEC_block_MHz = 10
+
+
 [directions]
 # Full path to file containing calibrator directions. If not given, directions
 # are selected internally using the flux density and size cuts below

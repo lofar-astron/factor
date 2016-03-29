@@ -214,6 +214,13 @@ def get_global_options(parset):
     else:
         parset_dict['max_peak_smearing'] = 0.15
 
+    # Size of frequency block in MHz over which a single TEC solution is fit
+    # (default = 10)
+    if 'tec_block_mhz' in parset_dict:
+        parset_dict['tec_block_mhz'] = parset.getfloat('global', 'tec_block_mhz')
+    else:
+        parset_dict['tec_block_mhz'] = 10.0
+
     # Check for unused options
     given_options = parset.options('global')
     allowed_options = ['dir_working', 'dir_ms', 'lofarroot',
@@ -221,7 +228,7 @@ def get_global_options(parset):
         'exit_on_selfcal_failure', 'skip_selfcal_check', 'wsclean_nbands',
         'facet_imager', 'keep_avg_facet_data', 'keep_unavg_facet_data',
         'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal',
-        'skymodel_extension', 'max_peak_smearing']
+        'skymodel_extension', 'max_peak_smearing', 'tec_block_mhz']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [global] section of the '
