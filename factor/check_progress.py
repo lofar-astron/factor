@@ -666,9 +666,19 @@ def get_current_step(direction):
     # loops (if the previous step was the last step of the loop, we will get the
     # next step after the loop instead of the first step in the loop if it is
     # still looping), but is the best we can do currently
-    previous_step_name = os.path.splitext(os.path.basename(d[1][-1][1]['mapfile']))[0]
-    current_steps = get_current_op_step_names(direction)
-    current_index = current_steps.index(previous_step_name) + 1
+    found_prev = False
+    prev_indx = -1
+    while not found_prev:
+        # Work backward to find a valid step (i.e., not a plugin step)
+        previous_step_name = os.path.splitext(os.path.basename(d[1][prev_indx][1]['mapfile']))[0]
+        try:
+            current_steps = get_current_op_step_names(direction)
+            found_prev = True
+        except ValueError:
+            prev_indx -= 1
+            if abs(prev_indx) > len(d[1]):
+                return (None, None, None, None)
+    current_index = current_steps.index(previous_step_name) + abs(prev_indx+1) + 1
     if current_index >= len(current_steps):
         current_index = len(current_steps) - 1
     start_time = d[0]['start_time']
