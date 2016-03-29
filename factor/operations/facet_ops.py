@@ -279,7 +279,7 @@ class FacetImage(Operation):
         self.direction.facet_image_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'final_image.mapfile')
         self.direction.subtracted_data_new_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'subtract_facet_model.mapfile'),
+            'subtract_facet_model.mapfile')
 
         # Delete temp data
         self.direction.cleanup_mapfiles = [
