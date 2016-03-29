@@ -519,7 +519,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
         # Set minimum size to 2 - 10 * FWHM of resolution of high-res image, scaled by
         # sqrt(flux) to include strong artifacts in the avoidance region
         fwhm = 25.0 / 3600.0 # degrees
-        min_sizes = [fwhm*min(10.0, max(2.0, np.sqrt(flux_jy/0.02))) for flux_jy in fluxes_jy]
+        min_sizes = [fwhm*min(10.0, max(2.0, np.sqrt(flux_jy/0.01))) for flux_jy in fluxes_jy]
         sizes = [max(size, min_size) for size, min_size in zip(sizes, min_sizes)]
 
         # Filter sources to get only those close to a boundary. We need to iterate
