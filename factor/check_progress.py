@@ -340,7 +340,18 @@ def on_press(event):
     """
     global fig, all_directions, at, selected_direction
 
+    # Check for other assignments of the shortcuts we want to use and, if found,
+    # remove them
+    factor_keys = ['u', 'c', 'f', 't', 'g']
+    for k in plt.rcParams.iterkeys():
+        if 'keymap' in k:
+            for key in factor_keys:
+                if key in  plt.rcParams[k]:
+                    indx = plt.rcParams[k].index(key)
+                    plt.rcParams[k][indx] = ''
+
     if event.key == 'u':
+        # Update plot
         info = 'Updating display...'
         c = at.get_child()
         c.set_text(info)
