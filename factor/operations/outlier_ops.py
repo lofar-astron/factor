@@ -84,6 +84,7 @@ class OutlierPeel(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'predict_outlier_model.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'corrupt_outlier_model.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'average_pre.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'average_post.mapfile')]
+            os.path.join(self.pipeline_mapfile_dir, 'average_post.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'sorted_groups.mapfile_groups')]
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()
