@@ -504,6 +504,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
         RA, Dec = s.getPatchPositions(asArray=True)
         sx, sy = radec2xy(RA, Dec, refRA=field_ra_deg, refDec=field_dec_deg)
         sizes = s.getPatchSizes(units='degree').tolist()
+        fluxes_jy = s.getColValues('I', units='Jy', aggregate='sum')
 
         if target_ra is not None and target_dec is not None and target_radius_arcmin is not None:
             log.info('Including target ({0}, {1}) in facet adjustment'.format(
@@ -515,9 +516,11 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
             sy.extend(ty)
             sizes.append(target_radius_arcmin*2.0/1.2/60.0)
 
-        # Set minimum size to 2*FWHM of resolution of high-res image
-        fwhm = 2.0 * 25.0 / 3600.0 # degrees
-        sizes = [max(size, fwhm) for size in sizes]
+        # Set minimum size to 2 - 10 * FWHM of resolution of high-res image, scaled by
+        # sqrt(flux) to include strong artifacts in the avoidance region
+        fwhm = 25.0 / 3600.0 # degrees
+        min_sizes = [fwhm*min(10.0, max(2.0, np.sqrt(flux_jy/0.02))) for flux_jy in fluxes_jy]
+        sizes = [max(size, min_size) for size, min_size in zip(sizes, min_sizes)]
 
         # Filter sources to get only those close to a boundary. We need to iterate
         # until no sources are found
