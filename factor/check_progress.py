@@ -346,9 +346,12 @@ def on_press(event):
     for k in plt.rcParams.iterkeys():
         if 'keymap' in k:
             for key in factor_keys:
-                if key in  plt.rcParams[k]:
-                    indx = plt.rcParams[k].index(key)
-                    plt.rcParams[k][indx] = ''
+                if type(plt.rcParams[k]) is list:
+                    if key in plt.rcParams[k]:
+                        indx = plt.rcParams[k].index(key)
+                        plt.rcParams[k][indx] = ''
+                elif key == plt.rcParams[k]:
+                    plt.rcParams[k] = ''
 
     if event.key == 'u':
         # Update plot
