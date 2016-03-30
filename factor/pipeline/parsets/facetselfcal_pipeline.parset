@@ -1449,7 +1449,7 @@ average5.argument.flagzero.amplmin                         =   1e-20
 create_compressed_mapfile5.control.kind                    =   plugin
 create_compressed_mapfile5.control.type                    =   compressMapfile
 create_compressed_mapfile5.control.mapfile_in              =   average5.output.mapfile
-create_compressed_mapfile5.control.mapfile_dir             =   {{ mapfile_dir }}
+create_compressed_mapfile5.control.mapfile_dir             =   input.output.mapfile_dir
 create_compressed_mapfile5.control.filename                =   concat_averaged_input.mapfile
 
 # sort compressed mapfile so that there is one group per timestamp, length = ntimes

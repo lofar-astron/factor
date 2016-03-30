@@ -175,7 +175,7 @@ def meanclip(indata, clipsig=4.0, maxiter=10, converge_num=0.001, verbose=True):
 
 def find_imagenoise(imagename):
     """
-    Finds noise and dynamic range for an image
+    Finds noise, dynamic range, and min/max for an image
 
     Parameters
     ----------
@@ -188,19 +188,29 @@ def find_imagenoise(imagename):
         Noise (Jy/beam) of image
     dynamic_range : float
         Dynamic range (max/min) of image
+    minmax : float
+        Ratio of min/max
 
     """
     im    = pim.image(imagename)
     image = numpy.copy(im.getdata())
     mean, rms =  meanclip(image)
+    minmax = abs(numpy.min(image) / numpy.max(image))
 
-    return rms, numpy.abs(numpy.max(image)/rms)
+    return rms, numpy.abs(numpy.max(image)/rms), minmax
 
 
 def main(im1, im2, count=-1, factor=1.0125):
     """
-    Compare the dynamic range of two images and check whether:
+    Compare the dynamic range and min/max of two images and check whether:
+
         dynamic_range1 / factor > dynamic_range2
+
+    or
+
+        abs(min1/max1) * factor < abs(min2/max2)
+
+    Typically, im1 is the latest image and im2 the previous one.
 
     Parameters
     ----------
@@ -224,17 +234,21 @@ def main(im1, im2, count=-1, factor=1.0125):
     factor = float(factor)
     count = int(count)
 
-    rms1, dynamic_range1 =  find_imagenoise(im1)
-    rms2, dynamic_range2 =  find_imagenoise(im2)
+    rms1, dynamic_range1, minmax1 =  find_imagenoise(im1)
+    rms2, dynamic_range2, minmax2 =  find_imagenoise(im2)
 
-    print('Image 1: rms = {0} Jy/beam; dynamic range = {1}'.format(rms1, dynamic_range1))
-    print('Image 2: rms = {0} Jy/beam; dynamic range = {1}'.format(rms2, dynamic_range2))
+    print('Image 1: rms = {0} Jy/beam; dynamic range = {1}, abs(min/max) = {2}'.format(
+        rms1, dynamic_range1, minmax1))
+    print('Image 2: rms = {0} Jy/beam; dynamic range = {1}, abs(min/max) = {2}'.format(
+        rms2, dynamic_range2, minmax2))
 
     if count == 0:
         # For count = 0 only, always return False so that loop continues
         return {'break': False}
     else:
-        if dynamic_range1 / factor > dynamic_range2:
+        # Check whether dynamic range is increasing or minmax is decreasing. If
+        # so, continue (return False)
+        if (dynamic_range1 / factor > dynamic_range2) or (minmax1 * factor < minmax2):
             return {'break': False}
         else:
             return {'break': True}
@@ -249,4 +263,4 @@ if __name__ == '__main__':
     parser.add_argument('factor', help='required improvement factor for success')
     args = parser.parse_args()
 
-    main(args.im1, args.im2, args.factor)
+    main(args.im1, args.im2, factor=args.factor)
