@@ -504,7 +504,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
         RA, Dec = s.getPatchPositions(asArray=True)
         sx, sy = radec2xy(RA, Dec, refRA=field_ra_deg, refDec=field_dec_deg)
         sizes = s.getPatchSizes(units='degree').tolist()
-        fluxes_jy = s.getColValues('I', units='Jy', aggregate='sum')
+        fluxes_jy = s.getColValues('I', units='Jy', aggregate='sum').tolist()
 
         if target_ra is not None and target_dec is not None and target_radius_arcmin is not None:
             log.info('Including target ({0}, {1}) in facet adjustment'.format(
