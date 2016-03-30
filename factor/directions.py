@@ -515,6 +515,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
             sx.extend(tx)
             sy.extend(ty)
             sizes.append(target_radius_arcmin*2.0/1.2/60.0)
+            fluxes_jy.append(0.0)
 
         # Set minimum size to 2 - 10 * FWHM of resolution of high-res image, scaled by
         # sqrt(flux) to include strong artifacts in the avoidance region
