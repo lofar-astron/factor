@@ -451,6 +451,11 @@ def find_unflagged_fraction(ms_file):
         "sum([select nelements(FLAG) from {0}])'".format(ms_file),
         shell=True, stdout=subprocess.PIPE)
     r = p.communicate()
+    if p.returncode!=0:
+        self.log.error('taql exited abnormally checking flagged fraction for file {}.'.format(ms_file))
+        self.log.info('Exiting!')
+        sys.exit(1)
+
     unflagged_fraction = float(r[0])
 
     return unflagged_fraction
