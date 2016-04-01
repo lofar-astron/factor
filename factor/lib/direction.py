@@ -135,6 +135,7 @@ class Direction(object):
         self.blavg_weight_column = 'WEIGHT_SPECTRUM' # name of weights column
         self.started_operations = []
         self.completed_operations = []
+        self.reset_operations = []
         self.cleanup_mapfiles = []
         self.do_reset = False # whether to reset this direction
         self.is_patch = False # whether direction is just a patch (not full facet)
@@ -823,23 +824,29 @@ class Direction(object):
         Parameters
         ----------
         op_names : list of str, optional
-            Name of operation to reset. If None, all started and completed
-            operations are reset
+            List of names of operations to reset. Reset is done only if the
+            operation name appears in self.reset_operations. If None, all
+            started and completed operations that are in self.reset_operations
+            are reset
 
         """
         if op_names is None:
             op_names = self.completed_operations[:] + self.started_operations[:]
         elif type(op_names) is str:
             op_names = [op_names]
-        self.log.info('Resetting state for operation(s): {}'.format(', '.join(op_names)))
+        op_names_reset = [op for op in op_names if op in self.reset_operations]
+        if len(op_names_reset) > 0:
+            self.log.info('Resetting state for operation(s): {}'.format(', '.join(op_names_reset)))
+        else:
+            return
 
         # Reset selfcal flag
-        if 'facetselfcal' in op_names:
+        if 'facetselfcal' in op_names_reset:
             self.selfcal_ok = False
 
         # Remove operation name from lists of started and completed operations
         # and delete the results directories
-        for op_name in op_names:
+        for op_name in op_names_reset:
             while op_name in self.completed_operations:
                 self.completed_operations.remove(op_name)
             while op_name in self.started_operations:
