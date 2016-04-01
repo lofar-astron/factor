@@ -283,7 +283,7 @@ class Direction(object):
         # 1 arcmin)
         if initial_skymodel is not None and self.mscale_field_do is None:
             sizes = self.get_source_sizes(initial_skymodel.copy())
-            large_size_arcmin = 4.0
+            large_size_arcmin = 6.0
             if any([s > large_size_arcmin for s in sizes]):
                 self.mscale_field_do = True
             else:
@@ -413,7 +413,7 @@ class Direction(object):
         for i in range(len(skymodel)):
             inside[i] = bbPath.contains_point((x[i], y[i]))
         skymodel.select(inside, force=True)
-        sizes = skymodel.getPatchSizes(units='arcmin', weight=True)
+        sizes = skymodel.getPatchSizes(units='arcmin', weight=False)
 
         return sizes
 
