@@ -398,7 +398,7 @@ def on_press(event):
         selfcal_plots = find_selfcal_tec_plots(selected_direction)
         if len(selfcal_plots) > 0:
             info = 'Opening selfcal TEC solution plots for {}...'.format(selected_direction.name)
-            os.system('display {} &'.format(' '.join(selfcal_plots)))
+            os.system('display -geometry 800x600 {} &'.format(' '.join(selfcal_plots)))
         else:
             info = 'Final selfcal solutions do not exist for {}'.format(selected_direction.name)
 
@@ -407,7 +407,7 @@ def on_press(event):
         selfcal_plots = find_selfcal_gain_plots(selected_direction)
         if len(selfcal_plots) > 0:
             info = 'Opening selfcal Gain solution plots for {}...'.format(selected_direction.name)
-            os.system('display {} &'.format(' '.join(selfcal_plots)))
+            os.system('display -geometry 800x600 {} &'.format(' '.join(selfcal_plots)))
         else:
             info = 'Final selfcal solutions do not exist for {}'.format(selected_direction.name)
 
