@@ -573,12 +573,17 @@ def find_selfcal_tec_plots(direction):
     """
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
+    facetpeel_dir = os.path.join(direction.working_dir, 'results', 'facetpeel',
+        direction.name)
     peel_dir = os.path.join(direction.working_dir, 'results', 'outlierpeel',
         direction.name)
 
     # Check selfcal and peel directories
     if os.path.exists(selfcal_dir):
         selfcal_plots = glob.glob(selfcal_dir+'/*.make_selfcal_plots_tec*.png')
+        selfcal_plots.sort()
+    elif os.path.exists(facetpeel_dir):
+        selfcal_plots = glob.glob(facetpeel_dir+'/*.make_selfcal_plots_tec*.png')
         selfcal_plots.sort()
     elif os.path.exists(peel_dir):
         selfcal_plots = glob.glob(peel_dir+'/*.make_selfcal_plots_tec*.png')
@@ -595,6 +600,8 @@ def find_selfcal_gain_plots(direction):
     """
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
+    facelpeel_dir = os.path.join(direction.working_dir, 'results', 'facetpeel',
+        direction.name)
     peel_dir = os.path.join(direction.working_dir, 'results', 'outlierpeel',
         direction.name)
 
@@ -602,6 +609,10 @@ def find_selfcal_gain_plots(direction):
     if os.path.exists(selfcal_dir):
         selfcal_plots = glob.glob(selfcal_dir+'/*.make_selfcal_plots_amp*.png')
         selfcal_plots.extend(glob.glob(selfcal_dir+'/*.make_selfcal_plots_phase*.png'))
+        selfcal_plots.sort()
+    elif os.path.exists(facelpeel_dir):
+        selfcal_plots = glob.glob(facelpeel_dir+'/*.make_selfcal_plots_amp*.png')
+        selfcal_plots.extend(glob.glob(facelpeel_dir+'/*.make_selfcal_plots_phase*.png'))
         selfcal_plots.sort()
     elif os.path.exists(peel_dir):
         selfcal_plots = glob.glob(peel_dir+'/*.make_selfcal_plots_amp*.png')
