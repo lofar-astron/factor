@@ -4,18 +4,18 @@
 {% block full_image_parms %}
 
 # make a virtual concatenated map, length = 1
-virtual_concat.control.type                      =   virtual_concat
-virtual_concat.control.mapfile_in                =   concat_averaged_compressed_map.output.mapfile
-virtual_concat.control.inputkey                  =   msfiles
-virtual_concat.control.outputkey                 =   msconcat
-virtual_concat.argument.flags                    =   [msfiles,msconcat]
+virtual_concat.control.type                       =   virtual_concat
+virtual_concat.control.mapfile_in                 =   concat_averaged_compressed_map.output.mapfile
+virtual_concat.control.inputkey                   =   msfiles
+virtual_concat.control.outputkey                  =   msconcat
+virtual_concat.argument.flags                     =   [msfiles,msconcat]
 
 # Make a preliminary clean mask from the facet region, length = 1
 premask.control.type                              =   make_clean_mask
-premask.control.mapfile_in                        =   virtual_concat.output.mapfile
+premask.control.mapfile_in                        =   concat_averaged_compressed_map.output.mapfile
 premask.control.inputkey                          =   imagefile
 premask.control.outputkey                         =   maskfile
-premask.argument.flags                            =   [None,maskfile]
+premask.argument.flags                            =   [imagefile,maskfile]
 premask.argument.img_format                       =   casa
 premask.argument.pad_to_size                      =   {{ facet_imsize }}
 premask.argument.skip_source_detection            =   True

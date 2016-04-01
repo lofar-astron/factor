@@ -151,10 +151,6 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         Dict with nsig-sigma rms threshold
 
     """
-    if image_name is not None:
-        if image_name.lower() == 'none':
-            image_name = None
-
     if rmsbox is not None and type(rmsbox) is str:
         rmsbox = eval(rmsbox)
 
