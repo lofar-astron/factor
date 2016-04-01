@@ -26,7 +26,7 @@ log = logging.getLogger('factor')
 
 
 def run(parset_file, logging_level='info', dry_run=False, test_run=False,
-    reset_directions=[]):
+    reset_directions=[], reset_operations=[]):
     """
     Processes a dataset using facet calibration
 
@@ -51,6 +51,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         only and will not produce useful results
     reset_directions : list of str, optional
         List of names of directions to be reset
+    reset_operations : list of str, optional
+        Llist of operations to be reset
 
     """
     # Read parset
@@ -68,7 +70,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
     # Define directions and groups
     directions, direction_groups = _set_up_directions(parset, bands, dry_run,
-    test_run, reset_directions)
+    test_run, reset_directions, reset_operations)
 
     # Run peeling operations on outlier directions and any facets
     # for which the calibrator is to be peeled
@@ -474,7 +476,7 @@ def _set_up_bands(parset, test_run=False):
 
 
 def _set_up_directions(parset, bands, dry_run=False, test_run=False,
-    reset_directions=[]):
+    reset_directions=[], reset_operations=[]):
     """
     Sets up directions (facets)
 
@@ -491,6 +493,8 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
         only and will not produce useful results
     reset_directions : list of str, optional
         List of direction names to be reset
+    reset_operations : list of str, optional
+        Llist of operations to be reset
 
     Returns
     -------
@@ -584,6 +588,11 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
         # Reset state if specified
         if direction.name in reset_directions:
             direction.do_reset = True
+            if len(reset_operations) > 0:
+                direction.reset_operations = reset_operations
+            else:
+                direction.reset_operations = (direction.completed_operations[:] +
+                    direction.started_operations[:])
         else:
             direction.do_reset = False
 
