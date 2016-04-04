@@ -13,6 +13,9 @@ FacetPeel : Operation
 FacetSub : Operation
     Subtracts all facet sources from data. Must be run in series as writes are
     made to original datasets
+FacetSubreset : Operation
+    Resets previous subtraction of all facet sources from data. Must be run in
+    series as writes are made to original datasets
 FacetImage : Operation
     Images the entire facet. May be run in parallel
 
