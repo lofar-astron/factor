@@ -79,7 +79,7 @@ def make_template_image(image_name, reference_ra_deg, reference_dec_deg,
     header['EQUINOX'] = 2000.0
 
     # Add telescope
-    header['TELESCOP'] = 'UNKNOWN'
+    header['TELESCOP'] = 'LOFAR'
 
     hdulist[0].header = header
 
