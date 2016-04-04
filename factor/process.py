@@ -567,13 +567,14 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
     log.info("Determining imaging parameters for each direction...")
     mean_freq_mhz = np.mean([b.freq for b in bands]) / 1e6
     min_peak_smearing_factor = 1.0 - parset['max_peak_smearing']
-    if parset['facet_imager'].lower() == 'wsclean':
-        # Use larger padding for WSClean images
-        padding = 1.20
-    else:
-        padding = 1.05
     for i, direction in enumerate(directions):
         # Set imaging and calibration parameters
+        if parset['facet_imager'].lower() == 'wsclean':
+            # Use larger padding for WSClean images
+            padding = parset['wsclean_image_padding']
+            direction.wsclean_model_padding = parset['wsclean_model_padding']
+        else:
+            padding = 1.05
         direction.set_imcal_parameters(parset['wsclean_nbands'],
             bands[0].chan_width_hz, bands[0].nchan, bands[0].timepersample,
             bands[0].minSamplesPerFile, len(bands), mean_freq_mhz,

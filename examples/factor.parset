@@ -33,6 +33,12 @@ interactive = False
 # Wide-band clean is activated when there are more than 5 bands
 wsclean_nbands = 2
 
+# Padding factor for WSClean images (default = 1.4)
+wsclean_image_padding = 1.4
+
+# Padding factor for WSClean models (default = 1.4)
+wsclean_model_padding = 1.4
+
 # Exit if selfcal fails for any direction (default = True). If False, processing
 # will continue and the failed direction will receive the selfcal solutions of
 # the nearest successful direction unless skip_selfcal_check is True, in which
