@@ -35,6 +35,16 @@ except:
 
 log = logging.getLogger('factor:progress')
 
+def show_instructions():
+    log.info('Left-click on a direction to select it and see its current state')
+    log.info('Right-click on a direction to deselect it')
+    log.info('(In both cases, pan/zoom mode must be off)')
+    log.info('Press "c" to display calibrator selfcal images for selected direction')
+    log.info('Press "i" to display facet image for selected direction')
+    log.info('Press "t" to display TEC solutions for selected direction')
+    log.info('Press "g" to display Gain solutions for selected direction')
+    log.info('Press "u" to update display (display is updated automatically every minute)')
+    log.info('Press "h" to repeat these instructions on this terminal')
 
 def run(parset_file, trim_names=True):
     """
@@ -58,7 +68,7 @@ def run(parset_file, trim_names=True):
 
     # Check for other assignments of the shortcuts we want to use and, if found,
     # remove them
-    factor_keys = ['u', 'c', 'f', 't', 'g']
+    factor_keys = ['u', 'c', 'i', 't', 'g', 'h']
     for k in plt.rcParams.iterkeys():
         if 'keymap' in k:
             for key in factor_keys:
@@ -71,15 +81,7 @@ def run(parset_file, trim_names=True):
 
     # Plot field
     log.info('Plotting directions...')
-    log.info('Left-click on a direction to select it and see its current state')
-    log.info('Right-click on a direction to deselect it')
-    log.info('(In both cases, pan/zoom mode must be off)')
-    log.info('Press "c" to display calibrator selfcal images for selected direction')
-    log.info('Press "i" to display facet image for selected direction')
-    log.info('Press "t" to display TEC solutions for selected direction')
-    log.info('Press "g" to display Gain solutions for selected direction')
-    log.info('Press "u" to update display (display is updated automatically every minute)')
-
+    show_instructions()
     plot_state(all_directions, trim_names=trim_names)
 
 
@@ -411,6 +413,10 @@ def on_press(event):
         else:
             info = 'Final selfcal solutions do not exist for {}'.format(selected_direction.name)
 
+    elif event.key == 'h':
+        info='Reprinting instructions'
+        show_instructions()
+
     else:
         return
 
@@ -689,7 +695,10 @@ def get_current_step(direction):
             prev_indx -= 1
             if abs(prev_indx) > len(d[1]):
                 return (None, None, None, None)
-    current_index = current_steps.index(previous_step_name) + abs(prev_indx+1) + 1
+    try:
+        current_index = current_steps.index(previous_step_name) + abs(prev_indx+1) + 1
+    except ValueError:
+        return (None,None,None,None)
     if current_index >= len(current_steps):
         current_index = len(current_steps) - 1
     start_time = d[0]['start_time']
