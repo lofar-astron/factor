@@ -1641,7 +1641,7 @@ wsclean_ft.argument.mem                                    =   {{ max_percent_me
 wsclean_ft.argument.channelsout                            =   {{ wsclean_nchannels }}
 wsclean_ft.argument.j                                      =   {{ max_cpus_per_img }}
 wsclean_ft.argument.tempdir                                =   {{ local_dir }}
-wsclean_ft.argument.nwlayers-for-size                      =   49152 49152
+wsclean_ft.argument.nwlayers-for-size                      =   12288 12288
 {% endblock full_image_parms %}
 ########## end of a block that can be replaced by another imager.
 {% endif %}
