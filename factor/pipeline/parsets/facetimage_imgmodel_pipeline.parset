@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, regroup_shift_empty_map, {% block model_data_steps %}expand_facet_model_map, wsclean_ft, {% endblock model_data_steps %} corrupt_final_model, add_model_to_empty_data, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %}wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, regroup_shift_empty_map, {% block model_data_steps %}expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, {% endblock model_data_steps %} corrupt_final_model, add_model_to_empty_data, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %}wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -66,15 +66,22 @@ expand_facet_model_map.control.mapfile_to_match       =   regroup_shift_empty_ma
 expand_facet_model_map.control.mapfile_dir            =   input.output.mapfile_dir
 expand_facet_model_map.control.filename               =   expand_facet_model.datamap
 
+# expand mapfile of the model image sizes to all groups, length = some
+expand_facet_model_size_map.control.kind              =   plugin
+expand_facet_model_size_map.control.type              =   expandMapfile
+expand_facet_model_size_map.control.mapfile_in        =   {{ wsclean_modelimg_size_mapfile }}
+expand_facet_model_size_map.control.mapfile_to_match  =   regroup_shift_empty_map.output.mapfile
+expand_facet_model_size_map.control.mapfile_dir       =   input.output.mapfile_dir
+expand_facet_model_size_map.control.filename          =   expand_facet_model_size.mapfile
+
 # add the facet-model visibilities to the data, length = some
 # For WSClean predict, we do not need to increase the number of wplanes (as is
 # done for the predict step used for subtraction), as we do not care about
 # regions outside of the facet image
 wsclean_ft.control.type                               =   wsclean_ft
-wsclean_ft.control.mapfiles_in                        =   [regroup_shift_empty_map.output.mapfile,expand_facet_model_map.output.mapfile]
-wsclean_ft.control.inputkeys                          =   [msfile,name]
+wsclean_ft.control.mapfiles_in                        =   [regroup_shift_empty_map.output.mapfile,expand_facet_model_map.output.mapfile,expand_facet_model_size_map.output.mapfile]
+wsclean_ft.control.inputkeys                          =   [msfile,name,size]
 wsclean_ft.argument.flags                             =   [-predict,msfile]
-wsclean_ft.argument.size                              =   {{ facet_imsize }} {{ facet_imsize }}
 wsclean_ft.argument.scale                             =   0.000417
 wsclean_ft.argument.mem                               =   {{ max_percent_memory }}
 wsclean_ft.argument.channelsout                       =   {{ wsclean_nchannels }}

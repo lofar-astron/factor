@@ -567,6 +567,11 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
     log.info("Determining imaging parameters for each direction...")
     mean_freq_mhz = np.mean([b.freq for b in bands]) / 1e6
     min_peak_smearing_factor = 1.0 - parset['max_peak_smearing']
+    if parset['facet_imager'].lower() == 'wsclean':
+        # Use larger padding for WSClean images
+        padding = 1.20
+    else:
+        padding = 1.05
     for i, direction in enumerate(directions):
         # Set imaging and calibration parameters
         direction.set_imcal_parameters(parset['wsclean_nbands'],
@@ -575,7 +580,7 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
             initial_skymodel, parset['preaverage_flux_jy'],
             min_peak_smearing_factor=min_peak_smearing_factor,
             tec_block_mhz=parset['tec_block_mhz'],
-            peel_flux_jy=parset['peel_flux_jy'])
+            peel_flux_jy=parset['peel_flux_jy'], padding=padding)
 
         # Set field center to that of first band (all bands have the same phase
         # center)

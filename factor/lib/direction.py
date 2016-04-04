@@ -172,7 +172,7 @@ class Direction(object):
     def set_imcal_parameters(self, nbands_per_channel, chan_width_hz,
     	nchan, timestep_sec, ntimes, nbands, mean_freq_mhz, initial_skymodel=None,
     	preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95, tec_block_mhz=10.0,
-    	peel_flux_jy=25.0):
+    	peel_flux_jy=25.0, padding=1.05):
         """
         Sets various parameters for imaging and calibration
 
@@ -207,10 +207,13 @@ class Direction(object):
             fit
         peel_flux_jy : float, optional
             Peel cailbrators with fluxes above this value
+        padding : float, optional
+            Padding factor by which size of facet is multiplied to determine
+            the facet image size
 
         """
         self.set_imaging_parameters(nbands, nbands_per_channel, nchan,
-            initial_skymodel)
+            initial_skymodel, padding)
         self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,
             timestep_sec, ntimes, nbands, mean_freq_mhz, initial_skymodel,
             preaverage_flux_jy, min_peak_smearing_factor, tec_block_mhz,

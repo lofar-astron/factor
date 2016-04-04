@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources,  add_all_facet_sources, {% if peel_calibrator %} shift_and_average, {% endif %} create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2 {% endblock full_image_steps %} {% if peel_calibrator %}, create_model_map, regroup_shift_empty_map, create_expanded_model_mapfile, {% block ft_steps %}wsclean_ft{% endblock ft_steps %}, corrupt_final_model, subtract_facet_model {% endif %}]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources,  add_all_facet_sources, {% if peel_calibrator %} shift_and_average, {% endif %} create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2 {% endblock full_image_steps %} {% if peel_calibrator %}, {% block ft_steps %} create_model_map, pad_model_images, create_expanded_model_mapfile, expand_facet_model_size_map, regroup_shift_empty_map, wsclean_ft {% endblock ft_steps %}, corrupt_final_model, subtract_facet_model {% endif %}]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -305,6 +305,7 @@ adjust_wsclean_mapfile2.control.filename                =   final_image.mapfile
 ########## end of a block that can be replaced by another imager.
 
 {% if peel_calibrator %}
+{% block ft_parms %}
 # make a mapfile with the root-name of the final WSClean images, length = 1
 create_model_map.control.kind                           =   plugin
 create_model_map.control.type                           =   trimMapfile
@@ -312,6 +313,28 @@ create_model_map.control.mapfile_in                     =   wsclean_image_full2.
 create_model_map.control.trim                           =   -
 create_model_map.control.mapfile_dir                    =   input.output.mapfile_dir
 create_model_map.control.filename                       =   final_model_rootnames.mapfile
+
+# pad the model image with zeros, length = 1
+pad_model_images.control.type                           =   pad_image
+pad_model_images.control.mapfile_in                     =   create_model_map.output.mapfile
+pad_model_images.control.inputkey                       =   imagefile
+pad_model_images.argument.flags                         =   [imagefile,{{ wsclean_model_padding }}]
+
+# expand the mapfile of the model image to all files, length = some
+create_expanded_model_mapfile.control.kind              =   plugin
+create_expanded_model_mapfile.control.type              =   expandMapfile
+create_expanded_model_mapfile.control.mapfile_in        =   create_model_map.output.mapfile
+create_expanded_model_mapfile.control.mapfile_to_match  =   regroup_shift_empty_map.output.mapfile
+create_expanded_model_mapfile.control.mapfile_dir       =   input.output.mapfile_dir
+create_expanded_model_mapfile.control.filename          =   expand_wsclean_model.mapfile
+
+# expand mapfile of the model image sizes to all groups, length = some
+expand_facet_model_size_map.control.kind                =   plugin
+expand_facet_model_size_map.control.type                =   expandMapfile
+expand_facet_model_size_map.control.mapfile_in          =   pad_model_images.output.padsize.mapfile
+expand_facet_model_size_map.control.mapfile_to_match    =   regroup_shift_empty_map.output.mapfile
+expand_facet_model_size_map.control.mapfile_dir         =   input.output.mapfile_dir
+expand_facet_model_size_map.control.filename            =   expand_facet_model_size.mapfile
 
 # sort the "shift_empty" unaveraged data into groups that can be concatenated, length = some
 # needed because virtual concatenating all files results in a "too many open files" error.
@@ -324,15 +347,6 @@ regroup_shift_empty_map.control.join_max_files          =   100
 regroup_shift_empty_map.control.rotate_groups           =   True
 regroup_shift_empty_map.control.filename                =   regroup_shift_empty.mapfile
 
-# expand the mapfile of the model image to all files, length = some
-create_expanded_model_mapfile.control.kind              =   plugin
-create_expanded_model_mapfile.control.type              =   expandMapfile
-create_expanded_model_mapfile.control.mapfile_in        =   create_model_map.output.mapfile
-create_expanded_model_mapfile.control.mapfile_to_match  =   regroup_shift_empty_map.output.mapfile
-create_expanded_model_mapfile.control.mapfile_dir       =   input.output.mapfile_dir
-create_expanded_model_mapfile.control.filename          =   expand_wsclean_model.mapfile
-
-{% block ft_parms %}
 # make model visibilities, length = some
 # For WSClean predict, we need to increase the number of wplanes so that the
 # effective model image size is larger than the FOV (to prevent aliasing issues)
