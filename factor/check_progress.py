@@ -56,13 +56,26 @@ def run(parset_file, trim_names=True):
     logging.root.setLevel(logging.INFO)
     log.setLevel(logging.INFO)
 
+    # Check for other assignments of the shortcuts we want to use and, if found,
+    # remove them
+    factor_keys = ['u', 'c', 'f', 't', 'g']
+    for k in plt.rcParams.iterkeys():
+        if 'keymap' in k:
+            for key in factor_keys:
+                if type(plt.rcParams[k]) is list:
+                    if key in plt.rcParams[k]:
+                        indx = plt.rcParams[k].index(key)
+                        plt.rcParams[k][indx] = ''
+                elif key == plt.rcParams[k]:
+                    plt.rcParams[k] = ''
+
     # Plot field
     log.info('Plotting directions...')
     log.info('Left-click on a direction to select it and see its current state')
     log.info('Right-click on a direction to deselect it')
     log.info('(In both cases, pan/zoom mode must be off)')
     log.info('Press "c" to display calibrator selfcal images for selected direction')
-    log.info('Press "f" to display facet image for selected direction')
+    log.info('Press "i" to display facet image for selected direction')
     log.info('Press "t" to display TEC solutions for selected direction')
     log.info('Press "g" to display Gain solutions for selected direction')
     log.info('Press "u" to update display (display is updated automatically every minute)')
@@ -340,19 +353,6 @@ def on_press(event):
     """
     global fig, all_directions, at, selected_direction
 
-    # Check for other assignments of the shortcuts we want to use and, if found,
-    # remove them
-    factor_keys = ['u', 'c', 'f', 't', 'g']
-    for k in plt.rcParams.iterkeys():
-        if 'keymap' in k:
-            for key in factor_keys:
-                if type(plt.rcParams[k]) is list:
-                    if key in plt.rcParams[k]:
-                        indx = plt.rcParams[k].index(key)
-                        plt.rcParams[k][indx] = ''
-                elif key == plt.rcParams[k]:
-                    plt.rcParams[k] = ''
-
     if event.key == 'u':
         # Update plot
         info = 'Updating display...'
@@ -381,7 +381,7 @@ def on_press(event):
         else:
             info = 'No selfcal images exist for {}'.format(selected_direction.name)
 
-    elif event.key == 'f':
+    elif event.key == 'i':
         # Open full facet image (if any)
         if os.path.exists('/tmp/tempimage'):
             shutil.rmtree('/tmp/tempimage')
