@@ -164,13 +164,13 @@ def get_global_options(parset):
     if 'wsclean_image_padding' in parset_dict:
         parset_dict['wsclean_image_padding'] = parset.getfloat('global', 'wsclean_image_padding')
     else:
-        parset_dict['wsclean_image_padding'] = 0.0
+        parset_dict['wsclean_image_padding'] = 1.2
 
     # Padding factor for WSClean images (default = 1.4)
     if 'wsclean_model_padding' in parset_dict:
         parset_dict['wsclean_model_padding'] = parset.getfloat('global', 'wsclean_model_padding')
     else:
-        parset_dict['wsclean_model_padding'] = 0.0
+        parset_dict['wsclean_model_padding'] = 1.4
 
     # Use WSClean or CASA for imaging of entire facet (default = wsclean). For large
     # bandwidths, the CASA imager is typically faster
