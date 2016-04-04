@@ -97,12 +97,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             # Check whether direction went through selfcal successfully. If
             # not, exit
             if d.selfcal_ok:
-                # Set the name of the subtracted data column for remaining
-                # directions
+                # Set the name of the subtracted data column for all directions
                 if set_sub_data_colname:
                     for direction in directions:
-                        if direction.name != d.name:
-                            direction.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
+                        direction.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
                     set_sub_data_colname = False
             else:
                 log.error('Peeling verification failed for direction {0}.'.format(d.name))
