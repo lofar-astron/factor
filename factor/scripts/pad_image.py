@@ -11,8 +11,10 @@ import sys
 import os
 
 
-def main(root, scalefactor=1.5, verbose=True):
+def main(root, scalefactor=1.5):
     model_images = glob.glob(root + '-model.fits') + glob.glob(root + '-0*-model.fits') + glob.glob(root + '-MFS-model.fits')
+
+    scalefactor = float(scalefactor)
 
     for infile in model_images:
         hdu = pyfits.open(infile)
@@ -20,14 +22,12 @@ def main(root, scalefactor=1.5, verbose=True):
 
         (xsize, ysize) = imdata.shape
         assert(xsize == ysize)
-        if verbose:
-            print 'size is', xsize
+        print 'size is', xsize
 
         padsize = int(xsize * scalefactor)
         offset = (padsize - xsize) / 2
-        if verbose:
-            print 'padding to', padsize
-            print 'offset is', offset
+        print 'padding to', padsize
+        print 'offset is', offset
 
         newdata=np.zeros((1, 1, padsize, padsize))
 
