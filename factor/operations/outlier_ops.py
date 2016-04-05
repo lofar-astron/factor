@@ -58,8 +58,6 @@ class OutlierPeel(Operation):
             'merge_normalized_selfcal_parmdbs.mapfile')
         self.direction.dir_indep_skymodels_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'full_skymodels.mapfile')
-        self.direction.dir_dep_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'merge_selfcal_parmdbs.mapfile')
         self.direction.selfcal_plots_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'make_selfcal_plots.mapfile')
 
