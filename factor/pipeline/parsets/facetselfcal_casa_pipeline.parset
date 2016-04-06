@@ -156,7 +156,7 @@ concat_unaveraged.control.inputkey                         =   msfiles
 concat_unaveraged.control.outputkey                        =   msconcat
 concat_unaveraged.argument.flags                           =   [msfiles,msconcat]
 
-# create a compressed mapfile with the virtual concated files, length = 1 
+# create a compressed mapfile with the virtual concated files, length = 1
 # needed because the following casa-step can run only once.
 create_compressed_mapfile6.control.kind                    =   plugin
 create_compressed_mapfile6.control.type                    =   compressMapfile

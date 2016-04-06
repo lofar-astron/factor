@@ -1,6 +1,6 @@
 {% extends "facetimage_skymodel_pipeline.parset" %}
 {% block full_image_steps %}virtual_concat, premask, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2{% endblock full_image_steps %}
-{% block ft_steps %}create_model4_map, concat_unaveraged, create_compressed_mapfile6, casa_ft{% endblock ft_steps %}
+{% block ft_steps %}create_model4_map, regroup_add_all_map, concat_unaveraged, create_compressed_mapfile6, casa_ft{% endblock ft_steps %}
 {% block full_image_parms %}
 
 # make a virtual concatenated map, length = 1
@@ -132,34 +132,45 @@ adjust_casa_mapfile2.control.filename             =   final_image.mapfile
 
 {% block ft_parms %}
 # create a mapfile with the model image, length = 1
-create_model4_map.control.kind                             =   plugin
-create_model4_map.control.type                             =   trimMapfile
-create_model4_map.control.mapfile_in                       =   casa_image_full2.output.casa_image_full2.model.mapfile
-create_model4_map.control.trim                             =   .model
-create_model4_map.control.mapfile_dir                      =   input.output.mapfile_dir
-create_model4_map.control.filename                         =   final_model_rootnames.mapfile
+create_model4_map.control.kind                    =   plugin
+create_model4_map.control.type                    =   trimMapfile
+create_model4_map.control.mapfile_in              =   casa_image_full2.output.casa_image_full2.model.mapfile
+create_model4_map.control.trim                    =   .model
+create_model4_map.control.mapfile_dir             =   input.output.mapfile_dir
+create_model4_map.control.filename                =   final_model_rootnames.mapfile
+
+# sort the "add_all" unaveraged data into groups that can be concatenated, length = some
+# needed because virtual concatenating all files results in a "too many open files" error.
+regroup_add_all_map.control.kind                  =   plugin
+regroup_add_all_map.control.type                  =   reGroupMapfile
+regroup_add_all_map.control.mapfile_in            =   add_all_facet_sources.output.mapfile
+regroup_add_all_map.control.mapfile_groups        =   create_msmulti_map.output.mapfile
+regroup_add_all_map.control.mapfile_dir           =   input.output.mapfile_dir
+regroup_add_all_map.control.join_max_files        =   100
+regroup_add_all_map.control.rotate_groups         =   True
+regroup_add_all_map.control.filename              =   regroup_add_all.mapfile
 
 ## virtual concat of the re-grouped unaveraged data, length = some
-concat_unaveraged.control.type                             =   virtual_concat
-concat_unaveraged.control.mapfile_in                       =   regroup_shift_empty_map.output.mapfile
-concat_unaveraged.control.inputkey                         =   msfiles
-concat_unaveraged.control.outputkey                        =   msconcat
-concat_unaveraged.argument.flags                           =   [msfiles,msconcat]
+concat_unaveraged.control.type                    =   virtual_concat
+concat_unaveraged.control.mapfile_in              =   regroup_add_all_map.output.mapfile
+concat_unaveraged.control.inputkey                =   msfiles
+concat_unaveraged.control.outputkey               =   msconcat
+concat_unaveraged.argument.flags                  =   [msfiles,msconcat]
 
 # create a compressed mapfile with the virtual concated files, length = 1
 # needed because the following casa-step can run only once.
-create_compressed_mapfile6.control.kind                    =   plugin
-create_compressed_mapfile6.control.type                    =   compressMapfile
-create_compressed_mapfile6.control.mapfile_in              =   concat_unaveraged.output.mapfile
-create_compressed_mapfile6.control.mapfile_dir             =   input.output.mapfile_dir
-create_compressed_mapfile6.control.filename                =   concat_unaveraged_compressed.datamap
+create_compressed_mapfile6.control.kind           =   plugin
+create_compressed_mapfile6.control.type           =   compressMapfile
+create_compressed_mapfile6.control.mapfile_in     =   concat_unaveraged.output.mapfile
+create_compressed_mapfile6.control.mapfile_dir    =   input.output.mapfile_dir
+create_compressed_mapfile6.control.filename       =   concat_unaveraged_compressed.datamap
 
 # make model visibilities on the unaveraged data, length = 1
 # can run only once, because (may) create files in the directory of input data
-casa_ft4.control.type                                      =   casa
-casa_ft4.control.mapfiles_in                               =   [create_compressed_mapfile6.output.mapfile,create_model4_map.output.mapfile]
-casa_ft4.control.inputkeys                                 =   [inputms,modelimg]
-casa_ft4.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft_multi.py,modelimg,{{ nterms }},{{ facet_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py,inputms]
+casa_ft4.control.type                             =   casa
+casa_ft4.control.mapfiles_in                      =   [create_compressed_mapfile6.output.mapfile,create_model4_map.output.mapfile]
+casa_ft4.control.inputkeys                        =   [inputms,modelimg]
+casa_ft4.control.arguments                        =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft_multi.py,modelimg,{{ nterms }},{{ facet_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py,inputms]
 
 {% endblock ft_parms %}
 
