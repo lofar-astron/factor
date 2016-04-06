@@ -129,6 +129,8 @@ class Direction(object):
         self.cellsize_selfcal_deg = 0.000417 # selfcal cell size
         self.cellsize_facet_deg = 0.000417 # facet image cell size
         self.cellsize_verify_deg = 0.00833 # verify subtract cell size
+        self.robust_selfcal = -0.25 # selfcal robust parameter
+        self.robust_facet = -0.25 # facet image robust parameter
         self.target_rms_rad = 0.2 # preaverage target rms
         self.subtracted_data_colname = 'SUBTRACTED_DATA_ALL' # name of empty data column
         self.pre_average = False # whether to use baseline averaging
@@ -170,7 +172,8 @@ class Direction(object):
 
     def set_imcal_parameters(self, nbands_per_channel, chan_width_hz,
     	nchan, timestep_sec, ntimes, nbands, mean_freq_mhz, initial_skymodel=None,
-    	preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95, tec_block_mhz=10.0):
+    	preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95, tec_block_mhz=10.0,
+    	selfcal_cellsize_arcsec=1.5, selfcal_robust=-0.25):
         """
         Sets various parameters for imaging and calibration
 
@@ -203,8 +206,16 @@ class Direction(object):
         tec_block_mhz : float, optional
             Size of frequency block in MHz over which a single TEC solution is
             fit
+        selfcal_cellsize_arcsec : float, optional
+            Cellsize for selfcal imaging
+        selfcal_robust : float, optional
+            Briggs robust parameter for selfcal imaging
 
         """
+        self.cellsize_selfcal_deg = selfcal_cellsize_arcsec / 3600.0
+        self.cellsize_facet_deg = selfcal_cellsize_arcsec / 3600.0
+        self.robust_selfcal = selfcal_robust
+        self.robust_facet = selfcal_robust
         self.set_imaging_parameters(nbands, nbands_per_channel, nchan,
             initial_skymodel)
         self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,

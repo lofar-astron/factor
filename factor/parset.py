@@ -35,16 +35,23 @@ def parset_read(parset_file, use_log_file=True):
     log.info("Reading parset file: {}".format(parset_file))
     parset = ConfigParser.RawConfigParser()
     parset.read(parset_file)
-    parset_dict = {}
+    parset_dict = {'direction_specific': {}, 'calibration_specific': {},
+        'imaging_specific': {}, 'cluster_specific': {}}
 
     # Handle global parameters
     parset_dict.update(get_global_options(parset))
 
+    # Handle calibration parameters
+    parset_dict['calibration_specific'].update(get_calibration_options(parset)['calibration_specific'])
+
+    # Handle imaging parameters
+    parset_dict['imaging_specific'].update(get_imaging_options(parset)['imaging_specific'])
+
     # Handle directions-related parameters
-    parset_dict.update(get_directions_options(parset))
+    parset_dict['direction_specific']update(get_directions_options(parset)['direction_specific'])
 
     # Handle cluster-specific parameters
-    parset_dict.update(get_cluster_options(parset))
+    parset_dict['cluster_specific'].update(get_cluster_options(parset)['cluster_specific'])
 
     # Set up working directory. All output will be placed in this directory
     if '+' in parset_dict['dir_working']:
@@ -88,7 +95,7 @@ def parset_read(parset_file, use_log_file=True):
     # Check for unused sections
     given_sections = parset._sections.keys()
     msfiles = [os.path.basename(m) for m in parset_dict['mss']]
-    allowed_sections = ['global', 'directions', 'cluster'] + msfiles
+    allowed_sections = ['global', 'calibration', 'imaging', 'directions', 'cluster'] + msfiles
     for section in given_sections:
         if section not in allowed_sections:
             log.warning('Section "{}" was given in the parset but is not a valid '
@@ -114,6 +121,9 @@ def get_global_options(parset):
     """
     parset_dict = parset._sections['global']
 
+    # Add dicts for new parset sections
+    parset_dict['calibration_specific'] = {}
+
     # Parmdb name for dir-indep. selfcal solutions (stored inside the input band
     # measurement sets, so path should be relative to those; default = instrument)
     if 'parmdb_name' not in parset_dict:
@@ -133,37 +143,37 @@ def get_global_options(parset):
 
     # Make final mosaic (default = True)
     if 'make_mosaic' in parset_dict:
-        parset_dict['make_mosaic'] = parset.getboolean('global', 'make_mosaic')
+        parset_dict['imaging_specific']['make_mosaic'] = parset.getboolean('global', 'make_mosaic')
     else:
-        parset_dict['make_mosaic'] = True
+        parset_dict['imaging_specific']['make_mosaic'] = True
 
     # Exit if selfcal fails for any direction (default = True). If False, processing
     # will continue and the failed direction will receive the selfcal solutions of
     # the nearest successful direction unless skip_selfcal_check is True, in which
     # case processing continues as if the selfcal succeeded
     if 'exit_on_selfcal_failure' in parset_dict:
-        parset_dict['exit_on_selfcal_failure'] = parset.getboolean('global',
+        parset_dict['calibration_specific']['exit_on_selfcal_failure'] = parset.getboolean('global',
             'exit_on_selfcal_failure')
     else:
-        parset_dict['exit_on_selfcal_failure'] = True
+        parset_dict['calibration_specific']['exit_on_selfcal_failure'] = True
     if 'skip_selfcal_check' in parset_dict:
-        parset_dict['skip_selfcal_check'] = parset.getboolean('global',
+        parset_dict['calibration_specific']['skip_selfcal_check'] = parset.getboolean('global',
             'skip_selfcal_check')
     else:
-        parset_dict['skip_selfcal_check'] = False
+        parset_dict['calibration_specific']['skip_selfcal_check'] = False
 
     # Max number of bands per WSClean image when wide-band clean is used (default =
     # 5). Smaller values produce better results but require longer run times.
     # Wide-band clean is activated when there are more than 5 bands
     if 'wsclean_nbands' in parset_dict:
-        parset_dict['wsclean_nbands'] = parset.getint('global', 'wsclean_nbands')
+        parset_dict['imaging_specific']['wsclean_nbands'] = parset.getint('global', 'wsclean_nbands')
     else:
-        parset_dict['wsclean_nbands'] = 3
+        parset_dict['imaging_specific']['wsclean_nbands'] = 3
 
     # Use WSClean or CASA for imaging of entire facet (default = wsclean). For large
     # bandwidths, the CASA imager is typically faster
     if 'facet_imager' not in parset_dict:
-        parset_dict['facet_imager'] = 'wsclean'
+        parset_dict['imaging_specific']['facet_imager'] = 'wsclean'
 
     # Keep calibrated data for each facet to allow re-imaging by hand (default =
     # True for averaged data and False for unaveraged data). If a target is
@@ -183,26 +193,26 @@ def get_global_options(parset):
     # until the improvement in dynamic range over the previous image is less than
     # 1.25%
     if 'max_selfcal_loops' in parset_dict:
-        parset_dict['max_selfcal_loops'] = parset.getint('global', 'max_selfcal_loops')
+        parset_dict['calibration_specific']['max_selfcal_loops'] = parset.getint('global', 'max_selfcal_loops')
     else:
-        parset_dict['max_selfcal_loops'] = 10
+        parset_dict['calibration_specific']['max_selfcal_loops'] = 10
 
     # Use baseline-dependent preaveraging to increase the signal-to-noise of the
     # phase-only solve for sources below this flux (default = 0.0; i.e., disabled).
     # When activated, averaging in time is done to exploit the time coherence in the
     # TEC solutions
     if 'preaverage_flux_jy' in parset_dict:
-        parset_dict['preaverage_flux_jy'] = parset.getfloat('global', 'preaverage_flux_jy')
+        parset_dict['calibration_specific']['preaverage_flux_jy'] = parset.getfloat('global', 'preaverage_flux_jy')
     else:
-        parset_dict['preaverage_flux_jy'] = 0.0
+        parset_dict['calibration_specific']['preaverage_flux_jy'] = 0.0
 
     # Use multi-scale selfcal that starts at 20 arcsec resolution and increases the
     # resolution in stages to the full resolution (default = False). This method may
     # improve convergence, especially when the starting model is poor
     if 'multiscale_selfcal' in parset_dict:
-        parset_dict['multiscale_selfcal'] = parset.getboolean('global', 'multiscale_selfcal')
+        parset_dict['calibration_specific']['multiscale_selfcal'] = parset.getboolean('global', 'multiscale_selfcal')
     else:
-        parset_dict['multiscale_selfcal'] = False
+        parset_dict['calibration_specific']['multiscale_selfcal'] = False
 
     # Max desired peak flux density reduction at center of the facet edges due to
     # bandwidth smearing (at the mean frequency) and time smearing (default = 0.15 =
@@ -210,29 +220,220 @@ def get_global_options(parset):
     # more smearing away from the facet centers. This value only applies to the
     # facet imaging (selfcal always uses a value of 0.15)
     if 'max_peak_smearing' in parset_dict:
-        parset_dict['max_peak_smearing'] = parset.getfloat('global', 'max_peak_smearing')
+        parset_dict['imaging_specific']['max_peak_smearing'] = parset.getfloat('global', 'max_peak_smearing')
     else:
-        parset_dict['max_peak_smearing'] = 0.15
+        parset_dict['imaging_specific']['max_peak_smearing'] = 0.15
 
     # Size of frequency block in MHz over which a single TEC solution is fit
     # (default = 10)
     if 'tec_block_mhz' in parset_dict:
-        parset_dict['tec_block_mhz'] = parset.getfloat('global', 'tec_block_mhz')
+        parset_dict['calibration_specific']['tec_block_mhz'] = parset.getfloat('global', 'tec_block_mhz')
     else:
-        parset_dict['tec_block_mhz'] = 10.0
+        parset_dict['calibration_specific']['tec_block_mhz'] = 10.0
+
+    # Selfcal imaging parameters: pixel size in arcsec (default = 1.5) and Briggs
+    # robust parameter (default = -0.25)
+    if 'selfcal_cellsize_arcsec' in parset_dict:
+        parset_dict['imaging_specific']['selfcal_cellsize_arcsec'] = parset.getfloat('global', 'selfcal_cellsize_arcsec')
+    else:
+        parset_dict['imaging_specific']['selfcal_cellsize_arcsec'] = 1.5
+    if 'selfcal_robust' in parset_dict:
+        parset_dict['imaging_specific']['selfcal_robust'] = parset.getfloat('global', 'selfcal_robust')
+    else:
+        parset_dict['imaging_specific']['selfcal_robust'] = -0.25
+
 
     # Check for unused options
     given_options = parset.options('global')
-    allowed_options = ['dir_working', 'dir_ms', 'lofarroot',
-        'lofarpythonpath', 'parmdb_name', 'interactive', 'make_mosaic',
-        'exit_on_selfcal_failure', 'skip_selfcal_check', 'wsclean_nbands',
-        'facet_imager', 'keep_avg_facet_data', 'keep_unavg_facet_data',
-        'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal',
-        'skymodel_extension', 'max_peak_smearing', 'tec_block_mhz']
+    allowed_options = ['dir_working', 'dir_ms', 'parmdb_name', 'interactive',
+        'make_mosaic', 'exit_on_selfcal_failure', 'skip_selfcal_check',
+        'wsclean_nbands', 'facet_imager', 'keep_avg_facet_data',
+        'keep_unavg_facet_data', 'max_selfcal_loops', 'preaverage_flux_jy',
+        'multiscale_selfcal', 'skymodel_extension', 'max_peak_smearing',
+        'tec_block_mhz', 'selfcal_cellsize_arcsec', 'selfcal_robust']
+    deprecated_options_imaging = ['make_mosaic', 'wsclean_nbands',
+        'facet_imager', 'max_peak_smearing', 'selfcal_cellsize_arcsec',
+        'selfcal_robust']
+    deprecated_options_cal = ['exit_on_selfcal_failure',
+        'skip_selfcal_check', 'max_selfcal_loops', 'preaverage_flux_jy',
+        'multiscale_selfcal', 'tec_block_mhz']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [global] section of the '
                 'parset but is not a valid global option'.format(option))
+        if option in deprecated_options_imaging:
+            log.warning('Option "{}" was given in the [global] section of the '
+                'parset but should be in the [imaging] section'.format(option))
+        if option in deprecated_options_cal:
+            log.warning('Option "{}" was given in the [global] section of the '
+                'parset but should be in the [calibration] section'.format(option))
+
+    return parset_dict
+
+
+def get_calibration_options(parset):
+    """
+    Handle the calibration options
+
+    Parameters
+    ----------
+    parset : RawConfigParser object
+        Input parset
+
+    Returns
+    -------
+    parset_dict : dict
+        Dictionary with all calibration options
+
+    """
+    if 'calibration' in parset._sections.keys():
+        parset_dict = {'calibration_specific': parset._sections['calibration']}
+    else:
+        parset_dict = {'calibration_specific': {}}
+
+    # Exit if selfcal fails for any direction (default = True). If False, processing
+    # will continue and the failed direction will receive the selfcal solutions of
+    # the nearest successful direction unless skip_selfcal_check is True, in which
+    # case processing continues as if the selfcal succeeded
+    if 'exit_on_selfcal_failure' in parset_dict:
+        parset_dict['calibration_specific']['exit_on_selfcal_failure'] = parset.getboolean('calibration',
+            'exit_on_selfcal_failure')
+    else:
+        parset_dict['calibration_specific']['exit_on_selfcal_failure'] = True
+    if 'skip_selfcal_check' in parset_dict:
+        parset_dict['calibration_specific']['skip_selfcal_check'] = parset.getboolean('calibration',
+            'skip_selfcal_check')
+    else:
+        parset_dict['calibration_specific']['skip_selfcal_check'] = False
+
+    # Maximum number of cycles of the last step of selfcal to perform (default =
+    # 10). The last step is looped until the number of cycles reaches this value or
+    # until the improvement in dynamic range over the previous image is less than
+    # 1.25%
+    if 'max_selfcal_loops' in parset_dict:
+        parset_dict['calibration_specific']['max_selfcal_loops'] = parset.getint('calibration', 'max_selfcal_loops')
+    else:
+        parset_dict['calibration_specific']['max_selfcal_loops'] = 10
+
+    # Use baseline-dependent preaveraging to increase the signal-to-noise of the
+    # phase-only solve for sources below this flux (default = 0.0; i.e., disabled).
+    # When activated, averaging in time is done to exploit the time coherence in the
+    # TEC solutions
+    if 'preaverage_flux_jy' in parset_dict:
+        parset_dict['calibration_specific']['preaverage_flux_jy'] = parset.getfloat('calibration', 'preaverage_flux_jy')
+    else:
+        parset_dict['calibration_specific']['preaverage_flux_jy'] = 0.0
+
+    # Use multi-scale selfcal that starts at 20 arcsec resolution and increases the
+    # resolution in stages to the full resolution (default = False). This method may
+    # improve convergence, especially when the starting model is poor
+    if 'multiscale_selfcal' in parset_dict:
+        parset_dict['calibration_specific']['multiscale_selfcal'] = parset.getboolean('calibration', 'multiscale_selfcal')
+    else:
+        parset_dict['calibration_specific']['multiscale_selfcal'] = False
+
+    # Size of frequency block in MHz over which a single TEC solution is fit
+    # (default = 10)
+    if 'tec_block_mhz' in parset_dict:
+        parset_dict['calibration_specific']['tec_block_mhz'] = parset.getfloat('calibration', 'tec_block_mhz')
+    else:
+        parset_dict['calibration_specific']['tec_block_mhz'] = 10.0
+
+    # Check for unused options
+    given_options = parset.options('calibration')
+    allowed_options = = ['exit_on_selfcal_failure', 'skip_selfcal_check',
+        'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal',
+        'tec_block_mhz']
+    for option in given_options:
+        if option not in allowed_options:
+            log.warning('Option "{}" was given in the [calibration] section of the '
+                'parset but is not a valid calibration option'.format(option))
+
+    return parset_dict
+
+
+def get_imaging_options(parset):
+    """
+    Handle the imaging options
+
+    Parameters
+    ----------
+    parset : RawConfigParser object
+        Input parset
+
+    Returns
+    -------
+    parset_dict : dict
+        Dictionary with all imaging options
+
+    """
+    if 'imaging' in parset._sections.keys():
+        parset_dict = {'imaging_specific': parset._sections['imaging']}
+    else:
+        parset_dict = {'imaging_specific': {}}
+
+    # Make final mosaic (default = True)
+    if 'make_mosaic' in parset_dict:
+        parset_dict['imaging_specific']['make_mosaic'] = parset.getboolean('imaging', 'make_mosaic')
+    else:
+        parset_dict['imaging_specific']['make_mosaic'] = True
+
+    # Re-image directions for which selfcal was successful (default = False)
+    if 'reimage' in parset_dict['imaging_specific']:
+        parset_dict['imaging_specific']['reimage'] = parset.getboolean('imaging',
+            'reimage')
+    elif 'reimage' in parset['direction_specific']:
+        log.warning('Option "reimage" was given in the [directions] section of the '
+            'parset but should be in the [imaging] section')
+        parset_dict['imaging_specific']['reimage'] = parset.getboolean('directions',
+            'reimage')
+    else:
+        parset_dict['imaging_specific']['reimage'] = False
+
+    # Max number of bands per WSClean image when wide-band clean is used (default =
+    # 5). Smaller values produce better results but require longer run times.
+    # Wide-band clean is activated when there are more than 5 bands
+    if 'wsclean_nbands' in parset_dict:
+        parset_dict['imaging_specific']['wsclean_nbands'] = parset.getint('imaging', 'wsclean_nbands')
+    else:
+        parset_dict['imaging_specific']['wsclean_nbands'] = 3
+
+    # Use WSClean or CASA for imaging of entire facet (default = wsclean). For large
+    # bandwidths, the CASA imager is typically faster
+    if 'facet_imager' not in parset_dict:
+        parset_dict['imaging_specific']['facet_imager'] = 'wsclean'
+
+    # Max desired peak flux density reduction at center of the facet edges due to
+    # bandwidth smearing (at the mean frequency) and time smearing (default = 0.15 =
+    # 15% reduction in peak flux). Higher values result in shorter run times but
+    # more smearing away from the facet centers. This value only applies to the
+    # facet imaging (selfcal always uses a value of 0.15)
+    if 'max_peak_smearing' in parset_dict:
+        parset_dict['imaging_specific']['max_peak_smearing'] = parset.getfloat('imaging', 'max_peak_smearing')
+    else:
+        parset_dict['imaging_specific']['max_peak_smearing'] = 0.15
+
+
+    # Selfcal imaging parameters: pixel size in arcsec (default = 1.5) and Briggs
+    # robust parameter (default = -0.25)
+    if 'selfcal_cellsize_arcsec' in parset_dict:
+        parset_dict['imaging_specific']['selfcal_cellsize_arcsec'] = parset.getfloat('imaging', 'selfcal_cellsize_arcsec')
+    else:
+        parset_dict['imaging_specific']['selfcal_cellsize_arcsec'] = 1.5
+    if 'selfcal_robust' in parset_dict:
+        parset_dict['imaging_specific']['selfcal_robust'] = parset.getfloat('imaging', 'selfcal_robust')
+    else:
+        parset_dict['imaging_specific']['selfcal_robust'] = -0.25
+
+
+    # Check for unused options
+    given_options = parset.options('imaging')
+    allowed_options = ['make_mosaic', 'wsclean_nbands', 'facet_imager',
+        'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust']
+    for option in given_options:
+        if option not in allowed_options:
+            log.warning('Option "{}" was given in the [imaging] section of the '
+                'parset but is not a valid imaging option'.format(option))
 
     return parset_dict
 
@@ -315,11 +516,15 @@ def get_directions_options(parset):
 
     # Number of internally derived directions can be limited to a maximum number
     # of directions if desired with max_num (default = all).
-    if 'max_num' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['max_num'] = parset.getint('directions',
+    if 'ndir_max' in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['ndir_max'] = parset.getint('directions',
+            'ndir_max')
+    elif 'max_num' in parset_dict['direction_specific']:
+        log.warning('Option "max_num" is deprecated and should be changed to "ndir_max"')
+        parset_dict['direction_specific']['ndir_max'] = parset.getint('directions',
             'max_num')
     else:
-        parset_dict['direction_specific']['max_num'] = None
+        parset_dict['direction_specific']['ndir_max'] = None
 
     # Radius within which facets will be used (default = 1.25 * FWHM of primary beam
     # of highest-frequency band); outside of this radius, small patches are used
@@ -379,14 +584,21 @@ def get_directions_options(parset):
     # direction for which selfcal succeeded (if a target is specified and
     # target_has_own_facet = True, it will be imaged in this way after ndir_total
     # number of directions are processed)
-    if 'ndir_total' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['ndir_total'] = parset.getint('directions', 'ndir_total')
-        if parset_dict['direction_specific']['ndir_total'] < 1:
+    if 'ndir_process' in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['ndir_process'] = parset.getint('directions', 'ndir_process')
+        if parset_dict['direction_specific']['ndir_process'] < 1:
             log.error('Total number of directions to process must be 1 or more')
             sys.exit(1)
-        log.info("Processing up to %s direction(s) in total" % (parset_dict['direction_specific']['ndir_total']))
+        log.info("Processing up to %s direction(s) in total" % (parset_dict['direction_specific']['ndir_process']))
+    elif 'ndir_total' in parset_dict['direction_specific']:
+        log.warning('Option "ndir_total" is deprecated and should be changed to "ndir_process"')
+        parset_dict['direction_specific']['ndir_process'] = parset.getint('directions', 'ndir_total')
+        if parset_dict['direction_specific']['ndir_process'] < 1:
+            log.error('Total number of directions to process must be 1 or more')
+            sys.exit(1)
+        log.info("Processing up to %s direction(s) in total" % (parset_dict['direction_specific']['ndir_process']))
     else:
-        parset_dict['direction_specific']['ndir_total'] = None
+        parset_dict['direction_specific']['ndir_process'] = None
 
     # A target can be specified to ensure that it falls entirely within a single
     # facet. The values should be those of a circular region that encloses the
@@ -414,27 +626,25 @@ def get_directions_options(parset):
     # direction is within this distance of a calibrator for which selfcal was
     # successful, the dir-dep selfcal solutions from this calibrator will be used
     # instead of the dir-indep ones
-    if 'transfer_radius' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['transfer_radius'] = parset.getfloat('directions',
+    if 'transfer_radius_deg' in parset_dict['direction_specific']:
+        parset_dict['direction_specific']['transfer_radius_deg'] = parset.getfloat('directions',
+            'transfer_radius_deg')
+    elif 'transfer_radius' in parset_dict['direction_specific']:
+        log.warning('Option "transfer_radius" is deprecated and should be changed to "transfer_radius_deg"')
+        parset_dict['direction_specific']['transfer_radius_deg'] = parset.getfloat('directions',
             'transfer_radius')
     else:
-        parset_dict['direction_specific']['transfer_radius'] = 0.0
-
-    # Re-image directions for which selfcal was successful (default = False)
-    if 'reimage' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['reimage'] = parset.getboolean('directions',
-            'reimage')
-    else:
-        parset_dict['direction_specific']['reimage'] = False
+        parset_dict['direction_specific']['transfer_radius_deg'] = 0.0
 
     # Check for unused options
     given_options = parset.options('directions')
     allowed_options = ['directions_file', 'max_radius_deg',
         'flux_min_for_merging_jy', 'flux_min_jy', 'size_max_arcmin',
-        'separation_max_arcmin', 'max_num', 'faceting_radius_deg',
-        'check_edges', 'ndir_total', 'ndir_selfcal', 'transfer_radius',
-        'groupings', 'allow_reordering', 'reimage', 'target_ra',
-        'target_dec', 'target_radius_arcmin', 'target_has_own_facet']
+        'separation_max_arcmin', 'max_num', 'ndir_max',
+        'faceting_radius_deg', 'check_edges', 'ndir_total', 'ndir_process',
+        'ndir_selfcal', 'transfer_radius', 'transfer_radius_deg',
+        'groupings', 'allow_reordering', 'target_ra', 'target_dec',
+        'target_radius_arcmin', 'target_has_own_facet']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [directions] section of the '
@@ -496,13 +706,18 @@ def get_cluster_options(parset):
 
     # Maximum fraction of the total memory per node that WSClean may use (default =
     # 0.9)
-    if 'fmem' in parset_dict['cluster_specific']:
-        parset_dict['cluster_specific']['fmem'] = parset.getfloat('cluster', 'fmem')
-        if parset_dict['cluster_specific']['fmem'] > 1.0:
-            parset_dict['cluster_specific']['fmem'] = 1.0
+    if 'wsclean_fmem' in parset_dict['cluster_specific']:
+        parset_dict['cluster_specific']['wsclean_fmem'] = parset.getfloat('cluster', 'wsclean_fmem')
+        if parset_dict['cluster_specific']['wsclean_fmem'] > 1.0:
+            parset_dict['cluster_specific']['wsclean_fmem'] = 1.0
+    elif 'fmem' in parset_dict['cluster_specific']:
+        log.warning('Option "fmem" is deprecated and should be changed to "wsclean_fmem"')
+        parset_dict['cluster_specific']['wsclean_fmem'] = parset.getfloat('cluster', 'fmem')
+        if parset_dict['cluster_specific']['wsclean_fmem'] > 1.0:
+            parset_dict['cluster_specific']['wsclean_fmem'] = 1.0
     else:
-        parset_dict['cluster_specific']['fmem'] = 0.9
-    log.info("Using up to {0}% of the memory per node for WSClean".format(parset_dict['cluster_specific']['fmem']*100.0))
+        parset_dict['cluster_specific']['wsclean_fmem'] = 0.9
+    log.info("Using up to {0}% of the memory per node for WSClean jobs".format(parset_dict['cluster_specific']['wsclean_fmem']*100.0))
 
     # Number of directions to process in parallel on each node (default = 1). If
     # directions are split into groups to be processed in parallel (with the
@@ -547,9 +762,9 @@ def get_cluster_options(parset):
 
     # Check for unused options
     given_options = parset.options('cluster')
-    allowed_options = ['ncpu', 'fmem', 'ndir_per_node', 'nimg_per_node',
-        'clusterdesc_file', 'cluster_type', 'dir_local', 'node_list',
-        'lofarroot', 'lofarpythonpath']
+    allowed_options = ['ncpu', 'fmem', 'wsclean_fmem', 'ndir_per_node',
+        'nimg_per_node', 'clusterdesc_file', 'cluster_type', 'dir_local',
+        'node_list', 'lofarroot', 'lofarpythonpath']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [cluster] section of the '

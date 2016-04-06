@@ -81,7 +81,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             parset['cluster_specific']['node_list'],
             parset['cluster_specific']['nimg_per_node'],
             parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['fmem'],
+            parset['cluster_specific']['wsclean_fmem'],
             len(bands))
 
         # Do the peeling
@@ -101,7 +101,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     set_sub_data_colname = False
             else:
                 log.warn('Selfcal verification failed for direction {0}.'.format(d.name))
-                if parset['exit_on_selfcal_failure']:
+                if parset['calibration_specific']['exit_on_selfcal_failure']:
                     log.info('Exiting...')
                     sys.exit(1)
 
@@ -125,7 +125,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 parset['cluster_specific']['node_list'],
                 parset['cluster_specific']['nimg_per_node'],
                 parset['cluster_specific']['ncpu'],
-                parset['cluster_specific']['fmem'],
+                parset['cluster_specific']['wsclean_fmem'],
                 len(bands))
             ops = [FacetSubReset(parset, bands, d) for d in direction_group_reset_facetsub]
             for op in ops:
@@ -140,7 +140,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             parset['cluster_specific']['ndir_per_node'],
             parset['cluster_specific']['nimg_per_node'],
             parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['fmem'],
+            parset['cluster_specific']['wsclean_fmem'],
             len(bands))
 
         # Check for any directions within transfer radius that have successfully
@@ -149,7 +149,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         if len(dirs_with_selfcal) > 0:
             for d in direction_group:
                 nearest, sep = factor.directions.find_nearest(d, dirs_with_selfcal)
-                if sep < parset['direction_specific']['transfer_radius']:
+                if sep < parset['direction_specific']['transfer_radius_deg']:
                     log.debug('Initializing selfcal for direction {0} with solutions from direction {1}.'.format(
                         d.name, nearest.name))
                     d.dir_dep_parmdb_mapfile = nearest.dir_dep_parmdb_mapfile
@@ -178,7 +178,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             parset['cluster_specific']['node_list'],
             parset['cluster_specific']['nimg_per_node'],
             parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['fmem'],
+            parset['cluster_specific']['wsclean_fmem'],
             len(bands))
 
         # Subtract final model(s) for directions for which selfcal went OK
@@ -191,7 +191,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         for d in direction_group:
             if not d.selfcal_ok:
                 log.warn('Selfcal verification failed for direction {0}.'.format(d.name))
-        if not all(selfcal_ok) and parset['exit_on_selfcal_failure']:
+        if not all(selfcal_ok) and parset['calibration_specific']['exit_on_selfcal_failure']:
             log.info('Exiting...')
             sys.exit(1)
 
@@ -201,8 +201,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         log.error('Selfcal verification failed for all directions. Exiting...')
         sys.exit(1)
 
-    # Make final facet images (from final empty datasets) if desired. Also image
-    # any facets for which selfcal failed or no selfcal was done
+    # (Re)image facets
     dirs_to_image = [d for d in directions if d.make_final_image and
         d.selfcal_ok and not d.is_patch and not d.is_outlier]
     if len(dirs_to_image) > 0:
@@ -245,7 +244,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 parset['cluster_specific']['ndir_per_node'],
                 parset['cluster_specific']['nimg_per_node'],
                 parset['cluster_specific']['ncpu'],
-                parset['cluster_specific']['fmem'],
+                parset['cluster_specific']['wsclean_fmem'],
                 len(bands))
 
             # Do facet imaging
@@ -253,7 +252,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             scheduler.run(ops)
 
     # Mosaic the final facet images together
-    if parset['make_mosaic']:
+    if parset['imaging_specific']['make_mosaic']:
         # Make direction object for the field and load previous state (if any)
         field = Direction('field', bands[0].ra, bands[0].dec,
             factor_working_dir=parset['dir_working'])
@@ -276,7 +275,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             parset['cluster_specific']['node_list'],
             parset['cluster_specific']['nimg_per_node'],
             parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['fmem'],
+            parset['cluster_specific']['wsclean_fmem'],
             len(bands))[0]
 
         # Do mosaicking
@@ -539,9 +538,9 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
     if target_has_own_facet:
         direction_names = [d.name for d in directions]
         target = directions[direction_names.index('target')]
-    if dir_parset['ndir_total'] is not None:
-        if dir_parset['ndir_total'] < len(directions):
-            directions = directions[:dir_parset['ndir_total']]
+    if dir_parset['ndir_process'] is not None:
+        if dir_parset['ndir_process'] < len(directions):
+            directions = directions[:dir_parset['ndir_process']]
 
             # Make sure target is still included
             direction_names = [d.name for d in directions]
@@ -551,23 +550,23 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
     # Set various direction attributes
     log.info("Determining imaging parameters for each direction...")
     mean_freq_mhz = np.mean([b.freq for b in bands]) / 1e6
-    min_peak_smearing_factor = 1.0 - parset['max_peak_smearing']
+    min_peak_smearing_factor = 1.0 - parset['imaging_specific']['max_peak_smearing']
     for i, direction in enumerate(directions):
         # Set imaging and calibration parameters
-        direction.set_imcal_parameters(parset['wsclean_nbands'],
+        direction.set_imcal_parameters(parset['imaging_specific']['wsclean_nbands'],
             bands[0].chan_width_hz, bands[0].nchan, bands[0].timepersample,
             bands[0].minSamplesPerFile, len(bands), mean_freq_mhz,
-            initial_skymodel, parset['preaverage_flux_jy'],
+            initial_skymodel, parset['calibration_specific']['preaverage_flux_jy'],
             min_peak_smearing_factor=min_peak_smearing_factor,
-            tec_block_mhz=parset['tec_block_mhz'])
+            tec_block_mhz=parset['calibration_specific']['tec_block_mhz'])
 
         # Set field center to that of first band (all bands have the same phase
         # center)
         direction.field_ra = bands[0].ra
         direction.field_dec = bands[0].dec
 
-        # Set global re-image flag
-        direction.make_final_image = dir_parset['reimage']
+        # Set re-image flag
+        direction.make_final_image = parset['imaging_specific']['reimage']
 
         # Reset state if specified
         if direction.name in reset_directions:
@@ -652,7 +651,7 @@ def _initialize_directions(parset, initial_skymodel, ref_band, dry_run=False):
                 initial_skymodel.copy(), dir_parset['flux_min_jy'],
                 dir_parset['size_max_arcmin'],
                 dir_parset['separation_max_arcmin'],
-                directions_max_num=dir_parset['max_num'],
+                directions_max_num=dir_parset['ndir_max'],
                 interactive=parset['interactive'],
                 flux_min_for_merging_Jy=dir_parset['flux_min_for_merging_jy'])
             directions = factor.directions.directions_read(dir_parset['directions_file'],

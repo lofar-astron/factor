@@ -38,16 +38,17 @@ class FacetSelfcal(Operation):
             name='FacetSelfcal')
 
         # Set the pipeline parset to use
-        if self.parset['facet_imager'].lower() == 'casa' or self.parset['facet_imager'].lower() == 'casapy':
+        if (self.parset['imaging_specific']['facet_imager'].lower() == 'casa' or
+            self.parset['imaging_specific']['facet_imager'].lower() == 'casapy'):
             # Set parset template to CASA parset
-            if self.parset['multiscale_selfcal']:
+            if self.parset['calibration_specific']['multiscale_selfcal']:
                 # Set parset template to multi-scale selfcal parset
                 self.pipeline_parset_template = '{0}_taper_casa_pipeline.parset'.format(self.name)
             else:
                 self.pipeline_parset_template = '{0}_casa_pipeline.parset'.format(self.name)
         else:
             # Set parset template to default (i.e., WSClean) parset
-            if self.parset['multiscale_selfcal']:
+            if self.parset['calibration_specific']['multiscale_selfcal']:
                 # Set parset template to multi-scale selfcal parset
                 self.pipeline_parset_template = '{0}_taper_pipeline.parset'.format(self.name)
             else:
@@ -66,7 +67,7 @@ class FacetSelfcal(Operation):
             for parmdb in band.dirindparmdbs:
                 dir_indep_parmDBs.append(parmdb)
         skymodels = [band.skymodel_dirindep for band in self.bands]
-        loopcount = max(1, self.parset['max_selfcal_loops'])
+        loopcount = max(1, self.parset['calibration_specific']['max_selfcal_loops'])
         if self.direction.peel_skymodel is not None:
             initial_selfcal_skymodel = self.direction.peel_skymodel
             initial_selfcal_parset = os.path.join(self.factor_parset_dir,
@@ -119,14 +120,15 @@ class FacetSelfcal(Operation):
 
         # Store results of verify_subtract check. This will work if the verification
         # was done using multiple bands although we use only one at the moment
-        if os.path.exists(self.direction.verify_subtract_mapfile) and not self.parset['skip_selfcal_check']:
+        if (os.path.exists(self.direction.verify_subtract_mapfile) and not
+            self.parset['calibration_specific']['skip_selfcal_check']):
             ok_mapfile = DataMap.load(self.direction.verify_subtract_mapfile)
             ok_flags = [ast.literal_eval(item.file) for item in ok_mapfile]
             if all(ok_flags):
                 self.direction.selfcal_ok = True
             else:
                 self.direction.selfcal_ok = False
-        elif self.parset['skip_selfcal_check']:
+        elif self.parset['calibration_specific']['skip_selfcal_check']:
             self.direction.selfcal_ok = True
         else:
             self.direction.selfcal_ok = False
@@ -164,7 +166,7 @@ class FacetSelfcal(Operation):
             # imaging them all at once)
             self.direction.cleanup_mapfiles.append(
                 os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'))
-        if self.direction.selfcal_ok or not self.parset['exit_on_selfcal_failure']:
+        if self.direction.selfcal_ok or not self.parset['calibration_specific']['exit_on_selfcal_failure']:
             self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
             self.direction.cleanup()
 
@@ -212,7 +214,7 @@ class FacetImage(Operation):
             name='FacetImage')
 
         # Set the pipeline parset to use
-        if self.parset['facet_imager'].lower() == 'casa':
+        if self.parset['imaging_specific']['facet_imager'].lower() == 'casa':
             # Set parset template to casa parset
             if not self.direction.selfcal_ok:
                 # Set parset template to sky-model parset

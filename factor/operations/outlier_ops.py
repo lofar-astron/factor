@@ -63,14 +63,15 @@ class OutlierPeel(Operation):
 
         # Store results of verify_subtract check. This will work if the verification
         # was done using multiple bands although we use only one at the moment
-        if os.path.exists(self.direction.verify_subtract_mapfile) and not self.parset['skip_selfcal_check']:
+        if (os.path.exists(self.direction.verify_subtract_mapfile) and not
+            self.parset['calibration_specific']['skip_selfcal_check']):
             ok_mapfile = DataMap.load(self.direction.verify_subtract_mapfile)
             ok_flags = [ast.literal_eval(item.file) for item in ok_mapfile]
             if all(ok_flags):
                 self.direction.selfcal_ok = True
             else:
                 self.direction.selfcal_ok = False
-        elif self.parset['skip_selfcal_check']:
+        elif self.parset['calibration_specific']['skip_selfcal_check']:
             self.direction.selfcal_ok = True
         else:
             self.direction.selfcal_ok = False
