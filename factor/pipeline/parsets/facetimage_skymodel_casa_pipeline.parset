@@ -167,10 +167,10 @@ create_compressed_mapfile6.control.filename       =   concat_unaveraged_compress
 
 # make model visibilities on the unaveraged data, length = 1
 # can run only once, because (may) create files in the directory of input data
-casa_ft4.control.type                             =   casa
-casa_ft4.control.mapfiles_in                      =   [create_compressed_mapfile6.output.mapfile,create_model4_map.output.mapfile]
-casa_ft4.control.inputkeys                        =   [inputms,modelimg]
-casa_ft4.control.arguments                        =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft_multi.py,modelimg,{{ nterms }},{{ facet_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py,inputms]
+casa_ft.control.type                              =   casa
+casa_ft.control.mapfiles_in                       =   [create_compressed_mapfile6.output.mapfile,create_model4_map.output.mapfile]
+casa_ft.control.inputkeys                         =   [inputms,modelimg]
+casa_ft.control.arguments                         =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft_multi.py,modelimg,{{ nterms }},{{ facet_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py,inputms]
 
 {% endblock ft_parms %}
 
