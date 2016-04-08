@@ -135,6 +135,7 @@ class Direction(object):
         self.blavg_weight_column = 'WEIGHT_SPECTRUM' # name of weights column
         self.started_operations = []
         self.completed_operations = []
+        self.reset_operations = []
         self.cleanup_mapfiles = []
         self.do_reset = False # whether to reset this direction
         self.is_patch = False # whether direction is just a patch (not full facet)
@@ -269,12 +270,16 @@ class Direction(object):
             self.wsclean_suffix = '-image.fits'
 
         # Set number of iterations and threshold for full facet image, scaled to
-        # the number of bands
+        # the number of bands. We use 6 times more iterations for the full2
+        # image to ensure the imager has a reasonable chance to reach the
+        # threshold first (which is set by the masking step)
         scaling_factor = np.sqrt(np.float(nbands))
-        self.wsclean_full_image_niter = int(5000 * scaling_factor)
-        self.wsclean_full_image_threshold_jy =  1.5e-3 * 0.7 / scaling_factor
-        self.casa_full_image_niter = int(2000 * scaling_factor)
-        self.casa_full_image_threshold_mjy = "{}mJy".format(1.5 * 0.7 / scaling_factor)
+        self.wsclean_full1_image_niter = int(5000 * scaling_factor)
+        self.wsclean_full1_image_threshold_jy =  1.5e-3 * 0.7 / scaling_factor
+        self.casa_full1_image_niter = int(2000 * scaling_factor)
+        self.casa_full1_image_threshold_mjy = "{}mJy".format(1.5 * 0.7 / scaling_factor)
+        self.wsclean_full2_image_niter = int(30000 * scaling_factor)
+        self.casa_full2_image_niter = int(12000 * scaling_factor)
 
         # Set multiscale imaging mode: Get source sizes and check for large
         # sources (anything above 4 arcmin -- the CC sky model was convolved
@@ -282,7 +287,7 @@ class Direction(object):
         # 1 arcmin)
         if initial_skymodel is not None and self.mscale_field_do is None:
             sizes = self.get_source_sizes(initial_skymodel.copy())
-            large_size_arcmin = 4.0
+            large_size_arcmin = 6.0
             if any([s > large_size_arcmin for s in sizes]):
                 self.mscale_field_do = True
             else:
@@ -290,7 +295,8 @@ class Direction(object):
         if self.mscale_field_do:
             self.casa_multiscale = '[0, 3, 7, 25, 60, 150]'
             self.wsclean_multiscale = '-multiscale,'
-            self.wsclean_full_image_niter /= 2.0 # fewer iterations are needed
+            self.wsclean_full1_image_niter /= 2.0 # fewer iterations are needed
+            self.wsclean_full2_image_niter /= 2.0 # fewer iterations are needed
         else:
             self.casa_multiscale = '[0]'
             self.wsclean_multiscale = ''
@@ -412,7 +418,7 @@ class Direction(object):
         for i in range(len(skymodel)):
             inside[i] = bbPath.contains_point((x[i], y[i]))
         skymodel.select(inside, force=True)
-        sizes = skymodel.getPatchSizes(units='arcmin', weight=True)
+        sizes = skymodel.getPatchSizes(units='arcmin', weight=False)
 
         return sizes
 
@@ -823,23 +829,29 @@ class Direction(object):
         Parameters
         ----------
         op_names : list of str, optional
-            Name of operation to reset. If None, all started and completed
-            operations are reset
+            List of names of operations to reset. Reset is done only if the
+            operation name appears in self.reset_operations. If None, all
+            started and completed operations that are in self.reset_operations
+            are reset
 
         """
         if op_names is None:
             op_names = self.completed_operations[:] + self.started_operations[:]
         elif type(op_names) is str:
             op_names = [op_names]
-        self.log.info('Resetting state for operation(s): {}'.format(', '.join(op_names)))
+        op_names_reset = [op for op in op_names if op in self.reset_operations]
+        if len(op_names_reset) > 0:
+            self.log.info('Resetting state for operation(s): {}'.format(', '.join(op_names_reset)))
+        else:
+            return
 
         # Reset selfcal flag
-        if 'facetselfcal' in op_names:
+        if 'facetselfcal' in op_names_reset:
             self.selfcal_ok = False
 
         # Remove operation name from lists of started and completed operations
         # and delete the results directories
-        for op_name in op_names:
+        for op_name in op_names_reset:
             while op_name in self.completed_operations:
                 self.completed_operations.remove(op_name)
             while op_name in self.started_operations:

@@ -83,8 +83,8 @@ def solplot_scalarphase(parmdb, imageroot, refstationi, plot_international=False
 
         f.savefig(imageroot+"_scalarphase_channel{}.png".format(chan_indx),dpi=100)
         plt.close(f)
-
-    return
+    parmdbmtable = False
+    del(soldict)
 
 
 def solplot_tec(parmdb, imageroot, refstationi, plot_international=False, freq=None):
@@ -144,7 +144,8 @@ def solplot_tec(parmdb, imageroot, refstationi, plot_international=False, freq=N
 
         f.savefig(imageroot+"_tec_channel{}.png".format(chan_indx),dpi=100)
         plt.close(f)
-    return
+    parmdbmtable = False
+    del(soldict)
 
 
 def solplot_clock(parmdb, imageroot, refstationi, plot_international=False):
@@ -191,7 +192,9 @@ def solplot_clock(parmdb, imageroot, refstationi, plot_international=False):
         axs[istat][0].set_title(station)
 
     f.savefig(imageroot+"_clock.png",dpi=100)
-    return
+    plt.close(f)
+    parmdbmtable = False
+    del(soldict)
 
 def solplot_phase_phasors(parmdb, imageroot, refstationi, plot_international=False):
     parmdbmtable = lp.parmdb(parmdb)
@@ -242,7 +245,8 @@ def solplot_phase_phasors(parmdb, imageroot, refstationi, plot_international=Fal
 
         f.savefig(imageroot+"_phase_channel{}.png".format(chan_indx),dpi=100)
         plt.close(f)
-    return
+    parmdbmtable = False
+    del(soldict)
 
 
 def solplot_phase(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp=False, plot_international=False):
@@ -313,7 +317,9 @@ def solplot_phase(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp
             axsp[istat][0].set_title(station)
 
         fp.savefig(imageroot+"_phase_channel{}.png".format(chan_indx),dpi=100)
-    return
+        plt.close(fp)
+    parmdbmtable = False
+    del(soldict)
 
 
 def solplot_amp(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp=False, plot_international=False):
@@ -409,7 +415,9 @@ def solplot_amp(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp=F
             axsa[istat][0].set_title(station)
 
         fa.savefig(imageroot+"_amp_channel{}.png".format(chan_indx),dpi=100)
-    return
+        plt.close(fa)
+    parmdbmtable = False
+    del(soldict)
 
 
 def main(parmdb, imageroot, freq=150.0, plot_tec=True, plot_amp=True,
