@@ -391,7 +391,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
         with postions outside this radius will get small rectangular patches
         instead of thiessen polygons
     s : LSMTool SkyModel object, optional
-        Band to use to check for source near facet edges
+        Sky model to use to check for source near facet edges
     check_edges : bool, optional
         If True, check whether any know source falls on a facet edge. If sources
         are found that do, the facet is adjusted
