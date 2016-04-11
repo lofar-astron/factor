@@ -512,10 +512,10 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
         "selection (if desired)...")
     ref_band = bands[-1]
     max_radius_deg = dir_parset['max_radius_deg']
-    initial_skymodel = factor.directions.make_initial_skymodel(ref_band,
-        max_radius_deg=max_radius_deg)
+    initial_skymodel = factor.directions.make_initial_skymodel(ref_band)
     log.info('Setting up directions...')
-    directions = _initialize_directions(parset, initial_skymodel, ref_band, dry_run)
+    directions = _initialize_directions(parset, initial_skymodel, ref_band,
+        max_radius_deg=max_radius_deg, dry_run=dry_run)
 
     # Check with user
     if parset['interactive']:
@@ -625,7 +625,8 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
     return directions, direction_groups
 
 
-def _initialize_directions(parset, initial_skymodel, ref_band, dry_run=False):
+def _initialize_directions(parset, initial_skymodel, ref_band, max_radius_deg=None,
+    dry_run=False):
     """
     Read in directions file and initialize resulting directions
 
@@ -637,6 +638,9 @@ def _initialize_directions(parset, initial_skymodel, ref_band, dry_run=False):
         Local sky model
     ref_band : Band object
         Reference band
+    max_radius_deg : float, optional
+        Maximum radius in degrees from the phase center within which to include
+        sources. If None, it is set to the FWHM (i.e., a diameter of 2 * FWHM)
     dry_run : bool, optional
         If True, do not run pipelines. All parsets, etc. are made as normal
 
@@ -647,6 +651,7 @@ def _initialize_directions(parset, initial_skymodel, ref_band, dry_run=False):
 
     """
     dir_parset = parset['direction_specific']
+    s = initial_skymodel.copy()
 
     # First check for user-supplied directions file, then for Factor-generated
     # file from a previous run, then for parameters needed to generate it internally
@@ -668,9 +673,20 @@ def _initialize_directions(parset, initial_skymodel, ref_band, dry_run=False):
             # Make directions from dir-indep sky model of highest-frequency
             # band, as it has the smallest field of view
             log.info("No directions file given. Selecting directions internally...")
+
+            # Filter out sources that lie outside of maximum specific radius from phase
+            # center
+            if max_radius_deg is None:
+                max_radius_deg = ref_band.fwhm_deg # means a diameter of 2 * FWHM
+            log.info('Removing sources beyond a radius of {0} degrees (corresponding to '
+                'a diameter of {1} * FWHM of the primary beam at {2} MHz)...'.format(
+                max_radius_deg, round(2.0*max_radius_deg/ref_band.fwhm_deg, 1), ref_band.freq/1e6))
+            dist = s.getDistance(ref_band.ra, ref_band.dec, byPatch=True)
+            s.remove(dist > max_radius_deg, aggregate=True)
+
+            # Generate the directions file
             dir_parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(
-                initial_skymodel.copy(), dir_parset['flux_min_jy'],
-                dir_parset['size_max_arcmin'],
+                s, dir_parset['flux_min_jy'], dir_parset['size_max_arcmin'],
                 dir_parset['separation_max_arcmin'],
                 directions_max_num=dir_parset['max_num'],
                 interactive=parset['interactive'],
@@ -707,7 +723,7 @@ def _initialize_directions(parset, initial_skymodel, ref_band, dry_run=False):
         faceting_radius_deg = 1.25 * ref_band.fwhm_deg / 2.0
     beam_ratio = 1.0 / np.sin(ref_band.mean_el_rad) # ratio of N-S to E-W beam
     factor.directions.thiessen(directions, ref_band.ra, ref_band.dec,
-        faceting_radius_deg, s=initial_skymodel.copy(),
+        faceting_radius_deg, s=s,
         check_edges=dir_parset['check_edges'], target_ra=target_ra,
         target_dec=target_dec, target_radius_arcmin=target_radius_arcmin,
         beam_ratio=beam_ratio)
