@@ -160,11 +160,11 @@ def get_global_options(parset):
     else:
         parset_dict['wsclean_nbands'] = 3
 
-    # Padding factor for WSClean images (default = 1.4)
+    # Padding factor for WSClean images (default = 1.6)
     if 'wsclean_image_padding' in parset_dict:
         parset_dict['wsclean_image_padding'] = parset.getfloat('global', 'wsclean_image_padding')
     else:
-        parset_dict['wsclean_image_padding'] = 1.2
+        parset_dict['wsclean_image_padding'] = 1.6
 
     # Padding factor for WSClean images (default = 1.4)
     if 'wsclean_model_padding' in parset_dict:
