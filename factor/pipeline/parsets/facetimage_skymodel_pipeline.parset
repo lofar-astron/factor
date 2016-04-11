@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources,  add_all_facet_sources, {% if peel_calibrator %} shift_and_average, {% endif %} create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2 {% endblock full_image_steps %} {% if peel_calibrator %}, {% block ft_steps %} create_model_map, pad_model_images, regroup_add_all_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft {% endblock ft_steps %}, corrupt_final_model, subtract_facet_model {% endif %}]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources,  add_all_facet_sources, {% if peel_calibrator %} add_imaging_cols_all_facet_sources, shift_and_average, {% endif %} create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2 {% endblock full_image_steps %} {% if peel_calibrator %}, {% block ft_steps %} create_model_map, pad_model_images, regroup_add_all_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft {% endblock ft_steps %}, corrupt_final_model, subtract_facet_model {% endif %}]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -137,6 +137,12 @@ add_all_facet_sources.argument.add.sourcedb             =   sourcedb
 add_all_facet_sources.argument.add.operation            =   add
 add_all_facet_sources.argument.add.applycal.parmdb      =   parmdb
 add_all_facet_sources.argument.add.applycal.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
+
+# add the imaging columns to the MS files, length = nfiles
+add_imaging_cols_all_facet_sources.control.type         =   add_imaging_columns
+add_imaging_cols_all_facet_sources.control.mapfile_in   =   add_all_facet_sources.output.mapfile
+add_imaging_cols_all_facet_sources.control.inputkey     =   msfile
+add_imaging_cols_all_facet_sources.argument.flags       =   [msfile]
 
 # Phase shift, correct, and average in preparation for imaging, length = nfiles
 shift_and_average.control.type                          =   dppp
