@@ -90,7 +90,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         for d in peel_directions:
             # Reset if needed. Reset of facetsub for peeled calibrators is not
             # currently supported
-            d.reset_state(['outlierpeel', 'facetpeel', 'facetimage'])
+            d.reset_state(['outlierpeel', 'facetpeel', 'facetpeelimage'])
 
             if d.is_outlier:
                 op = OutlierPeel(parset, bands, d)
