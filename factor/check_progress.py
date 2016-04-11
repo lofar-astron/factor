@@ -595,8 +595,8 @@ def find_selfcal_tec_plots(direction):
             mtimes.append(np.nan)
     try:
         latest_dir = dirs[np.nanargmax(mtimes)]
-    except ValueError:
-        # ValueError indicates mtimes list is all NaNs
+    except (ValueError, TypeError):
+        # ValueError or TypeError indicates mtimes list is all NaNs
         return []
 
     selfcal_plots = glob.glob(os.path.join(latest_dir, '*.make_selfcal_plots_tec*.png'))
@@ -626,8 +626,8 @@ def find_selfcal_gain_plots(direction):
             mtimes.append(np.nan)
     try:
         latest_dir = dirs[np.nanargmax(mtimes)]
-    except ValueError:
-        # ValueError indicates mtimes list is all NaNs
+    except (ValueError, TypeError):
+        # ValueError or TypeError indicates mtimes list is all NaNs
         return []
 
     selfcal_plots = glob.glob(os.path.join(latest_dir, '*.make_selfcal_plots_amp*.png'))
@@ -656,8 +656,8 @@ def find_facet_image(direction):
             mtimes.append(np.nan)
     try:
         latest_dir = dirs[np.nanargmax(mtimes)]
-    except ValueError:
-        # ValueError indicates mtimes list is all NaNs
+    except (ValueError, TypeError):
+        # ValueError or TypeError indicates mtimes list is all NaNs
         return []
 
     # Search for various image patterns
