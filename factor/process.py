@@ -114,7 +114,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             if d.peel_calibrator:
                 # Do the imaging of the facet if calibrator was peeled and
                 # subtract the improved model
-                op = FacetImage(parset, bands, d)
+                op = FacetPeelImage(parset, bands, d)
                 scheduler.run(op)
 
                 op = FacetSub(parset, bands, d)

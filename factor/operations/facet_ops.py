@@ -18,6 +18,8 @@ FacetSubreset : Operation
     series as writes are made to original datasets
 FacetImage : Operation
     Images the entire facet. May be run in parallel
+FacetPeelImage:  Operation
+    Images the entire facet after facet was peeled. May be run in parallel
 
 """
 import os
@@ -232,9 +234,9 @@ class FacetImage(Operation):
         model using wsclean
 
     """
-    def __init__(self, parset, bands, direction):
+    def __init__(self, parset, bands, direction, name='FacetImage'):
         super(FacetImage, self).__init__(parset, bands, direction,
-            name='FacetImage')
+            name=name)
 
         # Set imager infix for pipeline parset names
         if self.parset['facet_imager'].lower() == 'casa':
@@ -247,13 +249,8 @@ class FacetImage(Operation):
             # Set parset template to sky-model parset
             self.pipeline_parset_template = '{0}_skymodel{1}_pipeline.parset'.format(self.name, infix)
         else:
-            if self.direction.peel_calibrator:
-                # For peeled calibrators, set parset template to sky-model parset,
-                # since we don't have a model of the facet yet
-                self.pipeline_parset_template = '{0}_skymodel{1}_pipeline.parset'.format(self.name, infix)
-            else:
-                # Set parset template to facet model-image parset
-                self.pipeline_parset_template = '{0}_imgmodel{1}_pipeline.parset'.format(self.name, infix)
+            # Set parset template to facet model-image parset
+            self.pipeline_parset_template = '{0}_imgmodel{1}_pipeline.parset'.format(self.name, infix)
 
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
@@ -272,6 +269,55 @@ class FacetImage(Operation):
                                 'ms_files_grouped' : str(ms_files),
                                 'skymodels': skymodels,
                                 'dir_indep_parmDBs': dir_indep_parmDBs})
+
+
+    def finalize(self):
+        """
+        Finalize this operation
+        """
+        # Add output datamaps to direction object for later use
+        self.direction.facet_image_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'final_image.mapfile')
+        self.direction.facet_premask_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'premask.mapfile')
+
+        # Delete temp data
+        self.direction.cleanup_mapfiles = [
+            os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_input.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'sorted_groups.mapfile_groups')]
+        if not self.parset['keep_avg_facet_data'] and self.direction.name != 'target':
+            # Add averaged calibrated data for the facet to files to be deleted.
+            # These are only needed if the user wants to reimage by hand (e.g.,
+            # with a different weighting). They are always kept for the target
+            self.direction.cleanup_mapfiles.append(
+                os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_compressed.mapfile'))
+        if not self.parset['keep_unavg_facet_data']:
+            # Add unaveraged calibrated data for the facet to files to be deleted.
+            # These are only needed if the user wants to phase shift them to
+            # another direction (e.g., to combine several facets together before
+            # imaging them all at once)
+            self.direction.cleanup_mapfiles.append(
+                os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'))
+        self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
+        self.direction.cleanup()
+
+
+class FacetPeelImage(FacetImage):
+    """
+    Operation to make the full image of a facet after peeling
+    """
+    def __init__(self, parset, bands, direction):
+        super(FacetPeelImage, self).__init__(parset, bands, direction,
+            name='FacetPeelImage')
+
+        # Set imager infix for pipeline parset names
+        if self.parset['facet_imager'].lower() == 'casa':
+            infix = '_casa'
+        else:
+            infix = ''
+
+        # Set the pipeline parset to use
+        self.pipeline_parset_template = '{0}_skymodel{1}_pipeline.parset'.format(self.name, infix)
 
 
     def finalize(self):
@@ -310,4 +356,3 @@ class FacetImage(Operation):
                 os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'))
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()
-
