@@ -317,7 +317,7 @@ class FacetPeelImage(FacetImage):
             infix = ''
 
         # Set the pipeline parset to use
-        self.pipeline_parset_template = '{0}_skymodel{1}_pipeline.parset'.format(self.name, infix)
+        self.pipeline_parset_template = 'facetimage_skymodel{0}_pipeline.parset'.format(infix)
 
 
     def finalize(self):
