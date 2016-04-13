@@ -32,6 +32,12 @@ try:
     hasWCSaxes = True
 except:
     hasWCSaxes = False
+try:
+    import aplpy
+    from factor.scripts import make_selfcal_images
+    hasaplpy = True
+except:
+    hasaplpy = False
 
 log = logging.getLogger('factor:progress')
 
@@ -379,8 +385,15 @@ def on_press(event):
         selfcal_images = find_selfcal_images(selected_direction)
         if len(selfcal_images) > 0:
             info = 'Opening selfcal images for {}...'.format(selected_direction.name)
-            im = pim.image(selfcal_images)
-            im.view()
+            if hasaplpy:
+                # Update the text box as the call below takes a few seconds
+                c = at.get_child()
+                c.set_text(info)
+                fig.canvas.draw()
+                make_selfcal_images.main(selfcal_images, interactive=True)
+            else:
+                im = pim.image(selfcal_images)
+                im.view()
         else:
             info = 'No selfcal images exist for {}'.format(selected_direction.name)
 
@@ -559,12 +572,18 @@ def find_selfcal_images(direction):
         direction.name)
     if os.path.exists(selfcal_dir):
         selfcal_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image[01]2.image.tt0'))
-        selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image22_iter*.image.tt0'))
+        tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22_iter*.image.tt0'))
+        if len(tec_iter_images) == 0:
+            tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22.image.tt0'))
+        selfcal_images += tec_iter_images
         selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image[3]2.image.tt0'))
         selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image42_iter*.image.tt0'))
         if len(selfcal_images) == 0:
             selfcal_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image[01]2.image'))
-            selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image22_iter*.image'))
+            tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22_iter*.image'))
+            if len(tec_iter_images) == 0:
+                tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22.image'))
+            selfcal_images += tec_iter_images
             selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image[3]2.image'))
             selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image42_iter*.image'))
         selfcal_images.sort()
