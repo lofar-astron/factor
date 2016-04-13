@@ -12,7 +12,7 @@ concat_unaveraged.control.inputkey                =   msfiles
 concat_unaveraged.control.outputkey               =   msconcat
 concat_unaveraged.argument.flags                  =   [msfiles,msconcat]
 
-# create a compressed mapfile with the virtual concated files, length = 1 
+# create a compressed mapfile with the virtual concated files, length = 1
 # needed because the following casa-step can run only once.
 create_compressed_unaveraged.control.kind         =   plugin
 create_compressed_unaveraged.control.type         =   compressMapfile
@@ -44,7 +44,7 @@ casa_image_full1.control.arguments                =   [--nologger,--nogui,-c]
 casa_image_full1.argument.clean.wprojplanes       =   {{ facet_wplanes }}
 casa_image_full1.argument.clean.uvrange           =   '>80lambda'
 casa_image_full1.argument.clean.nterms            =   {{ nterms }}
-casa_image_full1.argument.clean.niter             =   15000
+casa_image_full1.argument.clean.niter             =   {{ casa_full1_image_niter }}
 casa_image_full1.argument.clean.threshold         =   '0mJy'
 casa_image_full1.argument.clean.imsize            =   [{{ facet_imsize }}, {{ facet_imsize }}]
 casa_image_full1.argument.clean.cell              =   ['1.5arcsec', '1.5arcsec']
@@ -105,7 +105,7 @@ casa_image_full2.control.arguments                =   [--nologger,--nogui,-c]
 casa_image_full2.argument.clean.wprojplanes       =   {{ facet_wplanes }}
 casa_image_full2.argument.clean.uvrange           =   '>80lambda'
 casa_image_full2.argument.clean.nterms            =   {{ nterms }}
-casa_image_full2.argument.clean.niter             =   1000000
+casa_image_full2.argument.clean.niter             =   {{ casa_full2_image_niter }}
 casa_image_full2.argument.clean.imsize            =   [{{ facet_imsize }}, {{ facet_imsize }}]
 casa_image_full2.argument.clean.cell              =   ['1.5arcsec', '1.5arcsec']
 casa_image_full2.argument.clean.robust            =   -0.25

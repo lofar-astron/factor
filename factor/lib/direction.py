@@ -281,12 +281,16 @@ class Direction(object):
             self.wsclean_suffix = '-image.fits'
 
         # Set number of iterations and threshold for full facet image, scaled to
-        # the number of bands
+        # the number of bands. We use 6 times more iterations for the full2
+        # image to ensure the imager has a reasonable chance to reach the
+        # threshold first (which is set by the masking step)
         scaling_factor = np.sqrt(np.float(nbands))
-        self.wsclean_full_image_niter = int(5000 * scaling_factor)
-        self.wsclean_full_image_threshold_jy =  1.5e-3 * 0.7 / scaling_factor
-        self.casa_full_image_niter = int(2000 * scaling_factor)
-        self.casa_full_image_threshold_mjy = "{}mJy".format(1.5 * 0.7 / scaling_factor)
+        self.wsclean_full1_image_niter = int(5000 * scaling_factor)
+        self.wsclean_full1_image_threshold_jy =  1.5e-3 * 0.7 / scaling_factor
+        self.casa_full1_image_niter = int(2000 * scaling_factor)
+        self.casa_full1_image_threshold_mjy = "{}mJy".format(1.5 * 0.7 / scaling_factor)
+        self.wsclean_full2_image_niter = int(30000 * scaling_factor)
+        self.casa_full2_image_niter = int(12000 * scaling_factor)
 
         # Set multiscale imaging mode: Get source sizes and check for large
         # sources (anything above 4 arcmin -- the CC sky model was convolved
@@ -302,7 +306,8 @@ class Direction(object):
         if self.mscale_field_do:
             self.casa_multiscale = '[0, 3, 7, 25, 60, 150]'
             self.wsclean_multiscale = '-multiscale,'
-            self.wsclean_full_image_niter /= 2.0 # fewer iterations are needed
+            self.wsclean_full1_image_niter /= 2.0 # fewer iterations are needed
+            self.wsclean_full2_image_niter /= 2.0 # fewer iterations are needed
         else:
             self.casa_multiscale = '[0]'
             self.wsclean_multiscale = ''
