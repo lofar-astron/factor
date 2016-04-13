@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources,  add_all_facet_sources, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources,  add_all_facet_sources, {% if peel_calibrator %} add_imaging_cols_all_facet_sources, shift_and_average, {% endif %} create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2 {% endblock full_image_steps %} {% if peel_calibrator %}, {% block ft_steps %} create_model_map, pad_model_images, regroup_add_all_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft {% endblock ft_steps %}, corrupt_final_model, subtract_facet_model {% endif %}]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -54,7 +54,9 @@ make_facet_skymodels_all.control.mapfile_in             =   create_full_skymodel
 make_facet_skymodels_all.control.inputkey               =   fullmodelfile
 make_facet_skymodels_all.control.outputkey              =   outfile
 make_facet_skymodels_all.argument.flags                 =   [fullmodelfile,outfile,{{ vertices_file }}]
-make_facet_skymodels_all.argument.cal_only              =   False
+{% if peel_calibrator %}
+make_facet_skymodels_all.argument.remove_cal            =   True
+{% endif %}
 
 # convert the facet skymodel into a sourcedb, length = nbands
 make_sourcedb_all_facet_sources.control.type            =   make_sourcedb
@@ -71,11 +73,12 @@ expand_sourcedb_all_facet_sources.control.mapfile_groups =   create_msmulti_map.
 expand_sourcedb_all_facet_sources.control.mapfile_dir   =   input.output.mapfile_dir
 expand_sourcedb_all_facet_sources.control.filename      =   expand_sourcedb_all_facet_sources.mapfile
 
+{% if not peel_calibrator %}
 # "do nearly everything" call to NDPPP: phaseshift, add, correct, and average in one NDPPP call, length = nfiles
 add_all_facet_sources.control.type                      =   dppp
 add_all_facet_sources.control.opts.mapfiles_in          =   [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 add_all_facet_sources.control.opts.inputkeys            =   [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb]
-add_all_facet_sources.argument.numthreads               =   {{ max_cpus_per_band }}
+add_all_facet_sources.argument.numthreads               =   {{ max_cpus_per_chunk }}
 add_all_facet_sources.argument.msin.datacolumn          =   SUBTRACTED_DATA_ALL_NEW
 add_all_facet_sources.argument.msout.overwrite          =   True
 add_all_facet_sources.argument.msout.writefullresflag   =   False
@@ -114,6 +117,72 @@ create_compressed_mapfile.control.type                  =   compressMapfile
 create_compressed_mapfile.control.mapfile_in            =   add_all_facet_sources.output.mapfile
 create_compressed_mapfile.control.mapfile_dir           =   input.output.mapfile_dir
 create_compressed_mapfile.control.filename              =   concat_averaged_input.mapfile
+
+{% else %}
+
+# Add sources, but don't phase shift. We will use these data later        / length = nfiles
+# to subtract the outlier model using the direction-dependent calibration
+# to create improved "empty" datasets
+add_all_facet_sources.control.type                      =   dppp
+add_all_facet_sources.control.opts.mapfiles_in          =   [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
+add_all_facet_sources.control.opts.inputkeys            =   [msin,sourcedb,parmdb]
+add_all_facet_sources.argument.numthreads               =   {{ max_cpus_per_chunk }}
+add_all_facet_sources.argument.msin.datacolumn          =   SUBTRACTED_DATA_ALL_NEW
+add_all_facet_sources.argument.msout.overwrite          =   True
+add_all_facet_sources.argument.msout.writefullresflag   =   False
+add_all_facet_sources.argument.local_scratch_dir        =   {{ local_dir }}
+add_all_facet_sources.argument.steps                    =   [add]
+add_all_facet_sources.argument.add.type                 =   predict
+add_all_facet_sources.argument.add.sourcedb             =   sourcedb
+add_all_facet_sources.argument.add.operation            =   add
+add_all_facet_sources.argument.add.applycal.parmdb      =   parmdb
+add_all_facet_sources.argument.add.applycal.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
+
+# add the imaging columns to the MS files, length = nfiles
+add_imaging_cols_all_facet_sources.control.type         =   add_imaging_columns
+add_imaging_cols_all_facet_sources.control.mapfile_in   =   add_all_facet_sources.output.mapfile
+add_imaging_cols_all_facet_sources.control.inputkey     =   msfile
+add_imaging_cols_all_facet_sources.argument.flags       =   [msfile]
+
+# Phase shift, correct, and average in preparation for imaging, length = nfiles
+shift_and_average.control.type                          =   dppp
+shift_and_average.control.opts.mapfiles_in              =   [add_all_facet_sources.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+shift_and_average.control.opts.inputkeys                =   [msin,dir_dep_parmdb]
+shift_and_average.argument.numthreads                   =   {{ max_cpus_per_chunk }}
+shift_and_average.argument.msin.datacolumn              =   DATA
+shift_and_average.argument.msout.overwrite              =   True
+shift_and_average.argument.msout.writefullresflag       =   False
+shift_and_average.argument.local_scratch_dir            =   {{ local_dir }}
+shift_and_average.argument.steps                        =   [shift,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
+shift_and_average.argument.shift.type                   =   phaseshifter
+shift_and_average.argument.shift.phasecenter            =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+shift_and_average.argument.correct_fast1.type           =   applycal
+shift_and_average.argument.correct_fast1.parmdb         =   dir_dep_parmdb
+shift_and_average.argument.correct_fast1.correction     =   tec
+shift_and_average.argument.correct_fast1.invert         =   True
+shift_and_average.argument.correct_fast1.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
+shift_and_average.argument.correct_fast2.type           =   applycal
+shift_and_average.argument.correct_fast2.parmdb         =   dir_dep_parmdb
+shift_and_average.argument.correct_fast2.correction     =   commonscalarphase
+shift_and_average.argument.correct_fast2.invert         =   True
+shift_and_average.argument.correct_fast2.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
+shift_and_average.argument.correct_slow.type            =   applycal
+shift_and_average.argument.correct_slow.parmdb          =   dir_dep_parmdb
+shift_and_average.argument.correct_slow.invert          =   True
+shift_and_average.argument.correct_slow.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
+shift_and_average.argument.flagzero.type                =   preflagger
+shift_and_average.argument.flagzero.amplmin             =   1e-20
+shift_and_average.argument.avg.type                     =   squash
+shift_and_average.argument.avg.freqstep                 =   {{ facetimage_freqstep }}
+shift_and_average.argument.avg.timestep                 =   {{ facetimage_timestep }}
+
+# make the compressed mapfile, length = 1
+create_compressed_mapfile.control.kind                  =   plugin
+create_compressed_mapfile.control.type                  =   compressMapfile
+create_compressed_mapfile.control.mapfile_in            =   shift_and_average.output.mapfile
+create_compressed_mapfile.control.mapfile_dir           =   input.output.mapfile_dir
+create_compressed_mapfile.control.filename              =   concat_averaged_input.mapfile
+{% endif %}
 
 #############################
 # need to test: is it faster to first concatenate, or to have WSClean run on hundreds of small files?
@@ -256,3 +325,95 @@ adjust_wsclean_mapfile2.control.append                  =   {{ wsclean_suffix }}
 adjust_wsclean_mapfile2.control.mapfile_dir             =   input.output.mapfile_dir
 adjust_wsclean_mapfile2.control.filename                =   final_image.mapfile
 {% endblock full_image_parms %}
+########## end of a block that can be replaced by another imager.
+
+{% if peel_calibrator %}
+{% block ft_parms %}
+# make a mapfile with the root-name of the final WSClean images, length = 1
+create_model_map.control.kind                           =   plugin
+create_model_map.control.type                           =   trimMapfile
+create_model_map.control.mapfile_in                     =   wsclean_image_full2.output.wsclean_image_full2-model.fits.mapfile
+create_model_map.control.trim                           =   -
+create_model_map.control.mapfile_dir                    =   input.output.mapfile_dir
+create_model_map.control.filename                       =   final_model_rootnames.mapfile
+
+# pad the model image with zeros, length = 1
+pad_model_images.control.type                           =   pad_image
+pad_model_images.control.mapfile_in                     =   create_model_map.output.mapfile
+pad_model_images.control.inputkey                       =   imagefile
+pad_model_images.argument.flags                         =   [imagefile,{{ wsclean_model_padding }}]
+
+# sort the "add_all" unaveraged data into groups that can be concatenated, length = some
+# needed because virtual concatenating all files results in a "too many open files" error.
+regroup_add_all_map.control.kind                        =   plugin
+regroup_add_all_map.control.type                        =   reGroupMapfile
+regroup_add_all_map.control.mapfile_in                  =   add_all_facet_sources.output.mapfile
+regroup_add_all_map.control.mapfile_groups              =   create_msmulti_map.output.mapfile
+regroup_add_all_map.control.mapfile_dir                 =   input.output.mapfile_dir
+regroup_add_all_map.control.join_max_files              =   100
+regroup_add_all_map.control.rotate_groups               =   True
+regroup_add_all_map.control.filename                    =   regroup_add_all.mapfile
+
+# expand the mapfile of the model image to all files, length = some
+create_expanded_model_mapfile.control.kind              =   plugin
+create_expanded_model_mapfile.control.type              =   expandMapfile
+create_expanded_model_mapfile.control.mapfile_in        =   create_model_map.output.mapfile
+create_expanded_model_mapfile.control.mapfile_to_match  =   regroup_add_all_map.output.mapfile
+create_expanded_model_mapfile.control.mapfile_dir       =   input.output.mapfile_dir
+create_expanded_model_mapfile.control.filename          =   expand_wsclean_model.mapfile
+
+# expand mapfile of the model image sizes to all groups, length = some
+expand_facet_model_size_map.control.kind                =   plugin
+expand_facet_model_size_map.control.type                =   expandMapfile
+expand_facet_model_size_map.control.mapfile_in          =   pad_model_images.output.padsize.mapfile
+expand_facet_model_size_map.control.mapfile_to_match    =   regroup_add_all_map.output.mapfile
+expand_facet_model_size_map.control.mapfile_dir         =   input.output.mapfile_dir
+expand_facet_model_size_map.control.filename            =   expand_facet_model_size.mapfile
+
+# make model visibilities, length = some
+# For WSClean predict, we need to increase the number of wplanes so that the
+# effective model image size is larger than the FOV (to prevent aliasing issues)
+wsclean_ft.control.type                                 =   wsclean_ft
+wsclean_ft.control.mapfiles_in                          =   [regroup_add_all_map.output.mapfile,create_expanded_model_mapfile.output.mapfile,expand_facet_model_size_map.output.mapfile]
+wsclean_ft.control.inputkeys                            =   [msfile,name,size]
+wsclean_ft.argument.flags                               =   [-predict,msfile]
+wsclean_ft.argument.scale                               =   0.000417
+wsclean_ft.argument.mem                                 =   {{ max_percent_memory_per_img }}
+wsclean_ft.argument.channelsout                         =   {{ wsclean_nchannels }}
+wsclean_ft.argument.j                                   =   {{ max_cpus_per_img }}
+wsclean_ft.argument.tempdir                             =   {{ local_dir }}
+wsclean_ft.argument.nwlayers-for-size                   =   12288 12288
+{% endblock ft_parms %}
+
+# corrupt the model visibilities, length = nfiles
+corrupt_final_model.control.type                        =   dppp
+corrupt_final_model.control.opts.mapfiles_in            =   [add_all_facet_sources.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+corrupt_final_model.control.opts.inputkeys              =   [msin,parmdb]
+corrupt_final_model.argument.numthreads                 =   {{ max_cpus_per_band }}
+corrupt_final_model.argument.msin.datacolumn            =   MODEL_DATA
+corrupt_final_model.argument.msout.overwrite            =   True
+corrupt_final_model.argument.msout.writefullresflag     =   False
+corrupt_final_model.argument.local_scratch_dir          =   {{ local_dir }}
+corrupt_final_model.argument.steps                      =   [corrupt_fast1,corrupt_fast2,corrupt_slow]
+corrupt_final_model.argument.corrupt_fast1.type         =   applycal
+corrupt_final_model.argument.corrupt_fast1.parmdb       =   parmdb
+corrupt_final_model.argument.corrupt_fast1.correction   =   tec
+corrupt_final_model.argument.corrupt_fast1.invert       =   False
+corrupt_final_model.argument.corrupt_fast1.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
+corrupt_final_model.argument.corrupt_fast2.type         =   applycal
+corrupt_final_model.argument.corrupt_fast2.parmdb       =   parmdb
+corrupt_final_model.argument.corrupt_fast2.correction   =   commonscalarphase
+corrupt_final_model.argument.corrupt_fast2.invert       =   False
+corrupt_final_model.argument.corrupt_fast2.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
+corrupt_final_model.argument.corrupt_slow.type          =   applycal
+corrupt_final_model.argument.corrupt_slow.parmdb        =   parmdb
+corrupt_final_model.argument.corrupt_slow.correction    =   gain
+corrupt_final_model.argument.corrupt_slow.invert        =   False
+corrupt_final_model.argument.corrupt_slow.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
+
+# Subtract the corrupted model from the data to make improved subtracted datasets, length = nfiles
+subtract_facet_model.control.type                       =   add_subtract_columns
+subtract_facet_model.control.opts.mapfiles_in           =   [add_all_facet_sources.output.mapfile,corrupt_final_model.output.mapfile]
+subtract_facet_model.control.opts.inputkeys             =   [file1,file2]
+subtract_facet_model.argument.flags                     =   [file1,file2,DATA,DATA,SUBTRACTED_DATA_ALL,subtract]
+{% endif %}

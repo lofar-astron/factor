@@ -170,6 +170,18 @@ def get_global_options(parset):
     else:
         parset_dict['imaging_specific']['wsclean_nbands'] = 3
 
+    # Padding factor for WSClean images (default = 1.6)
+    if 'wsclean_image_padding' in parset_dict:
+        parset_dict['wsclean_image_padding'] = parset.getfloat('global', 'wsclean_image_padding')
+    else:
+        parset_dict['wsclean_image_padding'] = 1.6
+
+    # Padding factor for WSClean images (default = 1.4)
+    if 'wsclean_model_padding' in parset_dict:
+        parset_dict['wsclean_model_padding'] = parset.getfloat('global', 'wsclean_model_padding')
+    else:
+        parset_dict['wsclean_model_padding'] = 1.4
+
     # Use WSClean or CASA for imaging of entire facet (default = wsclean). For large
     # bandwidths, the CASA imager is typically faster
     if 'facet_imager' not in parset_dict:
@@ -205,6 +217,16 @@ def get_global_options(parset):
         parset_dict['calibration_specific']['preaverage_flux_jy'] = parset.getfloat('global', 'preaverage_flux_jy')
     else:
         parset_dict['calibration_specific']['preaverage_flux_jy'] = 0.0
+
+    # Peel the calibrator for sources above this flux density (default = 25.0).
+    # When activated, the calibrator is peeled using a supplied sky model and
+    # the facet is then imaged as normal. Note: a sky model must be specified in the
+    # directions file in the peel_skymodel column for each source that should be
+    # peeled
+    if 'peel_flux_jy' in parset_dict:
+        parset_dict['peel_flux_jy'] = parset.getfloat('global', 'peel_flux_jy')
+    else:
+        parset_dict['peel_flux_jy'] = 25.0
 
     # Use multi-scale selfcal that starts at 20 arcsec resolution and increases the
     # resolution in stages to the full resolution (default = False). This method may
@@ -248,6 +270,7 @@ def get_global_options(parset):
     allowed_options = ['dir_working', 'dir_ms', 'parmdb_name', 'interactive',
         'make_mosaic', 'exit_on_selfcal_failure', 'skip_selfcal_check',
         'wsclean_nbands', 'facet_imager', 'keep_avg_facet_data',
+        'wsclean_image_padding', 'wsclean_model_padding', 'peel_flux_jy',
         'keep_unavg_facet_data', 'max_selfcal_loops', 'preaverage_flux_jy',
         'multiscale_selfcal', 'skymodel_extension', 'max_peak_smearing',
         'tec_block_mhz', 'selfcal_cellsize_arcsec', 'selfcal_robust']
@@ -256,7 +279,7 @@ def get_global_options(parset):
         'selfcal_robust']
     deprecated_options_cal = ['exit_on_selfcal_failure',
         'skip_selfcal_check', 'max_selfcal_loops', 'preaverage_flux_jy',
-        'multiscale_selfcal', 'tec_block_mhz']
+        'multiscale_selfcal', 'tec_block_mhz', 'peel_flux_jy']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [global] section of the '

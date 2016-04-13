@@ -62,6 +62,13 @@ dir_ms = /data/bands
 # (default = 10)
 # TEC_block_MHz = 10
 
+# Peel the calibrator for sources above this flux density (default = 25.0).
+# When activated, the calibrator is peeled using a supplied sky model and
+# the facet is then imaged as normal. Note: a sky model must be specified in the
+# directions file in the peel_skymodel column for each source that should be
+# peeled
+# peel_flux_Jy = 30.0
+
 
 [imaging]
 # Make final mosaic (default = True)
@@ -69,6 +76,12 @@ dir_ms = /data/bands
 
 # Re-image all directions for which selfcal was successful (default = False)
 # reimage = False
+
+# Padding factor for WSClean images (default = 1.6)
+# wsclean_image_padding = 1.6
+
+# Padding factor for WSClean models (default = 1.4)
+# wsclean_model_padding = 1.4
 
 # Max desired peak flux density reduction at center of the facet edges due to
 # bandwidth smearing (at the mean frequency) and time smearing (default = 0.15 =
@@ -121,7 +134,7 @@ dir_ms = /data/bands
 # calibrator
 # flux_min_for_merging_Jy = 0.1
 size_max_arcmin = 2.0
-separation_max_arcmin = 6.0
+separation_max_arcmin = 7.0
 flux_min_Jy = 0.3
 
 # Number of internally derived directions can be limited to a maximum number

@@ -31,7 +31,7 @@ def read_vertices(filename, cal_only=False):
         return direction_dict['vertices']
 
 
-def main(fullskymodel, outmodel, vertices_file, cal_only=False):
+def main(fullskymodel, outmodel, vertices_file, cal_only=False, remove_cal=False):
     """
     Makes a makesourcedb sky model for components inside input polygon
 
@@ -44,8 +44,11 @@ def main(fullskymodel, outmodel, vertices_file, cal_only=False):
     vertices_file : str
         Filename of pickled file with direction vertices that define polygon
     cal_only : bool, optional
-        If True, only components wihtin cal_radius_deg of (facet_ra, facet_dec)
-        are selected.
+        If True, only components within the calibrator region will be selected
+    remove_cal : bool, optional
+        If True, remove components from within the calibrator region from the
+        full facet. Note: this option can only be activated if cal_only is
+        False
 
     """
     if type(cal_only) is str:
@@ -53,6 +56,14 @@ def main(fullskymodel, outmodel, vertices_file, cal_only=False):
             cal_only = True
         else:
             cal_only = False
+    if type(remove_cal) is str:
+        if remove_cal.lower() == 'true':
+            remove_cal = True
+        else:
+            remove_cal = False
+    if cal_only and remove_cal:
+        print('cal_only and remove_cal cannot both be True')
+        sys.exit(1)
 
     s = lsmtool.load(fullskymodel)
     vertices = read_vertices(vertices_file, cal_only=cal_only)
@@ -66,6 +77,19 @@ def main(fullskymodel, outmodel, vertices_file, cal_only=False):
     for i in range(len(s)):
         inside[i] = bbPath.contains_point((x[i], y[i]))
     s.select(inside, force=True)
+
+    if remove_cal and len(s) > 0:
+        vertices = read_vertices(vertices_file, cal_only=True)
+
+        # Select sources inside poly defined by vertices
+        x, y, midRA, midDec = s._getXY()
+        xv, yv = radec2xy(vertices[0], vertices[1], midRA, midDec)
+        xyvertices = array([[xp, yp] for xp, yp in zip(xv, yv)])
+        bbPath = mplPath.Path(xyvertices)
+        inside = zeros(len(s), dtype=bool)
+        for i in range(len(s)):
+            inside[i] = bbPath.contains_point((x[i], y[i]))
+        s.remove(inside, force=True)
 
     if len(s) == 0:
         print('No sources found for this facet')

@@ -72,12 +72,14 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     directions, direction_groups = _set_up_directions(parset, bands, dry_run,
     test_run, reset_directions, reset_operations)
 
-    # Run peeling and subtract operations on outlier directions
+    # Run peeling operations on outlier directions and any facets
+    # for which the calibrator is to be peeled
     set_sub_data_colname = True
-    outlier_directions = [d for d in directions if d.is_outlier]
-    if len(outlier_directions) > 0:
+    peel_directions = [d for d in directions if d.is_outlier]
+    peel_directions.extend([d for d in directions if d.peel_calibrator])
+    if len(peel_directions) > 0:
         # Combine the nodes and cores for the peeling operation
-        outlier_directions = factor.cluster.combine_nodes(outlier_directions,
+        outlier_directions = factor.cluster.combine_nodes(peel_directions,
             parset['cluster_specific']['node_list'],
             parset['cluster_specific']['nimg_per_node'],
             parset['cluster_specific']['ncpu'],
@@ -85,25 +87,38 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             len(bands))
 
         # Do the peeling
-        for d in outlier_directions:
-            op = OutlierPeel(parset, bands, d)
+        for d in peel_directions:
+            # Reset if needed. Note that proper reset of the subtract steps in
+            # outlierpeel and facetsub is not currently supported
+            d.reset_state(['outlierpeel', 'facetpeel', 'facetpeelimage', 'facetsub'])
+
+            if d.is_outlier:
+                op = OutlierPeel(parset, bands, d)
+            else:
+                op = FacetPeel(parset, bands, d)
             scheduler.run(op)
 
             # Check whether direction went through selfcal successfully. If
             # not, exit
             if d.selfcal_ok:
-                # Set the name of the subtracted data column for remaining
-                # directions
+                # Set the name of the subtracted data column for all directions
                 if set_sub_data_colname:
                     for direction in directions:
-                        if direction.name != d.name:
-                            direction.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
+                        direction.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
                     set_sub_data_colname = False
             else:
-                log.warn('Selfcal verification failed for direction {0}.'.format(d.name))
-                if parset['calibration_specific']['exit_on_selfcal_failure']:
-                    log.info('Exiting...')
-                    sys.exit(1)
+                log.error('Peeling verification failed for direction {0}.'.format(d.name))
+                log.info('Exiting...')
+                sys.exit(1)
+
+            if d.peel_calibrator:
+                # Do the imaging of the facet if calibrator was peeled and
+                # subtract the improved model
+                op = FacetPeelImage(parset, bands, d)
+                scheduler.run(op)
+
+                op = FacetSub(parset, bands, d)
+                scheduler.run(op)
 
     # Run selfcal and subtract operations on direction groups
     for gindx, direction_group in enumerate(direction_groups):
@@ -156,7 +171,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     d.save_state()
                     d.transfer_nearest_solutions = True
 
-        # Do selfcal on calibrator only
+        # Do selfcal or peeling on calibrator only
+        to_peel = [d for d in direction_group if d.peel_calibrator]
+        to_selfcal = [d for d in direction_group if not d.peel_calibrator]
         ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
         scheduler.run(ops)
         if dry_run:
@@ -494,10 +511,10 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
         "selection (if desired)...")
     ref_band = bands[-1]
     max_radius_deg = dir_parset['max_radius_deg']
-    initial_skymodel = factor.directions.make_initial_skymodel(ref_band,
-        max_radius_deg=max_radius_deg)
+    initial_skymodel = factor.directions.make_initial_skymodel(ref_band)
     log.info('Setting up directions...')
-    directions = _initialize_directions(parset, initial_skymodel, ref_band, dry_run)
+    directions = _initialize_directions(parset, initial_skymodel, ref_band,
+        max_radius_deg=max_radius_deg, dry_run=dry_run)
 
     # Check with user
     if parset['interactive']:
@@ -553,12 +570,19 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
     min_peak_smearing_factor = 1.0 - parset['imaging_specific']['max_peak_smearing']
     for i, direction in enumerate(directions):
         # Set imaging and calibration parameters
+        if parset['facet_imager'].lower() == 'wsclean':
+            # Use larger padding for WSClean images
+            padding = parset['imaging_specific']['wsclean_image_padding']
+            direction.wsclean_model_padding = parset['imaging_specific']['wsclean_model_padding']
+        else:
+            padding = 1.05
         direction.set_imcal_parameters(parset['imaging_specific']['wsclean_nbands'],
             bands[0].chan_width_hz, bands[0].nchan, bands[0].timepersample,
             bands[0].minSamplesPerFile, len(bands), mean_freq_mhz,
             initial_skymodel, parset['calibration_specific']['preaverage_flux_jy'],
             min_peak_smearing_factor=min_peak_smearing_factor,
-            tec_block_mhz=parset['calibration_specific']['tec_block_mhz'])
+            tec_block_mhz=parset['calibration_specific']['tec_block_mhz'],
+            peel_flux_jy=parset['calibration_specific']['peel_flux_jy'], padding=padding)
 
         # Set field center to that of first band (all bands have the same phase
         # center)
@@ -583,10 +607,11 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
     if target_has_own_facet:
         # Make sure target is not a DDE calibrator and is at end of directions list
         selfcal_directions = [d for d in directions if d.name != target.name and
-                              not d.is_outlier]
+                              not d.is_outlier and not d.peel_calibrator]
         directions = [d for d in directions if d.name != target.name] + [target]
     else:
-        selfcal_directions = [d for d in directions if not d.is_outlier]
+        selfcal_directions = [d for d in directions if not d.is_outlier and
+            not d.peel_calibrator]
 
     if dir_parset['ndir_selfcal'] is not None:
         if dir_parset['ndir_selfcal'] <= len(selfcal_directions):
@@ -599,7 +624,8 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
     return directions, direction_groups
 
 
-def _initialize_directions(parset, initial_skymodel, ref_band, dry_run=False):
+def _initialize_directions(parset, initial_skymodel, ref_band, max_radius_deg=None,
+    dry_run=False):
     """
     Read in directions file and initialize resulting directions
 
@@ -611,6 +637,9 @@ def _initialize_directions(parset, initial_skymodel, ref_band, dry_run=False):
         Local sky model
     ref_band : Band object
         Reference band
+    max_radius_deg : float, optional
+        Maximum radius in degrees from the phase center within which to include
+        sources. If None, it is set to the FWHM (i.e., a diameter of 2 * FWHM)
     dry_run : bool, optional
         If True, do not run pipelines. All parsets, etc. are made as normal
 
@@ -621,6 +650,7 @@ def _initialize_directions(parset, initial_skymodel, ref_band, dry_run=False):
 
     """
     dir_parset = parset['direction_specific']
+    s = initial_skymodel.copy()
 
     # First check for user-supplied directions file, then for Factor-generated
     # file from a previous run, then for parameters needed to generate it internally
@@ -631,12 +661,7 @@ def _initialize_directions(parset, initial_skymodel, ref_band, dry_run=False):
         directions = factor.directions.directions_read(os.path.join(parset['dir_working'],
             'factor_directions.txt'), parset['dir_working'])
     else:
-        if dry_run:
-            # Stop here if dry_run is True but no directions file was given
-            log.warn('No directions file given. Cannot proceed beyond the '
-                'initsubtract operation. Exiting...')
-            sys.exit(0)
-        elif dir_parset['flux_min_jy'] is None or \
+        if dir_parset['flux_min_jy'] is None or \
             dir_parset['size_max_arcmin'] is None or \
             dir_parset['separation_max_arcmin'] is None:
                 log.critical('If no directions file is specified, you must '
@@ -647,9 +672,20 @@ def _initialize_directions(parset, initial_skymodel, ref_band, dry_run=False):
             # Make directions from dir-indep sky model of highest-frequency
             # band, as it has the smallest field of view
             log.info("No directions file given. Selecting directions internally...")
+
+            # Filter out sources that lie outside of maximum specific radius from phase
+            # center
+            if max_radius_deg is None:
+                max_radius_deg = ref_band.fwhm_deg # means a diameter of 2 * FWHM
+            log.info('Removing sources beyond a radius of {0} degrees (corresponding to '
+                'a diameter of {1} * FWHM of the primary beam at {2} MHz)...'.format(
+                max_radius_deg, round(2.0*max_radius_deg/ref_band.fwhm_deg, 1), ref_band.freq/1e6))
+            dist = s.getDistance(ref_band.ra, ref_band.dec, byPatch=True)
+            s.remove(dist > max_radius_deg, aggregate=True)
+
+            # Generate the directions file
             dir_parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(
-                initial_skymodel.copy(), dir_parset['flux_min_jy'],
-                dir_parset['size_max_arcmin'],
+                s, dir_parset['flux_min_jy'], dir_parset['size_max_arcmin'],
                 dir_parset['separation_max_arcmin'],
                 directions_max_num=dir_parset['ndir_max'],
                 interactive=parset['interactive'],
@@ -686,7 +722,7 @@ def _initialize_directions(parset, initial_skymodel, ref_band, dry_run=False):
         faceting_radius_deg = 1.25 * ref_band.fwhm_deg / 2.0
     beam_ratio = 1.0 / np.sin(ref_band.mean_el_rad) # ratio of N-S to E-W beam
     factor.directions.thiessen(directions, ref_band.ra, ref_band.dec,
-        faceting_radius_deg, s=initial_skymodel.copy(),
+        faceting_radius_deg, s=s,
         check_edges=dir_parset['check_edges'], target_ra=target_ra,
         target_dec=target_dec, target_radius_arcmin=target_radius_arcmin,
         beam_ratio=beam_ratio)

@@ -32,8 +32,18 @@ try:
     hasWCSaxes = True
 except:
     hasWCSaxes = False
+try:
+    import aplpy
+    from factor.scripts import make_selfcal_images
+    hasaplpy = True
+except:
+    hasaplpy = False
 
 log = logging.getLogger('factor:progress')
+logging.getLogger('astropy').setLevel(logging.CRITICAL)
+logging.getLogger('factor:parset').setLevel(logging.CRITICAL)
+logging.getLogger('factor:directions').setLevel(logging.CRITICAL)
+
 
 def show_instructions():
     log.info('Left-click on a direction to select it and see its current state')
@@ -52,22 +62,15 @@ def run(parset_file, trim_names=True):
     """
     global all_directions
 
-    # Set logging level to ERROR to suppress extraneous info from parset read
-    logging.root.setLevel(logging.ERROR)
-    log.setLevel(logging.ERROR)
-
     # Read in parset and get directions
     all_directions = load_directions(parset_file)
     if len(all_directions) == 0:
-        log.error('No directions found. Please check parset')
+        log.error('No directions found. Please check the parset or wait until '
+            'FACTOR has initialized the directions')
         sys.exit(1)
 
-    # Set logging level to normal
-    logging.root.setLevel(logging.INFO)
-    log.setLevel(logging.INFO)
-
     # Check for other assignments of the shortcuts we want to use and, if found,
-    # remove them
+    # remove them from rcParams
     factor_keys = ['u', 'c', 'i', 't', 'g', 'h']
     for k in plt.rcParams.iterkeys():
         if 'keymap' in k:
@@ -263,8 +266,12 @@ def plot_state(directions_list, trim_names=True):
     plt.close(fig)
 
     # Clean up any temp pyrap images
-    if os.path.exists('/tmp/tempimage'):
-        shutil.rmtree('/tmp/tempimage')
+    if not hasaplpy:
+        if os.path.exists('/tmp/tempimage'):
+            try:
+                shutil.rmtree('/tmp/tempimage')
+            except OSError:
+                pass
 
 
 def on_pick(event):
@@ -373,20 +380,26 @@ def on_press(event):
 
     elif event.key == 'c':
         # Open selfcal images (if any)
-        if os.path.exists('/tmp/tempimage'):
-            shutil.rmtree('/tmp/tempimage')
         selfcal_images = find_selfcal_images(selected_direction)
         if len(selfcal_images) > 0:
             info = 'Opening selfcal images for {}...'.format(selected_direction.name)
-            im = pim.image(selfcal_images)
-            im.view()
+            if hasaplpy:
+                # Update the text box as the call below takes a few seconds
+                c = at.get_child()
+                c.set_text(info)
+                fig.canvas.draw()
+                make_selfcal_images.main(selfcal_images, interactive=True,
+                    facet_name=selected_direction.name)
+            else:
+                if os.path.exists('/tmp/tempimage'):
+                    shutil.rmtree('/tmp/tempimage')
+                im = pim.image(selfcal_images)
+                im.view()
         else:
             info = 'No selfcal images exist for {}'.format(selected_direction.name)
 
     elif event.key == 'i':
         # Open full facet image (if any)
-        if os.path.exists('/tmp/tempimage'):
-            shutil.rmtree('/tmp/tempimage')
         facet_image = find_facet_image(selected_direction)
         if len(facet_image) > 0:
             info = 'Opening facet image for {}...'.format(selected_direction.name)
@@ -520,7 +533,7 @@ def get_completed_ops(direction):
     """
     has_state = direction.load_state()
     if has_state:
-        return list(set(direction.completed_operations))
+        return direction.completed_operations
     else:
         return []
 
@@ -531,7 +544,7 @@ def get_started_ops(direction):
     """
     has_state = direction.load_state()
     if has_state:
-        return list(set(direction.started_operations))
+        return direction.started_operations
     else:
         return []
 
@@ -547,7 +560,7 @@ def get_current_op(direction):
     if len(started_but_not_completed_ops) == 0:
         return None
     else:
-        return started_but_not_completed_ops[0]
+        return started_but_not_completed_ops[-1]
 
 
 def find_selfcal_images(direction):
@@ -557,15 +570,21 @@ def find_selfcal_images(direction):
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
     if os.path.exists(selfcal_dir):
-        selfcal_images = glob.glob(selfcal_dir+'/*.casa_image[01]2.image.tt0')
-        selfcal_images += glob.glob(selfcal_dir+'/*.casa_image22_iter*.image.tt0')
-        selfcal_images += glob.glob(selfcal_dir+'/*.casa_image[3]2.image.tt0')
-        selfcal_images += glob.glob(selfcal_dir+'/*.casa_image42_iter*.image.tt0')
+        selfcal_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image[01]2.image.tt0'))
+        tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22_iter*.image.tt0'))
+        if len(tec_iter_images) == 0:
+            tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22.image.tt0'))
+        selfcal_images += tec_iter_images
+        selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image[3]2.image.tt0'))
+        selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image42_iter*.image.tt0'))
         if len(selfcal_images) == 0:
-            selfcal_images = glob.glob(selfcal_dir+'/*.casa_image[01]2.image')
-            selfcal_images += glob.glob(selfcal_dir+'/*.casa_image22_iter*.image')
-            selfcal_images += glob.glob(selfcal_dir+'/*.casa_image[3]2.image')
-            selfcal_images += glob.glob(selfcal_dir+'/*.casa_image42_iter*.image')
+            selfcal_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image[01]2.image'))
+            tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22_iter*.image'))
+            if len(tec_iter_images) == 0:
+                tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22.image'))
+            selfcal_images += tec_iter_images
+            selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image[3]2.image'))
+            selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image42_iter*.image'))
         selfcal_images.sort()
     else:
         selfcal_images = []
@@ -579,18 +598,27 @@ def find_selfcal_tec_plots(direction):
     """
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
+    facetpeel_dir = os.path.join(direction.working_dir, 'results', 'facetpeel',
+        direction.name)
     peel_dir = os.path.join(direction.working_dir, 'results', 'outlierpeel',
         direction.name)
+    dirs = [selfcal_dir, facetpeel_dir, peel_dir]
 
-    # Check selfcal and peel directories
-    if os.path.exists(selfcal_dir):
-        selfcal_plots = glob.glob(selfcal_dir+'/*.make_selfcal_plots_tec*.png')
-        selfcal_plots.sort()
-    elif os.path.exists(peel_dir):
-        selfcal_plots = glob.glob(peel_dir+'/*.make_selfcal_plots_tec*.png')
-        selfcal_plots.sort()
-    else:
-        selfcal_plots = []
+    # Find most recently modified directory (if any)
+    mtimes = []
+    for d in dirs:
+        if os.path.exists(d):
+            mtimes.append(os.path.getmtime(d))
+        else:
+            mtimes.append(np.nan)
+    try:
+        latest_dir = dirs[np.nanargmax(mtimes)]
+    except (ValueError, TypeError):
+        # ValueError or TypeError indicates mtimes list is all NaNs
+        return []
+
+    selfcal_plots = glob.glob(os.path.join(latest_dir, '*.make_selfcal_plots_tec*.png'))
+    selfcal_plots.sort()
 
     return selfcal_plots
 
@@ -601,20 +629,28 @@ def find_selfcal_gain_plots(direction):
     """
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
+    facetpeel_dir = os.path.join(direction.working_dir, 'results', 'facetpeel',
+        direction.name)
     peel_dir = os.path.join(direction.working_dir, 'results', 'outlierpeel',
         direction.name)
+    dirs = [selfcal_dir, facetpeel_dir, peel_dir]
 
-    # Check selfcal and peel directories
-    if os.path.exists(selfcal_dir):
-        selfcal_plots = glob.glob(selfcal_dir+'/*.make_selfcal_plots_amp*.png')
-        selfcal_plots.extend(glob.glob(selfcal_dir+'/*.make_selfcal_plots_phase*.png'))
-        selfcal_plots.sort()
-    elif os.path.exists(peel_dir):
-        selfcal_plots = glob.glob(peel_dir+'/*.make_selfcal_plots_amp*.png')
-        selfcal_plots.extend(glob.glob(peel_dir+'/*.make_selfcal_plots_phase*.png'))
-        selfcal_plots.sort()
-    else:
-        selfcal_plots = []
+    # Find most recently modified directory (if any)
+    mtimes = []
+    for d in dirs:
+        if os.path.exists(d):
+            mtimes.append(os.path.getmtime(d))
+        else:
+            mtimes.append(np.nan)
+    try:
+        latest_dir = dirs[np.nanargmax(mtimes)]
+    except (ValueError, TypeError):
+        # ValueError or TypeError indicates mtimes list is all NaNs
+        return []
+
+    selfcal_plots = glob.glob(os.path.join(latest_dir, '*.make_selfcal_plots_amp*.png'))
+    selfcal_plots.extend(glob.glob(os.path.join(latest_dir, '*.make_selfcal_plots_phase*.png')))
+    selfcal_plots.sort()
 
     return selfcal_plots
 
@@ -627,19 +663,29 @@ def find_facet_image(direction):
         direction.name)
     image_dir = os.path.join(direction.working_dir, 'results', 'facetimage',
         direction.name)
+    dirs = [selfcal_dir, image_dir]
 
-    # Check selfcal and image directories. An image in the facetimage directory
-    # is preferred
-    facet_image = []
-    for d in [image_dir, selfcal_dir]:
-        if os.path.exists(d) and len(facet_image) == 0:
-            facet_image = glob.glob(d+'/*.wsclean_image_full2-MFS-image.fits')
+    # Find most recently modified directory (if any)
+    mtimes = []
+    for d in dirs:
+        if os.path.exists(d):
+            mtimes.append(os.path.getmtime(d))
+        else:
+            mtimes.append(np.nan)
+    try:
+        latest_dir = dirs[np.nanargmax(mtimes)]
+    except (ValueError, TypeError):
+        # ValueError or TypeError indicates mtimes list is all NaNs
+        return []
+
+    # Search for various image patterns
+    facet_image = glob.glob(os.path.join(latest_dir, '*.wsclean_image_full2-MFS-image.fits'))
+    if len(facet_image) == 0:
+        facet_image = glob.glob(os.path.join(latest_dir, '*.wsclean_image_full2-image.fits'))
+        if len(facet_image) == 0:
+            facet_image = glob.glob(os.path.join(latest_dir, '*.casa_image_full2.image.tt0'))
             if len(facet_image) == 0:
-                facet_image = glob.glob(d+'/*.wsclean_image_full2-image.fits')
-                if len(facet_image) == 0:
-                    facet_image = glob.glob(d+'/*.casa_image_full2.image.tt0')
-                    if len(facet_image) == 0:
-                        facet_image = glob.glob(d+'/*.casa_image_full2.image')
+                facet_image = glob.glob(os.path.join(latest_dir, '*.casa_image_full2.image'))
 
     return facet_image
 
@@ -768,24 +814,3 @@ def verify_subtract(direction):
             return False
     else:
         return False
-
-
-def resample(array, factor):
-    """
-    Return resampled version of an image
-    """
-
-    nx, ny = np.shape(array)
-
-    nx_new = nx // factor
-    ny_new = ny // factor
-
-    array2 = np.zeros((nx_new, ny))
-    for i in range(nx_new):
-        array2[i, :] = np.mean(array[i * factor:(i + 1) * factor, :], axis=0)
-
-    array3 = np.zeros((nx_new, ny_new))
-    for j in range(ny_new):
-        array3[:, j] = np.mean(array2[:, j * factor:(j + 1) * factor], axis=1)
-
-    return array3

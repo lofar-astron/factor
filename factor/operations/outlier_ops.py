@@ -21,9 +21,9 @@ class OutlierPeel(Operation):
     """
     Operation to peel an outlier direction
     """
-    def __init__(self, parset, bands, direction):
+    def __init__(self, parset, bands, direction, name='OutlierPeel'):
         super(OutlierPeel, self).__init__(parset, bands, direction,
-            name='OutlierPeel')
+            name=name)
 
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
@@ -54,10 +54,10 @@ class OutlierPeel(Operation):
             'input_files_single.mapfile')
         self.direction.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'verify_subtract.break.mapfile')
+        self.direction.dir_dep_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'merge_normalized_selfcal_parmdbs.mapfile')
         self.direction.dir_indep_skymodels_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'full_skymodels.mapfile')
-        self.direction.dir_dep_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'merge_selfcal_parmdbs.mapfile')
         self.direction.selfcal_plots_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'make_selfcal_plots.mapfile')
 
