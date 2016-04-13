@@ -270,8 +270,12 @@ def plot_state(directions_list, trim_names=True):
     plt.close(fig)
 
     # Clean up any temp pyrap images
-    if os.path.exists('/tmp/tempimage'):
-        shutil.rmtree('/tmp/tempimage')
+    if not hasaplpy:
+        if os.path.exists('/tmp/tempimage'):
+            try:
+                shutil.rmtree('/tmp/tempimage')
+            except OSError:
+                pass
 
 
 def on_pick(event):
