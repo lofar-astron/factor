@@ -255,7 +255,6 @@ mask.argument.atrous_jmax                             =   3
 mask.argument.adaptive_rmsbox                         =   True
 mask.argument.atrous_do                               =   True
 mask.argument.img_format                              =   fits
-mask.argument.nsig                                    =   1.0
 mask.argument.vertices_file                           =   {{ vertices_file }}
 
 # second round of imaging with the mask, length = 1
