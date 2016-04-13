@@ -380,8 +380,6 @@ def on_press(event):
 
     elif event.key == 'c':
         # Open selfcal images (if any)
-        if os.path.exists('/tmp/tempimage'):
-            shutil.rmtree('/tmp/tempimage')
         selfcal_images = find_selfcal_images(selected_direction)
         if len(selfcal_images) > 0:
             info = 'Opening selfcal images for {}...'.format(selected_direction.name)
@@ -392,6 +390,8 @@ def on_press(event):
                 fig.canvas.draw()
                 make_selfcal_images.main(selfcal_images, interactive=True)
             else:
+                if os.path.exists('/tmp/tempimage'):
+                    shutil.rmtree('/tmp/tempimage')
                 im = pim.image(selfcal_images)
                 im.view()
         else:
@@ -399,8 +399,6 @@ def on_press(event):
 
     elif event.key == 'i':
         # Open full facet image (if any)
-        if os.path.exists('/tmp/tempimage'):
-            shutil.rmtree('/tmp/tempimage')
         facet_image = find_facet_image(selected_direction)
         if len(facet_image) > 0:
             info = 'Opening facet image for {}...'.format(selected_direction.name)
