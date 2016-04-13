@@ -40,6 +40,10 @@ except:
     hasaplpy = False
 
 log = logging.getLogger('factor:progress')
+logging.getLogger('astropy').setLevel(logging.CRITICAL)
+logging.getLogger('factor:parset').setLevel(logging.CRITICAL)
+logging.getLogger('factor:directions').setLevel(logging.CRITICAL)
+
 
 def show_instructions():
     log.info('Left-click on a direction to select it and see its current state')
@@ -58,20 +62,12 @@ def run(parset_file, trim_names=True):
     """
     global all_directions
 
-    # Set logging level to ERROR to suppress extraneous info from parset read
-    logging.root.setLevel(logging.ERROR)
-    log.setLevel(logging.ERROR)
-
     # Read in parset and get directions
     all_directions = load_directions(parset_file)
     if len(all_directions) == 0:
         log.error('No directions found. Please check the parset or wait until '
             'FACTOR has initialized the directions')
         sys.exit(1)
-
-    # Set logging level to normal
-    logging.root.setLevel(logging.INFO)
-    log.setLevel(logging.INFO)
 
     # Check for other assignments of the shortcuts we want to use and, if found,
     # remove them from rcParams
@@ -392,7 +388,8 @@ def on_press(event):
                 c = at.get_child()
                 c.set_text(info)
                 fig.canvas.draw()
-                make_selfcal_images.main(selfcal_images, interactive=True)
+                make_selfcal_images.main(selfcal_images, interactive=True,
+                    facet_name=selected_direction.name)
             else:
                 if os.path.exists('/tmp/tempimage'):
                     shutil.rmtree('/tmp/tempimage')

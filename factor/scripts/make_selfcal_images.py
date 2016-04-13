@@ -166,7 +166,8 @@ def robust_sigma(in_y, zero=0):
     return out_val
 
 
-def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False):
+def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
+    facet_name=None):
     """
     Makes a png of the input images and masks
 
@@ -180,6 +181,11 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False):
         the standard selfcal naming convention
     imagenoise : float, optional
         Image noise to use to set the image scaling
+    interactive : bool, optional
+        If True, plot images as grid and show. If False, save one image for
+        each input image
+    facet_name : str, optional
+        Facet name for figure window
 
     """
      # Set logging level to ERROR to suppress extraneous info from aplpy
@@ -251,6 +257,10 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False):
         Nc = 4
         Nr = 2 + int(numpy.ceil(num_tecamp_plots/4.0))
         fig = plt.figure(figsize=(14, Nr*3+1), facecolor='w', edgecolor='w')
+        if facet_name is not None:
+            fig.canvas.set_window_title('Selfcal Images for {0}'.format(facet_name))
+        else:
+            fig.canvas.set_window_title('Selfcal Images')
         gs = GridSpec(Nr, Nc, wspace=0.0, hspace=0.0)
         row1_colindx = 0
         row2_colindx = 0
