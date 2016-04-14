@@ -728,7 +728,7 @@ def _initialize_directions(parset, initial_skymodel, ref_band, max_radius_deg=No
 
     # Set calibrator size (must be done before faceting below is done)
     for d in directions:
-        d.set_cal_size(selfcal_cellsize_arcsec)
+        d.set_cal_size(parset['imaging_specific']['selfcal_cellsize_arcsec'])
 
     # Create facets and patches
     faceting_radius_deg = dir_parset['faceting_radius_deg']
