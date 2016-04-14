@@ -193,7 +193,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
         matplotlib.use('Agg')
     import aplpy
 
-     # Set logging level to ERROR to suppress extraneous info from aplpy
+    # Set logging level to ERROR to suppress extraneous info from aplpy
     logging.root.setLevel(logging.ERROR)
 
     if type(imagefiles) is str:
