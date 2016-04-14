@@ -148,11 +148,40 @@ class Direction(object):
         self.vertices_file = self.save_file
 
 
+    def set_cal_size(selfcal_cellsize_arcsec):
+        """
+        Sets the calibrator image size from calibrator size (or vice versa)
+
+        Parameters
+        ----------
+        selfcal_cellsize_arcsec : float
+            Cellsize for selfcal imaging
+
+        """
+        self.cellsize_selfcal_deg = selfcal_cellsize_arcsec / 3600.0
+        self.cellsize_facet_deg = selfcal_cellsize_arcsec / 3600.0
+
+        if self.cal_size_deg is None:
+            # Set calibrator size from cal_imsize assuming 50% padding
+            if self.cal_imsize == 0:
+                self.log.error('The cal_imsize must be specified in the directions '
+                    'file if cal_size_deg is not specified')
+                sys.exit(1)
+            else:
+                self.cal_size_deg = self.cal_imsize * self.cellsize_selfcal_deg / 1.5
+        else:
+            if self.cal_imsize == 0:
+                self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
+                    / self.cellsize_selfcal_deg * 1.2)) # cal imsize has 20% padding
+
+        self.cal_radius_deg = self.cal_size_deg / 2.0
+        self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
+
+
     def set_imcal_parameters(self, nbands_per_channel, chan_width_hz,
     	nchan, timestep_sec, ntimes, nbands, mean_freq_mhz, initial_skymodel=None,
     	preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95, tec_block_mhz=10.0,
-    	selfcal_cellsize_arcsec=1.5, selfcal_robust=-0.25, peel_flux_jy=25.0,
-    	padding=1.05):
+    	selfcal_robust=-0.25, facet_robust=-0.25, peel_flux_jy=25.0, padding=1.05):
         """
         Sets various parameters for imaging and calibration
 
@@ -185,10 +214,10 @@ class Direction(object):
         tec_block_mhz : float, optional
             Size of frequency block in MHz over which a single TEC solution is
             fit
-        selfcal_cellsize_arcsec : float, optional
-            Cellsize for selfcal imaging
         selfcal_robust : float, optional
             Briggs robust parameter for selfcal imaging
+        facet_robust : float, optional
+            Briggs robust parameter for facet imaging
         peel_flux_jy : float, optional
             Peel cailbrators with fluxes above this value
         padding : float, optional
@@ -196,26 +225,8 @@ class Direction(object):
             the facet image size
 
         """
-        self.cellsize_selfcal_deg = selfcal_cellsize_arcsec / 3600.0
-        self.cellsize_facet_deg = selfcal_cellsize_arcsec / 3600.0
         self.robust_selfcal = selfcal_robust
-        self.robust_facet = selfcal_robust
-
-        if self.cal_size_deg is None:
-            # Set calibrator size from cal_imsize assuming 50% padding
-            if self.cal_imsize == 0:
-                self.log.error('The cal_imsize must be specified in the directions '
-                    'file if cal_size_deg is not specified')
-                sys.exit(1)
-            else:
-                self.cal_size_deg = self.cal_imsize * self.cellsize_selfcal_deg / 1.5
-        else:
-            if self.cal_imsize == 0:
-                self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
-                    / self.cellsize_selfcal_deg * 1.2)) # cal imsize has 20% padding
-
-        self.cal_radius_deg = self.cal_size_deg / 2.0
-        self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
+        self.robust_facet = facet_robust
 
         self.set_imaging_parameters(nbands, nbands_per_channel, nchan,
             initial_skymodel, padding)

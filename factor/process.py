@@ -589,7 +589,10 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
             initial_skymodel, parset['calibration_specific']['preaverage_flux_jy'],
             min_peak_smearing_factor=min_peak_smearing_factor,
             tec_block_mhz=parset['calibration_specific']['tec_block_mhz'],
-            peel_flux_jy=parset['calibration_specific']['peel_flux_jy'], padding=padding)
+            selfcal_robust=parset['imaging_specific']['selfcal_robust'],
+            facet_robust=parset['imaging_specific']['facet_robust'],
+            peel_flux_jy=parset['calibration_specific']['peel_flux_jy'],
+            padding=padding)
 
         # Set field center to that of first band (all bands have the same phase
         # center)
@@ -723,16 +726,19 @@ def _initialize_directions(parset, initial_skymodel, ref_band, max_radius_deg=No
             log.critical('target_has_own_facet = True, but target RA, Dec, or radius not found in parset')
             sys.exit(1)
 
+    # Set calibrator size (must be done before faceting below is done)
+    for d in directions:
+        d.set_cal_size(selfcal_cellsize_arcsec)
+
     # Create facets and patches
     faceting_radius_deg = dir_parset['faceting_radius_deg']
     if faceting_radius_deg is None:
         faceting_radius_deg = 1.25 * ref_band.fwhm_deg / 2.0
     beam_ratio = 1.0 / np.sin(ref_band.mean_el_rad) # ratio of N-S to E-W beam
     factor.directions.thiessen(directions, ref_band.ra, ref_band.dec,
-        faceting_radius_deg, s=s,
-        check_edges=dir_parset['check_edges'], target_ra=target_ra,
-        target_dec=target_dec, target_radius_arcmin=target_radius_arcmin,
-        beam_ratio=beam_ratio)
+        faceting_radius_deg, s=s, check_edges=dir_parset['check_edges'],
+        target_ra=target_ra, target_dec=target_dec,
+        target_radius_arcmin=target_radius_arcmin, beam_ratio=beam_ratio)
 
     # Make DS9 region files so user can check the facets, etc.
     ds9_facet_reg_file = os.path.join(parset['dir_working'], 'regions', 'facets_ds9.reg')
