@@ -663,7 +663,9 @@ def find_facet_image(direction):
         direction.name)
     image_dir = os.path.join(direction.working_dir, 'results', 'facetimage',
         direction.name)
-    dirs = [selfcal_dir, image_dir]
+    peelimage_dir = os.path.join(direction.working_dir, 'results', 'facetpeelimage',
+        direction.name)
+    dirs = [selfcal_dir, image_dir, peelimage_dir]
 
     # Find most recently modified directory (if any)
     mtimes = []
