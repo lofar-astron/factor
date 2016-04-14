@@ -719,19 +719,19 @@ def get_cluster_options(parset):
         parset_dict = {'cluster_specific': {}}
 
     # Paths to the LOFAR software
-    if 'lofarroot' not in parset_dict:
+    if 'lofarroot' not in parset_dict['cluster_specific']:
         if 'LOFARROOT' in os.environ:
-            parset_dict['lofarroot'] = os.environ['LOFARROOT']
+            parset_dict['cluster_specific']['lofarroot'] = os.environ['LOFARROOT']
         else:
             log.critical("The LOFAR root directory cannot be determined. Please "
                 "specify it in the [cluster] section of the parset as lofarroot")
             sys.exit(1)
-    if 'lofarpythonpath' not in parset_dict:
-        if parset_dict['lofarroot'] in os.environ['PYTHONPATH']:
+    if 'lofarpythonpath' not in parset_dict['cluster_specific']:
+        if parset_dict['cluster_specific']['lofarroot'] in os.environ['PYTHONPATH']:
             pypaths = os.environ['PYTHONPATH'].split(':')
             for pypath in pypaths:
-                if parset_dict['lofarroot'] in pypath:
-                    parset_dict['lofarpythonpath'] = pypath
+                if parset_dict['cluster_specific']['lofarroot'] in pypath:
+                    parset_dict['cluster_specific']['lofarpythonpath'] = pypath
                     break
         else:
             log.critical("The LOFAR Python root directory cannot be determined. "
