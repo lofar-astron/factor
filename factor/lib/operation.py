@@ -134,6 +134,7 @@ class Operation(object):
                            'pipeline_dir': self.factor_pipeline_dir,
                            'script_dir': self.factor_script_dir,
                            'local_dir': self.local_scratch_dir,
+                           'pipeline_parset_dir': self.pipeline_parset_dir,
                            'hosts': self.node_list}
 
         # Update the dictionaries with the attributes of the operation's
