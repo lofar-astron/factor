@@ -21,6 +21,7 @@ FACTOR requires the following:
 * [LSMTool](https://github.com/darafferty/LSMTool) (version 1.1 or later)
 * [jinja2](http://jinja.pocoo.org/docs/dev)
 * [Shapely](https://github.com/Toblerity/Shapely)
+* [APLpy](http://aplpy.github.io)
 
 ### Downloading and Installing
 

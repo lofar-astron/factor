@@ -213,7 +213,7 @@ def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
     return directions_file
 
 
-def make_initial_skymodel(band, max_radius_deg=None):
+def make_initial_skymodel(band):
     """
     Makes the initial skymodel used to adjust facet edges
 
@@ -226,9 +226,6 @@ def make_initial_skymodel(band, max_radius_deg=None):
     -------
     s : LSMTool Skymodel object
         Resulting sky model
-    max_radius_deg : float, optional
-        Maximum radius in degrees from the phase center within which to include
-        sources. If None, it is set to the FWHM (i.e., a diameter of 2 * FWHM)
 
     """
     import lsmtool
@@ -248,20 +245,6 @@ def make_initial_skymodel(band, max_radius_deg=None):
         sys.exit(1)
     log.info('Found {0} sources through thresholding'.format(
         len(s.getPatchNames())))
-
-    # Filter out sources that lie outside of maximum specific radius from phase
-    # center
-    if not hasattr(band, 'fwhm_deg'):
-        band.set_image_sizes()
-    if max_radius_deg is None:
-        max_radius_deg = band.fwhm_deg # means a diameter of 2 * FWHM
-
-    log.info('Removing sources beyond a radius of {0} degrees (corresponding to '
-        'a diameter of {1} * FWHM of the primary beam at {2} MHz)...'.format(
-        max_radius_deg, round(2.0*max_radius_deg/band.fwhm_deg, 1), band.freq/1e6))
-
-    dist = s.getDistance(band.ra, band.dec, byPatch=True)
-    s.remove(dist > max_radius_deg, aggregate=True)
 
     return s
 
@@ -408,7 +391,7 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
         with postions outside this radius will get small rectangular patches
         instead of thiessen polygons
     s : LSMTool SkyModel object, optional
-        Band to use to check for source near facet edges
+        Sky model to use to check for source near facet edges
     check_edges : bool, optional
         If True, check whether any know source falls on a facet edge. If sources
         are found that do, the facet is adjusted

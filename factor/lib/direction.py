@@ -111,7 +111,7 @@ class Direction(object):
             self.log.error('Peel sky model file {} not found.'.format(self.peel_skymodel))
             sys.exit(1)
         else:
-            self.log.info('Using sky model file {} for selfcal'.format(self.peel_skymodel))
+            self.log.info('Using sky model file {} for selfcal/peeling'.format(self.peel_skymodel))
         self.is_outlier = outlier_do
         self.make_final_image = make_final_image
         if cal_flux_jy is not None:
@@ -133,6 +133,7 @@ class Direction(object):
         self.subtracted_data_colname = 'SUBTRACTED_DATA_ALL' # name of empty data column
         self.pre_average = False # whether to use baseline averaging
         self.blavg_weight_column = 'WEIGHT_SPECTRUM' # name of weights column
+        self.peel_calibrator = False # whether to peel calibrator before imaging
         self.started_operations = []
         self.completed_operations = []
         self.reset_operations = []
@@ -170,7 +171,8 @@ class Direction(object):
 
     def set_imcal_parameters(self, nbands_per_channel, chan_width_hz,
     	nchan, timestep_sec, ntimes, nbands, mean_freq_mhz, initial_skymodel=None,
-    	preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95, tec_block_mhz=10.0):
+    	preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95, tec_block_mhz=10.0,
+    	peel_flux_jy=25.0, padding=1.05):
         """
         Sets various parameters for imaging and calibration
 
@@ -203,13 +205,19 @@ class Direction(object):
         tec_block_mhz : float, optional
             Size of frequency block in MHz over which a single TEC solution is
             fit
+        peel_flux_jy : float, optional
+            Peel cailbrators with fluxes above this value
+        padding : float, optional
+            Padding factor by which size of facet is multiplied to determine
+            the facet image size
 
         """
         self.set_imaging_parameters(nbands, nbands_per_channel, nchan,
-            initial_skymodel)
+            initial_skymodel, padding)
         self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,
             timestep_sec, ntimes, nbands, mean_freq_mhz, initial_skymodel,
-            preaverage_flux_jy, min_peak_smearing_factor, tec_block_mhz)
+            preaverage_flux_jy, min_peak_smearing_factor, tec_block_mhz,
+            peel_flux_jy)
 
 
     def set_imaging_parameters(self, nbands, nbands_per_channel, nchan_per_band,
@@ -274,11 +282,11 @@ class Direction(object):
         # image to ensure the imager has a reasonable chance to reach the
         # threshold first (which is set by the masking step)
         scaling_factor = np.sqrt(np.float(nbands))
-        self.wsclean_full1_image_niter = int(5000 * scaling_factor)
+        self.wsclean_full1_image_niter = int(2000 * scaling_factor)
         self.wsclean_full1_image_threshold_jy =  1.5e-3 * 0.7 / scaling_factor
         self.casa_full1_image_niter = int(2000 * scaling_factor)
         self.casa_full1_image_threshold_mjy = "{}mJy".format(1.5 * 0.7 / scaling_factor)
-        self.wsclean_full2_image_niter = int(30000 * scaling_factor)
+        self.wsclean_full2_image_niter = int(12000 * scaling_factor)
         self.casa_full2_image_niter = int(12000 * scaling_factor)
 
         # Set multiscale imaging mode: Get source sizes and check for large
@@ -466,7 +474,8 @@ class Direction(object):
 
     def set_averaging_steps_and_solution_intervals(self, chan_width_hz, nchan,
         timestep_sec, ntimes_min, nbands, mean_freq_mhz, initial_skymodel=None,
-        preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95, tec_block_mhz=10.0):
+        preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95, tec_block_mhz=10.0,
+        peel_flux_jy=25.0):
         """
         Sets the averaging step sizes and solution intervals
 
@@ -508,6 +517,8 @@ class Direction(object):
         tec_block_mhz : float, optional
             Size of frequency block in MHz over which a single TEC solution is
             fit
+        peel_flux_jy : float, optional
+            Peel cailbrators with fluxes above this value
 
         """
         # generate a (numpy-)array with the divisors of nchan
@@ -610,6 +621,13 @@ class Direction(object):
                 self.pre_average = True
             else:
                 self.pre_average = False
+
+            # Set peeling flag
+            if (effective_flux_jy > peel_flux_jy and not self.is_outlier and
+                self.peel_skymodel is not None):
+                self.peel_calibrator = True
+            else:
+                self.peel_calibrator = False
 
             # Set fast (phase-only) solution time interval
             if self.solint_time_p == 0:

@@ -36,6 +36,12 @@ def main(image, counter, indx):
         shutil.rmtree(image_copy)
     shutil.copytree(image, image_copy)
 
+    mask = image.split('.image')[0] + '.mask'
+    mask_copy = mask.replace('image{0}2'.format(indx), 'image{0}2_iter{1}'.format(indx, counter))
+    if os.path.exists(mask_copy):
+        shutil.rmtree(mask_copy)
+    shutil.copytree(mask, mask_copy)
+
     if counter > 0:
         # Use image from previous iteration of the current imaging step
         image_prev = image.replace('image{0}2'.format(indx), 'image{0}2_iter{1}'.format(indx, counter-1))
@@ -51,10 +57,11 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description=descriptiontext, formatter_class=RawTextHelpFormatter)
     parser.add_argument('image', help='name of the image to copy')
-    parser.add_argument('counter', help='loop index')
+    parser.add_argument('counter', help='loop counter')
+    parser.add_argument('index', help='imaging step index')
     args = parser.parse_args()
 
-    main(args.image, args.counter)
+    main(args.image, args.counter, args.index)
 
 
 
