@@ -271,6 +271,8 @@ def get_global_options(parset):
         'keep_unavg_facet_data', 'max_selfcal_loops', 'preaverage_flux_jy',
         'multiscale_selfcal', 'skymodel_extension', 'max_peak_smearing',
         'tec_block_mhz', 'selfcal_cellsize_arcsec', 'selfcal_robust']
+    allowed_options.extend(['direction_specific', 'calibration_specific',
+        'imaging_specific', 'cluster_specific']) # add dicts needed for deprecated options
     deprecated_options_imaging = ['make_mosaic', 'wsclean_nbands',
         'facet_imager', 'max_peak_smearing', 'selfcal_cellsize_arcsec',
         'selfcal_robust']
