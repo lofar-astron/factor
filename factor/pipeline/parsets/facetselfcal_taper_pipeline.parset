@@ -1382,11 +1382,12 @@ make_selfcal_plots.control.outputkey                       =   plots_root
 make_selfcal_plots.argument.flags                          =   [parmdb,plots_root]
 
 # create a mapfile with the selfcal images, length = 1
-create_selfcal_images_mapfile.control.kind                  =   plugin
-create_selfcal_images_mapfile.control.type                  =   addSelfcalImagesMapfile
-create_selfcal_images_mapfile.control.selfcal_dir           =   {{ pipeline_parset_dir }}
-create_selfcal_images_mapfile.control.mapfile_dir           =   input.output.mapfile_dir
-create_selfcal_images_mapfile.control.filename              =   selfcal_images.mapfile
+create_selfcal_images_mapfile.control.kind                 =   plugin
+create_selfcal_images_mapfile.control.type                 =   addSelfcalImagesMapfile
+create_selfcal_images_mapfile.control.selfcal_dir          =   {{ pipeline_parset_dir }}
+create_selfcal_images_mapfile.control.mapfile_dir          =   input.output.mapfile_dir
+create_selfcal_images_mapfile.control.hosts                =   {{ hosts }}
+create_selfcal_images_mapfile.control.filename             =   selfcal_images.mapfile
 
 # make plots of the selfcal images, length = 1
 make_selfcal_images.control.type                           =   make_selfcal_images
