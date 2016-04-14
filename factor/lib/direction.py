@@ -58,15 +58,13 @@ class Direction(object):
         selfcaled?
     cal_size_deg : float, optional
         Size in degrees of calibrator source(s)
-    cal_flux_jy : float, optional
-        Apparent flux density in Jy of calibrator source
 
     """
     def __init__(self, name, ra, dec, atrous_do=False, mscale_field_do=False,
     	cal_imsize=512, solint_p=1, solint_a=30, dynamic_range='LD',
     	region_selfcal='empty', region_field='empty', peel_skymodel='empty',
     	outlier_do=False, factor_working_dir='', make_final_image=False,
-    	cal_size_deg=None, cal_flux_jy=None):
+    	cal_size_deg=None):
 
         # Handle input args
         self.name = name
@@ -114,10 +112,7 @@ class Direction(object):
             self.log.info('Using sky model file {} for selfcal/peeling'.format(self.peel_skymodel))
         self.is_outlier = outlier_do
         self.make_final_image = make_final_image
-        if cal_flux_jy is not None:
-            self.apparent_flux_mjy = cal_flux_jy * 1000.0
-        else:
-            self.apparent_flux_mjy = None
+        self.cal_size_deg = cal_size_deg
 
         # Initialize some parameters to default/initial values
         self.loop_amp_selfcal = False
@@ -145,24 +140,6 @@ class Direction(object):
         self.nchunks = 1
         self.num_selfcal_groups = 1
         self.timeSlotsPerParmUpdate = 100
-
-        # Set the size of the calibrator
-        if cal_size_deg is None:
-            # Try to get from cal_imsize assuming 50% padding
-            if self.cal_imsize == 0:
-                self.log.error('The cal_imsize must be specified in the directions '
-                    'file')
-                sys.exit(1)
-            else:
-                self.cal_size_deg = self.cal_imsize * self.cellsize_selfcal_deg / 1.5
-        else:
-            self.cal_size_deg = cal_size_deg
-            if self.cal_imsize == 0:
-                self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
-                    / self.cellsize_selfcal_deg * 1.2)) # cal imsize has 20% padding
-
-        self.cal_radius_deg = self.cal_size_deg / 2.0
-        self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
 
         # Define some directories and files
         self.working_dir = factor_working_dir
@@ -223,6 +200,23 @@ class Direction(object):
         self.cellsize_facet_deg = selfcal_cellsize_arcsec / 3600.0
         self.robust_selfcal = selfcal_robust
         self.robust_facet = selfcal_robust
+
+        if self.cal_size_deg is None:
+            # Set calibrator size from cal_imsize assuming 50% padding
+            if self.cal_imsize == 0:
+                self.log.error('The cal_imsize must be specified in the directions '
+                    'file if cal_size_deg is not specified')
+                sys.exit(1)
+            else:
+                self.cal_size_deg = self.cal_imsize * self.cellsize_selfcal_deg / 1.5
+        else:
+            if self.cal_imsize == 0:
+                self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
+                    / self.cellsize_selfcal_deg * 1.2)) # cal imsize has 20% padding
+
+        self.cal_radius_deg = self.cal_size_deg / 2.0
+        self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
+
         self.set_imaging_parameters(nbands, nbands_per_channel, nchan,
             initial_skymodel, padding)
         self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,

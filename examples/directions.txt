@@ -4,12 +4,12 @@
 #
 # Columns are defined as follows:
 #
-# name position atrous_do mscale_field_do cal_imsize solint_ph solint_amp dynamic_range region_selfcal region_facet peel_skymodel outlier_source
+# name position atrous_do mscale_field_do cal_imsize solint_ph solint_amp dynamic_range region_selfcal region_facet peel_skymodel outlier_source cal_size_deg cal_flux_mjy
 #
 # Values of "empty" (for string or boolean entries) or 0 (for integer entries) indicate
 # that they should be derived internally by Factor.
 
-s1  14h41m01.884,+35d30m31.52 empty empty 512  1  30  LD empty empty /full/path/to/s1.skymodel True
-s2  14h38m29.584,+33d57m37.82 True  True    0  1   0  LD empty empty empty False
-s25 14h21m07.482,+35d35m22.87 empty empty   0  2   0  LD empty /full/path/to/s25.rgn empty False
+s1  14h41m01.884,+35d30m31.52 empty empty 512  1  30  LD empty empty /full/path/to/s1.skymodel True 0.01 2400
+s2  14h38m29.584,+33d57m37.82 True  True    0  1   0  LD empty empty empty False 0.02 1300
+s25 14h21m07.482,+35d35m22.87 empty empty   0  2   0  LD empty /full/path/to/s25.rgn empty False 0.1 1020
 ...

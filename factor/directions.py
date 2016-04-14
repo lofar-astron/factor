@@ -105,20 +105,15 @@ def directions_read(directions_file, factor_working_dir):
                 cal_size_deg = None
             else:
                 cal_size_deg = direction['cal_size_deg']
-            if np.isnan(direction['cal_flux_mjy']):
-                cal_flux_jy = None
-            else:
-                cal_flux_jy = direction['cal_flux_mjy'] / 1000.0
         else:
             cal_size_deg = None
-            cal_flux_jy = None
 
         data.append(Direction(direction['name'], ra, dec, atrous_do,
         	mscale_field_do, direction['cal_imsize'], direction['solint_p'],
         	direction['solint_a'], direction['dynamic_range'],
         	direction['region_selfcal'], direction['region_field'],
         	direction['peel_skymodel'], outlier_source, factor_working_dir,
-        	False, cal_size_deg, cal_flux_jy))
+        	False, cal_size_deg))
 
     return data
 
