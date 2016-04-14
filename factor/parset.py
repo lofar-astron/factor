@@ -48,7 +48,7 @@ def parset_read(parset_file, use_log_file=True):
     parset_dict['imaging_specific'].update(get_imaging_options(parset)['imaging_specific'])
 
     # Handle directions-related parameters
-    parset_dict['direction_specific']update(get_directions_options(parset)['direction_specific'])
+    parset_dict['direction_specific'].update(get_directions_options(parset)['direction_specific'])
 
     # Handle cluster-specific parameters
     parset_dict['cluster_specific'].update(get_cluster_options(parset)['cluster_specific'])
