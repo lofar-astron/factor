@@ -11,9 +11,6 @@ import numpy
 import astropy.io.fits
 import subprocess
 import logging
-from matplotlib import pyplot as plt
-from matplotlib.gridspec import GridSpec
-from matplotlib.ticker import NullFormatter
 
 
 def meanclip(indata, clipsig=4.0, maxiter=10, converge_num=0.001, verbose=0):
@@ -188,7 +185,12 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
         Facet name for figure window
 
     """
-     # Set logging level to ERROR to suppress extraneous info from aplpy
+    if interactive:
+        from matplotlib import pyplot as plt
+        from matplotlib.gridspec import GridSpec
+        from matplotlib.ticker import NullFormatter
+
+    # Set logging level to ERROR to suppress extraneous info from aplpy
     logging.root.setLevel(logging.ERROR)
 
     if type(imagefiles) is str:
