@@ -6,7 +6,6 @@ import argparse
 from argparse import RawTextHelpFormatter
 import sys
 import os
-import aplpy
 import numpy
 import astropy.io.fits
 import subprocess
@@ -189,6 +188,10 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
         from matplotlib import pyplot as plt
         from matplotlib.gridspec import GridSpec
         from matplotlib.ticker import NullFormatter
+    else:
+        import matplotlib
+        matplotlib.use('Agg')
+        import aplpy
 
      # Set logging level to ERROR to suppress extraneous info from aplpy
     logging.root.setLevel(logging.ERROR)
