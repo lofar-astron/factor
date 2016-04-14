@@ -474,7 +474,7 @@ def get_imaging_options(parset):
     given_options = parset.options('imaging')
     allowed_options = ['make_mosaic', 'wsclean_nbands', 'facet_imager',
         'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
-        'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust']
+        'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust', 'reimage']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [imaging] section of the '
