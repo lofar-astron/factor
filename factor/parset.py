@@ -283,10 +283,12 @@ def get_global_options(parset):
                 'parset but is not a valid global option'.format(option))
         if option in deprecated_options_imaging:
             log.warning('Option "{}" was given in the [global] section of the '
-                'parset but should be in the [imaging] section'.format(option))
+                'parset but should be in the [imaging] section'.format(option),
+                DeprecationWarning)
         if option in deprecated_options_cal:
             log.warning('Option "{}" was given in the [global] section of the '
-                'parset but should be in the [calibration] section'.format(option))
+                'parset but should be in the [calibration] section'.format(option),
+                DeprecationWarning)
 
     return parset_dict
 
