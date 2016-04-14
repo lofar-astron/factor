@@ -115,8 +115,8 @@ class Operation(object):
             'pipeline.cfg')
 
         # Define parameters needed for the pipeline config.
-        self.cfg_dict = {'lofarroot': parset['lofarroot'],
-                         'pythonpath': parset['lofarpythonpath'],
+        self.cfg_dict = {'lofarroot': parset['cluster_specific']['lofarroot'],
+                         'pythonpath': parset['cluster_specific']['lofarpythonpath'],
                          'factorroot': self.factor_root_dir,
                          'pipeline_working_dir': self.pipeline_working_dir,
                          'pipeline_runtime_dir': self.pipeline_runtime_dir,
