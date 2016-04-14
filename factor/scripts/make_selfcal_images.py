@@ -6,7 +6,6 @@ import argparse
 from argparse import RawTextHelpFormatter
 import sys
 import os
-import aplpy
 import numpy
 import astropy.io.fits
 import subprocess
