@@ -36,9 +36,8 @@ def main(image, counter, indx):
         shutil.rmtree(image_copy)
     shutil.copytree(image, image_copy)
 
-    mask = image.split('.image')[0] + '.image.mask{}'.format(indx)
-    mask = mask.replace('image{0}2'.format(indx), 'image{0}1'.format(indx))
-    mask_copy = mask.replace('image{0}1'.format(indx), 'image{0}1_iter{1}'.format(indx, counter))
+    mask = image.split('.image')[0] + '.mask'
+    mask_copy = mask.replace('image{0}2'.format(indx), 'image{0}2_iter{1}'.format(indx, counter))
     if os.path.exists(mask_copy):
         shutil.rmtree(mask_copy)
     shutil.copytree(mask, mask_copy)

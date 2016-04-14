@@ -198,9 +198,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
     if maskfiles is None:
         maskfiles = []
         for imagefile in imagefiles:
-            i = int(imagefile.split('casa_image')[1][0])
-            maskfile = imagefile.split('.image')[0] + '.image.mask{}'.format(i)
-            maskfile = maskfile.replace('image{}2'.format(i), 'image{}1'.format(i))
+            maskfile = imagefile.split('.image')[0] + '.mask'
             if os.path.exists(maskfile):
                 maskfiles.append(maskfile)
             else:
@@ -243,28 +241,32 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
             imagenoises.append(find_imagenoise(data))
             hdulist.close()
         imagenoise = min(imagenoises)
-    print('Image noise for plot scaling is: {} mJy'.format(imagenoise*1e3))
 
     # Set up plot(s)
     if interactive:
         row1_images = ['image02']
         row2_images = ['image12', 'image22']
         row3_images = ['image32', 'image42']
+        num_tec_plots = 0
         num_tecamp_plots = 0
+        for fitsimagename in fitsfiles:
+            if any([fitsimagename.find(r) > 0 for r in row2_images]):
+                num_tec_plots += 1
         for fitsimagename in fitsfiles:
             if any([fitsimagename.find(r) > 0 for r in row3_images]):
                 num_tecamp_plots += 1
         Nc = 4
-        Nr = 2 + int(numpy.ceil(num_tecamp_plots/4.0))
+        Nr = 1 + int(numpy.ceil(num_tec_plots/4.0)) + int(numpy.ceil(num_tecamp_plots/4.0))
         fig = plt.figure(figsize=(14, Nr*3+1), facecolor='w', edgecolor='w')
         if facet_name is not None:
-            fig.canvas.set_window_title('Selfcal Images for {0}'.format(facet_name))
+            fig.canvas.set_window_title('Selfcal Images for {0} (scaling noise = {1} mJy/beam)'.format(facet_name, round(imagenoise*1e3, 3)))
         else:
-            fig.canvas.set_window_title('Selfcal Images')
+            fig.canvas.set_window_title('Selfcal Images (scaling noise = {0} mJy/beam)'.format(round(imagenoise*1e3, 3)))
         gs = GridSpec(Nr, Nc, wspace=0.0, hspace=0.0)
         row1_colindx = 0
         row2_colindx = 0
         row3_colindx = 0
+        first_tec = True
         first_gain = True
 
         for i, (fitsimagename, mask) in enumerate(zip(fitsfiles, fitsmaskfiles)):
@@ -284,13 +286,21 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
                         else:
                             title = im
             if any([fitsimagename.find(r) > 0 for r in row2_images]):
-                ax = plt.subplot(gs[1, row2_colindx])
+                if first_tec:
+                    row_indx = 1
+                if row2_colindx % 4 == 0:
+                    row2_colindx = 0
+                    if not first_tec:
+                        row_indx += 1
+                    else:
+                        first_tec = False
+                ax = plt.subplot(gs[row_indx, row2_colindx])
                 if row2_colindx == 0:
                     plot_label = 'TEC'
                 else:
                     plot_label = None
                 row2_colindx += 1
-                subplotindx = row2_colindx + 4
+                subplotindx = row2_colindx + 4 * row_indx
                 for im in row2_images:
                     if im in fitsimagename:
                         if '_iter' in fitsimagename:
@@ -335,10 +345,10 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
             f = aplpy.FITSFigure(fitsimagename, figure=fig, slices=[0, 0],
                 subplot=(Nr, Nc, subplotindx))
             f.show_colorscale(vmax=16*imagenoise, vmin=-6*imagenoise, cmap='bone')
-            f.add_beam()
             f.tick_labels.hide()
             f.axis_labels.hide()
             f.set_title(title)
+            f.add_beam()
             f.beam.set_frame(True)
             f.beam.set_color('white')
             f.beam.set_edgecolor('black')
@@ -352,10 +362,19 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
                     alpha=0.6, linewidths=1)
         fig.show()
     else:
+        image_infixes = ['image02', 'image12', 'image22', 'image32', 'image42']
         for fitsimagename, mask in zip(fitsfiles, fitsmaskfiles):
             outplotname = fitsimagename.replace('.fits', '.png')
+            for im in image_infixes:
+                if im in fitsimagename:
+                    if '_iter' in fitsimagename:
+                        iter = int(fitsimagename.split('_iter')[1][0])
+                        title = im + '_iter{}'.format(iter)
+                    else:
+                        title = im
             f = aplpy.FITSFigure(fitsimagename, slices=[0, 0])
             f.show_colorscale(vmax=16*imagenoise, vmin=-6*imagenoise, cmap='bone')
+            f.set_title(title+' (scaling noise = {} mJy/beam)'.format(round(imagenoise*1e3, 3)))
             f.add_beam()
             f.beam.set_frame(True)
             f.beam.set_color('white')
