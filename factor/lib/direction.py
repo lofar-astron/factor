@@ -282,11 +282,11 @@ class Direction(object):
         # image to ensure the imager has a reasonable chance to reach the
         # threshold first (which is set by the masking step)
         scaling_factor = np.sqrt(np.float(nbands))
-        self.wsclean_full1_image_niter = int(5000 * scaling_factor)
+        self.wsclean_full1_image_niter = int(2000 * scaling_factor)
         self.wsclean_full1_image_threshold_jy =  1.5e-3 * 0.7 / scaling_factor
         self.casa_full1_image_niter = int(2000 * scaling_factor)
         self.casa_full1_image_threshold_mjy = "{}mJy".format(1.5 * 0.7 / scaling_factor)
-        self.wsclean_full2_image_niter = int(30000 * scaling_factor)
+        self.wsclean_full2_image_niter = int(12000 * scaling_factor)
         self.casa_full2_image_niter = int(12000 * scaling_factor)
 
         # Set multiscale imaging mode: Get source sizes and check for large
