@@ -122,101 +122,101 @@ def get_global_options(parset):
     parset_dict = parset._sections['global']
 
     # Add dicts for new parset sections
-    parset_dict['calibration_specific'] = {}
+    parset['calibration_specific'] = {}
 
     # Parmdb name for dir-indep. selfcal solutions (stored inside the input band
     # measurement sets, so path should be relative to those; default = instrument)
     if 'parmdb_name' not in parset_dict:
-        parset_dict['parmdb_name'] = 'instrument'
+        parset['parmdb_name'] = 'instrument'
 
     # Extension that when concatenated with the 'extension-stripped' MS path gives
     # a path that is checked if it contains a skymodel
     if 'skymodel_extension' not in parset_dict:
-        parset_dict['skymodel_extension'] = '.wsclean_low2-model.merge'
+        parset['skymodel_extension'] = '.wsclean_low2-model.merge'
 
     # Use interactive mode (default = False). Factor will ask for confirmation of
     # internally derived DDE calibrators and facets
     if 'interactive' in parset_dict:
-        parset_dict['interactive'] = parset.getboolean('global', 'interactive')
+        parset['interactive'] = parset.getboolean('global', 'interactive')
     else:
-        parset_dict['interactive'] = False
+        parset['interactive'] = False
 
     # Make final mosaic (default = True)
     if 'make_mosaic' in parset_dict:
-        parset_dict['imaging_specific']['make_mosaic'] = parset.getboolean('global', 'make_mosaic')
+        parset['imaging_specific']['make_mosaic'] = parset.getboolean('global', 'make_mosaic')
     else:
-        parset_dict['imaging_specific']['make_mosaic'] = True
+        parset['imaging_specific']['make_mosaic'] = True
 
     # Exit if selfcal fails for any direction (default = True). If False, processing
     # will continue and the failed direction will receive the selfcal solutions of
     # the nearest successful direction unless skip_selfcal_check is True, in which
     # case processing continues as if the selfcal succeeded
     if 'exit_on_selfcal_failure' in parset_dict:
-        parset_dict['calibration_specific']['exit_on_selfcal_failure'] = parset.getboolean('global',
+        parset['calibration_specific']['exit_on_selfcal_failure'] = parset.getboolean('global',
             'exit_on_selfcal_failure')
     else:
-        parset_dict['calibration_specific']['exit_on_selfcal_failure'] = True
+        parset['calibration_specific']['exit_on_selfcal_failure'] = True
     if 'skip_selfcal_check' in parset_dict:
-        parset_dict['calibration_specific']['skip_selfcal_check'] = parset.getboolean('global',
+        parset['calibration_specific']['skip_selfcal_check'] = parset.getboolean('global',
             'skip_selfcal_check')
     else:
-        parset_dict['calibration_specific']['skip_selfcal_check'] = False
+        parset['calibration_specific']['skip_selfcal_check'] = False
 
     # Max number of bands per WSClean image when wide-band clean is used (default =
     # 5). Smaller values produce better results but require longer run times.
     # Wide-band clean is activated when there are more than 5 bands
     if 'wsclean_nbands' in parset_dict:
-        parset_dict['imaging_specific']['wsclean_nbands'] = parset.getint('global', 'wsclean_nbands')
+        parset['imaging_specific']['wsclean_nbands'] = parset.getint('global', 'wsclean_nbands')
     else:
-        parset_dict['imaging_specific']['wsclean_nbands'] = 3
+        parset['imaging_specific']['wsclean_nbands'] = 3
 
     # Padding factor for WSClean images (default = 1.6)
     if 'wsclean_image_padding' in parset_dict:
-        parset_dict['wsclean_image_padding'] = parset.getfloat('global', 'wsclean_image_padding')
+        parset['imaging_specific']['wsclean_image_padding'] = parset.getfloat('global', 'wsclean_image_padding')
     else:
-        parset_dict['wsclean_image_padding'] = 1.6
+        parset['imaging_specific']['wsclean_image_padding'] = 1.6
 
     # Padding factor for WSClean images (default = 1.4)
     if 'wsclean_model_padding' in parset_dict:
-        parset_dict['wsclean_model_padding'] = parset.getfloat('global', 'wsclean_model_padding')
+        parset['imaging_specific']['wsclean_model_padding'] = parset.getfloat('global', 'wsclean_model_padding')
     else:
-        parset_dict['wsclean_model_padding'] = 1.4
+        parset['imaging_specific']['wsclean_model_padding'] = 1.4
 
     # Use WSClean or CASA for imaging of entire facet (default = wsclean). For large
     # bandwidths, the CASA imager is typically faster
     if 'facet_imager' not in parset_dict:
-        parset_dict['imaging_specific']['facet_imager'] = 'wsclean'
+        parset['imaging_specific']['facet_imager'] = 'wsclean'
 
     # Keep calibrated data for each facet to allow re-imaging by hand (default =
     # True for averaged data and False for unaveraged data). If a target is
     # specified (see below), the averaged data for the target is always kept,
     # regardless of this setting
     if 'keep_avg_facet_data' in parset_dict:
-        parset_dict['keep_avg_facet_data'] = parset.getboolean('global', 'keep_avg_facet_data')
+        parset['keep_avg_facet_data'] = parset.getboolean('global', 'keep_avg_facet_data')
     else:
-        parset_dict['keep_avg_facet_data'] = True
+        parset['keep_avg_facet_data'] = True
     if 'keep_unavg_facet_data' in parset_dict:
-        parset_dict['keep_unavg_facet_data'] = parset.getboolean('global', 'keep_unavg_facet_data')
+        parset['keep_unavg_facet_data'] = parset.getboolean('global', 'keep_unavg_facet_data')
     else:
-        parset_dict['keep_unavg_facet_data'] = False
+        parset['keep_unavg_facet_data'] = False
 
     # Maximum number of cycles of the last step of selfcal to perform (default =
     # 10). The last step is looped until the number of cycles reaches this value or
     # until the improvement in dynamic range over the previous image is less than
     # 1.25%
     if 'max_selfcal_loops' in parset_dict:
-        parset_dict['calibration_specific']['max_selfcal_loops'] = parset.getint('global', 'max_selfcal_loops')
+        parset['calibration_specific']['max_selfcal_loops'] = parset.getint('global', 'max_selfcal_loops')
     else:
-        parset_dict['calibration_specific']['max_selfcal_loops'] = 10
+        parset['calibration_specific']['max_selfcal_loops'] = 10
 
     # Use baseline-dependent preaveraging to increase the signal-to-noise of the
     # phase-only solve for sources below this flux (default = 0.0; i.e., disabled).
     # When activated, averaging in time is done to exploit the time coherence in the
     # TEC solutions
     if 'preaverage_flux_jy' in parset_dict:
-        parset_dict['calibration_specific']['preaverage_flux_jy'] = parset.getfloat('global', 'preaverage_flux_jy')
+        parset['calibration_specific']['preaverage_flux_jy'] = parset.getfloat('global', 'preaverage_flux_jy')
     else:
-        parset_dict['calibration_specific']['preaverage_flux_jy'] = 0.0
+        parset['calibration_specific']['preaverage_flux_jy'] = 0.0
 
     # Peel the calibrator for sources above this flux density (default = 25.0).
     # When activated, the calibrator is peeled using a supplied sky model and
@@ -224,17 +224,17 @@ def get_global_options(parset):
     # directions file in the peel_skymodel column for each source that should be
     # peeled
     if 'peel_flux_jy' in parset_dict:
-        parset_dict['peel_flux_jy'] = parset.getfloat('global', 'peel_flux_jy')
+        parset['calibration_specific']['peel_flux_jy'] = parset.getfloat('global', 'peel_flux_jy')
     else:
-        parset_dict['peel_flux_jy'] = 25.0
+        parset['calibration_specific']['peel_flux_jy'] = 25.0
 
     # Use multi-scale selfcal that starts at 20 arcsec resolution and increases the
     # resolution in stages to the full resolution (default = False). This method may
     # improve convergence, especially when the starting model is poor
     if 'multiscale_selfcal' in parset_dict:
-        parset_dict['calibration_specific']['multiscale_selfcal'] = parset.getboolean('global', 'multiscale_selfcal')
+        parset['calibration_specific']['multiscale_selfcal'] = parset.getboolean('global', 'multiscale_selfcal')
     else:
-        parset_dict['calibration_specific']['multiscale_selfcal'] = False
+        parset['calibration_specific']['multiscale_selfcal'] = False
 
     # Max desired peak flux density reduction at center of the facet edges due to
     # bandwidth smearing (at the mean frequency) and time smearing (default = 0.15 =
@@ -242,27 +242,27 @@ def get_global_options(parset):
     # more smearing away from the facet centers. This value only applies to the
     # facet imaging (selfcal always uses a value of 0.15)
     if 'max_peak_smearing' in parset_dict:
-        parset_dict['imaging_specific']['max_peak_smearing'] = parset.getfloat('global', 'max_peak_smearing')
+        parset['imaging_specific']['max_peak_smearing'] = parset.getfloat('global', 'max_peak_smearing')
     else:
-        parset_dict['imaging_specific']['max_peak_smearing'] = 0.15
+        parset['imaging_specific']['max_peak_smearing'] = 0.15
 
     # Size of frequency block in MHz over which a single TEC solution is fit
     # (default = 10)
     if 'tec_block_mhz' in parset_dict:
-        parset_dict['calibration_specific']['tec_block_mhz'] = parset.getfloat('global', 'tec_block_mhz')
+        parset['calibration_specific']['tec_block_mhz'] = parset.getfloat('global', 'tec_block_mhz')
     else:
-        parset_dict['calibration_specific']['tec_block_mhz'] = 10.0
+        parset['calibration_specific']['tec_block_mhz'] = 10.0
 
     # Selfcal imaging parameters: pixel size in arcsec (default = 1.5) and Briggs
     # robust parameter (default = -0.25)
     if 'selfcal_cellsize_arcsec' in parset_dict:
-        parset_dict['imaging_specific']['selfcal_cellsize_arcsec'] = parset.getfloat('global', 'selfcal_cellsize_arcsec')
+        parset['imaging_specific']['selfcal_cellsize_arcsec'] = parset.getfloat('global', 'selfcal_cellsize_arcsec')
     else:
-        parset_dict['imaging_specific']['selfcal_cellsize_arcsec'] = 1.5
+        parset['imaging_specific']['selfcal_cellsize_arcsec'] = 1.5
     if 'selfcal_robust' in parset_dict:
-        parset_dict['imaging_specific']['selfcal_robust'] = parset.getfloat('global', 'selfcal_robust')
+        parset['imaging_specific']['selfcal_robust'] = parset.getfloat('global', 'selfcal_robust')
     else:
-        parset_dict['imaging_specific']['selfcal_robust'] = -0.25
+        parset['imaging_specific']['selfcal_robust'] = -0.25
 
 
     # Check for unused options
@@ -291,7 +291,7 @@ def get_global_options(parset):
             log.warning('Option "{}" was given in the [global] section of the '
                 'parset but should be in the [calibration] section'.format(option))
 
-    return parset_dict
+    return parset
 
 
 def get_calibration_options(parset):
