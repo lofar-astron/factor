@@ -1,7 +1,6 @@
 import os
 import numpy as np
-from lofarpipe.support.data_map import DataMap
-from lofarpipe.support.data_map import DataProduct
+from lofarpipe.support.data_map import DataMap, DataProduct, MultiDataMap, MultiDataProduct
 
 
 def plugin_main(args, **kwargs):
@@ -14,24 +13,24 @@ def plugin_main(args, **kwargs):
     mapfile_in : str
         Name of the input mapfile to be re-grouped.
     mapfile_groups : str
-        Name of the multi-mapfile with the given groups. Total number of files needs 
-        to be the same as in mapfile_in. 
+        Name of the multi-mapfile with the given groups. Total number of files needs
+        to be the same as in mapfile_in.
     check_basename : Bool (str) , optional
         Check if the basenames (see os.path.basename()) minus extension match
         default = True
     join_groups : int (str), optional
-        If it is set, then join so many groups into one new group. (Gives fewer 
+        If it is set, then join so many groups into one new group. (Gives fewer
         groups but more files per group than in mapfile_groups.)
         default = keep same grouping as in mapfile_groups
     join_max_files : int (str), optional
-        If it is set, then try to join as many groups together before the number of 
-        files per group woud exceed "join_max_files". Similar to "join_groups", but 
-        the number of joind groups is not fixed but depends on the number of files 
+        If it is set, then try to join as many groups together before the number of
+        files per group woud exceed "join_max_files". Similar to "join_groups", but
+        the number of joind groups is not fixed but depends on the number of files
         per group. Mutaully exclusive with "join_groups"!
     rotate_groups : bool (str), optional
-        If set to "True": form groups by taking n files from each group, with n given 
-        by join_groups or join_max_files. I.e. form groups of files from all bands 
-        instead of groups with the same bands. This will fully mangle the order of 
+        If set to "True": form groups by taking n files from each group, with n given
+        by join_groups or join_max_files. I.e. form groups of files from all bands
+        instead of groups with the same bands. This will fully mangle the order of
         the time-steps but will guarantee at least one file per (frequency-)group
         in each output-group.
     mapfile_dir : str
@@ -76,12 +75,12 @@ def plugin_main(args, **kwargs):
             if inmap[inindex].skip:
                 print 'PipelineStep_reGroupMapfile: Skipping full group for file:'+inmap[inindex].file
                 skip = True
-            inindex += 1            
+            inindex += 1
         map_out.data.append(MultiDataProduct(group.host, grouplist, skip))
         minpergroup = min(minpergroup,len(grouplist))
     assert inindex == len(inmap)
 
-    
+
     if not rotate_groups:
         if 'join_groups' in kwargs:
             groups_to_join =  int(kwargs['join_groups'])
@@ -147,94 +146,7 @@ def string2bool(instring):
         raise ValueError('string2bool: Input is not a basic string!')
     if instring.upper() == 'TRUE' or instring == '1':
         return True
-    elif instring.upper() == 'FALSE' or instring == '0': 
+    elif instring.upper() == 'FALSE' or instring == '0':
         return False
     else:
         raise ValueError('string2bool: Cannot convert string "'+instring+'" to boolean!')
-
-class MultiDataProduct(DataProduct):
-    """
-    Class representing multiple files in a DataProduct.
-    """
-    def __init__(self, host=None, file=None, skip=True):
-        super(MultiDataProduct, self).__init__(host, file, skip)
-        if not file:
-            self.file = list()
-        else:
-            self._set_file(file)
-
-    def __repr__(self):
-        """Represent an instance as a Python dict"""
-        return (
-            "{{'host': '{0}', 'file': {1}, 'skip': {2}}}".format(self.host, self.file, str(self.skip))
-        )
-
-    def __str__(self):
-        """Print an instance as 'host:[filelist]'"""
-        return ':'.join((self.host, str(self.file)))
-
-    def _set_file(self, data):
-        try:
-            # Try parsing as a list
-            if isinstance(data, list):
-                self.file = data
-            if isinstance(data, DataProduct):
-                self._from_dataproduct(data)
-            if isinstance(data, DataMap):
-                self._from_datamap(data)
-
-        except TypeError:
-            raise DataProduct("No known method to set a filelist from %s" % str(file))
-
-    def _from_dataproduct(self, prod):
-        print 'setting filelist from DataProduct'
-        self.host = prod.host
-        self.file = prod.file
-        self.skip = prod.skip
-
-    def _from_datamap(self, inmap):
-        print 'setting filelist from DataMap'
-        filelist = {}
-        for item in inmap:
-            if not item.host in filelist:
-                filelist[item.host] = []
-            filelist[item.host].append(item.file)
-        self.file = filelist['i am']
-
-    def append(self, item):
-        self.file.append(item)
-
-
-class MultiDataMap(DataMap):
-    """
-    Class representing a specialization of data-map, a collection of data
-    products located on the same node, skippable as a set and individually
-    """
-    @DataMap.data.setter
-    def data(self, data):
-        if isinstance(data, DataMap):
-            mdpdict = {}
-            data.iterator = DataMap.SkipIterator
-            for item in data:
-                if not item.host in mdpdict:
-                    mdpdict[item.host] = []
-                mdpdict[item.host].append(item.file)
-            mdplist = []
-            for k, v in mdpdict.iteritems():
-                mdplist.append(MultiDataProduct(k, v, False))
-            self._set_data(mdplist, dtype=MultiDataProduct)
-        elif isinstance(data, MultiDataProduct):
-            self._set_data(data, dtype=MultiDataProduct)
-        elif not data:
-            pass
-        else:
-            self._set_data(data, dtype=MultiDataProduct)
-
-    def split_list(self, number):
-        mdplist = []
-        for item in self.data:
-            for i in xrange(0, len(item.file), number):
-                chunk = item.file[i:i+number]
-                mdplist.append(MultiDataProduct(item.host, chunk, item.skip))
-        self._set_data(mdplist)
-
