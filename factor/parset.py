@@ -364,7 +364,7 @@ def get_calibration_options(parset):
 
     # Check for unused options
     given_options = parset.options('calibration')
-    allowed_options = = ['exit_on_selfcal_failure', 'skip_selfcal_check',
+    allowed_options = ['exit_on_selfcal_failure', 'skip_selfcal_check',
         'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal',
         'tec_block_mhz']
     for option in given_options:
