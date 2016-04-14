@@ -148,7 +148,7 @@ class Direction(object):
         self.vertices_file = self.save_file
 
 
-    def set_cal_size(selfcal_cellsize_arcsec):
+    def set_cal_size(self, selfcal_cellsize_arcsec):
         """
         Sets the calibrator image size from calibrator size (or vice versa)
 
