@@ -590,6 +590,7 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
             min_peak_smearing_factor=min_peak_smearing_factor,
             tec_block_mhz=parset['calibration_specific']['tec_block_mhz'],
             selfcal_robust=parset['imaging_specific']['selfcal_robust'],
+            use_selfcal_clean_threshold=parset['imaging_specific']['selfcal_clean_threshold'],
             facet_robust=parset['imaging_specific']['facet_robust'],
             peel_flux_jy=parset['calibration_specific']['peel_flux_jy'],
             padding=padding)

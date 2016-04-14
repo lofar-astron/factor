@@ -460,17 +460,24 @@ mask0.argument.threshold_format                            =   str_with_units
 
 # image the virtual concatenated data again with casa and mask, length = 1
 casa_image02.control.type                                  =   casa_clean
+{% if use_selfcal_clean_threshold %}
+casa_image02.control.mapfiles_in                           =   [concat0.output.mapfile,mask0.output.mapfile,mask0.output.threshold_5sig.mapfile]
+casa_image02.control.inputkeys                             =   [clean.vis,clean.mask,clean.threshold]
+casa_image02.argument.clean.niter                          =   10000
+{% else %}
 casa_image02.control.mapfiles_in                           =   [concat0.output.mapfile,mask0.output.mapfile]
 casa_image02.control.inputkeys                             =   [clean.vis,clean.mask]
+casa_image02.argument.clean.threshold                      =   '0mJy'
+casa_image02.argument.clean.niter                          =   1000
+{% endif %}
 casa_image02.control.outputkey                             =   clean.imagename
 casa_image02.control.arguments                             =   [--nologger,--nogui,-c]
 casa_image02.argument.clean.wprojplanes                    =   {{ cal_wplanes }}
 casa_image02.argument.clean.uvrange                        =   '>80lambda'
 casa_image02.argument.clean.nterms                         =   {{ nterms }}
-casa_image02.argument.clean.niter                          =   1000
 casa_image02.argument.clean.imsize                         =   [{{ cal_imsize }}, {{ cal_imsize }}]
 casa_image02.argument.clean.cell                           =   ['{{ cellsize_selfcal_deg }}degree', '{{ cellsize_selfcal_deg }}degree']
-casa_image02.argument.clean.robust                         =   -0.25
+casa_image02.argument.clean.robust                         =   {{ robust_selfcal }}
 casa_image02.argument.clean.multiscale                     =   [0, 3, 7, 25, 60, 150]
 casa_image02.argument.clean.selectdata                     =   True
 casa_image02.argument.clean.gridmode                       =   'widefield'
@@ -584,7 +591,7 @@ casa_image11.argument.clean.niter                          =   1000
 casa_image11.argument.clean.threshold                      =   '0mJy'
 casa_image11.argument.clean.imsize                         =   [{{ cal_imsize }}, {{ cal_imsize }}]
 casa_image11.argument.clean.cell                           =   ['{{ cellsize_selfcal_deg }}degree', '{{ cellsize_selfcal_deg }}degree']
-casa_image11.argument.clean.robust                         =   -0.25
+casa_image11.argument.clean.robust                         =   {{ robust_selfcal }}
 casa_image11.argument.clean.multiscale                     =   [0, 3, 7, 25, 60, 150]
 casa_image11.argument.clean.selectdata                     =   True
 casa_image11.argument.clean.gridmode                       =   'widefield'
@@ -638,8 +645,16 @@ mask1.argument.threshold_format                            =   str_with_units
 
 # image the virtual concatenated data again with casa and mask, length = 1
 casa_image12.control.type                                  =   casa_clean
+{% if use_selfcal_clean_threshold %}
+casa_image12.control.mapfiles_in                           =   [concat1.output.mapfile,mask1.output.mapfile,mask1.output.threshold_5sig.mapfile]
+casa_image12.control.inputkeys                             =   [clean.vis,clean.mask,clean.threshold]
+casa_image12.argument.clean.niter                          =   10000
+{% else %}
 casa_image12.control.mapfiles_in                           =   [concat1.output.mapfile,mask1.output.mapfile]
 casa_image12.control.inputkeys                             =   [clean.vis,clean.mask]
+casa_image12.argument.clean.threshold                      =   '0mJy'
+casa_image12.argument.clean.niter                          =   1000
+{% endif %}
 casa_image12.control.outputkey                             =   clean.imagename
 casa_image12.control.arguments                             =   [--nologger,--nogui,-c]
 casa_image12.argument.clean.wprojplanes                    =   {{ cal_wplanes }}
@@ -649,7 +664,7 @@ casa_image12.argument.clean.niter                          =   1000
 casa_image12.argument.clean.threshold                      =   '0mJy'
 casa_image12.argument.clean.imsize                         =   [{{ cal_imsize }}, {{ cal_imsize }}]
 casa_image12.argument.clean.cell                           =   ['{{ cellsize_selfcal_deg }}degree', '{{ cellsize_selfcal_deg }}degree']
-casa_image12.argument.clean.robust                         =   -0.25
+casa_image12.argument.clean.robust                         =   {{ robust_selfcal }}
 casa_image12.argument.clean.multiscale                     =   [0, 3, 7, 25, 60, 150]
 casa_image12.argument.clean.selectdata                     =   True
 casa_image12.argument.clean.gridmode                       =   'widefield'
@@ -774,7 +789,7 @@ casa_image21.argument.clean.niter                          =   1000
 casa_image21.argument.clean.threshold                      =   '0mJy'
 casa_image21.argument.clean.imsize                         =   [{{ cal_imsize }}, {{ cal_imsize }}]
 casa_image21.argument.clean.cell                           =   ['{{ cellsize_selfcal_deg }}degree', '{{ cellsize_selfcal_deg }}degree']
-casa_image21.argument.clean.robust                         =   -0.25
+casa_image21.argument.clean.robust                         =   {{ robust_selfcal }}
 casa_image21.argument.clean.multiscale                     =   [0, 3, 7, 25, 60, 150]
 casa_image21.argument.clean.selectdata                     =   True
 casa_image21.argument.clean.gridmode                       =   'widefield'
@@ -826,8 +841,16 @@ mask2.argument.threshold_format                            =   str_with_units
 
 # image the virtual concatenated data again with casa and mask, length = 1
 casa_image22.control.type                                  =   casa_clean
+{% if use_selfcal_clean_threshold %}
+casa_image22.control.mapfiles_in                           =   [concat2.output.mapfile,mask2.output.mapfile,mask2.output.threshold_5sig.mapfile]
+casa_image22.control.inputkeys                             =   [clean.vis,clean.mask,clean.threshold]
+casa_image22.argument.clean.niter                          =   10000
+{% else %}
 casa_image22.control.mapfiles_in                           =   [concat2.output.mapfile,mask2.output.mapfile]
 casa_image22.control.inputkeys                             =   [clean.vis,clean.mask]
+casa_image22.argument.clean.threshold                      =   '0mJy'
+casa_image22.argument.clean.niter                          =   1000
+{% endif %}
 casa_image22.control.outputkey                             =   clean.imagename
 casa_image22.control.arguments                             =   [--nologger,--nogui,-c]
 casa_image22.argument.clean.wprojplanes                    =   {{ cal_wplanes }}
@@ -837,7 +860,7 @@ casa_image22.argument.clean.niter                          =   1000
 casa_image22.argument.clean.threshold                      =   '0mJy'
 casa_image22.argument.clean.imsize                         =   [{{ cal_imsize }}, {{ cal_imsize }}]
 casa_image22.argument.clean.cell                           =   ['{{ cellsize_selfcal_deg }}degree', '{{ cellsize_selfcal_deg }}degree']
-casa_image22.argument.clean.robust                         =   -0.25
+casa_image22.argument.clean.robust                         =   {{ robust_selfcal }}
 casa_image22.argument.clean.multiscale                     =   [0, 3, 7, 25, 60, 150]
 casa_image22.argument.clean.selectdata                     =   True
 casa_image22.argument.clean.gridmode                       =   'widefield'
@@ -1016,7 +1039,7 @@ casa_image31.argument.clean.niter                          =   1000
 casa_image31.argument.clean.threshold                      =   '0mJy'
 casa_image31.argument.clean.imsize                         =   [{{ cal_imsize }}, {{ cal_imsize }}]
 casa_image31.argument.clean.cell                           =   ['{{ cellsize_selfcal_deg }}degree', '{{ cellsize_selfcal_deg }}degree']
-casa_image31.argument.clean.robust                         =   -0.25
+casa_image31.argument.clean.robust                         =   {{ robust_selfcal }}
 casa_image31.argument.clean.multiscale                     =   [0, 3, 7, 25, 60, 150]
 casa_image31.argument.clean.selectdata                     =   True
 casa_image31.argument.clean.gridmode                       =   'widefield'
@@ -1068,8 +1091,16 @@ mask3.argument.threshold_format                            =   str_with_units
 
 # image the virtual concatenated data again with casa and mask, length = 1
 casa_image32.control.type                                  =   casa_clean
+{% if use_selfcal_clean_threshold %}
+casa_image32.control.mapfiles_in                           =   [concat3.output.mapfile,mask3.output.mapfile,mask3.output.threshold_5sig.mapfile]
+casa_image32.control.inputkeys                             =   [clean.vis,clean.mask,clean.threshold]
+casa_image32.argument.clean.niter                          =   10000
+{% else %}
 casa_image32.control.mapfiles_in                           =   [concat3.output.mapfile,mask3.output.mapfile]
 casa_image32.control.inputkeys                             =   [clean.vis,clean.mask]
+casa_image32.argument.clean.threshold                      =   '0mJy'
+casa_image32.argument.clean.niter                          =   1000
+{% endif %}
 casa_image32.control.outputkey                             =   clean.imagename
 casa_image32.control.arguments                             =   [--nologger,--nogui,-c]
 casa_image32.argument.clean.wprojplanes                    =   {{ cal_wplanes }}
@@ -1079,7 +1110,7 @@ casa_image32.argument.clean.niter                          =   1000
 casa_image32.argument.clean.threshold                      =   '0mJy'
 casa_image32.argument.clean.imsize                         =   [{{ cal_imsize }}, {{ cal_imsize }}]
 casa_image32.argument.clean.cell                           =   ['{{ cellsize_selfcal_deg }}degree', '{{ cellsize_selfcal_deg }}degree']
-casa_image32.argument.clean.robust                         =   -0.25
+casa_image32.argument.clean.robust                         =   {{ robust_selfcal }}
 casa_image32.argument.clean.multiscale                     =   [0, 3, 7, 25, 60, 150]
 casa_image32.argument.clean.selectdata                     =   True
 casa_image32.argument.clean.gridmode                       =   'widefield'
@@ -1258,7 +1289,7 @@ casa_image41.argument.clean.niter                          =   1000
 casa_image41.argument.clean.threshold                      =   '0mJy'
 casa_image41.argument.clean.imsize                         =   [{{ cal_imsize }}, {{ cal_imsize }}]
 casa_image41.argument.clean.cell                           =   ['{{ cellsize_selfcal_deg }}degree', '{{ cellsize_selfcal_deg }}degree']
-casa_image41.argument.clean.robust                         =   -0.25
+casa_image41.argument.clean.robust                         =   {{ robust_selfcal }}
 casa_image41.argument.clean.multiscale                     =   [0, 3, 7, 25, 60, 150]
 casa_image41.argument.clean.selectdata                     =   True
 casa_image41.argument.clean.gridmode                       =   'widefield'
@@ -1310,8 +1341,16 @@ mask4.argument.threshold_format                            =   str_with_units
 
 # image the virtual concatenated data again with casa and mask, length = 1
 casa_image42.control.type                                  =   casa_clean
+{% if use_selfcal_clean_threshold %}
+casa_image42.control.mapfiles_in                           =   [concat4.output.mapfile,mask4.output.mapfile,mask4.output.threshold_5sig.mapfile]
+casa_image42.control.inputkeys                             =   [clean.vis,clean.mask,clean.threshold]
+casa_image42.argument.clean.niter                          =   10000
+{% else %}
 casa_image42.control.mapfiles_in                           =   [concat4.output.mapfile,mask4.output.mapfile]
 casa_image42.control.inputkeys                             =   [clean.vis,clean.mask]
+casa_image42.argument.clean.threshold                      =   '0mJy'
+casa_image42.argument.clean.niter                          =   1000
+{% endif %}
 casa_image42.control.outputkey                             =   clean.imagename
 casa_image42.control.arguments                             =   [--nologger,--nogui,-c]
 casa_image42.argument.clean.wprojplanes                    =   {{ cal_wplanes }}
@@ -1321,7 +1360,7 @@ casa_image42.argument.clean.niter                          =   1000
 casa_image42.argument.clean.threshold                      =   '0mJy'
 casa_image42.argument.clean.imsize                         =   [{{ cal_imsize }}, {{ cal_imsize }}]
 casa_image42.argument.clean.cell                           =   ['{{ cellsize_selfcal_deg }}degree', '{{ cellsize_selfcal_deg }}degree']
-casa_image42.argument.clean.robust                         =   -0.25
+casa_image42.argument.clean.robust                         =   {{ robust_selfcal }}
 casa_image42.argument.clean.multiscale                     =   [0, 3, 7, 25, 60, 150]
 casa_image42.argument.clean.selectdata                     =   True
 casa_image42.argument.clean.gridmode                       =   'widefield'

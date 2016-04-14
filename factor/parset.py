@@ -447,6 +447,14 @@ def get_imaging_options(parset):
     else:
         parset_dict['imaging_specific']['selfcal_robust'] = -0.25
 
+    # Use a clean threshold during selfcal imaging (default = False). If False,
+    # clean will always stop at 1000 iterations. If True, clean will go to 1 sigma
+    # noise level
+    if 'selfcal_clean_threshold' in parset_dict:
+        parset_dict['imaging_specific']['selfcal_clean_threshold'] = parset.getboolean('imaging', 'selfcal_clean_threshold')
+    else:
+        parset_dict['imaging_specific']['selfcal_clean_threshold'] = False
+
     # Facet imaging parameters. These parameters are used only for making full facet
     # images (and not for making improved models). One set of images and one mosaic
     # image will be made for each set of parameters. By default, facets will be
