@@ -191,7 +191,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
     else:
         import matplotlib
         matplotlib.use('Agg')
-        import aplpy
+    import aplpy
 
      # Set logging level to ERROR to suppress extraneous info from aplpy
     logging.root.setLevel(logging.ERROR)
