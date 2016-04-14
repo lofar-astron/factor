@@ -236,9 +236,12 @@ class FacetImage(Operation):
         model using wsclean
 
     """
-    def __init__(self, parset, bands, direction, name='FacetImage'):
+    def __init__(self, parset, bands, direction, cellsize_arcsec, robust,
+        taper_arcsec, name='FacetImage'):
+        fullname = 'FacetImage_c{0}_r{1}_t{2}'.format(round(cellsize_arcsec,1),
+                    round(robust,2), round(taper_arcsec,1))
         super(FacetImage, self).__init__(parset, bands, direction,
-            name=name)
+            name=fullname)
 
         # Set imager infix for pipeline parset names
         if self.parset['facet_imager'].lower() == 'casa':
@@ -249,10 +252,10 @@ class FacetImage(Operation):
         # Set the pipeline parset to use
         if not self.direction.selfcal_ok:
             # Set parset template to sky-model parset
-            self.pipeline_parset_template = '{0}_skymodel{1}_pipeline.parset'.format(self.name, infix)
+            self.pipeline_parset_template = '{0}_skymodel{1}_pipeline.parset'.format(name, infix)
         else:
             # Set parset template to facet model-image parset
-            self.pipeline_parset_template = '{0}_imgmodel{1}_pipeline.parset'.format(self.name, infix)
+            self.pipeline_parset_template = '{0}_imgmodel{1}_pipeline.parset'.format(name, infix)
 
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
@@ -308,9 +311,12 @@ class FacetPeelImage(FacetImage):
     """
     Operation to make the full image of a facet after peeling
     """
-    def __init__(self, parset, bands, direction):
+    def __init__(self, parset, bands, direction, cellsize_arcsec, robust,
+        taper_arcsec):
+        fullname = 'FacetPeelImage_c{0}_r{1}_t{2}'.format(round(cellsize_arcsec,1),
+                    round(robust,2), round(taper_arcsec,1))
         super(FacetPeelImage, self).__init__(parset, bands, direction,
-            name='FacetPeelImage')
+            name=fullname)
 
         # Set imager infix for pipeline parset names
         if self.parset['facet_imager'].lower() == 'casa':

@@ -448,11 +448,34 @@ def get_imaging_options(parset):
     else:
         parset_dict['imaging_specific']['selfcal_robust'] = -0.25
 
+    # Facet imaging parameters. These parameters are used only for making full facet
+    # images (and not for making improved models). One set of images and one mosaic
+    # image will be made for each set of parameters. By default, facets will be
+    # imaged using the selfcal settings above
+    if 'facet_cellsize_arcsec' in parset_dict:
+        val_list = parset_dict['imaging_specific']['facet_cellsize_arcsec'].strip('[]').split(',')
+        val_list = [float(v) for v in val_list]
+        parset_dict['imaging_specific']['facet_cellsize_arcsec'] = val_list
+    else:
+        parset_dict['imaging_specific']['facet_cellsize_arcsec'] = [parset_dict['imaging_specific']['selfcal_cellsize_arcsec']]
+    if 'facet_taper_arcsec' in parset_dict:
+        val_list = parset_dict['imaging_specific']['facet_taper_arcsec'].strip('[]').split(',')
+        val_list = [float(v) for v in val_list]
+        parset_dict['imaging_specific']['facet_taper_arcsec'] = val_list
+    else:
+        parset_dict['imaging_specific']['facet_taper_arcsec'] = [0.0]
+    if 'facet_robust' in parset_dict:
+        val_list = parset_dict['imaging_specific']['facet_robust'].strip('[]').split(',')
+        val_list = [float(v) for v in val_list]
+        parset_dict['imaging_specific']['facet_robust'] = val_list
+    else:
+        parset_dict['imaging_specific']['facet_robust'] = [parset_dict['imaging_specific']['selfcal_robust']]
 
     # Check for unused options
     given_options = parset.options('imaging')
     allowed_options = ['make_mosaic', 'wsclean_nbands', 'facet_imager',
-        'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust']
+        'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
+        'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [imaging] section of the '

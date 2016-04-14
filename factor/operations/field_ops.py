@@ -3,7 +3,7 @@ Module that holds all field (non-facet-specific) operations
 
 Classes
 -------
-MakeMosaic : Operation
+FieldMosaic : Operation
     Makes a mosaic of the field from the facet images
 
 """
@@ -15,19 +15,25 @@ from lofarpipe.support.data_map import DataMap
 log = logging.getLogger('factor:field_ops')
 
 
-class MakeMosaic(Operation):
+class FieldMosaic(Operation):
     """
     Operation to mosiac facet images
     """
-    def __init__(self, parset, bands, direction):
+    def __init__(self, parset, bands, direction, cellsize_arcsec, robust,
+        taper_arcsec):
+        fullname = 'FieldMosaic_c{0}_r{1}_t{2}'.format(round(cellsize_arcsec,1),
+                    round(robust,2), round(taper_arcsec,1))
         super(MakeMosaic, self).__init__(parset, bands, direction,
-            name='MakeMosaic')
+            name=fullname)
 
         input_files = [b.files for b in self.bands]
         input_files_single = []
         for bandfiles in input_files:
             for filename in bandfiles:
                 input_files_single.append(filename)
+
+        # Set the pipeline parset to use
+        self.pipeline_parset_template = 'fieldmosaic_pipeline.parset'.format(infix)
 
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the

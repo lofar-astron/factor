@@ -218,7 +218,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         log.error('Selfcal verification failed for all directions. Exiting...')
         sys.exit(1)
 
-    # (Re)image facets
+    # (Re)image facets for each set of cellsize, robust, and taper settings
     dirs_to_image = [d for d in directions if d.make_final_image and
         d.selfcal_ok and not d.is_patch and not d.is_outlier]
     if len(dirs_to_image) > 0:
@@ -242,62 +242,69 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     dirs_to_image.extend(dirs_to_transfer)
 
     if len(dirs_to_image) > 0:
-        # Set up reset of any directions that need it
-        directions_reset = [d for d in dirs_to_image if d.do_reset]
-        for d in directions_reset:
-            d.reset_state('facetimage')
+        cellsizes = parset['imaging_specific']['facet_cellsize_arcsec']
+        tapers = parset['imaging_specific']['facet_taper_arcsec']
+        robusts = parset['imaging_specific']['facet_robust']
+        for cellsize_arcsec, taper_arcsec, robust in zip(cellsizes, tapers, robusts):
+            # Set up reset of any directions that need it
+            directions_reset = [d for d in dirs_to_image if d.do_reset]
+            for d in directions_reset:
+                d.reset_state('facetimage_c{0}_r{1}_t{2}'.format(round(cellsize_arcsec,1),
+                    round(robust,2), round(taper_arcsec,1)))
 
-        # Group directions. This is done to ensure that multiple directions
-        # aren't competing for the same resources
-        ndir_simul = (len(parset['cluster_specific']['node_list']) *
-            parset['cluster_specific']['ndir_per_node'])
-        for i in range(int(np.ceil(len(dirs_to_image)/float(ndir_simul)))):
-            dir_group = dirs_to_image[i*ndir_simul:(i+1)*ndir_simul]
+            # Group directions. This is done to ensure that multiple directions
+            # aren't competing for the same resources
+            ndir_simul = (len(parset['cluster_specific']['node_list']) *
+                parset['cluster_specific']['ndir_per_node'])
+            for i in range(int(np.ceil(len(dirs_to_image)/float(ndir_simul)))):
+                dir_group = dirs_to_image[i*ndir_simul:(i+1)*ndir_simul]
 
-            # Divide up the nodes and cores among the directions for the parallel
-            # imaging operations
-            dir_group = factor.cluster.divide_nodes(dir_group,
+                # Divide up the nodes and cores among the directions for the parallel
+                # imaging operations
+                dir_group = factor.cluster.divide_nodes(dir_group,
+                    parset['cluster_specific']['node_list'],
+                    parset['cluster_specific']['ndir_per_node'],
+                    parset['cluster_specific']['nimg_per_node'],
+                    parset['cluster_specific']['ncpu'],
+                    parset['cluster_specific']['wsclean_fmem'],
+                    len(bands))
+
+                # Do facet imaging
+                ops = [FacetImage(parset, bands, d, cellsize_arcsec, robust,
+                    taper_arcsec) for d in dir_group]
+                scheduler.run(ops)
+
+        # Mosaic the final facet images together
+        if parset['imaging_specific']['make_mosaic']:
+            # Make direction object for the field and load previous state (if any)
+            field = Direction('field', bands[0].ra, bands[0].dec,
+                factor_working_dir=parset['dir_working'])
+            field.load_state()
+
+            # Reset the field direction if specified
+            if 'field' in reset_directions:
+                field.reset_state('makemosaic')
+
+            field.facet_image_filenames = []
+            field.facet_vertices_filenames = []
+            for d in directions:
+                if not d.is_patch:
+                    facet_image = DataMap.load(d.facet_image_mapfile)[0].file
+                    field.facet_image_filenames.append(facet_image)
+                    field.facet_vertices_filenames.append(d.save_file)
+
+            # Combine the nodes and cores for the mosaic operation
+            field = factor.cluster.combine_nodes([field],
                 parset['cluster_specific']['node_list'],
-                parset['cluster_specific']['ndir_per_node'],
                 parset['cluster_specific']['nimg_per_node'],
                 parset['cluster_specific']['ncpu'],
                 parset['cluster_specific']['wsclean_fmem'],
-                len(bands))
+                len(bands))[0]
 
-            # Do facet imaging
-            ops = [FacetImage(parset, bands, d) for d in dir_group]
-            scheduler.run(ops)
-
-    # Mosaic the final facet images together
-    if parset['imaging_specific']['make_mosaic']:
-        # Make direction object for the field and load previous state (if any)
-        field = Direction('field', bands[0].ra, bands[0].dec,
-            factor_working_dir=parset['dir_working'])
-        field.load_state()
-
-        # Reset the field direction if specified
-        if 'field' in reset_directions:
-            field.reset_state('makemosaic')
-
-        field.facet_image_filenames = []
-        field.facet_vertices_filenames = []
-        for d in directions:
-            if not d.is_patch:
-                facet_image = DataMap.load(d.facet_image_mapfile)[0].file
-                field.facet_image_filenames.append(facet_image)
-                field.facet_vertices_filenames.append(d.save_file)
-
-        # Combine the nodes and cores for the mosaic operation
-        field = factor.cluster.combine_nodes([field],
-            parset['cluster_specific']['node_list'],
-            parset['cluster_specific']['nimg_per_node'],
-            parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['wsclean_fmem'],
-            len(bands))[0]
-
-        # Do mosaicking
-        op = MakeMosaic(parset, bands, field)
-        scheduler.run(op)
+            # Do mosaicking
+            op = FieldMosaic(parset, bands, field, cellsize_arcsec, robust,
+                    taper_arcsec)
+            scheduler.run(op)
 
     log.info("Factor has finished :)")
 
