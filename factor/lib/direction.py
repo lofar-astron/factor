@@ -191,7 +191,7 @@ class Direction(object):
         """
         mean_freq_mhz = np.mean([b.freq for b in bands]) / 1e6
         min_peak_smearing_factor = 1.0 - parset['imaging_specific']['max_peak_smearing']
-        if parset['facet_imager'].lower() == 'wsclean':
+        if parset['imaging_specific']['facet_imager'].lower() == 'wsclean':
             # Use larger padding for WSClean images
             padding = parset['imaging_specific']['wsclean_image_padding']
             direction.wsclean_model_padding = parset['imaging_specific']['wsclean_model_padding']
