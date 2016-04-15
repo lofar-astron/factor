@@ -7,6 +7,7 @@ from argparse import RawTextHelpFormatter
 from lofar import bdsm
 import pyrap.images as pim
 from astropy.io import fits as pyfits
+from astropy.coordinates import Angle
 import pickle
 import numpy as np
 import sys
@@ -21,6 +22,35 @@ def read_vertices(filename):
     with open(filename, 'r') as f:
         direction_dict = pickle.load(f)
     return direction_dict['vertices']
+
+
+def read_casa_polys(filename):
+    """
+    Returns casa region file and returns polys
+
+    Note: only regions of type "poly" are supported
+    """
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+
+    polys = []
+    for line in lines:
+        if line.startswith('poly'):
+            poly_str_temp = line.split('[[')[1]
+            poly_str = poly_str_temp.split(']]')[0]
+            poly_str_list = poly_str.split('], [')
+            poly_vertices = []
+            for pos in poly_str_list:
+                RAstr, Decstr = pos.split(',')
+                ra = Angle(RAstr, unit='hourangle').to('deg').value
+                dec = Angle(Decstr.replace('.', ':', 2), unit='deg').to('deg').value
+                poly_vertices.append(np.array([ra, dec]))
+            polys.append(poly_vertices)
+        elif line.startswith('ellipse') or line.startswith('box'):
+            print('Only CASA regions of type "poly" are supported')
+            sys.exit(1)
+
+    return polys
 
 
 def make_template_image(image_name, reference_ra_deg, reference_dec_deg,
@@ -278,17 +308,9 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                 has_large_isl = True
 
     if (region_file is not None) and (region_file != '[]'):
-        # Copy the CASA region file (stripped of brackets, etc.) and return
+        # Copy region file and return if source detection was not done
         os.system('cp {0} {1}'.format(region_file.strip('[]"'), mask_name))
-        if not skip_source_detection:
-            if threshold_format == 'float':
-                return {'threshold_5sig': nsig * img.clipped_rms, 'multiscale': has_large_isl}
-            elif threshold_format == 'str_with_units':
-                # This is done to get around the need for quotes around strings in casapy scripts
-                # 'casastr/' is removed by the generic pipeline
-                return {'threshold_5sig': 'casastr/{0}Jy'.format(nsig * img.clipped_rms),
-                        'multiscale': has_large_isl}
-        else:
+        if skip_source_detection:
             return {'threshold_5sig': '0.0'}
     elif not skip_source_detection:
         img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
@@ -369,6 +391,35 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             data[0, 0, 0:margin, 0:sh[3]] = 0
             data[0, 0, 0:sh[2], sh[3]-margin:sh[3]] = 0
             data[0, 0, sh[2]-margin:sh[2], 0:sh[3]] = 0
+
+        if (region_file is not None) and (region_file != '[]'):
+            # Merge the CASA regions with the mask
+            casa_polys = read_casa_polys(region_file)
+            for vertices in casa_polys:
+                RAverts = vertices[0]
+                Decverts = vertices[1]
+                xvert = []
+                yvert = []
+                for RAvert, Decvert in zip(RAverts, Decverts):
+                    try:
+                        pixels = new_mask.topixel([0, 1, Decvert*np.pi/180.0,
+                                                   RAvert*np.pi/180.0])
+                    except:
+                        pixels = new_mask.topixel([1, 1, Decvert*np.pi/180.0,
+                                                   RAvert*np.pi/180.0])
+                    xvert.append(pixels[2]) # x -> Dec
+                    yvert.append(pixels[3]) # y -> RA
+                poly = Polygon(xvert, yvert)
+
+                # Find masked regions
+                masked_ind = np.where(data[0, 0])
+
+                # Find distance to nearest poly edge and unmask those that
+                # are outside the facet (dist < 0)
+                dist = poly.is_inside(masked_ind[0], masked_ind[1])
+                outside_ind = np.where(dist < 0.0)
+                if len(outside_ind[0]) > 0:
+                    data[0, 0, masked_ind[0][outside_ind], masked_ind[1][outside_ind]] = 0
 
         # Save changes
         new_mask.putdata(data)
