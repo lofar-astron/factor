@@ -222,7 +222,7 @@ class FacetSubReset(Operation):
             name='FacetSubReset')
 
         # Set imager infix for pipeline parset names
-        if self.parset['facet_imager'].lower() == 'casa':
+        if self.parset['imaging_specific']['facet_imager'].lower() == 'casa':
             infix = '_casa'
         else:
             infix = ''
@@ -285,7 +285,7 @@ class FacetImage(Operation):
             name=fullname)
 
         # Set imager infix for pipeline parset names
-        if self.parset['facet_imager'].lower() == 'casa':
+        if self.parset['imaging_specific']['facet_imager'].lower() == 'casa':
             infix = '_casa'
         else:
             infix = ''
@@ -363,7 +363,7 @@ class FacetPeelImage(FacetImage):
             name='FacetPeelImage')
 
         # Set imager infix for pipeline parset names
-        if self.parset['facet_imager'].lower() == 'casa':
+        if self.parset['imaging_specific']['facet_imager'].lower() == 'casa':
             infix = '_casa'
         else:
             infix = ''
