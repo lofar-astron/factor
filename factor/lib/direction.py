@@ -222,8 +222,7 @@ class Direction(object):
             facet_taper_arcsec = 0.0
         self.taper_facet_arcsec = facet_taper_arcsec
 
-        self.set_imaging_parameters(nbands, nbands_per_channel, nchan,
-            self.skymodel, padding)
+        self.set_imaging_parameters(nbands, nbands_per_channel, nchan, padding)
         self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,
             timestep_sec, ntimes, nbands, mean_freq_mhz, self.skymodel,
             preaverage_flux_jy, min_peak_smearing_factor, tec_block_mhz,
@@ -231,7 +230,7 @@ class Direction(object):
 
 
     def set_imaging_parameters(self, nbands, nbands_per_channel, nchan_per_band,
-        initial_skymodel=None, padding=1.05):
+        padding=1.05):
         """
         Sets various parameters for images in facetselfcal and facetimage pipelines
 
@@ -243,8 +242,6 @@ class Direction(object):
             Number of bands per output channel (WSClean only)
         nchan_per_band : int
             Number of channels per band
-        initial_skymodel : LSMTool SkyModel object, optional
-            Sky model used to check source sizes
         padding : float, optional
             Padding factor by which size of facet is multiplied to determine
             the facet image size
@@ -303,7 +300,7 @@ class Direction(object):
         # sources (anything above 4 arcmin -- the CC sky model was convolved
         # with a Gaussian of 1 arcmin, so unresolved sources have sizes of ~
         # 1 arcmin)
-        if initial_skymodel is not None and self.mscale_field_do is None:
+        if self.mscale_field_do is None:
             sizes_arcmin = self.get_source_sizes()
             large_size_arcmin = 6.0
             if any([s > large_size_arcmin for s in sizes_arcmin]):

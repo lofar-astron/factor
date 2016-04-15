@@ -577,7 +577,7 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
     min_peak_smearing_factor = 1.0 - parset['imaging_specific']['max_peak_smearing']
     for i, direction in enumerate(directions):
         # Set direction sky model
-        direction.set_skymodel(initial_skymodel)
+        direction.set_skymodel(initial_skymodel.copy())
 
         # Set field center to that of first band (all bands have the same phase
         # center)
