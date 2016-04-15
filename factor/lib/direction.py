@@ -197,7 +197,7 @@ class Direction(object):
             self.wsclean_model_padding = parset['imaging_specific']['wsclean_model_padding']
         else:
             padding = 1.05
-        nbands = parset['imaging_specific']['wsclean_nbands']
+        nbands_per_channel = parset['imaging_specific']['wsclean_nbands']
         chan_width_hz = bands[0].chan_width_hz
         nchan = bands[0].nchan
         timestep_sec = bands[0].timepersample
