@@ -296,7 +296,7 @@ def get_calibration_options(parset):
             'exit_on_selfcal_failure')
     else:
         parset_dict['exit_on_selfcal_failure'] = True
-    if 'skip_selfcal_check' in parset_dict['calibration_specific']:
+    if 'skip_selfcal_check' in parset_dict:
         parset_dict['skip_selfcal_check'] = parset.getboolean('calibration',
             'skip_selfcal_check')
     else:
