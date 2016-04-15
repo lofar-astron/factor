@@ -293,10 +293,10 @@ class FacetImage(Operation):
         # Set the pipeline parset to use
         if not self.direction.selfcal_ok:
             # Set parset template to sky-model parset
-            self.pipeline_parset_template = '{0}_skymodel{1}_pipeline.parset'.format(name, infix)
+            self.pipeline_parset_template = 'facetimage_skymodel{}_pipeline.parset'.format(infix)
         else:
             # Set parset template to facet model-image parset
-            self.pipeline_parset_template = '{0}_imgmodel{1}_pipeline.parset'.format(name, infix)
+            self.pipeline_parset_template = 'facetimage_imgmodel{}_pipeline.parset'.format(infix)
 
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
