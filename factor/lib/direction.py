@@ -816,6 +816,7 @@ class Direction(object):
         with open(self.save_file, 'wb') as f:
             save_dict = self.__dict__.copy()
             save_dict.pop('log')
+            save_dict.pop('skymodel')
             pickle.dump(save_dict, f)
 
 
