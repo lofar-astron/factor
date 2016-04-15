@@ -572,9 +572,6 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
                 directions.append(target)
 
     # Set various direction attributes
-    log.info("Determining imaging parameters for each direction...")
-    mean_freq_mhz = np.mean([b.freq for b in bands]) / 1e6
-    min_peak_smearing_factor = 1.0 - parset['imaging_specific']['max_peak_smearing']
     for i, direction in enumerate(directions):
         # Set direction sky model
         direction.set_skymodel(initial_skymodel.copy())

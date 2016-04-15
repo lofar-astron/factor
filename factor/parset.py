@@ -117,7 +117,7 @@ def get_global_options(parset):
         Dictionary with all global options
 
     """
-    parset_dict = parset._sections['global']
+    parset_dict = parset._sections['global'].copy()
     parset_dict.update({'direction_specific': {}, 'calibration_specific': {},
         'imaging_specific': {}, 'cluster_specific': {}})
 
