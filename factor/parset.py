@@ -102,9 +102,13 @@ def parset_read(parset_file, use_log_file=True):
     # Print summary of options
     log.debug('Summary of FACTOR options:')
     for section in allowed_sections:
-        log.debug('[{}]'.format(section)
-        for k, v in parset_dict[section].iteritems():
-            log.debug('    {0} = {1}').format(k, v)
+        log.debug('[{}]'.format(section))
+        if section == 'global':
+            for k, v in parset_dict.iteritems():
+                log.debug('    {0} = {1}'.format(k, v))
+        else:
+            for k, v in parset_dict[section].iteritems():
+                log.debug('    {0} = {1}'.format(k, v))
 
     return parset_dict
 
