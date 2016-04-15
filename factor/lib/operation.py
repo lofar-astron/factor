@@ -137,14 +137,6 @@ class Operation(object):
                            'pipeline_parset_dir': self.pipeline_parset_dir,
                            'hosts': self.node_list}
 
-        # Update the dictionaries with the attributes of the operation's
-        # direction object. Any attributes set in the direction object that are
-        # also in the parms_dict will be set to those of the direction object
-        # (e.g., 'max_cpus_per_node', which is set in the direction object by
-        # factor.cluster.divide_nodes() will override the value set above)
-        self.cfg_dict.update(self.direction.__dict__)
-        self.parms_dict.update(self.direction.__dict__)
-
         # Add cluster-related info
         if self.parset['cluster_specific']['clustertype'] == 'local':
             self.cfg_dict['remote'] = '[remote]\n'\
@@ -165,6 +157,11 @@ class Operation(object):
             self.parset['cluster_specific']['clusterdesc'])
 
 
+    def update_dicts():
+        self.cfg_dict.update(self.direction.__dict__)
+        self.parms_dict.update(self.direction.__dict__)
+
+
     def setup(self):
         """
         Set up this operation
@@ -173,6 +170,13 @@ class Operation(object):
         Generally, this does not need to be re-defined in the subclasses
         unless the operation has non-standard template names
         """
+        # Update the dictionaries with the attributes of the operation's
+        # direction object. Any attributes set in the direction object that are
+        # also in the parms_dict will be set to those of the direction object
+        # (e.g., 'max_cpus_per_node', which is set in the direction object by
+        # factor.cluster.divide_nodes() will override the value set above)
+        self.update_dicts()
+
         self.pipeline_parset_template = env_parset.get_template(self.pipeline_parset_template)
         tmp = self.pipeline_parset_template.render(self.parms_dict)
         with open(self.pipeline_parset_file, 'w') as f:

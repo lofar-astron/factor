@@ -65,7 +65,7 @@ class FacetSelfcal(Operation):
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
-        direction.set_imcal_parameters(parset, bands)
+        self.direction.set_imcal_parameters(parset, bands)
         ms_files = [band.files for band in self.bands]
         ms_files_single = []
         for bandfiles in ms_files:
@@ -194,7 +194,7 @@ class FacetPeel(OutlierPeel):
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
-        direction.set_imcal_parameters(parset, bands)
+        self.direction.set_imcal_parameters(parset, bands)
 
 
 class FacetSub(Operation):
@@ -233,7 +233,7 @@ class FacetSubReset(Operation):
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
-        direction.set_imcal_parameters(parset, bands)
+        self.direction.set_imcal_parameters(parset, bands)
         dir_indep_parmDBs = []
         for band in self.bands:
             for parmdb in band.dirindparmdbs:
@@ -301,7 +301,7 @@ class FacetImage(Operation):
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
-        direction.set_imcal_parameters(parset, bands, cellsize_arcsec, robust,
+        self.direction.set_imcal_parameters(parset, bands, cellsize_arcsec, robust,
             taper_arcsec)
         ms_files = [band.files for band in self.bands]
         ms_files_single = []
@@ -374,7 +374,7 @@ class FacetPeelImage(FacetImage):
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
-        direction.set_imcal_parameters(parset, bands,)
+        self.direction.set_imcal_parameters(parset, bands,)
 
 
     def finalize(self):
