@@ -40,16 +40,16 @@ def parset_read(parset_file, use_log_file=True):
     parset_dict = get_global_options(parset)
 
     # Handle calibration parameters
-    parset_dict['calibration_specific'].update(get_calibration_options(parset)['calibration_specific'])
+    parset_dict['calibration_specific'].update(get_calibration_options(parset))
 
     # Handle imaging parameters
-    parset_dict['imaging_specific'].update(get_imaging_options(parset)['imaging_specific'])
+    parset_dict['imaging_specific'].update(get_imaging_options(parset))
 
     # Handle directions-related parameters
-    parset_dict['direction_specific'].update(get_directions_options(parset)['direction_specific'])
+    parset_dict['direction_specific'].update(get_directions_options(parset))
 
     # Handle cluster-specific parameters
-    parset_dict['cluster_specific'].update(get_cluster_options(parset)['cluster_specific'])
+    parset_dict['cluster_specific'].update(get_cluster_options(parset))
 
     # Set up working directory. All output will be placed in this directory
     if '+' in parset_dict['dir_working']:
@@ -283,57 +283,57 @@ def get_calibration_options(parset):
 
     """
     if 'calibration' in parset._sections.keys():
-        parset_dict = {'calibration_specific': parset._sections['calibration']}
+        parset_dict = parset._sections['calibration']
     else:
-        parset_dict = {'calibration_specific': {}}
+        parset_dict = {}
 
     # Exit if selfcal fails for any direction (default = True). If False, processing
     # will continue and the failed direction will receive the selfcal solutions of
     # the nearest successful direction unless skip_selfcal_check is True, in which
     # case processing continues as if the selfcal succeeded
     if 'exit_on_selfcal_failure' in parset_dict:
-        parset_dict['calibration_specific']['exit_on_selfcal_failure'] = parset.getboolean('calibration',
+        parset_dict['exit_on_selfcal_failure'] = parset.getboolean('calibration',
             'exit_on_selfcal_failure')
     else:
-        parset_dict['calibration_specific']['exit_on_selfcal_failure'] = True
-    if 'skip_selfcal_check' in parset_dict:
-        parset_dict['calibration_specific']['skip_selfcal_check'] = parset.getboolean('calibration',
+        parset_dict['exit_on_selfcal_failure'] = True
+    if 'skip_selfcal_check' in parset_dict['calibration_specific']:
+        parset_dict['skip_selfcal_check'] = parset.getboolean('calibration',
             'skip_selfcal_check')
     else:
-        parset_dict['calibration_specific']['skip_selfcal_check'] = False
+        parset_dict['skip_selfcal_check'] = False
 
     # Maximum number of cycles of the last step of selfcal to perform (default =
     # 10). The last step is looped until the number of cycles reaches this value or
     # until the improvement in dynamic range over the previous image is less than
     # 1.25%
     if 'max_selfcal_loops' in parset_dict:
-        parset_dict['calibration_specific']['max_selfcal_loops'] = parset.getint('calibration', 'max_selfcal_loops')
+        parset_dict['max_selfcal_loops'] = parset.getint('calibration', 'max_selfcal_loops')
     else:
-        parset_dict['calibration_specific']['max_selfcal_loops'] = 10
+        parset_dict['max_selfcal_loops'] = 10
 
     # Use baseline-dependent preaveraging to increase the signal-to-noise of the
     # phase-only solve for sources below this flux (default = 0.0; i.e., disabled).
     # When activated, averaging in time is done to exploit the time coherence in the
     # TEC solutions
     if 'preaverage_flux_jy' in parset_dict:
-        parset_dict['calibration_specific']['preaverage_flux_jy'] = parset.getfloat('calibration', 'preaverage_flux_jy')
+        parset_dict['preaverage_flux_jy'] = parset.getfloat('calibration', 'preaverage_flux_jy')
     else:
-        parset_dict['calibration_specific']['preaverage_flux_jy'] = 0.0
+        parset_dict['preaverage_flux_jy'] = 0.0
 
     # Use multi-scale selfcal that starts at 20 arcsec resolution and increases the
     # resolution in stages to the full resolution (default = False). This method may
     # improve convergence, especially when the starting model is poor
     if 'multiscale_selfcal' in parset_dict:
-        parset_dict['calibration_specific']['multiscale_selfcal'] = parset.getboolean('calibration', 'multiscale_selfcal')
+        parset_dict['multiscale_selfcal'] = parset.getboolean('calibration', 'multiscale_selfcal')
     else:
-        parset_dict['calibration_specific']['multiscale_selfcal'] = False
+        parset_dict['multiscale_selfcal'] = False
 
     # Size of frequency block in MHz over which a single TEC solution is fit
     # (default = 10)
     if 'tec_block_mhz' in parset_dict:
-        parset_dict['calibration_specific']['tec_block_mhz'] = parset.getfloat('calibration', 'tec_block_mhz')
+        parset_dict['tec_block_mhz'] = parset.getfloat('calibration', 'tec_block_mhz')
     else:
-        parset_dict['calibration_specific']['tec_block_mhz'] = 10.0
+        parset_dict['tec_block_mhz'] = 10.0
 
     # Peel the calibrator for sources above this flux density (default = 25.0).
     # When activated, the calibrator is peeled using a supplied sky model and
@@ -341,9 +341,9 @@ def get_calibration_options(parset):
     # directions file in the peel_skymodel column for each source that should be
     # peeled
     if 'peel_flux_jy' in parset_dict:
-        parset_dict['calibration_specific']['peel_flux_jy'] = parset.getfloat('calibration', 'peel_flux_jy')
+        parset_dict['peel_flux_jy'] = parset.getfloat('calibration', 'peel_flux_jy')
     else:
-        parset_dict['calibration_specific']['peel_flux_jy'] = 25.0
+        parset_dict['peel_flux_jy'] = 25.0
 
     # Check for unused options
     given_options = parset.options('calibration')
@@ -374,40 +374,40 @@ def get_imaging_options(parset):
 
     """
     if 'imaging' in parset._sections.keys():
-        parset_dict = {'imaging_specific': parset._sections['imaging']}
+        parset_dict = parset._sections['imaging']
     else:
-        parset_dict = {'imaging_specific': {}}
+        parset_dict = {}
 
     # Make final mosaic (default = True)
     if 'make_mosaic' in parset_dict:
-        parset_dict['imaging_specific']['make_mosaic'] = parset.getboolean('imaging', 'make_mosaic')
+        parset_dict['make_mosaic'] = parset.getboolean('imaging', 'make_mosaic')
     else:
-        parset_dict['imaging_specific']['make_mosaic'] = True
+        parset_dict['make_mosaic'] = True
 
     # Re-image directions for which selfcal was successful (default = False)
-    if 'reimage' in parset_dict['imaging_specific']:
-        parset_dict['imaging_specific']['reimage'] = parset.getboolean('imaging',
+    if 'reimage' in parset_dict:
+        parset_dict['reimage'] = parset.getboolean('imaging',
             'reimage')
-    elif 'reimage' in parset['direction_specific']:
+    elif 'reimage' in parset._sections['direction_specific']:
         log.warning('Option "reimage" was given in the [directions] section of the '
             'parset but should be in the [imaging] section')
-        parset_dict['imaging_specific']['reimage'] = parset.getboolean('directions',
+        parset_dict['reimage'] = parset.getboolean('directions',
             'reimage')
     else:
-        parset_dict['imaging_specific']['reimage'] = False
+        parset_dict['reimage'] = False
 
     # Max number of bands per WSClean image when wide-band clean is used (default =
     # 5). Smaller values produce better results but require longer run times.
     # Wide-band clean is activated when there are more than 5 bands
     if 'wsclean_nbands' in parset_dict:
-        parset_dict['imaging_specific']['wsclean_nbands'] = parset.getint('imaging', 'wsclean_nbands')
+        parset_dict['wsclean_nbands'] = parset.getint('imaging', 'wsclean_nbands')
     else:
-        parset_dict['imaging_specific']['wsclean_nbands'] = 3
+        parset_dict['wsclean_nbands'] = 3
 
     # Use WSClean or CASA for imaging of entire facet (default = wsclean). For large
     # bandwidths, the CASA imager is typically faster
     if 'facet_imager' not in parset_dict:
-        parset_dict['imaging_specific']['facet_imager'] = 'wsclean'
+        parset_dict['facet_imager'] = 'wsclean'
 
     # Max desired peak flux density reduction at center of the facet edges due to
     # bandwidth smearing (at the mean frequency) and time smearing (default = 0.15 =
@@ -415,21 +415,21 @@ def get_imaging_options(parset):
     # more smearing away from the facet centers. This value only applies to the
     # facet imaging (selfcal always uses a value of 0.15)
     if 'max_peak_smearing' in parset_dict:
-        parset_dict['imaging_specific']['max_peak_smearing'] = parset.getfloat('imaging', 'max_peak_smearing')
+        parset_dict['max_peak_smearing'] = parset.getfloat('imaging', 'max_peak_smearing')
     else:
-        parset_dict['imaging_specific']['max_peak_smearing'] = 0.15
+        parset_dict['max_peak_smearing'] = 0.15
 
 
     # Selfcal imaging parameters: pixel size in arcsec (default = 1.5) and Briggs
     # robust parameter (default = -0.25)
     if 'selfcal_cellsize_arcsec' in parset_dict:
-        parset_dict['imaging_specific']['selfcal_cellsize_arcsec'] = parset.getfloat('imaging', 'selfcal_cellsize_arcsec')
+        parset_dict['selfcal_cellsize_arcsec'] = parset.getfloat('imaging', 'selfcal_cellsize_arcsec')
     else:
-        parset_dict['imaging_specific']['selfcal_cellsize_arcsec'] = 1.5
+        parset_dict['selfcal_cellsize_arcsec'] = 1.5
     if 'selfcal_robust' in parset_dict:
-        parset_dict['imaging_specific']['selfcal_robust'] = parset.getfloat('imaging', 'selfcal_robust')
+        parset_dict['selfcal_robust'] = parset.getfloat('imaging', 'selfcal_robust')
     else:
-        parset_dict['imaging_specific']['selfcal_robust'] = -0.25
+        parset_dict['selfcal_robust'] = -0.25
 
     # Use a clean threshold during selfcal imaging (default = False). If False,
     # clean will always stop at 1000 iterations. If True, clean will go to 1 sigma
@@ -444,35 +444,35 @@ def get_imaging_options(parset):
     # image will be made for each set of parameters. By default, facets will be
     # imaged using the selfcal settings above
     if 'facet_cellsize_arcsec' in parset_dict:
-        val_list = parset_dict['imaging_specific']['facet_cellsize_arcsec'].strip('[]').split(',')
+        val_list = parset_dict['facet_cellsize_arcsec'].strip('[]').split(',')
         val_list = [float(v) for v in val_list]
-        parset_dict['imaging_specific']['facet_cellsize_arcsec'] = val_list
+        parset_dict['facet_cellsize_arcsec'] = val_list
     else:
-        parset_dict['imaging_specific']['facet_cellsize_arcsec'] = [parset_dict['imaging_specific']['selfcal_cellsize_arcsec']]
+        parset_dict['facet_cellsize_arcsec'] = [parset_dict['selfcal_cellsize_arcsec']]
     if 'facet_taper_arcsec' in parset_dict:
-        val_list = parset_dict['imaging_specific']['facet_taper_arcsec'].strip('[]').split(',')
+        val_list = parset_dict['facet_taper_arcsec'].strip('[]').split(',')
         val_list = [float(v) for v in val_list]
-        parset_dict['imaging_specific']['facet_taper_arcsec'] = val_list
+        parset_dict['facet_taper_arcsec'] = val_list
     else:
-        parset_dict['imaging_specific']['facet_taper_arcsec'] = [0.0]
+        parset_dict['facet_taper_arcsec'] = [0.0]
     if 'facet_robust' in parset_dict:
-        val_list = parset_dict['imaging_specific']['facet_robust'].strip('[]').split(',')
+        val_list = parset_dict['facet_robust'].strip('[]').split(',')
         val_list = [float(v) for v in val_list]
-        parset_dict['imaging_specific']['facet_robust'] = val_list
+        parset_dict['facet_robust'] = val_list
     else:
-        parset_dict['imaging_specific']['facet_robust'] = [parset_dict['imaging_specific']['selfcal_robust']]
+        parset_dict['facet_robust'] = [parset_dict['selfcal_robust']]
 
    # Padding factor for WSClean images (default = 1.6)
     if 'wsclean_image_padding' in parset_dict:
-        parset_dict['imaging_specific']['wsclean_image_padding'] = parset.getfloat('global', 'wsclean_image_padding')
+        parset_dict['wsclean_image_padding'] = parset.getfloat('imaging', 'wsclean_image_padding')
     else:
-        parset_dict['imaging_specific']['wsclean_image_padding'] = 1.6
+        parset_dict['wsclean_image_padding'] = 1.6
 
     # Padding factor for WSClean images (default = 1.4)
     if 'wsclean_model_padding' in parset_dict:
-        parset_dict['imaging_specific']['wsclean_model_padding'] = parset.getfloat('global', 'wsclean_model_padding')
+        parset_dict['wsclean_model_padding'] = parset.getfloat('imaging', 'wsclean_model_padding')
     else:
-        parset_dict['imaging_specific']['wsclean_model_padding'] = 1.4
+        parset_dict['wsclean_model_padding'] = 1.4
 
     # Check for unused options
     given_options = parset.options('imaging')
@@ -505,18 +505,17 @@ def get_directions_options(parset):
 
     """
     if 'directions' in parset._sections.keys():
-        parset_dict = {'direction_specific': parset._sections['directions']}
+        parset_dict = parset._sections['directions']
     else:
-        parset_dict = {'direction_specific': {}}
+        parset_dict = {}
 
     # Check whether any sources from the initial subtract sky model fall on facet
     # edges. If any are found, the facet regions are adjusted to avoid them (default
     # is False)
-    if 'check_edges' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['check_edges'] = parset.getboolean('directions',
-            'check_edges')
+    if 'check_edges' in parset_dict:
+        parset_dict['check_edges'] = parset.getboolean('directions', 'check_edges')
     else:
-        parset_dict['direction_specific']['check_edges'] = False
+        parset_dict['check_edges'] = False
 
     # Parameters for selecting directions internally (radius from phase center
     # within which to consider sources as potential calibrators, min flux, max size
@@ -530,11 +529,11 @@ def get_directions_options(parset):
 
     # Radius from phase center within which to consider sources as potential
     # calibrators (default = 2 * FWHM of primary beam of highest-frequency band)
-    if 'max_radius_deg' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['max_radius_deg'] = parset.getfloat('directions',
+    if 'max_radius_deg' in parset_dict:
+        parset_dict['max_radius_deg'] = parset.getfloat('directions',
             'max_radius_deg')
     else:
-        parset_dict['direction_specific']['max_radius_deg'] = None
+        parset_dict['max_radius_deg'] = None
 
     # If no directions_file is given, the selection criteria for calibrator sources
     # that follow must be given. For merging of multiple sources into one calibrator
@@ -544,47 +543,45 @@ def get_directions_options(parset):
     # they are grouped into one calibrator. After grouping, flux_min_Jy sets the
     # min total flux density of a source (or group) to be considered as a DDE
     # calibrator
-    if 'flux_min_for_merging_jy' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['flux_min_for_merging_jy'] = parset.getfloat('directions',
+    if 'flux_min_for_merging_jy' in parset_dict:
+        parset_dict['flux_min_for_merging_jy'] = parset.getfloat('directions',
             'flux_min_for_merging_jy')
     else:
-        parset_dict['direction_specific']['flux_min_for_merging_jy'] = 0.1
-    if 'size_max_arcmin' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['size_max_arcmin'] = parset.getfloat('directions',
+        parset_dict['flux_min_for_merging_jy'] = 0.1
+    if 'size_max_arcmin' in parset_dict:
+        parset_dict['size_max_arcmin'] = parset.getfloat('directions',
             'size_max_arcmin')
     else:
-        parset_dict['direction_specific']['size_max_arcmin'] = None
-    if 'separation_max_arcmin' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['separation_max_arcmin'] = parset.getfloat('directions',
+        parset_dict['size_max_arcmin'] = None
+    if 'separation_max_arcmin' in parset_dict:
+        parset_dict['separation_max_arcmin'] = parset.getfloat('directions',
             'separation_max_arcmin')
     else:
-        parset_dict['direction_specific']['separation_max_arcmin'] = None
-    if 'flux_min_jy' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['flux_min_jy'] = parset.getfloat('directions',
+        parset_dict['separation_max_arcmin'] = None
+    if 'flux_min_jy' in parset_dict:
+        parset_dict['flux_min_jy'] = parset.getfloat('directions',
             'flux_min_jy')
     else:
-        parset_dict['direction_specific']['flux_min_jy'] = None
+        parset_dict['flux_min_jy'] = None
 
     # Number of internally derived directions can be limited to a maximum number
     # of directions if desired with max_num (default = all).
-    if 'ndir_max' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['ndir_max'] = parset.getint('directions',
-            'ndir_max')
-    elif 'max_num' in parset_dict['direction_specific']:
+    if 'ndir_max' in parset_dict:
+        parset_dict['ndir_max'] = parset.getint('directions', 'ndir_max')
+    elif 'max_num' in parset_dict:
         log.warning('Option "max_num" is deprecated and should be changed to "ndir_max"')
-        parset_dict['direction_specific']['ndir_max'] = parset.getint('directions',
-            'max_num')
+        parset_dict['ndir_max'] = parset.getint('directions', 'max_num')
     else:
-        parset_dict['direction_specific']['ndir_max'] = None
+        parset_dict['ndir_max'] = None
 
     # Radius within which facets will be used (default = 1.25 * FWHM of primary beam
     # of highest-frequency band); outside of this radius, small patches are used
     # that do not appear in the final mosaic.
-    if 'faceting_radius_deg' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['faceting_radius_deg'] = parset.getfloat('directions',
+    if 'faceting_radius_deg' in parset_dict:
+        parset_dict['faceting_radius_deg'] = parset.getfloat('directions',
             'faceting_radius_deg')
     else:
-        parset_dict['direction_specific']['faceting_radius_deg'] = None
+        parset_dict['faceting_radius_deg'] = None
 
     # Grouping of directions into groups that are selfcal-ed in parallel, defined as
     # grouping:n_total_per_grouping. For example, groupings = 1:5, 4:0 means two
@@ -592,42 +589,42 @@ def get_directions_options(parset):
     # each direction processed in series) and the rest of the directions divided
     # into groups of 4 (i.e., 4 directions processed in parallel). Default is one at
     # a time (i.e., groupings = 1:0)
-    if 'groupings' in parset_dict['direction_specific']:
+    if 'groupings' in parset_dict:
         groupings=[]
         keys = []
         vals = []
-        kvs = parset_dict['direction_specific']['groupings'].split(',')
+        kvs = parset_dict['groupings'].split(',')
         for kv in kvs:
             key, val = kv.split(':')
             keys.append(key.strip())
             vals.append(val.strip())
         for key, val in zip(keys, vals):
             groupings.append({key: int(val)})
-        parset_dict['direction_specific']['groupings'] = groupings
+        parset_dict['groupings'] = groupings
     else:
-        parset_dict['direction_specific']['groupings'] = [{'1':0}]
+        parset_dict['groupings'] = [{'1':0}]
     log.info("Using the following groupings for directions: {}"
         .format(', '.join(['{0}:{1}'.format(n.keys()[0], n.values()[0])
-        for n in parset_dict['direction_specific']['groupings']])))
+        for n in parset_dict['groupings']])))
 
     # If groups are used to process more than one direction in parallel, reordering
     # of the directions in the groups can be done to maximize the flux-weighted
     # separation between directions in each group (default = True)
-    if 'allow_reordering' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['allow_reordering'] = parset.getboolean('directions',
+    if 'allow_reordering' in parset_dict:
+        parset_dict['allow_reordering'] = parset.getboolean('directions',
             'allow_reordering')
     else:
-        parset_dict['direction_specific']['allow_reordering'] = True
+        parset_dict['allow_reordering'] = True
 
     # Total number of directions to selfcal (default = all)
-    if 'ndir_selfcal' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['ndir_selfcal'] = parset.getint('directions', 'ndir_selfcal')
-        if parset_dict['direction_specific']['ndir_selfcal'] < 1:
+    if 'ndir_selfcal' in parset_dict:
+        parset_dict['ndir_selfcal'] = parset.getint('directions', 'ndir_selfcal')
+        if parset_dict['ndir_selfcal'] < 1:
             log.error('Total number of directions to selfcal must be 1 or more')
             sys.exit(1)
-        log.info("Self calibrating up to %s direction(s)" % (parset_dict['direction_specific']['ndir_selfcal']))
+        log.info("Self calibrating up to %s direction(s)" % (parset_dict['ndir_selfcal']))
     else:
-        parset_dict['direction_specific']['ndir_selfcal'] = None
+        parset_dict['ndir_selfcal'] = None
 
     # Total number of directions to process (default = all). If this number is
     # greater than ndir_selfcal, then the remaining directions will not be selfcal-
@@ -635,21 +632,21 @@ def get_directions_options(parset):
     # direction for which selfcal succeeded (if a target is specified and
     # target_has_own_facet = True, it will be imaged in this way after ndir_total
     # number of directions are processed)
-    if 'ndir_process' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['ndir_process'] = parset.getint('directions', 'ndir_process')
-        if parset_dict['direction_specific']['ndir_process'] < 1:
+    if 'ndir_process' in parset_dict:
+        parset_dict['ndir_process'] = parset.getint('directions', 'ndir_process')
+        if parset_dict['ndir_process'] < 1:
             log.error('Total number of directions to process must be 1 or more')
             sys.exit(1)
-        log.info("Processing up to %s direction(s) in total" % (parset_dict['direction_specific']['ndir_process']))
-    elif 'ndir_total' in parset_dict['direction_specific']:
+        log.info("Processing up to %s direction(s) in total" % (parset_dict['ndir_process']))
+    elif 'ndir_total' in parset_dict:
         log.warning('Option "ndir_total" is deprecated and should be changed to "ndir_process"')
-        parset_dict['direction_specific']['ndir_process'] = parset.getint('directions', 'ndir_total')
-        if parset_dict['direction_specific']['ndir_process'] < 1:
+        parset_dict['ndir_process'] = parset.getint('directions', 'ndir_total')
+        if parset_dict['ndir_process'] < 1:
             log.error('Total number of directions to process must be 1 or more')
             sys.exit(1)
-        log.info("Processing up to %s direction(s) in total" % (parset_dict['direction_specific']['ndir_process']))
+        log.info("Processing up to %s direction(s) in total" % (parset_dict['ndir_process']))
     else:
-        parset_dict['direction_specific']['ndir_process'] = None
+        parset_dict['ndir_process'] = None
 
     # A target can be specified to ensure that it falls entirely within a single
     # facet. The values should be those of a circular region that encloses the
@@ -657,35 +654,35 @@ def get_directions_options(parset):
     # a facet of its own. In this case, it will not go through selfcal but will
     # instead use the selfcal solutions of the nearest facet for which selfcal was
     # done
-    if 'target_ra' not in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['target_ra'] = None
-    if 'target_dec' not in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['target_dec'] = None
-    if 'target_radius_arcmin' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['target_radius_arcmin'] = parset.getfloat('directions',
+    if 'target_ra' not in parset_dict:
+        parset_dict['target_ra'] = None
+    if 'target_dec' not in parset_dict:
+        parset_dict['target_dec'] = None
+    if 'target_radius_arcmin' in parset_dict:
+        parset_dict['target_radius_arcmin'] = parset.getfloat('directions',
             'target_radius_arcmin')
     else:
-        parset_dict['direction_specific']['target_radius_arcmin'] = None
-    if 'target_has_own_facet' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['target_has_own_facet'] = parset.getboolean('directions',
+        parset_dict['target_radius_arcmin'] = None
+    if 'target_has_own_facet' in parset_dict:
+        parset_dict['target_has_own_facet'] = parset.getboolean('directions',
             'target_has_own_facet')
     else:
-        parset_dict['direction_specific']['target_has_own_facet'] = False
+        parset_dict['target_has_own_facet'] = False
 
     # Radius in degrees within which the direction-dependent solutions will be
     # transferred before starting selfcal (default = 0; i.e., disabled). If a
     # direction is within this distance of a calibrator for which selfcal was
     # successful, the dir-dep selfcal solutions from this calibrator will be used
     # instead of the dir-indep ones
-    if 'transfer_radius_deg' in parset_dict['direction_specific']:
-        parset_dict['direction_specific']['transfer_radius_deg'] = parset.getfloat('directions',
+    if 'transfer_radius_deg' in parset_dict:
+        parset_dict['transfer_radius_deg'] = parset.getfloat('directions',
             'transfer_radius_deg')
-    elif 'transfer_radius' in parset_dict['direction_specific']:
+    elif 'transfer_radius' in parset_dict:
         log.warning('Option "transfer_radius" is deprecated and should be changed to "transfer_radius_deg"')
-        parset_dict['direction_specific']['transfer_radius_deg'] = parset.getfloat('directions',
+        parset_dict['transfer_radius_deg'] = parset.getfloat('directions',
             'transfer_radius')
     else:
-        parset_dict['direction_specific']['transfer_radius_deg'] = 0.0
+        parset_dict['transfer_radius_deg'] = 0.0
 
     # Check for unused options
     given_options = parset.options('directions')
@@ -720,24 +717,24 @@ def get_cluster_options(parset):
 
     """
     if 'cluster' in parset._sections.keys():
-        parset_dict = {'cluster_specific': parset._sections['cluster']}
+        parset_dict = parset._sections['cluster']
     else:
-        parset_dict = {'cluster_specific': {}}
+        parset_dict = {}
 
     # Paths to the LOFAR software
-    if 'lofarroot' not in parset_dict['cluster_specific']:
+    if 'lofarroot' not in parset_dict:
         if 'LOFARROOT' in os.environ:
-            parset_dict['cluster_specific']['lofarroot'] = os.environ['LOFARROOT']
+            parset_dict['lofarroot'] = os.environ['LOFARROOT']
         else:
             log.critical("The LOFAR root directory cannot be determined. Please "
                 "specify it in the [cluster] section of the parset as lofarroot")
             sys.exit(1)
-    if 'lofarpythonpath' not in parset_dict['cluster_specific']:
-        if parset_dict['cluster_specific']['lofarroot'] in os.environ['PYTHONPATH']:
+    if 'lofarpythonpath' not in parset_dict:
+        if parset_dict['lofarroot'] in os.environ['PYTHONPATH']:
             pypaths = os.environ['PYTHONPATH'].split(':')
             for pypath in pypaths:
-                if parset_dict['cluster_specific']['lofarroot'] in pypath:
-                    parset_dict['cluster_specific']['lofarpythonpath'] = pypath
+                if parset_dict['lofarroot'] in pypath:
+                    parset_dict['lofarpythonpath'] = pypath
                     break
         else:
             log.critical("The LOFAR Python root directory cannot be determined. "
@@ -748,63 +745,63 @@ def get_cluster_options(parset):
     # Full path to a local disk on the nodes for I/O-intensive processing. The path
     # must be the same for all nodes. If not given, the default directory in the
     # working directory is used
-    if 'ncpu' in parset_dict['cluster_specific']:
-        parset_dict['cluster_specific']['ncpu'] = parset.getint('cluster', 'ncpu')
+    if 'ncpu' in parset_dict:
+        parset_dict['ncpu'] = parset.getint('cluster', 'ncpu')
     else:
         import multiprocessing
-        parset_dict['cluster_specific']['ncpu'] = multiprocessing.cpu_count()
-    log.info("Using up to %s CPU(s) per node" % (parset_dict['cluster_specific']['ncpu']))
+        parset_dict['ncpu'] = multiprocessing.cpu_count()
+    log.info("Using up to %s CPU(s) per node" % (parset_dict['ncpu']))
 
     # Maximum fraction of the total memory per node that WSClean may use (default =
     # 0.9)
-    if 'wsclean_fmem' in parset_dict['cluster_specific']:
-        parset_dict['cluster_specific']['wsclean_fmem'] = parset.getfloat('cluster', 'wsclean_fmem')
-        if parset_dict['cluster_specific']['wsclean_fmem'] > 1.0:
-            parset_dict['cluster_specific']['wsclean_fmem'] = 1.0
-    elif 'fmem' in parset_dict['cluster_specific']:
+    if 'wsclean_fmem' in parset_dict:
+        parset_dict['wsclean_fmem'] = parset.getfloat('cluster', 'wsclean_fmem')
+        if parset_dict['wsclean_fmem'] > 1.0:
+            parset_dict['wsclean_fmem'] = 1.0
+    elif 'fmem' in parset_dict:
         log.warning('Option "fmem" is deprecated and should be changed to "wsclean_fmem"')
-        parset_dict['cluster_specific']['wsclean_fmem'] = parset.getfloat('cluster', 'fmem')
-        if parset_dict['cluster_specific']['wsclean_fmem'] > 1.0:
-            parset_dict['cluster_specific']['wsclean_fmem'] = 1.0
+        parset_dict['wsclean_fmem'] = parset.getfloat('cluster', 'fmem')
+        if parset_dict['wsclean_fmem'] > 1.0:
+            parset_dict['wsclean_fmem'] = 1.0
     else:
-        parset_dict['cluster_specific']['wsclean_fmem'] = 0.9
-    log.info("Using up to {0}% of the memory per node for WSClean jobs".format(parset_dict['cluster_specific']['wsclean_fmem']*100.0))
+        parset_dict['wsclean_fmem'] = 0.9
+    log.info("Using up to {0}% of the memory per node for WSClean jobs".format(parset_dict['wsclean_fmem']*100.0))
 
     # Number of directions to process in parallel on each node (default = 1). If
     # directions are split into groups to be processed in parallel (with the
     # groupings parameter), this parameter controls how many directions are run
     # simultaneously on a single node. Note that the number of CPUs (set with the
     # ncpu parameter) will be divided among the directions on each node
-    if 'ndir_per_node' in parset_dict['cluster_specific']:
-        parset_dict['cluster_specific']['ndir_per_node'] = parset.getint('cluster',
+    if 'ndir_per_node' in parset_dict:
+        parset_dict['ndir_per_node'] = parset.getint('cluster',
             'ndir_per_node')
     else:
-        parset_dict['cluster_specific']['ndir_per_node'] = 1
+        parset_dict['ndir_per_node'] = 1
     log.info("Processing up to %s direction(s) in parallel per node" %
-        (parset_dict['cluster_specific']['ndir_per_node']))
+        (parset_dict['ndir_per_node']))
 
     # Number of imager jobs to run per node (affects initsubtract and facetimage
     # operationa; default = 1). If your nodes have many CPUs and > 32 GB of memory,
     # it may be advantageous to set this to 2 or more
-    if 'nimg_per_node' in parset_dict['cluster_specific']:
-        parset_dict['cluster_specific']['nimg_per_node'] = parset.getint('cluster',
+    if 'nimg_per_node' in parset_dict:
+        parset_dict['nimg_per_node'] = parset.getint('cluster',
             'nimg_per_node')
     else:
-        parset_dict['cluster_specific']['nimg_per_node'] = 1
+        parset_dict['nimg_per_node'] = 1
 
     # Full path to cluster description file. Use clusterdesc_file = PBS to use the
     # PBS / torque reserved nodes. If not given, the clusterdesc file for a single
     # (i.e., local) node is used
-    if 'clusterdesc_file' not in parset_dict['cluster_specific']:
-        parset_dict['cluster_specific']['clusterdesc_file'] = parset_dict['lofarroot'] + '/share/local.clusterdesc'
-        parset_dict['cluster_specific']['node_list'] = ['localhost']
+    if 'clusterdesc_file' not in parset_dict:
+        parset_dict['clusterdesc_file'] = parset_dict['lofarroot'] + '/share/local.clusterdesc'
+        parset_dict['node_list'] = ['localhost']
 
     # Full path to a local disk on the nodes for I/O-intensive processing. The path
     # must be the same for all nodes. If not given, the default directory in the
     # working directory is used
-    if 'dir_local' not in parset_dict['cluster_specific']:
-        parset_dict['cluster_specific']['dir_local'] = None
-    elif parset_dict['cluster_specific']['clusterdesc_file'] != 'PBS':
+    if 'dir_local' not in parset_dict:
+        parset_dict['dir_local'] = None
+    elif parset_dict['clusterdesc_file'] != 'PBS':
         # The local directory only works when the dppp_scratch.py node recipe is
         # used, which is only done when clusterdesc_file = PBS, so exit if not
         log.critical('A local scratch directory can only be used when '
