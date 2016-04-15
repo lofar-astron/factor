@@ -39,13 +39,15 @@ def read_casa_polys(filename):
             poly_str_temp = line.split('[[')[1]
             poly_str = poly_str_temp.split(']]')[0]
             poly_str_list = poly_str.split('], [')
-            poly_vertices = []
+            ra = []
+            dec = []
             for pos in poly_str_list:
                 RAstr, Decstr = pos.split(',')
-                ra = Angle(RAstr, unit='hourangle').to('deg').value
-                dec = Angle(Decstr.replace('.', ':', 2), unit='deg').to('deg').value
-                poly_vertices.append(np.array([ra, dec]))
-            polys.append(poly_vertices)
+                ra.append(Angle(RAstr, unit='hourangle').to('deg').value)
+                dec.append(Angle(Decstr.replace('.', ':', 2), unit='deg').to('deg').value)
+            poly_vertices = [np.array(ra), np.array(dec)]
+            poly_array = np.vstack([poly_vertices, poly_vertices[0]])
+            polys.append(poly_array)
         elif line.startswith('ellipse') or line.startswith('box'):
             print('Only CASA regions of type "poly" are supported')
             sys.exit(1)
@@ -307,16 +309,17 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                 # a source of ~ 10 beams
                 has_large_isl = True
 
-    if (region_file is not None) and (region_file != '[]'):
+    if (region_file is not None and region_file != '[]' and skip_source_detection):
         # Copy region file and return if source detection was not done
         os.system('cp {0} {1}'.format(region_file.strip('[]"'), mask_name))
-        if skip_source_detection:
-            return {'threshold_5sig': '0.0'}
+        return {'threshold_5sig': '0.0'}
     elif not skip_source_detection:
         img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
                          img_format=img_format, clobber=True)
 
-    if vertices_file is not None or trim_by > 0 or pad_to_size is not None or skip_source_detection:
+    if (vertices_file is not None or trim_by > 0 or pad_to_size is not None
+        or (region_file is not None and region_file != '[]')
+        or skip_source_detection):
         # Alter the mask in various ways
         if skip_source_detection:
             # Read the image
@@ -411,15 +414,15 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                     yvert.append(pixels[3]) # y -> RA
                 poly = Polygon(xvert, yvert)
 
-                # Find masked regions
-                masked_ind = np.where(data[0, 0])
+                # Find unmasked regions
+                unmasked_ind = np.where(data[0, 0] == 0)
 
-                # Find distance to nearest poly edge and unmask those that
-                # are outside the facet (dist < 0)
-                dist = poly.is_inside(masked_ind[0], masked_ind[1])
-                outside_ind = np.where(dist < 0.0)
-                if len(outside_ind[0]) > 0:
-                    data[0, 0, masked_ind[0][outside_ind], masked_ind[1][outside_ind]] = 0
+                # Find distance to nearest poly edge and mask those that
+                # are inside the casa region (dist > 0)
+                dist = poly.is_inside(unmasked_ind[0], unmasked_ind[1])
+                inside_ind = np.where(dist > 0.0)
+                if len(inside_ind[0]) > 0:
+                    data[0, 0, unmasked_ind[0][inside_ind], unmasked_ind[1][inside_ind]] = 1
 
         # Save changes
         new_mask.putdata(data)
