@@ -172,7 +172,7 @@ class Direction(object):
 
 
     def set_imcal_parameters(self, parset, bands, facet_cellsize_arcsec=None,
-        facet_robust=None, facet_taper_arcsec=None)
+        facet_robust=None, facet_taper_arcsec=None):
         """
         Sets various parameters for imaging and calibration
 
