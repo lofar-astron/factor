@@ -194,7 +194,7 @@ class Direction(object):
         if parset['imaging_specific']['facet_imager'].lower() == 'wsclean':
             # Use larger padding for WSClean images
             padding = parset['imaging_specific']['wsclean_image_padding']
-            direction.wsclean_model_padding = parset['imaging_specific']['wsclean_model_padding']
+            self.wsclean_model_padding = parset['imaging_specific']['wsclean_model_padding']
         else:
             padding = 1.05
         nbands = parset['imaging_specific']['wsclean_nbands']
