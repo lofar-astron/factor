@@ -47,7 +47,7 @@ class FieldMosaic(Operation):
         """
         # Delete averaged data as they're no longer needed
         self.direction.cleanup_mapfiles = [
-            os.path.join(self.pipeline_mapfile_dir, 'sorted_groups.datamap_groups')
+            os.path.join(self.pipeline_mapfile_dir, 'sorted_groups.mapfile_groups')
             ]
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()

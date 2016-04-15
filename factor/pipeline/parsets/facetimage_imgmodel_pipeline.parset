@@ -22,7 +22,7 @@ create_msmulti_map.control.type                       =   addListMultiMapfile
 create_msmulti_map.control.hosts                      =   {{ hosts }}
 create_msmulti_map.control.files                      =   {{ ms_files_grouped }}
 create_msmulti_map.control.mapfile_dir                =   input.output.mapfile_dir
-create_msmulti_map.control.filename                   =   input_files_grouped.datamap
+create_msmulti_map.control.filename                   =   input_files_grouped.mapfile
 
 # expand mapfile of the dir-dependent parmDB to all files, length = nfiles
 expand_merged_parmdb_map.control.kind                 =   plugin
@@ -30,7 +30,7 @@ expand_merged_parmdb_map.control.type                 =   expandMapfile
 expand_merged_parmdb_map.control.mapfile_in           =   {{ dir_dep_parmdb_mapfile }}
 expand_merged_parmdb_map.control.mapfile_to_match     =   create_ms_map.output.mapfile
 expand_merged_parmdb_map.control.mapfile_dir          =   input.output.mapfile_dir
-expand_merged_parmdb_map.control.filename             =   expand_merged_parmdbs.datamap
+expand_merged_parmdb_map.control.filename             =   expand_merged_parmdbs.mapfile
 
 # shift current residual visibilities to facet-center, length = nfiles
 shift_empty.control.type                              =   dppp
@@ -55,7 +55,7 @@ regroup_shift_empty_map.control.mapfile_groups        =   create_msmulti_map.out
 regroup_shift_empty_map.control.mapfile_dir           =   input.output.mapfile_dir
 regroup_shift_empty_map.control.join_max_files        =   100
 regroup_shift_empty_map.control.rotate_groups         =   True
-regroup_shift_empty_map.control.filename              =   regroup_shift_empty.datamap
+regroup_shift_empty_map.control.filename              =   regroup_shift_empty.mapfile
 
 {% block model_data_parms %}
 # expand mapfile of the facet-model to all groups, length = some
@@ -64,7 +64,7 @@ expand_facet_model_map.control.type                   =   expandMapfile
 expand_facet_model_map.control.mapfile_in             =   {{ facet_model_mapfile }}
 expand_facet_model_map.control.mapfile_to_match       =   regroup_shift_empty_map.output.mapfile
 expand_facet_model_map.control.mapfile_dir            =   input.output.mapfile_dir
-expand_facet_model_map.control.filename               =   expand_facet_model.datamap
+expand_facet_model_map.control.filename               =   expand_facet_model.mapfile
 
 # expand mapfile of the model image sizes to all groups, length = some
 expand_facet_model_size_map.control.kind              =   plugin
@@ -224,6 +224,9 @@ wsclean_image_full1.argument.mem                      =   {{ max_percent_memory 
 wsclean_image_full1.argument.j                        =   {{ max_cpus_per_node }}
 wsclean_image_full1.argument.tempdir                  =   {{ local_dir }}
 wsclean_image_full1.argument.weighting-rank-filter    =   3
+{% if taper_facet_arcsec > 0.0 %}
+wsclean_image_full1.argument.taper-gaussian           =  {{ taper_facet_arcsec }}
+{% endif %}
 
 # make a mapfile with the root-name of the WSClean images, length = 1
 create_imagebase_map1.control.kind                    =   plugin
@@ -277,6 +280,9 @@ wsclean_image_full2.argument.mem                      =   {{ max_percent_memory 
 wsclean_image_full2.argument.j                        =   {{ max_cpus_per_node }}
 wsclean_image_full2.argument.tempdir                  =   {{ local_dir }}
 wsclean_image_full2.argument.weighting-rank-filter    =   3
+{% if taper_facet_arcsec > 0.0 %}
+wsclean_image_full2.argument.taper-gaussian           =  {{ taper_facet_arcsec }}
+{% endif %}
 
 # make a mapfile with the root-name of the WSClean images, length = 1
 create_imagebase_map2.control.kind                    =   plugin

@@ -65,6 +65,7 @@ class FacetSelfcal(Operation):
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
+        direction.set_imcal_parameters(parset, bands)
         ms_files = [band.files for band in self.bands]
         ms_files_single = []
         for bandfiles in ms_files:
@@ -103,8 +104,6 @@ class FacetSelfcal(Operation):
             'input_files_single.mapfile')
         self.direction.shifted_model_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'corrupt_final_model.mapfile')
-        self.direction.diff_models_field_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'shift_diff_model_to_field.mapfile')
         self.direction.dir_indep_parmdbs_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'dir_indep_instrument_parmdbs.mapfile')
         self.direction.dir_indep_skymodels_mapfile = os.path.join(self.pipeline_mapfile_dir,
@@ -153,6 +152,8 @@ class FacetSelfcal(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'corrupt_final_model.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'predict_all_model_data.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'shift_cal.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'shift_diff_model_to_field.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'final_image1.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'make_concat_corr.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'make_blavg_data.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat0_input.mapfile'),
@@ -190,6 +191,11 @@ class FacetPeel(OutlierPeel):
         # Set the pipeline parset to use (the outlierpeel one)
         self.pipeline_parset_template = 'outlierpeel_pipeline.parset'
 
+        # Define extra parameters needed for this operation (beyond those
+        # defined in the master Operation class and as attributes of the
+        # direction object)
+        direction.set_imcal_parameters(parset, bands)
+
 
 class FacetSub(Operation):
     """
@@ -214,6 +220,41 @@ class FacetSubReset(Operation):
     def __init__(self, parset, bands, direction):
         super(FacetSubReset, self).__init__(parset, bands, direction,
             name='FacetSubReset')
+
+        # Set imager infix for pipeline parset names
+        if self.parset['facet_imager'].lower() == 'casa':
+            infix = '_casa'
+        else:
+            infix = ''
+
+        # Set the pipeline parset to use
+        self.pipeline_parset_template = 'facetsubreset{0}_pipeline.parset'.format(infix)
+
+        # Define extra parameters needed for this operation (beyond those
+        # defined in the master Operation class and as attributes of the
+        # direction object)
+        direction.set_imcal_parameters(parset, bands)
+        dir_indep_parmDBs = []
+        for band in self.bands:
+            for parmdb in band.dirindparmdbs:
+                dir_indep_parmDBs.append(parmdb)
+        skymodels = [band.skymodel_dirindep for band in self.bands]
+        self.parms_dict.update({'skymodels': skymodels,
+                                'dir_indep_parmDBs': dir_indep_parmDBs})
+
+
+    def finalize(self):
+        """
+        Finalize this operation
+        """
+        # Delete temp data
+        self.direction.cleanup_mapfiles = [
+            os.path.join(self.pipeline_mapfile_dir, 'regroup_shift_empty.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'corrupt_final_model.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'predict_all_model_data.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'shift_diff_model_to_field.mapfile_groups')]
+        self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
+        self.direction.cleanup()
 
 
 class FacetImage(Operation):
@@ -260,6 +301,8 @@ class FacetImage(Operation):
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
+        direction.set_imcal_parameters(parset, bands, cellsize_arcsec, robust,
+            taper_arcsec)
         ms_files = [band.files for band in self.bands]
         ms_files_single = []
         for bandfiles in ms_files:
@@ -289,6 +332,7 @@ class FacetImage(Operation):
         # Delete temp data
         self.direction.cleanup_mapfiles = [
             os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_input.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'image1.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'sorted_groups.mapfile_groups')]
         if not self.parset['keep_avg_facet_data'] and self.direction.name != 'target':
             # Add averaged calibrated data for the facet to files to be deleted.
@@ -310,13 +354,13 @@ class FacetImage(Operation):
 class FacetPeelImage(FacetImage):
     """
     Operation to make the full image of a facet after peeling
+
+    Note, we do not allow cellsize, robust, or taper parameters, as they must
+    match the selfcal ones
     """
-    def __init__(self, parset, bands, direction, cellsize_arcsec, robust,
-        taper_arcsec):
-        fullname = 'FacetPeelImage_c{0}_r{1}_t{2}'.format(round(cellsize_arcsec,1),
-                    round(robust,2), round(taper_arcsec,1))
+    def __init__(self, parset, bands, direction):
         super(FacetPeelImage, self).__init__(parset, bands, direction,
-            name=fullname)
+            name='FacetPeelImage')
 
         # Set imager infix for pipeline parset names
         if self.parset['facet_imager'].lower() == 'casa':
@@ -326,6 +370,11 @@ class FacetPeelImage(FacetImage):
 
         # Set the pipeline parset to use
         self.pipeline_parset_template = 'facetimage_skymodel{0}_pipeline.parset'.format(infix)
+
+        # Define extra parameters needed for this operation (beyond those
+        # defined in the master Operation class and as attributes of the
+        # direction object)
+        direction.set_imcal_parameters(parset, bands,)
 
 
     def finalize(self):

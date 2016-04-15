@@ -13,7 +13,7 @@ create_images_map.control.type                         =   addListMapfile
 create_images_map.control.hosts                        =   {{ hosts }}
 create_images_map.control.files                        =   {{ facet_image_filenames }}
 create_images_map.control.mapfile_dir                  =   input.output.mapfile_dir
-create_images_map.control.filename                     =   facet_images.datamap
+create_images_map.control.filename                     =   facet_images.mapfile
 
 # create a mapfile with the existing vertices, length = unknown / nfacets
 create_vertices_map.control.kind                       =   plugin
@@ -21,21 +21,21 @@ create_vertices_map.control.type                       =   addListMapfile
 create_vertices_map.control.hosts                      =   {{ hosts }}
 create_vertices_map.control.files                      =   {{ facet_vertices_filenames }}
 create_vertices_map.control.mapfile_dir                =   input.output.mapfile_dir
-create_vertices_map.control.filename                   =   facet_vertices.datamap
+create_vertices_map.control.filename                   =   facet_vertices.mapfile
 
 # compress mapfile so that all images are in one group, length = 1
 create_compressed_mapfile_images.control.kind          =   plugin
 create_compressed_mapfile_images.control.type          =   compressMapfile
 create_compressed_mapfile_images.control.mapfile_in    =   create_images_map.output.mapfile
 create_compressed_mapfile_images.control.mapfile_dir   =   input.output.mapfile_dir
-create_compressed_mapfile_images.control.filename      =   mosaic_images_input.datamap
+create_compressed_mapfile_images.control.filename      =   mosaic_images_input.mapfile
 
 # compress mapfile so that all vertices are in one group, length = 1
 create_compressed_mapfile_vertices.control.kind        =   plugin
 create_compressed_mapfile_vertices.control.type        =   compressMapfile
 create_compressed_mapfile_vertices.control.mapfile_in  =   create_vertices_map.output.mapfile
 create_compressed_mapfile_vertices.control.mapfile_dir =   input.output.mapfile_dir
-create_compressed_mapfile_vertices.control.filename    =   mosaic_vertices_input.datamap
+create_compressed_mapfile_vertices.control.filename    =   mosaic_vertices_input.mapfile
 
 # make the mosaic image, length = 1
 make_mosaic.control.type                               =   mosaic_images
@@ -50,7 +50,7 @@ create_ms_map.control.type                             =   addListMapfile
 create_ms_map.control.hosts                            =   {{ hosts }}
 create_ms_map.control.files                            =   {{ ms_files_single }}
 create_ms_map.control.mapfile_dir                      =   input.output.mapfile_dir
-create_ms_map.control.filename                         =   input_MSs_single.datamap
+create_ms_map.control.filename                         =   input_MSs_single.mapfile
 
 # create a multi-mapfile with the groups of MSs from supplied list, length = nbands
 # not needed for the time being...
@@ -59,19 +59,19 @@ create_msmulti_map.control.type                        =   addListMultiMapfile
 create_msmulti_map.control.hosts                       =   {{ hosts }}
 create_msmulti_map.control.files                       =   {{ ms_files_grouped }}
 create_msmulti_map.control.mapfile_dir                 =   input.output.mapfile_dir
-create_msmulti_map.control.filename                    =   input_files_grouped.datamap
+create_msmulti_map.control.filename                    =   input_files_grouped.mapfile
 
 # compress mapfile so that all MSs are in one group, length = 1
 create_compressed_mapfile_ms.control.kind              =   plugin
 create_compressed_mapfile_ms.control.type              =   compressMapfile
 create_compressed_mapfile_ms.control.mapfile_in        =   create_ms_map.output.mapfile
 create_compressed_mapfile_ms.control.mapfile_dir       =   input.output.mapfile_dir
-create_compressed_mapfile_ms.control.filename          =   compressed_MSs_all.datamap
+create_compressed_mapfile_ms.control.filename          =   compressed_MSs_all.mapfile
 
 # sort compressed mapfile so that there is one group per timestamp, length = ntimes
 sort_into_Groups.control.type                          =   sort_times_into_freqGroups
 sort_into_Groups.argument.flags                        =   [create_compressed_mapfile_ms.output.mapfile]
-sort_into_Groups.argument.filename                     =   sorted_groups.datamap
+sort_into_Groups.argument.filename                     =   sorted_groups.mapfile
 sort_into_Groups.argument.mapfile_dir                  =   input.output.mapfile_dir
 sort_into_Groups.argument.hosts                        =   {{ hosts }}
 sort_into_Groups.argument.target_path                  =   input.output.working_directory/input.output.job_name
@@ -82,7 +82,7 @@ sort_into_Groups_maps.control.type                     =   mapfilenamesFromMapfi
 sort_into_Groups_maps.control.mapfile_groupmap         =   sort_into_Groups.output.groupmapfile.mapfile
 sort_into_Groups_maps.control.mapfile_filesmap         =   sort_into_Groups.output.mapfile.mapfile
 
-# concat data in frequency, length = ntimes 
+# concat data in frequency, length = ntimes
 concat_data.control.type                               =   dppp
 concat_data.control.mapfile_out                        =   sort_into_Groups_maps.output.groupmap
 concat_data.control.mapfile_in                         =   sort_into_Groups_maps.output.filesmap
@@ -103,7 +103,7 @@ create_compressed_mapfile.control.kind                 =   plugin
 create_compressed_mapfile.control.type                 =   compressMapfile
 create_compressed_mapfile.control.mapfile_in           =   concat_data.output.mapfile
 create_compressed_mapfile.control.mapfile_dir          =   input.output.mapfile_dir
-create_compressed_mapfile.control.filename             =   compressed_averaged.datamap
+create_compressed_mapfile.control.filename             =   compressed_averaged.mapfile
 
 # virtual concat ov averaged data, length = 1
 concat.control.type                                    =   virtual_concat

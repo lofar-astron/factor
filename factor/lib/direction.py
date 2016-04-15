@@ -23,53 +23,50 @@ class Direction(object):
     All attributes needed by the pipeline templates should be set on the class
     instance so that they can be passed with self.__dict__
 
-    Parameters
-    ----------
-    name : str
-        Name of direction
-    ra : float
-        RA in degrees of calibrator center
-    dec : float
-        Dec in degrees of calibrator center
-    atrous_do : bool
-        Fit to wavelet images in PyBDSM?
-    mscale_field_do : bool
-        Use multiscale clean for facet field?
-    cal_imsize : int
-        Size of calibrator image in 1.5 arcsec pixels
-    solint_p : int
-        Solution interval for phase calibration (# of time slots)
-    solint_a : int
-        Solution interval for amplitude calibration (# of time slots)
-    dynamic_range : str
-        LD (low dynamic range) or HD (high dynamic range)
-    region_selfcal : str
-        Region for clean mask for calibrator selfcal
-    region_field : str
-        Region for clean mask for facet image
-    peel_skymodel : str
-        Sky model for peeling
-    outlier_do : bool
-        If True, peel source without selfcal
-    factor_working_dir : str
-        Full path of working directory
-    make_final_image : bool, optional
-        Make final image of this direction, after all directions have been
-        selfcaled?
-    cal_size_deg : float, optional
-        Size in degrees of calibrator source(s)
-
     """
     def __init__(self, name, ra, dec, atrous_do=False, mscale_field_do=False,
     	cal_imsize=512, solint_p=1, solint_a=30, dynamic_range='LD',
     	region_selfcal='empty', region_field='empty', peel_skymodel='empty',
-    	outlier_do=False, factor_working_dir='', make_final_image=False,
-    	cal_size_deg=None):
+    	outlier_do=False, factor_working_dir='', cal_size_deg=None):
+        """
+        Instantiate direction object
 
-        # Handle input args
+        Parameters
+        ----------
+        name : str
+            Name of direction
+        ra : float
+            RA in degrees of calibrator center
+        dec : float
+            Dec in degrees of calibrator center
+        atrous_do : bool
+            Fit to wavelet images in PyBDSM?
+        mscale_field_do : bool
+            Use multiscale clean for facet field?
+        cal_imsize : int
+            Size of calibrator image in 1.5 arcsec pixels
+        solint_p : int
+            Solution interval for phase calibration (# of time slots)
+        solint_a : int
+            Solution interval for amplitude calibration (# of time slots)
+        dynamic_range : str
+            LD (low dynamic range) or HD (high dynamic range)
+        region_selfcal : str
+            Region for clean mask for calibrator selfcal
+        region_field : str
+            Region for clean mask for facet image
+        peel_skymodel : str
+            Sky model for peeling
+        outlier_do : bool
+            If True, peel source without selfcal
+        factor_working_dir : str
+            Full path of working directory
+        cal_size_deg : float, optional
+            Size in degrees of calibrator source(s)
+
+        """
         self.name = name
         self.log = logging.getLogger('factor:{0}'.format(self.name))
-
         if type(ra) is str:
             ra = Angle(ra).to('deg').value
         if type(dec) is str:
@@ -121,11 +118,7 @@ class Direction(object):
         self.max_residual_val = 0.5 # maximum residual in Jy for facet subtract test
         self.wsclean_nchannels = 1 # set number of wide-band channels
         self.use_new_sub_data = False # set flag that tells which subtracted-data column to use
-        self.cellsize_selfcal_deg = 0.000417 # selfcal cell size
-        self.cellsize_facet_deg = 0.000417 # facet image cell size
         self.cellsize_verify_deg = 0.00833 # verify subtract cell size
-        self.robust_selfcal = -0.25 # selfcal robust parameter
-        self.robust_facet = -0.25 # facet image robust parameter
         self.target_rms_rad = 0.2 # preaverage target rms
         self.subtracted_data_colname = 'SUBTRACTED_DATA_ALL' # name of empty data column
         self.pre_average = False # whether to use baseline averaging
@@ -140,6 +133,7 @@ class Direction(object):
         self.nchunks = 1
         self.num_selfcal_groups = 1
         self.timeSlotsPerParmUpdate = 100
+        self.skymodel = None
 
         # Define some directories and files
         self.working_dir = factor_working_dir
@@ -159,7 +153,6 @@ class Direction(object):
 
         """
         self.cellsize_selfcal_deg = selfcal_cellsize_arcsec / 3600.0
-        self.cellsize_facet_deg = selfcal_cellsize_arcsec / 3600.0
 
         if self.cal_size_deg is None:
             # Set calibrator size from cal_imsize assuming 50% padding
@@ -178,64 +171,62 @@ class Direction(object):
         self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
 
 
-    def set_imcal_parameters(self, nbands_per_channel, chan_width_hz,
-    	nchan, timestep_sec, ntimes, nbands, mean_freq_mhz, initial_skymodel=None,
-    	preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95, tec_block_mhz=10.0,
-    	selfcal_robust=-0.25, facet_robust=-0.25, peel_flux_jy=25.0, padding=1.05,
-    	use_selfcal_clean_threshold=False):
+    def set_imcal_parameters(self, parset, bands, facet_cellsize_arcsec=None,
+        facet_robust=None, facet_taper_arcsec=None)
         """
         Sets various parameters for imaging and calibration
 
         Parameters
         ----------
-        nbands_per_channel : int
-            Number of bands per output channel (WSClean only)
-        nchan_per_band : int
-            Number of channels per band
-        chan_width_hz : float
-            Channel width in Hz
-        nchan : int
-            Number of channels per band
-        timestep_sec : float
-            Time step
-        ntimes : int
-            Number of timeslots per band
-        nbands : int
-            Number of bands
-        mean_freq_mhz : float
-            Mean frequency in MHz of full bandwidth
-        initial_skymodel : LSMTool SkyModel object, optional
-            Sky model used to check source sizes
-        preaverage_flux_jy : bool, optional
-            Use baseline-dependent averaging and solint_time_p = 1 for phase-only
-            calibration for sources below this flux value
-        min_peak_smearing_factor : float, optional
-            Min allowed peak flux density reduction due to smearing at the mean
-            frequency (facet imaging only)
-        tec_block_mhz : float, optional
-            Size of frequency block in MHz over which a single TEC solution is
-            fit
-        selfcal_robust : float, optional
-            Briggs robust parameter for selfcal imaging
+        parset : dict
+            Parset of operation
+        bands : list of Band objects
+            Bands for this operation
+        facet_cellsize_arcsec : float, optional
+            Pixel size in arcsec for facet imaging
         facet_robust : float, optional
             Briggs robust parameter for facet imaging
-        peel_flux_jy : float, optional
-            Peel cailbrators with fluxes above this value
-        padding : float, optional
-            Padding factor by which size of facet is multiplied to determine
-            the facet image size
-        use_selfcal_clean_threshold : bool, optional
-            If True, clean to a 1-sigma threshold during selfcal imaging
+        facet_taper_arcsec : float, optional
+            Taper in arcsec for facet imaging
 
         """
-        self.robust_selfcal = selfcal_robust
+        mean_freq_mhz = np.mean([b.freq for b in bands]) / 1e6
+        min_peak_smearing_factor = 1.0 - parset['imaging_specific']['max_peak_smearing']
+        if parset['facet_imager'].lower() == 'wsclean':
+            # Use larger padding for WSClean images
+            padding = parset['imaging_specific']['wsclean_image_padding']
+            direction.wsclean_model_padding = parset['imaging_specific']['wsclean_model_padding']
+        else:
+            padding = 1.05
+        nbands = parset['imaging_specific']['wsclean_nbands']
+        chan_width_hz = bands[0].chan_width_hz
+        nchan = bands[0].nchan
+        timestep_sec = bands[0].timepersample
+        ntimes = bands[0].minSamplesPerFile
+        nbands = len(bands)
+        preaverage_flux_jy = parset['calibration_specific']['preaverage_flux_jy']
+        tec_block_mhz = parset['calibration_specific']['tec_block_mhz']
+        peel_flux_jy = parset['calibration_specific']['peel_flux_jy']
+
+        self.robust_selfcal = parset['imaging_specific']['selfcal_robust']
+        self.use_selfcal_clean_threshold = parset['imaging_specific']['selfcal_clean_threshold']
+
+        if facet_cellsize_arcsec is None:
+            facet_cellsize_arcsec = parset['imaging_specific']['selfcal_cellsize_arcsec']
+        self.cellsize_facet_deg = facet_cellsize_arcsec / 3600.0
+
+        if facet_robust is None:
+            facet_robust = parset['imaging_specific']['selfcal_robust']
         self.robust_facet = facet_robust
-        self.use_selfcal_clean_threshold = use_selfcal_clean_threshold
+
+        if facet_taper_arcsec is None:
+            facet_taper_arcsec = 0.0
+        self.taper_facet_arcsec = facet_taper_arcsec
 
         self.set_imaging_parameters(nbands, nbands_per_channel, nchan,
-            initial_skymodel, padding)
+            self.skymodel, padding)
         self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,
-            timestep_sec, ntimes, nbands, mean_freq_mhz, initial_skymodel,
+            timestep_sec, ntimes, nbands, mean_freq_mhz, self.skymodel,
             preaverage_flux_jy, min_peak_smearing_factor, tec_block_mhz,
             peel_flux_jy)
 
@@ -263,7 +254,7 @@ class Direction(object):
         # Set facet image size
         if hasattr(self, 'width'):
             self.facet_imsize = max(512, self.get_optimum_size(self.width
-                / self.cellsize_selfcal_deg * padding))
+                / self.cellsize_facet_deg * padding))
         else:
             self.facet_imsize = None
 
@@ -302,11 +293,11 @@ class Direction(object):
         # image to ensure the imager has a reasonable chance to reach the
         # threshold first (which is set by the masking step)
         scaling_factor = np.sqrt(np.float(nbands))
-        self.wsclean_full1_image_niter = int(5000 * scaling_factor)
+        self.wsclean_full1_image_niter = int(2000 * scaling_factor)
         self.wsclean_full1_image_threshold_jy =  1.5e-3 * 0.7 / scaling_factor
         self.casa_full1_image_niter = int(2000 * scaling_factor)
         self.casa_full1_image_threshold_mjy = "{}mJy".format(1.5 * 0.7 / scaling_factor)
-        self.wsclean_full2_image_niter = int(30000 * scaling_factor)
+        self.wsclean_full2_image_niter = int(12000 * scaling_factor)
         self.casa_full2_image_niter = int(12000 * scaling_factor)
 
         # Set multiscale imaging mode: Get source sizes and check for large
@@ -314,9 +305,9 @@ class Direction(object):
         # with a Gaussian of 1 arcmin, so unresolved sources have sizes of ~
         # 1 arcmin)
         if initial_skymodel is not None and self.mscale_field_do is None:
-            sizes = self.get_source_sizes(initial_skymodel.copy())
+            sizes_arcmin = self.get_source_sizes()
             large_size_arcmin = 6.0
-            if any([s > large_size_arcmin for s in sizes]):
+            if any([s > large_size_arcmin for s in sizes_arcmin]):
                 self.mscale_field_do = True
             else:
                 self.mscale_field_do = False
@@ -426,16 +417,17 @@ class Direction(object):
         return newlarge
 
 
-    def get_source_sizes(self, skymodel):
+    def set_skymodel(self, skymodel):
         """
-        Returns list of source sizes in arcmin
+        Sets the direction sky model
+
+        The sky model is filtered to include only those sources within the
+        direction facet
 
         Parameters
         ----------
         skymodel : LSMTool SkyModel object
-            CC sky model used to determine source sizes. The sky model is
-            filtered to include only those sources within the direction
-            facet
+            CC sky model
 
         """
         x, y, midRA, midDec = skymodel._getXY()
@@ -446,21 +438,30 @@ class Direction(object):
         for i in range(len(skymodel)):
             inside[i] = bbPath.contains_point((x[i], y[i]))
         skymodel.select(inside, force=True)
-        sizes = skymodel.getPatchSizes(units='arcmin', weight=False)
+        self.skymodel = skymodel
+
+
+    def get_source_sizes(self):
+        """
+        Returns list of source sizes in arcmin
+
+        """
+        sizes = self.skymodel.getPatchSizes(units='arcmin', weight=False)
 
         return sizes
 
 
-    def get_cal_fluxes(self, skymodel, fwhmArcsec=25.0, threshold=0.1):
+    def get_cal_fluxes(self, fwhmArcsec=25.0, threshold=0.1):
         """
         Returns total flux density in Jy and max peak flux density in
         Jy per beam for calibrator
 
         Parameters
         ----------
-        skymodel : LSMTool SkyModel object
-            CC sky model used to determine source fluxes. The sky model is
-            filtered to include only those sources within the calibrator region
+        fwhmArcsec : float, optional
+            Smoothing scale
+        threshold : float, optional
+            Threshold
 
         Returns
         -------
@@ -470,6 +471,7 @@ class Direction(object):
 
         """
         dist = skymodel.getDistance(self.ra, self.dec)
+        skymodel = self.skymodel.copy()
         skymodel.select(dist < self.cal_radius_deg)
 
         # Generate image grid with 1 pix = FWHM / 4
@@ -629,7 +631,7 @@ class Direction(object):
             # calibrator sources). In these cases, we can use a higher effective
             # flux density to set the intervals. A scaling with a power of 1/1.5
             # seems to work well
-            total_flux_jy, peak_flux_jy_bm = self.get_cal_fluxes(initial_skymodel.copy())
+            total_flux_jy, peak_flux_jy_bm = self.get_cal_fluxes()
             effective_flux_jy = peak_flux_jy_bm * (total_flux_jy / peak_flux_jy_bm)**0.667
             ref_flux_jy = 1.4 * (4.0 / nbands)**0.5
             self.log.debug('Total flux density of calibrator: {} Jy'.format(total_flux_jy))

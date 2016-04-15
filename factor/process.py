@@ -165,8 +165,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             for d in direction_group:
                 nearest, sep = factor.directions.find_nearest(d, dirs_with_selfcal)
                 if sep < parset['direction_specific']['transfer_radius_deg']:
-                    log.debug('Initializing selfcal for direction {0} with solutions from direction {1}.'.format(
-                        d.name, nearest.name))
+                    log.debug('Initializing selfcal for direction {0} with '
+                        'solutions from direction {1}.'.format(d.name, nearest.name))
                     d.dir_dep_parmdb_mapfile = nearest.dir_dep_parmdb_mapfile
                     d.save_state()
                     d.transfer_nearest_solutions = True
@@ -283,7 +283,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
             # Reset the field direction if specified
             if 'field' in reset_directions:
-                field.reset_state('makemosaic')
+                field.reset_state('fieldmosaic')
 
             field.facet_image_filenames = []
             field.facet_vertices_filenames = []
@@ -576,24 +576,8 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
     mean_freq_mhz = np.mean([b.freq for b in bands]) / 1e6
     min_peak_smearing_factor = 1.0 - parset['imaging_specific']['max_peak_smearing']
     for i, direction in enumerate(directions):
-        # Set imaging and calibration parameters
-        if parset['facet_imager'].lower() == 'wsclean':
-            # Use larger padding for WSClean images
-            padding = parset['imaging_specific']['wsclean_image_padding']
-            direction.wsclean_model_padding = parset['imaging_specific']['wsclean_model_padding']
-        else:
-            padding = 1.05
-        direction.set_imcal_parameters(parset['imaging_specific']['wsclean_nbands'],
-            bands[0].chan_width_hz, bands[0].nchan, bands[0].timepersample,
-            bands[0].minSamplesPerFile, len(bands), mean_freq_mhz,
-            initial_skymodel, parset['calibration_specific']['preaverage_flux_jy'],
-            min_peak_smearing_factor=min_peak_smearing_factor,
-            tec_block_mhz=parset['calibration_specific']['tec_block_mhz'],
-            selfcal_robust=parset['imaging_specific']['selfcal_robust'],
-            use_selfcal_clean_threshold=parset['imaging_specific']['selfcal_clean_threshold'],
-            facet_robust=parset['imaging_specific']['facet_robust'],
-            peel_flux_jy=parset['calibration_specific']['peel_flux_jy'],
-            padding=padding)
+        # Set direction sky model
+        direction.set_skymodel(initial_skymodel)
 
         # Set field center to that of first band (all bands have the same phase
         # center)

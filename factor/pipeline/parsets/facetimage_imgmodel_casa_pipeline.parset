@@ -18,7 +18,7 @@ create_compressed_unaveraged.control.kind         =   plugin
 create_compressed_unaveraged.control.type         =   compressMapfile
 create_compressed_unaveraged.control.mapfile_in   =   concat_unaveraged.output.mapfile
 create_compressed_unaveraged.control.mapfile_dir  =   input.output.mapfile_dir
-create_compressed_unaveraged.control.filename     =   concat_unaveraged_compressed.datamap
+create_compressed_unaveraged.control.filename     =   concat_unaveraged_compressed.mapfile
 
 # make model visibilities on the unaveraged data, length = 1
 # can run only once, because (may) create files in the directory of input data
@@ -60,7 +60,6 @@ casa_image_full1.argument.clean.ftmachine         =   'mosaic'
 casa_image_full1.argument.clean.mosweight         =   False
 casa_image_full1.argument.clean.scaletype         =   'SAULT'
 casa_image_full1.argument.clean.weighting         =   'briggs'
-casa_image_full1.argument.clean.uvtaper           =   False
 casa_image_full1.argument.clean.pbcor             =   False
 casa_image_full1.argument.clean.minpb             =   0.2
 casa_image_full1.argument.clean.npixels           =   0
@@ -70,6 +69,12 @@ casa_image_full1.argument.clean.cyclespeedup      =   -1
 casa_image_full1.argument.clean.chaniter          =   False
 casa_image_full1.argument.clean.flatnoise         =   True
 casa_image_full1.argument.clean.allowchunk        =   False
+{% if taper_facet_arcsec > 0.0 %}
+casa_image_full1.argument.clean.uvtaper           =   True
+casa_image_full1.argument.clean.outertaper        =   ['20arcsec']
+{% else %}
+casa_image_full1.argument.clean.uvtaper           =   False
+{% endif %}
 
 # fiddle with the casa mapfiles, length = 1
 adjust_casa_mapfile.control.kind                  =   plugin
@@ -77,7 +82,7 @@ adjust_casa_mapfile.control.type                  =   appendMapfile
 adjust_casa_mapfile.control.mapfile_in            =   casa_image_full1.output.casa_image_full1.image.mapfile
 adjust_casa_mapfile.control.append                =   {{ casa_suffix }}
 adjust_casa_mapfile.control.mapfile_dir           =   input.output.mapfile_dir
-adjust_casa_mapfile.control.filename              =   mask_input.mapfile
+adjust_casa_mapfile.control.filename              =   image1.mapfile
 
 # generate a clean-mask from first image, length = 1
 mask.control.type                                 =   make_clean_mask
@@ -120,7 +125,6 @@ casa_image_full2.argument.clean.ftmachine         =   'mosaic'
 casa_image_full2.argument.clean.mosweight         =   False
 casa_image_full2.argument.clean.scaletype         =   'SAULT'
 casa_image_full2.argument.clean.weighting         =   'briggs'
-casa_image_full2.argument.clean.uvtaper           =   False
 casa_image_full2.argument.clean.pbcor             =   False
 casa_image_full2.argument.clean.minpb             =   0.2
 casa_image_full2.argument.clean.npixels           =   0
@@ -130,6 +134,12 @@ casa_image_full2.argument.clean.cyclespeedup      =   -1
 casa_image_full2.argument.clean.chaniter          =   False
 casa_image_full2.argument.clean.flatnoise         =   True
 casa_image_full2.argument.clean.allowchunk        =   False
+{% if taper_facet_arcsec > 0.0 %}
+casa_image_full1.argument.clean.uvtaper           =   True
+casa_image_full1.argument.clean.outertaper        =   ['20arcsec']
+{% else %}
+casa_image_full1.argument.clean.uvtaper           =   False
+{% endif %}
 
 # create a mapfile with the final image and a known name, length = 1
 adjust_casa_mapfile2.control.kind                 =   plugin

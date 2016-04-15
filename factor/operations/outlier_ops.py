@@ -28,6 +28,7 @@ class OutlierPeel(Operation):
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
+        direction.set_imcal_parameters(parset, bands)
         ms_files = [band.files for band in self.bands]
         ms_files_single = []
         for bandfiles in ms_files:

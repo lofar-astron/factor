@@ -36,7 +36,7 @@ casa_image_full1.argument.clean.niter                      =   {{ casa_full1_ima
 casa_image_full1.argument.clean.threshold                  =   '{{ casa_full1_image_threshold_mjy }}'
 casa_image_full1.argument.clean.imsize                     =   [{{ facet_imsize }}, {{ facet_imsize }}]
 casa_image_full1.argument.clean.cell                       =   ['{{ cellsize_selfcal_deg * 3600.0 }}arcsec', '{{ cellsize_selfcal_deg * 3600.0 }}arcsec']
-casa_image_full1.argument.clean.robust                     =   {{ robust_facet }}
+casa_image_full1.argument.clean.robust                     =   {{ robust_selfcal }}
 casa_image_full1.argument.clean.multiscale                 =   {{ casa_multiscale }}
 casa_image_full1.argument.clean.selectdata                 =   True
 casa_image_full1.argument.clean.gridmode                   =   'widefield'
@@ -66,7 +66,7 @@ adjust_casa_mapfile6.control.type                          =   appendMapfile
 adjust_casa_mapfile6.control.mapfile_in                    =   casa_image_full1.output.casa_image_full1.image.mapfile
 adjust_casa_mapfile6.control.append                        =   {{ casa_suffix }}
 adjust_casa_mapfile6.control.mapfile_dir                   =   input.output.mapfile_dir
-adjust_casa_mapfile6.control.filename                      =   mask5_input.mapfile
+adjust_casa_mapfile6.control.filename                      =   final_image1.mapfile
 
 # generate a clean-mask from first image, length = 1
 mask5.control.type                                         =   make_clean_mask
@@ -98,7 +98,7 @@ casa_image_full2.argument.clean.nterms                     =   {{ nterms }}
 casa_image_full2.argument.clean.niter                      =   {{ casa_full2_image_niter }}
 casa_image_full2.argument.clean.imsize                     =   [{{ facet_imsize }}, {{ facet_imsize }}]
 casa_image_full2.argument.clean.cell                       =   ['{{ cellsize_selfcal_deg * 3600.0 }}arcsec', '{{ cellsize_selfcal_deg * 3600.0 }}arcsec']
-casa_image_full2.argument.clean.robust                     =   {{ robust_facet }}
+casa_image_full2.argument.clean.robust                     =   {{ robust_selfcal }}
 casa_image_full2.argument.clean.multiscale                 =   {{ casa_multiscale }}
 casa_image_full2.argument.clean.selectdata                 =   True
 casa_image_full2.argument.clean.gridmode                   =   'widefield'
@@ -161,7 +161,7 @@ create_compressed_mapfile6.control.kind                    =   plugin
 create_compressed_mapfile6.control.type                    =   compressMapfile
 create_compressed_mapfile6.control.mapfile_in              =   concat_unaveraged.output.mapfile
 create_compressed_mapfile6.control.mapfile_dir             =   input.output.mapfile_dir
-create_compressed_mapfile6.control.filename                =   concat_unaveraged_compressed.datamap
+create_compressed_mapfile6.control.filename                =   concat_unaveraged_compressed.mapfile
 
 # make model visibilities on the unaveraged data, length = 1
 # can run only once, because (may) create files in the directory of input data
