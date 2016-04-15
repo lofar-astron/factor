@@ -113,7 +113,7 @@ def directions_read(directions_file, factor_working_dir):
         	direction['solint_a'], direction['dynamic_range'],
         	direction['region_selfcal'], direction['region_field'],
         	direction['peel_skymodel'], outlier_source, factor_working_dir,
-        	False, cal_size_deg))
+        	cal_size_deg))
 
     return data
 
