@@ -282,6 +282,7 @@ mask.control.mapfile_in                                 =   adjust_wsclean_mapfi
 mask.control.inputkey                                   =   imagefile
 mask.control.outputkey                                  =   maskfile
 mask.argument.flags                                     =   [imagefile,maskfile]
+mask.argument.region_file                               =   {{ region_field }}
 mask.argument.threshisl                                 =   3
 mask.argument.threshpix                                 =   5
 mask.argument.rmsbox                                    =   (300,100)
