@@ -157,7 +157,7 @@ class Operation(object):
             self.parset['cluster_specific']['clusterdesc'])
 
 
-    def update_dicts():
+    def update_dicts(self):
         self.cfg_dict.update(self.direction.__dict__)
         self.parms_dict.update(self.direction.__dict__)
 
