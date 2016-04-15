@@ -466,7 +466,7 @@ class Direction(object):
             Jy per beam for calibrator
 
         """
-        dist = skymodel.getDistance(self.ra, self.dec)
+        dist = self.skymodel.getDistance(self.ra, self.dec)
         skymodel = self.skymodel.copy()
         skymodel.select(dist < self.cal_radius_deg)
 
