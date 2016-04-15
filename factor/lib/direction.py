@@ -108,7 +108,6 @@ class Direction(object):
         else:
             self.log.info('Using sky model file {} for selfcal/peeling'.format(self.peel_skymodel))
         self.is_outlier = outlier_do
-        self.make_final_image = make_final_image
         self.cal_size_deg = cal_size_deg
 
         # Initialize some parameters to default/initial values
