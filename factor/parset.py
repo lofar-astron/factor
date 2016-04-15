@@ -462,12 +462,25 @@ def get_imaging_options(parset):
     else:
         parset_dict['imaging_specific']['facet_robust'] = [parset_dict['imaging_specific']['selfcal_robust']]
 
+   # Padding factor for WSClean images (default = 1.6)
+    if 'wsclean_image_padding' in parset_dict:
+        parset_dict['imaging_specific']['wsclean_image_padding'] = parset.getfloat('global', 'wsclean_image_padding')
+    else:
+        parset_dict['imaging_specific']['wsclean_image_padding'] = 1.6
+
+    # Padding factor for WSClean images (default = 1.4)
+    if 'wsclean_model_padding' in parset_dict:
+        parset_dict['imaging_specific']['wsclean_model_padding'] = parset.getfloat('global', 'wsclean_model_padding')
+    else:
+        parset_dict['imaging_specific']['wsclean_model_padding'] = 1.4
+
     # Check for unused options
     given_options = parset.options('imaging')
     allowed_options = ['make_mosaic', 'wsclean_nbands', 'facet_imager',
         'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
         'selfcal_clean_threshold', 'facet_cellsize_arcsec',
-        'facet_taper_arcsec', 'facet_robust', 'reimage']
+        'facet_taper_arcsec', 'facet_robust', 'reimage',
+        'wsclean_image_padding', 'wsclean_model_padding']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [imaging] section of the '
