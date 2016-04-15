@@ -8,6 +8,8 @@
 #
 # Values of "empty" (for string or boolean entries) or 0 (for integer entries) indicate
 # that they should be derived internally by Factor.
+#
+# Note: supplied region files must be CASA region files of type "poly" only.
 
 s1  14h41m01.884,+35d30m31.52 empty empty 512  1  30  LD empty empty /full/path/to/s1.skymodel True 0.01 2400
 s2  14h38m29.584,+33d57m37.82 True  True    0  1   0  LD empty empty empty False 0.02 1300
