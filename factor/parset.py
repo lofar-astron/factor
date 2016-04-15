@@ -361,11 +361,21 @@ def get_calibration_options(parset):
     else:
         parset_dict['calibration_specific']['tec_block_mhz'] = 10.0
 
+    # Peel the calibrator for sources above this flux density (default = 25.0).
+    # When activated, the calibrator is peeled using a supplied sky model and
+    # the facet is then imaged as normal. Note: a sky model must be specified in the
+    # directions file in the peel_skymodel column for each source that should be
+    # peeled
+    if 'peel_flux_jy' in parset_dict:
+        parset_dict['calibration_specific']['peel_flux_jy'] = parset.getfloat('calibration', 'peel_flux_jy')
+    else:
+        parset_dict['calibration_specific']['peel_flux_jy'] = 25.0
+
     # Check for unused options
     given_options = parset.options('calibration')
     allowed_options = ['exit_on_selfcal_failure', 'skip_selfcal_check',
         'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal',
-        'tec_block_mhz']
+        'tec_block_mhz', 'peel_flux_jy']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [calibration] section of the '
@@ -482,7 +492,8 @@ def get_imaging_options(parset):
     given_options = parset.options('imaging')
     allowed_options = ['make_mosaic', 'wsclean_nbands', 'facet_imager',
         'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
-        'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust', 'reimage']
+        'selfcal_clean_threshold', 'facet_cellsize_arcsec',
+        'facet_taper_arcsec', 'facet_robust', 'reimage']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [imaging] section of the '
