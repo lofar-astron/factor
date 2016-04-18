@@ -264,7 +264,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
         Nr = 1 + int(numpy.ceil(num_tec_plots/float(Nc))) + int(numpy.ceil(num_tecamp_plots/float(Nc)))
         xsize = 16
         ysize = min(10, Nr*2.5+1)
-        fig = plt.figure(figsize=(, ysize), facecolor='w', edgecolor='w')
+        fig = plt.figure(figsize=(xsize, ysize), facecolor='w', edgecolor='w')
         if facet_name is not None:
             fig.canvas.set_window_title('Selfcal Images for {0} (scaling noise = {1} mJy/beam)'.format(facet_name, round(imagenoise*1e3, 3)))
         else:
