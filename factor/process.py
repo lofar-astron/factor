@@ -226,7 +226,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         d.is_patch and not d.is_outlier]
     if len(dirs_without_selfcal) > 0:
         log.info('Imaging the following direction(s) with nearest selcal solutions:')
-        log.info('{0}'.format([d.name for d in dirs_to_transfer]))
+        log.info('{0}'.format([d.name for d in dirs_without_selfcal]))
     for d in dirs_without_selfcal:
         # Search for nearest direction with successful selfcal
         nearest, sep = factor.directions.find_nearest(d, dirs_with_selfcal)
@@ -235,7 +235,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         d.dir_dep_parmdb_mapfile = nearest.dir_dep_parmdb_mapfile
         d.save_state()
 
-    if len(dirs_with_selfcal_to_reimage) or len(dirs_without_selfcal) > 0:
+    if len(dirs_with_selfcal_to_reimage + dirs_without_selfcal) > 0:
         cellsizes = parset['imaging_specific']['facet_cellsize_arcsec']
         tapers = parset['imaging_specific']['facet_taper_arcsec']
         robusts = parset['imaging_specific']['facet_robust']
@@ -243,7 +243,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
         for cellsize_arcsec, taper_arcsec, robust, min_uv_lambda in zip(cellsizes,
             tapers, robusts, min_uvs):
-            # Always image dirs_without_selfcal
+            # Always image directions that did not go through selfcal
             dirs_to_image = dirs_without_selfcal
 
             # Only reimage facets with selfcal imaging parameters if reimage_selfcal flag is set
