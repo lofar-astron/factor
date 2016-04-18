@@ -394,7 +394,7 @@ def get_imaging_options(parset):
     if 'reimage_selfcaled' in parset_dict:
         parset_dict['reimage_selfcaled'] = parset.getboolean('imaging',
             'reimage_selfcaled')
-    elif 'reimage' in parset._sections['direction_specific']:
+    elif 'reimage' in parset._sections['directions']:
         log.warning('Option "reimage" was given in the [directions] section of the '
             'parset but should be in the [imaging] section and should be changed to '
             '"reimage_selfcaled"')
