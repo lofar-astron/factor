@@ -121,11 +121,11 @@ class MultiDataMap(DataMap):
         """Load a data map from file `filename`. Return a DataMap instance."""
         with open(filename) as f:
             datamap = eval(f.read())
-            file_entry = datamap['file']
-            if file_entry.startswith('[') and file_entry.endswith(']'):
-                file_list = [e.strip(' \'\"') for e in file_entry.strip('[]').split(',')]
-                datamap = [{'host': datamap['host'], 'file': e, 'skip': datamap['skip']}
-                    for e in file_list]
+            for i, d in enumerate(datamap):
+                file_entry = d['file']
+                if file_entry.startswith('[') and file_entry.endswith(']'):
+                    file_list = [e.strip(' \'\"') for e in file_entry.strip('[]').split(',')]
+                    datamap[i] = {'host': d['host'], 'file': file_list, 'skip': d['skip']}
             return cls(datamap)
 
     @DataMap.data.setter
