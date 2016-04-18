@@ -260,8 +260,8 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
         for fitsimagename in fitsfiles:
             if any([fitsimagename.find(r) > 0 for r in row3_images]):
                 num_tecamp_plots += 1
-        Nc = 4
-        Nr = 1 + int(numpy.ceil(num_tec_plots/4.0)) + int(numpy.ceil(num_tecamp_plots/4.0))
+        Nc = 5
+        Nr = 1 + int(numpy.ceil(num_tec_plots/5.0)) + int(numpy.ceil(num_tecamp_plots/5.0))
         ysize = min(10, Nr*3+1)
         fig = plt.figure(figsize=(13, ysize), facecolor='w', edgecolor='w')
         if facet_name is not None:
@@ -294,7 +294,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
             if any([fitsimagename.find(r) > 0 for r in row2_images]):
                 if first_tec:
                     row_indx = 1
-                if row2_colindx % 4 == 0:
+                if row2_colindx % 5 == 0:
                     row2_colindx = 0
                     if not first_tec:
                         row_indx += 1
@@ -306,7 +306,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
                 else:
                     plot_label = None
                 row2_colindx += 1
-                subplotindx = row2_colindx + 4 * row_indx
+                subplotindx = row2_colindx + 5 * row_indx
                 for im in row2_images:
                     if im in fitsimagename:
                         if '_iter' in fitsimagename:
@@ -317,7 +317,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
             if any([fitsimagename.find(r) > 0 for r in row3_images]):
                 if first_gain:
                     row_indx = 2
-                if row3_colindx % 4 == 0:
+                if row3_colindx % 5 == 0:
                     row3_colindx = 0
                     if not first_gain:
                         row_indx += 1
@@ -329,7 +329,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
                     plot_label = None
                 ax = plt.subplot(gs[row_indx, row3_colindx])
                 row3_colindx += 1
-                subplotindx = row3_colindx + 4 * row_indx
+                subplotindx = row3_colindx + 5 * row_indx
                 for im in row3_images:
                     if im in fitsimagename:
                         if '_iter' in fitsimagename:
