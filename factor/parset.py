@@ -488,7 +488,7 @@ def get_imaging_options(parset):
     elif len(set(len_list)) == 1:
         nvals = len_list[0]
     else:
-        log.error('The options facet_cellsize_arcsec, facet_taper_arcsec, facet_robust, and'
+        log.error('The options facet_cellsize_arcsec, facet_taper_arcsec, facet_robust, and '
             'facet_min_uv_lambda must all have the same number of entires')
         sys.exit(1)
 
