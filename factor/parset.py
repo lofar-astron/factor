@@ -456,30 +456,47 @@ def get_imaging_options(parset):
     # only for making full facet images (and not for making improved models). One
     # set of images and one mosaic image will be made for each set of parameters. By
     # default, facets will be imaged using the selfcal imaging parameters above
+    len_list = []
     if 'facet_cellsize_arcsec' in parset_dict:
         val_list = parset_dict['facet_cellsize_arcsec'].strip('[]').split(',')
         val_list = [float(v) for v in val_list]
         parset_dict['facet_cellsize_arcsec'] = val_list
-    else:
-        parset_dict['facet_cellsize_arcsec'] = [parset_dict['selfcal_cellsize_arcsec']]
+        len_list.append(len(val_list))
     if 'facet_taper_arcsec' in parset_dict:
         val_list = parset_dict['facet_taper_arcsec'].strip('[]').split(',')
         val_list = [float(v) for v in val_list]
         parset_dict['facet_taper_arcsec'] = val_list
-    else:
-        parset_dict['facet_taper_arcsec'] = [0.0]
+        len_list.append(len(val_list))
     if 'facet_robust' in parset_dict:
         val_list = parset_dict['facet_robust'].strip('[]').split(',')
         val_list = [float(v) for v in val_list]
         parset_dict['facet_robust'] = val_list
-    else:
-        parset_dict['facet_robust'] = [parset_dict['selfcal_robust']]
+        len_list.append(len(val_list))
     if 'facet_min_uv_lambda' in parset_dict:
         val_list = parset_dict['facet_min_uv_lambda'].strip('[]').split(',')
         val_list = [float(v) for v in val_list]
         parset_dict['facet_min_uv_lambda'] = val_list
+        len_list.append(len(val_list))
+
+    # Check that all the above options have the same number of entries
+    if len(set(len_list)) == 0:
+        nvals = 1
+    elif len(set(len_list)) == 1:
+        nvals = len_list[0]
     else:
-        parset_dict['facet_min_uv_lambda'] = [parset_dict['selfcal_min_uv_lambda']]
+        log.error('The options facet_cellsize_arcsec, facet_taper_arcsec, facet_robust, and'
+            'facet_min_uv_lambda must all have the same number of entires')
+        sys.exit(1)
+
+    # Set defaults for any that did not have entries
+    if 'facet_cellsize_arcsec' not in parset_dict:
+        parset_dict['facet_cellsize_arcsec'] = [parset_dict['selfcal_cellsize_arcsec']] * nvals
+    if 'facet_taper_arcsec' not in parset_dict:
+        parset_dict['facet_taper_arcsec'] = [0.0] * nvals
+    if 'facet_robust' not in parset_dict:
+        parset_dict['facet_robust'] = [parset_dict['selfcal_robust']] * nvals
+    if 'facet_min_uv_lambda' not in parset_dict:
+        parset_dict['facet_min_uv_lambda'] = [parset_dict['selfcal_min_uv_lambda']] * nvals
 
    # Padding factor for WSClean images (default = 1.6)
     if 'wsclean_image_padding' in parset_dict:
