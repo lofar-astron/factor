@@ -238,6 +238,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     threshpix = float(threshpix)
     threshisl = float(threshisl)
     nsig = float(nsig)
+    threshold = 0.0
 
     if not skip_source_detection:
         if vertices_file is not None:
@@ -297,8 +298,13 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                                      atrous_jmax=atrous_jmax)
 
         if img.nisl == 0:
-            print('No islands found. Clean mask cannot be made.')
-            sys.exit(1)
+            if region_file is None or region_file != '[]':
+                print('No islands found. Clean mask cannot be made.')
+                sys.exit(1)
+            else:
+                # Continue on and use user-supplied region file
+                skip_source_detection = True
+                threshold = nsig * img.clipped_rms
 
         # Check if there are large islands preset (indicating that multi-scale
         # clean is needed)
@@ -312,7 +318,12 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     if (region_file is not None and region_file != '[]' and skip_source_detection):
         # Copy region file and return if source detection was not done
         os.system('cp {0} {1}'.format(region_file.strip('[]"'), mask_name))
-        return {'threshold_5sig': '0.0'}
+        if threshold_format == 'float':
+            return {'threshold_5sig': threshold}
+        elif threshold_format == 'str_with_units':
+            # This is done to get around the need for quotes around strings in casapy scripts
+            # 'casastr/' is removed by the generic pipeline
+            return {'threshold_5sig': 'casastr/{0}Jy'.format(threshold)}
     elif not skip_source_detection:
         img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
                          img_format=img_format, clobber=True)
