@@ -277,7 +277,7 @@ class FacetImage(Operation):
             robust != parset['imaging_specific']['selfcal_robust'] or
             taper_arcsec != 0.0 or
             min_uv_lambda != parset['imaging_specific']['selfcal_min_uv_lambda']):
-            name = 'FacetImage_c{1}r{2}t{3}u{4}'.format(round(cellsize_arcsec, 1),
+            name = 'FacetImage_c{0}r{1}t{2}u{3}'.format(round(cellsize_arcsec, 1),
                     round(robust, 2), round(taper_arcsec, 1), round(min_uv_lambda, 1))
         else:
             name = 'FacetImage'
