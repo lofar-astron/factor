@@ -305,7 +305,7 @@ class FacetImage(Operation):
         # defined in the master Operation class and as attributes of the
         # direction object)
         self.direction.set_imcal_parameters(parset, bands, cellsize_arcsec, robust,
-            taper_arcsec)
+            taper_arcsec, imging_only=True)
         ms_files = [band.files for band in self.bands]
         ms_files_single = []
         for bandfiles in ms_files:
@@ -377,7 +377,7 @@ class FacetPeelImage(Operation):
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
-        self.direction.set_imcal_parameters(parset, bands)
+        self.direction.set_imcal_parameters(parset, bands, imging_only=True)
         ms_files = [band.files for band in self.bands]
         ms_files_single = []
         for bandfiles in ms_files:

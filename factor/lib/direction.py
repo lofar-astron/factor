@@ -171,7 +171,7 @@ class Direction(object):
 
 
     def set_imcal_parameters(self, parset, bands, facet_cellsize_arcsec=None,
-        facet_robust=None, facet_taper_arcsec=None):
+        facet_robust=None, facet_taper_arcsec=None, imging_only=False):
         """
         Sets various parameters for imaging and calibration
 
@@ -187,6 +187,8 @@ class Direction(object):
             Briggs robust parameter for facet imaging
         facet_taper_arcsec : float, optional
             Taper in arcsec for facet imaging
+        imging_only : bool, optional
+            If True, set only imaging-related parameters
 
         """
         mean_freq_mhz = np.mean([b.freq for b in bands]) / 1e6
@@ -226,7 +228,7 @@ class Direction(object):
         self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,
             timestep_sec, ntimes, nbands, mean_freq_mhz, self.skymodel,
             preaverage_flux_jy, min_peak_smearing_factor, tec_block_mhz,
-            peel_flux_jy)
+            peel_flux_jy, imging_only=imging_only)
 
 
     def set_imaging_parameters(self, nbands, nbands_per_channel, nchan_per_band,
@@ -493,7 +495,7 @@ class Direction(object):
     def set_averaging_steps_and_solution_intervals(self, chan_width_hz, nchan,
         timestep_sec, ntimes_min, nbands, mean_freq_mhz, initial_skymodel=None,
         preaverage_flux_jy=0.0, min_peak_smearing_factor=0.95, tec_block_mhz=10.0,
-        peel_flux_jy=25.0):
+        peel_flux_jy=25.0, imaging_only=False):
         """
         Sets the averaging step sizes and solution intervals
 
@@ -537,6 +539,8 @@ class Direction(object):
             fit
         peel_flux_jy : float, optional
             Peel cailbrators with fluxes above this value
+        imging_only : bool, optional
+            If True, set only imaging-related parameters
 
         """
         # generate a (numpy-)array with the divisors of nchan
@@ -548,7 +552,7 @@ class Direction(object):
 
         # For selfcal, use the size of the calibrator to set the averaging
         # steps
-        if self.cal_size_deg is not None:
+        if not imaging_only and self.cal_size_deg is not None:
             # Set min allowable smearing reduction factor for bandwidth and time
             # smearing so that they are equal and their product is 0.85
             min_peak_smearing_factor_selfcal = 0.85
@@ -576,6 +580,12 @@ class Direction(object):
             self.log.debug('Using averaging steps of {0} channels and {1} time slots '
                 'for selfcal'.format(self.facetselfcal_freqstep, self.facetselfcal_timestep))
 
+            # For selfcal verify, average to 2 MHz per channel and 120 sec per time
+            # slot
+            self.verify_freqstep = max(1, min(int(round(2.0 * 1e6 / chan_width_hz)), nchan))
+            self.verify_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors - self.verify_freqstep))]
+            self.verify_timestep = max(1, int(round(120.0 / timestep_sec)))
+
         # For facet imaging, use the facet image size to set the averaging steps
         if self.facet_imsize is not None:
             # Set min allowable smearing reduction factor for bandwidth and time
@@ -602,12 +612,6 @@ class Direction(object):
             self.log.debug('Using averaging steps of {0} channels and {1} time slots '
                 'for facet imaging'.format(self.facetimage_freqstep, self.facetimage_timestep))
 
-        # For selfcal verify, average to 2 MHz per channel and 120 sec per time
-        # slot
-        self.verify_freqstep = max(1, min(int(round(2.0 * 1e6 / chan_width_hz)), nchan))
-        self.verify_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors - self.verify_freqstep))]
-        self.verify_timestep = max(1, int(round(120.0 / timestep_sec)))
-
         # Set timeSlotsPerParmUpdate to an even divisor of the number of time slots
         # to work around a bug in DPPP ApplyCal
         self.timeSlotsPerParmUpdate = 100
@@ -617,9 +621,8 @@ class Direction(object):
             while ntimes_min % self.timeSlotsPerParmUpdate:
                 self.timeSlotsPerParmUpdate += 1
 
-        # Set time intervals for selfcal solve steps. The initial skymodel is
-        # None for field-type directions, so the steps below are skipped
-        if initial_skymodel is not None:
+        # Set time intervals for selfcal solve steps
+        if not imaging_only:
             # Calculate the effective flux density. This is the one used to set the
             # intervals. It is the peak flux density adjusted to account for cases
             # in which the total flux density is larger than the peak flux density
