@@ -284,8 +284,10 @@ def get_calibration_options(parset):
     """
     if 'calibration' in parset._sections.keys():
         parset_dict = parset._sections['calibration']
+        given_options = parset.options('calibration')
     else:
         parset_dict = {}
+        given_options = []
 
     # Exit if selfcal fails for any direction (default = True). If False, processing
     # will continue and the failed direction will receive the selfcal solutions of
@@ -352,7 +354,6 @@ def get_calibration_options(parset):
         parset_dict['solve_min_uv_lambda'] = 25.0
 
     # Check for unused options
-    given_options = parset.options('calibration')
     allowed_options = ['exit_on_selfcal_failure', 'skip_selfcal_check',
         'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal',
         'tec_block_mhz', 'peel_flux_jy', 'solve_min_uv_lambda']
@@ -381,8 +382,11 @@ def get_imaging_options(parset):
     """
     if 'imaging' in parset._sections.keys():
         parset_dict = parset._sections['imaging']
+        given_options = parset.options('imaging')
     else:
         parset_dict = {}
+        given_options = []
+
 
     # Make final mosaic (default = True)
     if 'make_mosaic' in parset_dict:
@@ -511,7 +515,6 @@ def get_imaging_options(parset):
         parset_dict['wsclean_model_padding'] = 1.4
 
     # Check for unused options
-    given_options = parset.options('imaging')
     allowed_options = ['make_mosaic', 'wsclean_nbands', 'facet_imager',
         'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
         'selfcal_clean_threshold', 'facet_cellsize_arcsec',
@@ -543,8 +546,10 @@ def get_directions_options(parset):
     """
     if 'directions' in parset._sections.keys():
         parset_dict = parset._sections['directions']
+        given_options = parset.options('directions')
     else:
         parset_dict = {}
+        given_options = []
 
     # Check whether any sources from the initial subtract sky model fall on facet
     # edges. If any are found, the facet regions are adjusted to avoid them (default
@@ -722,7 +727,6 @@ def get_directions_options(parset):
         parset_dict['transfer_radius_deg'] = 0.0
 
     # Check for unused options
-    given_options = parset.options('directions')
     allowed_options = ['directions_file', 'max_radius_deg',
         'flux_min_for_merging_jy', 'flux_min_jy', 'size_max_arcmin',
         'separation_max_arcmin', 'max_num', 'ndir_max',
@@ -755,8 +759,10 @@ def get_cluster_options(parset):
     """
     if 'cluster' in parset._sections.keys():
         parset_dict = parset._sections['cluster']
+        given_options = parset.options('cluster')
     else:
         parset_dict = {}
+        given_options = []
 
     # Paths to the LOFAR software
     if 'lofarroot' not in parset_dict:
@@ -846,7 +852,6 @@ def get_cluster_options(parset):
         sys.exit(1)
 
     # Check for unused options
-    given_options = parset.options('cluster')
     allowed_options = ['ncpu', 'fmem', 'wsclean_fmem', 'ndir_per_node',
         'nimg_per_node', 'clusterdesc_file', 'cluster_type', 'dir_local',
         'node_list', 'lofarroot', 'lofarpythonpath']
