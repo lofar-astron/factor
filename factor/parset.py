@@ -355,7 +355,7 @@ def get_calibration_options(parset):
     given_options = parset.options('calibration')
     allowed_options = ['exit_on_selfcal_failure', 'skip_selfcal_check',
         'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal',
-        'tec_block_mhz', 'peel_flux_jy', 'min_uv_lambda']
+        'tec_block_mhz', 'peel_flux_jy', 'solve_min_uv_lambda']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [calibration] section of the '
@@ -499,7 +499,8 @@ def get_imaging_options(parset):
         'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
         'selfcal_clean_threshold', 'facet_cellsize_arcsec',
         'facet_taper_arcsec', 'facet_robust', 'reimage_selfcaled',
-        'wsclean_image_padding', 'wsclean_model_padding']
+        'wsclean_image_padding', 'wsclean_model_padding', 'selfcal_min_uv_lambda',
+        'facet_min_uv_lambda']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [imaging] section of the '
