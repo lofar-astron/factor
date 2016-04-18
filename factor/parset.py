@@ -351,7 +351,7 @@ def get_calibration_options(parset):
     if 'solve_min_uv_lambda' in parset_dict:
         parset_dict['solve_min_uv_lambda'] = parset.getfloat('calibration', 'solve_min_uv_lambda')
     else:
-        parset_dict['solve_min_uv_lambda'] = 25.0
+        parset_dict['solve_min_uv_lambda'] = 80.0
 
     # Check for unused options
     allowed_options = ['exit_on_selfcal_failure', 'skip_selfcal_check',
