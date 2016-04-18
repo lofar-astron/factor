@@ -191,11 +191,6 @@ class FacetPeel(OutlierPeel):
         # Set the pipeline parset to use (the outlierpeel one)
         self.pipeline_parset_template = 'outlierpeel_pipeline.parset'
 
-        # Define extra parameters needed for this operation (beyond those
-        # defined in the master Operation class and as attributes of the
-        # direction object)
-        self.direction.set_imcal_parameters(parset, bands)
-
 
 class FacetSub(Operation):
     """
@@ -278,11 +273,19 @@ class FacetImage(Operation):
 
     """
     def __init__(self, parset, bands, direction, cellsize_arcsec, robust,
-        taper_arcsec, name='FacetImage'):
-        fullname = 'FacetImage_c{0}_r{1}_t{2}'.format(round(cellsize_arcsec,1),
+        taper_arcsec):
+        # Set name from the facet imaging parameters. If the parameters are all
+        # the same as those used for selfcal, just use 'FacetImage'; otherwise,
+        # append the parameters
+        if (cellsize_arcsec != parset_dict['imaging_specific']['selfcal_cellsize_arcsec'] or
+            robust != parset_dict['imaging_specific']['selfcal_robust'] or
+            taper_arcsec != 0.0):
+            name = 'FacetImage_c{1}r{2}t{3}'.format(round(cellsize_arcsec,1),
                     round(robust,2), round(taper_arcsec,1))
+        else:
+            name = 'FacetImage'
         super(FacetImage, self).__init__(parset, bands, direction,
-            name=fullname)
+            name=name)
 
         # Set imager infix for pipeline parset names
         if self.parset['imaging_specific']['facet_imager'].lower() == 'casa':
@@ -351,7 +354,7 @@ class FacetImage(Operation):
         self.direction.cleanup()
 
 
-class FacetPeelImage(FacetImage):
+class FacetPeelImage(Operation):
     """
     Operation to make the full image of a facet after peeling
 
@@ -374,7 +377,21 @@ class FacetPeelImage(FacetImage):
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
-        self.direction.set_imcal_parameters(parset, bands,)
+        self.direction.set_imcal_parameters(parset, bands)
+        ms_files = [band.files for band in self.bands]
+        ms_files_single = []
+        for bandfiles in ms_files:
+            for filename in bandfiles:
+                ms_files_single.append(filename)
+        dir_indep_parmDBs = []
+        for band in self.bands:
+            for parmdb in band.dirindparmdbs:
+                dir_indep_parmDBs.append(parmdb)
+        skymodels = [band.skymodel_dirindep for band in self.bands]
+        self.parms_dict.update({'ms_files_single': ms_files_single,
+                                'ms_files_grouped' : str(ms_files),
+                                'skymodels': skymodels,
+                                'dir_indep_parmDBs': dir_indep_parmDBs})
 
 
     def finalize(self):

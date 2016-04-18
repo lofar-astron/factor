@@ -193,7 +193,8 @@ class MultiDataProduct(DataProduct):
     def __repr__(self):
         """Represent an instance as a Python dict"""
         return (
-            "{{'host': '{0}', 'file': {1}, 'skip': {2}}}".format(self.host, self.file, str(self.skip))
+            "{{'host': '{0}', 'file': '{1}', 'skip': {2}}}".format(self.host,
+                '[{}]'.format(','.join(self.file)), str(self.skip))
         )
 
     def __str__(self):
@@ -237,6 +238,21 @@ class MultiDataMap(DataMap):
     Class representing a specialization of data-map, a collection of data
     products located on the same node, skippable as a set and individually
     """
+    def __init__(self, data=list(), iterator=iter):
+        super(MultiDataMap, self).__init__(data, iterator)
+
+    @classmethod
+    def load(cls, filename):
+        """Load a data map from file `filename`. Return a DataMap instance."""
+        with open(filename) as f:
+            datamap = eval(f.read())
+            file_entry = datamap['file']
+            if file_entry.startswith('[') and file_entry.endswith(']'):
+                file_list = [e.strip(' \'\"') for e in file_entry.strip('[]').split(',')]
+                datamap = [{'host': datamap['host'], 'file': e, 'skip': datamap['skip']}
+                    for e in file_list]
+            return cls(datamap)
+
     @DataMap.data.setter
     def data(self, data):
         if isinstance(data, DataMap):

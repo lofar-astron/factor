@@ -39,7 +39,6 @@ class OutlierPeel(Operation):
             for parmdb in band.dirindparmdbs:
                 dir_indep_parmDBs.append(parmdb)
         skymodels = [band.skymodel_dirindep for band in self.bands]
-
         self.parms_dict.update({'ms_files_single': ms_files_single,
                                 'ms_files_grouped' : str(ms_files),
                                 'skymodels': skymodels,

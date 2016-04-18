@@ -21,16 +21,18 @@ class FieldMosaic(Operation):
     """
     def __init__(self, parset, bands, direction, cellsize_arcsec, robust,
         taper_arcsec):
-        fullname = 'FieldMosaic_c{0}_r{1}_t{2}'.format(round(cellsize_arcsec,1),
+        # Set name from the facet imaging parameters. If the parameters are all
+        # the same as those used for selfcal, just use 'FieldMosaic'; otherwise,
+        # append the parameters
+        if (cellsize_arcsec != parset_dict['imaging_specific']['selfcal_cellsize_arcsec'] or
+            robust != parset_dict['imaging_specific']['selfcal_robust'] or
+            taper_arcsec != 0.0):
+            name = 'FieldMosaic_c{0}r{1}t{2}'.format(round(cellsize_arcsec,1),
                     round(robust,2), round(taper_arcsec,1))
+        else:
+            name = 'FieldMosaic'
         super(MakeMosaic, self).__init__(parset, bands, direction,
-            name=fullname)
-
-        input_files = [b.files for b in self.bands]
-        input_files_single = []
-        for bandfiles in input_files:
-            for filename in bandfiles:
-                input_files_single.append(filename)
+            name=name)
 
         # Set the pipeline parset to use
         self.pipeline_parset_template = 'fieldmosaic_pipeline.parset'.format(infix)
@@ -38,6 +40,11 @@ class FieldMosaic(Operation):
         # Define extra parameters needed for this operation (beyond those
         # defined in the master Operation class and as attributes of the
         # direction object)
+        input_files = [b.files for b in self.bands]
+        input_files_single = []
+        for bandfiles in input_files:
+            for filename in bandfiles:
+                input_files_single.append(filename)
         self.parms_dict.update({'ms_files_single': input_files_single,
                                 'ms_files_grouped' : str(input_files) })
 
