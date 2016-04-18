@@ -300,7 +300,7 @@ class FacetImage(Operation):
 
         # Define extra parameters needed for this operation
         self.direction.set_imcal_parameters(parset, bands, cellsize_arcsec, robust,
-            taper_arcsec, facet_min_uv_lambda, imging_only=True)
+            taper_arcsec, min_uv_lambda, imging_only=True)
         ms_files = [band.files for band in self.bands]
         ms_files_single = []
         for bandfiles in ms_files:
