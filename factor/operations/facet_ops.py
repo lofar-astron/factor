@@ -277,8 +277,8 @@ class FacetImage(Operation):
         # Set name from the facet imaging parameters. If the parameters are all
         # the same as those used for selfcal, just use 'FacetImage'; otherwise,
         # append the parameters
-        if (cellsize_arcsec != parset_dict['imaging_specific']['selfcal_cellsize_arcsec'] or
-            robust != parset_dict['imaging_specific']['selfcal_robust'] or
+        if (cellsize_arcsec != parset['imaging_specific']['selfcal_cellsize_arcsec'] or
+            robust != parset['imaging_specific']['selfcal_robust'] or
             taper_arcsec != 0.0):
             name = 'FacetImage_c{1}r{2}t{3}'.format(round(cellsize_arcsec,1),
                     round(robust,2), round(taper_arcsec,1))
