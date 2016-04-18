@@ -172,7 +172,7 @@ class Direction(object):
 
     def set_imcal_parameters(self, parset, bands, facet_cellsize_arcsec=None,
         facet_robust=None, facet_taper_arcsec=None, facet_min_uv_lambda=None,
-        imging_only=False):
+        imaging_only=False):
         """
         Sets various parameters for imaging and calibration
 
@@ -188,7 +188,7 @@ class Direction(object):
             Briggs robust parameter for facet imaging
         facet_taper_arcsec : float, optional
             Taper in arcsec for facet imaging
-        imging_only : bool, optional
+        imaging_only : bool, optional
             If True, set only imaging-related parameters
 
         """
@@ -235,7 +235,7 @@ class Direction(object):
         self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,
             timestep_sec, ntimes, nbands, mean_freq_mhz, self.skymodel,
             preaverage_flux_jy, min_peak_smearing_factor, tec_block_mhz,
-            peel_flux_jy, imging_only=imging_only)
+            peel_flux_jy, imaging_only=imaging_only)
 
 
     def set_imaging_parameters(self, nbands, nbands_per_channel, nchan_per_band,
@@ -546,7 +546,7 @@ class Direction(object):
             fit
         peel_flux_jy : float, optional
             Peel cailbrators with fluxes above this value
-        imging_only : bool, optional
+        imaging_only : bool, optional
             If True, set only imaging-related parameters
 
         """
