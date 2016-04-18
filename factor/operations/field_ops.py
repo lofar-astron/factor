@@ -26,9 +26,10 @@ class FieldMosaic(Operation):
         # append the parameters
         if (cellsize_arcsec != parset['imaging_specific']['selfcal_cellsize_arcsec'] or
             robust != parset['imaging_specific']['selfcal_robust'] or
-            taper_arcsec != 0.0):
-            name = 'FieldMosaic_c{0}r{1}t{2}'.format(round(cellsize_arcsec,1),
-                    round(robust,2), round(taper_arcsec,1))
+            taper_arcsec != 0.0 or
+            min_uv_lambda != parset['imaging_specific']['selfcal_min_uv_lambda']):
+            name = 'FieldMosaic_c{1}r{2}t{3}u{4}'.format(round(cellsize_arcsec, 1),
+                    round(robust, 2), round(taper_arcsec, 1), round(min_uv_lambda, 1))
         else:
             name = 'FieldMosaic'
         super(MakeMosaic, self).__init__(parset, bands, direction,
@@ -37,9 +38,7 @@ class FieldMosaic(Operation):
         # Set the pipeline parset to use
         self.pipeline_parset_template = 'fieldmosaic_pipeline.parset'.format(infix)
 
-        # Define extra parameters needed for this operation (beyond those
-        # defined in the master Operation class and as attributes of the
-        # direction object)
+        # Define extra parameters needed for this operation
         input_files = [b.files for b in self.bands]
         input_files_single = []
         for bandfiles in input_files:

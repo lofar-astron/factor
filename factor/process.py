@@ -239,8 +239,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         cellsizes = parset['imaging_specific']['facet_cellsize_arcsec']
         tapers = parset['imaging_specific']['facet_taper_arcsec']
         robusts = parset['imaging_specific']['facet_robust']
+        min_uvs = parset['imaging_specific']['facet_min_uv_lambda']
 
-        for cellsize_arcsec, taper_arcsec, robust in zip(cellsizes, tapers, robusts):
+        for cellsize_arcsec, taper_arcsec, robust, min_uv_lambda in zip(cellsizes,
+            tapers, robusts, min_uvs):
             # Always image dirs_without_selfcal
             dirs_to_image = dirs_without_selfcal
 
@@ -290,7 +292,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
                 # Do facet imaging
                 ops = [FacetImage(parset, bands, d, cellsize_arcsec, robust,
-                    taper_arcsec) for d in dir_group]
+                    taper_arcsec, min_uv_lambda) for d in dir_group]
                 scheduler.run(ops)
 
             # Mosaic the final facet images together
@@ -328,7 +330,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
                 # Do mosaicking
                 op = FieldMosaic(parset, bands, field, cellsize_arcsec, robust,
-                        taper_arcsec)
+                        taper_arcsec, min_uv_lambda)
                 scheduler.run(op)
 
     log.info("Factor has finished :)")

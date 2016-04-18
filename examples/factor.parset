@@ -70,7 +70,7 @@ dir_ms = /data/bands
 # peel_flux_Jy = 30.0
 
 # Minimum uv distance in lambda for calibration (default = 80)
-# min_uv_lambda = 80.0
+# solve_min_uv_lambda = 80.0
 
 
 [imaging]

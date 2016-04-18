@@ -62,9 +62,7 @@ class FacetSelfcal(Operation):
             else:
                 self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
 
-        # Define extra parameters needed for this operation (beyond those
-        # defined in the master Operation class and as attributes of the
-        # direction object)
+        # Define extra parameters needed for this operation
         self.direction.set_imcal_parameters(parset, bands)
         ms_files = [band.files for band in self.bands]
         ms_files_single = []
@@ -225,9 +223,7 @@ class FacetSubReset(Operation):
         # Set the pipeline parset to use
         self.pipeline_parset_template = 'facetsubreset{0}_pipeline.parset'.format(infix)
 
-        # Define extra parameters needed for this operation (beyond those
-        # defined in the master Operation class and as attributes of the
-        # direction object)
+        # Define extra parameters needed for this operation
         self.direction.set_imcal_parameters(parset, bands)
         dir_indep_parmDBs = []
         for band in self.bands:
@@ -273,15 +269,16 @@ class FacetImage(Operation):
 
     """
     def __init__(self, parset, bands, direction, cellsize_arcsec, robust,
-        taper_arcsec):
+        taper_arcsec, min_uv_lambda):
         # Set name from the facet imaging parameters. If the parameters are all
         # the same as those used for selfcal, just use 'FacetImage'; otherwise,
         # append the parameters
         if (cellsize_arcsec != parset['imaging_specific']['selfcal_cellsize_arcsec'] or
             robust != parset['imaging_specific']['selfcal_robust'] or
-            taper_arcsec != 0.0):
-            name = 'FacetImage_c{1}r{2}t{3}'.format(round(cellsize_arcsec,1),
-                    round(robust,2), round(taper_arcsec,1))
+            taper_arcsec != 0.0 or
+            min_uv_lambda != parset['imaging_specific']['selfcal_min_uv_lambda']):
+            name = 'FacetImage_c{1}r{2}t{3}u{4}'.format(round(cellsize_arcsec, 1),
+                    round(robust, 2), round(taper_arcsec, 1), round(min_uv_lambda, 1))
         else:
             name = 'FacetImage'
         super(FacetImage, self).__init__(parset, bands, direction,
@@ -301,11 +298,9 @@ class FacetImage(Operation):
             # Set parset template to facet model-image parset
             self.pipeline_parset_template = 'facetimage_imgmodel{}_pipeline.parset'.format(infix)
 
-        # Define extra parameters needed for this operation (beyond those
-        # defined in the master Operation class and as attributes of the
-        # direction object)
+        # Define extra parameters needed for this operation
         self.direction.set_imcal_parameters(parset, bands, cellsize_arcsec, robust,
-            taper_arcsec, imging_only=True)
+            taper_arcsec, facet_min_uv_lambda, imging_only=True)
         ms_files = [band.files for band in self.bands]
         ms_files_single = []
         for bandfiles in ms_files:
@@ -374,9 +369,7 @@ class FacetPeelImage(Operation):
         # Set the pipeline parset to use
         self.pipeline_parset_template = 'facetimage_skymodel{0}_pipeline.parset'.format(infix)
 
-        # Define extra parameters needed for this operation (beyond those
-        # defined in the master Operation class and as attributes of the
-        # direction object)
+        # Define extra parameters needed for this operation
         self.direction.set_imcal_parameters(parset, bands, imging_only=True)
         ms_files = [band.files for band in self.bands]
         ms_files_single = []

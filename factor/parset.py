@@ -346,10 +346,10 @@ def get_calibration_options(parset):
         parset_dict['peel_flux_jy'] = 25.0
 
     # Minimum uv distance in lambda for calibration (default = 80)
-    if 'min_uv_lambda' in parset_dict:
-        parset_dict['min_uv_lambda'] = parset.getfloat('calibration', 'min_uv_lambda')
+    if 'solve_min_uv_lambda' in parset_dict:
+        parset_dict['solve_min_uv_lambda'] = parset.getfloat('calibration', 'solve_min_uv_lambda')
     else:
-        parset_dict['min_uv_lambda'] = 25.0
+        parset_dict['solve_min_uv_lambda'] = 25.0
 
     # Check for unused options
     given_options = parset.options('calibration')
@@ -441,7 +441,7 @@ def get_imaging_options(parset):
     if 'selfcal_min_uv_lambda' in parset_dict:
         parset_dict['selfcal_min_uv_lambda'] = parset.getfloat('imaging', 'selfcal_min_uv_lambda')
     else:
-        parset_dict['selfcal_min_uv_lambda'] = -0.25
+        parset_dict['selfcal_min_uv_lambda'] = 80.0
 
     # Use a clean threshold during selfcal imaging (default = False). If False,
     # clean will always stop at 1000 iterations. If True, clean will go to 1 sigma

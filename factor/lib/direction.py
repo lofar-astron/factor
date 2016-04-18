@@ -171,7 +171,8 @@ class Direction(object):
 
 
     def set_imcal_parameters(self, parset, bands, facet_cellsize_arcsec=None,
-        facet_robust=None, facet_taper_arcsec=None, imging_only=False):
+        facet_robust=None, facet_taper_arcsec=None, facet_min_uv_lambda=None,
+        imging_only=False):
         """
         Sets various parameters for imaging and calibration
 
@@ -210,6 +211,8 @@ class Direction(object):
         peel_flux_jy = parset['calibration_specific']['peel_flux_jy']
 
         self.robust_selfcal = parset['imaging_specific']['selfcal_robust']
+        self.solve_min_uv_lambda = parset['calibration_specific']['solve_min_uv_lambda']
+        self.selfcal_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
         self.use_selfcal_clean_threshold = parset['imaging_specific']['selfcal_clean_threshold']
 
         if facet_cellsize_arcsec is None:
@@ -223,6 +226,10 @@ class Direction(object):
         if facet_taper_arcsec is None:
             facet_taper_arcsec = 0.0
         self.taper_facet_arcsec = facet_taper_arcsec
+
+        if facet_min_uv_lambda is None:
+            facet_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
+        self.facet_min_uv_lambda = facet_min_uv_lambda
 
         self.set_imaging_parameters(nbands, nbands_per_channel, nchan, padding)
         self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,

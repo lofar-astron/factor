@@ -18,5 +18,4 @@ Step.solve.Solve.Options.MaxIter          = 100
 Step.solve.Solve.Options.LMFactor         = 1.0
 Step.solve.Solve.Options.BalancedEqs      = F
 Step.solve.Solve.Options.UseSVD           = T
-Step.solve.Solve.UVRange                  = [80]
 Step.solve.Solve.Mode                     = COMPLEX
