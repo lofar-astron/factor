@@ -219,38 +219,57 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         sys.exit(1)
 
     # (Re)image facets for each set of cellsize, robust, and taper settings
-    dirs_to_image = [d for d in directions if d.make_final_image and
-        d.selfcal_ok and not d.is_patch and not d.is_outlier]
-    if len(dirs_to_image) > 0:
-        log.info('Reimaging the following direction(s):')
-        log.info('{0}'.format([d.name for d in dirs_to_image]))
-
-    # Add directions without selfcal to those that will be imaged
-    dirs_to_transfer = [d for d in directions if not d.selfcal_ok and not
+    dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
+    dirs_with_selfcal_to_reimage = [d for d in dirs_with_selfcal if not d.is_patch
+        and not d.is_outlier]
+    dirs_without_selfcal = [d for d in directions if not d.selfcal_ok and not
         d.is_patch and not d.is_outlier]
-    if len(dirs_to_transfer) > 0:
+    if len(dirs_without_selfcal) > 0:
         log.info('Imaging the following direction(s) with nearest selcal solutions:')
         log.info('{0}'.format([d.name for d in dirs_to_transfer]))
-    dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
-    for d in dirs_to_transfer:
+    for d in dirs_without_selfcal:
         # Search for nearest direction with successful selfcal
         nearest, sep = factor.directions.find_nearest(d, dirs_with_selfcal)
         log.debug('Using solutions from direction {0} for direction {1}.'.format(
             nearest.name, d.name))
         d.dir_dep_parmdb_mapfile = nearest.dir_dep_parmdb_mapfile
         d.save_state()
-    dirs_to_image.extend(dirs_to_transfer)
 
-    if len(dirs_to_image) > 0:
+    if len(dirs_with_selfcal_to_reimage) or len(dirs_without_selfcal) > 0:
         cellsizes = parset['imaging_specific']['facet_cellsize_arcsec']
         tapers = parset['imaging_specific']['facet_taper_arcsec']
         robusts = parset['imaging_specific']['facet_robust']
+
         for cellsize_arcsec, taper_arcsec, robust in zip(cellsizes, tapers, robusts):
+            # Always image dirs_without_selfcal
+            dirs_to_image = dirs_without_selfcal
+
+            # Only reimage facets with selfcal imaging parameters if reimage_selfcal flag is set
+            if (cellsize_arcsec == parset['imaging_specific']['selfcal_cellsize_arcsec'] and
+                robust == parset['imaging_specific']['selfcal_robust'] and
+                taper_arcsec == 0.0):
+                if parset['imaging_specific']['reimage_selfcaled']:
+                    dirs_to_image += dirs_with_selfcal_to_reimage
+            else:
+                dirs_to_image += dirs_with_selfcal_to_reimage
+
+            if len(dirs_to_image) > 0:
+                log.info('Imaging with cellsize = {0} arcsec, robust = {1}, '
+                    'taper = {2} arcsec'.format(cellsize_arcsec, robust, taper_arcsec))
+                log.info('Imaging the following direction(s):')
+                log.info('{0}'.format([d.name for d in dirs_to_reimage]))
+
             # Set up reset of any directions that need it
             directions_reset = [d for d in dirs_to_image if d.do_reset]
             for d in directions_reset:
-                d.reset_state('facetimage_c{0}_r{1}_t{2}'.format(round(cellsize_arcsec,1),
-                    round(robust,2), round(taper_arcsec,1)))
+                if (cellsize_arcsec != parset['imaging_specific']['selfcal_cellsize_arcsec'] or
+                    robust != parset['imaging_specific']['selfcal_robust'] or
+                    taper_arcsec != 0.0):
+                    name = 'facetimage_c{1}r{2}t{3}'.format(round(cellsize_arcsec,1),
+                            round(robust,2), round(taper_arcsec,1))
+                else:
+                    name = 'facetimage'
+                d.reset_state(name)
 
             # Group directions. This is done to ensure that multiple directions
             # aren't competing for the same resources
@@ -274,37 +293,43 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     taper_arcsec) for d in dir_group]
                 scheduler.run(ops)
 
-        # Mosaic the final facet images together
-        if parset['imaging_specific']['make_mosaic']:
-            # Make direction object for the field and load previous state (if any)
-            field = Direction('field', bands[0].ra, bands[0].dec,
-                factor_working_dir=parset['dir_working'])
-            field.load_state()
+            # Mosaic the final facet images together
+            if parset['imaging_specific']['make_mosaic']:
+                # Make direction object for the field and load previous state (if any)
+                field = Direction('field', bands[0].ra, bands[0].dec,
+                    factor_working_dir=parset['dir_working'])
+                field.load_state()
 
-            # Reset the field direction if specified
-            if 'field' in reset_directions:
-                field.reset_state('fieldmosaic')
+                # Reset the field direction if specified
+                if 'field' in reset_directions:
+                    if (cellsize_arcsec != parset['imaging_specific']['selfcal_cellsize_arcsec'] or
+                        robust != parset['imaging_specific']['selfcal_robust'] or
+                        taper_arcsec != 0.0):
+                        name = 'fieldmosaic_c{1}r{2}t{3}'.format(round(cellsize_arcsec,1),
+                                round(robust,2), round(taper_arcsec,1))
+                    else:
+                        field.reset_state('fieldmosaic')
 
-            field.facet_image_filenames = []
-            field.facet_vertices_filenames = []
-            for d in directions:
-                if not d.is_patch:
-                    facet_image = DataMap.load(d.facet_image_mapfile)[0].file
-                    field.facet_image_filenames.append(facet_image)
-                    field.facet_vertices_filenames.append(d.save_file)
+                field.facet_image_filenames = []
+                field.facet_vertices_filenames = []
+                for d in directions:
+                    if not d.is_patch:
+                        facet_image = DataMap.load(d.facet_image_mapfile)[0].file
+                        field.facet_image_filenames.append(facet_image)
+                        field.facet_vertices_filenames.append(d.save_file)
 
-            # Combine the nodes and cores for the mosaic operation
-            field = factor.cluster.combine_nodes([field],
-                parset['cluster_specific']['node_list'],
-                parset['cluster_specific']['nimg_per_node'],
-                parset['cluster_specific']['ncpu'],
-                parset['cluster_specific']['wsclean_fmem'],
-                len(bands))[0]
+                # Combine the nodes and cores for the mosaic operation
+                field = factor.cluster.combine_nodes([field],
+                    parset['cluster_specific']['node_list'],
+                    parset['cluster_specific']['nimg_per_node'],
+                    parset['cluster_specific']['ncpu'],
+                    parset['cluster_specific']['wsclean_fmem'],
+                    len(bands))[0]
 
-            # Do mosaicking
-            op = FieldMosaic(parset, bands, field, cellsize_arcsec, robust,
-                    taper_arcsec)
-            scheduler.run(op)
+                # Do mosaicking
+                op = FieldMosaic(parset, bands, field, cellsize_arcsec, robust,
+                        taper_arcsec)
+                scheduler.run(op)
 
     log.info("Factor has finished :)")
 
@@ -580,9 +605,6 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
         # center)
         direction.field_ra = bands[0].ra
         direction.field_dec = bands[0].dec
-
-        # Set re-image flag
-        direction.make_final_image = parset['imaging_specific']['reimage']
 
         # Reset state if specified
         if direction.name in reset_directions:

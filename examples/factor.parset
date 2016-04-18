@@ -69,13 +69,16 @@ dir_ms = /data/bands
 # peeled
 # peel_flux_Jy = 30.0
 
+# Minimum uv distance in lambda for calibration (default = 80)
+# min_uv_lambda = 80.0
+
 
 [imaging]
 # Make final mosaic (default = True)
 # make_mosaic = True
 
-# Re-image all directions for which selfcal was successful (default = False)
-# reimage = False
+# Re-image all directions for which selfcal was successful (default = True)
+# reimage_selfcaled = True
 
 # Padding factor for WSClean images (default = 1.6)
 # wsclean_image_padding = 1.6
@@ -99,25 +102,28 @@ dir_ms = /data/bands
 # Wide-band clean is activated when there are more than 5 bands
 # wsclean_nbands = 5
 
-# Selfcal imaging parameters: pixel size in arcsec (default = 1.5) and Briggs
-# robust parameter (default = -0.25). These settings apply both to selfcal
-# images and to the full facet image used to make the improved facet model that
-# is subtracted from the data
+# Selfcal imaging parameters: pixel size in arcsec (default = 1.5), Briggs
+# robust parameter (default = -0.25), and minimum uv distance in lambda (default
+# = 80). These settings apply both to selfcal images and to the full facet image
+# used to make the improved facet model that is subtracted from the data
 # selfcal_cellsize_arcsec = 1.5
 # selfcal_robust = -0.25
+# selfcal_min_uv_lambda = 80.0
+
+# Facet imaging parameters: pixel size in arcsec, Briggs robust parameter, uv
+# taper in arcsec, and minimum uv distance in lambda. These parameters are used
+# only for making full facet images (and not for making improved models). One
+# set of images and one mosaic image will be made for each set of parameters. By
+# default, facets will be imaged using the selfcal imaging parameters above
+# facet_cellsize_arcsec = [1.5, 15.0]
+# facet_robust = [-0.25, 0.0]
+# facet_taper_arcsec = [0.0, 45.0]
+# facet_min_uv_lambda = [80.0, 160.0]
 
 # Use a clean threshold during selfcal imaging (default = False). If False,
 # clean will always stop at 1000 iterations. If True, clean will go to 1 sigma
 # noise level
 # selfcal_clean_threshold = False
-
-# Facet imaging parameters. These parameters are used only for making full facet
-# images (and not for making improved models). One set of images and one mosaic
-# image will be made for each set of parameters. By default, facets will be
-# imaged using the selfcal settings above
-# facet_cellsize_arcsec = [1.5, 15.0]
-# facet_taper_arcsec = [0.0, 45.0]
-# facet_robust = [-0.25, 0.0]
 
 
 [directions]

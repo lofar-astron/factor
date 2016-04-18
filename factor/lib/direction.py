@@ -892,13 +892,13 @@ class Direction(object):
         # Remove operation name from lists of started and completed operations
         # and delete the results directories
         for op_name in op_names_reset:
-            while op_name in self.completed_operations:
-                self.completed_operations.remove(op_name)
-            while op_name in self.started_operations:
-                self.started_operations.remove(op_name)
+            while op_name.lower() in self.completed_operations:
+                self.completed_operations.remove(op_name.lower())
+            while op_name.lower() in self.started_operations:
+                self.started_operations.remove(op_name.lower())
 
             # Delete results directory for this operation
-            op_dir = os.path.join(self.working_dir, 'results', op_name, self.name)
+            op_dir = os.path.join(self.working_dir, 'results', op_name.lower(), self.name)
             if os.path.exists(op_dir):
                 os.system('rm -rf {0}'.format(op_dir))
 

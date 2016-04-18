@@ -345,11 +345,17 @@ def get_calibration_options(parset):
     else:
         parset_dict['peel_flux_jy'] = 25.0
 
+    # Minimum uv distance in lambda for calibration (default = 80)
+    if 'min_uv_lambda' in parset_dict:
+        parset_dict['min_uv_lambda'] = parset.getfloat('calibration', 'min_uv_lambda')
+    else:
+        parset_dict['min_uv_lambda'] = 25.0
+
     # Check for unused options
     given_options = parset.options('calibration')
     allowed_options = ['exit_on_selfcal_failure', 'skip_selfcal_check',
         'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal',
-        'tec_block_mhz', 'peel_flux_jy']
+        'tec_block_mhz', 'peel_flux_jy', 'min_uv_lambda']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [calibration] section of the '
@@ -384,17 +390,18 @@ def get_imaging_options(parset):
     else:
         parset_dict['make_mosaic'] = True
 
-    # Re-image directions for which selfcal was successful (default = False)
-    if 'reimage' in parset_dict:
-        parset_dict['reimage'] = parset.getboolean('imaging',
-            'reimage')
+    # Re-image directions for which selfcal was successful (default = True)
+    if 'reimage_selfcaled' in parset_dict:
+        parset_dict['reimage_selfcaled'] = parset.getboolean('imaging',
+            'reimage_selfcaled')
     elif 'reimage' in parset._sections['direction_specific']:
         log.warning('Option "reimage" was given in the [directions] section of the '
-            'parset but should be in the [imaging] section')
-        parset_dict['reimage'] = parset.getboolean('directions',
+            'parset but should be in the [imaging] section and should be changed to '
+            '"reimage_selfcaled"')
+        parset_dict['reimage_selfcaled'] = parset.getboolean('directions',
             'reimage')
     else:
-        parset_dict['reimage'] = False
+        parset_dict['reimage_selfcaled'] = True
 
     # Max number of bands per WSClean image when wide-band clean is used (default =
     # 5). Smaller values produce better results but require longer run times.
@@ -419,9 +426,10 @@ def get_imaging_options(parset):
     else:
         parset_dict['max_peak_smearing'] = 0.15
 
-
-    # Selfcal imaging parameters: pixel size in arcsec (default = 1.5) and Briggs
-    # robust parameter (default = -0.25)
+    # Selfcal imaging parameters: pixel size in arcsec (default = 1.5), Briggs
+    # robust parameter (default = -0.25), and minimum uv distance in lambda (default
+    # = 80). These settings apply both to selfcal images and to the full facet image
+    # used to make the improved facet model that is subtracted from the data
     if 'selfcal_cellsize_arcsec' in parset_dict:
         parset_dict['selfcal_cellsize_arcsec'] = parset.getfloat('imaging', 'selfcal_cellsize_arcsec')
     else:
@@ -430,6 +438,10 @@ def get_imaging_options(parset):
         parset_dict['selfcal_robust'] = parset.getfloat('imaging', 'selfcal_robust')
     else:
         parset_dict['selfcal_robust'] = -0.25
+    if 'selfcal_min_uv_lambda' in parset_dict:
+        parset_dict['selfcal_min_uv_lambda'] = parset.getfloat('imaging', 'selfcal_min_uv_lambda')
+    else:
+        parset_dict['selfcal_min_uv_lambda'] = -0.25
 
     # Use a clean threshold during selfcal imaging (default = False). If False,
     # clean will always stop at 1000 iterations. If True, clean will go to 1 sigma
@@ -439,10 +451,11 @@ def get_imaging_options(parset):
     else:
         parset_dict['selfcal_clean_threshold'] = False
 
-    # Facet imaging parameters. These parameters are used only for making full facet
-    # images (and not for making improved models). One set of images and one mosaic
-    # image will be made for each set of parameters. By default, facets will be
-    # imaged using the selfcal settings above
+    # Facet imaging parameters: pixel size in arcsec, Briggs robust parameter, uv
+    # taper in arcsec, and minimum uv distance in lambda. These parameters are used
+    # only for making full facet images (and not for making improved models). One
+    # set of images and one mosaic image will be made for each set of parameters. By
+    # default, facets will be imaged using the selfcal imaging parameters above
     if 'facet_cellsize_arcsec' in parset_dict:
         val_list = parset_dict['facet_cellsize_arcsec'].strip('[]').split(',')
         val_list = [float(v) for v in val_list]
@@ -461,6 +474,12 @@ def get_imaging_options(parset):
         parset_dict['facet_robust'] = val_list
     else:
         parset_dict['facet_robust'] = [parset_dict['selfcal_robust']]
+    if 'facet_min_uv_lambda' in parset_dict:
+        val_list = parset_dict['facet_min_uv_lambda'].strip('[]').split(',')
+        val_list = [float(v) for v in val_list]
+        parset_dict['facet_min_uv_lambda'] = val_list
+    else:
+        parset_dict['facet_min_uv_lambda'] = [parset_dict['selfcal_min_uv_lambda']]
 
    # Padding factor for WSClean images (default = 1.6)
     if 'wsclean_image_padding' in parset_dict:
@@ -479,7 +498,7 @@ def get_imaging_options(parset):
     allowed_options = ['make_mosaic', 'wsclean_nbands', 'facet_imager',
         'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
         'selfcal_clean_threshold', 'facet_cellsize_arcsec',
-        'facet_taper_arcsec', 'facet_robust', 'reimage',
+        'facet_taper_arcsec', 'facet_robust', 'reimage_selfcaled',
         'wsclean_image_padding', 'wsclean_model_padding']
     for option in given_options:
         if option not in allowed_options:
