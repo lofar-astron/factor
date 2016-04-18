@@ -257,9 +257,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
             if len(dirs_to_image) > 0:
                 log.info('Imaging with cellsize = {0} arcsec, robust = {1}, '
-                    'taper = {2} arcsec'.format(cellsize_arcsec, robust, taper_arcsec))
+                    'taper = {2} arcsec, min_uv = {3} lambda'.format(cellsize_arcsec,
+                    robust, taper_arcsec, min_uv_lambda))
                 log.info('Imaging the following direction(s):')
-                log.info('{0}'.format([d.name for d in dirs_to_reimage]))
+                log.info('{0}'.format([d.name for d in dirs_to_image]))
 
             # Set up reset of any directions that need it
             directions_reset = [d for d in dirs_to_image if d.do_reset]
