@@ -298,7 +298,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                                      atrous_jmax=atrous_jmax)
 
         if img.nisl == 0:
-            if region_file is None or region_file != '[]':
+            if region_file is None or region_file == '[]':
                 print('No islands found. Clean mask cannot be made.')
                 sys.exit(1)
             else:
