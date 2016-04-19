@@ -15,7 +15,7 @@ update_input_bands_hosts.control.mapfile_in           =   {{ input_files_single_
 update_input_bands_hosts.control.hosts                =   {{ hosts }}
 
 {% block add_sub_parms %}
-# subtract model difference from facet-selfcal to original data, length = nfiles
+# subtract model difference from facet-selfcal from original data, length = nfiles
 add_diff_model_to_empty_data.control.type             =   add_subtract_columns
 add_diff_model_to_empty_data.control.opts.mapfiles_in =   [{{ input_files_single_mapfile }},{{ diff_models_field_mapfile }}]
 add_diff_model_to_empty_data.control.opts.inputkeys   =   [file1,file2]

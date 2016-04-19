@@ -120,6 +120,8 @@ class FacetSelfcal(Operation):
             'premask.mapfile')
         self.direction.wsclean_modelimg_size_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'pad_model_images.padsize.mapfile')
+        self.direction.diff_models_field_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'shift_diff_model_to_field.mapfile')
         self.direction.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'verify_subtract.break.mapfile')
 
@@ -150,7 +152,6 @@ class FacetSelfcal(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'corrupt_final_model.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'predict_all_model_data.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'shift_cal.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'shift_diff_model_to_field.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'final_image1.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'make_concat_corr.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'make_blavg_data.mapfile'),
@@ -204,6 +205,19 @@ class FacetSub(Operation):
             self.pipeline_parset_template = '{0}_replace_pipeline.parset'.format(self.name)
         else:
             self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
+
+
+    def finalize(self):
+        """
+        Finalize this operation
+        """
+        # Delete the full-resolution model-difference files from
+        self.direction.cleanup_mapfiles = [self.direction.diff_models_field_mapfile]
+        if hasattr(self.direction, 'subtracted_data_new_mapfile'):
+            # Delete the improved subtracted data from peelimage op
+            self.direction.cleanup_mapfiles.append(self.direction.subtracted_data_new_mapfile)
+        self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
+        self.direction.cleanup()
 
 
 class FacetSubReset(Operation):
