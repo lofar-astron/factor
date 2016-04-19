@@ -327,11 +327,6 @@ def group_directions(directions, n_per_grouping=[{'1':0}], allow_reordering=True
             log.info('Reordering directions to obtain max separation...')
             direction_groups_orig = direction_groups[:]
             remaining_directions = directions[:]
-            fluxes = [d.apparent_flux_mjy for d in remaining_directions]
-            if None in fluxes:
-                use_fluxes = False
-            else:
-                use_fluxes = True
             if len(direction_groups) > 1:
                 for i, group in enumerate(direction_groups_orig):
                     d0 = remaining_directions[0]
@@ -341,12 +336,10 @@ def group_directions(directions, n_per_grouping=[{'1':0}], allow_reordering=True
                     wsep_prev = [0] * len(remaining_directions)
                     if ndir > 1:
                         for j in range(1, ndir):
-                            if use_fluxes:
-                                weights = [d.apparent_flux_mjy for d in
-                                    remaining_directions]
-                            else:
-                                weights = [len(remaining_directions)-k for k in
-                                    range(len(remaining_directions))]
+                            weights = []
+                            for d in remaining_directions:
+                                flux_jy, peak_flux_jy_bm = d.get_cal_fluxes()
+                                weights.append(flux_jy)
                             sep = [calculateSeparation(d0.ra, d0.dec,
                                 d.ra, d.dec) for d in remaining_directions]
                             wsep_new = []
