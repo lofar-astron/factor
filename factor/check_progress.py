@@ -730,14 +730,12 @@ def get_current_step(direction):
             found_prev = True
         else:
             prev_indx -= 1
-        if abs(prev_indx) > len(d[1]):
-            return (None, None, None, None)
+            if abs(prev_indx) > len(d[1]):
+                return (None, None, None, None)
     try:
         current_index = current_steps.index(previous_step_name) + abs(prev_indx+1) + 1
     except ValueError:
         return (None,None,None,None)
-    if current_index >= len(current_steps):
-        current_index = len(current_steps) - 1
     start_time = d[0]['start_time']
 
     return (current_steps[current_index], current_index, len(current_steps), start_time)
