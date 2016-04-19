@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, regroup_shift_empty_map, {% block model_data_steps %}expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, {% endblock model_data_steps %} corrupt_final_model, add_model_to_empty_data, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %}wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, add_imaging_cols, regroup_shift_empty_map, {% block model_data_steps %}expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, {% endblock model_data_steps %} corrupt_final_model, add_model_to_empty_data, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %}wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -45,6 +45,12 @@ shift_empty.argument.local_scratch_dir                =   {{ local_dir }}
 shift_empty.argument.steps                            =   [shift]
 shift_empty.argument.shift.type                       =   phaseshifter
 shift_empty.argument.shift.phasecenter                =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+
+# add the imaging columns to the MS files, length = nfiles
+add_imaging_cols.control.type                         =   add_imaging_columns
+add_imaging_cols.control.mapfile_in                   =   shift_empty.output.mapfile
+add_imaging_cols.control.inputkey                     =   msfile
+add_imaging_cols.argument.flags                       =   [msfile]
 
 # sort the "shift_empty" unaveraged data into groups that can be concatenated, length = some
 # needed because virtual concatenating all files results in a "too many open files" error.
