@@ -722,16 +722,16 @@ def get_current_step(direction):
     # still looping), but is the best we can do currently
     found_prev = False
     prev_indx = -1
+    current_steps = get_current_op_step_names(direction)
     while not found_prev:
         # Work backward to find a valid step (i.e., not a plugin step)
         previous_step_name = os.path.splitext(os.path.basename(d[1][prev_indx][1]['mapfile']))[0]
-        try:
-            current_steps = get_current_op_step_names(direction)
+        if previous_step_name in current_steps:
             found_prev = True
-        except ValueError:
+        else:
             prev_indx -= 1
-            if abs(prev_indx) > len(d[1]):
-                return (None, None, None, None)
+        if abs(prev_indx) > len(d[1]):
+            return (None, None, None, None)
     try:
         current_index = current_steps.index(previous_step_name) + abs(prev_indx+1) + 1
     except ValueError:
