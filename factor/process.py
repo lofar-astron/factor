@@ -244,7 +244,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         for cellsize_arcsec, taper_arcsec, robust, min_uv_lambda in zip(cellsizes,
             tapers, robusts, min_uvs):
             # Always image directions that did not go through selfcal
-            dirs_to_image = dirs_without_selfcal
+            dirs_to_image = dirs_without_selfcal[:]
 
             # Only reimage facets with selfcal imaging parameters if reimage_selfcal flag is set
             if (cellsize_arcsec == parset['imaging_specific']['selfcal_cellsize_arcsec'] and
