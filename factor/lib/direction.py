@@ -917,6 +917,7 @@ class Direction(object):
         Cleans up unneeded data
         """
         from lofarpipe.support.data_map import DataMap
+        import glob
 
         for mapfile in self.cleanup_mapfiles:
             try:
@@ -930,5 +931,14 @@ class Direction(object):
                     for f in files:
                         if os.path.exists(f):
                             os.system('rm -rf {0}'.format(f))
+
+                        # Deal with special case of f being an MFS WSClean image
+                        if f.endswith('MFS-image.fits'):
+                            # Search for channel images and delete if found
+                            image_root = f.split('MFS-image.fits')[0]
+                            extra_files = glob.glob(image_root+'*.fits')
+                            for e in extra_files:
+                                if os.path.exists(e):
+                                    os.system('rm -rf {0}'.format(e))
             except IOError:
                 pass
