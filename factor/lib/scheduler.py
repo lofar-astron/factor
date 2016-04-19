@@ -135,11 +135,7 @@ class Scheduler(object):
         """
         if type(operation_list) != list:
             operation_list = [operation_list]
-
-        # Set up the operation(s)
         self.operation_list = operation_list
-        for op in operation_list:
-             op.setup()
 
         # Run the operation(s)
         if len(operation_list) > 0:
@@ -149,6 +145,7 @@ class Scheduler(object):
                     if not self.dry_run and not op.check_completed():
                         # Only run incomplete operations (and only if this is
                         # not a dry run)
+                        op.setup()
                         op.set_started()
                         pool.apply_async(call_generic_pipeline, (op.name,
                             op.direction.name, op.pipeline_parset_file,
