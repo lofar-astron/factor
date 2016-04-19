@@ -932,10 +932,17 @@ class Direction(object):
                         if os.path.exists(f):
                             os.system('rm -rf {0}'.format(f))
 
-                        # Deal with special case of f being an MFS WSClean image
+                        # Deal with special case of f being a WSClean image
                         if f.endswith('MFS-image.fits'):
-                            # Search for channel images and delete if found
+                            # Search for related images and delete if found
                             image_root = f.split('MFS-image.fits')[0]
+                            extra_files = glob.glob(image_root+'*.fits')
+                            for e in extra_files:
+                                if os.path.exists(e):
+                                    os.system('rm -rf {0}'.format(e))
+                        elif f.endswith('-image.fits'):
+                            # Search for related images and delete if found
+                            image_root = f.split('-image.fits')[0]
                             extra_files = glob.glob(image_root+'*.fits')
                             for e in extra_files:
                                 if os.path.exists(e):
