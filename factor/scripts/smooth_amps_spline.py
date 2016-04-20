@@ -7,10 +7,6 @@ import argparse
 from argparse import RawTextHelpFormatter
 import pyrap.tables as pt
 import numpy
-try:
-    from numpy import pad
-except ImportError:
-    pad = pad_2Darray
 import os
 import lofar.parmdb
 import math
@@ -272,6 +268,11 @@ def pad_2Darray(a):
 
 
 def median2Dampfilter(amp_orig):
+    try:
+        from numpy import pad
+    except ImportError:
+        pad = pad_2Darray
+
     orinal_size = numpy.shape(amp_orig)
     # padd array by reflection around axis
 
