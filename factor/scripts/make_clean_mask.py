@@ -231,7 +231,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         if reference_ra_deg is not None and reference_dec_deg is not None:
             image_name = mask_name + '.tmp'
             make_template_image(image_name, reference_ra_deg, reference_dec_deg,
-                cellsize_deg=cellsize_deg)
+                cellsize_deg=float(cellsize_deg))
         else:
             print('ERROR: if image not found, a refernce position must be given')
             sys.exit(1)
