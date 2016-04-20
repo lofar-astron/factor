@@ -7,6 +7,10 @@ import argparse
 from argparse import RawTextHelpFormatter
 import pyrap.tables as pt
 import numpy
+try:
+    from numpy import pad
+except ImportError:
+    pad = pad_2Darray
 import os
 import lofar.parmdb
 import math
@@ -245,10 +249,33 @@ def spline1D(amp_orig):
     return amp_clean, 10**(model[ndata:ndata + ndata]), noisevec[ndata:ndata + ndata], scatter, n_knots, idxbad, weights[ndata:ndata + ndata]
 
 
+def pad_2Darray(a):
+    pad_shape = (a.shape[0]*3, a.shape[1]*3)
+    pad_a = np.zeros(pad_shape)
+
+    # center
+    pad_a[a.shape[0]:2*a.shape[0], a.shape[1]:2*a.shape[1]] = a
+
+    # four corners
+    pad_a[0:a.shape[0], 0:a.shape[1]] = a[::-1, ::-1]
+    pad_a[0:a.shape[0], 2*a.shape[1]:3*a.shape[1]] = a[::-1, ::-1]
+    pad_a[2*a.shape[0]:3*a.shape[0], 2*a.shape[1]:3*a.shape[1]] = a[::-1, ::-1]
+    pad_a[2*a.shape[0]:3*a.shape[0], 0:a.shape[1]] = a[::-1, ::-1]
+
+    # middle edges
+    pad_a[0:a.shape[0], a.shape[1]:2*a.shape[1]] = a[:, ::-1]
+    pad_a[a.shape[0]:2*a.shape[0], 2*a.shape[1]:3*a.shape[1]] = a[::-1, :]
+    pad_a[2*a.shape[0]:3*a.shape[0], a.shape[1]:2*a.shape[1]] = a[:, ::-1]
+    pad_a[a.shape[0]:2*a.shape[0], 0:a.shape[1]] = a[::-1, :]
+
+    return pad_a
+
+
 def median2Dampfilter(amp_orig):
     orinal_size = numpy.shape(amp_orig)
     # padd array by reflection around axis
-    amp = numpy.pad(amp_orig, ((numpy.shape(amp_orig)[0],numpy.shape(amp_orig)[0]),
+
+    amp = pad(amp_orig, ((numpy.shape(amp_orig)[0],numpy.shape(amp_orig)[0]),
         (numpy.shape(amp_orig)[1],numpy.shape(amp_orig)[1])), mode='reflect')
 
     # take the log
