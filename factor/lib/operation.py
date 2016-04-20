@@ -141,11 +141,11 @@ class Operation(object):
         if self.parset['cluster_specific']['clustertype'] == 'local':
             self.cfg_dict['remote'] = '[remote]\n'\
                 + 'method = local\n'\
-                + 'max_per_node = {0}\n'.format(self.cfg_dict['max_cpus_per_node'])
+                + 'max_per_node = {0}\n'.format(self.direction.max_cpus_per_node)
         elif self.parset['cluster_specific']['clustertype'] == 'juropa_slurm':
             self.cfg_dict['remote'] = '[remote]\n'\
                 + 'method = slurm_srun\n'\
-                + 'max_per_node = {0}\n'.format(self.cfg_dict['max_cpus_per_node'])
+                + 'max_per_node = {0}\n'.format(self.direction.max_cpus_per_node)
         elif self.parset['cluster_specific']['clustertype'] == 'pbs':
             self.cfg_dict['remote'] = ''
         else:
