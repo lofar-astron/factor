@@ -245,7 +245,7 @@ def spline1D(amp_orig):
     return amp_clean, 10**(model[ndata:ndata + ndata]), noisevec[ndata:ndata + ndata], scatter, n_knots, idxbad, weights[ndata:ndata + ndata]
 
 
-def median2Dampfilter(amp):
+def median2Dampfilter(amp_orig):
     orinal_size = numpy.shape(amp_orig)
     # padd array by reflection around axis
     amp = numpy.pad(amp_orig, ((numpy.shape(amp_orig)[0],numpy.shape(amp_orig)[0]),
@@ -396,12 +396,12 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
                             xy=(0.01,0.02), color=cc,textcoords='axes fraction')
 
                     if numpy.any(idxbad):
-                        axsa[istat][0].plot(timevec[idxbad],channel_amp_orig[nchan][idxbad],
+                        axsa[istat][0].plot(timevec[idxbad],channel_amp_orig[chan][idxbad],
                             marker='o', c=ccf, ls=ls, markersize=4)
 
                     idxbadi = numpy.where(weights < 1.0)
                     if numpy.any(idxbadi):
-                        axsa[istat][0].plot(timevec[idxbadi],amp_orig[idxbadi],
+                        axsa[istat][0].plot(timevec[idxbadi],channel_amp_orig[chan][idxbadi],
                             marker='o', c='black', ls=ls, markersize=4, mec='black')
 
                     axsa[istat][0].plot(timevec, model, c=ccf, lw=1.0)
