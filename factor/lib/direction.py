@@ -854,11 +854,11 @@ class Direction(object):
                     self.completed_operations = d['completed_operations']
 
                 # Load mapfiles needed for facetsubreset
-                if ('diff_models_field_mapfile' in d and
-                    'input_files_single_mapfile' in d and
+                if ('dir_dep_parmdb_mapfile' in d and
+                    'facet_model_mapfile' in d and
                     'subtracted_data_colname' in d):
-                    self.diff_models_field_mapfile = d['diff_models_field_mapfile']
-                    self.input_files_single_mapfile = d['input_files_single_mapfile']
+                    self.dir_dep_parmdb_mapfile = d['dir_dep_parmdb_mapfile']
+                    self.facet_model_mapfile = d['facet_model_mapfile']
                     self.subtracted_data_colname = d['subtracted_data_colname']
             return True
         except:
