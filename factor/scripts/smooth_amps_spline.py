@@ -449,12 +449,9 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
                 amp_orig = numpy.sqrt(channel_parms_real[:]**2 + channel_parms_imag[:]**2)
                 phase    = numpy.arctan2(channel_parms_imag[:], channel_parms_real[:]**2)
 
-                pool = multiprocessing.Pool()
-                results = pool.map(median2Dampfilter, channel_amp_orig)
-                pool.close()
-                pool.join()
+                amp_cleaned, amp_median, baddata = median2Dampfilter(numpy.copy(amp_orig))
 
-                for chan, (amp_cleaned, amp_median, baddata) in enumerate(results):
+                for chan, () in enumerate(results):
                     # put back the results
                     parms[gain + ':' + pol + ':Real:' + antenna]['values'][:, chan] = numpy.copy((amp_cleaned[chan,:])*numpy.cos(phase[chan,:]))
                     parms[gain + ':' + pol + ':Imag:' + antenna]['values'][:, chan] = numpy.copy((amp_cleaned[chan,:])*numpy.sin(phase[chan,:]))
