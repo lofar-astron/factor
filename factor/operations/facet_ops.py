@@ -391,7 +391,7 @@ class FacetPeelImage(Operation):
         self.pipeline_parset_template = 'facetimage_skymodel{0}_pipeline.parset'.format(infix)
 
         # Define extra parameters needed for this operation
-        self.direction.set_imcal_parameters(parset, bands, imging_only=True)
+        self.direction.set_imcal_parameters(parset, bands, imaging_only=True)
         ms_files = [band.files for band in self.bands]
         ms_files_single = []
         for bandfiles in ms_files:
