@@ -604,6 +604,14 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
         # Set direction sky model
         direction.set_skymodel(initial_skymodel.copy())
 
+        # Set peeling flag (i.e., facet calibrator should be peeled before facet
+        # is imaged)
+        if not direction.is_outlier and direction.peel_skymodel is not None:
+            total_flux_jy, peak_flux_jy_bm = direction.get_cal_fluxes()
+            effective_flux_jy = peak_flux_jy_bm * (total_flux_jy / peak_flux_jy_bm)**0.667
+            if effective_flux_jy > parset['calibration_specific']['peel_flux_jy']:
+                direction.peel_calibrator = True
+
         # Set field center to that of first band (all bands have the same phase
         # center)
         direction.field_ra = bands[0].ra

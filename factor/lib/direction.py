@@ -650,13 +650,6 @@ class Direction(object):
             else:
                 self.pre_average = False
 
-            # Set peeling flag
-            if (effective_flux_jy > peel_flux_jy and not self.is_outlier and
-                self.peel_skymodel is not None):
-                self.peel_calibrator = True
-            else:
-                self.peel_calibrator = False
-
             # Set fast (phase-only) solution time interval
             if self.solint_time_p == 0:
                 if self.pre_average:
