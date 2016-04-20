@@ -29,6 +29,7 @@ casa_ft4.control.arguments                        =   [--nologger,--nogui,-c,{{ 
 {% endblock model_data_parms %}
 
 {% block full_image_parms %}
+# make a virtual concatenated map, length = 1
 virtual_concat_averaged.control.type              =   virtual_concat
 virtual_concat_averaged.control.mapfile_in        =   concat_averaged_compressed_map.output.mapfile
 virtual_concat_averaged.control.inputkey          =   msfiles

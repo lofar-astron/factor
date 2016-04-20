@@ -95,7 +95,7 @@ wsclean_ft.argument.j                                 =   {{ max_cpus_per_img }}
 wsclean_ft.argument.tempdir                           =   {{ local_dir }}
 {% endblock model_data_parms %}
 
-# corrupt the facet-model visibilities
+# corrupt the facet-model visibilities, length = nfiles
 corrupt_final_model.control.type                      =   dppp
 corrupt_final_model.control.opts.mapfiles_in          =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 corrupt_final_model.control.opts.inputkeys            =   [msin,parmdb]

@@ -112,7 +112,7 @@ concat.control.inputkey                                =   msfiles
 concat.control.outputkey                               =   msconcat
 concat.argument.flags                                  =   [msfiles,msconcat]
 
-# make a dummy image with the awimager to get the primary beam, length =1
+# make a dummy image with the awimager to get the primary beam, length = 1
 make_pbimage.control.type                              =   awimager
 make_pbimage.control.opts.mapfile_in                   =   concat.output.mapfile
 make_pbimage.control.opts.inputkey                     =   ms
