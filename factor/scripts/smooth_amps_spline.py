@@ -245,7 +245,7 @@ def spline1D(amp_orig):
     return amp_clean, 10**(model[ndata:ndata + ndata]), noisevec[ndata:ndata + ndata], scatter, n_knots, idxbad, weights[ndata:ndata + ndata]
 
 
-def pad_2Darray(a):
+def pad_2Darray(a, width, mode):
     pad_shape = (a.shape[0]*3, a.shape[1]*3)
     pad_a = np.zeros(pad_shape)
 
