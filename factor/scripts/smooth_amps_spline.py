@@ -376,7 +376,7 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
                     cc = 'green'
                     ccf= 'red'
 
-                timevec = numpy.arange(0,len(amp_orig))
+                timevec = numpy.arange(0,len(channel_amp_orig[chan]))
 
                 # only plot one channel, just to verify code works
                 if plotting and chan == nchans-1: # plot last channel
@@ -396,7 +396,7 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
                             xy=(0.01,0.02), color=cc,textcoords='axes fraction')
 
                     if numpy.any(idxbad):
-                        axsa[istat][0].plot(timevec[idxbad],amp_orig[idxbad],
+                        axsa[istat][0].plot(timevec[idxbad],channel_amp_orig[nchan][idxbad],
                             marker='o', c=ccf, ls=ls, markersize=4)
 
                     idxbadi = numpy.where(weights < 1.0)
