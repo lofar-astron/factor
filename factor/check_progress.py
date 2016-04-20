@@ -733,7 +733,7 @@ def get_current_step(direction):
             if abs(prev_indx) > len(d[1]):
                 return (None, None, None, None)
     try:
-        current_index = current_steps.index(previous_step_name) + abs(prev_indx+1) + 1
+        current_index = min(len(current_steps)-1, current_steps.index(previous_step_name)+1)
     except ValueError:
         return (None,None,None,None)
     start_time = d[0]['start_time']
