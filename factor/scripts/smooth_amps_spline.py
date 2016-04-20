@@ -444,11 +444,13 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
                     for chan in range(nchans)]
                 channel_parms_real =  numpy.asarray(channel_parms_real)
                 channel_parms_imag =  numpy.asarray(channel_parms_imag)
+                channel_amp_orig = [numpy.sqrt(channel_parms_real[chan]**2 +
+                    channel_parms_imag[chan]**2) for chan in range(nchans)]
                 amp_orig = numpy.sqrt(channel_parms_real[:]**2 + channel_parms_imag[:]**2)
                 phase    = numpy.arctan2(channel_parms_imag[:], channel_parms_real[:]**2)
 
                 pool = multiprocessing.Pool()
-                results = pool.map(median2Dampfilter, amp_orig)
+                results = pool.map(median2Dampfilter, channel_amp_orig)
                 pool.close()
                 pool.join()
 
