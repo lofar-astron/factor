@@ -246,13 +246,16 @@ class FacetSubReset(Operation):
 
         # Define extra parameters needed for this operation
         self.direction.set_imcal_parameters(parset, bands)
+        dir_dep_parmdb_mapfile = os.path.join(self.factor_working_dir, 'results',
+            'facetselfcal', self.direction.name, 'merge_selfcal_parmdbs.mapfile')
         dir_indep_parmDBs = []
         for band in self.bands:
             for parmdb in band.dirindparmdbs:
                 dir_indep_parmDBs.append(parmdb)
         skymodels = [band.skymodel_dirindep for band in self.bands]
         self.parms_dict.update({'skymodels': skymodels,
-                                'dir_indep_parmDBs': dir_indep_parmDBs})
+                                'dir_indep_parmDBs': dir_indep_parmDBs,
+                                'dir_dep_parmdb_mapfile': dir_dep_parmdb_mapfile})
 
 
     def finalize(self):
