@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, add_imaging_cols, regroup_shift_empty_map, {% block model_data_steps %}expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, {% endblock model_data_steps %} corrupt_final_model, add_model_to_empty_data, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %}wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, add_imaging_cols, regroup_shift_empty_map, {% block model_data_steps %}expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, {% endblock model_data_steps %} corrupt_final_model, add_model_to_empty_data, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %}premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -210,9 +210,24 @@ concat_averaged_compressed_map.control.mapfile_dir    =   input.output.mapfile_d
 concat_averaged_compressed_map.control.filename       =   concat_averaged_compressed.mapfile
 
 {% block full_image_parms %}
+
+# Make a preliminary clean mask from the facet region, length = 1
+premask.control.type                                    =   make_clean_mask
+premask.control.mapfile_in                              =   concat_averaged_compressed_map.output.mapfile
+premask.control.inputkey                                =   imagefile
+premask.control.outputkey                               =   maskfile
+premask.argument.flags                                  =   [imagefile,maskfile]
+premask.argument.img_format                             =   fits
+premask.argument.pad_to_size                            =   {{ facet_imsize }}
+premask.argument.skip_source_detection                  =   True
+premask.argument.vertices_file                          =   {{ vertices_file }}
+premask.argument.reference_ra_deg                       =   {{ facet_ra }}
+premask.argument.reference_dec_deg                      =   {{ facet_dec }}
+premask.argument.cellsize_deg                           =   {{ cellsize_facet_deg }}
+
 # do the first round of imaging, length = 1
 wsclean_image_full1.control.type                      =   wsclean
-wsclean_image_full1.control.mapfiles_in               =   [concat_averaged_compressed_map.output.mapfile,{{ facet_premask_mapfile }}]
+wsclean_image_full1.control.mapfiles_in               =   [concat_averaged_compressed_map.output.mapfile,premask.output.mapfile]
 wsclean_image_full1.control.inputkeys                 =   [msfile,fitsmask]
 wsclean_image_full1.argument.flags                    =   [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
 wsclean_image_full1.argument.fitsmask                 =   fitsmask

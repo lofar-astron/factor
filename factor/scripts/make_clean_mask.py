@@ -124,7 +124,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
          rmsbox_bright=(35, 7), iterate_threshold=False, adaptive_rmsbox=False, img_format='fits',
          threshold_format='float', trim_by=0.0, vertices_file=None, atrous_jmax=6,
          pad_to_size=None, skip_source_detection=False, region_file=None, nsig=1.0,
-         reference_ra_deg=None, reference_dec_deg=None):
+         reference_ra_deg=None, reference_dec_deg=None, cellsize_deg=0.000417):
     """
     Make a clean mask and return clean threshold
 
@@ -176,6 +176,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         RA for center of output mask image
     reference_dec_deg : float, optional
         Dec for center of output mask image
+    cellsize_deg : float, optional
+        Size of a pixel in degrees
 
     Returns
     -------
@@ -228,7 +230,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             sys.exit(1)
         if reference_ra_deg is not None and reference_dec_deg is not None:
             image_name = mask_name + '.tmp'
-            make_template_image(image_name, reference_ra_deg, reference_dec_deg)
+            make_template_image(image_name, reference_ra_deg, reference_dec_deg,
+                cellsize_deg=cellsize_deg)
         else:
             print('ERROR: if image not found, a refernce position must be given')
             sys.exit(1)

@@ -2,7 +2,7 @@
 
 {% block model_data_steps %}concat_unaveraged, create_compressed_unaveraged, casa_ft4, {% endblock model_data_steps %}
 
-{% block full_image_steps %}virtual_concat_averaged, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2{% endblock full_image_steps %}
+{% block full_image_steps %}virtual_concat_averaged, premask, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2{% endblock full_image_steps %}
 
 {% block model_data_parms %}
 ## virtual concat of the re-grouped unaveraged data, length = some
@@ -36,9 +36,23 @@ virtual_concat_averaged.control.inputkey          =   msfiles
 virtual_concat_averaged.control.outputkey         =   msconcat
 virtual_concat_averaged.argument.flags            =   [msfiles,msconcat]
 
+# Make a preliminary clean mask from the facet region, length = 1
+premask.control.type                              =   make_clean_mask
+premask.control.mapfile_in                        =   concat_averaged_compressed_map.output.mapfile
+premask.control.inputkey                          =   imagefile
+premask.control.outputkey                         =   maskfile
+premask.argument.flags                            =   [imagefile,maskfile]
+premask.argument.img_format                       =   casa
+premask.argument.pad_to_size                      =   {{ facet_imsize }}
+premask.argument.skip_source_detection            =   True
+premask.argument.vertices_file                    =   {{ vertices_file }}
+premask.argument.reference_ra_deg                 =   {{ facet_ra }}
+premask.argument.reference_dec_deg                =   {{ facet_dec }}
+premask.argument.cellsize_deg                     =   {{ cellsize_facet_deg }}
+
 # image the virtual concatenated data, length = 1
 casa_image_full1.control.type                     =   casa_clean
-casa_image_full1.control.mapfiles_in              =   [virtual_concat_averaged.output.mapfile,{{ facet_premask_mapfile }}]
+casa_image_full1.control.mapfiles_in              =   [virtual_concat_averaged.output.mapfile,premask.output.mapfile]
 casa_image_full1.control.inputkeys                =   [clean.vis,clean.mask]
 casa_image_full1.control.outputkey                =   clean.imagename
 casa_image_full1.control.arguments                =   [--nologger,--nogui,-c]
