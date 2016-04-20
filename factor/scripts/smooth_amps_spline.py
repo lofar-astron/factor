@@ -247,7 +247,7 @@ def spline1D(amp_orig):
 
 def pad_2Darray(a, width, mode):
     pad_shape = (a.shape[0]*3, a.shape[1]*3)
-    pad_a = np.zeros(pad_shape)
+    pad_a = numpy.zeros(pad_shape)
 
     # center
     pad_a[a.shape[0]:2*a.shape[0], a.shape[1]:2*a.shape[1]] = a
