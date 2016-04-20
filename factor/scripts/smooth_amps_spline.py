@@ -451,7 +451,7 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
 
                 amp_cleaned, amp_median, baddata = median2Dampfilter(numpy.copy(amp_orig))
 
-                for chan, () in enumerate(results):
+                for chan in range(nchans):
                     # put back the results
                     parms[gain + ':' + pol + ':Real:' + antenna]['values'][:, chan] = numpy.copy((amp_cleaned[chan,:])*numpy.cos(phase[chan,:]))
                     parms[gain + ':' + pol + ':Imag:' + antenna]['values'][:, chan] = numpy.copy((amp_cleaned[chan,:])*numpy.sin(phase[chan,:]))
