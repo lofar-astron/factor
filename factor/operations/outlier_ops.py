@@ -37,10 +37,17 @@ class OutlierPeel(Operation):
             for parmdb in band.dirindparmdbs:
                 dir_indep_parmDBs.append(parmdb)
         skymodels = [band.skymodel_dirindep for band in self.bands]
+
+        if self.parset['calibration_specific']['spline_smooth2d']:
+            smooth_amps_task = 'smooth_amps_spline'
+        else:
+            smooth_amps_task = 'smooth_amps'
+
         self.parms_dict.update({'ms_files_single': ms_files_single,
                                 'ms_files_grouped' : str(ms_files),
                                 'skymodels': skymodels,
-                                'dir_indep_parmDBs': dir_indep_parmDBs})
+                                'dir_indep_parmDBs': dir_indep_parmDBs,
+                                'smooth_amps_task': smooth_amps_task})
 
 
     def finalize(self):

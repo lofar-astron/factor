@@ -72,6 +72,10 @@ dir_ms = /data/bands
 # Minimum uv distance in lambda for calibration (default = 80)
 # solve_min_uv_lambda = 80.0
 
+# Smooth amplitudes with spline fit + 2-D median (default = False; i.e., smooth
+# with a 1-D median only)
+# spline_smooth2D = False
+
 
 [imaging]
 # Make final mosaic (default = True)

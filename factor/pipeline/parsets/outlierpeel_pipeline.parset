@@ -255,7 +255,7 @@ merge_amp_parmdbs.argument.flags                         =   [mslist,instrument,
 
 # Smooth the amplitude solutions, but do not normalize them as the sky model is  // length = 1
 # in absolute flux and not apparent flux
-smooth_amps.control.type                                 =   smooth_amps
+smooth_amps.control.type                                 =   {{ smooth_amps_task }}
 smooth_amps.control.mapfile_in                           =   merge_amp_parmdbs.output.mapfile
 smooth_amps.control.inputkey                             =   ampparmdb
 smooth_amps.control.outputkey                            =   outparmdb
@@ -264,7 +264,7 @@ smooth_amps.argument.normalize                           =   False
 
 # Now smooth the amplitude solutions and normalize them (for use later during
 # imaging of facets for peeled calibrators)
-smooth_amps_normalized.control.type                      =   smooth_amps
+smooth_amps_normalized.control.type                      =   {{ smooth_amps_task }}
 smooth_amps_normalized.control.mapfile_in                =   merge_amp_parmdbs.output.mapfile
 smooth_amps_normalized.control.inputkey                  =   ampparmdb
 smooth_amps_normalized.control.outputkey                 =   outparmdb

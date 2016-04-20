@@ -75,6 +75,12 @@ class FacetSelfcal(Operation):
                 dir_indep_parmDBs.append(parmdb)
         skymodels = [band.skymodel_dirindep for band in self.bands]
         loopcount = max(1, self.parset['calibration_specific']['max_selfcal_loops'])
+
+        if self.parset['calibration_specific']['spline_smooth2d']:
+            smooth_amps_task = 'smooth_amps_spline'
+        else:
+            smooth_amps_task = 'smooth_amps'
+
         if self.direction.peel_skymodel is not None:
             initial_selfcal_skymodel = self.direction.peel_skymodel
             initial_selfcal_parset = os.path.join(self.factor_parset_dir,
@@ -90,7 +96,8 @@ class FacetSelfcal(Operation):
                                 'dir_indep_parmDBs': dir_indep_parmDBs,
                                 'initial_selfcal_skymodel': initial_selfcal_skymodel,
                                 'initial_selfcal_parset': initial_selfcal_parset,
-                                'loopcount': loopcount})
+                                'loopcount': loopcount,
+                                'smooth_amps_task': smooth_amps_task})
 
     def finalize(self):
         """

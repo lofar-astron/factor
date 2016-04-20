@@ -353,10 +353,17 @@ def get_calibration_options(parset):
     else:
         parset_dict['solve_min_uv_lambda'] = 80.0
 
+    # Smooth amplitudes with spline fit + 2-D median (default = False, i.e., smooth
+    # with a 1-D median only)
+    if 'spline_smooth2d' in parset_dict:
+        parset_dict['spline_smooth2d'] = parset.getboolean('calibration', 'spline_smooth2d')
+    else:
+        parset_dict['spline_smooth2d'] = False
+
     # Check for unused options
     allowed_options = ['exit_on_selfcal_failure', 'skip_selfcal_check',
         'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal',
-        'tec_block_mhz', 'peel_flux_jy', 'solve_min_uv_lambda']
+        'tec_block_mhz', 'peel_flux_jy', 'solve_min_uv_lambda', 'spline_smooth2D']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [calibration] section of the '
