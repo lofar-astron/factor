@@ -218,8 +218,9 @@ class FacetSub(Operation):
         """
         Finalize this operation
         """
-        # Delete the full-resolution model-difference files from
-        self.direction.cleanup_mapfiles = [self.direction.diff_models_field_mapfile]
+        # Delete the full-resolution model-difference files
+        if hasattr(self.direction, 'diff_models_field_mapfile'):
+            self.direction.cleanup_mapfiles.append(self.direction.diff_models_field_mapfile)
         if hasattr(self.direction, 'subtracted_data_new_mapfile'):
             # Delete the improved subtracted data from peelimage op
             self.direction.cleanup_mapfiles.append(self.direction.subtracted_data_new_mapfile)
