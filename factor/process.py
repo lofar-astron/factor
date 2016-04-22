@@ -599,6 +599,13 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
             if target_has_own_facet and 'target' not in direction_names:
                 directions.append(target)
 
+            # Warn user if reimaging is to be done but they are not processing
+            # the full field
+            if parset['imaging_specific']['reimage_selfcaled']:
+                log.warn("The reimage_selfcaled parameter is True but all directions "
+                    "will not be processed. If you're interested in only a single "
+                    "target facet, this setting should generally be False.")
+
     # Set various direction attributes
     for i, direction in enumerate(directions):
         # Set direction sky model
