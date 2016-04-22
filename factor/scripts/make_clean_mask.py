@@ -24,9 +24,9 @@ def read_vertices(filename):
     return direction_dict['vertices']
 
 
-def read_casa_polys(filename):
+def read_casa_polys(filename, image):
     """
-    Returns casa region file and returns polys
+    Reads casa region file and returns polys
 
     Note: only regions of type "poly" are supported
     """
@@ -46,10 +46,105 @@ def read_casa_polys(filename):
                 ra.append(Angle(RAstr, unit='hourangle').to('deg').value)
                 dec.append(Angle(Decstr.replace('.', ':', 2), unit='deg').to('deg').value)
             poly_vertices = [np.array(ra), np.array(dec)]
-            poly_array = np.vstack([poly_vertices, poly_vertices[0]])
-            polys.append(poly_array)
-        elif line.startswith('ellipse') or line.startswith('box'):
-            print('Only CASA regions of type "poly" are supported')
+
+            # Convert to image-plane polygon
+            xvert = []
+            yvert = []
+            for RAvert, Decvert in zip(np.array(ra), np.array(dec)):
+                try:
+                    pixels = image.topixel([0, 1, Decvert*np.pi/180.0,
+                                               RAvert*np.pi/180.0])
+                except:
+                    pixels = image.topixel([1, 1, Decvert*np.pi/180.0,
+                                               RAvert*np.pi/180.0])
+                xvert.append(pixels[2]) # x -> Dec
+                yvert.append(pixels[3]) # y -> RA
+            polys.append(Polygon(xvert, yvert))
+
+        elif line.startswith('ellipse'):
+            ell_str_temp = line.split('[[')[1]
+            if '], 0.0' not in ell_str_temp and '], 90.0' not in ell_str_temp:
+                print('Only position angles of 0.0 and 90.0 are support for CASA '
+                    'regions of type "ellipse"')
+                sys.exit(1)
+            if '], 0.0' in ell_str_temp:
+                ell_str = ell_str_temp.split('], 0.0')[0]
+                pa = 0
+            else:
+                ell_str = ell_str_temp.split('], 90.0')[0]
+                pa = 90
+            ell_str_list = ell_str.split('], [')
+
+            # Ellipse center
+            RAstr, Decstr = ell_str_list[0].split(',')
+            ra_center = Angle(RAstr, unit='hourangle').to('deg').value
+            dec_center = Angle(Decstr.replace('.', ':', 2), unit='deg').to('deg').value
+            pixels = image.topixel([0, 1, dec_center*np.pi/180.0,
+                ra_center*np.pi/180.0])
+            x_center = pixels[2] # x -> Dec
+            y_center = pixels[3] # y -> RA
+
+            # Ellipse semimajor and semiminor axes
+            a_str, b_str = ell_str_list[1].split(',')
+            a_deg = float(a_str.split('arcsec')[0])/3600.0
+            b_deg = float(b_str.split('arcsec')[0])/3600.0
+            pixels1 = image.topixel([0, 1, (dec_center-a_deg/2.0)*np.pi/180.0,
+                ra_center*np.pi/180.0])
+            a_pix1 = pixels1[2]
+            pixels2 = image.topixel([0, 1, (dec_center+a_deg/2.0)*np.pi/180.0,
+                ra_center*np.pi/180.0])
+            a_pix2 = pixels2[2]
+            a_pix = abs(a_pix2 - a_pix1)
+            ex = []
+            ey = []
+            for th in range(0, 360, 1):
+                if pa == 0:
+                    # semimajor axis is along x-axis
+                    ex.append(a_pix * np.cos(th * np.pi / 180.0)
+                        + x_center) # x -> Dec
+                    ey.append(a_pix * b_deg / a_deg * np.sin(th * np.pi / 180.0) + y_center) # y -> RA
+                elif pa == 90:
+                    # semimajor axis is along y-axis
+                    ex.append(a_pix * b_deg / a_deg * np.cos(th * np.pi / 180.0)
+                        + x_center) # x -> Dec
+                    ey.append(a_pix * np.sin(th * np.pi / 180.0) + y_center) # y -> RA
+            polys.append(Polygon(ex, ey))
+
+        elif line.startswith('box'):
+            poly_str_temp = line.split('[[')[1]
+            poly_str = poly_str_temp.split(']]')[0]
+            poly_str_list = poly_str.split('], [')
+            ra = []
+            dec = []
+            for pos in poly_str_list:
+                RAstr, Decstr = pos.split(',')
+                ra.append(Angle(RAstr, unit='hourangle').to('deg').value)
+                dec.append(Angle(Decstr.replace('.', ':', 2), unit='deg').to('deg').value)
+            ra.insert(1, ra[0])
+            dec.insert(1, dec[1])
+            ra.append(ra[2])
+            dec.append(dec[0])
+            poly_vertices = [np.array(ra), np.array(dec)]
+
+            # Convert to image-plane polygon
+            xvert = []
+            yvert = []
+            for RAvert, Decvert in zip(np.array(ra), np.array(dec)):
+                try:
+                    pixels = image.topixel([0, 1, Decvert*np.pi/180.0,
+                                               RAvert*np.pi/180.0])
+                except:
+                    pixels = image.topixel([1, 1, Decvert*np.pi/180.0,
+                                               RAvert*np.pi/180.0])
+                xvert.append(pixels[2]) # x -> Dec
+                yvert.append(pixels[3]) # y -> RA
+            polys.append(Polygon(xvert, yvert))
+
+        elif line.startswith('#'):
+            pass
+
+        else:
+            print('Only CASA regions of type "poly", "box", or "ellipse" are supported')
             sys.exit(1)
 
     return polys
@@ -411,23 +506,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
 
         if (region_file is not None) and (region_file != '[]'):
             # Merge the CASA regions with the mask
-            casa_polys = read_casa_polys(region_file)
-            for vertices in casa_polys:
-                RAverts = vertices[0]
-                Decverts = vertices[1]
-                xvert = []
-                yvert = []
-                for RAvert, Decvert in zip(RAverts, Decverts):
-                    try:
-                        pixels = new_mask.topixel([0, 1, Decvert*np.pi/180.0,
-                                                   RAvert*np.pi/180.0])
-                    except:
-                        pixels = new_mask.topixel([1, 1, Decvert*np.pi/180.0,
-                                                   RAvert*np.pi/180.0])
-                    xvert.append(pixels[2]) # x -> Dec
-                    yvert.append(pixels[3]) # y -> RA
-                poly = Polygon(xvert, yvert)
-
+            casa_polys = read_casa_polys(region_file, new_mask)
+            for poly in casa_polys:
                 # Find unmasked regions
                 unmasked_ind = np.where(data[0, 0] == 0)
 
