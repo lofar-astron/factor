@@ -67,7 +67,7 @@ dir_ms = /data/bands
 # the facet is then imaged as normal. Note: a sky model must be specified in the
 # directions file in the peel_skymodel column for each source that should be
 # peeled
-# peel_flux_Jy = 30.0
+# peel_flux_Jy = 25.0
 
 # Minimum uv distance in lambda for calibration (default = 80)
 # solve_min_uv_lambda = 80.0
@@ -75,6 +75,12 @@ dir_ms = /data/bands
 # Smooth amplitudes with spline fit + 2-D median (default = False; i.e., smooth
 # with a 1-D median only)
 # spline_smooth2D = False
+
+# Include XY and YX correlations during the slow gain solve for sources above
+# this flux density (default = 5.0). Below this value, only the XX and YY
+# correlations are included. Note that spline_smooth2D must be True to use this
+# option
+# solve_all_correlations_flux_Jy = 5.0
 
 
 [imaging]

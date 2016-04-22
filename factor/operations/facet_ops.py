@@ -76,11 +76,13 @@ class FacetSelfcal(Operation):
         skymodels = [band.skymodel_dirindep for band in self.bands]
         loopcount = max(1, self.parset['calibration_specific']['max_selfcal_loops'])
 
+        # Task for smoothing
         if self.parset['calibration_specific']['spline_smooth2d']:
             smooth_amps_task = 'smooth_amps_spline'
         else:
             smooth_amps_task = 'smooth_amps'
 
+        # Parset for initial solve (not used for later selfcal stages)
         if self.direction.peel_skymodel is not None:
             initial_selfcal_skymodel = self.direction.peel_skymodel
             initial_selfcal_parset = os.path.join(self.factor_parset_dir,
@@ -90,12 +92,22 @@ class FacetSelfcal(Operation):
                 'empty.skymodel')
             initial_selfcal_parset = os.path.join(self.factor_parset_dir,
                 'facet_dirdep_phaseonly_solve.parset')
+
+        # Parset for slow gain solve
+        if self.direction.solve_all_correlations:
+            selfcal_gain_parset = os.path.join(self.factor_parset_dir,
+                'facet_dirdep_amponly_solve_allcorr.parset')
+        else:
+            selfcal_gain_parset = os.path.join(self.factor_parset_dir,
+                'facet_dirdep_amponly_solve.parset')
+
         self.parms_dict.update({'ms_files_single': ms_files_single,
                                 'ms_files_grouped' : str(ms_files),
                                 'skymodels': skymodels,
                                 'dir_indep_parmDBs': dir_indep_parmDBs,
                                 'initial_selfcal_skymodel': initial_selfcal_skymodel,
                                 'initial_selfcal_parset': initial_selfcal_parset,
+                                'selfcal_gain_parset': selfcal_gain_parset,
                                 'loopcount': loopcount,
                                 'smooth_amps_task': smooth_amps_task})
 

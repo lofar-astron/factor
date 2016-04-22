@@ -360,10 +360,20 @@ def get_calibration_options(parset):
     else:
         parset_dict['spline_smooth2d'] = False
 
+    # Include XY and YX correlations during the slow gain solve for sources above
+    # this flux density (default = 5.0). Below this value, only the XX and YY
+    # correlations are included. Note that spline_smooth2D must be True to use this
+    # option
+    if 'solve_all_correlations_flux_Jy' in parset_dict:
+        parset_dict['solve_all_correlations_flux_Jy'] = parset.getfloat('calibration', 'solve_all_correlations_flux_Jy')
+    else:
+        parset_dict['solve_all_correlations_flux_Jy'] = 5.0
+
     # Check for unused options
     allowed_options = ['exit_on_selfcal_failure', 'skip_selfcal_check',
         'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal',
-        'tec_block_mhz', 'peel_flux_jy', 'solve_min_uv_lambda', 'spline_smooth2D']
+        'tec_block_mhz', 'peel_flux_jy', 'solve_min_uv_lambda', 'spline_smooth2D',
+        'solve_all_correlations_flux_Jy']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [calibration] section of the '

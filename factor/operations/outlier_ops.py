@@ -38,6 +38,15 @@ class OutlierPeel(Operation):
                 dir_indep_parmDBs.append(parmdb)
         skymodels = [band.skymodel_dirindep for band in self.bands]
 
+        # Parset for slow gain solve
+        if self.direction.solve_all_correlations:
+            selfcal_gain_parset = os.path.join(self.factor_parset_dir,
+                'facet_dirdep_amponly_solve_allcorr_skymodel.parset')
+        else:
+            selfcal_gain_parset = os.path.join(self.factor_parset_dir,
+                'facet_dirdep_amponly_solve_skymodel.parset')
+
+        # Task for smoothing
         if self.parset['calibration_specific']['spline_smooth2d']:
             smooth_amps_task = 'smooth_amps_spline'
         else:

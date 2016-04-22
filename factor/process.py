@@ -613,11 +613,19 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
 
         # Set peeling flag (i.e., facet calibrator should be peeled before facet
         # is imaged)
+        total_flux_jy, peak_flux_jy_bm = direction.get_cal_fluxes()
+        effective_flux_jy = peak_flux_jy_bm * (total_flux_jy / peak_flux_jy_bm)**0.667
         if not direction.is_outlier and direction.peel_skymodel is not None:
-            total_flux_jy, peak_flux_jy_bm = direction.get_cal_fluxes()
-            effective_flux_jy = peak_flux_jy_bm * (total_flux_jy / peak_flux_jy_bm)**0.667
             if effective_flux_jy > parset['calibration_specific']['peel_flux_jy']:
                 direction.peel_calibrator = True
+
+        # Set full correlation solve
+        if effective_flux_jy > parset['calibration_specific']['solve_all_correlations_flux_Jy']:
+            if not parset_dict['calibration_specific']['spline_smooth2d']:
+                log.error('The option spline_smooth2d must be enabled to use '
+                    'XY and YX correlations during the slow gain solve')
+                sys.exit(1)
+            direction.solve_all_correlations = True
 
         # Set field center to that of first band (all bands have the same phase
         # center)

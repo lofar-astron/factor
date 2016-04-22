@@ -123,6 +123,7 @@ class Direction(object):
         self.pre_average = False # whether to use baseline averaging
         self.blavg_weight_column = 'WEIGHT_SPECTRUM' # name of weights column
         self.peel_calibrator = False # whether to peel calibrator before imaging
+        self.solve_all_correlations = False # whether to solve for all corrs for slow gain
         self.started_operations = []
         self.completed_operations = []
         self.reset_operations = []
