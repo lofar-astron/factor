@@ -621,7 +621,7 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
 
         # Set full correlation solve
         if effective_flux_jy > parset['calibration_specific']['solve_all_correlations_flux_Jy']:
-            if not parset_dict['calibration_specific']['spline_smooth2d']:
+            if not parset['calibration_specific']['spline_smooth2d']:
                 log.error('The option spline_smooth2d must be enabled to use '
                     'XY and YX correlations during the slow gain solve')
                 sys.exit(1)
