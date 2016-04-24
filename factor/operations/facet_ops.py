@@ -95,11 +95,9 @@ class FacetSelfcal(Operation):
 
         # Parset for slow gain solve
         if self.direction.solve_all_correlations:
-            selfcal_gain_parset = os.path.join(self.factor_parset_dir,
-                'facet_dirdep_amponly_solve_allcorr.parset')
+            selfcal_gain_parset = 'facet_dirdep_amponly_solve_allcorr.parset'
         else:
-            selfcal_gain_parset = os.path.join(self.factor_parset_dir,
-                'facet_dirdep_amponly_solve.parset')
+            selfcal_gain_parset = 'facet_dirdep_amponly_solve.parset'
 
         self.parms_dict.update({'ms_files_single': ms_files_single,
                                 'ms_files_grouped' : str(ms_files),
