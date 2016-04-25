@@ -504,9 +504,9 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             data[0, 0, 0:sh[2], sh[3]-margin:sh[3]] = 0
             data[0, 0, sh[2]-margin:sh[2], 0:sh[3]] = 0
 
-        if (region_file is not None) and (region_file != '[]'):
+        if region_file is not None and region_file != '[]':
             # Merge the CASA regions with the mask
-            casa_polys = read_casa_polys(region_file, new_mask)
+            casa_polys = read_casa_polys(region_file.strip('[]"'), new_mask)
             for poly in casa_polys:
                 # Find unmasked regions
                 unmasked_ind = np.where(data[0, 0] == 0)
