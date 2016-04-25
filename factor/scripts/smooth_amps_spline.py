@@ -515,8 +515,9 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
 
                     # Clip extremely low amplitude solutions to prevent very high
                     # amplitudes in the corrected data
-                    low_ind = numpy.where(amp < 0.2)
-                    amp[low_ind] = 0.2
+                    if pol == '1:1' or pol == '0:0':
+                        low_ind = numpy.where(amp < 0.2)
+                        amp[low_ind] = 0.2
 
                     parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = numpy.copy(amp *
                         numpy.cos(phase) * norm_factor)
