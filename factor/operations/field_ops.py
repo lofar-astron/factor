@@ -32,7 +32,7 @@ class FieldMosaic(Operation):
                     round(robust, 2), round(taper_arcsec, 1), round(min_uv_lambda, 1))
         else:
             name = 'FieldMosaic'
-        super(MakeMosaic, self).__init__(parset, bands, direction,
+        super(FieldMosaic, self).__init__(parset, bands, direction,
             name=name)
 
         # Set the pipeline parset to use
