@@ -20,7 +20,7 @@ class FieldMosaic(Operation):
     Operation to mosiac facet images
     """
     def __init__(self, parset, bands, direction, cellsize_arcsec, robust,
-        taper_arcsec):
+        taper_arcsec, min_uv_lambda):
         # Set name from the facet imaging parameters. If the parameters are all
         # the same as those used for selfcal, just use 'FieldMosaic'; otherwise,
         # append the parameters
