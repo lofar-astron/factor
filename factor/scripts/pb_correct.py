@@ -67,6 +67,9 @@ def main(mosaicfits, pbfits, outroot):
     pbcorout = np.zeros_like(mosaicdat)
 
     pbhead = pf.getheader(pbfits)
+    if pbhead['CDELT4'] == 0.0:
+        # Causes WCS init problems if zero
+        pbhead['CDELT4'] = -8.236827542606E+07
     pbcordat = pf.getdata(pbfits)
     pbhdulist = pf.open(pbfits)
     pbwcs = pywcs.WCS(pbhead)
