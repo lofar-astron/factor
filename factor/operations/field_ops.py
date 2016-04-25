@@ -36,7 +36,7 @@ class FieldMosaic(Operation):
             name=name)
 
         # Set the pipeline parset to use
-        self.pipeline_parset_template = 'fieldmosaic_pipeline.parset'.format(infix)
+        self.pipeline_parset_template = 'fieldmosaic_pipeline.parset'
 
         # Define extra parameters needed for this operation
         input_files = [b.files for b in self.bands]
