@@ -122,7 +122,7 @@ def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
     directions_separation_max_arcmin, directions_max_num=None, interactive=False,
     flux_min_for_merging_Jy=0.1):
     """
-    Selects appropriate calibrators from sky models and makes the directions file
+    Selects appropriate calibrators from sky model and makes the directions file
 
     Parameters
     ----------
@@ -151,22 +151,26 @@ def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
     directions_file = 'factor_directions.txt'
     ds9_directions_file = 'factor_directions_ds9.reg'
 
-    # Filter larger patches
+    # Filter patches on size
+    s_large = s.copy()
     sizes = s.getPatchSizes(units='arcmin', weight=True)
     s.select(sizes < size_max_arcmin, aggregate=True, force=True)
     if len(s) == 0:
-        log.critical("No sources found that meet the specified max size criteria.")
+        log.critical("No sources found that meet the specified max size criterion.")
         sys.exit(1)
     log.info('Found {0} sources with sizes below {1} '
         'arcmin'.format(len(s.getPatchNames()), size_max_arcmin))
+    s_large.remove(sizes < size_max_arcmin, aggregate=True, force=True)
 
-    # Filter fainter patches on merge flux-density limit
+    # Filter patches on flux density limit for merging
     s.select('I > {0} Jy'.format(flux_min_for_merging_Jy), aggregate='sum', force=True)
     if len(s) == 0:
         log.critical("No sources found above {} Jy.".format(flux_min_for_merging_Jy))
         sys.exit(1)
     log.info('Found {0} sources with flux densities above {1} Jy'.format(
         len(s.getPatchNames()), flux_min_for_merging_Jy))
+    if len(s_large) > 0:
+        s_large.select('I > {0} Jy'.format(flux_min_for_merging_Jy), aggregate='sum', force=True)
 
     # Look for nearby pairs
     log.info('Merging sources within {0} arcmin of each other...'.format(
@@ -179,11 +183,11 @@ def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
             patches = s.getPatchNames()[nearby]
             s.merge(patches.tolist())
 
-    # Filter fainter patches on user flux-density limit
+    # Filter patches on total flux density limit
     s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='sum', force=True)
     if len(s) == 0:
         log.critical("No sources or merged groups found that meet the specified "
-            "min total flux density criteria.")
+            "min total flux density criterion.")
         sys.exit(1)
     log.info('Found {0} sources or merged groups with total flux densities above {1} Jy'.format(
         len(s.getPatchNames()), flux_min_Jy))
@@ -197,8 +201,36 @@ def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
         while len(dir_fluxes_sorted) > directions_max_num:
             cut_jy = dir_fluxes_sorted.pop() + 0.00001
         s.remove('I < {0} Jy'.format(cut_jy), aggregate='sum')
-
     log.info('Kept {0} directions in total'.format(len(s.getPatchNames())))
+
+    # Now, merge calibrator patches with any extended sources that meet the
+    # flux density limit for merging
+    if len(s_large) > 0:
+        log.info('Merging extended sources within {0} arcmin of calibrators...'.format(
+            directions_separation_max_arcmin))
+        calibrator_names = s.getPatchNames().tolist()
+        s.concatenate(s_large)
+        pRA, pDec = s.getPatchPositions(asArray=True)
+        for ra, dec in zip(pRA.tolist()[:], pDec.tolist()[:]):
+            dist = s.getDistance(ra, dec, byPatch=True, units='arcmin')
+            nearby = np.where(dist < directions_separation_max_arcmin)
+            if len(nearby[0]) > 1:
+                patches = s.getPatchNames()[nearby].tolist()
+
+                # Ensure that calibrator patch is first in list (as merged
+                # patch will get its name)
+                for calibrator_name in calibrator_names:
+                    if calibrator_name in patches:
+                        patches.remove(calibrator_name)
+                        patches.insert(0, calibrator_name)
+                        break
+                s.merge(patches)
+
+        # Remove any non-calibrator patches from the merged model
+        all_names = s.getPatchNames().tolist()
+        calibrator_ind = np.array([all_names.index(calibrator_name) for calibrator_name
+            in calibrator_names])
+        s.select(calibrator_ind, aggregate=True)
 
     # Write the file
     s.setPatchPositions(method='mid')
