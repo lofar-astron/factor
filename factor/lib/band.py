@@ -371,8 +371,8 @@ class Band(object):
                     # This will re-run for bad files every time factor is started, but the
                     # user could just remove the file from the input directory.
                     if find_unflagged_fraction(self.files[MS_id]) < min_fraction:
-                        log.debug('File {} not used because it contains too little unflagged'
-                                  ' data'.format(os.path.basename(self.files[MS_id])))
+                        self.log.debug('File {} not used because it contains too little unflagged'
+                                       ' data'.format(os.path.basename(self.files[MS_id])))
                         continue
                     os.symlink(self.files[MS_id], chunk_file)
 
