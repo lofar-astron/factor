@@ -212,6 +212,7 @@ class Direction(object):
         peel_flux_jy = parset['calibration_specific']['peel_flux_jy']
 
         self.robust_selfcal = parset['imaging_specific']['selfcal_robust']
+        self.robust_selfcal_wsclean = parset['imaging_specific']['selfcal_robust_wsclean']
         self.solve_min_uv_lambda = parset['calibration_specific']['solve_min_uv_lambda']
         self.selfcal_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
         self.use_selfcal_clean_threshold = parset['imaging_specific']['selfcal_clean_threshold']
@@ -221,7 +222,11 @@ class Direction(object):
         self.cellsize_facet_deg = facet_cellsize_arcsec / 3600.0
 
         if facet_robust is None:
-            facet_robust = parset['imaging_specific']['selfcal_robust']
+            # Use the selfcal values
+            if parset['imaging_specific']['facet_imager'].lower() == 'wsclean':
+                facet_robust = parset['imaging_specific']['selfcal_robust_wsclean']
+            else:
+                facet_robust = parset['imaging_specific']['selfcal_robust']
         self.robust_facet = facet_robust
 
         if facet_taper_arcsec is None:

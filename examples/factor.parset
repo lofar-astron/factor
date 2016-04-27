@@ -113,11 +113,13 @@ dir_ms = /data/bands
 # wsclean_nbands = 5
 
 # Selfcal imaging parameters: pixel size in arcsec (default = 1.5), Briggs
-# robust parameter (default = -0.25), and minimum uv distance in lambda (default
-# = 80). These settings apply both to selfcal images and to the full facet image
-# used to make the improved facet model that is subtracted from the data
+# robust parameter (default = -0.25 for casa and -0.5 for wsclean), and minimum
+# uv distance in lambda (default = 80). These settings apply both to selfcal
+# images and to the full facet image used to make the improved facet model that
+# is subtracted from the data
 # selfcal_cellsize_arcsec = 1.5
 # selfcal_robust = -0.25
+# selfcal_robust_wsclean = -0.5
 # selfcal_min_uv_lambda = 80.0
 
 # Facet imaging parameters: pixel size in arcsec, Briggs robust parameter, uv

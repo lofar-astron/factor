@@ -42,9 +42,11 @@ class OutlierPeel(Operation):
         if self.direction.solve_all_correlations:
             selfcal_gain_parset = os.path.join(self.factor_parset_dir,
                 'facet_dirdep_amponly_solve_allcorr_skymodel.parset')
+            fourpol = True # plot all correlations
         else:
             selfcal_gain_parset = os.path.join(self.factor_parset_dir,
                 'facet_dirdep_amponly_solve_skymodel.parset')
+            fourpol = False
 
         # Task for smoothing
         if self.parset['calibration_specific']['spline_smooth2d']:
@@ -56,6 +58,8 @@ class OutlierPeel(Operation):
                                 'ms_files_grouped' : str(ms_files),
                                 'skymodels': skymodels,
                                 'dir_indep_parmDBs': dir_indep_parmDBs,
+                                'selfcal_gain_parset': selfcal_gain_parset,
+                                'fourpol': fourpol,
                                 'smooth_amps_task': smooth_amps_task})
 
 

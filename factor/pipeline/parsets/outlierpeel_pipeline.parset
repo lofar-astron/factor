@@ -291,6 +291,7 @@ make_selfcal_plots.control.mapfile_in                    =   merge_normalized_se
 make_selfcal_plots.control.inputkeys                     =   parmdb
 make_selfcal_plots.control.outputkey                     =   plots_root
 make_selfcal_plots.argument.flags                        =   [parmdb,plots_root]
+make_selfcal_plots.argument.fourpol                      =   {{ fourpol }}
 
 # expand the merged parmDB to all files, length = nfiles
 expand_merged_parmdb_map.control.kind                    =   plugin

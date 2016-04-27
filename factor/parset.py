@@ -448,9 +448,10 @@ def get_imaging_options(parset):
         parset_dict['max_peak_smearing'] = 0.15
 
     # Selfcal imaging parameters: pixel size in arcsec (default = 1.5), Briggs
-    # robust parameter (default = -0.25), and minimum uv distance in lambda (default
-    # = 80). These settings apply both to selfcal images and to the full facet image
-    # used to make the improved facet model that is subtracted from the data
+    # robust parameter (default = -0.25 for casa and -0.5 for wsclean), and minimum
+    # uv distance in lambda (default = 80). These settings apply both to selfcal
+    # images and to the full facet image used to make the improved facet model that
+    # is subtracted from the data
     if 'selfcal_cellsize_arcsec' in parset_dict:
         parset_dict['selfcal_cellsize_arcsec'] = parset.getfloat('imaging', 'selfcal_cellsize_arcsec')
     else:
@@ -459,6 +460,10 @@ def get_imaging_options(parset):
         parset_dict['selfcal_robust'] = parset.getfloat('imaging', 'selfcal_robust')
     else:
         parset_dict['selfcal_robust'] = -0.25
+    if 'selfcal_robust_wsclean' in parset_dict:
+        parset_dict['selfcal_robust_wsclean'] = parset.getfloat('imaging', 'selfcal_robust_wsclean')
+    else:
+        parset_dict['selfcal_robust_wsclean'] = -0.5
     if 'selfcal_min_uv_lambda' in parset_dict:
         parset_dict['selfcal_min_uv_lambda'] = parset.getfloat('imaging', 'selfcal_min_uv_lambda')
     else:
@@ -534,10 +539,10 @@ def get_imaging_options(parset):
     # Check for unused options
     allowed_options = ['make_mosaic', 'wsclean_nbands', 'facet_imager',
         'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
-        'selfcal_clean_threshold', 'facet_cellsize_arcsec',
-        'facet_taper_arcsec', 'facet_robust', 'reimage_selfcaled',
-        'wsclean_image_padding', 'wsclean_model_padding', 'selfcal_min_uv_lambda',
-        'facet_min_uv_lambda']
+        'selfcal_robust_wsclean' 'selfcal_clean_threshold',
+        'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
+        'reimage_selfcaled', 'wsclean_image_padding', 'wsclean_model_padding',
+        'selfcal_min_uv_lambda', 'facet_min_uv_lambda']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [imaging] section of the '
