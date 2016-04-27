@@ -811,9 +811,7 @@ def get_cluster_options(parset):
                 "lofarpythonpath")
             sys.exit(1)
 
-    # Full path to a local disk on the nodes for I/O-intensive processing. The path
-    # must be the same for all nodes. If not given, the default directory in the
-    # working directory is used
+    # Number of CPUs per node to be used.
     if 'ncpu' in parset_dict:
         parset_dict['ncpu'] = parset.getint('cluster', 'ncpu')
     else:
