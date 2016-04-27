@@ -257,3 +257,18 @@ flux_min_Jy = 0.3
 
 [ms2.ms]
 # init_skymodel = /data/ms2.sky
+
+
+[checkfactor]
+# Use casa or ds9 for facet images (default = casa)
+# facet_viewer = ds9
+
+# Load facet regions (ds9 only; default = False)
+# ds9_load_regions = True
+
+# Scale limits (min max) in Jy/beam (default = full range)
+# ds9_limits = 0 0.1
+
+# Use display or eog to display PNG images (default = display)
+# image_display = eog
+
