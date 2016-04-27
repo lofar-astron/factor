@@ -143,7 +143,7 @@ def load_directions(parset_file):
     return direction_list, options
 
 
-def plot_state(directions_list, trim_names=True, options={}):
+def plot_state(directions_list, trim_names=True):
     """
     Plots the facets of a run
     """
