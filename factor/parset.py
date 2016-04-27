@@ -51,6 +51,9 @@ def parset_read(parset_file, use_log_file=True):
     # Handle cluster-specific parameters
     parset_dict['cluster_specific'].update(get_cluster_options(parset))
 
+    # Handle checkfactor parameters
+    parset_dict['checkfactor'].update(get_checkfactor_options(parset))
+
     # Set up working directory. All output will be placed in this directory
     if '+' in parset_dict['dir_working']:
         # Check if "+" is in path, as casapy buildmytasks will not work
@@ -119,7 +122,8 @@ def get_global_options(parset):
     """
     parset_dict = parset._sections['global'].copy()
     parset_dict.update({'direction_specific': {}, 'calibration_specific': {},
-        'imaging_specific': {}, 'cluster_specific': {}})
+                        'imaging_specific': {}, 'cluster_specific': {},
+                        'checkfactor': {}})
 
     # Parmdb name for dir-indep. selfcal solutions (stored inside the input band
     # measurement sets, so path should be relative to those; default = instrument)
@@ -916,4 +920,43 @@ def get_ms_options(parset, ms_files, skymodel_extension = '.wsclean_low2-model.m
                     parset_dict['ms_specific'][msbase]['init_skymodel'] = default_skymodel
             elif msbase not in parset_dict['ms_specific'].keys():
                 parset_dict['ms_specific'][msbase] = {'init_skymodel': default_skymodel}
+    return parset_dict
+
+
+def get_checkfactor_options(parset):
+    """
+    Handle the options for checkfactor
+
+    Parameters
+    ----------
+    parset : RawConfigParser object
+        Input parset
+
+    Returns
+    -------
+    parset_dict : dict
+        Dictionary with all cluster options
+
+    """
+    if 'checkfactor' in parset._sections.keys():
+        parset_dict = parset._sections['checkfactor']
+        given_options = parset.options('checkfactor')
+    else:
+        parset_dict = {}
+        given_options = []
+
+    if 'facet_viewer' not in parset_dict:
+        parset_dict['facet_viewer'] = 'casa'
+
+    if 'ds9_limits' not in parset_dict:
+        parset_dict['ds9_limits'] = None
+
+    if 'image_display' not in parset_dict:
+        parset_dict['image_display'] = 'display -geometry 800x600'
+
+    if 'ds9_load_regions' in parset_dict:
+        parset_dict['ds9_load_regions'] = parset.getboolean('checkfactor', 'ds9_load_regions')
+    else:
+        parset_dict['ds9_load_regions'] = False
+
     return parset_dict

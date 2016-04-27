@@ -39,6 +39,12 @@ try:
 except:
     hasaplpy = False
 
+try:
+    import pyds9
+    haspyds9 = True
+except:
+    haspyds9 = False
+
 log = logging.getLogger('factor:progress')
 logging.getLogger('astropy').setLevel(logging.CRITICAL)
 logging.getLogger('factor:parset').setLevel(logging.CRITICAL)
@@ -61,9 +67,10 @@ def run(parset_file, trim_names=True):
     Displays the current progress of a run
     """
     global all_directions
+    global options
 
     # Read in parset and get directions
-    all_directions = load_directions(parset_file)
+    all_directions, options = load_directions(parset_file)
     if len(all_directions) == 0:
         log.error('No directions found. Please check the parset or wait until '
             'FACTOR has initialized the directions')
@@ -90,10 +97,11 @@ def run(parset_file, trim_names=True):
 
 def load_directions(parset_file):
     """
-    Return directions for a run
+    Return directions for a run and any checkfactor-specific options
     """
     # Read parset
     parset = factor.parset.parset_read(parset_file, use_log_file=False)
+    options = parset['checkfactor']
 
     # Load directions. First check for user-supplied directions file then for
     # Factor-generated file from a previous run
@@ -132,10 +140,10 @@ def load_directions(parset_file):
         if has_state:
             direction_list.append(direction)
 
-    return direction_list
+    return direction_list, options
 
 
-def plot_state(directions_list, trim_names=True):
+def plot_state(directions_list, trim_names=True, options={}):
     """
     Plots the facets of a run
     """
@@ -403,8 +411,24 @@ def on_press(event):
         facet_image = find_facet_image(selected_direction)
         if len(facet_image) > 0:
             info = 'Opening facet image for {}...'.format(selected_direction.name)
-            im2 = pim.image(facet_image[0])
-            im2.view()
+            if options['facet_viewer'] == 'casa':
+                im2 = pim.image(facet_image[0])
+                im2.view()
+            elif options['facet_viewer'] == 'ds9':
+                if not haspyds9:
+                    os.system('ds9 '+facet_image[0]+' &')
+                else:
+                    # use pyds9 if available to re-use an existing ds9
+                    ds9=pyds9.DS9('checkfactor')
+                    ds9.set('file '+facet_image[0])
+                    if options['ds9_limits'] is not None:
+                        ds9.set('scale limits '+options['ds9_limits'])
+                    if options['ds9_load_regions']:
+                        regionfile=os.path.join(selected_direction.working_dir,'regions','facets_ds9.reg')
+                        ds9.set('regions delete all')
+                        ds9.set('regions load '+regionfile)
+            else:
+                info = 'Unknown facet viewer specified in config file!'
         else:
             info = 'No image of facet exists for {}'.format(selected_direction.name)
 
@@ -413,7 +437,7 @@ def on_press(event):
         selfcal_plots = find_selfcal_tec_plots(selected_direction)
         if len(selfcal_plots) > 0:
             info = 'Opening selfcal TEC solution plots for {}...'.format(selected_direction.name)
-            os.system('display -geometry 800x600 {} &'.format(' '.join(selfcal_plots)))
+            os.system(options['image_display']+' {} &'.format(' '.join(selfcal_plots)))
         else:
             info = 'Final selfcal solutions do not exist for {}'.format(selected_direction.name)
 
@@ -422,7 +446,7 @@ def on_press(event):
         selfcal_plots = find_selfcal_gain_plots(selected_direction)
         if len(selfcal_plots) > 0:
             info = 'Opening selfcal Gain solution plots for {}...'.format(selected_direction.name)
-            os.system('display -geometry 800x600 {} &'.format(' '.join(selfcal_plots)))
+            os.system(options['image_display']+' {} &'.format(' '.join(selfcal_plots)))
         else:
             info = 'Final selfcal solutions do not exist for {}'.format(selected_direction.name)
 
