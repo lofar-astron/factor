@@ -861,12 +861,12 @@ def get_cluster_options(parset):
     # working directory is used
     if 'dir_local' not in parset_dict:
         parset_dict['dir_local'] = None
-    elif parset_dict['clusterdesc_file'] != 'PBS':
+    #elif parset_dict['clusterdesc_file'] != 'PBS':
         # The local directory only works when the dppp_scratch.py node recipe is
         # used, which is only done when clusterdesc_file = PBS, so exit if not
-        log.critical('A local scratch directory can only be used when '
-            'clusterdesc_file = PBS (i.e., on a cluster with many nodes)')
-        sys.exit(1)
+    #    log.critical('A local scratch directory can only be used when '
+    #        'clusterdesc_file = PBS (i.e., on a cluster with many nodes)')
+    #    sys.exit(1)
 
     # Check for unused options
     allowed_options = ['ncpu', 'fmem', 'wsclean_fmem', 'ndir_per_node',
