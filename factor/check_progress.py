@@ -3,6 +3,7 @@ Module that checks and displays the progress of a run
 """
 import sys
 import os
+import subprocess
 import shutil
 import numpy as np
 import pickle
@@ -415,6 +416,12 @@ def on_press(event):
                 im2 = pim.image(facet_image[0])
                 im2.view()
             elif options['facet_viewer'] == 'ds9':
+                if os.path.isdir(facet_image[0]):
+                    # Convert casa image to fits
+                    if not os.path.exists('{0}.fits'.format(facet_image[0])):
+                        subprocess.call('image2fits in={0} out={0}.fits'.format(facet_image[0]),
+                            shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    facet_image[0] = '{0}.fits'.format(facet_image[0])
                 if not haspyds9:
                     os.system('ds9 '+facet_image[0]+' &')
                 else:
@@ -683,6 +690,12 @@ def find_facet_image(direction):
     """
     Returns the filename of full facet image
     """
+    if direction.name == 'field':
+        mosaic_dir = os.path.join(direction.working_dir, 'results', 'fieldmosaic',
+            direction.name)
+        facet_image = glob.glob(os.path.join(mosaic_dir, '*.correct_mosaic.pbcut.fits'))
+        return facet_image
+
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
     image_dir = os.path.join(direction.working_dir, 'results', 'facetimage',
