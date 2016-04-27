@@ -96,7 +96,8 @@ def parset_read(parset_file, use_log_file=True):
     # Check for unused sections
     given_sections = parset._sections.keys()
     msfiles = [os.path.basename(m) for m in parset_dict['mss']]
-    allowed_sections = ['global', 'calibration', 'imaging', 'directions', 'cluster'] + msfiles
+    allowed_sections = ['global', 'calibration', 'imaging', 'directions',
+        'cluster', 'checkfactor'] + msfiles
     for section in given_sections:
         if section not in allowed_sections:
             log.warning('Section "{}" was given in the parset but is not a valid '
@@ -951,10 +952,20 @@ def get_checkfactor_options(parset):
 
     if 'image_display' not in parset_dict:
         parset_dict['image_display'] = 'display -geometry 800x600'
+    elif parset_dict['image_display'] == 'display':
+        parset_dict['image_display'] = 'display -geometry 800x600'
 
     if 'ds9_load_regions' in parset_dict:
         parset_dict['ds9_load_regions'] = parset.getboolean('checkfactor', 'ds9_load_regions')
     else:
         parset_dict['ds9_load_regions'] = False
+
+    # Check for unused options
+    allowed_options = ['facet_viewer', 'ds9_limits', 'image_display',
+        'ds9_load_regions']
+    for option in given_options:
+        if option not in allowed_options:
+            log.warning('Option "{}" was given in the [checkfactor] section of the '
+                'parset but is not a valid checkfactor option'.format(option))
 
     return parset_dict
