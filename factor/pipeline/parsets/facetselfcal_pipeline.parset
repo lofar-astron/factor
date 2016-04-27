@@ -1387,6 +1387,7 @@ make_selfcal_plots.control.mapfile_in                      =   merge_selfcal_par
 make_selfcal_plots.control.inputkeys                       =   parmdb
 make_selfcal_plots.control.outputkey                       =   plots_root
 make_selfcal_plots.argument.flags                          =   [parmdb,plots_root]
+make_selfcal_plots.argument.fourpol                        =   {{ fourpol }}
 
 # create a mapfile with the selfcal images, length = 1
 create_selfcal_images_mapfile.control.kind                 =   plugin
