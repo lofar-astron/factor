@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 """
-Script to make a sky model for a facet
+Script to make selfcal images for a calibrator
 """
 import argparse
 from argparse import RawTextHelpFormatter
@@ -10,6 +10,8 @@ import numpy
 import astropy.io.fits
 import subprocess
 import logging
+import warnings
+warnings.filterwarnings("ignore") # Needed to suppress excessive output from matplotlib 1.5 that hangs the pipeline
 
 
 def meanclip(indata, clipsig=4.0, maxiter=10, converge_num=0.001, verbose=0):
@@ -176,7 +178,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
         Filenames of input mask(s). If not given, these are assumed to follow
         the standard selfcal naming convention
     imagenoise : float, optional
-        Image noise to use to set the image scaling
+        Image noise in Jy/beam to use to set the image scaling
     interactive : bool, optional
         If True, plot images as grid and show. If False, save one image for
         each input image
@@ -400,13 +402,15 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
 
 
 if __name__ == '__main__':
-    descriptiontext = "Make a sky model for a facet.\n"
+    descriptiontext = "Make selfcal images for a calibrator.\n"
 
     parser = argparse.ArgumentParser(description=descriptiontext, formatter_class=RawTextHelpFormatter)
-    parser.add_argument('fullskymodel', help='name of the full skymodel')
-    parser.add_argument('outmodel', help='name for the output')
-    parser.add_argument('vertices_file', help='file containing facet vertices')
-    parser.add_argument('-c', '--cal_only', help='return calibrator model only', type=bool, default=False)
+    parser.add_argument('imagefiles', help='list of the selfcal images')
+    parser.add_argument('maskfiles', help='list of the mask images', type=str, default=None)
+    parser.add_argument('imagenoise', help='noise for scaling (Jy/beam)', type=float, default=None)
+    parser.add_argument('interactive', help='return calibrator model only', type=bool, default=False)
+    parser.add_argument('facet_name', help='name of facet', type=str, default=None)
     args = parser.parse_args()
 
-    main(args.fullskymodel, args.outmodel, args.vertices_file, cal_only=args.cal_only)
+    main(args.imagefiles, maskfiles=args.maskfiles, imagenoise=args.imagenoise,
+        interactive=args.interactive, facet_name=args.facet_name)
