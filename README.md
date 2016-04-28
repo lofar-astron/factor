@@ -22,6 +22,7 @@ FACTOR requires the following:
 * [jinja2](http://jinja.pocoo.org/docs/dev)
 * [Shapely](https://github.com/Toblerity/Shapely)
 * [APLpy](http://aplpy.github.io) (version 1.0 or later)
+* [pyds9](https://github.com/ericmandel/pyds9) (optional, to allow checkfactor to interface with ds9)
 
 ### Downloading and Installing
 
