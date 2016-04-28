@@ -266,7 +266,7 @@ flux_min_Jy = 0.3
 # Load facet regions (ds9 only; default = False)
 # ds9_load_regions = True
 
-# Scale limits (min max) in Jy/beam (default = full range)
+# Scale limits (min max) in Jy/beam (ds9 only; default = full range)
 # ds9_limits = 0 0.1
 
 # Use display or eog to display PNG images (default = display)
