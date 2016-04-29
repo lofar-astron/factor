@@ -189,6 +189,6 @@ shift_diff_model_to_field.argument.shift.phasecenter         =   [{{ field_ra }}
 
 # subtract model difference from facet-selfcal to original data, length = nfiles
 subtract_diff_model_from_empty_data.control.type             =   add_subtract_columns
-subtract_diff_model_from_empty_data.control.opts.mapfiles_in =   [{{ input_files_single_mapfile }},{{ diff_models_field_mapfile }}]
+subtract_diff_model_from_empty_data.control.opts.mapfiles_in =   [create_ms_map.output.mapfile,shift_diff_model_to_field.output.mapfile]
 subtract_diff_model_from_empty_data.control.opts.inputkeys   =   [file1,file2]
 subtract_diff_model_from_empty_data.argument.flags           =   [file1,file2,{{ subtracted_data_colname }},DATA,SUBTRACTED_DATA_ALL_NEW,subtract]
