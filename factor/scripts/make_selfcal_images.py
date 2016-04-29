@@ -10,7 +10,8 @@ import numpy
 import astropy.io.fits
 import subprocess
 import logging
-
+import warnings
+warnings.filterwarnings("ignore")
 
 def meanclip(indata, clipsig=4.0, maxiter=10, converge_num=0.001, verbose=0):
    """
