@@ -15,6 +15,22 @@ mpl.rc('font',size =8 )
 mpl.rc('figure.subplot',left=0.05, bottom=0.05, right=0.95, top=0.95 )
 
 
+def input2bool(invar):
+    if isinstance(invar, bool):
+        return invar
+    elif isinstance(invar, str):
+        if invar.upper() == 'TRUE' or invar == '1':
+            return True
+        elif invar.upper() == 'FALSE' or invar == '0':
+            return False
+        else:
+            raise ValueError('input2bool: Cannot convert string "'+invar+'" to boolean!')
+    elif isinstance(invar, int) or isinstance(invar, float):
+        return bool(invar)
+    else:
+        raise TypeError('input2bool: Unsupported data type:'+str(type(invar)))
+
+
 def normalize(phase):
     """
     Normalize phase to the range [-pi, pi].
@@ -211,11 +227,11 @@ def solplot_phase_phasors(parmdb, imageroot, refstationi, plot_international=Fal
     refstation = stationsnames[refstationi]
     phase11_ref = soldict['Gain:1:1:Phase:{s}'.format(s=refstation)]['values']
     phase00_ref = soldict['Gain:0:0:Phase:{s}'.format(s=refstation)]['values']
-    
+
     if fourpol:
         phase10_ref = soldict['Gain:1:0:Phase:{s}'.format(s=refstation)]['values']
         phase01_ref = soldict['Gain:0:1:Phase:{s}'.format(s=refstation)]['values']
-    
+
     times= soldict['Gain:1:1:Phase:{s}'.format(s=refstation)]['times']
     num_channels = phase11_ref.shape[1]
 
@@ -303,13 +319,13 @@ def solplot_phase(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp
             real01_ref = soldict['Gain:0:1:Real:{s}'.format(s=refstation)]['values']
             imag10_ref = soldict['Gain:1:0:Imag:{s}'.format(s=refstation)]['values']
             imag01_ref = soldict['Gain:0:1:Imag:{s}'.format(s=refstation)]['values']
-        
+
             valscorr10 = real10_ref +1.j*imag10_ref
             valscorr01 = real01_ref +1.j*imag01_ref
 
             phase01_ref = np.angle(valscorr01)
-            phase10_ref = np.angle(valscorr10)  
-      
+            phase10_ref = np.angle(valscorr10)
+
 
     Nr = int(np.ceil(np.sqrt(Nstat)))
     Nc = int(np.ceil(np.float(Nstat)/Nr))
@@ -329,7 +345,7 @@ def solplot_phase(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp
 
             phase00_ref_chan = phase00_ref[:, chan_indx]
             phase11_ref_chan = phase11_ref[:, chan_indx]
-            
+
             if fourpol:
 	        real10 = soldict['Gain:1:0:Real:{s}'.format(s=station)]['values'][:, chan_indx]
                 real01 = soldict['Gain:0:1:Real:{s}'.format(s=station)]['values'][:, chan_indx]
@@ -341,10 +357,10 @@ def solplot_phase(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp
 
                 phase01_ref_chan = phase01_ref[:, chan_indx]
                 phase10_ref_chan = phase10_ref[:, chan_indx]
-                
+
                 phase01 = np.angle(valscorr01)
                 phase10 = np.angle(valscorr10)
-                
+
                 phase01 = np.ma.masked_where(phase01==0, phase01)
                 phase10 = np.ma.masked_where(phase10==0, phase10)
 
@@ -362,11 +378,11 @@ def solplot_phase(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp
 
             if fourpol:
                 axsp[istat][0].plot(times, normalize(phase01-phase01_ref_chan), color='orange',  marker=fmt, ls=ls, label='Gain:0:1:Phase',mec='orange')
-                axsp[istat][0].plot(times, normalize(phase10-phase10_ref_chan), color='red',  marker=fmt, ls=ls, label='Gain:1:0:Phase',mec='red') 
+                axsp[istat][0].plot(times, normalize(phase10-phase10_ref_chan), color='red',  marker=fmt, ls=ls, label='Gain:1:0:Phase',mec='red')
 
             axsp[istat][0].plot(times, normalize(phase00-phase00_ref_chan), color='b',  marker=fmt, ls=ls, label='Gain:0:0:Phase',mec='b')
             axsp[istat][0].plot(times, normalize(phase11-phase11_ref_chan), color='g',  marker=fmt, ls=ls, label='Gain:1:1:Phase',mec='g')
-            
+
             axsp[istat][0].set_ylim(-3.2, 3.2)
             axsp[istat][0].set_xlim(times.min(), times.max())
             axsp[istat][0].set_title(station)
@@ -398,8 +414,8 @@ def solplot_amp(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp=F
     real00_ref = soldict['Gain:0:0:Real:{s}'.format(s=refstation)]['values']
     imag11_ref = soldict['Gain:1:1:Imag:{s}'.format(s=refstation)]['values']
     imag00_ref = soldict['Gain:0:0:Imag:{s}'.format(s=refstation)]['values']
-    
-    
+
+
     if fourpol:
       real10_ref = soldict['Gain:1:0:Real:{s}'.format(s=refstation)]['values']
       real01_ref = soldict['Gain:0:1:Real:{s}'.format(s=refstation)]['values']
@@ -409,8 +425,8 @@ def solplot_amp(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp=F
       valscorr01 = real01_ref +1.j*imag01_ref
       amp01_ref = np.abs(valscorr01)
       amp10_ref = np.abs(valscorr10)
-      
-    
+
+
     num_channels = real11_ref.shape[1]
 
     valscorr00 = real00_ref +1.j*imag00_ref
@@ -455,20 +471,20 @@ def solplot_amp(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp=F
                 amp10_ref_chan = amp10_ref[:, chan_indx]
                 amp01 = np.abs(valscorr01)
                 amp10 = np.abs(valscorr10)
-            
-            
-            
-            
+
+
+
+
             if len(np.unique(real11)) > 500:
                 fmt = ','
             else:
                 fmt = '.'
             ls='none'
-            
+
             ## for y scale: check max and min values
             amp00m = np.ma.masked_where(amp00==1, amp00).compressed()
             amp11m = np.ma.masked_where(amp11==1, amp11).compressed()
-            
+
             if fourpol:
                 amp01m = np.ma.masked_where(amp01==1, amp01).compressed()
                 amp10m = np.ma.masked_where(amp10==1, amp10).compressed()
@@ -485,18 +501,18 @@ def solplot_amp(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp=F
             # don't plot flagged amplitudes
             amp00 = np.ma.masked_where(amp00==1, amp00)
             amp11 = np.ma.masked_where(amp11==1, amp11)
-            
+
             if fourpol:
 	        amp01 = np.ma.masked_where(amp01==1, amp01)
                 amp10 = np.ma.masked_where(amp10==1, amp10)
 
             axsa[istat][0].plot(times, amp00, color='b', marker=fmt, ls=ls, label='Gain:0:0:Amp',mec='b')
             axsa[istat][0].plot(times, amp11, color='g', marker=fmt, ls=ls, label='Gain:1:1:Amp',mec='g')
-            
+
             if fourpol:
                 axsa[istat][0].plot(times, amp01, color='orange', marker=fmt, ls=ls, label='Gain:0:1:Amp',mec='orange')
                 axsa[istat][0].plot(times, amp10, color='red', marker=fmt, ls=ls, label='Gain:1:0:Amp',mec='red')
-           
+
             if median_amp:
                 median_amp00 = np.median(amp00)
                 median_amp11 = np.median(amp11)
@@ -516,7 +532,7 @@ def solplot_amp(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp=F
             else:
 	        if fourpol:
 		    axsa[istat][0].set_ylim(0,ymax) # we always need ymin to be zero for cross-hand amps
-		else:  
+		else:
                     axsa[istat][0].set_ylim(ymin,ymax)
 
             axsa[istat][0].set_xlim(times.min(), times.max())
@@ -534,10 +550,23 @@ def main(parmdb, imageroot, freq=150.0, plot_tec=True, plot_amp=True,
     """
     Make various plots
     """
+    freq = float(freq)
     if freq != 0:
         reffreq = float(freq) * 1e6
     else:
         reffreq = None
+    refstation = int(refstation)
+
+    plot_tec = input2bool(plot_tec)
+    plot_amp = input2bool(plot_amp)
+    plot_phase = input2bool(plot_phase)
+    plot_scalarphase = input2bool(plot_scalarphase)
+    median_amp = input2bool(median_amp)
+    norm_amp_lim = input2bool(norm_amp_lim)
+    plot_clock = input2bool(plot_clock)
+    phasors = input2bool(phasors)
+    plot_international = input2bool(plot_international)
+    fourpol = input2bool(fourpol)
 
     if plot_scalarphase:
         solplot_scalarphase(parmdb, imageroot, refstation, plot_international=plot_international)
@@ -573,7 +602,7 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--plot-international-stations', dest='plot_international', action="store_true", default=False, help="plot international stations")
     parser.add_argument('-r', '--refstation', dest='refstation', default=0, help="given reference station (integer)")
     parser.add_argument('--4pol', dest='fourpol', action="store_true", default=False, help="plot all four correlations (must be present)")
-    
+
     parser.add_argument('parmdb', help="Name of solution parmdb")
     parser.add_argument('imageroot', help="Root name for output images")
 
