@@ -10,6 +10,7 @@ import matplotlib.path as mplPath
 from scipy.ndimage import gaussian_filter
 from scipy.special import erf
 import sys
+import glob
 
 
 class Direction(object):
@@ -811,6 +812,27 @@ class Direction(object):
 
         return delta_freq
 
+
+    def find_peel_skymodel(self):
+        """
+        Searches for an appropriate sky model for peeling
+        """
+        if self.peel_skymodel is not None:
+            return
+
+        max_separation_arcmin = 1.0
+        factor_lib_dir = os.path.dirname(os.path.abspath(__file__))
+        skymodel_dir = os.path.join(os.path.split(factor_lib_dir)[0], 'skymodels')
+        skymodels = glob.glob(os.path.join(skymodel_dir, '*'))
+        for skymodel in skymodels:
+            try:
+                s = lsmtool.load(skymodel)
+                dist_deg = s.getDistance(self.ra, self.dec)
+                if any(dist_deg*60.0 < max_separation_arcmin):
+                    self.peel_skymodel = skymodel
+                    break
+            except IOError:
+                pass
 
     def save_state(self):
         """

@@ -78,6 +78,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     peel_directions = [d for d in directions if d.is_outlier]
     peel_directions.extend([d for d in directions if d.peel_calibrator])
     if len(peel_directions) > 0:
+        log.info('Peeling {0} direction(s)'.format(len(peel_directions)))
+
         # Combine the nodes and cores for the peeling operation
         outlier_directions = factor.cluster.combine_nodes(peel_directions,
             parset['cluster_specific']['node_list'],
@@ -107,7 +109,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                         direction.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
                     set_sub_data_colname = False
             else:
-                log.error('Peeling verification failed for direction {0}.'.format(d.name))
+                log.error('Peeling failed for direction {0}.'.format(d.name))
                 log.info('Exiting...')
                 sys.exit(1)
 
@@ -122,7 +124,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
     # Run selfcal and subtract operations on direction groups
     for gindx, direction_group in enumerate(direction_groups):
-        log.info('Processing {0} direction(s) in Group {1}'.format(
+        log.info('Self calibrating {0} direction(s) in Group {1}'.format(
             len(direction_group), gindx+1))
 
         # Set up reset of any directions that need it. If the direction has
@@ -165,7 +167,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             for d in direction_group:
                 nearest, sep = factor.directions.find_nearest(d, dirs_with_selfcal)
                 if sep < parset['direction_specific']['transfer_radius_deg']:
-                    log.debug('Initializing selfcal for direction {0} with '
+                    log.debug('Initializing self calibration for direction {0} with '
                         'solutions from direction {1}.'.format(d.name, nearest.name))
                     d.dir_dep_parmdb_mapfile = nearest.dir_dep_parmdb_mapfile
                     d.save_state()
@@ -207,7 +209,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         selfcal_ok = [d.selfcal_ok for d in direction_group]
         for d in direction_group:
             if not d.selfcal_ok:
-                log.warn('Selfcal verification failed for direction {0}.'.format(d.name))
+                log.warn('Self calibration failed for direction {0}.'.format(d.name))
         if not all(selfcal_ok) and parset['calibration_specific']['exit_on_selfcal_failure']:
             log.info('Exiting...')
             sys.exit(1)
@@ -215,7 +217,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     # Check that at least one direction went through selfcal successfully. If
     # not, exit
     if len([d for d in directions if d.selfcal_ok]) == 0:
-        log.error('Selfcal verification failed for all directions. Exiting...')
+        log.error('Self calibration failed for all directions. Exiting...')
         sys.exit(1)
 
     # (Re)image facets for each set of cellsize, robust, and taper settings
@@ -225,7 +227,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     dirs_without_selfcal = [d for d in directions if not d.selfcal_ok and not
         d.is_patch and not d.is_outlier]
     if len(dirs_without_selfcal) > 0:
-        log.info('Imaging the following direction(s) with nearest selcal solutions:')
+        log.info('Imaging the following direction(s) with nearest self calibration solutions:')
         log.info('{0}'.format([d.name for d in dirs_without_selfcal]))
     for d in dirs_without_selfcal:
         # Search for nearest direction with successful selfcal
@@ -580,7 +582,8 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
             log.warn('Direction {} was specified for resetting but does not '
                 'exist in current list of directions'.format(name))
 
-    # Load previously completed operations (if any) and save the state
+    # Load previously completed operations (if any) and facetsubreset-specific
+    # attributes and save the state
     for direction in directions:
         direction.load_state()
         direction.save_state()
@@ -615,9 +618,24 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
         # is imaged)
         total_flux_jy, peak_flux_jy_bm = direction.get_cal_fluxes()
         effective_flux_jy = peak_flux_jy_bm * (total_flux_jy / peak_flux_jy_bm)**0.667
-        if not direction.is_outlier and direction.peel_skymodel is not None:
-            if effective_flux_jy > parset['calibration_specific']['peel_flux_jy']:
-                direction.peel_calibrator = True
+        if (effective_flux_jy > parset['calibration_specific']['peel_flux_jy'] or
+            direction.is_outlier):
+            direction.find_peel_skymodel()
+            if direction.peel_skymodel is not None:
+                if not direction.is_outlier:
+                   direction.peel_calibrator = True
+                log.info('Direction {0} will be peeled using sky model: {1}'.format(
+                    direction.name, direction.peel_skymodel))
+            else:
+                if direction.is_outlier:
+                    log.error('Direction {} was specified as an outlier source '
+                    'but an appropriate sky model is not available'.format(direction.name))
+                    sys.exit(1)
+                else:
+                    log.warning('The flux density of direction {} exceeds peel_flux_Jy '
+                        'but an appropriate peeling sky model is not available. '
+                        'This direction will go through normal self calibration '
+                        'instead'.format(direction.name))
 
         # Set full correlation solve
         if effective_flux_jy > parset['calibration_specific']['solve_all_correlations_flux_jy']:
