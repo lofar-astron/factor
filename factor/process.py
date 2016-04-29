@@ -136,7 +136,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             'facetsub' in d.completed_operations]
         if len(direction_group_reset_facetsub) > 0:
             for d in direction_group_reset_facetsub:
-                d.reset_state('facetsubreset')
+                if 'facetsubreset' in d.completed_operations:
+                    # Reset a previous reset
+                    d.reset_state('facetsubreset')
             direction_group_reset_facetsub = factor.cluster.combine_nodes(
                 direction_group_reset_facetsub,
                 parset['cluster_specific']['node_list'],
