@@ -5,6 +5,7 @@ import os
 import logging
 from astropy.coordinates import Angle
 import numpy as np
+import lsmtool
 from lsmtool.operations_lib import radec2xy
 import matplotlib.path as mplPath
 from scipy.ndimage import gaussian_filter
