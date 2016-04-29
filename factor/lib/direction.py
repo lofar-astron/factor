@@ -820,6 +820,7 @@ class Direction(object):
         import pickle
 
         with open(self.save_file, 'wb') as f:
+            # Remove log and skymodel objects, as they cannot be pickled
             save_dict = self.__dict__.copy()
             save_dict.pop('log')
             save_dict.pop('skymodel')
@@ -853,12 +854,14 @@ class Direction(object):
                     self.completed_operations = d['completed_operations']
 
                 # Load mapfiles needed for facetsubreset
-                if ('dir_dep_parmdb_mapfile' in d and
-                    'facet_model_mapfile' in d and
-                    'subtracted_data_colname' in d):
+                if 'dir_dep_parmdb_mapfile' in d:
                     self.dir_dep_parmdb_mapfile = d['dir_dep_parmdb_mapfile']
+                if 'facet_model_mapfile' in d:
                     self.facet_model_mapfile = d['facet_model_mapfile']
+                if 'subtracted_data_colname' in d:
                     self.subtracted_data_colname = d['subtracted_data_colname']
+                if 'wsclean_modelimg_size_mapfile' in d:
+                    self.wsclean_modelimg_size_mapfile = d['wsclean_modelimg_size_mapfile']
             return True
         except:
             return False
