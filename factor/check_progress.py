@@ -426,6 +426,7 @@ def on_press(event):
                     os.system('ds9 '+facet_image[0]+' &')
                 else:
                     # use pyds9 if available to re-use an existing ds9
+                    pyds9.ds9_xpans()
                     ds9=pyds9.DS9('checkfactor')
                     ds9.set('file '+facet_image[0])
                     if options['ds9_limits'] is not None:
