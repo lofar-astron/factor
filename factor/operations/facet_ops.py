@@ -102,7 +102,7 @@ class FacetSelfcal(Operation):
             fourpol = False
 
         self.parms_dict.update({'ms_files_single': ms_files_single,
-                                'ms_files_grouped' : str(ms_files),
+                                'ms_files_grouped': str(ms_files),
                                 'skymodels': skymodels,
                                 'dir_indep_parmDBs': dir_indep_parmDBs,
                                 'initial_selfcal_skymodel': initial_selfcal_skymodel,
@@ -260,12 +260,19 @@ class FacetSubReset(Operation):
 
         # Define extra parameters needed for this operation
         self.direction.set_imcal_parameters(parset, bands)
+        ms_files = [band.files for band in self.bands]
+        ms_files_single = []
+        for bandfiles in ms_files:
+            for filename in bandfiles:
+                ms_files_single.append(filename)
         dir_indep_parmDBs = []
         for band in self.bands:
             for parmdb in band.dirindparmdbs:
                 dir_indep_parmDBs.append(parmdb)
         skymodels = [band.skymodel_dirindep for band in self.bands]
-        self.parms_dict.update({'skymodels': skymodels,
+        self.parms_dict.update({'ms_files_single': ms_files_single,
+                                'ms_files_grouped': str(ms_files),
+                                'skymodels': skymodels,
                                 'dir_indep_parmDBs': dir_indep_parmDBs})
 
 
