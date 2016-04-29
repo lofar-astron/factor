@@ -85,13 +85,11 @@ class FacetSelfcal(Operation):
         # Parset for initial solve (not used for later selfcal stages)
         if self.direction.peel_skymodel is not None:
             initial_selfcal_skymodel = self.direction.peel_skymodel
-            initial_selfcal_parset = os.path.join(self.factor_parset_dir,
-                'facet_dirdep_phaseonly_solve_skymodel.parset')
+            initial_selfcal_parset = 'facet_dirdep_phaseonly_solve_skymodel.parset'
         else:
             initial_selfcal_skymodel = os.path.join(self.factor_skymodel_dir,
                 'empty.skymodel')
-            initial_selfcal_parset = os.path.join(self.factor_parset_dir,
-                'facet_dirdep_phaseonly_solve.parset')
+            initial_selfcal_parset = 'facet_dirdep_phaseonly_solve.parset'
 
         # Parset for slow gain solve
         if self.direction.solve_all_correlations:
