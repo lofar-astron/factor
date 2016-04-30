@@ -544,7 +544,7 @@ def get_imaging_options(parset):
     # Check for unused options
     allowed_options = ['make_mosaic', 'wsclean_nbands', 'facet_imager',
         'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
-        'selfcal_robust_wsclean' 'selfcal_clean_threshold',
+        'selfcal_robust_wsclean', 'selfcal_clean_threshold',
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
         'reimage_selfcaled', 'wsclean_image_padding', 'wsclean_model_padding',
         'selfcal_min_uv_lambda', 'facet_min_uv_lambda',
