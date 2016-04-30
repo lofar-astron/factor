@@ -88,12 +88,12 @@ class FacetSelfcal(Operation):
         # generally done otherwise)
         if self.direction.peel_skymodel is not None:
             initial_selfcal_skymodel = self.direction.peel_skymodel
-            initial_selfcal_parset = os.path.join(self.factor_skymodel_dir,
+            initial_selfcal_parset = os.path.join(self.factor_parset_dir,
                 'facet_dirdep_phaseonly_solve_skymodel.parset')
         else:
             initial_selfcal_skymodel = os.path.join(self.factor_skymodel_dir,
                 'empty.skymodel')
-            initial_selfcal_parset = os.path.join(self.factor_skymodel_dir,
+            initial_selfcal_parset = os.path.join(self.factor_parset_dir,
                 'facet_dirdep_phaseonly_solve.parset')
 
         # Parset for slow gain solve
