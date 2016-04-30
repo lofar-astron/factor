@@ -82,9 +82,10 @@ class FacetSelfcal(Operation):
         else:
             smooth_amps_task = 'smooth_amps'
 
-        # Parset for initial solve (not used for later selfcal stages). Note
-        # that these must be full paths, as the parsets to not prepend the
-        # parset directory (as is generally done otherwise)
+        # Parset and sky model for initial solve (not used for later selfcal
+        # stages). Note that these must be full paths, as the entries in these
+        # steps do not prepend the parset or sky model directories (as is
+        # generally done otherwise)
         if self.direction.peel_skymodel is not None:
             initial_selfcal_skymodel = self.direction.peel_skymodel
             initial_selfcal_parset = os.path.join(self.factor_skymodel_dir,

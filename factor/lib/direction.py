@@ -835,6 +835,7 @@ class Direction(object):
             except IOError:
                 pass
 
+
     def save_state(self):
         """
         Saves the direction state to a file
