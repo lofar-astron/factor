@@ -313,13 +313,13 @@ class Direction(object):
         self.wsclean_full2_image_niter = int(12000 * scaling_factor)
         self.casa_full2_image_niter = int(12000 * scaling_factor)
 
-        # Set multiscale imaging mode: Get source sizes and check for large
-        # sources (anything above 4 arcmin -- the CC sky model was convolved
-        # with a Gaussian of 1 arcmin, so unresolved sources have sizes of ~
-        # 1 arcmin)
+        # Set multiscale imaging mode for facet imaging: Get source sizes and
+        # check for large sources (anything above 4 arcmin -- the CC sky model
+        # was convolved with a Gaussian of 1 arcmin, so unresolved sources have
+        # sizes of ~ 1 arcmin)
+        large_size_arcmin = 6.0
         if self.mscale_field_do is None:
             sizes_arcmin = self.get_source_sizes()
-            large_size_arcmin = 6.0
             if any([s > large_size_arcmin for s in sizes_arcmin]):
                 self.mscale_field_do = True
             else:
@@ -333,9 +333,10 @@ class Direction(object):
             self.casa_multiscale = '[0]'
             self.wsclean_multiscale = ''
 
-        # Set wavelet source-finding mode
+        # Set whether to use wavelet module in calibrator masking
         if self.atrous_do is None:
-            if self.mscale_field_do:
+            sizes_arcmin = self.get_source_sizes(cal_only=True)
+            if any([s > large_size_arcmin for s in sizes_arcmin]):
                 self.atrous_do = True
             else:
                 self.atrous_do = False
@@ -454,12 +455,15 @@ class Direction(object):
         self.skymodel = skymodel
 
 
-    def get_source_sizes(self):
+    def get_source_sizes(self, cal_only=False):
         """
         Returns list of source sizes in arcmin
-
         """
-        sizes = self.skymodel.getPatchSizes(units='arcmin', weight=False)
+        skymodel = self.skymodel.copy()
+        if cal_only:
+            dist = skymodel.getDistance(self.ra, self.dec, byPatch=True)
+            skymodel.select(dist < self.cal_radius_deg, aggregate=True)
+        sizes = skymodel.getPatchSizes(units='arcmin', weight=False)
 
         return sizes
 
