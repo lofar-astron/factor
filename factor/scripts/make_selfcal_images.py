@@ -319,7 +319,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
                             title = im
             if any([fitsimagename.find(r) > 0 for r in row3_images]):
                 if first_gain:
-                    row_indx = 2
+                    row_indx += 1
                 if row3_colindx % Nc == 0:
                     row3_colindx = 0
                     if not first_gain:
