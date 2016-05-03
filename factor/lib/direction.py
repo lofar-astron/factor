@@ -828,7 +828,7 @@ class Direction(object):
         max_separation_arcmin = 1.0
         factor_lib_dir = os.path.dirname(os.path.abspath(__file__))
         skymodel_dir = os.path.join(os.path.split(factor_lib_dir)[0], 'skymodels')
-        skymodels = glob.glob(os.path.join(skymodel_dir, '*'))
+        skymodels = glob.glob(os.path.join(skymodel_dir, '*.skymodel'))
         for skymodel in skymodels:
             try:
                 s = lsmtool.load(skymodel)
