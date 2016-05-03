@@ -145,7 +145,7 @@ def main(instrument_name, instrument_name_smoothed, normalize=True):
                     imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
                     amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
                     amplist.append(amp)
-        norm_factor = 1.0/(numpy.mean(np.concatenate(amplist)))
+        norm_factor = 1.0/(numpy.mean(numpy.concatenate(amplist)))
         print "smooth_amps.py: Normalization-Factor is:", norm_factor
 
         # Now do the normalization
