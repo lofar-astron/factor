@@ -318,6 +318,12 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         else:
             skip_source_detection = False
 
+    if type(use_adaptive_threshold) is str:
+        if use_adaptive_threshold.lower() == 'true':
+            use_adaptive_threshold = True
+        else:
+            use_adaptive_threshold = False
+
     if reference_ra_deg is not None and reference_dec_deg is not None:
         reference_ra_deg = float(reference_ra_deg)
         reference_dec_deg = float(reference_dec_deg)
