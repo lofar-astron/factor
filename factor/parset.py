@@ -358,21 +358,21 @@ def get_calibration_options(parset):
     else:
         parset_dict['solve_min_uv_lambda'] = 80.0
 
-    # Smooth amplitudes with spline fit + 2-D median (default = False, i.e., smooth
+    # Smooth amplitudes with spline fit + 2-D median (default = True, i.e., smooth
     # with a 1-D median only)
     if 'spline_smooth2d' in parset_dict:
         parset_dict['spline_smooth2d'] = parset.getboolean('calibration', 'spline_smooth2d')
     else:
-        parset_dict['spline_smooth2d'] = False
+        parset_dict['spline_smooth2d'] = True
 
     # Include XY and YX correlations during the slow gain solve for sources above
-    # this flux density (default = 5.0). Below this value, only the XX and YY
+    # this flux density (default = 1000.0). Below this value, only the XX and YY
     # correlations are included. Note that spline_smooth2D must be True to use this
     # option
     if 'solve_all_correlations_flux_jy' in parset_dict:
         parset_dict['solve_all_correlations_flux_jy'] = parset.getfloat('calibration', 'solve_all_correlations_flux_jy')
     else:
-        parset_dict['solve_all_correlations_flux_jy'] = 5.0
+        parset_dict['solve_all_correlations_flux_jy'] = 1000.0
 
     # Check for unused options
     allowed_options = ['exit_on_selfcal_failure', 'skip_selfcal_check',
