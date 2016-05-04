@@ -218,6 +218,7 @@ class Direction(object):
         self.solve_min_uv_lambda = parset['calibration_specific']['solve_min_uv_lambda']
         self.selfcal_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
         self.use_selfcal_clean_threshold = parset['imaging_specific']['selfcal_clean_threshold']
+        self.casa_multiscale = parset['imaging_specific']['selfcal_scales']
 
         if facet_cellsize_arcsec is None:
             facet_cellsize_arcsec = parset['imaging_specific']['selfcal_cellsize_arcsec']
@@ -325,7 +326,6 @@ class Direction(object):
             else:
                 self.mscale_field_do = False
         if self.mscale_field_do:
-            self.casa_multiscale = '[0, 3, 7, 25, 60, 150]'
             self.wsclean_multiscale = '-multiscale,'
             self.wsclean_full1_image_niter /= 2.0 # fewer iterations are needed
             self.wsclean_full2_image_niter /= 2.0 # fewer iterations are needed

@@ -430,12 +430,12 @@ def get_imaging_options(parset):
         parset_dict['reimage_selfcaled'] = True
 
     # Max number of bands per WSClean image when wide-band clean is used (default =
-    # 5). Smaller values produce better results but require longer run times.
+    # 1). Smaller values produce better results but require longer run times.
     # Wide-band clean is activated when there are more than 5 bands
     if 'wsclean_nbands' in parset_dict:
         parset_dict['wsclean_nbands'] = parset.getint('imaging', 'wsclean_nbands')
     else:
-        parset_dict['wsclean_nbands'] = 3
+        parset_dict['wsclean_nbands'] = 1
 
     # Use WSClean or CASA for imaging of entire facet (default = wsclean). For large
     # bandwidths, the CASA imager is typically faster
@@ -453,10 +453,11 @@ def get_imaging_options(parset):
         parset_dict['max_peak_smearing'] = 0.15
 
     # Selfcal imaging parameters: pixel size in arcsec (default = 1.5), Briggs
-    # robust parameter (default = -0.25 for casa and -0.5 for wsclean), and minimum
-    # uv distance in lambda (default = 80). These settings apply both to selfcal
-    # images and to the full facet image used to make the improved facet model that
-    # is subtracted from the data
+    # robust parameter (default = -0.25 for casa and -0.5 for wsclean), minimum uv
+    # distance in lambda (default = 80), and multiscale clean scales (default = [0,
+    # 3, 7, 25, 60, 150]). These settings apply both to selfcal images and to the
+    # full facet image used to make the improved facet model that is subtracted from
+    # the data
     if 'selfcal_cellsize_arcsec' in parset_dict:
         parset_dict['selfcal_cellsize_arcsec'] = parset.getfloat('imaging', 'selfcal_cellsize_arcsec')
     else:
@@ -473,6 +474,8 @@ def get_imaging_options(parset):
         parset_dict['selfcal_min_uv_lambda'] = parset.getfloat('imaging', 'selfcal_min_uv_lambda')
     else:
         parset_dict['selfcal_min_uv_lambda'] = 80.0
+    if not 'selfcal_scales' in parset_dict:
+        parset_dict['selfcal_scales'] = '[0, 3, 7, 25, 60, 150]'
 
     # Use a clean threshold during selfcal imaging (default = False). If False,
     # clean will always stop at 1000 iterations. If True, clean will go to 1 sigma
