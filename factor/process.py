@@ -338,13 +338,6 @@ def _set_up_compute_parameters(parset, dry_run=False):
             parset['cluster_specific']['clusterdesc'] = parset['lofarroot'] + '/share/local.clusterdesc'
             parset['cluster_specific']['clustertype'] = 'juropa_slurm'
             parset['cluster_specific']['node_list'] = ['localhost']
-        elif cluster_parset['clusterdesc_file'].lower() == 'herts_mpiexec' \
-                or ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'herts_mpiexec'):
-            log.info('Using cluster setting: \"HERTS_mpiexec\" (Single genericpipeline using multiple nodes).')
-            # slurm_srun on JUROPA uses the local.clusterdesc
-            parset['cluster_specific']['clusterdesc'] = parset['lofarroot'] + '/share/local.clusterdesc'
-            parset['cluster_specific']['clustertype'] = 'herts_mpiexec'
-            parset['cluster_specific']['node_list'] = ['localhost']
         else:
             log.info('Using cluster setting: \"local\" (Single node).')
             parset['cluster_specific']['clusterdesc'] = cluster_parset['clusterdesc_file']

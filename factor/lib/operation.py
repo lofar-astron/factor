@@ -154,10 +154,6 @@ class Operation(object):
             self.cfg_dict['remote'] = '[remote]\n'\
                 + 'method = slurm_srun\n'\
                 + 'max_per_node = {0}\n'.format(self.cfg_dict['max_cpus_per_node'])
-        elif self.parset['cluster_specific']['clustertype'] == 'herts_mpiexec':
-            self.cfg_dict['remote'] = '[remote]\n'\
-                + 'method = mpiexec\n'\
-                + 'max_per_node = {0}\n'.format(self.cfg_dict['max_cpus_per_node'])
         elif self.parset['cluster_specific']['clustertype'] == 'pbs':
             self.cfg_dict['remote'] = ''
         else:
