@@ -485,6 +485,14 @@ def get_imaging_options(parset):
     else:
         parset_dict['selfcal_clean_threshold'] = False
 
+    # Use an adaptive masking threshold during selfcal imaging (default = False). If
+    # True, the masking threshold will be estimated using the negative peaks in the
+    # image, which can help selfcal convergence in the presence of strong artifacts
+    if 'selfcal_adaptive_threshold' in parset_dict:
+        parset_dict['selfcal_adaptive_threshold'] = parset.getboolean('imaging', 'selfcal_adaptive_threshold')
+    else:
+        parset_dict['selfcal_adaptive_threshold'] = False
+
     # Facet imaging parameters: pixel size in arcsec, Briggs robust parameter, uv
     # taper in arcsec, and minimum uv distance in lambda. These parameters are used
     # only for making full facet images (and not for making improved models). One
@@ -547,7 +555,7 @@ def get_imaging_options(parset):
     # Check for unused options
     allowed_options = ['make_mosaic', 'wsclean_nbands', 'facet_imager',
         'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
-        'selfcal_robust_wsclean', 'selfcal_clean_threshold',
+        'selfcal_robust_wsclean', 'selfcal_clean_threshold', 'selfcal_adaptive_threshold',
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
         'reimage_selfcaled', 'wsclean_image_padding', 'wsclean_model_padding',
         'selfcal_min_uv_lambda', 'facet_min_uv_lambda',

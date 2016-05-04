@@ -218,6 +218,7 @@ class Direction(object):
         self.solve_min_uv_lambda = parset['calibration_specific']['solve_min_uv_lambda']
         self.selfcal_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
         self.use_selfcal_clean_threshold = parset['imaging_specific']['selfcal_clean_threshold']
+        self.use_selfcal_adaptive_threshold = parset['imaging_specific']['selfcal_adaptive_threshold']
         self.casa_multiscale = parset['imaging_specific']['selfcal_scales']
 
         if facet_cellsize_arcsec is None:

@@ -219,7 +219,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
          rmsbox_bright=(35, 7), iterate_threshold=False, adaptive_rmsbox=False, img_format='fits',
          threshold_format='float', trim_by=0.0, vertices_file=None, atrous_jmax=6,
          pad_to_size=None, skip_source_detection=False, region_file=None, nsig=1.0,
-         reference_ra_deg=None, reference_dec_deg=None, cellsize_deg=0.000417):
+         reference_ra_deg=None, reference_dec_deg=None, cellsize_deg=0.000417,
+         use_adaptive_threshold=False):
     """
     Make a clean mask and return clean threshold
 
@@ -273,6 +274,9 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         Dec for center of output mask image
     cellsize_deg : float, optional
         Size of a pixel in degrees
+    use_adaptive_threshold : bool, optional
+        If True, use an adaptive threshold estimated from the negative values in
+        the image
 
     Returns
     -------
@@ -371,6 +375,32 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
 
             # Save changes
             input_img.putdata(data)
+
+        if use_adaptive_threshold:
+            # Get an estimate of the rms
+            img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
+                                     thresh_pix=threshpix, thresh_isl=threshisl,
+                                     atrous_do=atrous_do, ini_method='curvature', thresh='hard',
+                                     adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150,
+                                     rms_box_bright=rmsbox_bright, rms_map=True, quiet=True,
+                                     atrous_jmax=atrous_jmax)
+
+            # Find min and max pixels
+            max_neg_val = abs(np.min(img.ch0_arr))
+            max_neg_pos = np.where(img.ch0_arr == np.min(img.ch0_arr))
+            max_pos_val = abs(np.max(img.ch0_arr))
+            max_pos_pos = np.where(img.ch0_arr == np.max(img.ch0_arr))
+
+            # Estimate new thresh_isl from min pixel value's sigma, but don't let
+            # it get higher than 1/2 of the peak's sigma
+            threshisl_neg = 3.0 * max_neg_val / img.rms_arr[max_neg_pos][0]
+            max_sigma = max_pos_val / img.rms_arr[max_pos_pos][0]
+            if threshisl_neg > max_sigma / 2.0:
+                threshisl_neg = max_sigma / 2.0
+
+            # Use the new threshold only if it is larger than the user-specified one
+            if threshisl_neg > threshisl:
+                threshisl = threshisl_neg
 
         if iterate_threshold:
             # Start with given threshold and lower it until we get at least one island

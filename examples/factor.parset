@@ -139,6 +139,11 @@ dir_ms = /data/bands
 # noise level
 # selfcal_clean_threshold = False
 
+# Use an adaptive masking threshold during selfcal imaging (default = False). If
+# True, the masking threshold will be estimated using the negative peaks in the
+# image, which can help selfcal convergence in the presence of strong artifacts
+# selfcal_adaptive_threshold = False
+
 
 [directions]
 # Full path to file containing calibrator directions. If not given, directions
