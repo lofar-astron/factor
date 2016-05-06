@@ -16,7 +16,7 @@ If you want to install FACTOR yourself, follow the instructions below.
 FACTOR requires the following:
 
 * The LOFAR offline trunk from the LOFAR software repository (version 2.15 or later)
-* [CASA](http://casa.nrao.edu) (version 4.2 or version 4.5 (versions 4.3, 4.4, and 4.6 do not work); note that CASA requires Java for the buildmytasks script that is needed by FACTOR, so you will need Java as well)
+* [CASA](http://casa.nrao.edu) (version 4.2 or version 4.5 -- versions 4.3, 4.4, and 4.6 do not work; note that CASA requires Java for the buildmytasks script that is needed by FACTOR, so you will need Java as well)
 * [WSClean](http://sourceforge.net/p/wsclean/wiki/Home) (version 1.10 or later)
 * [LSMTool](https://github.com/darafferty/LSMTool) (version 1.1 or later)
 * [jinja2](http://jinja.pocoo.org/docs/dev)
