@@ -385,6 +385,21 @@ def _set_up_compute_parameters(parset, dry_run=False):
         parset['cluster_specific']['node_list'] = factor.cluster.get_compute_nodes(
             parset['cluster_specific']['clusterdesc'])
 
+    # check ulimit(s), 
+    try:
+        import resource
+        nof_files_limits = resource.getrlimit(resource.RLIMIT_NOFILE)
+        if parset['cluster_specific']['clustertype'] == 'local' and nof_files_limits[0] < nof_files_limits[1]:
+            log.info('Setting limit for number of open files to: {}.'.format(nof_files_limits[1]))
+            resource.setrlimit(resource.RLIMIT_NOFILE,(nof_files_limits[1],nof_files_limits[1]))
+            nof_files_limits = resource.getrlimit(resource.RLIMIT_NOFILE)
+        log.info('Active limit for number of open files is {0}, maximum limit is {1}.'.format(nof_files_limits[0],nof_files_limits[1]))
+        if nof_files_limits[0] < 2048:
+            log.warn('The limit for number of open files is small, this could results in a "Too many open files" problem when running factor.')
+            log.warn('The active limit can be increased to the maximum for the user with: "ulimit -Sn <number>" (bash) or "limit descriptors 1024" (csh).')
+    except resource.error:
+        log.warn('Cannot check limits for number of open files, what kind of system is this?')
+            
     # Get paths to required executables
     factor.cluster.find_executables(parset)
 
