@@ -358,21 +358,21 @@ def get_calibration_options(parset):
     else:
         parset_dict['solve_min_uv_lambda'] = 80.0
 
-    # Smooth amplitudes with spline fit + 2-D median (default = False, i.e., smooth
+    # Smooth amplitudes with spline fit + 2-D median (default = True, i.e., smooth
     # with a 1-D median only)
     if 'spline_smooth2d' in parset_dict:
         parset_dict['spline_smooth2d'] = parset.getboolean('calibration', 'spline_smooth2d')
     else:
-        parset_dict['spline_smooth2d'] = False
+        parset_dict['spline_smooth2d'] = True
 
     # Include XY and YX correlations during the slow gain solve for sources above
-    # this flux density (default = 5.0). Below this value, only the XX and YY
+    # this flux density (default = 1000.0). Below this value, only the XX and YY
     # correlations are included. Note that spline_smooth2D must be True to use this
     # option
     if 'solve_all_correlations_flux_jy' in parset_dict:
         parset_dict['solve_all_correlations_flux_jy'] = parset.getfloat('calibration', 'solve_all_correlations_flux_jy')
     else:
-        parset_dict['solve_all_correlations_flux_jy'] = 5.0
+        parset_dict['solve_all_correlations_flux_jy'] = 1000.0
 
     # Check for unused options
     allowed_options = ['exit_on_selfcal_failure', 'skip_selfcal_check',
@@ -430,12 +430,12 @@ def get_imaging_options(parset):
         parset_dict['reimage_selfcaled'] = True
 
     # Max number of bands per WSClean image when wide-band clean is used (default =
-    # 5). Smaller values produce better results but require longer run times.
+    # 1). Smaller values produce better results but require longer run times.
     # Wide-band clean is activated when there are more than 5 bands
     if 'wsclean_nbands' in parset_dict:
         parset_dict['wsclean_nbands'] = parset.getint('imaging', 'wsclean_nbands')
     else:
-        parset_dict['wsclean_nbands'] = 3
+        parset_dict['wsclean_nbands'] = 1
 
     # Use WSClean or CASA for imaging of entire facet (default = wsclean). For large
     # bandwidths, the CASA imager is typically faster
@@ -453,10 +453,11 @@ def get_imaging_options(parset):
         parset_dict['max_peak_smearing'] = 0.15
 
     # Selfcal imaging parameters: pixel size in arcsec (default = 1.5), Briggs
-    # robust parameter (default = -0.25 for casa and -0.5 for wsclean), and minimum
-    # uv distance in lambda (default = 80). These settings apply both to selfcal
-    # images and to the full facet image used to make the improved facet model that
-    # is subtracted from the data
+    # robust parameter (default = -0.25 for casa and -0.5 for wsclean), minimum uv
+    # distance in lambda (default = 80), and multiscale clean scales (default = [0,
+    # 3, 7, 25, 60, 150]). These settings apply both to selfcal images and to the
+    # full facet image used to make the improved facet model that is subtracted from
+    # the data
     if 'selfcal_cellsize_arcsec' in parset_dict:
         parset_dict['selfcal_cellsize_arcsec'] = parset.getfloat('imaging', 'selfcal_cellsize_arcsec')
     else:
@@ -473,6 +474,8 @@ def get_imaging_options(parset):
         parset_dict['selfcal_min_uv_lambda'] = parset.getfloat('imaging', 'selfcal_min_uv_lambda')
     else:
         parset_dict['selfcal_min_uv_lambda'] = 80.0
+    if not 'selfcal_scales' in parset_dict:
+        parset_dict['selfcal_scales'] = '[0, 3, 7, 25, 60, 150]'
 
     # Use a clean threshold during selfcal imaging (default = False). If False,
     # clean will always stop at 1000 iterations. If True, clean will go to 1 sigma
@@ -481,6 +484,14 @@ def get_imaging_options(parset):
         parset_dict['selfcal_clean_threshold'] = parset.getboolean('imaging', 'selfcal_clean_threshold')
     else:
         parset_dict['selfcal_clean_threshold'] = False
+
+    # Use an adaptive masking threshold during selfcal imaging (default = False). If
+    # True, the masking threshold will be estimated using the negative peaks in the
+    # image, which can help selfcal convergence in the presence of strong artifacts
+    if 'selfcal_adaptive_threshold' in parset_dict:
+        parset_dict['selfcal_adaptive_threshold'] = parset.getboolean('imaging', 'selfcal_adaptive_threshold')
+    else:
+        parset_dict['selfcal_adaptive_threshold'] = False
 
     # Facet imaging parameters: pixel size in arcsec, Briggs robust parameter, uv
     # taper in arcsec, and minimum uv distance in lambda. These parameters are used
@@ -544,7 +555,7 @@ def get_imaging_options(parset):
     # Check for unused options
     allowed_options = ['make_mosaic', 'wsclean_nbands', 'facet_imager',
         'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
-        'selfcal_robust_wsclean', 'selfcal_clean_threshold',
+        'selfcal_robust_wsclean', 'selfcal_clean_threshold', 'selfcal_adaptive_threshold',
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
         'reimage_selfcaled', 'wsclean_image_padding', 'wsclean_model_padding',
         'selfcal_min_uv_lambda', 'facet_min_uv_lambda',

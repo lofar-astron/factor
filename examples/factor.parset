@@ -59,8 +59,8 @@ dir_ms = /data/bands
 # multiscale_selfcal = False
 
 # Size of frequency block in MHz over which a single TEC solution is fit
-# (default = 10)
-# TEC_block_MHz = 10
+# (default = 10.0)
+# TEC_block_MHz = 10.0
 
 # Peel the calibrator for sources above this flux density (default = 25.0).
 # When activated, the calibrator is peeled using a supplied sky model and
@@ -69,18 +69,18 @@ dir_ms = /data/bands
 # peeled
 # peel_flux_Jy = 25.0
 
-# Minimum uv distance in lambda for calibration (default = 80)
+# Minimum uv distance in lambda for calibration (default = 80.0)
 # solve_min_uv_lambda = 80.0
 
-# Smooth amplitudes with spline fit + 2-D median (default = False; i.e., smooth
+# Smooth amplitudes with spline fit + 2-D median (default = True; i.e., smooth
 # with a 1-D median only)
-# spline_smooth2D = False
+# spline_smooth2D = True
 
 # Include XY and YX correlations during the slow gain solve for sources above
-# this flux density (default = 5.0). Below this value, only the XX and YY
-# correlations are included. Note that spline_smooth2D must be True to use this
-# option
-# solve_all_correlations_flux_Jy = 5.0
+# this flux density (default = 1000.0). Below this value, only the XX and YY
+# correlations are included. Note that spline_smooth2D must be True to solve for
+# all correlations
+# solve_all_correlations_flux_Jy = 1000.0
 
 
 [imaging]
@@ -108,19 +108,21 @@ dir_ms = /data/bands
 # facet_imager = wsclean
 
 # Max number of bands per WSClean image when wide-band clean is used (default =
-# 5). Smaller values produce better results but require longer run times.
+# 1). Smaller values produce better results but require longer run times.
 # Wide-band clean is activated when there are more than 5 bands
-# wsclean_nbands = 5
+# wsclean_nbands = 1
 
 # Selfcal imaging parameters: pixel size in arcsec (default = 1.5), Briggs
-# robust parameter (default = -0.25 for casa and -0.5 for wsclean), and minimum
-# uv distance in lambda (default = 80). These settings apply both to selfcal
-# images and to the full facet image used to make the improved facet model that
-# is subtracted from the data
+# robust parameter (default = -0.25 for casa and -0.5 for wsclean), minimum uv
+# distance in lambda (default = 80), and multiscale clean scales (default = [0,
+# 3, 7, 25, 60, 150]; set to [0] to disable multiscale clean). These settings
+# apply both to selfcal images and to the full facet image used to make the
+# improved facet model that is subtracted from the data
 # selfcal_cellsize_arcsec = 1.5
 # selfcal_robust = -0.25
 # selfcal_robust_wsclean = -0.5
 # selfcal_min_uv_lambda = 80.0
+# selfcal_scales = [0, 3, 7, 25, 60, 150]
 
 # Facet imaging parameters: pixel size in arcsec, Briggs robust parameter, uv
 # taper in arcsec, and minimum uv distance in lambda. These parameters are used
@@ -136,6 +138,11 @@ dir_ms = /data/bands
 # clean will always stop at 1000 iterations. If True, clean will go to 1 sigma
 # noise level
 # selfcal_clean_threshold = False
+
+# Use an adaptive masking threshold during selfcal imaging (default = False). If
+# True, the masking threshold will be estimated using the negative peaks in the
+# image, which can help selfcal convergence in the presence of strong artifacts
+# selfcal_adaptive_threshold = False
 
 
 [directions]
@@ -186,11 +193,11 @@ flux_min_Jy = 0.3
 # check_edges = False
 
 # Radius in degrees within which the direction-dependent solutions will be
-# transferred before starting selfcal (default = 0; i.e., disabled). If a
+# transferred before starting selfcal (default = 0.0; i.e., disabled). If a
 # direction is within this distance of a calibrator for which selfcal was
 # successful, the dir-dep selfcal solutions from this calibrator will be used
 # instead of the dir-indep ones
-# transfer_radius_deg = 0
+# transfer_radius_deg = 0.0
 
 # Grouping of directions into groups that are selfcal-ed in parallel, defined as
 # grouping:n_total_per_grouping. For example, groupings = 1:5, 4:0 means two

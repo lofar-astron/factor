@@ -218,6 +218,8 @@ class Direction(object):
         self.solve_min_uv_lambda = parset['calibration_specific']['solve_min_uv_lambda']
         self.selfcal_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
         self.use_selfcal_clean_threshold = parset['imaging_specific']['selfcal_clean_threshold']
+        self.use_selfcal_adaptive_threshold = parset['imaging_specific']['selfcal_adaptive_threshold']
+        self.casa_multiscale = parset['imaging_specific']['selfcal_scales']
 
         if facet_cellsize_arcsec is None:
             facet_cellsize_arcsec = parset['imaging_specific']['selfcal_cellsize_arcsec']
@@ -325,12 +327,12 @@ class Direction(object):
             else:
                 self.mscale_field_do = False
         if self.mscale_field_do:
-            self.casa_multiscale = '[0, 3, 7, 25, 60, 150]'
+            self.casa_full_multiscale = '[0, 3, 7, 25, 60, 150]'
             self.wsclean_multiscale = '-multiscale,'
             self.wsclean_full1_image_niter /= 2.0 # fewer iterations are needed
             self.wsclean_full2_image_niter /= 2.0 # fewer iterations are needed
         else:
-            self.casa_multiscale = '[0]'
+            self.casa_full_multiscale = '[0]'
             self.wsclean_multiscale = ''
 
         # Set whether to use wavelet module in calibrator masking
@@ -828,7 +830,7 @@ class Direction(object):
         max_separation_arcmin = 1.0
         factor_lib_dir = os.path.dirname(os.path.abspath(__file__))
         skymodel_dir = os.path.join(os.path.split(factor_lib_dir)[0], 'skymodels')
-        skymodels = glob.glob(os.path.join(skymodel_dir, '*'))
+        skymodels = glob.glob(os.path.join(skymodel_dir, '*.skymodel'))
         for skymodel in skymodels:
             try:
                 s = lsmtool.load(skymodel)
@@ -886,8 +888,6 @@ class Direction(object):
                     self.dir_dep_parmdb_mapfile = d['dir_dep_parmdb_mapfile']
                 if 'facet_model_mapfile' in d:
                     self.facet_model_mapfile = d['facet_model_mapfile']
-                if 'subtracted_data_colname' in d:
-                    self.subtracted_data_colname = d['subtracted_data_colname']
                 if 'wsclean_modelimg_size_mapfile' in d:
                     self.wsclean_modelimg_size_mapfile = d['wsclean_modelimg_size_mapfile']
             return True
