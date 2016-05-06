@@ -888,8 +888,6 @@ class Direction(object):
                     self.dir_dep_parmdb_mapfile = d['dir_dep_parmdb_mapfile']
                 if 'facet_model_mapfile' in d:
                     self.facet_model_mapfile = d['facet_model_mapfile']
-                if 'subtracted_data_colname' in d:
-                    self.subtracted_data_colname = d['subtracted_data_colname']
                 if 'wsclean_modelimg_size_mapfile' in d:
                     self.wsclean_modelimg_size_mapfile = d['wsclean_modelimg_size_mapfile']
             return True

@@ -150,6 +150,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             for op in ops:
                 scheduler.run(op)
         for d in direction_group_reset:
+            d.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
             d.reset_state(['facetselfcal', 'facetsub'])
 
         # Divide up the nodes and cores among the directions for the parallel
