@@ -15,7 +15,6 @@ premask.control.mapfile_in                                 =   adjust_casa_mapfi
 premask.control.inputkey                                   =   imagefile
 premask.control.outputkey                                  =   maskfile
 premask.argument.flags                                     =   [imagefile,maskfile]
-premask.argument.region_file                               =   {{ region_field }}
 premask.argument.img_format                                =   casa
 premask.argument.pad_to_size                               =   {{ facet_imsize }}
 premask.argument.skip_source_detection                     =   True
