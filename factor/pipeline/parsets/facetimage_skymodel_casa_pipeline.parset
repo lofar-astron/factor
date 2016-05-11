@@ -61,7 +61,7 @@ casa_image_full1.argument.clean.flatnoise         =   True
 casa_image_full1.argument.clean.allowchunk        =   False
 {% if taper_facet_arcsec > 0.0 %}
 casa_image_full1.argument.clean.uvtaper           =   True
-casa_image_full1.argument.clean.outertaper        =   ['20arcsec']
+casa_image_full1.argument.clean.outertaper        =   ['{{ taper_facet_arcsec }}arcsec']
 {% else %}
 casa_image_full1.argument.clean.uvtaper           =   False
 {% endif %}
@@ -128,7 +128,7 @@ casa_image_full2.argument.clean.flatnoise         =   True
 casa_image_full2.argument.clean.allowchunk        =   False
 {% if taper_facet_arcsec > 0.0 %}
 casa_image_full2.argument.clean.uvtaper           =   True
-casa_image_full2.argument.clean.outertaper        =   ['20arcsec']
+casa_image_full2.argument.clean.outertaper        =   ['{{ taper_facet_arcsec }}arcsec']
 {% else %}
 casa_image_full2.argument.clean.uvtaper           =   False
 {% endif %}
