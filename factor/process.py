@@ -625,7 +625,7 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
             if parset['imaging_specific']['reimage_selfcaled']:
                 log.warn("The reimage_selfcaled parameter is True but all directions "
                     "will not be processed. If you're interested in only a single "
-                    "target facet, this setting should generally be False.")
+                    "target in the last facet, then re-imaging will not improve results.")
 
     # Set various direction attributes
     for i, direction in enumerate(directions):
