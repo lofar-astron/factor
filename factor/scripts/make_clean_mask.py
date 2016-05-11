@@ -389,7 +389,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                                      atrous_do=atrous_do, ini_method='curvature', thresh='hard',
                                      adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150,
                                      rms_box_bright=rmsbox_bright, rms_map=True, quiet=True,
-                                     atrous_jmax=atrous_jmax)
+                                     atrous_jmax=atrous_jmax, stop_at='isl')
 
             # Find min and max pixels
             max_neg_val = abs(np.min(img.ch0_arr))
@@ -399,7 +399,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
 
             # Estimate new thresh_isl from min pixel value's sigma, but don't let
             # it get higher than 1/2 of the peak's sigma
-            threshisl_neg = 3.0 * max_neg_val / img.rms_arr[max_neg_pos][0]
+            threshisl_neg = 2.0 * max_neg_val / img.rms_arr[max_neg_pos][0]
             max_sigma = max_pos_val / img.rms_arr[max_pos_pos][0]
             if threshisl_neg > max_sigma / 2.0:
                 threshisl_neg = max_sigma / 2.0
