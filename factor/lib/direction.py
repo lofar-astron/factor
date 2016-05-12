@@ -329,8 +329,8 @@ class Direction(object):
         if self.mscale_field_do:
             self.casa_full_multiscale = '[0, 3, 7, 25, 60, 150]'
             self.wsclean_multiscale = '-multiscale,'
-            self.wsclean_full1_image_niter /= 2.0 # fewer iterations are needed
-            self.wsclean_full2_image_niter /= 2.0 # fewer iterations are needed
+            self.wsclean_full1_image_niter /= 2 # fewer iterations are needed
+            self.wsclean_full2_image_niter /= 2 # fewer iterations are needed
         else:
             self.casa_full_multiscale = '[0]'
             self.wsclean_multiscale = ''
