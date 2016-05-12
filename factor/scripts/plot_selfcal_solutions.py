@@ -125,6 +125,61 @@ def solplot_tec(parmdb, imageroot, refstationi, plot_international=False, freq=N
     refstation = stationsnames[refstationi]
     times = soldict['CommonScalarPhase:{s}'.format(s=refstation)]['times']
     times = scaletimes(times)
+    tec_ref = soldict['TEC:{s}'.format(s=refstation)]['values']
+    num_channels = tec_ref.shape[1]
+
+    Nr = int(Nstat)
+    Nc = 1
+
+    for chan_indx in range(num_channels):
+        f, ax = plt.subplots(Nr, Nc, sharex=True, sharey=True, figsize=(12,72))
+        axs = ax.reshape((Nr*Nc,1))
+        ymin = 2
+        ymax = 0
+        for istat, station in enumerate(stationsnames):
+            tec = soldict['TEC:{s}'.format(s=station)]['values'][:, chan_indx]
+            tec_ref_chan = tec_ref[:, chan_indx]
+
+            tec = np.ma.masked_where(tec==0, tec)
+            if len(times) > 1000:
+                fmt = ','
+            else:
+                fmt = '.'
+            ls='none'
+
+            axs[istat][0].plot(times, tec-tec_ref_chan, color='b',  marker=fmt, ls=ls, label='TEC', mec='b')
+            axs[istat][0].set_ylim(-2.0, 2.0)
+            axs[istat][0].set_xlim(times.min(), times.max())
+            axs[istat][0].set_title(station)
+
+        f.savefig(imageroot+"_tec_channel{}.png".format(chan_indx),dpi=100)
+        plt.close(f)
+    parmdbmtable = False
+    del(soldict)
+
+
+def solplot_tec_scalarphase(parmdb, imageroot, refstationi, plot_international=False, freq=None):
+    parmdbmtable = lp.parmdb(parmdb)
+    soldict = parmdbmtable.getValuesGrid('*')
+
+    if freq is None:
+        tfrange = parmdbmtable.getRange()
+        print 'freqrange', tfrange[0:2]
+        freq = np.average(tfrange[0:2])
+        print 'freq', freq/1e6, 'MHz'
+
+    names = parmdbmtable.getNames()
+
+    'Gain:1:1:Phase:RS508HBA'
+    stationsnames = np.array([name.split(':')[-1] for name in names])
+    stationsnames = np.unique(stationsnames)
+    if not plot_international:
+        stationsnames = np.array([name for name in stationsnames if name[0] in ['C','R'] ])
+    Nstat = len(stationsnames)
+
+    refstation = stationsnames[refstationi]
+    times = soldict['CommonScalarPhase:{s}'.format(s=refstation)]['times']
+    times = scaletimes(times)
     phase_ref = soldict['CommonScalarPhase:{s}'.format(s=refstation)]['values']
     tec_ref = soldict['TEC:{s}'.format(s=refstation)]['values']
     num_channels = phase_ref.shape[1]
@@ -158,7 +213,7 @@ def solplot_tec(parmdb, imageroot, refstationi, plot_international=False, freq=N
             axs[istat][0].set_xlim(times.min(), times.max())
             axs[istat][0].set_title(station)
 
-        f.savefig(imageroot+"_tec_channel{}.png".format(chan_indx),dpi=100)
+        f.savefig(imageroot+"_tec_scalarphase_channel{}.png".format(chan_indx),dpi=100)
         plt.close(f)
     parmdbmtable = False
     del(soldict)
@@ -544,7 +599,7 @@ def solplot_amp(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp=F
     del(soldict)
 
 
-def main(parmdb, imageroot, freq=150.0, plot_tec=True, plot_amp=True,
+def main(parmdb, imageroot, freq=150.0, plot_tec=True, plot_tec_scalarphase=True, plot_amp=True,
     plot_phase=True, plot_scalarphase=False, median_amp=False, norm_amp_lim=False,
     plot_clock=False, phasors=False, plot_international=False, refstation=0, fourpol=False):
     """
@@ -558,6 +613,7 @@ def main(parmdb, imageroot, freq=150.0, plot_tec=True, plot_amp=True,
     refstation = int(refstation)
 
     plot_tec = input2bool(plot_tec)
+    plot_tec_scalarphase = input2bool(plot_tec_scalarphase)
     plot_amp = input2bool(plot_amp)
     plot_phase = input2bool(plot_phase)
     plot_scalarphase = input2bool(plot_scalarphase)
@@ -583,6 +639,9 @@ def main(parmdb, imageroot, freq=150.0, plot_tec=True, plot_amp=True,
     if plot_tec:
         solplot_tec(parmdb, imageroot, refstation, plot_international=plot_international, freq=reffreq)
 
+    if plot_tec_scalarphase:
+        solplot_tec_scalarphase(parmdb, imageroot, refstation, plot_international=plot_international, freq=reffreq)
+
     if plot_clock:
         solplot_clock(parmdb, imageroot, refstation, plot_international=plot_international)
 
@@ -595,7 +654,8 @@ if __name__ == "__main__":
     parser.add_argument('-p', '--phase', dest='phase', action="store_true", default=False, help="plot phase solutions")
     parser.add_argument('--phasors', dest='phasors', action="store_true", default=False, help="set phase-only")
     parser.add_argument('--freq', dest='freq', default=0, help="reference frequency for TEC plotting in MHz")
-    parser.add_argument('-t','--tec', dest='tec', action="store_true", default=False, help="set tec-mode plotting on and plot phase (TEC+scalarpahse)")
+    parser.add_argument('-t','--tec', dest='tec', action="store_true", default=False, help="set tec-mode plotting on (TEC)")
+    parser.add_argument('-e','--tec_scalarphase', dest='tec_scalarphase', action="store_true", default=False, help="set tec-mode plotting on and plot phase (TEC+scalarpahse)")
     parser.add_argument('-s', '--scalarphase', dest='scalarphase', action="store_true", default=False, help="plot scalarphase solutions")
     parser.add_argument('-n', '--norm-amplitude-limits', dest='norm_amp_lim', action="store_true", default=False, help="plot amps between 0 and 2")
     parser.add_argument('-m', '--plot-median-amplitude', dest='median_amp', action="store_true", default=False, help="plot median amplitudes")
@@ -607,8 +667,11 @@ if __name__ == "__main__":
     parser.add_argument('imageroot', help="Root name for output images")
 
     args = parser.parse_args()
-    main(args.parmdb, args.imageroot, freq=args.freq, plot_tec=args.tec, plot_amp=args.amp,
-        plot_phase=args.phase, plot_scalarphase=args.scalarphase, median_amp=args.median_amp,
-        norm_amp_lim=args.norm_amp_lim, plot_clock=args.clock, phasors=args.phasors,
-        plot_international=args.plot_international, refstation=args.refstation, fourpol=args.fourpol)
+    main(args.parmdb, args.imageroot, freq=args.freq, plot_tec=args.tec,
+        plot_tec_scalarphase=args.tec_scalarphase, plot_amp=args.amp,
+        plot_phase=args.phase, plot_scalarphase=args.scalarphase,
+        median_amp=args.median_amp, norm_amp_lim=args.norm_amp_lim,
+        plot_clock=args.clock, phasors=args.phasors,
+        plot_international=args.plot_international,
+        refstation=args.refstation, fourpol=args.fourpol)
 
