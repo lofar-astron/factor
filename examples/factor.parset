@@ -77,8 +77,8 @@ dir_ms = /data/bands
 # spline_smooth2D = True
 
 # Include XY and YX correlations during the slow gain solve for sources above
-# this flux density (default = 1000.0 i.e. effectively off). Below this value, 
-# only the XX and YY correlations are included. Note that spline_smooth2D must 
+# this flux density (default = 1000.0 i.e. effectively off). Below this value,
+# only the XX and YY correlations are included. Note that spline_smooth2D must
 # be True to solve for all correlations.
 # If you want to use it, then an useful value would be e.g.: 5.0
 # solve_all_correlations_flux_Jy = 1000.0
@@ -252,9 +252,9 @@ flux_min_Jy = 0.3
 # ncpu parameter) will be divided among the directions on each node
 # ndir_per_node = 1
 
-# Number of imager jobs to run per node (affects initsubtract and facetimage
-# operations; default = 1). If your nodes have many CPUs and > 32 GB of memory,
-# it may be advantageous to set this to 2 or more
+# Number of imager jobs to run per node (affects facetimage operation; default =
+# 1). If your nodes have many CPUs and > 32 GB of memory, it may be advantageous
+# to set this to 2 or more
 # nimg_per_node = 1
 
 
