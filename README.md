@@ -79,12 +79,7 @@ You can check the progress of a run with `checkfactor`:
 
 The parset defines the data and working directories, various options, etc.
 FACTOR handles all the initialization and sets up the directories, pipeline
-parsets, etc. FACTOR will also run the pipelines by default. However, if you
-want to run the pipelines yourself, you can set the dry_run (`-d`) argument
-(e.g., `runfactor -d factor.parset`). FACTOR will then perform all the setup but
-will not run the pipelines. Note that this option is most useful if a
-directions file is given, as without this file FACTOR cannot create pipelines
-for self calibration.
+parsets, etc.
 
 For details on the usage, please see the [full documentation](http://www.astron.nl/citt/facet-doc/)
 and the examples in the examples directory.

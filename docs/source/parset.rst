@@ -227,11 +227,11 @@ The available options are described below under their respective sections.
 
     ndir_max
         Number of internally derived directions can be limited to a maximum number
-        of directions if desired with max_num (default = all).
+        of directions if desired (default = all).
 
     ndir_process
         Total number of directions to process (default = all). If this number is
-        greater than ndir_selfcal, then the remaining directions will not be selfcal-
+        greater than ``ndir_selfcal``, then the remaining directions will not be selfcal-
         ed but will instead be imaged with the selfcal solutions from the nearest
         direction for which selfcal succeeded (if a target is specified and
         ``target_has_own_facet = True``, it will be imaged in this way after ndir_total
