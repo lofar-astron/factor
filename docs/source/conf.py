@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Facet Calibration Pipeline documentation build configuration file, created by
+# Factor documentation build configuration file, created by
 # sphinx-quickstart on Wed May 27 11:02:27 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -50,8 +50,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Facet Calibration Pipeline'
-copyright = u'2015, CITT'
+project = u'Factor'
+copyright = u'2016, CITT'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -183,7 +183,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'FacetCalibrationPipelinedoc'
+htmlhelp_basename = 'Factordoc'
 
 # Napoleon settings
 napoleon_google_docstring = False
@@ -216,7 +216,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'FacetCalibrationPipeline.tex', u'Facet Calibration Pipeline Documentation',
+  ('index', 'Factor.tex', u'Factor Documentation',
    u'CITT', 'manual'),
 ]
 
@@ -246,7 +246,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'facetcalibrationpipeline', u'Facet Calibration Pipeline Documentation',
+    ('index', 'factor', u'Factor Documentation',
      [u'CITT'], 1)
 ]
 
@@ -260,8 +260,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'FacetCalibrationPipeline', u'Facet Calibration Pipeline Documentation',
-   u'CITT', 'FacetCalibrationPipeline', 'One line description of project.',
+  ('index', 'Factor', u'Factor Documentation',
+   u'CITT', 'Factor', 'One line description of project.',
    'Miscellaneous'),
 ]
 
