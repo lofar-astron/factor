@@ -60,3 +60,7 @@ Classes
     :undoc-members:
     :show-inheritance:
 
+.. autoclass:: factor.lib.polygon.Polygon
+    :members:
+    :undoc-members:
+    :show-inheritance:
