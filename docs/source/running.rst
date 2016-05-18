@@ -7,7 +7,27 @@ Factor can be run with::
 
     $ runfactor factor.parset
 
-where ``factor.parset`` is the parset discussed above.
+where ``factor.parset`` is the parset discussed above. A number of options are available::
+
+    Usage: runfactor parset
+
+    Options:
+      --version             show program's version number and exit
+      -h, --help            show this help message and exit
+      -d                    enable dry-run mode
+      -q                    enable quiet mode
+      -r RESET, --reset=RESET
+                            comma-separated list of directions to reset (e.g., -r
+                            facet1,facet3)
+      -o OPS, --ops=OPS     comma-separated list of operations to reset for the
+                            directions specified with "-r or --reset" (e.g., -o
+                            facetselfcal,facetsub). By default, all operations are
+                            reset. Available operations are: outlierpeel,
+                            facetpeel, facetpeelimage, facetselfcal, facetsub,
+                            facetimage, fieldmosaic
+      -t                    enable test mode
+      -v                    enable verbose mode
+
 
 You can check the progress of a run with::
 
@@ -49,10 +69,10 @@ Factor produces the following output inside the working directory:
 ``factor_directions.txt``
     Optional file listing the DDE calibrators. This file is generated only when no directions file is supplied by the user.
 
-``chunks``
+``chunks/``
     Directory containing the time-chunked datasets that Factor uses for processing.
 
-``logs``
+``logs/``
     Directory containing the detailed operation logs.
 
     .. note::
@@ -63,18 +83,18 @@ Factor produces the following output inside the working directory:
 
         Some error messages are stored in the ``logs/operation_name/direction_name.err.log`` file, but these are rarely of interest. Generally, important error messages will appear in the ``logs/operation_name/direction_name.out.log`` file. These log files are very large, so a search for "error" is usually the easiest way to find any error messages.
 
-``regions``
+``regions/``
     Directory containing the ds9 region files for the facet and self-calibration images. The following region files are made:
 
     * ``calimages_ds9.reg`` - the self-calibration image regions. The inner box shows the area over which sources are added back and cleaned. The outer box shows the area that is imaged.
     * ``facets_ds9.reg`` - the facet image regions.
 
-``results``
+``results/``
     Directory containing the results (images, etc.) of each operation. See :ref:`operations` for details of the primary output products of each operation.
 
     .. note::
 
         The output of each operation is stored in a directory named ``results/operation_name/direction_name/``. For example, the results of the ``facetselfcal`` operation for a direction named ``facet_patch_200`` will be stored in ``results/facetselfcal/facet_patch_200/``.
 
-``state``
+``state/``
     Directory containing files that save the state of a reduction.

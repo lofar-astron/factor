@@ -50,7 +50,7 @@ class Polygon:
         An improved version of the algorithm of Nordbeck and Rydstedt.
 
         REF: SLOAN, S.W. (1985): A point-in-polygon program. Adv. Eng.
-             Software, Vol 7, No. 1, pp 45-47.
+        Software, Vol 7, No. 1, pp 45-47.
 
         Parameters
         ----------
@@ -65,9 +65,10 @@ class Polygon:
         -------
         mindst : array or float
             The distance from the point to the nearest point of the polygon:
-                If mindst < 0 then point is outside the polygon.
-                If mindst = 0 then point in on a side of the polygon.
-                If mindst > 0 then point is inside the polygon.
+
+            If mindst < 0 then point is outside the polygon.
+            If mindst = 0 then point in on a side of the polygon.
+            If mindst > 0 then point is inside the polygon.
 
         """
         xpoint = np.asfarray(xpoint)

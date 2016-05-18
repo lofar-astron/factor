@@ -299,7 +299,7 @@ The available options are described below under their respective sections.
 
     clusterdesc_file
         Full path to cluster description file. Use ``clusterdesc_file = PBS`` to use the
-        PBS / torque reserved nodes, or use ``clusterdesc_file = JUROPA_slurm ``to use
+        PBS / torque reserved nodes, or use ``clusterdesc_file = JUROPA_slurm`` to use
         multiple nodes in a slurm reservation on JUROPA.
         If not given, the clusterdesc file for a single (i.e., local) node is used.
 
