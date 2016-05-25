@@ -75,18 +75,16 @@ expand_facet_model_size_map.control.mapfile_dir              =   input.output.ma
 expand_facet_model_size_map.control.filename                 =   expand_facet_model_size.mapfile
 
 # add the facet-model visibilities to the data, length = some
-# For WSClean predict, we do not need to increase the number of wplanes (as is
-# done for the predict step used for subtraction), as we do not care about
-# regions outside of the facet image
 wsclean_ft.control.type                                      =   wsclean_ft
 wsclean_ft.control.mapfiles_in                               =   [regroup_shift_empty_map.output.mapfile,expand_facet_model_map.output.mapfile,expand_facet_model_size_map.output.mapfile]
 wsclean_ft.control.inputkeys                                 =   [msfile,name,size]
 wsclean_ft.argument.flags                                    =   [-predict,msfile]
-wsclean_ft.argument.scale                                    =   0.000417
+wsclean_ft.argument.scale                                    =   {{ cellsize_facet_deg }}
 wsclean_ft.argument.mem                                      =   {{ max_percent_memory }}
 wsclean_ft.argument.channelsout                              =   {{ wsclean_nchannels }}
-wsclean_ft.argument.j                                        =   {{ max_cpus_per_img }}
+wsclean_ft.argument.j                                        =   {{ max_cpus_per_node }}
 wsclean_ft.argument.tempdir                                  =   {{ local_dir }}
+wsclean_ft.argument.nwlayers-for-size                        =   12288 12288
 {% endblock model_data_parms %}
 
 # corrupt the facet-model visibilities
