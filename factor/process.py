@@ -135,8 +135,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             'facetsub' in d.completed_operations]
         if len(direction_group_reset_facetsub) > 0:
             for d in direction_group_reset_facetsub:
-                if 'facetsubreset' in d.completed_operations or
-                    'facetsubreset' in reset_operations:
+                if ('facetsubreset' in d.completed_operations or
+                    'facetsubreset' in reset_operations):
                     # Reset a previous reset, but only if it completed successfully
                     # or is explicitly specified for reset (to allow one to resume
                     # facetsubreset instead of always resetting and restarting it)
