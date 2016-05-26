@@ -151,10 +151,12 @@ The available options are described below under their respective sections.
         Use WSClean or CASA for imaging of entire facet (default = ``wsclean``). For large
         bandwidths, the CASA imager is typically faster.
 
-    wsclean_nbands
-        Max number of bands per WSClean image when wide-band clean is used (default =
-        1). Smaller values produce better results but require longer run times.
-        Wide-band clean is activated when there are more than 5 bands.
+    wsclean_nchannels_factor
+        Max factor used to set the number of WSClean channel images when wide-band
+        clean is used (default = 4). The number of channel images is determined by
+        dividing the number of bands by the nearest divisor to this factor. Smaller
+        values produce better results but require longer run times. Wide-band clean is
+        activated when there are more than 5 bands
 
     selfcal_cellsize_arcsec
         Self calibration pixel size in arcsec (default = 1.5).
