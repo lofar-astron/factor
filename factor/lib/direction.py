@@ -203,7 +203,7 @@ class Direction(object):
             self.wsclean_model_padding = parset['imaging_specific']['wsclean_model_padding']
         else:
             padding = 1.05
-        nbands_per_channel = parset['imaging_specific']['wsclean_nbands']
+        wsclean_nchannels_factor = parset['imaging_specific']['wsclean_nchannels_factor']
         chan_width_hz = bands[0].chan_width_hz
         nchan = bands[0].nchan
         timestep_sec = bands[0].timepersample
@@ -241,15 +241,38 @@ class Direction(object):
             facet_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
         self.facet_min_uv_lambda = facet_min_uv_lambda
 
-        self.set_imaging_parameters(nbands, nbands_per_channel, nchan, padding)
+        self.set_imaging_parameters(nbands, padding)
         self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,
             timestep_sec, ntimes, nbands, mean_freq_mhz, self.skymodel,
             preaverage_flux_jy, min_peak_smearing_factor, tec_block_mhz,
             peel_flux_jy, imaging_only=imaging_only)
 
+        # Set channelsout for wide-band imaging with WSClean and nterms
+        # for the CASA imager. Note that the number of WSClean channels must be
+        # an even divisor of the total number of channels in the full bandwidth
+        # after averaging to prevent mismatches during the predict step on the
+        # unaveraged data
+        #
+        # Also define the image suffixes (which depend on whether or not
+        # wide-band clean is done)
+        if self.use_wideband:
+            self.wsclean_nchannels = nbands / wsclean_nchannels_factor
+            nchan_after_avg = nchan_per_band * nbands / self.facetimage_freqstep
+            while nchan_after_avg % self.wsclean_nchannels:
+                self.wsclean_nchannels += 1
+            if self.wsclean_nchannels > nbands:
+                self.wsclean_nchannels = nbands
+            self.nterms = 2
+            self.casa_suffix = '.tt0'
+            self.wsclean_suffix = '-MFS-image.fits'
+        else:
+            self.wsclean_nchannels = 1
+            self.nterms = 1
+            self.casa_suffix = None
+            self.wsclean_suffix = '-image.fits'
 
-    def set_imaging_parameters(self, nbands, nbands_per_channel, nchan_per_band,
-        padding=1.05):
+
+    def set_imaging_parameters(self, nbands, padding=1.05):
         """
         Sets various parameters for images in facetselfcal and facetimage pipelines
 
@@ -257,10 +280,6 @@ class Direction(object):
         ----------
         nbands : int
             Number of bands
-        nbands_per_channel : int
-            Number of bands per output channel (WSClean only)
-        nchan_per_band : int
-            Number of channels per band
         padding : float, optional
             Padding factor by which size of facet is multiplied to determine
             the facet image size
@@ -282,26 +301,6 @@ class Direction(object):
             self.use_wideband = True
         else:
             self.use_wideband = False
-
-        # Set number of channels for wide-band imaging with WSClean and nterms
-        # for the CASA imager. Note that the number of WSClean channels must be
-        # an even divisor of the total number of channels in the full bandwidth.
-        # For now, we just set the number of channels to the number of bands to
-        # avoid any issues with this setting (revisit once we switch to fitting
-        # a spectral function during deconvolution).
-        #
-        # Also define the image suffixes (which depend on whether or not
-        # wide-band clean is done)
-        if self.use_wideband:
-            self.wsclean_nchannels = nbands
-            self.nterms = 2
-            self.casa_suffix = '.tt0'
-            self.wsclean_suffix = '-MFS-image.fits'
-        else:
-            self.wsclean_nchannels = 1
-            self.nterms = 1
-            self.casa_suffix = None
-            self.wsclean_suffix = '-image.fits'
 
         # Set number of iterations and threshold for full facet image, scaled to
         # the number of bands. We use 6 times more iterations for the full2

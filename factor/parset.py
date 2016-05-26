@@ -157,15 +157,7 @@ def get_global_options(parset):
     if 'skip_selfcal_check' in parset_dict:
         parset_dict['calibration_specific']['skip_selfcal_check'] = parset.getboolean('global',
             'skip_selfcal_check')
-
-    # Max number of bands per WSClean image when wide-band clean is used (default =
-    # 5). Smaller values produce better results but require longer run times.
-    # Wide-band clean is activated when there are more than 5 bands
-    if 'wsclean_nbands' in parset_dict:
-        parset_dict['imaging_specific']['wsclean_nbands'] = parset.getint('global', 'wsclean_nbands')
-    else:
-        parset_dict['imaging_specific']['wsclean_nbands'] = 3
-
+s
     # Padding factor for WSClean images (default = 1.6)
     if 'wsclean_image_padding' in parset_dict:
         parset_dict['imaging_specific']['wsclean_image_padding'] = parset.getfloat('global', 'wsclean_image_padding')
@@ -252,9 +244,8 @@ def get_global_options(parset):
         'tec_block_mhz', 'selfcal_cellsize_arcsec', 'selfcal_robust']
     allowed_options.extend(['direction_specific', 'calibration_specific',
         'imaging_specific', 'cluster_specific']) # add dicts needed for deprecated options
-    deprecated_options_imaging = ['make_mosaic', 'wsclean_nbands',
-        'facet_imager', 'max_peak_smearing', 'selfcal_cellsize_arcsec',
-        'selfcal_robust']
+    deprecated_options_imaging = ['make_mosaic', 'facet_imager',
+        'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust']
     deprecated_options_cal = ['exit_on_selfcal_failure',
         'skip_selfcal_check', 'max_selfcal_loops', 'preaverage_flux_jy',
         'multiscale_selfcal', 'tec_block_mhz', 'peel_flux_jy']
@@ -429,13 +420,15 @@ def get_imaging_options(parset):
     else:
         parset_dict['reimage_selfcaled'] = True
 
-    # Max number of bands per WSClean image when wide-band clean is used (default =
-    # 1). Smaller values produce better results but require longer run times.
-    # Wide-band clean is activated when there are more than 5 bands
-    if 'wsclean_nbands' in parset_dict:
-        parset_dict['wsclean_nbands'] = parset.getint('imaging', 'wsclean_nbands')
+    # Max factor used to set the number of WSClean channel images when wide-band
+    # clean is used (default = 4). The number of channel images is determined by
+    # dividing the number of bands by the nearest divisor to this factor. Smaller
+    # values produce better results but require longer run times. Wide-band clean is
+    # activated when there are more than 5 bands
+    if 'wsclean_nchannels_factor' in parset_dict:
+        parset_dict['wsclean_nchannels_factor'] = parset.getint('imaging', 'wsclean_nchannels_factor')
     else:
-        parset_dict['wsclean_nbands'] = 1
+        parset_dict['wsclean_nchannels_factor'] = 4
 
     # Use WSClean or CASA for imaging of entire facet (default = wsclean). For large
     # bandwidths, the CASA imager is typically faster
@@ -553,7 +546,7 @@ def get_imaging_options(parset):
         parset_dict['wsclean_model_padding'] = 1.4
 
     # Check for unused options
-    allowed_options = ['make_mosaic', 'wsclean_nbands', 'facet_imager',
+    allowed_options = ['make_mosaic', 'wsclean_nchannels_factor', 'facet_imager',
         'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
         'selfcal_robust_wsclean', 'selfcal_clean_threshold', 'selfcal_adaptive_threshold',
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
