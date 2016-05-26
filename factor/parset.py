@@ -157,7 +157,7 @@ def get_global_options(parset):
     if 'skip_selfcal_check' in parset_dict:
         parset_dict['calibration_specific']['skip_selfcal_check'] = parset.getboolean('global',
             'skip_selfcal_check')
-s
+
     # Padding factor for WSClean images (default = 1.6)
     if 'wsclean_image_padding' in parset_dict:
         parset_dict['imaging_specific']['wsclean_image_padding'] = parset.getfloat('global', 'wsclean_image_padding')
