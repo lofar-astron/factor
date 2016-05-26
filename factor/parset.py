@@ -427,6 +427,8 @@ def get_imaging_options(parset):
     # activated when there are more than 5 bands
     if 'wsclean_nchannels_factor' in parset_dict:
         parset_dict['wsclean_nchannels_factor'] = parset.getint('imaging', 'wsclean_nchannels_factor')
+        if parset_dict['wsclean_nchannels_factor'] < 1:
+            parset_dict['wsclean_nchannels_factor'] = 1
     else:
         parset_dict['wsclean_nchannels_factor'] = 4
 
