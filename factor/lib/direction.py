@@ -257,7 +257,7 @@ class Direction(object):
         # wide-band clean is done)
         if self.use_wideband:
             self.wsclean_nchannels = nbands / wsclean_nchannels_factor
-            nchan_after_avg = nchan_per_band * nbands / self.facetimage_freqstep
+            nchan_after_avg = nchan * nbands / self.facetimage_freqstep
             while nchan_after_avg % self.wsclean_nchannels:
                 self.wsclean_nchannels += 1
             if self.wsclean_nchannels > nbands:
