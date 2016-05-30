@@ -113,7 +113,7 @@ dir_ms = /data/bands
 # dividing the number of bands by the nearest divisor to this factor. Smaller
 # values produce better results but require longer run times. Wide-band clean is
 # activated when there are more than 5 bands
-wsclean_nchannels_factor = 4
+# wsclean_nchannels_factor = 4
 
 # Selfcal imaging parameters: pixel size in arcsec (default = 1.5), Briggs
 # robust parameter (default = -0.25 for casa and -0.5 for wsclean), minimum uv

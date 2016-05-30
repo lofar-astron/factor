@@ -392,10 +392,10 @@ def _set_up_compute_parameters(parset, dry_run=False):
         import resource
         nof_files_limits = resource.getrlimit(resource.RLIMIT_NOFILE)
         if parset['cluster_specific']['clustertype'] == 'local' and nof_files_limits[0] < nof_files_limits[1]:
-            log.info('Setting limit for number of open files to: {}.'.format(nof_files_limits[1]))
+            log.debug('Setting limit for number of open files to: {}.'.format(nof_files_limits[1]))
             resource.setrlimit(resource.RLIMIT_NOFILE,(nof_files_limits[1],nof_files_limits[1]))
             nof_files_limits = resource.getrlimit(resource.RLIMIT_NOFILE)
-        log.info('Active limit for number of open files is {0}, maximum limit is {1}.'.format(nof_files_limits[0],nof_files_limits[1]))
+        log.debug('Active limit for number of open files is {0}, maximum limit is {1}.'.format(nof_files_limits[0],nof_files_limits[1]))
         if nof_files_limits[0] < 2048:
             log.warn('The limit for number of open files is small, this could results in a "Too many open files" problem when running factor.')
             log.warn('The active limit can be increased to the maximum for the user with: "ulimit -Sn <number>" (bash) or "limit descriptors 1024" (csh).')
@@ -593,7 +593,7 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
             # Continue processing, but first re-initialize the directions to
             # pick up any changes the user made to the directions file
             directions = _initialize_directions(parset, initial_skymodel,
-                ref_band, dry_run)
+                ref_band, max_radius_deg=max_radius_deg, dry_run=dry_run)
 
     # Warn user if they've specified a direction to reset that does not exist
     direction_names = [d.name for d in directions]
