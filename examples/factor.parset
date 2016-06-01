@@ -53,10 +53,10 @@ dir_ms = /data/bands
 # coherence in the TEC solutions
 # preaverage_flux_Jy = 0.0
 
-# Use multi-scale selfcal that starts at 20 arcsec resolution and increases the
-# resolution in stages to the full resolution (default = False). This method may
-# improve convergence, especially when the starting model is poor
-# multiscale_selfcal = False
+# Use multi-resolution selfcal that starts at 20 arcsec resolution and increases
+# the resolution in stages to the full resolution (default = False). This method
+# may improve convergence, especially when the starting model is poor
+# multires_selfcal = False
 
 # Size of frequency block in MHz over which a single TEC solution is fit
 # (default = 10.0)
@@ -64,9 +64,9 @@ dir_ms = /data/bands
 
 # Peel the calibrator for sources above this flux density (default = 25.0).
 # When activated, the calibrator is peeled using a supplied sky model and
-# the facet is then imaged as normal. Note: a sky model must be specified in the
-# directions file in the peel_skymodel column for each source that should be
-# peeled
+# the facet is then imaged as normal. Note: for each source that should be
+# peeled, a sky model must be specified in the directions file in the
+# peel_skymodel column or be one of those included in Factor
 # peel_flux_Jy = 25.0
 
 # Minimum uv distance in lambda for calibration (default = 80.0)
@@ -192,8 +192,8 @@ flux_min_Jy = 0.3
 
 # Check whether any sources from the initial subtract sky model fall on facet
 # edges. If any are found, the facet regions are adjusted to avoid them (default
-# is False)
-# check_edges = False
+# is True)
+# check_edges = True
 
 # Radius in degrees within which the direction-dependent solutions will be
 # transferred before starting selfcal (default = 0.0; i.e., disabled). If a

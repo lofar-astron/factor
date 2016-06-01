@@ -49,15 +49,15 @@ class FacetSelfcal(Operation):
         if (self.parset['imaging_specific']['facet_imager'].lower() == 'casa' or
             self.parset['imaging_specific']['facet_imager'].lower() == 'casapy'):
             # Set parset template to CASA parset
-            if self.parset['calibration_specific']['multiscale_selfcal']:
-                # Set parset template to multi-scale selfcal parset
+            if self.parset['calibration_specific']['multires_selfcal']:
+                # Set parset template to multi-resolution selfcal parset
                 self.pipeline_parset_template = '{0}_taper_casa_pipeline.parset'.format(self.name)
             else:
                 self.pipeline_parset_template = '{0}_casa_pipeline.parset'.format(self.name)
         else:
             # Set parset template to default (i.e., WSClean) parset
-            if self.parset['calibration_specific']['multiscale_selfcal']:
-                # Set parset template to multi-scale selfcal parset
+            if self.parset['calibration_specific']['multires_selfcal']:
+                # Set parset template to multi-resolution selfcal parset
                 self.pipeline_parset_template = '{0}_taper_pipeline.parset'.format(self.name)
             else:
                 self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)

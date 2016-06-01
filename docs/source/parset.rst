@@ -90,8 +90,8 @@ The available options are described below under their respective sections.
         disabled). When activated, averaging in time is done to exploit the time
         coherence in the TEC solutions.
 
-    multiscale_selfcal
-        Use multi-scale selfcal that starts at 20 arcsec resolution and increases the
+    multires_selfcal
+        Use multi-resolution selfcal that starts at 20 arcsec resolution and increases the
         resolution in stages to the full resolution (default = ``False``). This method may
         improve convergence, especially when the starting model is poor.
 
@@ -102,9 +102,9 @@ The available options are described below under their respective sections.
     peel_flux_Jy
         Peel the calibrator for sources above this flux density (default = 25.0).
         When activated, the calibrator is peeled using a supplied sky model and
-        the facet is then imaged as normal. Note: a sky model must be specified in the
-        directions file in the peel_skymodel column for each source that should be
-        peeled.
+        the facet is then imaged as normal. Note: for each source that should be
+        peeled, a sky model must be specified in the directions file in the
+        peel_skymodel column or be one of those included in Factor
 
     solve_min_uv_lambda
         Minimum uv distance in lambda for calibration (default = 80.0).
@@ -237,10 +237,10 @@ The available options are described below under their respective sections.
         ed but will instead be imaged with the selfcal solutions from the nearest
         direction for which selfcal succeeded (if a target is specified and
         ``target_has_own_facet = True``, it will be imaged in this way after ndir_total
-        number of directions are processed)
+        number of directions are processed).
 
     ndir_selfcal
-        Total number of directions to selfcal (default = all)
+        Total number of directions to selfcal (default = all).
 
     faceting_radius_deg
         Radius within which facets will be used (default = 1.25 * FWHM of primary beam
@@ -250,14 +250,14 @@ The available options are described below under their respective sections.
     check_edges
         Check whether any sources from the initial subtract sky model fall on facet
         edges. If any are found, the facet regions are adjusted to avoid them (default
-        is ``False``)
+        is ``False``).
 
     transfer_radius_deg
         Radius in degrees within which the direction-dependent solutions will be
         transferred before starting selfcal (default = 0.0; i.e., disabled). If a
         direction is within this distance of a calibrator for which selfcal was
         successful, the dir-dep selfcal solutions from this calibrator will be used
-        instead of the dir-indep ones
+        instead of the dir-indep ones.
 
     groupings
         Grouping of directions into groups that are selfcal-ed in parallel, defined as
@@ -265,12 +265,14 @@ The available options are described below under their respective sections.
         groupings are used, with the first 5 directions put into groups of one (i.e.,
         each direction processed in series) and the rest of the directions divided
         into groups of 4 (i.e., 4 directions processed in parallel). Default is one at
-        a time (i.e., ``groupings = 1:0``)
+        a time (i.e., ``groupings = 1:0``).
 
     allow_reordering
         If groups are used to process more than one direction in parallel, reordering
         of the directions in the groups can be done to maximize the flux-weighted
-        separation between directions in each group (default = ``True``)
+        separation between directions in each group (default = ``True``). This
+        sorting attempts to minimize the effects that any artifacts from one
+        direction might have on the other simultaneously processed directions.
 
     target_ra
         RA of the center of a circular region that encloses the target source
@@ -304,6 +306,22 @@ The available options are described below under their respective sections.
         PBS / torque reserved nodes, or use ``clusterdesc_file = JUROPA_slurm`` to use
         multiple nodes in a slurm reservation on JUROPA.
         If not given, the clusterdesc file for a single (i.e., local) node is used.
+
+    .. note::
+
+        On a cluster that uses torque and PBS, Factor will automatically determine the nodes for which you have a
+        PBS reservation and use them. Note that you must ask for all the nodes you need
+        in a single PBS script, so that all nodes are available for the full Factor run. An
+        example PBS script is shown below::
+
+            #!/bin/bash
+            #PBS -N Factor
+            #PBS -l walltime=100:00:00
+            #PBS -l nodes=6:ppn=6
+
+            cd $PBS_O_WORKDIR
+            source ~rafferty/init_factor
+            runfactor factor.parset
 
     dir_local
         Full path to a local disk on the nodes for I/O-intensive processing. The path

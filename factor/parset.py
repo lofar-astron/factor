@@ -210,7 +210,8 @@ def get_global_options(parset):
     # resolution in stages to the full resolution (default = False). This method may
     # improve convergence, especially when the starting model is poor
     if 'multiscale_selfcal' in parset_dict:
-        parset_dict['calibration_specific']['multiscale_selfcal'] = parset.getboolean('global', 'multiscale_selfcal')
+        log.warning('Option "multiscale_selfcal" is deprecated and should be changed to "multires_selfcal"')
+        parset_dict['calibration_specific']['multires_selfcal'] = parset.getboolean('global', 'multiscale_selfcal')
 
     # Max desired peak flux density reduction at center of the facet edges due to
     # bandwidth smearing (at the mean frequency) and time smearing (default = 0.15 =
@@ -318,13 +319,16 @@ def get_calibration_options(parset):
     else:
         parset_dict['preaverage_flux_jy'] = 0.0
 
-    # Use multi-scale selfcal that starts at 20 arcsec resolution and increases the
+    # Use multi-resolution selfcal that starts at 20 arcsec resolution and increases the
     # resolution in stages to the full resolution (default = False). This method may
     # improve convergence, especially when the starting model is poor
-    if 'multiscale_selfcal' in parset_dict:
-        parset_dict['multiscale_selfcal'] = parset.getboolean('calibration', 'multiscale_selfcal')
+    if 'multires_selfcal' in parset_dict:
+        parset_dict['multires_selfcal'] = parset.getboolean('calibration', 'multires_selfcal')
+    elif 'multiscale_selfcal' in parset_dict:
+        log.warning('Option "multiscale_selfcal" is deprecated and should be changed to "multires_selfcal"')
+        parset_dict['multires_selfcal'] = parset.getboolean('calibration', 'multiscale_selfcal')
     else:
-        parset_dict['multiscale_selfcal'] = False
+        parset_dict['multires_selfcal'] = False
 
     # Size of frequency block in MHz over which a single TEC solution is fit
     # (default = 10)
@@ -367,7 +371,7 @@ def get_calibration_options(parset):
 
     # Check for unused options
     allowed_options = ['exit_on_selfcal_failure', 'skip_selfcal_check',
-        'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal',
+        'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal', 'multires_selfcal',
         'tec_block_mhz', 'peel_flux_jy', 'solve_min_uv_lambda', 'spline_smooth2d',
         'solve_all_correlations_flux_jy']
     for option in given_options:
@@ -587,11 +591,11 @@ def get_directions_options(parset):
 
     # Check whether any sources from the initial subtract sky model fall on facet
     # edges. If any are found, the facet regions are adjusted to avoid them (default
-    # is False)
+    # is True)
     if 'check_edges' in parset_dict:
         parset_dict['check_edges'] = parset.getboolean('directions', 'check_edges')
     else:
-        parset_dict['check_edges'] = False
+        parset_dict['check_edges'] = True
 
     # Parameters for selecting directions internally (radius from phase center
     # within which to consider sources as potential calibrators, min flux, max size
