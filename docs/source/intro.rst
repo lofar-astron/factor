@@ -16,3 +16,9 @@ Making a directions file (see :ref:`directions_file`)
 
 Running Factor (see :ref:`running_factor`)
     This step involves running Factor and checking its progress and output.
+
+
+Tutorials
+---------
+
+A number of tutorials have been written that give examples of common Factor use cases. The tutorials are available in the Factor section of the LOFAR Imaging Cookbook (http://www.astron.nl/radio-observatory/lofar/lofar-imaging-cookbook).
