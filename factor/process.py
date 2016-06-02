@@ -141,6 +141,11 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     # or is explicitly specified for reset (to allow one to resume
                     # facetsubreset instead of always resetting and restarting it)
                     d.reset_state('facetsubreset')
+
+                # Ensure that the subtracted data column is set the new one
+                # that facetsubreset produces
+                d.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
+
             direction_group_reset_facetsub = factor.cluster.combine_nodes(
                 direction_group_reset_facetsub,
                 parset['cluster_specific']['node_list'],
@@ -152,7 +157,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             for op in ops:
                 scheduler.run(op)
         for d in direction_group_reset:
-            d.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
             d.reset_state(['facetselfcal', 'facetsub'])
 
         # Divide up the nodes and cores among the directions for the parallel
