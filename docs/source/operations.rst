@@ -24,7 +24,7 @@ This operation peels a facet calibrator. It is the same as the outlierpeel opera
 Primary products (in ``results/facetpeel/direction_name/``):
     * ``*merge_selfcal_parmdbs`` - the (unnormalized) self-calibration solutions table used to subtract the source
     * ``*merge_normalized_selfcal_parmdbs`` - the (normalized) self-calibration solutions table used to correct the facet data before imaging
-    * ``*make_selfcal_plots*.png`` - plots of the self-calibration solutions (see Figure XX for an example)
+    * ``*make_selfcal_plots*.png`` - plots of the self-calibration solutions
 
 
 facetselfcal

@@ -1,20 +1,56 @@
 Factor: Facet Calibration for LOFAR
 ===================================
 
-This document describes the Factor software that implements the facet calibration scheme described in van Weeren et al. (2016) and Williams et al. (2016) on HBA LOFAR data.
+Factor is a tool for producing low-noise, high-resolution images from HBA LOFAR data using the facet calibration scheme described in van Weeren et al. (2016) and Williams et al. (2016).
+
+Introduction
+------------
 
 .. toctree::
    :maxdepth: 2
-   :numbered:
 
-   acknowledgements.rst
-   intro.rst
-   changelog.rst
-   preparation.rst
-   parset.rst
-   directions.rst
-   running.rst
-   operations.rst
-   future.rst
-   structure.rst
-   modules.rst
+   acknowledgements
+   capabilities
+   steps
+
+
+Obtaining Factor
+----------------
+
+.. toctree::
+   :maxdepth: 2
+
+   installation
+   changelog
+   future
+
+
+Setting up and Running Factor
+-----------------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   tutorials
+   preparation
+   parset
+   directions
+   running
+
+
+Factor Operations
+-----------------
+
+.. toctree::
+   :maxdepth: 2
+
+   structure
+   operations
+
+
+Code Documentation
+------------------
+.. toctree::
+   :maxdepth: 2
+
+   modules

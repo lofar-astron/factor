@@ -1,9 +1,9 @@
-.. _intro:
+.. _steps:
 
-Introduction
-============
+Steps in a Factor reduction
+===========================
 
-The Factor (Facet Calibration for LOFAR) software package has been developed to perform facet calibration in a user-friendly way for LOFAR HBA data. Running Factor on a dataset generally involves the following steps:
+Using Factor on a dataset generally involves the following basic steps:
 
 Preparing the data (see :ref:`data_preparation`)
     Factor requires that the input data be prepared in a specific way. This step involves running the pre-Factor pipelines.
@@ -14,11 +14,5 @@ Making a Factor parset (see :ref:`factor_parset`)
 Making a directions file (see :ref:`directions_file`)
     (Optional) This step involves making a file that defines the directions toward which direction-dependent solutions will be derived.
 
-Running Factor (see :ref:`running_factor`)
+Running Factor (see :ref:`runfactor`)
     This step involves running Factor and checking its progress and output.
-
-
-Tutorials
----------
-
-A number of tutorials have been written that give examples of common Factor use cases. The tutorials are available in the Factor section of the LOFAR Imaging Cookbook (http://www.astron.nl/radio-observatory/lofar/lofar-imaging-cookbook).
