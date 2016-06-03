@@ -1,4 +1,4 @@
-Factor Module and Class Documentation
+Factor module and class documentation
 =====================================
 
 The primary Factor modules that are used to set up and run the pipeline are documented here.

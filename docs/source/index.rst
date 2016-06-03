@@ -25,7 +25,7 @@ Obtaining Factor
    future
 
 
-Setting up and Running Factor
+Setting Up and Running Factor
 -----------------------------
 
 .. toctree::

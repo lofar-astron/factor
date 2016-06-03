@@ -1,6 +1,6 @@
 .. _factor_parset:
 
-The Factor Parset
+The Factor parset
 =================
 
 Before Factor can be run, a parset describing the reduction must be made. The

@@ -1,6 +1,6 @@
 .. _data_preparation:
 
-Data Preparation
+Data preparation
 ================
 
 .. note::
