@@ -28,6 +28,9 @@ The columns are described below. The calibrators will be processed in the order 
     You can let Factor generate the directions file itself and then edit the file to adjust the calibrators by hand. To do this, set ``interactive = True`` in the parset so that Factor will pause to allow editing. Once you are done, you can continue the same Factor run and it will pick up any changes made to the file.
 
 
+Columns
+-------
+
 .. glossary::
 
     name

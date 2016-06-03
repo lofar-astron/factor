@@ -127,9 +127,10 @@ def get_global_options(parset):
                         'checkfactor': {}})
 
     # Parmdb name for dir-indep. selfcal solutions (stored inside the input band
-    # measurement sets, so path should be relative to those; default = instrument)
+    # measurement sets, so path should be relative to those; default =
+    # instrument_directionindependent)
     if 'parmdb_name' not in parset_dict:
-        parset_dict['parmdb_name'] = 'instrument'
+        parset_dict['parmdb_name'] = 'instrument_directionindependent'
 
     # Extension that when concatenated with the 'extension-stripped' MS path gives
     # a path that is checked if it contains a skymodel

@@ -12,8 +12,9 @@ dir_working = /data/wdir
 dir_ms = /data/bands
 
 # Parmdb name for dir-indep. selfcal solutions (stored inside the input band
-# measurement sets, so path should be relative to those; default = instrument)
-# parmdb_name = instrument
+# measurement sets, so path should be relative to those; default =
+# instrument_directionindependent)
+# parmdb_name = instrument_directionindependent
 
 # Extension that when concatenated with the 'extension-stripped' MS path gives
 # a path that is checked if it contains a skymodel. The default finds the skymodel
@@ -72,8 +73,8 @@ dir_ms = /data/bands
 # Minimum uv distance in lambda for calibration (default = 80.0)
 # solve_min_uv_lambda = 80.0
 
-# Smooth amplitudes with spline fit + 2-D median (default = True; i.e., smooth
-# with a 1-D median only)
+# Smooth amplitudes with spline fit + 2-D median (default = True). If
+# ``False``, smoothing is done with a 1-D median.
 # spline_smooth2D = True
 
 # Include XY and YX correlations during the slow gain solve for sources above

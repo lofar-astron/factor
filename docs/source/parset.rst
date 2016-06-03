@@ -41,7 +41,7 @@ The available options are described below under their respective sections.
     parmdb_name
         Parmdb name for dir-indep. selfcal solutions (stored inside the input
         band measurement sets, so path should be relative to those; default =
-        instrument).
+        ``instrument_directionindependent``).
 
     skymodel_extension
         Extension that when concatenated with the "extension-stripped" MS path gives
@@ -110,8 +110,8 @@ The available options are described below under their respective sections.
         Minimum uv distance in lambda for calibration (default = 80.0).
 
     spline_smooth2D
-        Smooth amplitudes with spline fit + 2-D median (default = ``True``; i.e., smooth
-        with a 1-D median only).
+        Smooth amplitudes with spline fit + 2-D median (default = ``True``). If
+        ``False``, smoothing is done with a 1-D median.
 
     solve_all_correlations_flux_Jy
         Include XY and YX correlations during the slow gain solve for sources above
@@ -174,22 +174,33 @@ The available options are described below under their respective sections.
         Self calibration multiscale clean scales (default = ``[0, 3, 7, 25, 60,
         150]``; set to ``[0]`` to disable multiscale clean).
 
+    .. note::
+
+            The follwoing four parameters (``facet_cellsize_arcsec``,
+            ``facet_robust``, ``facet_taper_arcsec``, and ``facet_min_uv_lambda``)
+            can be specified as lists if more than one set of images is desired.
+            In this case, they must all have the same number of entries.
+
     facet_cellsize_arcsec
-        Facet image pixel size in arcsec (default = self calibration value).
+        Facet image pixel size in arcsec (default = self calibration value). E.g.,
+        ``facet_cellsize_arcsec = [1.5, 15.0]``.
 
     facet_robust
-        Facet image Briggs robust parameter (default = self calibration value).
+        Facet image Briggs robust parameter (default = self calibration value). E.g.,
+        ``facet_robust = [-0.25, 0.0]``.
 
     facet_taper_arcsec
-        Facet image uv taper in arcsec (default = self calibration value).
+        Facet image uv taper in arcsec (default = self calibration value). E.g.,
+        ``facet_taper_arcsec = [0.0, 45.0]``.
 
     facet_min_uv_lambda
-        Facet image minimum uv distance in lambda (default = self calibration value).
+        Facet image minimum uv distance in lambda (default = self calibration value). E.g.,
+        ``facet_min_uv_lambda = [80.0, 160.0]``.
 
     selfcal_clean_threshold
         Use a clean threshold during selfcal imaging (default = ``False``). If ``False``,
-        clean will always stop at 1000 iterations. If ``True``, clean will go to 1 sigma
-        noise level.
+        clean will always stop at 1000 iterations. If ``True``, clean will stop when it
+        reaches the 1 sigma noise level.
 
     selfcal_adaptive_threshold
         Use an adaptive masking threshold during selfcal imaging (default = ``False``). If

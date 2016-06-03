@@ -24,7 +24,7 @@ This operation peels a facet calibrator. It is the same as the outlierpeel opera
 Primary products (in ``results/facetpeel/direction_name/``):
     * ``*merge_selfcal_parmdbs`` - the (unnormalized) self-calibration solutions table used to subtract the source
     * ``*merge_normalized_selfcal_parmdbs`` - the (normalized) self-calibration solutions table used to correct the facet data before imaging
-    * ``*make_selfcal_plots*.png`` - plots of the self-calibration solutions
+    * ``*make_selfcal_plots*.png`` - plots of the self-calibration solutions (see Figure XX for an example)
 
 
 facetselfcal
@@ -42,6 +42,8 @@ Primary products (in ``results/facetselfcal/direction_name/``):
     * ``*casa_image*.image(.tt0)`` - self-calibration images (CASA format)
     * ``*casa_image*.png`` - self-calibration images (png format)
     * ``*image_full2*`` - facet image (not made if direction is a patch)
+    * ``*wsclean_pre-image.fits`` - residual image of field for middle band before subtraction of new model
+    * ``*wsclean_post-image.fits`` - residual image of field for middle band after subtraction of new model
     * files listed in ``mapfiles/concat_averaged_compressed.mapfile`` - averaged, corrected uv data (kept only if ``keep_avg_facet_data = True`` in the Factor parset)
 
 
