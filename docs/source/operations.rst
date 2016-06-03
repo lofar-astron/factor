@@ -9,7 +9,7 @@ Most of the processing performed by Factor is done in "operations," which are se
 outlierpeel
 -----------
 
-This operation peels an outlier source and subtracts it. During peeling, no self calibration is done and hence a sky model of the source must either be supplied by the user or must be one of those included in Factor (see ``factor/skymodels`` in the Factor installation for a list of available ones). To specify that a source is an outlier source and should be peeled, set ``outlier_source = True`` in the directions file.
+This operation peels an outlier source and subtracts it. During peeling, no self calibration is done and hence a sky model of the source must either be supplied by the user or must be one of those included in Factor (see ``factor/skymodels`` in the Factor installation for a list of available ones). To specify that a source is an outlier source and should be peeled, set :term:`outlier_source` to ``True`` in the directions file.
 
 Primary products (in ``results/outlierpeel/direction_name/``):
     * ``*merge_selfcal_parmdbs`` - the (unnormalized) self-calibration solutions table used to subtract the source
@@ -34,7 +34,7 @@ This operation self calibrates a facet calibrator and images the facet.
 
 .. note::
 
-    The facet image is made only for facet-type directions (i.e., not patch-type directions).
+    The facet image is made only for facet-type directions (i.e., not the small patch-type directions that lie outside of the faceting radius).
 
 Primary products (in ``results/facetselfcal/direction_name/``):
     * ``*merge_selfcal_parmdbs`` - the (normalized) self-calibration solutions table
@@ -44,7 +44,7 @@ Primary products (in ``results/facetselfcal/direction_name/``):
     * ``*image_full2*`` - facet image (not made if direction is a patch)
     * ``*wsclean_pre-image.fits`` - residual image of field for middle band before subtraction of new model
     * ``*wsclean_post-image.fits`` - residual image of field for middle band after subtraction of new model
-    * files listed in ``mapfiles/concat_averaged_compressed.mapfile`` - averaged, corrected uv data (kept only if ``keep_avg_facet_data = True`` in the Factor parset)
+    * files listed in ``mapfiles/concat_averaged_compressed.mapfile`` - averaged, corrected uv data (kept only if :term:`keep_avg_facet_data` is ``True`` in the Factor parset)
 
 
 facetsub
@@ -63,7 +63,7 @@ This operation images a facet using either the self-calibration solutions from t
 
 Primary products (in ``results/facetimage/direction_name/``):
     * ``*image_full2*`` - facet image
-    * files listed in ``mapfiles/concat_averaged_compressed.mapfile`` - averaged, corrected uv data (kept only if ``keep_avg_facet_data = True`` in the Factor parset)
+    * files listed in ``mapfiles/concat_averaged_compressed.mapfile`` - averaged, corrected uv data (kept only if :term:`keep_avg_facet_data` is ``True`` in the Factor parset)
 
 
 facetpeelimage
@@ -73,7 +73,7 @@ This operation images a facet using the self-calibration solutions from the face
 
 Primary products (in ``results/facetpeelimage/direction_name/``):
     * ``*image_full2*`` - facet image
-    * files listed in ``mapfiles/concat_averaged_compressed.mapfile`` - averaged, corrected uv data (kept only if ``keep_avg_facet_data = True`` in the Factor parset)
+    * files listed in ``mapfiles/concat_averaged_compressed.mapfile`` - averaged, corrected uv data (kept only if :term:`keep_avg_facet_data` is ``True`` in the Factor parset)
 
 
 fieldmosaic

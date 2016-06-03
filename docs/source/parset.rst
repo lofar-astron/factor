@@ -46,7 +46,7 @@ The available options are described below under their respective sections.
     skymodel_extension
         Extension that when concatenated with the "extension-stripped" MS path gives
         a path that is checked if it contains a skymodel. The default finds the skymodel
-        files from the standard prefactor Initial-Subtract.parset
+        files from the standard prefactor ``Initial-Subtract.parset``
         (default = ``.wsclean_low2-model.merge`` ; note the leading ".").
 
     interactive
@@ -116,8 +116,8 @@ The available options are described below under their respective sections.
     solve_all_correlations_flux_Jy
         Include XY and YX correlations during the slow gain solve for sources above
         this flux density (default = 1000.0; i.e., effectively off). Below this value,
-        only the XX and YY correlations are included. Note that spline_smooth2D must
-        be True to solve for all correlations. If you want to use it, then an useful
+        only the XX and YY correlations are included. Note that :term:`spline_smooth2D` must
+        be ``True`` to solve for all correlations. If you want to use it, then an useful
         value would be, e.g., 5.0.
 
 
@@ -145,7 +145,7 @@ The available options are described below under their respective sections.
         bandwidth smearing (at the mean frequency) and time smearing (default = 0.15 =
         15% reduction in peak flux). Higher values result in shorter run times but
         more smearing away from the facet centers. This value only applies to the
-        facet imaging (selfcal always uses a value of 0.15).
+        facet imaging (self calibration always uses a value of 0.15).
 
     facet_imager
         Use WSClean or CASA for imaging of entire facet (default = ``wsclean``). For large
@@ -174,12 +174,21 @@ The available options are described below under their respective sections.
         Self calibration multiscale clean scales (default = ``[0, 3, 7, 25, 60,
         150]``; set to ``[0]`` to disable multiscale clean).
 
+    selfcal_clean_threshold
+        Use a clean threshold during selfcal imaging (default = ``False``). If ``False``,
+        clean will always stop at 1000 iterations. If ``True``, clean will stop when it
+        reaches the 1 sigma noise level.
+
+    selfcal_adaptive_threshold
+        Use an adaptive masking threshold during selfcal imaging (default = ``False``). If
+        ``True``, the masking threshold will be estimated using the negative peaks in the
+        image, which can help selfcal convergence in the presence of strong artifacts.
+
 .. note::
 
-        The following four parameters (``facet_cellsize_arcsec``,
-        ``facet_robust``, ``facet_taper_arcsec``, and ``facet_min_uv_lambda``)
-        can be specified as lists if more than one set of images is desired.
-        In this case, they must all have the same number of entries.
+    The following four parameters can be specified as lists if more than one set
+    of images is desired. In this case, they must all have the same number of
+    entries.
 
     facet_cellsize_arcsec
         Facet image pixel size in arcsec (default = self calibration value). E.g.,
@@ -196,16 +205,6 @@ The available options are described below under their respective sections.
     facet_min_uv_lambda
         Facet image minimum uv distance in lambda (default = self calibration value). E.g.,
         ``facet_min_uv_lambda = [80.0, 160.0]``.
-
-    selfcal_clean_threshold
-        Use a clean threshold during selfcal imaging (default = ``False``). If ``False``,
-        clean will always stop at 1000 iterations. If ``True``, clean will stop when it
-        reaches the 1 sigma noise level.
-
-    selfcal_adaptive_threshold
-        Use an adaptive masking threshold during selfcal imaging (default = ``False``). If
-        ``True``, the masking threshold will be estimated using the negative peaks in the
-        image, which can help selfcal convergence in the presence of strong artifacts.
 
 
 .. _parset_directions_options:
@@ -244,10 +243,10 @@ The available options are described below under their respective sections.
 
     ndir_process
         Total number of directions to process (default = all). If this number is
-        greater than ``ndir_selfcal``, then the remaining directions will not be selfcal-
+        greater than :term:`ndir_selfcal`, then the remaining directions will not be selfcal-
         ed but will instead be imaged with the selfcal solutions from the nearest
         direction for which selfcal succeeded (if a target is specified and
-        ``target_has_own_facet = True``, it will be imaged in this way after ndir_total
+        :term:`target_has_own_facet` is ``True``, it will be imaged in this way after ndir_total
         number of directions are processed).
 
     ndir_selfcal
@@ -318,21 +317,21 @@ The available options are described below under their respective sections.
         multiple nodes in a slurm reservation on JUROPA.
         If not given, the clusterdesc file for a single (i.e., local) node is used.
 
-.. note::
+        .. note::
 
-    On a cluster that uses torque and PBS, Factor will automatically determine the nodes for which you have a
-    PBS reservation and use them. Note that you must ask for all the nodes you need
-    in a single PBS script, so that all nodes are available for the full Factor run. An
-    example PBS script is shown below::
+            On a cluster that uses torque and PBS, Factor will automatically determine the nodes for which you have a
+            PBS reservation and use them. Note that you must ask for all the nodes you need
+            in a single PBS script, so that all nodes are available for the full Factor run. An
+            example PBS script is shown below::
 
-        #!/bin/bash
-        #PBS -N Factor
-        #PBS -l walltime=100:00:00
-        #PBS -l nodes=6:ppn=6
+                #!/bin/bash
+                #PBS -N Factor
+                #PBS -l walltime=100:00:00
+                #PBS -l nodes=6:ppn=6
 
-        cd $PBS_O_WORKDIR
-        source ~rafferty/init_factor
-        runfactor factor.parset
+                cd $PBS_O_WORKDIR
+                source ~rafferty/init_factor
+                runfactor factor.parset
 
     dir_local
         Full path to a local disk on the nodes for I/O-intensive processing. The path

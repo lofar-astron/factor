@@ -21,11 +21,11 @@ A file defining the direction-dependent calibrators may be provided. The directi
     s25 14h21m07.482,+35d35m22.87 empty empty   0  2   0  LD empty /full/path/to/s25.rgn empty False 0.1 1020
     ...
 
-The columns are described below. The calibrators will be processed in the order in which they are given. If a directions file is provided, it must be specified with the ``directions_file`` option in the parset. If not,  Factor will identify suitable calibrators (or calibrator groups) using the values of the ``flux_min_for_merging_Jy``, ``size_max_arcmin``, ``separation_max_arcmin``, and ``flux_min_Jy`` parameters in the parset.
+The columns are described below. The calibrators will be processed in the order in which they are given. If a directions file is provided, it must be specified with the :term:`directions_file` option in the parset. If not, Factor will identify suitable calibrators (or calibrator groups) using the values of the :term:`flux_min_for_merging_Jy`, :term:`size_max_arcmin`, :term:`separation_max_arcmin`, and :term:`flux_min_Jy` parameters in the parset.
 
 .. note::
 
-    You can let Factor generate the directions file itself and then edit the file to adjust the calibrators by hand. To do this, set ``interactive = True`` in the parset so that Factor will pause to allow editing. Once you are done, you can continue the same Factor run and it will pick up any changes made to the file.
+    You can let Factor generate the directions file itself and then edit the file to adjust the calibrators by hand. To do this, set :term:`interactive` to  ``True`` in the parset so that Factor will pause to allow editing. Once you are done, you can continue the same Factor run and it will pick up any changes made to the file.
 
 
 Columns
@@ -55,7 +55,7 @@ Columns
         The solution interval in seconds for the amplitude solve. If ``0``, Factor will set the solution interval based on the brightness of the calibrator or calibrator group.
 
     dynamic_range
-        If ``HD``, amplitudes are solved for every channel. If ``LD``, amplitudes are solved in blocks defined by the ``TEC_block_MHz`` option in the parset.
+        If ``HD``, amplitudes are solved for every channel. If ``LD``, amplitudes are solved in blocks defined by the :term:`TEC_block_MHz` option in the parset.
 
     region_selfcal
         The region to use as a clean mask during self calibration. If given, this region will be unioned with the PyBDSM-generated one.
@@ -64,10 +64,10 @@ Columns
         The region to use as a clean mask during facet imaging. If given, this region will be unioned with the PyBDSM-generated one.
 
     peel_skymodel
-        The sky model to use during peeling (if the ``outlier_source`` column is set to ``True`` or if the calibrator flux density exceeds that set with the ``peel_flux_Jy`` option in the parset).
+        The sky model to use during peeling (if the :term:`outlier_source` column is set to ``True`` or if the calibrator flux density exceeds that set with the :term:`peel_flux_Jy` option in the parset).
 
     outlier_source
-        If ``True``, the calibrator will be peeled using the sky model given in the ``peel_skymodel`` column and self calibration will not be done.
+        If ``True``, the calibrator will be peeled using the sky model given in the :term:`peel_skymodel` column and self calibration will not be done.
 
     cal_size_deg
         The size of the calibrator or calibrator group in degrees.
