@@ -174,12 +174,12 @@ The available options are described below under their respective sections.
         Self calibration multiscale clean scales (default = ``[0, 3, 7, 25, 60,
         150]``; set to ``[0]`` to disable multiscale clean).
 
-    .. note::
+.. note::
 
-            The follwoing four parameters (``facet_cellsize_arcsec``,
-            ``facet_robust``, ``facet_taper_arcsec``, and ``facet_min_uv_lambda``)
-            can be specified as lists if more than one set of images is desired.
-            In this case, they must all have the same number of entries.
+        The following four parameters (``facet_cellsize_arcsec``,
+        ``facet_robust``, ``facet_taper_arcsec``, and ``facet_min_uv_lambda``)
+        can be specified as lists if more than one set of images is desired.
+        In this case, they must all have the same number of entries.
 
     facet_cellsize_arcsec
         Facet image pixel size in arcsec (default = self calibration value). E.g.,
@@ -318,21 +318,21 @@ The available options are described below under their respective sections.
         multiple nodes in a slurm reservation on JUROPA.
         If not given, the clusterdesc file for a single (i.e., local) node is used.
 
-    .. note::
+.. note::
 
-        On a cluster that uses torque and PBS, Factor will automatically determine the nodes for which you have a
-        PBS reservation and use them. Note that you must ask for all the nodes you need
-        in a single PBS script, so that all nodes are available for the full Factor run. An
-        example PBS script is shown below::
+    On a cluster that uses torque and PBS, Factor will automatically determine the nodes for which you have a
+    PBS reservation and use them. Note that you must ask for all the nodes you need
+    in a single PBS script, so that all nodes are available for the full Factor run. An
+    example PBS script is shown below::
 
-            #!/bin/bash
-            #PBS -N Factor
-            #PBS -l walltime=100:00:00
-            #PBS -l nodes=6:ppn=6
+        #!/bin/bash
+        #PBS -N Factor
+        #PBS -l walltime=100:00:00
+        #PBS -l nodes=6:ppn=6
 
-            cd $PBS_O_WORKDIR
-            source ~rafferty/init_factor
-            runfactor factor.parset
+        cd $PBS_O_WORKDIR
+        source ~rafferty/init_factor
+        runfactor factor.parset
 
     dir_local
         Full path to a local disk on the nodes for I/O-intensive processing. The path
