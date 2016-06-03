@@ -25,48 +25,44 @@ class Direction(object):
     All attributes needed by the pipeline templates should be set on the class
     instance so that they can be passed with self.__dict__
 
+    Parameters
+    ----------
+    name : str
+        Name of direction
+    ra : float
+        RA in degrees of calibrator center
+    dec : float
+        Dec in degrees of calibrator center
+    atrous_do : bool
+        Fit to wavelet images in PyBDSM?
+    mscale_field_do : bool
+        Use multiscale clean for facet field?
+    cal_imsize : int
+        Size of calibrator image in 1.5 arcsec pixels
+    solint_p : int
+        Solution interval for phase calibration (# of time slots)
+    solint_a : int
+        Solution interval for amplitude calibration (# of time slots)
+    dynamic_range : str
+        LD (low dynamic range) or HD (high dynamic range)
+    region_selfcal : str
+        Region for clean mask for calibrator selfcal
+    region_field : str
+        Region for clean mask for facet image
+    peel_skymodel : str
+        Sky model for peeling
+    outlier_do : bool
+        If True, peel source without selfcal
+    factor_working_dir : str
+        Full path of working directory
+    cal_size_deg : float, optional
+        Size in degrees of calibrator source(s)
+
     """
     def __init__(self, name, ra, dec, atrous_do=False, mscale_field_do=False,
     	cal_imsize=512, solint_p=1, solint_a=30, dynamic_range='LD',
     	region_selfcal='empty', region_field='empty', peel_skymodel='empty',
     	outlier_do=False, factor_working_dir='', cal_size_deg=None):
-        """
-        Instantiate direction object
-
-        Parameters
-        ----------
-        name : str
-            Name of direction
-        ra : float
-            RA in degrees of calibrator center
-        dec : float
-            Dec in degrees of calibrator center
-        atrous_do : bool
-            Fit to wavelet images in PyBDSM?
-        mscale_field_do : bool
-            Use multiscale clean for facet field?
-        cal_imsize : int
-            Size of calibrator image in 1.5 arcsec pixels
-        solint_p : int
-            Solution interval for phase calibration (# of time slots)
-        solint_a : int
-            Solution interval for amplitude calibration (# of time slots)
-        dynamic_range : str
-            LD (low dynamic range) or HD (high dynamic range)
-        region_selfcal : str
-            Region for clean mask for calibrator selfcal
-        region_field : str
-            Region for clean mask for facet image
-        peel_skymodel : str
-            Sky model for peeling
-        outlier_do : bool
-            If True, peel source without selfcal
-        factor_working_dir : str
-            Full path of working directory
-        cal_size_deg : float, optional
-            Size in degrees of calibrator source(s)
-
-        """
         self.name = name
         self.log = logging.getLogger('factor:{0}'.format(self.name))
         if type(ra) is str:
