@@ -527,6 +527,7 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
     seltab = tab.query('TIME >= ' + str(starttime) + ' && TIME < ' + str(endtime),
         sortlist='TIME,ANTENNA1,ANTENNA2', columns=','.join(colnames_to_keep))
 
+    copy = True
     if os.path.exists(chunk_file):
         try:
             newtab = pt.table(chunk_file, ack=False)
