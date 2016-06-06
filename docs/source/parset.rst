@@ -104,7 +104,7 @@ The available options are described below under their respective sections.
         When activated, the calibrator is peeled using a supplied sky model and
         the facet is then imaged as normal. Note: for each source that should be
         peeled, a sky model must be specified in the directions file in the
-        peel_skymodel column or be one of those included in Factor
+        :term:`peel_skymodel` column or be one of those included in Factor
 
     solve_min_uv_lambda
         Minimum uv distance in lambda for calibration (default = 80.0).
