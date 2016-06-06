@@ -533,8 +533,11 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
             newtab = pt.table(chunk_file, ack=False)
             if len(newtab) == len(seltab):
                 copy = False
-            newtab.close()
-            log.debug('Chunk {} exists with correct length, not copying!'.format(chunk_name))
+                newtab.close()
+            else:
+                log.error('Chunk {0} exists with incorrect length ({1} samples expected, {2} samples found), please check it!'.format(chunk_name, len(seltab), len(newtab)))
+                newtab.close()
+                sys.exit(1)
         except:
             copy = True
         if copy:
@@ -546,8 +549,11 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
             if len(newtab) == len(seltab):
                 copy = False
                 chunk_file = old_chunk_file
-            newtab.close()
-            log.debug('Chunk {} exists with correct length in old directory, not copying!'.format(chunk_name))
+                newtab.close()
+            else:
+                log.error('Chunk {0} exists with incorrect length ({1} samples expected, {2} samples found), please check it!'.format(chunk_name, len(seltab), len(newtab)))
+                newtab.close()
+                sys.exit(1)
         except:
             copy = True
     else:
@@ -575,6 +581,9 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
             chunk_file = chunk_file_original
 
         shutil.copytree(ms_parmdb, newdirindparmdb)
+    else:
+        log.debug('Chunk {} exists with correct length, not copying!'.format(chunk_name))
+
     seltab.close()
     tab.close()
 
