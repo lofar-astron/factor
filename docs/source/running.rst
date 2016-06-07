@@ -107,7 +107,7 @@ Factor produces the following output inside the working directory:
 
     .. note::
 
-        Some error messages are stored in the ``logs/operation_name/direction_name.err.log`` file, but these are rarely of interest. Generally, important error messages will appear in the ``logs/operation_name/direction_name.out.log`` file. These log files are very large, so a search for "error" is usually the easiest way to find any error messages.
+        Some error messages are stored in the ``logs/operation_name/direction_name.err.log`` file, but these are rarely of interest. Generally, important error messages will appear in the ``logs/operation_name/direction_name.out.log`` file. These log files can be very large, so a search for "error" is usually the easiest way to find any error messages.
 
 ``regions/``
     Directory containing the ds9 region files for the facet and self-calibration images. The following region files are made:
