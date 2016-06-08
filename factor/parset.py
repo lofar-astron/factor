@@ -169,8 +169,8 @@ def get_global_options(parset):
 
     # Use WSClean or CASA for imaging of entire facet (default = wsclean). For large
     # bandwidths, the CASA imager is typically faster
-    if 'facet_imager' not in parset_dict:
-        parset_dict['imaging_specific']['facet_imager'] = 'wsclean'
+    if 'facet_imager' in parset_dict:
+        parset_dict['imaging_specific']['facet_imager'] = parset_dict['facet_imager']
 
     # Keep calibrated data for each facet to allow re-imaging by hand (default =
     # True for averaged data and False for unaveraged data). If a target is
