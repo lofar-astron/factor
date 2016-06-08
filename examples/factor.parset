@@ -67,7 +67,8 @@ dir_ms = /data/bands
 # When activated, the calibrator is peeled using a supplied sky model and
 # the facet is then imaged as normal. Note: for each source that should be
 # peeled, a sky model must be specified in the directions file in the
-# peel_skymodel column or be one of those included in Factor
+# peel_skymodel column or be one of those included in Factor; if not, the
+# calibrator will go through self calibration as if it were a normal calibrator
 # peel_flux_Jy = 25.0
 
 # Minimum uv distance in lambda for calibration (default = 80.0)
@@ -89,7 +90,7 @@ dir_ms = /data/bands
 # Make final mosaic (default = True)
 # make_mosaic = True
 
-# Re-image all directions for which selfcal was successful (default = True)
+# Re-image directions for which selfcal was successful (default = True)
 # reimage_selfcaled = True
 
 # Padding factor for WSClean images (default = 1.6)
@@ -186,9 +187,9 @@ flux_min_Jy = 0.3
 # Total number of directions to selfcal (default = all)
 # ndir_selfcal = 5
 
-# Radius within which facets will be used (default = 1.25 * FWHM of primary beam
-# of highest-frequency band); outside of this radius, small patches are used
-# that do not appear in the final mosaic.
+# Radius within which facets will be used (default = 1.25 * FWHM / 2 of primary
+# beam of highest-frequency band); outside of this radius, small patches are
+# used that do not appear in the final mosaic.
 # faceting_radius_deg = 2.5
 
 # Check whether any sources from the initial subtract sky model fall on facet

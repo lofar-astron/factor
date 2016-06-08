@@ -56,7 +56,7 @@ The available options are described below under their respective sections.
     keep_avg_facet_data
         Keep averaged calibrated data for each facet to allow re-imaging by hand (default =
         ``True``). If a target is specified (see below), the averaged data for the target is always kept,
-        regardless of this setting
+        regardless of this setting.
 
     keep_unavg_facet_data
         Keep unaveraged calibrated data for each facet (default = ``False``).
@@ -104,7 +104,8 @@ The available options are described below under their respective sections.
         When activated, the calibrator is peeled using a supplied sky model and
         the facet is then imaged as normal. Note: for each source that should be
         peeled, a sky model must be specified in the directions file in the
-        :term:`peel_skymodel` column or be one of those included in Factor
+        :term:`peel_skymodel` column or be one of those included in Factor; if not, the
+        calibrator will go through self calibration as if it were a normal calibrator.
 
     solve_min_uv_lambda
         Minimum uv distance in lambda for calibration (default = 80.0).
@@ -156,7 +157,7 @@ The available options are described below under their respective sections.
         clean is used (default = 4). The number of channel images is determined by
         dividing the number of bands by the nearest divisor to this factor. Smaller
         values produce better results but require longer run times. Wide-band clean is
-        activated when there are more than 5 bands
+        activated when there are more than 5 bands.
 
     selfcal_cellsize_arcsec
         Self calibration pixel size in arcsec (default = 1.5).
@@ -253,14 +254,14 @@ The available options are described below under their respective sections.
         Total number of directions to selfcal (default = all).
 
     faceting_radius_deg
-        Radius within which facets will be used (default = 1.25 * FWHM of primary beam
+        Radius within which facets will be used (default = 1.25 * FWHM / 2 of primary beam
         of highest-frequency band); outside of this radius, small patches are used
         that do not appear in the final mosaic.
 
     check_edges
         Check whether any sources from the initial subtract sky model fall on facet
         edges. If any are found, the facet regions are adjusted to avoid them (default
-        is ``False``).
+        is ``True``).
 
     transfer_radius_deg
         Radius in degrees within which the direction-dependent solutions will be
@@ -295,7 +296,7 @@ The available options are described below under their respective sections.
         ``target_dec = +35d30m31.52``.
 
     target_radius_arcmin
-        Radius of a circular region that encloses the target source (to ensure
+        Radius in arcmin of a circular region that encloses the target source (to ensure
         that it falls entirely within a single facet; no default).
 
     target_has_own_facet
