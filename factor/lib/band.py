@@ -467,6 +467,7 @@ class Band(object):
         try:
             with open(self.save_file, 'r') as f:
                 d = pickle.load(f)
+            self.__dict__.update(d)
             return True
         except:
             return False
