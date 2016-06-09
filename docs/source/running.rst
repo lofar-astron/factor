@@ -32,7 +32,7 @@ Factor begins a run by checking the input measurement sets and the direction-ind
 
 Next, Factor will check for a file describing the DDE calibrators. If not found, Factor will select the DDE calibrators automatically and generate the facet regions (saved in a text file in the working directory called ``factor_directions.txt``). At this point, if ``interactive = True`` is set in the parset, Factor will pause to allow a check on the facets.
 
-After intialization, Factor will begin self calibration and imaging (described in detail in :ref:`operations`) of the first facet or group of facets. For the facet or facets that pass self-calibration verification, Factor subtracts the improved model using the direction-dependent instrument tables. Processing then proceeds to the self calibration and imaging of the next facet or facet group, and the step are looped until all facets have been processed.
+After intialization, Factor will begin self calibration and imaging (described in detail in :ref:`operations`) of the first facet or group of facets. For the facet or facets that pass self-calibration verification, Factor subtracts the improved model using the direction-dependent instrument tables. Processing then proceeds to the self calibration and imaging of the next facet or facet group, and the steps are looped until all facets have been processed.
 
 After self calibration is finished, imaging is done for any facets that did not successfully go through self calibration. These facets receive the direction-dependent instrument tables of the nearest facet for which self calibration succeeded. Lastly, all facet images are mosaicked together and the primary beam attenuation is corrected to produce the final image.
 

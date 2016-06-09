@@ -31,10 +31,15 @@ class Band(object):
         copied to the original output directory
     test_run : bool, optional
         If True, use test image sizes
+    process_files : bool, optional
+        If True, process input files, including chunking, etc.
+    chunk_size_sec : float, optional
+        Size of chunks in seconds
 
     """
     def __init__(self, MSfiles, factor_working_dir, dirindparmdb,
-        skymodel_dirindep=None, local_dir=None, test_run=False):
+        skymodel_dirindep=None, local_dir=None, test_run=False, check_files=True,
+        chunk_size_sec=2400.0):
 
         self.files = MSfiles
         self.msnames = [ MS.split('/')[-1] for MS in self.files ]
@@ -54,88 +59,94 @@ class Band(object):
         self.log = logging.getLogger('factor:{}'.format(self.name))
         self.log.debug('Band name is {}'.format(self.name))
         self.chunks_dir = os.path.join(factor_working_dir, 'chunks', self.name)
+        self.save_file = os.path.join(self.working_dir, 'state',
+            self.name+'_save.pkl')
 
-        # Do some checks
-        self.check_freqs()
-        self.check_parmdb()
+        # Load state (if any)
+        has_state = self.load_state()
 
-        # Get the field RA and Dec
-        obs = pt.table(self.files[0]+'::FIELD', ack=False)
-        self.ra = np.degrees(float(obs.col('REFERENCE_DIR')[0][0][0]))
-        if self.ra < 0.:
-            self.ra = 360.0 + (self.ra)
-        self.dec = np.degrees(float(obs.col('REFERENCE_DIR')[0][0][1]))
-        obs.close()
+        # Do some checks if desired
+        if process_files or not has_state:
+            self.check_freqs()
+            self.check_parmdb()
 
-        # Get the station diameter
-        ant = pt.table(self.files[0]+'::ANTENNA', ack=False)
-        self.diam = float(ant.col('DISH_DIAMETER')[0])
-        ant.close()
+            # Get the field RA and Dec
+            obs = pt.table(self.files[0]+'::FIELD', ack=False)
+            self.ra = np.degrees(float(obs.col('REFERENCE_DIR')[0][0][0]))
+            if self.ra < 0.:
+                self.ra = 360.0 + (self.ra)
+            self.dec = np.degrees(float(obs.col('REFERENCE_DIR')[0][0][1]))
+            obs.close()
 
-        # Find mean elevation and FOV
-        for MS_id in xrange(self.numMS):
-            # Add (virtual) elevation column to MS
-            try:
-                pt.addDerivedMSCal(self.files[MS_id])
-            except RuntimeError:
-                # RuntimeError indicates column already exists
-                pass
+            # Get the station diameter
+            ant = pt.table(self.files[0]+'::ANTENNA', ack=False)
+            self.diam = float(ant.col('DISH_DIAMETER')[0])
+            ant.close()
 
-            # Calculate mean elevation
-            tab = pt.table(self.files[MS_id], ack=False)
-            if MS_id == 0:
-                global_el_values = tab.getcol('AZEL1', rowincr=10000)[:, 1]
-            else:
-                global_el_values = np.hstack( (global_el_values, tab.getcol('AZEL1', rowincr=10000)[:, 1]) )
-            tab.close()
+            # Find mean elevation and FOV
+            for MS_id in xrange(self.numMS):
+                # Add (virtual) elevation column to MS
+                try:
+                    pt.addDerivedMSCal(self.files[MS_id])
+                except RuntimeError:
+                    # RuntimeError indicates column already exists
+                    pass
 
-            # Remove (virtual) elevation column from MS
-            pt.removeDerivedMSCal(self.files[MS_id])
-        self.mean_el_rad = np.mean(global_el_values)
-        sec_el = 1.0 / np.sin(self.mean_el_rad)
-        self.fwhm_deg = 1.1 * ((3.0e8 / self.freq) / self.diam) * 180. / np.pi * sec_el
+                # Calculate mean elevation
+                tab = pt.table(self.files[MS_id], ack=False)
+                if MS_id == 0:
+                    global_el_values = tab.getcol('AZEL1', rowincr=10000)[:, 1]
+                else:
+                    global_el_values = np.hstack( (global_el_values, tab.getcol('AZEL1', rowincr=10000)[:, 1]) )
+                tab.close()
 
-        # Check for SUBTRACTED_DATA_ALL column in original datasets
-        self.has_sub_data = True
-        self.has_sub_data_new = False
-        for MSid in xrange(self.numMS):
-            tab = pt.table(self.files[MSid], ack=False)
-            if not 'SUBTRACTED_DATA_ALL' in tab.colnames():
-                self.log.error('SUBTRACTED_DATA_ALL column not found in file '
-                    '{}'.format(self.files[MSid]))
-                self.has_sub_data = False
-            tab.close()
-        if not self.has_sub_data:
-            self.log.info('Exiting...')
-            sys.exit(1)
+                # Remove (virtual) elevation column from MS
+                pt.removeDerivedMSCal(self.files[MS_id])
+            self.mean_el_rad = np.mean(global_el_values)
+            sec_el = 1.0 / np.sin(self.mean_el_rad)
+            self.fwhm_deg = 1.1 * ((3.0e8 / self.freq) / self.diam) * 180. / np.pi * sec_el
 
-        # cut input files into chunks if needed
-        chunksize = 2400. # in seconds -> 40min
-        self.chunk_input_files(chunksize, dirindparmdb, local_dir=local_dir,
-                               test_run=test_run)
-        if len(self.files) == 0:
-            self.log.error('No data left after checking input files for band: {}. '
-                           'Probably too little unflagged data.'.format(self.name))
-            self.log.info('Exiting!')
-            sys.exit(1)
+            # Check for SUBTRACTED_DATA_ALL column in original datasets
+            self.has_sub_data = True
+            self.has_sub_data_new = False
+            for MSid in xrange(self.numMS):
+                tab = pt.table(self.files[MSid], ack=False)
+                if not 'SUBTRACTED_DATA_ALL' in tab.colnames():
+                    self.log.error('SUBTRACTED_DATA_ALL column not found in file '
+                        '{}'.format(self.files[MSid]))
+                    self.has_sub_data = False
+                tab.close()
+            if not self.has_sub_data:
+                self.log.info('Exiting...')
+                sys.exit(1)
 
-        # Calculate times and number of samples
-        self.sumsamples = 0
-        self.minSamplesPerFile = 4294967295  # If LOFAR lasts that many seconds then I buy you a beer.
-        self.starttime = np.finfo('d').max
-        self.endtime = 0.
-        for MSid in xrange(self.numMS):
-            tab = pt.table(self.files[MSid], ack=False)
-            self.starttime = min(self.starttime,np.min(tab.getcol('TIME')))
-            self.endtime = max(self.endtime,np.min(tab.getcol('TIME')))
-            for t2 in tab.iter(["ANTENNA1","ANTENNA2"]):
-                if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
-                    self.timepersample = t2.col('TIME')[1] - t2.col('TIME')[0]
-                    numsamples = t2.nrows()
-                    self.sumsamples += numsamples
-                    self.minSamplesPerFile = min(self.minSamplesPerFile,numsamples)
-                    break
-            tab.close()
+            # cut input files into chunks if needed
+            self.chunk_input_files(chunk_size_sec, dirindparmdb, local_dir=local_dir,
+                                   test_run=test_run)
+            if len(self.files) == 0:
+                self.log.error('No data left after checking input files for band: {}. '
+                               'Probably too little unflagged data.'.format(self.name))
+                self.log.info('Exiting!')
+                sys.exit(1)
+
+            # Calculate times and number of samples
+            self.sumsamples = 0
+            self.minSamplesPerFile = 4294967295  # If LOFAR lasts that many seconds then I buy you a beer.
+            self.starttime = np.finfo('d').max
+            self.endtime = 0.
+            for MSid in xrange(self.numMS):
+                tab = pt.table(self.files[MSid], ack=False)
+                self.starttime = min(self.starttime,np.min(tab.getcol('TIME')))
+                self.endtime = max(self.endtime,np.min(tab.getcol('TIME')))
+                for t2 in tab.iter(["ANTENNA1","ANTENNA2"]):
+                    if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
+                        self.timepersample = t2.col('TIME')[1] - t2.col('TIME')[0]
+                        numsamples = t2.nrows()
+                        self.sumsamples += numsamples
+                        self.minSamplesPerFile = min(self.minSamplesPerFile,numsamples)
+                        break
+                tab.close()
+            self.save_state()
 
         self.log.debug("Using {0} files.".format(len(self.files)))
         if skymodel_dirindep != None:
@@ -426,6 +437,40 @@ class Band(object):
             self.freq_divisors = np.array(tmp_divisors)
         idx = np.argmin(np.abs(self.freq_divisors-freqstep))
         return self.freq_divisors[idx]
+
+
+    def save_state(self):
+        """
+        Saves the band state to a file
+
+        """
+        import pickle
+
+        with open(self.save_file, 'wb') as f:
+            # Remove log object, as it cannot be pickled
+            save_dict = self.__dict__.copy()
+            save_dict.pop('log')
+            pickle.dump(save_dict, f)
+
+
+    def load_state(self):
+        """
+        Loads the band state from a file
+
+        Returns
+        -------
+        success : bool
+            True if state was successfully loaded, False if not
+        """
+        import pickle
+
+        try:
+            with open(self.save_file, 'r') as f:
+                d = pickle.load(f)
+            return True
+        except:
+            return False
+
 
 
 def find_unflagged_fraction(ms_file):

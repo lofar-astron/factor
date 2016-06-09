@@ -473,8 +473,9 @@ def _set_up_bands(parset, test_run=False):
                             'not found. Exiting...'.format(msbase))
                         sys.exit(1)
                     break
-        band = Band(msdict[MSkey], parset['dir_working'], parset['parmdb_name'], skymodel_dirindep,
-            local_dir=parset['cluster_specific']['dir_local'], test_run=test_run)
+        band = Band(msdict[MSkey], parset['dir_working'], parset['parmdb_name'],
+            skymodel_dirindep, local_dir=parset['cluster_specific']['dir_local'],
+            test_run=test_run, chunk_size_sec=parset['chunk_size_sec'])
         bands.append(band)
 
     # Sort bands by frequency

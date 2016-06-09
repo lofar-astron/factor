@@ -49,6 +49,14 @@ The available options are described below under their respective sections.
         files from the standard prefactor ``Initial-Subtract.parset``
         (default = ``.wsclean_low2-model.merge`` ; note the leading ".").
 
+    chunk_size_sec
+        Size of time chunks in seconds (default = 2400; minimum allowed value is
+        1200). Generally, the number of chunks should be at least the number of
+        available CPUs. To prevent Factor from chunking the data, set this value to be
+        larger than the length of the longest dataset (in this case, Factor will not
+        make copies of the files but will instead make symbolic links to them instead,
+        so please make backup copies yourself).
+
     interactive
         Use interactive mode (default = ``False``). Factor will ask for confirmation of
         internally derived DDE calibrators and facets.
