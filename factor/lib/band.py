@@ -39,7 +39,7 @@ class Band(object):
     """
     def __init__(self, MSfiles, factor_working_dir, dirindparmdb,
         skymodel_dirindep=None, local_dir=None, test_run=False, check_files=True,
-        chunk_size_sec=2400.0):
+        process_files=False, chunk_size_sec=2400.0):
 
         self.files = MSfiles
         self.msnames = [ MS.split('/')[-1] for MS in self.files ]
