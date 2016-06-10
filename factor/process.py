@@ -129,15 +129,17 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
         # Set up reset of any directions that need it. If the direction has
         # already been through the facetsub operation, we must undo the
-        # changes with the facetsubreset operation before we reset facetselfcal
-        # (otherwise the model data required to reset facetsub will be deleted)
+        # changes with the facetsubreset operation
         direction_group_reset = [d for d in direction_group if d.do_reset]
         direction_group_reset_facetsub = [d for d in direction_group_reset if
             'facetsub' in d.completed_operations]
         if len(direction_group_reset_facetsub) > 0:
             for d in direction_group_reset_facetsub:
-                if 'facetsubreset' in d.completed_operations:
-                    # Reset a previous reset
+                if ('facetsubreset' in d.completed_operations or
+                    'facetsubreset' in reset_operations):
+                    # Reset a previous reset, but only if it completed successfully
+                    # or is explicitly specified for reset (to allow one to resume
+                    # facetsubreset instead of always resetting and restarting it)
                     d.reset_state('facetsubreset')
             direction_group_reset_facetsub = factor.cluster.combine_nodes(
                 direction_group_reset_facetsub,
@@ -150,7 +152,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             for op in ops:
                 scheduler.run(op)
         for d in direction_group_reset:
-            d.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
             d.reset_state(['facetselfcal', 'facetsub'])
 
         # Divide up the nodes and cores among the directions for the parallel
@@ -399,15 +400,15 @@ def _set_up_compute_parameters(parset, dry_run=False):
         parset['cluster_specific']['node_list'] = factor.cluster.get_compute_nodes(
             parset['cluster_specific']['clusterdesc'])
 
-    # check ulimit(s),
+    # check ulimit(s)
     try:
         import resource
         nof_files_limits = resource.getrlimit(resource.RLIMIT_NOFILE)
         if parset['cluster_specific']['clustertype'] == 'local' and nof_files_limits[0] < nof_files_limits[1]:
-            log.info('Setting limit for number of open files to: {}.'.format(nof_files_limits[1]))
+            log.debug('Setting limit for number of open files to: {}.'.format(nof_files_limits[1]))
             resource.setrlimit(resource.RLIMIT_NOFILE,(nof_files_limits[1],nof_files_limits[1]))
             nof_files_limits = resource.getrlimit(resource.RLIMIT_NOFILE)
-        log.info('Active limit for number of open files is {0}, maximum limit is {1}.'.format(nof_files_limits[0],nof_files_limits[1]))
+        log.debug('Active limit for number of open files is {0}, maximum limit is {1}.'.format(nof_files_limits[0],nof_files_limits[1]))
         if nof_files_limits[0] < 2048:
             log.warn('The limit for number of open files is small, this could results in a "Too many open files" problem when running factor.')
             log.warn('The active limit can be increased to the maximum for the user with: "ulimit -Sn <number>" (bash) or "limit descriptors 1024" (csh).')
@@ -481,8 +482,9 @@ def _set_up_bands(parset, test_run=False):
                             'not found. Exiting...'.format(msbase))
                         sys.exit(1)
                     break
-        band = Band(msdict[MSkey], parset['dir_working'], parset['parmdb_name'], skymodel_dirindep,
-            local_dir=parset['cluster_specific']['dir_local'], test_run=test_run)
+        band = Band(msdict[MSkey], parset['dir_working'], parset['parmdb_name'],
+            skymodel_dirindep, local_dir=parset['cluster_specific']['dir_local'],
+            test_run=test_run, chunk_size_sec=parset['chunk_size_sec'])
         bands.append(band)
 
     # Sort bands by frequency
@@ -605,7 +607,7 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
             # Continue processing, but first re-initialize the directions to
             # pick up any changes the user made to the directions file
             directions = _initialize_directions(parset, initial_skymodel,
-                ref_band, dry_run)
+                ref_band, max_radius_deg=max_radius_deg, dry_run=dry_run)
 
     # Warn user if they've specified a direction to reset that does not exist
     direction_names = [d.name for d in directions]
