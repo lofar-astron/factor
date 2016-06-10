@@ -356,10 +356,17 @@ class FacetImage(Operation):
             for parmdb in band.dirindparmdbs:
                 dir_indep_parmDBs.append(parmdb)
         skymodels = [band.skymodel_dirindep for band in self.bands]
+        if not self.parset['use_existing_shift_empty_data']:
+            # Set the shift_empty mapfile to the output of the shift_empty step
+            # otherwise, the pipeline will skip this step and reuse the
+            # shift_empty data from a previous imaging run
+            self.direction.shift_empty_mapfile = 'shift_empty.output.mapfile'
+
         self.parms_dict.update({'ms_files_single': ms_files_single,
                                 'ms_files_grouped' : str(ms_files),
                                 'skymodels': skymodels,
-                                'dir_indep_parmDBs': dir_indep_parmDBs})
+                                'dir_indep_parmDBs': dir_indep_parmDBs,
+                                'use_existing_shift_empty_data': self.parset['use_existing_shift_empty_data']})
 
 
     def finalize(self):
@@ -371,6 +378,12 @@ class FacetImage(Operation):
             'final_image.mapfile')
         self.direction.facet_premask_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'premask.mapfile')
+        if self.parset['keep_unavg_facet_data'] and not self.parset['use_existing_shift_empty_data']:
+            # Store the shift_empty mapfile for use by other imaging runs. We do not
+            # update this if use_existing_shift_empty_data is True, as it should
+            # point to the first imaging run for this direction
+            self.direction.shift_empty_mapfile = os.path.join(self.pipeline_mapfile_dir,
+                'shift_empty.mapfile')
 
         # Delete temp data
         self.direction.cleanup_mapfiles = [

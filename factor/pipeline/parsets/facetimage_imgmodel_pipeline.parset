@@ -8,6 +8,15 @@ update_mapfile_hosts.control.type                     =   updateHosts
 update_mapfile_hosts.control.mapfile_dir              =   input.output.mapfile_dir
 update_mapfile_hosts.control.hosts                    =   {{ hosts }}
 
+{% if use_existing_shift_empty_data %}
+# update host entries in shift_empty mapfile
+update_mapfile_hosts.control.kind                     =   plugin
+update_mapfile_hosts.control.type                     =   updateHosts
+update_mapfile_hosts.control.mapfile_dir              =   input.output.mapfile_dir
+update_mapfile_hosts.control.hosts                    =   {{ hosts }}
+
+{% else %}
+
 # create a mapfile with all single MSs from supplied list, length = nfiles
 create_ms_map.control.kind                            =   plugin
 create_ms_map.control.type                            =   addListMapfile
@@ -148,10 +157,11 @@ apply_dir_dep_slow.argument.catalog                   =   {{ skymodel_dir }}/emp
 apply_dir_dep_slow.argument.parmdb                    =   inputparmdb
 apply_dir_dep_slow.argument.replace-sourcedb          =   True
 apply_dir_dep_slow.argument.replace-parmdb            =   True
+{% endif %}
 
 # average calibrated data to imaging resolution, length = nfiles
 average.control.type                                  =   dppp
-average.control.mapfile_in                            =   shift_empty.output.mapfile
+average.control.mapfile_in                            =   {{ shift_empty_mapfile }}
 average.control.inputkey                              =   msin
 average.argument.numthreads                           =   {{ max_cpus_per_band }}
 average.argument.msin.datacolumn                      =   CORRECTED_DATA
