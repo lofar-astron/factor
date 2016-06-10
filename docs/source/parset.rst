@@ -305,7 +305,8 @@ The available options are described below under their respective sections.
 
     target_radius_arcmin
         Radius in arcmin of a circular region that encloses the target source (to ensure
-        that it falls entirely within a single facet; no default).
+        that it falls entirely within a single facet; no default). Note that :term:`check_edges`
+        must be True for the facet boundaries to be adjusted.
 
     target_has_own_facet
         The target can be placed in a facet of its own. In this case, it will

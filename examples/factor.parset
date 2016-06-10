@@ -227,7 +227,8 @@ flux_min_Jy = 0.3
 
 # A target can be specified to ensure that it falls entirely within a single
 # facet. The values should be those of a circular region that encloses the
-# source and not those of the target itself. Lastly, the target can be placed in
+# source and not those of the target itself. Note that check_edges must be True
+# for the facet boundaries to be adjusted. Lastly, the target can be placed in
 # a facet of its own. In this case, it will not go through selfcal but will
 # instead use the selfcal solutions of the nearest facet for which selfcal was
 # done

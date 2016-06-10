@@ -356,7 +356,7 @@ class FacetImage(Operation):
             for parmdb in band.dirindparmdbs:
                 dir_indep_parmDBs.append(parmdb)
         skymodels = [band.skymodel_dirindep for band in self.bands]
-        if not self.parset['use_existing_shift_empty_data']:
+        if not self.direction.use_existing_shift_empty_data:
             # Set the shift_empty mapfile to the output of the shift_empty step
             # otherwise, the pipeline will skip this step and reuse the
             # shift_empty data from a previous imaging run
@@ -365,8 +365,7 @@ class FacetImage(Operation):
         self.parms_dict.update({'ms_files_single': ms_files_single,
                                 'ms_files_grouped' : str(ms_files),
                                 'skymodels': skymodels,
-                                'dir_indep_parmDBs': dir_indep_parmDBs,
-                                'use_existing_shift_empty_data': self.parset['use_existing_shift_empty_data']})
+                                'dir_indep_parmDBs': dir_indep_parmDBs})
 
 
     def finalize(self):

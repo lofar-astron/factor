@@ -297,15 +297,16 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     parset['cluster_specific']['wsclean_fmem'],
                     len(bands))
 
-                # Set the flags in the parset to save/use the phase-shifted, unaveraged,
+                # Set the flags to save/use the phase-shifted, unaveraged,
                 # corrected data if there are more images to be made
                 image_parset = parset.copy()
                 if i < nimages - 1:
                     image_parset['keep_unavg_facet_data'] = True
-                if i > 0:
-                    image_parset['use_existing_shift_empty_data'] = True
-                else:
-                    image_parset['use_existing_shift_empty_data'] = False
+                for d in dir_group:
+                    if i > 0:
+                        d.use_existing_shift_empty_data = True
+                    else:
+                        d.use_existing_shift_empty_data = False
 
                 # Do facet imaging
                 ops = [FacetImage(image_parset, bands, d, cellsize_arcsec, robust,
