@@ -596,6 +596,14 @@ def get_directions_options(parset):
         parset_dict = {}
         given_options = []
 
+    # Full path to sky model (in makesourcedb format) to be used for calibrator
+    # selection and facet-boundary source avoidance (default is to use
+    # direction-independent sky model of the highest-frequency band). The sky
+    # model must be grouped into patches by source (in PyBDSM, this grouping can be
+    # done by setting bbs_patches = 'source' in the write_catalog task)
+    if 'faceting_skymodel' not in parset_dict:
+        parset_dict['faceting_skymodel'] = None
+
     # Check whether any sources from the initial subtract sky model fall on facet
     # edges. If any are found, the facet regions are adjusted to avoid them (default
     # is True)
@@ -772,7 +780,7 @@ def get_directions_options(parset):
         parset_dict['transfer_radius_deg'] = 0.0
 
     # Check for unused options
-    allowed_options = ['directions_file', 'max_radius_deg',
+    allowed_options = ['faceting_skymodel', 'directions_file', 'max_radius_deg',
         'flux_min_for_merging_jy', 'flux_min_jy', 'size_max_arcmin',
         'separation_max_arcmin', 'max_num', 'ndir_max',
         'faceting_radius_deg', 'check_edges', 'ndir_total', 'ndir_process',
