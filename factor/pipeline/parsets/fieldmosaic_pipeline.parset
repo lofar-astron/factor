@@ -148,10 +148,7 @@ zero_avgpb.argument.flags                              =   [avgpb,outfile]
 
 # convert primary beam image to fits, length = 1
 image2fits.control.type                                =   image2fits
-#image2fits.control.mapfile_in                          =   zero_avgpb.output.mapfile
-#image2fits.control.inputkey                            =   in
 image2fits.control.outputkey                           =   out
-#image2fits.argument.dummy                              =   bla
 image2fits.argument.in                                 =   zero_avgpb.output.mapfile
 
 # correct the mosaic image with the primary beam, length = 1
