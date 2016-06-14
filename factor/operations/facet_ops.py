@@ -98,10 +98,10 @@ class FacetSelfcal(Operation):
 
         # Parset for slow gain solve
         if self.direction.solve_all_correlations:
-            selfcal_gain_parset = 'facet_dirdep_amponly_solve_allcorr.parset'
+            selfcal_caltype = 'fulljones'
             fourpol = True # plot all correlations
         else:
-            selfcal_gain_parset = 'facet_dirdep_amponly_solve.parset'
+            selfcal_caltype = 'diagonal'
             fourpol = False
 
         self.parms_dict.update({'ms_files_single': ms_files_single,
@@ -110,7 +110,7 @@ class FacetSelfcal(Operation):
                                 'dir_indep_parmDBs': dir_indep_parmDBs,
                                 'initial_selfcal_skymodel': initial_selfcal_skymodel,
                                 'initial_selfcal_parset': initial_selfcal_parset,
-                                'selfcal_gain_parset': selfcal_gain_parset,
+                                'selfcal_caltype': selfcal_caltype,
                                 'fourpol': fourpol,
                                 'loopcount': loopcount,
                                 'smooth_amps_task': smooth_amps_task})

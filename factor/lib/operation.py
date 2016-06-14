@@ -82,11 +82,11 @@ class Operation(object):
                 self.direction.name)
             self.dppp_nodescript = 'executable_args'
         elif self.parset['cluster_specific']['clusterdesc_file'].lower() == 'pbs':
-            # PBS = "system in Hamburg" -> use special NDPPP nodescript
+            # PBS = "system in Hamburg" -> use special DPPP node script
             self.local_scratch_dir = self.parset['cluster_specific']['dir_local']
             self.dppp_nodescript = 'dppp_scratch'
         else:
-            # other: use given scratch directory an standard nodescrit
+            # other: use given scratch directory and standard node script
             self.local_scratch_dir = self.parset['cluster_specific']['dir_local']
             self.dppp_nodescript = 'executable_args'
 
