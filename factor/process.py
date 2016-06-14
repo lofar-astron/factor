@@ -248,7 +248,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         min_uvs = parset['imaging_specific']['facet_min_uv_lambda']
         nimages = len(cellsizes)
 
-        for i, (cellsize_arcsec, taper_arcsec, robust, min_uv_lambda) in enumerate(
+        for image_indx, (cellsize_arcsec, taper_arcsec, robust, min_uv_lambda) in enumerate(
             zip(cellsizes, tapers, robusts, min_uvs)):
             # Always image directions that did not go through selfcal
             dirs_to_image = dirs_without_selfcal[:]
@@ -301,10 +301,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 # Set the flags to save/use the phase-shifted, unaveraged,
                 # corrected data if there are more images to be made
                 image_parset = parset.copy()
-                if i < nimages - 1:
+                if image_indx < nimages - 1:
                     image_parset['keep_unavg_facet_data'] = True
                 for d in dir_group:
-                    if i > 0:
+                    if image_indx > 0:
                         d.use_existing_shift_empty_data = True
                     else:
                         d.use_existing_shift_empty_data = False
