@@ -8,7 +8,7 @@ import numpy as np
 from lofarpipe.support.data_map import DataMap, DataProduct
 
 
-def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPfill=True, target_path=None, stepname=None):
+def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPfill=True, target_path=None, stepname=None, nband_pad=0):
     """
     Check a list of MS files for missing frequencies
 
@@ -35,7 +35,10 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
         into this directory with the subsequent NDPPP call.)
         default = keep path of input files
     stepname : str, optional
-        Add this step-name into the file-names of the output files.
+        Add this step-name into the file-names of the output files
+    nband_pad : int, optional
+        Add this number of bands of dummy data to the high-frequency end
+        of the list
 
     Returns
     -------
@@ -49,6 +52,7 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
     # convert input to needed types
     ms_list = input2strlist(ms_input)
     NDPPPfill = input2bool(NDPPPfill)
+    nband_pad = int(nband_pad)
 
     if type(hosts) is str:
         hosts = [h.strip(' \'\"') for h in hosts.strip('[]').split(',')]
@@ -126,6 +130,10 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
                     else:
                         (freq,fname) = (1e12,'This_shouldn\'t_show_up')
                     skip_this = False
+
+            for i in range(nband_pad):
+                files.append('dummy.ms')
+
             filemap.append(MultiDataProduct(hosts[hostID%numhosts], files, skip_this))
             groupname = time_groups[time]['basename']+'_%Xt_%dg.ms'%(time,fgroup)
             if type(stepname) is str:

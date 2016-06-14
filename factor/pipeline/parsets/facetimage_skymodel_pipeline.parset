@@ -133,6 +133,7 @@ sort_into_Groups.argument.flags                         =   [create_compressed_m
 sort_into_Groups.argument.filename                      =   sorted_groups.mapfile
 sort_into_Groups.argument.mapfile_dir                   =   input.output.mapfile_dir
 sort_into_Groups.argument.hosts                         =   {{ hosts }}
+sort_into_Groups.argument.nband_pad                     =   {{ nband_pad }}
 
 # convert the output of sort_into_Groups into usable mapfiles, len = 1 / ntimes
 sort_into_Groups_maps.control.kind                      =   plugin

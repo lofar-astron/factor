@@ -1559,6 +1559,7 @@ sort_average5.argument.filename                            =   average5_sorted_g
 sort_average5.argument.mapfile_dir                         =   input.output.mapfile_dir
 sort_average5.argument.hosts                               =   {{ hosts }}
 sort_average5.argument.stepname                            =   sort_average5
+sort_average5.argument.nband_pad                           =   {{ nband_pad }}
 
 # convert the output of sort_average5 into usable mapfiles, len = 1 / ntimes
 sort_average5_maps.control.kind                            =   plugin
