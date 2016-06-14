@@ -377,7 +377,7 @@ class FacetImage(Operation):
             'final_image.mapfile')
         self.direction.facet_premask_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'premask.mapfile')
-        if self.parset['keep_unavg_facet_data'] and not self.parset['use_existing_shift_empty_data']:
+        if self.parset['keep_unavg_facet_data'] and not self.direction.use_existing_shift_empty_data:
             # Store the shift_empty mapfile for use by other imaging runs. We do not
             # update this if use_existing_shift_empty_data is True, as it should
             # point to the first imaging run for this direction
