@@ -16,8 +16,8 @@ import lofar.parmdb
 from astropy.stats import median_absolute_deviation
 
 
-def main(ms_input, parmdb_input, input_colname, output_colname, target_rms_rad,
-    pre_average=True, minutes_per_block=10.0, baseline_file=None, verbose=True):
+def main(ms_input, parmdb_input, input_colname, output_data_colname, output_weights_colname,
+    target_rms_rad, minutes_per_block=10.0, baseline_file=None, verbose=True):
     """
     Pre-average data using a sliding Gaussian kernel on the weights
 
@@ -29,13 +29,13 @@ def main(ms_input, parmdb_input, input_colname, output_colname, target_rms_rad,
         List of parmdb filenames, or string with list, or path to a mapfile
         The resulting list from parmdb_input must match the one from ms_input
     input_colname : str
-        Name of the column in the MS from which the data is read
-    output_colname : str
-        Name of the column in the MS into which the averaged data is written
+        Name of the column in the MS from which the data are read
+    output_data_colname : str
+        Name of the column in the MS into which the averaged data are written
+    output_weights_colname : str
+        Name of the column in the MS into which the averaged data weights are written
     target_rms_rad : float (str)
         The target RMS for the phase noise in the input parmDBs. (Or whatever???)
-    pre_average : bool (str)
-        Actually do the pre-averaging. (If False: just copy the data.)
     """
 
     # convert input to needed types
@@ -48,77 +48,60 @@ def main(ms_input, parmdb_input, input_colname, output_colname, target_rms_rad,
 
     if type(target_rms_rad) is str:
         target_rms_rad = float(target_rms_rad)
-
-    if not pre_average:
-        # Just copy input column to output column
-        for ms in ms_list:
-            if verbose:
-                print('pre_average_multi: Copying column in MS:',ms)
-            ms = pt.table(ms_file, readonly=False, ack=False)
-            if output_colname not in ms.colnames():
-                desc = ms.getcoldesc(input_colname)
-                desc['name'] = output_colname
-                ms.addcols(desc)
-            data = ms.getcol(input_colname)
-            ms.putcol(output_colname, data)
-            ms.flush()
-            ms.close()
-        return {}
+    if baseline_file is None:
+        if verbose:
+            print('Calculating baseline lengths...')
+        baseline_dict = get_baseline_lengths(ms_list)
+    elif os.path.exists(baseline_file):
+        f = open('baseline_file', 'r')
+        baseline_dict = pickle.load(f)
+        f.close()
     else:
-        # Do the BL averaging
-        if baseline_file is None:
+        print('Cannot find baseline_file. Exiting...')
+        sys.exit(1)
+
+    # Iterate through time chunks and find the lowest ionfactor
+    start_times = []
+    end_times = []
+    ionfactors = []
+    if verbose:
+        print('Determining ionfactors...')
+    for msind in xrange(len(ms_list)):
+        tab = pt.table(ms_list[msind], ack=False)
+        start_time = tab[0]['TIME']
+        end_time = tab[-1]['TIME']
+        remaining_time = end_time - start_time # seconds
+        start_times.append(start_time)
+        end_times.append(end_time)
+        tab.close()
+        t_delta = minutes_per_block * 60.0 # seconds
+        t1 = 0.0
+        while remaining_time > 0.0:
+            if remaining_time < 1.5 * t_delta:
+                # If remaining time is too short, just include it all in this chunk
+                t_delta = remaining_time + 10.0
+            remaining_time -= t_delta
+
+            # Find ionfactor for this period
+            ionfactors.append(find_ionfactor(parmdb_list[msind], baseline_dict, t1+start_time,
+                                             t1+start_time+t_delta, target_rms_rad=target_rms_rad))
             if verbose:
-                print('Calculating baseline lengths...')
-            baseline_dict = get_baseline_lengths(ms_list)
-        elif os.path.exists(baseline_file):
-            f = open('baseline_file', 'r')
-            baseline_dict = pickle.load(f)
-            f.close()
-        else:
-            print('Cannot find baseline_file. Exiting...')
-            sys.exit(1)
+                print('    ionfactor (for timerange {0}-{1} sec) = {2}'.format(t1,
+                      t1+t_delta, ionfactors[-1]))
+            t1 += t_delta
 
-        # Iterate through time chunks and find the lowest ionfactor
-        start_times = []
-        end_times = []
-        ionfactors = []
-        if verbose:
-            print('Determining ionfactors...')
-        for msind in xrange(len(ms_list)):
-            tab = pt.table(ms_list[msind], ack=False)
-            start_time = tab[0]['TIME']
-            end_time = tab[-1]['TIME']
-            remaining_time = end_time - start_time # seconds
-            start_times.append(start_time)
-            end_times.append(end_time)
-            tab.close()
-            t_delta = minutes_per_block * 60.0 # seconds
-            t1 = 0.0
-            while remaining_time > 0.0:
-                if remaining_time < 1.5 * t_delta:
-                    # If remaining time is too short, just include it all in this chunk
-                    t_delta = remaining_time + 10.0
-                remaining_time -= t_delta
+    sorted_ms_tuples = sorted(zip(start_times,end_times,range(len(ms_list)),ms_list))
+    sorted_ms_dict = { 'msnames' :[ms for starttime,endtime,index,ms in sorted_ms_tuples],
+                       'starttimes' : [starttime for starttime,endtime,index,ms in sorted_ms_tuples],
+                       'endtimes' : [endtime for starttime,endtime,index,ms in sorted_ms_tuples] }
 
-                # Find ionfactor for this period
-                ionfactors.append(find_ionfactor(parmdb_list[msind], baseline_dict, t1+start_time,
-                                                 t1+start_time+t_delta, target_rms_rad=target_rms_rad))
-                if verbose:
-                    print('    ionfactor (for timerange {0}-{1} sec) = {2}'.format(t1,
-                          t1+t_delta, ionfactors[-1]))
-                t1 += t_delta
-
-        sorted_ms_tuples = sorted(zip(start_times,end_times,range(len(ms_list)),ms_list))
-        sorted_ms_dict = { 'msnames' :[ms for starttime,endtime,index,ms in sorted_ms_tuples],
-                           'starttimes' : [starttime for starttime,endtime,index,ms in sorted_ms_tuples],
-                           'endtimes' : [endtime for starttime,endtime,index,ms in sorted_ms_tuples] }
-
-        # Do pre-averaging using lowest ionfactor
-        ionfactor_min = min(ionfactors)
-        if verbose:
-            print('Using ionfactor = {}'.format(ionfactor_min))
-            print('Averaging...')
-        BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_colname, ionfactor_min)
+    # Do pre-averaging using lowest ionfactor
+    ionfactor_min = min(ionfactors)
+    if verbose:
+        print('Using ionfactor = {}'.format(ionfactor_min))
+        print('Averaging...')
+    BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_data_colname,
+        output_weights_colname, ionfactor_min)
 
 
 def get_baseline_lengths(ms_list, check_antennas=True):
@@ -237,8 +220,8 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2, target_rms_rad=0.2):
     return ionfactor
 
 
-def BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_colname, ionfactor,
-          clobber=True, maxgap_sec=1800, check_files = True):
+def BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_data_colname,
+        output_weights_colname, ionfactor, clobber=True, maxgap_sec=1800, check_files = True):
     """
     Averages data using a sliding Gaussian kernel on the weights
     """
@@ -367,14 +350,18 @@ def BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_colname, io
         for msindex in xrange(len(ms_names)):
             ms = pt.table(ms_names[msindex], readonly=False, ack=False)
             # Add the output columns if needed
-            if output_colname not in ms.colnames():
+            if output_data_colname not in ms.colnames():
                 desc = ms.getcoldesc(input_colname)
-                desc['name'] = output_colname
+                desc['name'] = output_data_colname
+                ms.addcols(desc)
+            if output_weights_colname not in ms.colnames():
+                desc = ms.getcoldesc('WEIGHT_SPECTRUM')
+                desc['name'] = output_weights_colname
                 ms.addcols(desc)
 
-            ms.putcol(output_colname, all_data_list[msindex])
+            ms.putcol(output_data_colname, all_data_list[msindex])
             ms.putcol('FLAG', all_flags_list[msindex]) # this saves flags of nans, which is always good
-            ms.putcol('WEIGHT_SPECTRUM', all_weights_list[msindex])
+            ms.putcol(output_weights_colname, all_weights_list[msindex])
             ms.close()
         print "BLavg_multi: Finished one group of measurement sets."
 
@@ -519,97 +506,13 @@ if __name__ == '__main__':
     parser.add_argument('ms_file_pattern', help='Glob-able filename-pattern of input datasets')
     parser.add_argument('parmdb_file_pattern', help='Glob-able filename-pattern of input direction-independent selfcal instrument parmdbs')
     parser.add_argument('input_colname', help='Name of input column to pre-average')
-    parser.add_argument('output_colname', help='Name of output column')
+    parser.add_argument('output_data_colname', help='Name of output column')
+    parser.add_argument('output_weights_colname', help='Name of output column')
+    parser.add_argument('target_rms', help='Target rms in Jy/beam')
     args = parser.parse_args()
 
     ms_input = glob.glob(args.ms_file_pattern)
     parmdb_input = glob.glob(args.parmdb_file_pattern)
 
-    main(ms_input, parmdb_input, args.input_colname, args.output_colname)
-
-
-
-"""
-# I don't think anymore that I'll actually need this...
-
-def find_ionfactor(parmdb_files, baseline_dict, t1, t2, target_rms_rad=0.2):
-
-    # Filter any stations not in both the instrument table and the ms
-    stations_set = set([s for s in baseline_dict.itervalues() if type(s) is str])
-    for pdb_file in parmdb_files:
-        pdb_in = lofar.parmdb.parmdb(pdb_file)
-        stations_pbd = set([s.split(':')[-1] for s in pdb_in.getNames()])
-        stations_set.intersection_update(stations_pbd)
-        pdb_in = False
-    stations = sorted(list(stations_set))
-
-    # Select long baselines only (BL > 10 km), as they will set the ionfactor scaling
-    ant1 = []
-    ant2 = []
-    dist = []
-    min_length = 10.0
-    for k, v in baseline_dict.iteritems():
-        if type(v) is not str and '-' in k:
-            if v > min_length:
-                s1 = k.split('-')[0]
-                s2 = k.split('-')[1]
-                s1_name = baseline_dict[s1]
-                s2_name = baseline_dict[s2]
-                if s1_name in stations and s2_name in stations:
-                    ant1.append(s1_name)
-                    ant2.append(s2_name)
-                    dist.append(v)
-
-    # Find correlation times
-    # (Will only generate unsorted list rmstimes and dists, so the order doesn't matter.)
-    rmstimes = []
-    dists = []
-    freq = None
-    for pdb_file in parmdb_files:
-        pdb_in = lofar.parmdb.parmdb(pdb_file)
-        parms = pdb_in.getValuesGrid('*')
-        pdb_in = False
-        times = None
-        for a1, a2, d in zip(ant1, ant2, dist):
-            if freq is None:
-                freq = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['freqs'])[0]
-                timepersolution = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['timewidths'])[0]
-            if times is None:
-                times = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['times'])
-                time_ind = np.where((times >= t1) & (times < t2))[0]
-            ph1 = np.copy(parms['Gain:0:0:Phase:{}'.format(a1)]['values'])[time_ind]
-            ph2 = np.copy(parms['Gain:0:0:Phase:{}'.format(a2)]['values'])[time_ind]
-
-            # Filter flagged solutions
-            good = np.where((~np.isnan(ph1)) & (~np.isnan(ph2)))[0]
-            if len(good) == 0:
-                continue
-
-            rmstime = None
-            ph = unwrap_fft(ph2[good] - ph1[good])
-
-            step = 1
-            for i in range(1, len(ph)/2, step):
-                p1 = ph[i:]
-                p2 = ph[:-i]
-                rms = np.linalg.norm(p1-p2) / np.sqrt(len(p1))
-                mad = median_absolute_deviation(p1-p2)
-                mean = np.mean(p1-p2)
-                if rms + mean > target_rms_rad:
-                    rmstime = i
-                    break
-            if rmstime is None:
-                rmstime = len(ph)/2
-            rmstimes.append(rmstime)
-            dists.append(d)
-
-    # Find the mean ionfactor assuming that the correlation time goes as
-    # t_corr ~ 1/sqrt(BL). The ionfactor is defined in BLavg() as:
-    #
-    #     ionfactor = (t_corr / 30.0 sec) / ( np.sqrt((25.0 / dist_km)) * (freq_hz / 60.e6) )
-    #
-    ionfactor = np.mean(np.array(rmstimes) / 30.0 / (np.sqrt(25.0 / np.array(dists))
-        * freq / 60.0e6)) * timepersolution
-
-    return ionfactor
-"""
+    main(ms_input, parmdb_input, args.input_colname, args.output_data_colname,
+        args.output_weights_colname, args.target_rms)
