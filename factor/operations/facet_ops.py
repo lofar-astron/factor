@@ -335,13 +335,27 @@ class FacetImage(Operation):
         else:
             infix = ''
 
-        # Set the pipeline parset to use
+
+        # Check that the data files to be reused do indeed exist
+        if self.direction.use_existing_data:
+            if not self.check_existing_files(self.direction.image_data_mapfile):
+                self.direction.use_existing_data = False
+
+        # Set the pipeline parset and existing data to use
         if not self.direction.selfcal_ok:
             # Set parset template to sky-model parset
             self.pipeline_parset_template = 'facetimage_skymodel{}_pipeline.parset'.format(infix)
+
+            # Set mapfile to use for imaging
+            if not self.direction.use_existing_data:
+                self.direction.image_data_mapfile = 'concat_averaged_compressed_map.output.mapfile'
         else:
             # Set parset template to facet model-image parset
             self.pipeline_parset_template = 'facetimage_imgmodel{}_pipeline.parset'.format(infix)
+
+            # Set mapfile to use for imaging
+            if not self.direction.use_existing_data:
+                self.direction.image_data_mapfile = 'concat_averaged_compressed_map.output.mapfile'
 
         # Define extra parameters needed for this operation
         self.direction.set_imcal_parameters(parset, bands, cellsize_arcsec, robust,
@@ -356,11 +370,15 @@ class FacetImage(Operation):
             for parmdb in band.dirindparmdbs:
                 dir_indep_parmDBs.append(parmdb)
         skymodels = [band.skymodel_dirindep for band in self.bands]
-        if not self.direction.use_existing_shift_empty_data:
+
+        if not self.direction.use_existing_data:
             # Set the shift_empty mapfile to the output of the shift_empty step
             # otherwise, the pipeline will skip this step and reuse the
             # shift_empty data from a previous imaging run
-            self.direction.shift_empty_mapfile = 'shift_empty.output.mapfile'
+            if not self.direction.selfcal_ok:
+                self.direction.image_data_mapfile = 'concat_averaged_compressed_map.output.mapfile'
+            else:
+                self.direction.image_data_mapfile = 'shift_empty.output.mapfile'
 
         self.parms_dict.update({'ms_files_single': ms_files_single,
                                 'ms_files_grouped' : str(ms_files),
@@ -377,12 +395,16 @@ class FacetImage(Operation):
             'final_image.mapfile')
         self.direction.facet_premask_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'premask.mapfile')
-        if self.parset['keep_unavg_facet_data'] and not self.direction.use_existing_shift_empty_data:
+        if self.parset['keep_unavg_facet_data'] and not self.direction.use_existing_data:
             # Store the shift_empty mapfile for use by other imaging runs. We do not
-            # update this if use_existing_shift_empty_data is True, as it should
+            # update this if use_existing_data is True, as it should
             # point to the first imaging run for this direction
-            self.direction.shift_empty_mapfile = os.path.join(self.pipeline_mapfile_dir,
-                'shift_empty.mapfile')
+            if not self.direction.selfcal_ok:
+                self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
+                    'concat_averaged_compressed_map.mapfile')
+            else:
+                self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
+                    'shift_empty.mapfile')
 
         # Delete temp data
         self.direction.cleanup_mapfiles = [
@@ -424,7 +446,7 @@ class FacetPeelImage(Operation):
             infix = ''
 
         # Set the pipeline parset to use
-        self.pipeline_parset_template = 'facetimage_skymodel{0}_pipeline.parset'.format(infix)
+        self.pipeline_parset_template = 'facetpeelimage{0}_pipeline.parset'.format(infix)
 
         # Define extra parameters needed for this operation
         self.direction.set_imcal_parameters(parset, bands, imaging_only=True)

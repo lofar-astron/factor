@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, {% if use_existing_shift_empty_data %} update_shift_empty_mapfile_hosts, {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, add_imaging_cols, regroup_shift_empty_map, {% block model_data_steps %}expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, {% endblock model_data_steps %} corrupt_final_model, add_model_to_empty_data, apply_dir_dep_fast, apply_dir_dep_slow, {% endif %} average, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %}premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
+pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_shift_empty_mapfile_hosts, {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, add_imaging_cols, regroup_shift_empty_map, {% block model_data_steps %}expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, {% endblock model_data_steps %} corrupt_final_model, add_model_to_empty_data, apply_dir_dep_fast, apply_dir_dep_slow, {% endif %} average, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %}premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -8,7 +8,7 @@ update_mapfile_hosts.control.type                     =   updateHosts
 update_mapfile_hosts.control.mapfile_dir              =   input.output.mapfile_dir
 update_mapfile_hosts.control.hosts                    =   {{ hosts }}
 
-{% if use_existing_shift_empty_data %}
+{% if use_existing_data %}
 # update host entries in existing shift_empty mapfile
 update_shift_empty_mapfile_hosts.control.kind         =   plugin
 update_shift_empty_mapfile_hosts.control.type         =   updateHosts
@@ -161,7 +161,7 @@ apply_dir_dep_slow.argument.replace-parmdb            =   True
 
 # average calibrated data to imaging resolution, length = nfiles
 average.control.type                                  =   dppp
-average.control.mapfile_in                            =   {{ shift_empty_mapfile }}
+average.control.mapfile_in                            =   {{ image_data_mapfile }}
 average.control.inputkey                              =   msin
 average.argument.numthreads                           =   {{ max_cpus_per_band }}
 average.argument.msin.datacolumn                      =   CORRECTED_DATA

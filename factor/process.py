@@ -305,9 +305,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     image_parset['keep_unavg_facet_data'] = True
                 for d in dir_group:
                     if image_indx > 0:
-                        d.use_existing_shift_empty_data = True
+                        d.use_existing_data = True
                     else:
-                        d.use_existing_shift_empty_data = False
+                        d.use_existing_data = False
 
                 # Do facet imaging
                 ops = [FacetImage(image_parset, bands, d, cellsize_arcsec, robust,

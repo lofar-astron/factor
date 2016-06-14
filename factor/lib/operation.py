@@ -255,3 +255,37 @@ class Operation(object):
         if self.name not in self.direction.completed_operations:
             self.direction.completed_operations.append(self.name)
             self.direction.save_state()
+
+
+    def check_existing_files(self, mapfile):
+        """
+        Checks if files in input mapfile exist
+
+        Paramters
+        ---------
+        mapfile : str
+            Filename of mapfile to check
+
+        Returns
+        -------
+        all_exist : bool
+            True if all files in mapfile exist, False if not
+
+        """
+        from lofarpipe.support.data_map import DataMap
+
+        all_exist = True
+        try:
+            datamap = DataMap.load(mapfile)
+            for item in datamap:
+                # Handle case in which item.file is a Python list
+                if item.file[0] == '[' and item.file[-1] == ']':
+                    files = item.file.strip('[]').split(',')
+                else:
+                    files = [item.file]
+                for f in files:
+                    if not os.path.exists(f):
+                        all_exist = False
+            return all_exist
+        except IOError:
+            return False

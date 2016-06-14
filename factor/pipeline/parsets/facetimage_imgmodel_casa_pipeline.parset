@@ -57,12 +57,12 @@ casa_image_full1.control.inputkeys                =   [clean.vis,clean.mask]
 casa_image_full1.control.outputkey                =   clean.imagename
 casa_image_full1.control.arguments                =   [--nologger,--nogui,-c]
 casa_image_full1.argument.clean.wprojplanes       =   {{ facet_wplanes }}
-casa_image_full1.argument.clean.uvrange           =   '>{{ selfcal_min_uv_lambda }}lambda'
+casa_image_full1.argument.clean.uvrange           =   '>{{ facet_min_uv_lambda }}lambda'
 casa_image_full1.argument.clean.nterms            =   {{ nterms }}
 casa_image_full1.argument.clean.niter             =   {{ casa_full1_image_niter }}
 casa_image_full1.argument.clean.threshold         =   '0mJy'
 casa_image_full1.argument.clean.imsize            =   [{{ facet_imsize }}, {{ facet_imsize }}]
-casa_image_full1.argument.clean.cell              =   ['{{ cellsize_selfcal_deg * 3600.0 }}arcsec', '{{ cellsize_selfcal_deg * 3600.0 }}arcsec']
+casa_image_full1.argument.clean.cell              =   ['{{ cellsize_facet_deg * 3600.0 }}arcsec', '{{ cellsize_facet_deg * 3600.0 }}arcsec']
 casa_image_full1.argument.clean.robust            =   {{ robust_facet }}
 casa_image_full1.argument.clean.multiscale        =   {{ casa_full_multiscale }}
 casa_image_full1.argument.clean.selectdata        =   True
@@ -125,11 +125,11 @@ casa_image_full2.control.inputkeys                =   [clean.vis,clean.mask,clea
 casa_image_full2.control.outputkey                =   clean.imagename
 casa_image_full2.control.arguments                =   [--nologger,--nogui,-c]
 casa_image_full2.argument.clean.wprojplanes       =   {{ facet_wplanes }}
-casa_image_full2.argument.clean.uvrange           =   '>{{ selfcal_min_uv_lambda }}lambda'
+casa_image_full2.argument.clean.uvrange           =   '>{{ facet_min_uv_lambda }}lambda'
 casa_image_full2.argument.clean.nterms            =   {{ nterms }}
 casa_image_full2.argument.clean.niter             =   {{ casa_full2_image_niter }}
 casa_image_full2.argument.clean.imsize            =   [{{ facet_imsize }}, {{ facet_imsize }}]
-casa_image_full2.argument.clean.cell              =   ['{{ cellsize_selfcal_deg * 3600.0 }}arcsec', '{{ cellsize_selfcal_deg * 3600.0 }}arcsec']
+casa_image_full2.argument.clean.cell              =   ['{{ cellsize_facet_deg * 3600.0 }}arcsec', '{{ cellsize_facet_deg * 3600.0 }}arcsec']
 casa_image_full2.argument.clean.robust            =   {{ robust_facet }}
 casa_image_full2.argument.clean.multiscale        =   {{ casa_full_multiscale }}
 casa_image_full2.argument.clean.selectdata        =   True
@@ -153,10 +153,10 @@ casa_image_full2.argument.clean.chaniter          =   False
 casa_image_full2.argument.clean.flatnoise         =   True
 casa_image_full2.argument.clean.allowchunk        =   False
 {% if taper_facet_arcsec > 0.0 %}
-casa_image_full1.argument.clean.uvtaper           =   True
-casa_image_full1.argument.clean.outertaper        =   ['{{ taper_facet_arcsec }}arcsec']
+casa_image_full2.argument.clean.uvtaper           =   True
+casa_image_full2.argument.clean.outertaper        =   ['{{ taper_facet_arcsec }}arcsec']
 {% else %}
-casa_image_full1.argument.clean.uvtaper           =   False
+casa_image_full2.argument.clean.uvtaper           =   False
 {% endif %}
 
 # create a mapfile with the final image and a known name, length = 1
