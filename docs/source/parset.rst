@@ -278,13 +278,6 @@ The available options are described below under their respective sections.
         edges. If any are found, the facet regions are adjusted to avoid them (default
         is ``True``).
 
-    transfer_radius_deg
-        Radius in degrees within which the direction-dependent solutions will be
-        transferred before starting selfcal (default = 0.0; i.e., disabled). If a
-        direction is within this distance of a calibrator for which selfcal was
-        successful, the dir-dep selfcal solutions from this calibrator will be used
-        instead of the dir-indep ones.
-
     groupings
         Grouping of directions into groups that are selfcal-ed in parallel, defined as
         grouping:n_total_per_grouping. For example, ``groupings = 1:5, 4:0`` means two

@@ -764,28 +764,12 @@ def get_directions_options(parset):
     else:
         parset_dict['target_has_own_facet'] = False
 
-    # Radius in degrees within which the direction-dependent solutions will be
-    # transferred before starting selfcal (default = 0; i.e., disabled). If a
-    # direction is within this distance of a calibrator for which selfcal was
-    # successful, the dir-dep selfcal solutions from this calibrator will be used
-    # instead of the dir-indep ones
-    if 'transfer_radius_deg' in parset_dict:
-        parset_dict['transfer_radius_deg'] = parset.getfloat('directions',
-            'transfer_radius_deg')
-    elif 'transfer_radius' in parset_dict:
-        log.warning('Option "transfer_radius" is deprecated and should be changed to "transfer_radius_deg"')
-        parset_dict['transfer_radius_deg'] = parset.getfloat('directions',
-            'transfer_radius')
-    else:
-        parset_dict['transfer_radius_deg'] = 0.0
-
     # Check for unused options
     allowed_options = ['faceting_skymodel', 'directions_file', 'max_radius_deg',
         'flux_min_for_merging_jy', 'flux_min_jy', 'size_max_arcmin',
         'separation_max_arcmin', 'max_num', 'ndir_max',
         'faceting_radius_deg', 'check_edges', 'ndir_total', 'ndir_process',
-        'ndir_selfcal', 'transfer_radius', 'transfer_radius_deg',
-        'groupings', 'allow_reordering', 'target_ra', 'target_dec',
+        'ndir_selfcal', 'groupings', 'allow_reordering', 'target_ra', 'target_dec',
         'target_radius_arcmin', 'target_has_own_facet']
     for option in given_options:
         if option not in allowed_options:

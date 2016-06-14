@@ -212,13 +212,6 @@ flux_min_Jy = 0.3
 # is True)
 # check_edges = True
 
-# Radius in degrees within which the direction-dependent solutions will be
-# transferred before starting selfcal (default = 0.0; i.e., disabled). If a
-# direction is within this distance of a calibrator for which selfcal was
-# successful, the dir-dep selfcal solutions from this calibrator will be used
-# instead of the dir-indep ones
-# transfer_radius_deg = 0.0
-
 # Grouping of directions into groups that are selfcal-ed in parallel, defined as
 # grouping:n_total_per_grouping. For example, groupings = 1:5, 4:0 means two
 # groupings are used, with the first 5 directions put into groups of one (i.e.,
