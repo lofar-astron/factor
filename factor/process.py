@@ -272,7 +272,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             # Reset facetimage op for any directions that need it
             directions_reset = [d for d in dirs_to_image if d.do_reset]
             for d in directions_reset:
-                op = FacetImage(image_parset, bands, d, cellsize_arcsec, robust,
+                op = FacetImage(parset, bands, d, cellsize_arcsec, robust,
                     taper_arcsec, min_uv_lambda)
                 d.reset_state(op.name)
 
