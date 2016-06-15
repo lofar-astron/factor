@@ -269,17 +269,12 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 log.info('Imaging the following direction(s):')
                 log.info('{0}'.format([d.name for d in dirs_to_image]))
 
-            # Set up reset of any directions that need it
+            # Reset facetimage op for any directions that need it
             directions_reset = [d for d in dirs_to_image if d.do_reset]
             for d in directions_reset:
-                if (cellsize_arcsec != parset['imaging_specific']['selfcal_cellsize_arcsec'] or
-                    robust != parset['imaging_specific']['selfcal_robust'] or
-                    taper_arcsec != 0.0):
-                    name = 'facetimage_c{1}r{2}t{3}'.format(round(cellsize_arcsec,1),
-                            round(robust,2), round(taper_arcsec,1))
-                else:
-                    name = 'facetimage'
-                d.reset_state(name)
+                op = FacetImage(image_parset, bands, d, cellsize_arcsec, robust,
+                    taper_arcsec, min_uv_lambda)
+                d.reset_state(op.name)
 
             # Group directions. This is done to ensure that multiple directions
             # aren't competing for the same resources
@@ -323,15 +318,11 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     factor_working_dir=parset['dir_working'])
                 field.load_state()
 
-                # Reset the field direction if specified
+                # Reset fieldmosaic op for the field direction if specified
                 if 'field' in reset_directions:
-                    if (cellsize_arcsec != parset['imaging_specific']['selfcal_cellsize_arcsec'] or
-                        robust != parset['imaging_specific']['selfcal_robust'] or
-                        taper_arcsec != 0.0):
-                        name = 'fieldmosaic_c{1}r{2}t{3}'.format(round(cellsize_arcsec,1),
-                                round(robust,2), round(taper_arcsec,1))
-                    else:
-                        field.reset_state('fieldmosaic')
+                    op = FieldMosaic(parset, bands, field, cellsize_arcsec, robust,
+                        taper_arcsec, min_uv_lambda)
+                    field.reset_state(op.name)
 
                 field.facet_image_filenames = []
                 field.facet_vertices_filenames = []
