@@ -183,7 +183,9 @@ class FacetSelfcal(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'concat2_input.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat3_input.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat4_input.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'sorted_groups.mapfile_groups')]
+            os.path.join(self.pipeline_mapfile_dir, 'sorted_groups.mapfile_groups'),
+            os.path.join(self.pipeline_mapfile_dir, 'solve_ampphase12.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'solve_ampphase22.mapfile')]
         if not self.parset['keep_avg_facet_data'] and self.direction.name != 'target':
             # Add averaged calibrated data for the facet to files to be deleted.
             # These are only needed if the user wants to reimage by hand (e.g.,
