@@ -335,7 +335,6 @@ class FacetImage(Operation):
         else:
             infix = ''
 
-
         # Check that the data files to be reused do indeed exist
         if self.direction.use_existing_data:
             if not self.check_existing_files(self.direction.image_data_mapfile):
@@ -370,16 +369,6 @@ class FacetImage(Operation):
             for parmdb in band.dirindparmdbs:
                 dir_indep_parmDBs.append(parmdb)
         skymodels = [band.skymodel_dirindep for band in self.bands]
-
-        if not self.direction.use_existing_data:
-            # Set the shift_empty mapfile to the output of the shift_empty step
-            # otherwise, the pipeline will skip this step and reuse the
-            # shift_empty data from a previous imaging run
-            if not self.direction.selfcal_ok:
-                self.direction.image_data_mapfile = 'concat_averaged_compressed_map.output.mapfile'
-            else:
-                self.direction.image_data_mapfile = 'shift_empty.output.mapfile'
-
         self.parms_dict.update({'ms_files_single': ms_files_single,
                                 'ms_files_grouped' : str(ms_files),
                                 'skymodels': skymodels,

@@ -12,7 +12,7 @@ update_mapfile_hosts.control.hosts                    =   {{ hosts }}
 # update host entries in existing shift_empty mapfile
 update_shift_empty_mapfile_hosts.control.kind         =   plugin
 update_shift_empty_mapfile_hosts.control.type         =   updateHosts
-update_shift_empty_mapfile_hosts.control.mapfile_in   =   {{ shift_empty_mapfile }}
+update_shift_empty_mapfile_hosts.control.mapfile_in   =   {{ image_data_mapfile }}
 update_shift_empty_mapfile_hosts.control.hosts        =   {{ hosts }}
 
 {% else %}
