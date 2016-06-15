@@ -132,6 +132,7 @@ class Direction(object):
         self.num_selfcal_groups = 1
         self.timeSlotsPerParmUpdate = 100
         self.skymodel = None
+        self.use_existing_data = False
 
         # Define some directories and files
         self.working_dir = factor_working_dir
