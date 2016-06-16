@@ -314,6 +314,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     factor_working_dir=parset['dir_working'])
                 field.load_state()
 
+                # Set averaging for primary beam generation
+                field.avgpb_freqstep = bands[0].nchan
+                field.avgpb_timestep = int(120.0 / bands[0].timepersample)
+
                 # Reset the field direction if specified
                 if 'field' in reset_directions:
                     if (cellsize_arcsec != parset['imaging_specific']['selfcal_cellsize_arcsec'] or
