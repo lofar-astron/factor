@@ -182,6 +182,8 @@ def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
         if len(nearby[0]) > 1:
             patches = s.getPatchNames()[nearby]
             s.merge(patches.tolist())
+    # update patch positions
+    s.setPatchPositions(method='mid')
 
     # Filter patches on total flux density limit
     s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='sum', force=True)
@@ -209,8 +211,9 @@ def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
         log.info('Merging extended sources within {0} arcmin of calibrators...'.format(
             directions_separation_max_arcmin))
         calibrator_names = s.getPatchNames().tolist()
-        s.concatenate(s_large)
+        # calibrator positions
         pRA, pDec = s.getPatchPositions(asArray=True)
+        s.concatenate(s_large)
         for ra, dec in zip(pRA.tolist()[:], pDec.tolist()[:]):
             dist = s.getDistance(ra, dec, byPatch=True, units='arcmin')
             nearby = np.where(dist < directions_separation_max_arcmin)
