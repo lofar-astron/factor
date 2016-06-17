@@ -68,7 +68,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     # Prepare vis data
     bands = _set_up_bands(parset, test_run)
 
-    # Define directions and groups
+    # Set up directions and groups
     directions, direction_groups = _set_up_directions(parset, bands, dry_run,
     test_run, reset_directions, reset_operations)
 
@@ -79,14 +79,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     peel_directions.extend([d for d in directions if d.peel_calibrator])
     if len(peel_directions) > 0:
         log.info('Peeling {0} direction(s)'.format(len(peel_directions)))
-
-        # Combine the nodes and cores for the peeling operation
-        outlier_directions = factor.cluster.combine_nodes(peel_directions,
-            parset['cluster_specific']['node_list'],
-            parset['cluster_specific']['nimg_per_node'],
-            parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['wsclean_fmem'],
-            len(bands))
 
         # Do the peeling
         for d in peel_directions:
@@ -154,16 +146,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         for d in direction_group_reset:
             d.reset_state(['facetselfcal', 'facetsub'])
 
-        # Divide up the nodes and cores among the directions for the parallel
-        # selfcal operations
-        direction_group = factor.cluster.divide_nodes(direction_group,
-            parset['cluster_specific']['node_list'],
-            parset['cluster_specific']['ndir_per_node'],
-            parset['cluster_specific']['nimg_per_node'],
-            parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['wsclean_fmem'],
-            len(bands))
-
         # Check for any directions within transfer radius that have successfully
         # gone through selfcal
         dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
@@ -178,12 +160,11 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     d.transfer_nearest_solutions = True
 
         # Do selfcal or peeling on calibrator only
-        to_peel = [d for d in direction_group if d.peel_calibrator]
-        to_selfcal = [d for d in direction_group if not d.peel_calibrator]
         ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
         scheduler.run(ops)
+
         if dry_run:
-            # For dryrun, skip check
+            # For dryrun, skip selfcal verification
             for d in direction_group:
                 d.selfcal_ok = True
         direction_group_ok = [d for d in direction_group if d.selfcal_ok]
@@ -195,14 +176,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     if d.name != direction_group_ok[0].name:
                         d.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
                 set_sub_data_colname = False
-
-        # Combine the nodes and cores for the serial subtract operations
-        direction_group_ok = factor.cluster.combine_nodes(direction_group_ok,
-            parset['cluster_specific']['node_list'],
-            parset['cluster_specific']['nimg_per_node'],
-            parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['wsclean_fmem'],
-            len(bands))
 
         # Subtract final model(s) for directions for which selfcal went OK
         ops = [FacetSub(parset, bands, d) for d in direction_group_ok]
@@ -224,7 +197,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         log.error('Self calibration failed for all directions. Exiting...')
         sys.exit(1)
 
-    # (Re)image facets for each set of cellsize, robust, and taper settings
+    # (Re)image facets for each set of cellsize, robust, taper, and uv cut settings
     dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
     dirs_with_selfcal_to_reimage = [d for d in dirs_with_selfcal if not d.is_patch
         and not d.is_outlier]
@@ -236,8 +209,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     for d in dirs_without_selfcal:
         # Search for nearest direction with successful selfcal
         nearest, sep = factor.directions.find_nearest(d, dirs_with_selfcal)
-        log.debug('Using solutions from direction {0} for direction {1}.'.format(
-            nearest.name, d.name))
+        log.debug('Using solutions from direction {0} for direction {1} '
+            '(separation = {2} deg).'.format(nearest.name, d.name, sep))
         d.dir_dep_parmdb_mapfile = nearest.dir_dep_parmdb_mapfile
         d.save_state()
 
@@ -276,38 +249,17 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     taper_arcsec, min_uv_lambda)
                 d.reset_state(op.name)
 
-            # Group directions. This is done to ensure that multiple directions
-            # aren't competing for the same resources
-            ndir_simul = (len(parset['cluster_specific']['node_list']) *
-                parset['cluster_specific']['ndir_per_node'])
-            for i in range(int(np.ceil(len(dirs_to_image)/float(ndir_simul)))):
-                dir_group = dirs_to_image[i*ndir_simul:(i+1)*ndir_simul]
+            # Set the flag to save the phase-shifted, unaveraged,
+            # corrected data if there are more images to be made
+            if image_indx == 0:
+                parset['keep_image_data'] = True
+            else:
+                parset['keep_image_data'] = False
 
-                # Divide up the nodes and cores among the directions for the parallel
-                # imaging operations
-                dir_group = factor.cluster.divide_nodes(dir_group,
-                    parset['cluster_specific']['node_list'],
-                    parset['cluster_specific']['ndir_per_node'],
-                    parset['cluster_specific']['nimg_per_node'],
-                    parset['cluster_specific']['ncpu'],
-                    parset['cluster_specific']['wsclean_fmem'],
-                    len(bands))
-
-                # Set the flags to save/use the phase-shifted, unaveraged,
-                # corrected data if there are more images to be made
-                image_parset = parset.copy()
-                if image_indx < nimages - 1:
-                    image_parset['keep_unavg_facet_data'] = True
-                for d in dir_group:
-                    if image_indx > 0:
-                        d.use_existing_data = True
-                    else:
-                        d.use_existing_data = False
-
-                # Do facet imaging
-                ops = [FacetImage(image_parset, bands, d, cellsize_arcsec, robust,
-                    taper_arcsec, min_uv_lambda) for d in dir_group]
-                scheduler.run(ops)
+            # Do facet imaging
+            ops = [FacetImage(parset, bands, d, cellsize_arcsec, robust,
+                taper_arcsec, min_uv_lambda) for d in dirs_to_image]
+            scheduler.run(ops)
 
         # Mosaic the final facet images together
         for i, (cellsize_arcsec, taper_arcsec, robust, min_uv_lambda) in enumerate(
@@ -331,14 +283,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                         facet_image = DataMap.load(d.facet_image_mapfile)[0].file
                         field.facet_image_filenames.append(facet_image)
                         field.facet_vertices_filenames.append(d.save_file)
-
-                # Combine the nodes and cores for the mosaic operation
-                field = factor.cluster.combine_nodes([field],
-                    parset['cluster_specific']['node_list'],
-                    parset['cluster_specific']['nimg_per_node'],
-                    parset['cluster_specific']['ncpu'],
-                    parset['cluster_specific']['wsclean_fmem'],
-                    len(bands))[0]
 
                 # Do mosaicking
                 op = FieldMosaic(parset, bands, field, cellsize_arcsec, robust,
@@ -372,19 +316,20 @@ def _set_up_compute_parameters(parset, dry_run=False):
         log.warn('Did not find \"clusterdesc_file\" in parset-dict! This shouldn\'t happen, but trying to continue anyhow.')
         parset['cluster_specific']['clusterdesc'] = 'local.clusterdesc'
     else:
-        if cluster_parset['clusterdesc_file'].lower() == 'pbs' or ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'pbs'):
-            log.info('Using cluster setting: \"PBS\".')
+        if (cluster_parset['clusterdesc_file'] == 'pbs' or
+            ('cluster_type' in cluster_parset and cluster_parset['cluster_type'] == 'pbs')):
+            log.info('Using cluster setting: "PBS".')
             parset['cluster_specific']['clusterdesc'] = factor.cluster.make_pbs_clusterdesc()
             parset['cluster_specific']['clustertype'] = 'pbs'
-        elif cluster_parset['clusterdesc_file'].lower() == 'juropa_slurm' \
-                or ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'juropa_slurm'):
-            log.info('Using cluster setting: \"JUROPA_slurm\" (Single genericpipeline using multiple nodes).')
+        elif (cluster_parset['clusterdesc_file'] == 'juropa_slurm' or
+            ('cluster_type' in cluster_parset and cluster_parset['cluster_type'] == 'juropa_slurm'):
+            log.info('Using cluster setting: "JUROPA_slurm" (Single genericpipeline using multiple nodes).')
             # slurm_srun on JUROPA uses the local.clusterdesc
-            parset['cluster_specific']['clusterdesc'] = parset['lofarroot'] + '/share/local.clusterdesc'
+            parset['cluster_specific']['clusterdesc'] = os.path.join(parset['lofarroot'], 'share', 'local.clusterdesc')
             parset['cluster_specific']['clustertype'] = 'juropa_slurm'
             parset['cluster_specific']['node_list'] = ['localhost']
         else:
-            log.info('Using cluster setting: \"local\" (Single node).')
+            log.info('Using cluster setting: "local" (Single node).')
             parset['cluster_specific']['clusterdesc'] = cluster_parset['clusterdesc_file']
             parset['cluster_specific']['clustertype'] = 'local'
     if not 'node_list' in parset['cluster_specific']:
