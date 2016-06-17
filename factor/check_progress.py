@@ -346,10 +346,11 @@ def get_current_info(direction):
         return info
 
     completed_ops = get_completed_ops(direction)
+    completed_ops_lines = wrap(', '.join(completed_ops))
     if len(completed_ops) == 0:
         info += 'Completed ops: None\n'
     else:
-        info += 'Completed ops: {}\n'.format(', '.join(completed_ops))
+        info += 'Completed ops: {}\n'.format('\n'.join(completed_ops_lines))
 
     current_op = get_current_op(direction)
     info += 'Current op: {}'.format(current_op)
@@ -852,3 +853,23 @@ def verify_subtract(direction):
             return False
     else:
         return False
+
+
+def wrap(text, width=60):
+    """Wraps text to given width and returns list of lines."""
+    lines = []
+    for paragraph in text.split('\n'):
+        line = []
+        len_line = 0
+        for word in paragraph.split(' '):
+            word.strip()
+            len_word = len(word)
+            if len_line + len_word <= width:
+                line.append(word)
+                len_line += len_word + 1
+            else:
+                lines.append(' '.join(line))
+                line = [word]
+                len_line = len_word + 1
+        lines.append(' '.join(line))
+    return lines
