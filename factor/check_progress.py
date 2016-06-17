@@ -350,7 +350,7 @@ def get_current_info(direction):
     if len(completed_ops) == 0:
         info += 'Completed ops: None\n'
     else:
-        info += 'Completed ops: {}\n'.format('\n'.join(completed_ops_lines))
+        info += 'Completed ops: {}\n'.format('\n  '.join(completed_ops_lines))
 
     current_op = get_current_op(direction)
     info += 'Current op: {}'.format(current_op)
