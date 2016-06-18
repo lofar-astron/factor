@@ -39,7 +39,7 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
         start_times = []
         for i, inparmdb in enumerate(inparmdbs):
             pdb_in = pdb.parmdb(inparmdb)
-            parmname = pdb_add.getNames()[0]
+            parmname = pdb_in.getNames()[0]
             parms = pdb_in.getValuesGrid(parmname)
             start_times.append(parms[parmname]['times'][0])
             pdb_in = False
