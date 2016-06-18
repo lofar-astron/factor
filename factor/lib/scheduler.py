@@ -6,6 +6,7 @@ import multiprocessing
 import os
 import sys
 import imp
+import numpy as np
 from factor.lib.context import Timer
 
 log = logging.getLogger('factor:scheduler')
