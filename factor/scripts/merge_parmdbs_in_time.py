@@ -8,6 +8,7 @@ import os
 import pyrap.tables as pt
 import lofar.parmdb as pdb
 import sys
+import numpy as np
 
 
 def main(input_mslist, parmdb_name, outparmdb, clobber=True):
