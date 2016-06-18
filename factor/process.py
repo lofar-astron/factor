@@ -309,13 +309,13 @@ def _set_up_compute_parameters(parset, dry_run=False):
         log.warn('Did not find \"clusterdesc_file\" in parset-dict! This shouldn\'t happen, but trying to continue anyhow.')
         parset['cluster_specific']['clusterdesc'] = 'local.clusterdesc'
     else:
-        if (cluster_parset['clusterdesc_file'] == 'pbs' or
-            ('cluster_type' in cluster_parset and cluster_parset['cluster_type'] == 'pbs')):
+        if (cluster_parset['clusterdesc_file'].lower() == 'pbs' or
+            ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'pbs')):
             log.info('Using cluster setting: "PBS".')
             parset['cluster_specific']['clusterdesc'] = factor.cluster.make_pbs_clusterdesc()
             parset['cluster_specific']['clustertype'] = 'pbs'
-        elif (cluster_parset['clusterdesc_file'] == 'juropa_slurm' or
-            ('cluster_type' in cluster_parset and cluster_parset['cluster_type'] == 'juropa_slurm')):
+        elif (cluster_parset['clusterdesc_file'].lower() == 'juropa_slurm' or
+            ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'juropa_slurm')):
             log.info('Using cluster setting: "JUROPA_slurm" (Single genericpipeline using multiple nodes).')
             # slurm_srun on JUROPA uses the local.clusterdesc
             parset['cluster_specific']['clusterdesc'] = os.path.join(parset['lofarroot'], 'share', 'local.clusterdesc')
