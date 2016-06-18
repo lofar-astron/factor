@@ -315,7 +315,7 @@ def _set_up_compute_parameters(parset, dry_run=False):
             parset['cluster_specific']['clusterdesc'] = factor.cluster.make_pbs_clusterdesc()
             parset['cluster_specific']['clustertype'] = 'pbs'
         elif (cluster_parset['clusterdesc_file'] == 'juropa_slurm' or
-            ('cluster_type' in cluster_parset and cluster_parset['cluster_type'] == 'juropa_slurm'):
+            ('cluster_type' in cluster_parset and cluster_parset['cluster_type'] == 'juropa_slurm')):
             log.info('Using cluster setting: "JUROPA_slurm" (Single genericpipeline using multiple nodes).')
             # slurm_srun on JUROPA uses the local.clusterdesc
             parset['cluster_specific']['clusterdesc'] = os.path.join(parset['lofarroot'], 'share', 'local.clusterdesc')
