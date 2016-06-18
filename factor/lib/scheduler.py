@@ -122,7 +122,7 @@ class Scheduler(object):
         fmem_max = self.operation_list[0].parset['cluster_specific']['wsclean_fmem']
         nops_per_node = max(self.operation_list[0].parset['cluster_specific']['ndir_per_node'],
             self.operation_list[0].parset['cluster_specific']['nimg_per_node'])
-        nbands = len(self.bands)
+        nbands = len(self.operation_list[0].bands)
         nops_simul = self.max_procs
 
         for i in range(int(np.ceil(len(operation_list)/float(nops_simul)))):
@@ -148,8 +148,8 @@ class Scheduler(object):
                     nops_per_node = min(nops_per_node, c[h[0]])
                 else:
                     nops_per_node = 1
-                nchunks_per_node = max(1, int(round(float(len(self.bands[0].nfiles)) /
-                    len(h))))
+                nchunks_per_node = max(1, int(round(float(
+                    len(op.bands[0].nfiles)) / len(h))))
 
                 op.direction.hosts = h
                 op.direction.max_cpus_per_node =  max(1, int(round(ncpu_max /
