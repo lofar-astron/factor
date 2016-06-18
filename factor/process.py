@@ -133,13 +133,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     # or is explicitly specified for reset (to allow one to resume
                     # facetsubreset instead of always resetting and restarting it)
                     d.reset_state('facetsubreset')
-            direction_group_reset_facetsub = factor.cluster.combine_nodes(
-                direction_group_reset_facetsub,
-                parset['cluster_specific']['node_list'],
-                parset['cluster_specific']['nimg_per_node'],
-                parset['cluster_specific']['ncpu'],
-                parset['cluster_specific']['wsclean_fmem'],
-                len(bands))
             ops = [FacetSubReset(parset, bands, d) for d in direction_group_reset_facetsub]
             for op in ops:
                 scheduler.run(op)

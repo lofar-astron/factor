@@ -92,36 +92,48 @@ class Scheduler(object):
         self.success = True
 
 
-    def allocate_resources(self):
+    def allocate_resources(self, operation_list=None):
         """
         Divide up nodes and cpus among the operations to be run in parallel
 
-        The following values are set:
-        nimg_per_node : number of imagers per node
-        max_cpus_per_node : maximum number of cores that the pipeline
-            should use
-        max_cpus_per_img : maximum number of threads per multi-process
-            imager call
-        max_io_proc_per_node : maximum number of IO-intensive processes
-        max_cpus_per_chunk : number of threads in NDPPP calls that are run "ntimes" times
-        max_cpus_per_band : number of threads in NDPPP calls that are run "nfiles" times
-        max_percent_memory : percentage of memory to use in imagers that are only run once (e.g. imaging the full facet)
-        max_percent_memory_per_img : percentage of memory to use in multi-process imager calls
+        Parameters
+        ----------
+        operation_list : list of Operation objects, optional
+            Input list of operations over which to distribute the resources. If
+            None, self.operation_list is used
+
+        The following attributes of the direction object of each operation are
+        set:
+            max_cpus_per_node : maximum number of cores that the pipeline
+                should use
+            max_io_proc_per_node : maximum number of IO-intensive processes
+            max_cpus_per_chunk : number of threads in NDPPP calls that are run
+                "ntimes" times
+            max_cpus_per_band : number of threads in NDPPP calls that are run
+                "nfiles" times
+            max_percent_memory : percentage of memory to give to WSClean
 
         """
+        if operation_list is None:
+            operation_list = self.operation_list
+
         node_list = self.operation_list[0].node_list
-        all_directions = [op.direction for op in self.operation_list]
+        ncpu_max = parset['cluster_specific']['ncpu']
+        fmem_max = parset['cluster_specific']['wsclean_fmem']
+        nops_per_node = max(parset['cluster_specific']['ndir_per_node'],
+            parset['cluster_specific']['nimg_per_node'])
+        nbands = len(self.bands)
+        nops_simul = self.max_procs
 
-        ndir_simul = self.max_procs
-        for i in range(int(np.ceil(len(all_directions)/float(ndir_simul)))):
-            directions = all_directions[i*ndir_simul:(i+1)*ndir_simul]
+        for i in range(int(np.ceil(len(operation_list)/float(nops_simul)))):
+            op_group = operation_list[i*nops_simul:(i+1)*nops_simul]
 
-            if len(directions) >= len(node_list):
-                for i in range(len(directions)-len(node_list)):
+            if len(op_group) >= len(node_list):
+                for i in range(len(op_group)-len(node_list)):
                     node_list.append(node_list[i])
                 hosts = [[n] for n in node_list]
             else:
-                parts = len(directions)
+                parts = len(op_group)
                 hosts = [node_list[i*len(node_list)//parts:
                     (i+1)*len(node_list)//parts] for i in range(parts)]
 
@@ -130,23 +142,25 @@ class Scheduler(object):
             for h in hosts:
                 h_flat.extend(h)
             c = Counter(h_flat)
-            for d, h in zip(directions, hosts):
-                d.hosts = h
+
+            for op, h in zip(op_group, hosts):
                 if len(h) == 1:
-                    ndir_per_node = min(ndir_per_node, c[h[0]])
+                    nops_per_node = min(nops_per_node, c[h[0]])
                 else:
-                    ndir_per_node = 1
-                d.nimg_per_node = nimg_per_node
-                d.max_cpus_per_node =  max(1, int(round(ncpu_max / float(ndir_per_node))))
-                d.max_cpus_per_img =  max(1, int(round(ncpu_max / float(nimg_per_node))))
-                d.max_io_proc_per_node = int(np.ceil(np.sqrt(ncpu_max)))
-                nchunks_per_node = max(1, int(round(float(len(self.bands[0].nfiles)) / len(d.hosts))))
-                d.max_cpus_per_chunk = int(round(d.max_cpus_per_node / nchunks_per_node))
-                d.max_cpus_per_band = max(1, int(round(d.max_cpus_per_node *
-                    len(d.hosts) / float(nbands))))
-                d.max_percent_memory = fmem_max / float(ndir_per_node) * 100.0
-                d.max_percent_memory_per_img = fmem_max / float(ndir_per_node) / float(nimg_per_node) * 100.0
-                d.save_state()
+                    nops_per_node = 1
+                nchunks_per_node = max(1, int(round(float(len(self.bands[0].nfiles)) /
+                    len(h))))
+
+                op.direction.hosts = h
+                op.direction.max_cpus_per_node =  max(1, int(round(ncpu_max /
+                    float(nops_per_node))))
+                op.direction.max_io_proc_per_node = int(np.ceil(np.sqrt(op.direction.max_cpus_per_node)))
+                op.direction.max_cpus_per_chunk = int(round(op.direction.max_cpus_per_node /
+                    nchunks_per_node))
+                op.direction.max_cpus_per_band = max(1, int(round(op.direction.max_cpus_per_node *
+                    len(op.direction.hosts) / float(nbands))))
+                op.direction.max_percent_memory = fmem_max / float(nops_per_node) * 100.0
+                op.direction.save_state()
 
 
     def result_callback(self, result):
@@ -160,30 +174,28 @@ class Scheduler(object):
             this_op_indx = [op.direction.name for op in self.operation_list].index(direction_name)
             this_op =  self.operation_list[this_op_indx]
         except ValueError:
-            this_op = None
+            log.warn('Operation {0} (direction: {1}) not in list of active '
+                'operations. This could indicate a problem with the operation'.
+                format(op_name, direction_name))
+            return
 
+        # Reallocate resources
+        if len(self.queued_ops) > 0:
+            # Give the completed op's resources to the next one in line (if any)
+            next_op = self.queued_ops.pop(0)
+            next_op.direction.hosts = this_op.direction.hosts[:]
+            next_op.setup()
+
+        # Finalize the operation
         if status == 0:
             log.info('--> Operation {0} completed (direction: '
                 '{1})'.format(op_name, direction_name))
-
-            # Finalize the operation
-            if this_op is not None:
-                this_op.finalize()
-                this_op.set_completed()
-            else:
-                log.error('Operation {0} (direction: {1}) not in list of active '
-                    'operations'.format(op_name, direction_name))
-                self.success = False
+            this_op.finalize()
+            this_op.set_completed()
         else:
             log.error('Operation {0} failed due to an error (direction: '
                 '{1})'.format(op_name, direction_name))
             self.success = False
-
-        # Give the completed op's nodes to the next one in line (if any)
-        if this_op is not None and len(self.queued_ops) > 0:
-            next_op = self.queued_ops.pop(0)
-            next_op.direction.hosts = this_op.direction.hosts[:]
-            next_op.setup()
 
 
     def run(self, operation_list):
@@ -203,7 +215,6 @@ class Scheduler(object):
             return
 
         # Run the operation(s)
-        self.num_complete = 0
         self.allocate_resources()
         with Timer(log, 'operation'):
             pool = multiprocessing.Pool(processes=self.max_procs)
