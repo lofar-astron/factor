@@ -151,7 +151,7 @@ class Scheduler(object):
                 else:
                     nops_per_node = 1
                 nchunks_per_node = max(1, int(round(float(
-                    len(op.bands[0].nfiles)) / len(h))))
+                    len(op.bands[0].files)) / len(h))))
 
                 op.direction.hosts = h
                 op.direction.max_cpus_per_node =  max(1, int(round(ncpu_max /
