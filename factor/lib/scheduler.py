@@ -212,7 +212,7 @@ class Scheduler(object):
             operation_list = [operation_list]
 
         # Finalize completed ops (so that various attributes are set correctly)
-        for op in [op for op in operation_list if op.check_completed()]
+        for op in [op for op in operation_list if op.check_completed()]:
             op.finalize()
 
         # Filter out completed ops
