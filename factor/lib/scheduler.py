@@ -7,6 +7,7 @@ import os
 import sys
 import imp
 import numpy as np
+from collections import Counter
 from factor.lib.context import Timer
 
 log = logging.getLogger('factor:scheduler')
