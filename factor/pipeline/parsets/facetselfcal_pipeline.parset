@@ -850,7 +850,7 @@ merge_amp_parmdbs1.control.type                            =   merge_parmdbs_in_
 merge_amp_parmdbs1.control.mapfile_in                      =   concat_data_compressed_mapfile.output.mapfile
 merge_amp_parmdbs1.control.inputkey                        =   mslist
 merge_amp_parmdbs1.control.outputkey                       =   outparmdb
-merge_amp_parmdbs1.argument.flags                          =   [mslist,instrument,outparmdb]
+merge_amp_parmdbs1.argument.flags                          =   [mslist,instrument_slow,outparmdb]
 
 # smooth the amplitues in the merged parmDB, length = 1
 # smooth_amps uses only ANTENNA subtable of inputms, so it should work on virtual concatenated MS
@@ -1102,7 +1102,7 @@ merge_amp_parmdbs2.control.type                            =   merge_parmdbs_in_
 merge_amp_parmdbs2.control.mapfile_in                      =   concat_data_compressed_mapfile.output.mapfile
 merge_amp_parmdbs2.control.inputkey                        =   mslist
 merge_amp_parmdbs2.control.outputkey                       =   outparmdb
-merge_amp_parmdbs2.argument.flags                          =   [mslist,instrument,outparmdb]
+merge_amp_parmdbs2.argument.flags                          =   [mslist,instrument_slow,outparmdb]
 
 # smooth the amplitues in the merged parmDB, length = 1
 # smooth_amps uses only ANTENNA subtable of inputms, so it should work on virtual concatenated MS
