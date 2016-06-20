@@ -841,7 +841,6 @@ solve_ampphase12.argument.solvegain.type                   =   gaincal
 solve_ampphase12.argument.solvegain.caltype                =   {{ selfcal_caltype }}
 solve_ampphase12.argument.solvegain.parmdb                 =   parmdb
 solve_ampphase12.argument.solvegain.usemodelcolumn         =   True
-solve_ampphase12.argument.solvegain.usebeammodel           =   False
 solve_ampphase12.argument.solvegain.solint                 =   {{ solint_time_a }}
 solve_ampphase12.argument.solvegain.nchan                  =   {{ solint_freq_a }}
 
@@ -1092,7 +1091,6 @@ solve_ampphase22.argument.solvegain.type                   =   gaincal
 solve_ampphase22.argument.solvegain.caltype                =   {{ selfcal_caltype }}
 solve_ampphase22.argument.solvegain.parmdb                 =   parmdb
 solve_ampphase22.argument.solvegain.usemodelcolumn         =   True
-solve_ampphase22.argument.solvegain.usebeammodel           =   False
 solve_ampphase22.argument.solvegain.solint                 =   {{ solint_time_a }}
 solve_ampphase22.argument.solvegain.nchan                  =   {{ solint_freq_a }}
 
