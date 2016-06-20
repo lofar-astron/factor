@@ -526,8 +526,6 @@ def update_plot():
             for d in all_directions:
                 if d.name == a.facet_name:
                     set_patch_color(a, d)
-                    a.selfcal_images = find_selfcal_images(d)
-                    a.facet_image = find_facet_image(d)
                     if selected_direction is not None:
                         if d.name == selected_direction.name:
                             info = get_current_info(d)
