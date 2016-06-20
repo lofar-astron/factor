@@ -95,8 +95,8 @@ concat_data.argument.msout.writefullresflag            =   False
 concat_data.argument.local_scratch_dir                 =   {{ local_dir }}
 concat_data.argument.steps                             =   [avg]
 concat_data.argument.avg.type                          =   squash
-concat_data.argument.avg.freqstep                      =   {{ facetselfcal_freqstep }}
-concat_data.argument.avg.timestep                      =   {{ facetselfcal_timestep }}
+concat_data.argument.avg.freqstep                      =   {{ avgpb_freqstep }}
+concat_data.argument.avg.timestep                      =   {{ avgpb_timestep }}
 
 # create compressed mapfile of averaged data, length = 1
 create_compressed_mapfile.control.kind                 =   plugin

@@ -263,7 +263,11 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     factor_working_dir=parset['dir_working'])
                 field.load_state()
 
-                # Reset fieldmosaic op for the field direction if specified
+                # Set averaging for primary beam generation
+                field.avgpb_freqstep = bands[0].nchan
+                field.avgpb_timestep = int(120.0 / bands[0].timepersample)
+
+                # Reset the field direction if specified
                 if 'field' in reset_directions:
                     op = FieldMosaic(parset, bands, field, cellsize_arcsec, robust,
                         taper_arcsec, min_uv_lambda)
@@ -507,11 +511,19 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
     """
     dir_parset = parset['direction_specific']
 
-    log.info("Building local sky model for source avoidance and DDE calibrator "
-        "selection (if desired)...")
-    ref_band = bands[-1]
     max_radius_deg = dir_parset['max_radius_deg']
-    initial_skymodel = factor.directions.make_initial_skymodel(ref_band)
+    ref_band = bands[-1]
+
+    if dir_parset['faceting_skymodel'] is not None:
+        import lsmtool
+        log.info("Using {} as sky model for source avoidance and DDE calibrator "
+            "selection (if desired)".format(dir_parset['faceting_skymodel']))
+        initial_skymodel = lsmtool.load(dir_parset['faceting_skymodel'])
+    else:
+        log.info("Building local sky model for source avoidance and DDE calibrator "
+            "selection (if desired)...")
+        initial_skymodel = factor.directions.make_initial_skymodel(ref_band)
+
     log.info('Setting up directions...')
     directions = _initialize_directions(parset, initial_skymodel, ref_band,
         max_radius_deg=max_radius_deg, dry_run=dry_run)
