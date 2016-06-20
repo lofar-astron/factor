@@ -513,6 +513,11 @@ def set_patch_color(a, d):
     a.completed_ops = get_completed_ops(d)
     a.started_ops = get_started_ops(d)
     a.current_op = get_current_op(d)
+    total_completed = len(a.completed_ops)-1
+    # treat facetselfcal and facetsub as one op for consistency with old code
+    if total_completed==0:
+        total_completed=1 
+    completed_color=(0.66/total_completed**0.5,0.96/total_completed**0.5,0.66/total_completed**0.5,1.0)
     if a.current_op is not None:
         # Means this facet is currently processing
         a.set_edgecolor('#a9a9a9')
@@ -520,13 +525,15 @@ def set_patch_color(a, d):
     elif 'facetselfcal' in a.completed_ops:
         if verify_subtract(d):
             a.set_edgecolor('#a9a9a9')
-            a.set_facecolor('#A9F5A9')
+            a.set_facecolor(completed_color)
         else:
+            # Failed facet
             a.set_edgecolor('#a9a9a9')
             a.set_facecolor('#F5A9A9')
     elif len(a.completed_ops) > 0:
+        # normally never run since facetselfcal will be first op
         a.set_edgecolor('#a9a9a9')
-        a.set_facecolor('#A9F5A9')
+        a.set_facecolor(completed_color)
 
 
 def set_highlight():
