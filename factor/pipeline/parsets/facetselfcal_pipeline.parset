@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, add_imaging_cols_empty, shift_cal, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, expand_parmdb_map, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_instrument_parmdb_map, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, average3, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_compressed_mapfile_ft, create_model4_map, blank_model, casa_ft4, {% else %} apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, sort_average5, sort_average5_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, add_imaging_cols_empty, shift_cal, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, expand_parmdb_map, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_instrument_parmdb_map, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_compressed_mapfile_ft, create_model4_map, blank_model, casa_ft4, {% else %} apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, sort_average5, sort_average5_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -818,7 +818,7 @@ make_instrument_parmdb_map.control.kind                       =  plugin
 make_instrument_parmdb_map.control.type                       =  createMapfile
 make_instrument_parmdb_map.control.method                     =  add_suffix_to_file
 make_instrument_parmdb_map.control.mapfile_in                 =  concat_data.output.mapfile
-make_instrument_parmdb_map.control.add_suffix_to_file         =  /instrument
+make_instrument_parmdb_map.control.add_suffix_to_file         =  /instrument_slow
 make_instrument_parmdb_map.control.mapfile_dir                =  input.output.mapfile_dir
 make_instrument_parmdb_map.control.filename                   =  instrument_parmdb.mapfile
 
@@ -868,38 +868,31 @@ expand_smoothed_amp1_parmdb_map.control.mapfile_to_match   =   concat_data.outpu
 expand_smoothed_amp1_parmdb_map.control.mapfile_dir        =   input.output.mapfile_dir
 expand_smoothed_amp1_parmdb_map.control.filename           =   expand_amp1_smoothed_parmdbs.mapfile
 
-# and apply the smoothed amplitudes, length = ntimes
-apply_amp1.control.type                                    =   calibrate-stand-alone_new
-apply_amp1.control.mapfiles_in                             =   [concat_data.output.mapfile,expand_smoothed_amp1_parmdb_map.output.mapfile]
-apply_amp1.control.inputkeys                               =   [inputms,inputparmdb]
-apply_amp1.argument.observation                            =   inputms
-apply_amp1.argument.parset                                 =   {{ parset_dir }}/facet_dirdep_amponly_apply.parset
-apply_amp1.argument.catalog                                =   {{ skymodel_dir }}/empty.skymodel
-apply_amp1.argument.parmdb                                 =   inputparmdb
-apply_amp1.argument.replace-sourcedb                       =   True
-apply_amp1.argument.replace-parmdb                         =   True
+# apply the smoothed amplitudes and average, length = ntimes
+apply_amp1.control.type                                    =   dppp
+apply_amp1.control.opts.mapfiles_in                        =   [concat_data.output.mapfile,expand_smoothed_amp1_parmdb_map.output.mapfile]
+apply_amp1.control.opts.inputkeys                          =   [msin,parmdb]
+apply_amp1.argument.numthreads                             =   {{ max_cpus_per_band }}
+apply_amp1.argument.msin.datacolumn                        =   CORRECTED_DATA
+apply_amp1.argument.msout.overwrite                        =   True
+apply_amp1.argument.msout.writefullresflag                 =   False
+apply_amp1.argument.local_scratch_dir                      =   {{ local_dir }}
+apply_amp1.argument.steps                                  =   [correct_slow,avg]
+apply_amp1.argument.correct_slow.type                      =   applycal
+apply_amp1.argument.correct_slow.parmdb                    =   dir_dep_parmdb
+apply_amp1.argument.correct_slow.invert                    =   True
+apply_amp1.argument.flagzero.type                          =   preflagger
+apply_amp1.argument.avg.type                               =   squash
+apply_amp1.argument.avg.freqstep                           =   1
+apply_amp1.argument.avg.timestep                           =   {{ facetselfcal_timestep }}
 
 ########## end of third round of selfcal
 ########## start of fourth round of selfcal
 
-# average the output pf the previous selfcal step, length = ntimes
-average3.control.type                                      =   dppp
-average3.control.mapfile_in                                =   concat_data.output.mapfile
-average3.control.inputkey                                  =   msin
-average3.argument.numthreads                               =   {{ max_cpus_per_chunk }}
-average3.argument.msin.datacolumn                          =   CORRECTED_DATA
-average3.argument.msout.overwrite                          =   True
-average3.argument.msout.writefullresflag                   =   False
-average3.argument.local_scratch_dir                        =   {{ local_dir }}
-average3.argument.steps                                    =   [avg]
-average3.argument.avg.type                                 =   squash
-average3.argument.avg.freqstep                             =   1
-average3.argument.avg.timestep                             =   {{ facetselfcal_timestep }}
-
 # make compressed mapfile of averaged data, length = 1
 create_compressed_mapfile3.control.kind                    =   plugin
 create_compressed_mapfile3.control.type                    =   compressMapfile
-create_compressed_mapfile3.control.mapfile_in              =   average3.output.mapfile
+create_compressed_mapfile3.control.mapfile_in              =   apply_amp1.output.mapfile
 create_compressed_mapfile3.control.mapfile_dir             =   input.output.mapfile_dir
 create_compressed_mapfile3.control.filename                =   concat3_input.mapfile
 
@@ -1024,7 +1017,7 @@ casa_image32.argument.clean.allowchunk                     =   False
 loop_ampcal.control.kind                                   =   loop
 loop_ampcal.control.type                                   =   conditional
 loop_ampcal.control.loopcount                              =   {{ loopcount }}
-loop_ampcal.control.loopsteps                              =   [create_model3_map,casa_ft3,{% if pre_average %}switch_weights_col7,{% endif %}solve_ampphase21,{% if pre_average %}switch_weights_col8,{% endif %}apply_ampphase21,merge_phase_parmdbs,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,average4,create_compressed_mapfile4,concat4,delete_image,casa_image41,adjust_casa_mapfile4,mask4,casa_image42,adjust_casa_mapfile5,copy_image,check_image]
+loop_ampcal.control.loopsteps                              =   [create_model3_map,casa_ft3,{% if pre_average %}switch_weights_col7,{% endif %}solve_ampphase21,{% if pre_average %}switch_weights_col8,{% endif %}apply_ampphase21,merge_phase_parmdbs,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,create_compressed_mapfile4,concat4,delete_image,casa_image41,adjust_casa_mapfile4,mask4,casa_image42,adjust_casa_mapfile5,copy_image,check_image]
 
 # create a mapfile with the model image, uses loop counter to select image32 or image42, length = 1
 create_model3_map.control.kind                             =   plugin
@@ -1127,40 +1120,33 @@ expand_smoothed_amp2_parmdb_map.control.mapfile_to_match   =   concat_data.outpu
 expand_smoothed_amp2_parmdb_map.control.mapfile_dir        =   input.output.mapfile_dir
 expand_smoothed_amp2_parmdb_map.control.filename           =   expand_amp2_smoothed_parmdbs.mapfile
 
-# and apply the smoothed amplitudes, length = ntimes
-apply_amp2.control.type                                    =   calibrate-stand-alone_new
-apply_amp2.control.mapfiles_in                             =   [concat_data.output.mapfile,expand_smoothed_amp2_parmdb_map.output.mapfile]
-apply_amp2.control.inputkeys                               =   [inputms,inputparmdb]
-apply_amp2.argument.observation                            =   inputms
-apply_amp2.argument.parset                                 =   {{ parset_dir }}/facet_dirdep_amponly_apply.parset
-apply_amp2.argument.catalog                                =   {{ skymodel_dir }}/empty.skymodel
-apply_amp2.argument.parmdb                                 =   inputparmdb
-apply_amp2.argument.replace-sourcedb                       =   True
-apply_amp2.argument.replace-parmdb                         =   True
+# apply the smoothed amplitudes and average, length = ntimes
+apply_amp2.control.type                                    =   dppp
+apply_amp2.control.opts.mapfiles_in                        =   [concat_data.output.mapfile,expand_smoothed_amp2_parmdb_map.output.mapfile]
+apply_amp2.control.opts.inputkeys                          =   [msin,parmdb]
+apply_amp2.argument.numthreads                             =   {{ max_cpus_per_band }}
+apply_amp2.argument.msin.datacolumn                        =   CORRECTED_DATA
+apply_amp2.argument.msout.overwrite                        =   True
+apply_amp2.argument.msout.writefullresflag                 =   False
+apply_amp2.argument.local_scratch_dir                      =   {{ local_dir }}
+apply_amp2.argument.steps                                  =   [correct_slow,avg]
+apply_amp2.argument.correct_slow.type                      =   applycal
+apply_amp2.argument.correct_slow.parmdb                    =   dir_dep_parmdb
+apply_amp2.argument.correct_slow.invert                    =   True
+apply_amp2.argument.flagzero.type                          =   preflagger
+apply_amp2.argument.avg.type                               =   squash
+apply_amp2.argument.avg.freqstep                           =   1
+apply_amp2.argument.avg.timestep                           =   {{ facetselfcal_timestep }}
 
 ########## end of fourth or of the looped round of selfcal
 
 ########## start of looped round of selfcal
 ########## make image to check if we can stop the loop, or as new model
 
-# average the output pf the previous selfcal step, length = ntimes
-average4.control.type                                      =   dppp
-average4.control.mapfile_in                                =   concat_data.output.mapfile
-average4.control.inputkey                                  =   msin
-average4.argument.numthreads                               =   {{ max_cpus_per_chunk }}
-average4.argument.msin.datacolumn                          =   CORRECTED_DATA
-average4.argument.msout.overwrite                          =   True
-average4.argument.msout.writefullresflag                   =   False
-average4.argument.local_scratch_dir                        =   {{ local_dir }}
-average4.argument.steps                                    =   [avg]
-average4.argument.avg.type                                 =   squash
-average4.argument.avg.freqstep                             =   1
-average4.argument.avg.timestep                             =   {{ facetselfcal_timestep }}
-
 # make compressed mapfile of averaged data, length = 1
 create_compressed_mapfile4.control.kind                    =   plugin
 create_compressed_mapfile4.control.type                    =   compressMapfile
-create_compressed_mapfile4.control.mapfile_in              =   average4.output.mapfile
+create_compressed_mapfile4.control.mapfile_in              =   apply_amp2.output.mapfile
 create_compressed_mapfile4.control.mapfile_dir             =   input.output.mapfile_dir
 create_compressed_mapfile4.control.filename                =   concat4_input.mapfile
 
