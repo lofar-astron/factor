@@ -148,8 +148,9 @@ def plot_state(directions_list, trim_names=True):
     """
     Plots the facets of a run
     """
-    global midRA, midDec, fig, at, selected_direction
+    global midRA, midDec, fig, at, selected_direction, choose_from_list
     selected_direction = None
+    choose_from_list = False
 
     # Set up coordinate system and figure
     points, midRA, midDec = factor.directions.getxy(directions_list)
@@ -287,8 +288,9 @@ def on_pick(event):
     """
     Handle picks with the mouse
     """
-    global all_directions, at, fig, selected_direction
+    global all_directions, at, fig, selected_direction, choose_from_list
 
+    choose_from_list = False
     facet = event.artist
     direction = None
     if hasattr(facet, 'facet_name'):
@@ -370,10 +372,11 @@ def on_press(event):
     """
     Handle key presses
     """
-    global fig, all_directions, at, selected_direction
+    global fig, at, selected_direction, choose_from_list
 
     if event.key == 'u':
         # Update plot
+        choose_from_list = False
         info = 'Updating display...'
         c = at.get_child()
         c.set_text(info)
@@ -390,6 +393,9 @@ def on_press(event):
 
     elif event.key == 'c':
         # Open selfcal images (if any)
+        choose_from_list = False
+        if selected_direction is None:
+            return
         selfcal_images = find_selfcal_images(selected_direction)
         if len(selfcal_images) > 0:
             info = 'Opening selfcal images for {}...'.format(selected_direction.name)
@@ -409,40 +415,33 @@ def on_press(event):
             info = 'No selfcal images exist for {}'.format(selected_direction.name)
 
     elif event.key == 'i':
-        # Open full facet image (if any)
-        facet_image = find_facet_image(selected_direction)
-        if len(facet_image) > 0:
-            info = 'Opening facet image for {}...'.format(selected_direction.name)
-            if options['facet_viewer'] == 'casa':
-                im2 = pim.image(facet_image[0])
-                im2.view()
-            elif options['facet_viewer'] == 'ds9':
-                if os.path.isdir(facet_image[0]):
-                    # Convert casa image to fits
-                    if not os.path.exists('{0}.fits'.format(facet_image[0])):
-                        subprocess.call('image2fits in={0} out={0}.fits'.format(facet_image[0]),
-                            shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    facet_image[0] = '{0}.fits'.format(facet_image[0])
-                if not haspyds9:
-                    os.system('ds9 '+facet_image[0]+' &')
-                else:
-                    # use pyds9 if available to re-use an existing ds9
-                    pyds9.ds9_xpans()
-                    ds9=pyds9.DS9('checkfactor')
-                    ds9.set('file '+facet_image[0])
-                    if options['ds9_limits'] is not None:
-                        ds9.set('scale limits '+options['ds9_limits'])
-                    if options['ds9_load_regions']:
-                        regionfile=os.path.join(selected_direction.working_dir,'regions','facets_ds9.reg')
-                        ds9.set('regions delete all')
-                        ds9.set('regions load '+regionfile)
-            else:
-                info = 'Unknown facet viewer specified in config file!'
-        else:
+        # Open full facet images (if any)
+        if selected_direction is None:
+            return
+        facet_images, facetimage_ops = find_facet_images(selected_direction)
+        if len(facet_images) == 0:
             info = 'No image of facet exists for {}'.format(selected_direction.name)
+        else:
+            info = 'Load image from (choose one):'
+            for opindx, (img, fimg_op) in enumerate(zip(facet_images, facetimage_ops)):
+                info += '\n  ({0}) {1}'.format(opindx+1, fimg_op)
+            choose_from_list = True
+
+    elif event.key in [str(num+1) for num in range(9)]:
+        # Open image (from list given on "i" press)
+        if choose_from_list:
+            facet_images, facetimage_ops = find_facet_images(selected_direction)
+            if int(event.key) <= len(facet_images):
+                display_image(facet_images[int(event.key)-1])
+                return
+        else:
+            return
 
     elif event.key == 't':
         # Open fast TEC selfcal plots (if any)
+        choose_from_list = False
+        if selected_direction is None:
+            return
         selfcal_plots = find_selfcal_tec_plots(selected_direction)
         if len(selfcal_plots) > 0:
             info = 'Opening selfcal TEC solution plots for {}...'.format(selected_direction.name)
@@ -452,6 +451,9 @@ def on_press(event):
 
     elif event.key == 'g':
         # Open slow Gain selfcal plots (if any)
+        choose_from_list = False
+        if selected_direction is None:
+            return
         selfcal_plots = find_selfcal_gain_plots(selected_direction)
         if len(selfcal_plots) > 0:
             info = 'Opening selfcal Gain solution plots for {}...'.format(selected_direction.name)
@@ -460,6 +462,7 @@ def on_press(event):
             info = 'Final selfcal solutions do not exist for {}'.format(selected_direction.name)
 
     elif event.key == 'h':
+        choose_from_list = False
         info='Reprinting instructions'
         show_instructions()
 
@@ -470,6 +473,42 @@ def on_press(event):
     c = at.get_child()
     c.set_text(info)
     fig.canvas.draw()
+
+
+def display_image(image):
+    """
+    Displays image in an external viewer
+    """
+    global fig, at, selected_direction
+
+    if options['facet_viewer'] == 'casa':
+        im2 = pim.image(image)
+        im2.view()
+    elif options['facet_viewer'] == 'ds9':
+        if os.path.isdir(image):
+            # Convert casa image to fits
+            if not os.path.exists('{0}.fits'.format(image)):
+                subprocess.call('image2fits in={0} out={0}.fits'.format(image),
+                    shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            image = '{0}.fits'.format(image)
+        if not haspyds9:
+            os.system('ds9 {} &'.format(image))
+        else:
+            # use pyds9 if available to re-use an existing ds9
+            pyds9.ds9_xpans()
+            ds9=pyds9.DS9('checkfactor')
+            ds9.set('file '+image)
+            if options['ds9_limits'] is not None:
+                ds9.set('scale limits '+options['ds9_limits'])
+            if options['ds9_load_regions']:
+                regionfile=os.path.join(selected_direction.working_dir,'regions','facets_ds9.reg')
+                ds9.set('regions delete all')
+                ds9.set('regions load '+regionfile)
+    else:
+        info = 'Unknown facet viewer specified in config file!'
+        c = at.get_child()
+        c.set_text(info)
+        fig.canvas.draw()
 
 
 def update_plot():
@@ -514,10 +553,10 @@ def set_patch_color(a, d):
     a.completed_ops = get_completed_ops(d)
     a.started_ops = get_started_ops(d)
     a.current_op = get_current_op(d)
-    total_completed = len(a.completed_ops)-1
+    total_completed = max(0, len(a.completed_ops)-1)
     # treat facetselfcal and facetsub as one op for consistency with old code
     if total_completed==0:
-        total_completed=1 
+        total_completed=1
     completed_color=(0.66/total_completed**0.5,0.96/total_completed**0.5,0.66/total_completed**0.5,1.0)
     if a.current_op is not None:
         # Means this facet is currently processing
@@ -695,47 +734,38 @@ def find_selfcal_gain_plots(direction):
     return selfcal_plots
 
 
-def find_facet_image(direction):
+def find_facet_images(direction):
     """
-    Returns the filename of full facet image
+    Returns the filenames and op names of full facet images
     """
     if direction.name == 'field':
         mosaic_dir = os.path.join(direction.working_dir, 'results', 'fieldmosaic',
             direction.name)
-        facet_image = glob.glob(os.path.join(mosaic_dir, '*.correct_mosaic.pbcut.fits'))
-        return facet_image
+        facet_images = glob.glob(os.path.join(mosaic_dir, '*.correct_mosaic.pbcut.fits'))
+        return facet_images, ['fieldmosaic']
 
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
-    image_dir = os.path.join(direction.working_dir, 'results', 'facetimage',
+    image_dir = os.path.join(direction.working_dir, 'results', 'facetimage*',
         direction.name)
     peelimage_dir = os.path.join(direction.working_dir, 'results', 'facetpeelimage',
         direction.name)
     dirs = [selfcal_dir, image_dir, peelimage_dir]
 
-    # Find most recently modified directory (if any)
-    mtimes = []
-    for d in dirs:
-        if os.path.exists(d):
-            mtimes.append(os.path.getmtime(d))
-        else:
-            mtimes.append(np.nan)
-    try:
-        latest_dir = dirs[np.nanargmax(mtimes)]
-    except (ValueError, TypeError):
-        # ValueError or TypeError indicates mtimes list is all NaNs
-        return []
-
     # Search for various image patterns
-    facet_image = glob.glob(os.path.join(latest_dir, '*.wsclean_image_full2-MFS-image.fits'))
-    if len(facet_image) == 0:
-        facet_image = glob.glob(os.path.join(latest_dir, '*.wsclean_image_full2-image.fits'))
-        if len(facet_image) == 0:
-            facet_image = glob.glob(os.path.join(latest_dir, '*.casa_image_full2.image.tt0'))
-            if len(facet_image) == 0:
-                facet_image = glob.glob(os.path.join(latest_dir, '*.casa_image_full2.image'))
+    facet_images = []
+    for d in dirs:
+        facet_images += glob.glob(os.path.join(d, '*.wsclean_image_full2-MFS-image.fits'))
+        facet_images += glob.glob(os.path.join(d, '*.wsclean_image_full2-image.fits'))
+        facet_images += glob.glob(os.path.join(d, '*.casa_image_full2.image.tt0'))
+        facet_images += glob.glob(os.path.join(d, '*.casa_image_full2.image'))
 
-    return facet_image
+    facetimage_ops = []
+    for facet_image in facet_images:
+        trimed_name = facet_image.split('results/facet')[1]
+        facetimage_ops.append('facet'+trimed_name.split('/')[0])
+
+    return facet_images, facetimage_ops
 
 
 def get_current_step(direction):
