@@ -377,18 +377,7 @@ def on_press(event):
     if event.key == 'u':
         # Update plot
         choose_from_list = False
-        info = 'Updating display...'
-        c = at.get_child()
-        c.set_text(info)
-        fig.canvas.draw()
         update_plot()
-        if selected_direction is None:
-            # Print "done" only if there is no selection, as otherwise it will
-            # overwrite the direction state info text
-            info += '\n...done'
-            c = at.get_child()
-            c.set_text(info)
-            fig.canvas.draw()
         return
 
     elif event.key == 'c':
@@ -422,7 +411,7 @@ def on_press(event):
         if len(facet_images) == 0:
             info = 'No image of facet exists for {}'.format(selected_direction.name)
         else:
-            info = 'Load image from (choose one):'
+            info = 'Load facet image from (choose one):'
             for opindx, (img, fimg_op) in enumerate(zip(facet_images, facetimage_ops)):
                 info += '\n  ({0}) {1}'.format(opindx+1, fimg_op)
             choose_from_list = True
@@ -465,6 +454,7 @@ def on_press(event):
         choose_from_list = False
         info='Reprinting instructions'
         show_instructions()
+        return
 
     else:
         return
@@ -496,7 +486,14 @@ def display_image(image):
         else:
             # use pyds9 if available to re-use an existing ds9
             pyds9.ds9_xpans()
-            ds9=pyds9.DS9('checkfactor')
+            c = at.get_child()
+            info_last = c.get_text()
+            info = 'Opening image in ds9...'
+            c.set_text(info)
+            fig.canvas.draw()
+            ds9=pyds9.DS9('checkfactor', wait=120)
+            c.set_text(info_last)
+            fig.canvas.draw()
             ds9.set('file '+image)
             if options['ds9_limits'] is not None:
                 ds9.set('scale limits '+options['ds9_limits'])
@@ -521,6 +518,10 @@ def update_plot():
     c = at.get_child()
 
     # Update colors and text box
+    info_last = c.get_text()
+    info = 'Updating display...'
+    c.set_text(info)
+    fig.canvas.draw()
     for a in ax.patches:
         if hasattr(a, 'facet_name'):
             for d in all_directions:
@@ -528,11 +529,9 @@ def update_plot():
                     set_patch_color(a, d)
                     if selected_direction is not None:
                         if d.name == selected_direction.name:
-                            info = get_current_info(d)
-                            c.set_text(info)
                             set_highlight()
                     break
-
+    c.set_text(info_last)
     fig.canvas.draw()
 
 
@@ -737,10 +736,14 @@ def find_facet_images(direction):
     Returns the filenames and op names of full facet images
     """
     if direction.name == 'field':
-        mosaic_dir = os.path.join(direction.working_dir, 'results', 'fieldmosaic',
+        mosaic_dir = os.path.join(direction.working_dir, 'results', 'fieldmosaic*',
             direction.name)
-        facet_images = glob.glob(os.path.join(mosaic_dir, '*.correct_mosaic.pbcut.fits'))
-        return facet_images, ['fieldmosaic']
+        field_images = glob.glob(os.path.join(mosaic_dir, '*.correct_mosaic.pbcut.fits'))
+        fieldmosaic_ops = []
+        for field_image in field_images:
+            trimed_name = field_image.split('results/fieldmosaic')[1]
+            fieldmosaic_ops.append('fieldmosaic'+trimed_name.split('/')[0])
+        return field_images, fieldmosaic_ops
 
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
