@@ -513,10 +513,10 @@ def set_patch_color(a, d):
     a.completed_ops = get_completed_ops(d)
     a.started_ops = get_started_ops(d)
     a.current_op = get_current_op(d)
-    total_completed = len(a.completed_ops)-1
+    total_completed = max(0, len(a.completed_ops)-1)
     # treat facetselfcal and facetsub as one op for consistency with old code
     if total_completed==0:
-        total_completed=1 
+        total_completed=1
     completed_color=(0.66/total_completed**0.5,0.96/total_completed**0.5,0.66/total_completed**0.5,1.0)
     if a.current_op is not None:
         # Means this facet is currently processing
