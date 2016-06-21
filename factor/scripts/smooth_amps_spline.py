@@ -339,7 +339,7 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
     key_names = parms.keys()
     for key_name in key_names:
         # Check for NaNs. If found, set to 1
-        flagged_indx = np.where(np.isnan(parms[key_name]['values']))
+        flagged_indx = numpy.where(numpy.isnan(parms[key_name]['values']))
         parms[key_name]['values'][flagged_indx] = 1.0
 
     nchans = len(parms[key_names[0]]['freqs'])
