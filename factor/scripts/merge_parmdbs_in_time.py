@@ -77,6 +77,15 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
                 if inter_chunk_timewidth < parms[parmname]['timewidths'][-1]:
                     parms[parmname]['timewidths'][-1] = inter_chunk_timewidth
 
+                    # Adjust following chunk as well
+                    pdb_next = pdb.parmdb(inparmdbs[i+1])
+                    parms_next = pdb_next.getValuesGrid(parmname)
+                    parms_next[parmname]['timewidths'][0] = inter_chunk_timewidth
+                    pdb_next.deleteValues(parmname)
+                    pdb_next.addValues(parmname, parms_next)
+                    pdb_next.flush()
+                    pdb_next = False
+
             ValueHolder = pdb_concat.makeValue(values=parms[parmname]['values'],
                                                sfreq=parms[parmname]['freqs'],
                                                efreq=parms[parmname]['freqwidths'],
