@@ -44,10 +44,10 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
             parmname = pdb_in.getNames()[0]
             parms = pdb_in.getValuesGrid(parmname)
             start_times.append(parms[parmname]['times'][0])
-            start_times_dict[i].update({parmname: parms[parmname]['times'][0]})
+            start_times_dicts[i].update({parmname: parms[parmname]['times'][0]})
             pdb_in = False
     inparmdbs = np.array(inparmdbs)[np.argsort(start_times)].tolist()
-    start_times_dict = np.array(inparmdbs)[np.argsort(start_times)].tolist()
+    start_times_dicts = np.array(start_times_dicts)[np.argsort(start_times)].tolist()
     start_times.sort()
 
     if type(clobber) is str:
@@ -72,7 +72,7 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
             # Adjust last timewidth if necessary, as DPPP GainCal (as of 2.16.4) does not
             # truncate last solution timewidth to end of MS
             if i < len(inparmdbs) - 1:
-                inter_chunk_timewidth = start_times_dict[i+1][parmname] - parms[parmname]['times'][-1]
+                inter_chunk_timewidth = start_times_dicts[i+1][parmname] - parms[parmname]['times'][-1]
                 if inter_chunk_timewidth < parms[parmname]['timewidths'][-1]:
                     parms[parmname]['timewidths'][-1] = inter_chunk_timewidth
 
