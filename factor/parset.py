@@ -178,10 +178,11 @@ def get_global_options(parset):
     if 'facet_imager' in parset_dict:
         parset._sections['imaging']['facet_imager'] = parset_dict['facet_imager']
 
-    # Keep calibrated data for each facet to allow re-imaging by hand (default =
-    # True for averaged data and False for unaveraged data). If a target is
-    # specified (see below), the averaged data for the target is always kept,
-    # regardless of this setting
+    # Keep calibrated data for each facet (default = True for averaged data and
+    # False for unaveraged data). If a target is specified (see below), the averaged
+    # data for the target is always kept, regardless of this setting. If the
+    # averaged data are kept, reimaging will be dramatically faster if multiple
+    # images per facet are made
     if 'keep_avg_facet_data' in parset_dict:
         parset_dict['keep_avg_facet_data'] = parset.getboolean('global', 'keep_avg_facet_data')
     else:

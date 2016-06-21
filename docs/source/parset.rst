@@ -62,9 +62,11 @@ The available options are described below under their respective sections.
         internally derived DDE calibrators and facets.
 
     keep_avg_facet_data
-        Keep averaged calibrated data for each facet to allow re-imaging by hand (default =
-        ``True``). If a target is specified (see below), the averaged data for the target is always kept,
-        regardless of this setting.
+        Keep averaged calibrated data for each facet to allow re-imaging by hand
+        (default = ``True``). If a target is specified (see below), the averaged
+        data for the target is always kept, regardless of this setting. If the
+        averaged data are kept, reimaging will be dramatically faster if
+        multiple images per facet are made (e.g., at different scales)
 
     keep_unavg_facet_data
         Keep unaveraged calibrated data for each facet (default = ``False``).

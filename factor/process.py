@@ -242,13 +242,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     taper_arcsec, min_uv_lambda)
                 d.reset_state(op.name)
 
-            # Set the flag to save the phase-shifted, unaveraged,
-            # corrected data if there are more images to be made
-            if image_indx == 0:
-                parset['keep_image_data'] = True
-            else:
-                parset['keep_image_data'] = False
-
             # Do facet imaging
             ops = [FacetImage(parset, bands, d, cellsize_arcsec, robust,
                 taper_arcsec, min_uv_lambda) for d in dirs_to_image]

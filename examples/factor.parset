@@ -34,10 +34,11 @@ dir_ms = /data/bands
 # internally derived DDE calibrators and facets
 # interactive = False
 
-# Keep calibrated data for each facet to allow re-imaging by hand (default =
-# True for averaged data and False for unaveraged data). If a target is
-# specified (see below), the averaged data for the target is always kept,
-# regardless of this setting
+# Keep calibrated data for each facet (default = True for averaged data and
+# False for unaveraged data). If a target is specified (see below), the averaged
+# data for the target is always kept, regardless of this setting. If the
+# averaged data are kept, reimaging will be dramatically faster if multiple
+# images per facet are made (e.g., at different scales)
 # keep_avg_facet_data = True
 # keep_unavg_facet_data = False
 
