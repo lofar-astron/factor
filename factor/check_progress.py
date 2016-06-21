@@ -534,7 +534,7 @@ def update_plot():
 
     info = info_last
     if selected_direction is not None:
-        info_new = get_current_info(direction)
+        info_new = get_current_info(selected_direction)
         if 'Current op:' in info_last:
             # Replace last info with new info only if it was showing the
             # current state
