@@ -76,9 +76,10 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
 
             # Also adjust first time and timewidth if necessary
             if i > 0:
-                if parms[parmname]['times'][0] < prev_end_time:
-                    parms[parmname]['times'][0] += prev_end_time - parms[parmname]['times'][0]
-                    parms[parmname]['timewidths'][0] -= prev_end_time - parms[parmname]['times'][0]
+                overlap = prev_end_time - parms[parmname]['times'][0]
+                if overlap > 0.0:
+                    parms[parmname]['times'][0] += overlap
+                    parms[parmname]['timewidths'][0] -= overlap
             prev_end_time = end_time
             ValueHolder = pdb_concat.makeValue(values=parms[parmname]['values'],
                                                sfreq=parms[parmname]['freqs'],
