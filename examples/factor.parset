@@ -164,10 +164,11 @@ dir_ms = /data/bands
 # directions_file = /data/directions.txt
 
 # Full path to sky model (in makesourcedb format) to be used for calibrator
-# selection and facet-boundary source avoidance (default is to use
+# selection and facet-boundary source avoidance (default is to use re-grouped
 # direction-independent sky model of the highest-frequency band). The sky
-# model must be grouped into patches by source (in PyBDSM, this grouping can be
-# done by setting bbs_patches = 'source' in the write_catalog task)
+# model must be grouped into patches by source, it is not re-grouped like the 
+# direction-independent sky model would be. (In PyBDSM, this grouping can be
+# done by setting bbs_patches = 'source' in the write_catalog task.)
 # faceting_skymodel = full_band.skymodel
 
 # Radius from phase center within which to consider sources as potential
