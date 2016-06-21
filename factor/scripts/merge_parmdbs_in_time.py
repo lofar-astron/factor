@@ -41,10 +41,11 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
         start_times_dicts = [{} for i in range(len(inparmdbs))]
         for i, inparmdb in enumerate(inparmdbs):
             pdb_in = pdb.parmdb(inparmdb)
-            parmname = pdb_in.getNames()[0]
-            parms = pdb_in.getValuesGrid(parmname)
-            start_times.append(parms[parmname]['times'][0])
-            start_times_dicts[i].update({parmname: parms[parmname]['times'][0]})
+            for j, parmname in enumerate(pdb_in.getNames()):
+                parms = pdb_in.getValuesGrid(parmname)
+                if j == 0:
+                    start_times.append(parms[parmname]['times'][0])
+                start_times_dicts[i].update({parmname: parms[parmname]['times'][0]})
             pdb_in = False
     inparmdbs = np.array(inparmdbs)[np.argsort(start_times)].tolist()
     start_times_dicts = np.array(start_times_dicts)[np.argsort(start_times)].tolist()
