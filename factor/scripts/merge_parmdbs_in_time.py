@@ -72,11 +72,14 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
                 inter_chunk_timewidth = start_times[i+1] - parms[parmname]['times'][-1]
                 if inter_chunk_timewidth < parms[parmname]['timewidths'][-1]:
                     parms[parmname]['timewidths'][-1] = inter_chunk_timewidth
-            if i > 0:
-                inter_chunk_timewidth = parms[parmname]['times'][0] - start_times[i-1]
-                if inter_chunk_timewidth < parms[parmname]['timewidths'][0]:
-                    parms[parmname]['timewidths'][0] = inter_chunk_timewidth
+                end_time = parms[parmname]['times'][-1] + parms[parmname]['timewidths'][-1]
 
+            # Also adjust first time and timewidth if necessary
+            if i > 0:
+                if parms[parmname]['times'][0] < prev_end_time:
+                    parms[parmname]['times'][0] += prev_end_time - parms[parmname]['times'][0]
+                    parms[parmname]['timewidths'][0] -= prev_end_time - parms[parmname]['times'][0]
+            prev_end_time = end_time
             ValueHolder = pdb_concat.makeValue(values=parms[parmname]['values'],
                                                sfreq=parms[parmname]['freqs'],
                                                efreq=parms[parmname]['freqwidths'],
