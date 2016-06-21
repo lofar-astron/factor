@@ -531,7 +531,15 @@ def update_plot():
                         if d.name == selected_direction.name:
                             set_highlight()
                     break
-    c.set_text(info_last)
+
+    info = info_last
+    if selected_direction is not None:
+        info_new = get_current_info(direction)
+        if 'Current op:' in info_last:
+            # Replace last info with new info only if it was showing the
+            # current state
+            info = info_new
+    c.set_text(info)
     fig.canvas.draw()
 
 
