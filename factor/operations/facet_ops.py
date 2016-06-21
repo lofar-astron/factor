@@ -344,7 +344,7 @@ class FacetImage(Operation):
             self.direction.use_existing_data = self.check_existing_files(self.direction.image_data_mapfile)
             if (self.direction.use_existing_data and
                 'facetselfcal' in self.direction.image_data_mapfile and
-                self.parset['reimage_selfcal']):
+                self.parset['imaging_specific']['reimage_selfcaled']):
                 # Old data exist but are from facetselfcal. Since reimage_selfcal is True,
                 # we will not use these data but generate new updated ones
                 self.direction.use_existing_data = False
@@ -411,7 +411,7 @@ class FacetImage(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_input.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'image1.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'sorted_groups.mapfile_groups')]
-        if (not self.parset['keep_avg_facet_data'] and self.direction.name != 'target']):
+        if (not self.parset['keep_avg_facet_data'] and self.direction.name != 'target'):
             # Add averaged calibrated data for the facet to files to be deleted.
             # These are only needed if the user wants to reimage by hand (e.g.,
             # with a different weighting) or for subsequent imaging runs. They
