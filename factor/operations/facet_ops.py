@@ -346,7 +346,7 @@ class FacetImage(Operation):
                 'facetselfcal' in self.direction.image_data_mapfile and
                 self.parset['imaging_specific']['reimage_selfcaled']):
                 # Old data exist but are from facetselfcal. Since reimage_selfcal is True,
-                # we will not use these data but generate new updated ones
+                # we will not use these data but instead generate new updated ones
                 self.direction.use_existing_data = False
 
                 # Store mapfile for old data from selfcal for later clean up
@@ -399,9 +399,9 @@ class FacetImage(Operation):
         self.direction.facet_premask_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'premask.mapfile')
 
-        # Store the shift_empty mapfile for use by other imaging runs. We do not
+        # Store the image_data_mapfile for use by other imaging runs. We do not
         # update this if use_existing_data is True, as in this case it should
-        # point to the mapfile from the first imaging run for this direction
+        # point to the mapfile of the existing data for this direction
         if not self.direction.use_existing_data:
             self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
                 'concat_averaged_compressed_map.mapfile')
@@ -421,11 +421,8 @@ class FacetImage(Operation):
         if not self.direction.use_existing_data and hasattr(self.direction, 'image_data_mapfile_selfcal'):
             # Add old data from selfcal to files to be deleted, as we have made new improved versions
             self.direction.cleanup_mapfiles.append(self.direction.image_data_mapfile_selfcal)
-        if (not self.parset['keep_unavg_facet_data'] and not self.parset['keep_image_data']):
-            # Add unaveraged calibrated data for the facet to files to be deleted.
-            # These are only needed if the user wants to phase shift them to
-            # another direction (e.g., to combine several facets together before
-            # imaging them all at once) or for subsequent imaging runs
+        if not self.parset['keep_unavg_facet_data']:
+            # Add unaveraged calibrated data for the facet to files to be deleted
             self.direction.cleanup_mapfiles.append(
                 os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'))
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
@@ -498,10 +495,7 @@ class FacetPeelImage(Operation):
             self.direction.cleanup_mapfiles.append(
                 os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_compressed.mapfile'))
         if not self.parset['keep_unavg_facet_data']:
-            # Add unaveraged calibrated data for the facet to files to be deleted.
-            # These are only needed if the user wants to phase shift them to
-            # another direction (e.g., to combine several facets together before
-            # imaging them all at once)
+            # Add unaveraged calibrated data for the facet to files to be deleted
             self.direction.cleanup_mapfiles.append(
                 os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'))
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
