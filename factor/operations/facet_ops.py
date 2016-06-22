@@ -148,7 +148,7 @@ class FacetSelfcal(Operation):
         self.direction.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'verify_subtract.break.mapfile')
         self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'concat_averaged_compressed_map.mapfile')
+            'concat_averaged_compressed.mapfile')
 
 
         # Store results of verify_subtract check. This will work if the verification
@@ -404,7 +404,7 @@ class FacetImage(Operation):
         # point to the mapfile of the existing data for this direction
         if not self.direction.use_existing_data:
             self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
-                'concat_averaged_compressed_map.mapfile')
+                'concat_averaged_compressed.mapfile')
 
         # Delete temp data
         self.direction.cleanup_mapfiles = [
