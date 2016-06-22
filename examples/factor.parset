@@ -133,7 +133,7 @@ dir_ms = /data/bands
 # greater than 1 (e.g., wsclean_nchannels_factor must be 1 to be an even divisor
 # of 29 bands, so activating this option would add 1 band of flagged data to
 # produce 30 bands, which will work with wsclean_nchannels_factor = 3, 5, or 6)
-# wsclean_band_padding = True
+# wsclean_add_bands = True
 
 # Selfcal imaging parameters: pixel size in arcsec (default = 1.5), Briggs
 # robust parameter (default = -0.25 for casa and -0.5 for wsclean), minimum uv
