@@ -125,7 +125,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         direction_group_reset = [d for d in direction_group if d.do_reset]
         direction_group_reset_facetsub = [d for d in direction_group_reset if
             'facetsub' in d.completed_operations]
-        if len(direction_group_reset_facetsub) > 0:
+        if len(direction_group_reset_facetsub) > 0 and
+            ('facetselfcal' in reset_operations or
+            'facetsub' in reset_operations or
+            'facetsubreset' in reset_operations):
             for d in direction_group_reset_facetsub:
                 if ('facetsubreset' in d.completed_operations or
                     'facetsubreset' in reset_operations):
