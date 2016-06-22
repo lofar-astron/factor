@@ -417,7 +417,8 @@ class FacetImage(Operation):
         # Delete temp data
         self.direction.cleanup_mapfiles = [
             os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_input.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'image1.mapfile')]
+            os.path.join(self.pipeline_mapfile_dir, 'image1.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'corrupt_final_model.mapfile')]
         if not self.parset['keep_avg_facet_data'] and self.direction.name != 'target':
             # Add averaged calibrated data for the facet to files to be deleted.
             # These are only needed if the user wants to reimage by hand (e.g.,
