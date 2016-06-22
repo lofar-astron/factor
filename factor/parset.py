@@ -451,10 +451,10 @@ def get_imaging_options(parset):
     # greater than 1 (e.g., wsclean_nchannels_factor must be 1 to be an even divisor
     # of 29 bands, so activating this option would add 1 band of flagged data to
     # produce 30 bands, which will work with wsclean_nchannels_factor = 3, 5, or 6)
-    if 'wsclean_allow_padding' in parset_dict:
-        parset_dict['wsclean_allow_padding'] = parset.getboolean('imaging', 'wsclean_allow_padding')
+    if 'wsclean_add_bands' in parset_dict:
+        parset_dict['wsclean_add_bands'] = parset.getboolean('imaging', 'wsclean_add_bands')
     else:
-        parset_dict['wsclean_allow_padding'] = True
+        parset_dict['wsclean_add_bands'] = True
 
     # Use WSClean or CASA for imaging of entire facet (default = wsclean). For large
     # bandwidths, the CASA imager is typically faster
@@ -577,7 +577,7 @@ def get_imaging_options(parset):
         'selfcal_robust_wsclean', 'selfcal_clean_threshold', 'selfcal_adaptive_threshold',
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
         'reimage_selfcaled', 'wsclean_image_padding', 'wsclean_model_padding',
-        'selfcal_min_uv_lambda', 'facet_min_uv_lambda', 'wsclean_allow_padding',
+        'selfcal_min_uv_lambda', 'facet_min_uv_lambda', 'wsclean_add_bands',
         'selfcal_robust_wsclean']
     for option in given_options:
         if option not in allowed_options:

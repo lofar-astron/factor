@@ -255,7 +255,7 @@ class Direction(object):
             self.wsclean_nchannels = max(1, nbands / wsclean_nchannels_factor)
             nchan_after_avg = nchan * nbands / self.facetimage_freqstep
             self.nband_pad = 0 # padding to allow self.wsclean_nchannels to be a divisor
-            if parset['imaging_specific']['wsclean_allow_padding']:
+            if parset['imaging_specific']['wsclean_add_bands']:
                 while nchan_after_avg % self.wsclean_nchannels:
                     self.nband_pad += 1
                     nchan_after_avg = nchan * (nbands + self.nband_pad) / self.facetimage_freqstep
