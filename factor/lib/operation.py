@@ -86,7 +86,7 @@ class Operation(object):
             self.local_scratch_dir = self.parset['cluster_specific']['dir_local']
             self.dppp_nodescript = 'dppp_scratch'
         else:
-            # other: use given scratch directory an standard nodescrit
+            # other: use given scratch directory an standard nodescript
             self.local_scratch_dir = self.parset['cluster_specific']['dir_local']
             self.dppp_nodescript = 'executable_args'
 
