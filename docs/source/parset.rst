@@ -374,16 +374,11 @@ The available options are described below under their respective sections.
         Maximum fraction of the total memory per node that WSClean may use (default = 0.9).
 
     ndir_per_node
-        Number of directions to process in parallel on each node (default = 1). If
-        directions are split into groups to be processed in parallel (with the
-        groupings parameter), this parameter controls how many directions are run
-        simultaneously on a single node. Note that the number of CPUs (set with the
-        ncpu parameter) will be divided among the directions on each node.
-
-    nimg_per_node
-        Number of imager jobs to run per node (affects facetimage
-        operations; default = 1). If your nodes have many CPUs and > 32 GB of memory,
-        it may be advantageous to set this to 2 or more.
+        Maximum umber of directions to process in parallel on each node (default
+        = 1). Note that the number of CPUs (set with the
+        :term:`ncpu` parameter) and the amount of memory available to WSClean
+        :(set with the term:`wsclean_fmem` parameter) will be divided among the
+        :directions on each node.
 
 
 .. _parset_checkfactor_options:

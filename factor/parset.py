@@ -874,11 +874,10 @@ def get_cluster_options(parset):
         parset_dict['wsclean_fmem'] = 0.9
     log.info("Using up to {0}% of the memory per node for WSClean jobs".format(parset_dict['wsclean_fmem']*100.0))
 
-    # Number of directions to process in parallel on each node (default = 1). If
-    # directions are split into groups to be processed in parallel (with the
-    # groupings parameter), this parameter controls how many directions are run
-    # simultaneously on a single node. Note that the number of CPUs (set with the
-    # ncpu parameter) will be divided among the directions on each node
+    # Maximum number of directions to process in parallel on each node (default =
+    # 1). Note that the number of CPUs (set with the ncpu parameter) and the amount
+    # of memory available to WSClean (set with the wsclean_fmem parameter) will be
+    # divided among the directions on each node
     if 'ndir_per_node' in parset_dict:
         parset_dict['ndir_per_node'] = parset.getint('cluster',
             'ndir_per_node')
@@ -886,15 +885,6 @@ def get_cluster_options(parset):
         parset_dict['ndir_per_node'] = 1
     log.info("Processing up to %s direction(s) in parallel per node" %
         (parset_dict['ndir_per_node']))
-
-    # Number of imager jobs to run per node (affects initsubtract and facetimage
-    # operationa; default = 1). If your nodes have many CPUs and > 32 GB of memory,
-    # it may be advantageous to set this to 2 or more
-    if 'nimg_per_node' in parset_dict:
-        parset_dict['nimg_per_node'] = parset.getint('cluster',
-            'nimg_per_node')
-    else:
-        parset_dict['nimg_per_node'] = 1
 
     # Full path to cluster description file. Use clusterdesc_file = PBS to use the
     # PBS / torque reserved nodes. If not given, the clusterdesc file for a single
@@ -917,7 +907,7 @@ def get_cluster_options(parset):
 
     # Check for unused options
     allowed_options = ['ncpu', 'fmem', 'wsclean_fmem', 'ndir_per_node',
-        'nimg_per_node', 'clusterdesc_file', 'cluster_type', 'dir_local',
+        'clusterdesc_file', 'cluster_type', 'dir_local',
         'node_list', 'lofarroot', 'lofarpythonpath']
     for option in given_options:
         if option not in allowed_options:

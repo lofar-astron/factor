@@ -176,7 +176,7 @@ dir_ms = /data/bands
 # Full path to sky model (in makesourcedb format) to be used for calibrator
 # selection and facet-boundary source avoidance (default is to use re-grouped
 # direction-independent sky model of the highest-frequency band). The sky
-# model must be grouped into patches by source, it is not re-grouped like the 
+# model must be grouped into patches by source, it is not re-grouped like the
 # direction-independent sky model would be. (In PyBDSM, this grouping can be
 # done by setting bbs_patches = 'source' in the write_catalog task.)
 # faceting_skymodel = full_band.skymodel
@@ -276,17 +276,11 @@ flux_min_Jy = 0.3
 # 0.9)
 # wsclean_fmem = 0.9
 
-# Number of directions to process in parallel on each node (default = 1). If
-# directions are split into groups to be processed in parallel (with the
-# groupings parameter), this parameter controls how many directions are run
-# simultaneously on a single node. Note that the number of CPUs (set with the
-# ncpu parameter) will be divided among the directions on each node
+# Maximum number of directions to process in parallel on each node (default =
+# 1). Note that the number of CPUs (set with the ncpu parameter) and the amount
+# of memory available to WSClean (set with the wsclean_fmem parameter) will be
+# divided among the directions on each node
 # ndir_per_node = 1
-
-# Number of imager jobs to run per node (affects facetimage operation; default =
-# 1). If your nodes have many CPUs and > 32 GB of memory, it may be advantageous
-# to set this to 2 or more
-# nimg_per_node = 1
 
 
 [ms1.ms]

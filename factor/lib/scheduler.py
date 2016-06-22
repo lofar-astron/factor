@@ -122,8 +122,7 @@ class Scheduler(object):
         node_list = self.operation_list[0].node_list
         ncpu_max = self.operation_list[0].parset['cluster_specific']['ncpu']
         fmem_max = self.operation_list[0].parset['cluster_specific']['wsclean_fmem']
-        nops_per_node = max(self.operation_list[0].parset['cluster_specific']['ndir_per_node'],
-            self.operation_list[0].parset['cluster_specific']['nimg_per_node'])
+        nops_per_node = self.operation_list[0].parset['cluster_specific']['ndir_per_node']
         nbands = len(self.operation_list[0].bands)
         nops_simul = self.max_procs
 
