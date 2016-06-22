@@ -213,13 +213,18 @@ class Scheduler(object):
         if type(operation_list) != list:
             operation_list = [operation_list]
 
-        # Finalize completed ops (so that various attributes are set correctly)
-        for op in [op for op in operation_list if op.check_completed()]:
+        # Finalize completed ops (so that various attributes are set correctly).
+        # The incomplete ops are finalized when complete in self.result_callback()
+        if self.dry_run:
+            completed_ops = operation_list
+        else:
+            completed_ops = [op for op in operation_list if op.check_completed()]
+        for op in completed_ops:
             op.finalize()
 
         # Filter out completed ops
         self.operation_list = [op for op in operation_list if not op.check_completed()]
-        if len(self.operation_list) == 0:
+        if len(self.operation_list) == 0 or self.dry_run:
             return
 
         # Run the operation(s)
@@ -228,22 +233,13 @@ class Scheduler(object):
             pool = multiprocessing.Pool(processes=self.max_procs)
             self.queued_ops = self.operation_list[self.max_procs:]
             for op in self.operation_list:
-                if not self.dry_run:
-                    # Only run incomplete operations (and only if this is
-                    # not a dry run)
-                    op.setup()
-                    op.set_started()
-                    pool.apply_async(call_generic_pipeline, (op.name,
-                        op.direction.name, op.pipeline_parset_file,
-                        op.pipeline_config_file, op.logbasename,
-                        self.genericpipeline_executable),
-                        callback=self.result_callback)
-                else:
-                    # For completed operations or dry runs, run finalize() to
-                    # be sure that all attributes are set properly
-                    op.finalize()
-                    if not self.dry_run:
-                        op.set_completed()
+                op.setup()
+                op.set_started()
+                pool.apply_async(call_generic_pipeline, (op.name,
+                    op.direction.name, op.pipeline_parset_file,
+                    op.pipeline_config_file, op.logbasename,
+                    self.genericpipeline_executable),
+                    callback=self.result_callback)
             pool.close()
             pool.join()
 
