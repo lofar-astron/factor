@@ -331,6 +331,13 @@ class FacetImage(Operation):
         super(FacetImage, self).__init__(parset, bands, direction,
             name=name)
 
+        # Set flag for full-resolution run (used in finalize() to ensure that averaging
+        # of the calibrated data is not too much for use by later imaging runs)
+        if cellsize_arcsec == parset['imaging_specific']['selfcal_cellsize_arcsec']:
+            self.full_res = True
+        else:
+            self.full_res = False
+
         # Set imager infix for pipeline parset names
         if self.parset['imaging_specific']['facet_imager'].lower() == 'casa':
             infix = '_casa'
@@ -400,8 +407,10 @@ class FacetImage(Operation):
 
         # Store the image_data_mapfile for use by other imaging runs. We do not
         # update this if use_existing_data is True, as in this case it should
-        # point to the mapfile of the existing data for this direction
-        if not self.direction.use_existing_data:
+        # point to the mapfile of the existing data for this direction. Also, we
+        # set this only if this is a full-res imaging run, to ensure that the
+        # averaging is not too much for use by later imaging runs
+        if not self.direction.use_existing_data and self.full_res:
             self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
                 'concat_averaged_compressed.mapfile')
 
