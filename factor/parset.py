@@ -555,6 +555,11 @@ def get_imaging_options(parset):
     if 'facet_taper_arcsec' not in parset_dict:
         parset_dict['facet_taper_arcsec'] = [0.0] * nvals
     if 'facet_robust' not in parset_dict:
+        if parset_dict['facet_imager'] == 'wsclean':
+            selfcal_robust = parset_dict['selfcal_robust_wsclean']
+        else:
+            selfcal_robust = parset_dict['selfcal_robust']
+
         parset_dict['facet_robust'] = [parset_dict['selfcal_robust']] * nvals
     if 'facet_min_uv_lambda' not in parset_dict:
         parset_dict['facet_min_uv_lambda'] = [parset_dict['selfcal_min_uv_lambda']] * nvals

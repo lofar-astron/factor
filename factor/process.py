@@ -223,9 +223,12 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             dirs_to_image = dirs_without_selfcal[:]
 
             # Only reimage facets with selfcal imaging parameters if reimage_selfcal flag is set
+            if parset['imaging_specific']['facet_imager'] == 'wsclean':
+                selfcal_robust = parset['imaging_specific']['selfcal_robust_wsclean']
+            else:
+                selfcal_robust = parset['imaging_specific']['selfcal_robust']
             if (cellsize_arcsec == parset['imaging_specific']['selfcal_cellsize_arcsec'] and
-                robust == parset['imaging_specific']['selfcal_robust'] and
-                taper_arcsec == 0.0):
+                robust == selfcal_robust and taper_arcsec == 0.0):
                 if parset['imaging_specific']['reimage_selfcaled']:
                     dirs_to_image += dirs_with_selfcal_to_reimage
             else:

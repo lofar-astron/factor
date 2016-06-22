@@ -320,9 +320,12 @@ class FacetImage(Operation):
         # Set name from the facet imaging parameters. If the parameters are all
         # the same as those used for selfcal, just use 'FacetImage'; otherwise,
         # append the parameters
+        if parset['imaging_specific']['facet_imager'] == 'wsclean':
+            selfcal_robust = parset['imaging_specific']['selfcal_robust_wsclean']
+        else:
+            selfcal_robust = parset['imaging_specific']['selfcal_robust']
         if (cellsize_arcsec != parset['imaging_specific']['selfcal_cellsize_arcsec'] or
-            robust != parset['imaging_specific']['selfcal_robust'] or
-            taper_arcsec != 0.0 or
+            robust != selfcal_robust or taper_arcsec != 0.0 or
             min_uv_lambda != parset['imaging_specific']['selfcal_min_uv_lambda']):
             name = 'FacetImage_c{0}r{1}t{2}u{3}'.format(round(cellsize_arcsec, 1),
                     round(robust, 2), round(taper_arcsec, 1), round(min_uv_lambda, 1))
