@@ -52,7 +52,11 @@ premask.argument.cellsize_deg                     =   {{ cellsize_facet_deg }}
 
 # image the virtual concatenated data, length = 1
 casa_image_full1.control.type                     =   casa_clean
+{% if average_image_data %}
+casa_image_full1.control.mapfiles_in              =   [average_image_data.output.mapfile,premask.output.mapfile]
+{% else %}
 casa_image_full1.control.mapfiles_in              =   [virtual_concat_averaged.output.mapfile,premask.output.mapfile]
+{% endif %}
 casa_image_full1.control.inputkeys                =   [clean.vis,clean.mask]
 casa_image_full1.control.outputkey                =   clean.imagename
 casa_image_full1.control.arguments                =   [--nologger,--nogui,-c]
@@ -120,7 +124,11 @@ mask.argument.threshold_format                    =   str_with_units
 
 # image the virtual concatenated data with the updated mask, length = 1
 casa_image_full2.control.type                     =   casa_clean
+{% if average_image_data %}
+casa_image_full2.control.mapfiles_in              =   [average_image_data.output.mapfile,mask.output.mapfile,mask.output.threshold_5sig.mapfile]
+{% else %}
 casa_image_full2.control.mapfiles_in              =   [virtual_concat_averaged.output.mapfile,mask.output.mapfile,mask.output.threshold_5sig.mapfile]
+{% endif %}
 casa_image_full2.control.inputkeys                =   [clean.vis,clean.mask,clean.threshold]
 casa_image_full2.control.outputkey                =   clean.imagename
 casa_image_full2.control.arguments                =   [--nologger,--nogui,-c]

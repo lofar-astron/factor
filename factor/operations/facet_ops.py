@@ -150,6 +150,11 @@ class FacetSelfcal(Operation):
         self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'concat_averaged_compressed.mapfile')
 
+        # We also need to save the averaging steps for the image_data, so that for
+        # any subsequent imaging runs that use these data, we can determine
+        # new averaging steps that will give the correct cumulative averaging
+        self.direction.full_res_facetimage_freqstep = self.direction.facetimage_freqstep
+        self.direction.full_res_facetimage_timestep = self.direction.facetimage_timestep
 
         # Store results of verify_subtract check. This will work if the verification
         # was done using multiple bands although we use only one at the moment
@@ -381,7 +386,14 @@ class FacetImage(Operation):
 
         # Define extra parameters needed for this operation
         self.direction.set_imcal_parameters(parset, bands, cellsize_arcsec, robust,
-            taper_arcsec, min_uv_lambda, imaging_only=True)
+            taper_arcsec, min_uv_lambda, imaging_only=True,
+            use_existing_data=self.direction.use_existing_data,
+            existing_data_freqstep=self.direction.full_res_facetimage_freqstep,
+            existing_data_timestep=self.direction.full_res_facetimage_timestep)
+        if use_existing_data:
+            # Set flag that determines whether additional averaging is to be done
+            if (self.direction.facetimage_freqstep != 1 or self.direction.facetimage_timestep != 1):
+                self.direction.average_image_data = True
         ms_files = [band.files for band in self.bands]
         ms_files_single = []
         for bandfiles in ms_files:
@@ -416,6 +428,12 @@ class FacetImage(Operation):
         if not self.direction.use_existing_data and self.full_res:
             self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
                 'concat_averaged_compressed.mapfile')
+
+            # We also need to save the averaging steps for these data, so that
+            # for the next imaging run, we can determine new averaging steps
+            # that will give the correct cumulative averaging
+            self.direction.full_res_facetimage_freqstep = self.direction.facetimage_freqstep
+            self.direction.full_res_facetimage_timestep = self.direction.facetimage_timestep
 
         # Delete temp data
         self.direction.cleanup_mapfiles = [

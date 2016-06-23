@@ -132,6 +132,9 @@ class Direction(object):
         self.timeSlotsPerParmUpdate = 100
         self.skymodel = None
         self.use_existing_data = False
+        self.existing_data_freqstep = None
+        self.existing_data_timestep = None
+        self.average_image_data = False
 
         # Define some directories and files
         self.working_dir = factor_working_dir
@@ -171,7 +174,8 @@ class Direction(object):
 
     def set_imcal_parameters(self, parset, bands, facet_cellsize_arcsec=None,
         facet_robust=None, facet_taper_arcsec=None, facet_min_uv_lambda=None,
-        imaging_only=False):
+        imaging_only=False, use_existing_data=False, existing_data_freqstep=None,
+        existing_data_timestep=None):
         """
         Sets various parameters for imaging and calibration
 
@@ -189,6 +193,13 @@ class Direction(object):
             Taper in arcsec for facet imaging
         imaging_only : bool, optional
             If True, set only imaging-related parameters
+        use_existing_data : bool, optional
+            If True, existing, potentially averaged, data are to be used instead
+            of the unaveraged data
+        existing_data_freqstep : int, optional
+            The freqstep used to average the existing data
+        existing_data_timestep : int, optional
+            The timestep used to average the existing data
 
         """
         mean_freq_mhz = np.mean([b.freq for b in bands]) / 1e6
@@ -204,6 +215,14 @@ class Direction(object):
         nchan = bands[0].nchan
         timestep_sec = bands[0].timepersample
         ntimes = bands[0].minSamplesPerFile
+        if (use_existing_data and existing_data_freqstep is not None and
+            existing_data_timestep is not None):
+            # Adjust the above values to match the existing data if necessary
+            chan_width_hz *= existing_data_freqstep
+            nchan /= existing_data_freqstep
+            timestep_sec *= existing_data_timestep
+            ntimes /= existing_data_timestep
+
         nbands = len(bands)
         preaverage_flux_jy = parset['calibration_specific']['preaverage_flux_jy']
         tec_block_mhz = parset['calibration_specific']['tec_block_mhz']
