@@ -390,7 +390,7 @@ class FacetImage(Operation):
             use_existing_data=self.direction.use_existing_data,
             existing_data_freqstep=self.direction.full_res_facetimage_freqstep,
             existing_data_timestep=self.direction.full_res_facetimage_timestep)
-        if use_existing_data:
+        if self.direction.use_existing_data:
             # Set flag that determines whether additional averaging is to be done
             if (self.direction.facetimage_freqstep != 1 or self.direction.facetimage_timestep != 1):
                 self.direction.average_image_data = True
