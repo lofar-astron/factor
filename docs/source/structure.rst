@@ -7,7 +7,7 @@ Factor effectively sets up and runs generic pipelines that perform the actual pr
 
 .. _factor-flowchart:
 
-.. figure:: factor_flow.pdf
+.. figure:: factor_flow.png
    :figwidth: 90 %
    :align: center
 
