@@ -171,7 +171,7 @@ The available options are described below under their respective sections.
 
     wsclean_add_bands
         Allow flagged data to be added during WSClean imaging to allow
-        :term:`wsclean_nchannels_factor` to be a divisor of the number bands (default = ``True`).
+        :term:`wsclean_nchannels_factor` to be a divisor of the number bands (default = ``True``).
         Enabling this option can dramatically speed up imaging with WSClean when the
         number of bands before padding does not allow :term:`wsclean_nchannels_factor` to be
         greater than 1 (e.g., :term:`wsclean_nchannels_factor` must be 1 to be an even divisor
