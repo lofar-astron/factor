@@ -36,6 +36,8 @@ def call_generic_pipeline(op_name, direction_name, parset, config, logbasename,
     """
     from lofarpipe.support.pipelinelogging import getSearchingLogger
     from factor.lib.context import RedirectStdStreams
+    import time
+
     genericpipeline_path = os.path.dirname(genericpipeline_executable)
     loader = imp.load_source('loader', os.path.join(genericpipeline_path,
         'loader.py'))
@@ -58,6 +60,7 @@ def call_generic_pipeline(op_name, direction_name, parset, config, logbasename,
         handler.setLevel(logging.DEBUG)
 
     # Run the pipeline, redirecting screen output to log files
+    time.sleep(2.0) # pause to allow result_callback() to transfer resources
     log.info('<-- Operation {0} started (direction: {1})'.format(op_name,
         direction_name))
     with open("{0}.out.log".format(logbasename), "wb") as out, \
