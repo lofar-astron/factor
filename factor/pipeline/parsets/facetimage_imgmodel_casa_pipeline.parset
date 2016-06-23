@@ -31,14 +31,14 @@ casa_ft4.control.arguments                        =   [--nologger,--nogui,-c,{{ 
 {% block full_image_parms %}
 # make a virtual concatenated map, length = 1
 virtual_concat_averaged.control.type              =   virtual_concat
-virtual_concat_averaged.control.mapfile_in        =   concat_averaged_compressed_map.output.mapfile
+virtual_concat_averaged.control.mapfile_in        =   {{ image_data_mapfile }}
 virtual_concat_averaged.control.inputkey          =   msfiles
 virtual_concat_averaged.control.outputkey         =   msconcat
 virtual_concat_averaged.argument.flags            =   [msfiles,msconcat]
 
 # Make a preliminary clean mask from the facet region, length = 1
 premask.control.type                              =   make_clean_mask
-premask.control.mapfile_in                        =   concat_averaged_compressed_map.output.mapfile
+premask.control.mapfile_in                        =   {{ image_data_mapfile }}
 premask.control.inputkey                          =   imagefile
 premask.control.outputkey                         =   maskfile
 premask.argument.flags                            =   [imagefile,maskfile]

@@ -12,7 +12,7 @@ virtual_concat.argument.flags                     =   [msfiles,msconcat]
 
 # Make a preliminary clean mask from the facet region, length = 1
 premask.control.type                              =   make_clean_mask
-premask.control.mapfile_in                        =   concat_averaged_compressed_map.output.mapfile
+premask.control.mapfile_in                        =   {{ image_data_mapfile }}
 premask.control.inputkey                          =   imagefile
 premask.control.outputkey                         =   maskfile
 premask.argument.flags                            =   [imagefile,maskfile]

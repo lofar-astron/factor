@@ -238,7 +238,7 @@ premask.argument.cellsize_deg                           =   {{ cellsize_facet_de
 
 # do the first round of imaging, length = 1
 wsclean_image_full1.control.type                      =   wsclean
-wsclean_image_full1.control.mapfiles_in               =   [concat_averaged_compressed_map.output.mapfile,premask.output.mapfile]
+wsclean_image_full1.control.mapfiles_in               =   [{{ image_data_mapfile }},premask.output.mapfile]
 wsclean_image_full1.control.inputkeys                 =   [msfile,fitsmask]
 wsclean_image_full1.argument.flags                    =   [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
 wsclean_image_full1.argument.fitsmask                 =   fitsmask
@@ -295,7 +295,7 @@ mask.argument.vertices_file                           =   {{ vertices_file }}
 
 # second round of imaging with the mask, length = 1
 wsclean_image_full2.control.type                      =   wsclean
-wsclean_image_full2.control.mapfiles_in               =   [concat_averaged_compressed_map.output.mapfile,mask.output.mapfile,mask.output.threshold_5sig.mapfile]
+wsclean_image_full2.control.mapfiles_in               =   [{{ image_data_mapfile }},mask.output.mapfile,mask.output.threshold_5sig.mapfile]
 wsclean_image_full2.control.inputkeys                 =   [msfile,fitsmask,threshold]
 wsclean_image_full2.argument.flags                    =   [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
 wsclean_image_full2.argument.fitsmask                 =   fitsmask
