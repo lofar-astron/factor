@@ -15,7 +15,7 @@ from multiprocessing import Pool
 from scipy.special import binom
 #for uniformity search
 import itertools
-import time 
+import time
 
 
 
@@ -128,24 +128,34 @@ def directions_read(directions_file, factor_working_dir):
 
 
 def chooseGroupSize(K,ncpu=1,timeFactor=32*11.7/3.17e6,maxTime=None,minGroupSize=5,plot=False):
-    '''The sum of uniformly distributed ensembles should be uniform, so choose groupSizes to search within maxTime.
-        Chooses the partitioning of combinatorial space to search for uniform calibrators
-        in terms of a groupSize <= K and a searchDepth. I.e. we search for groupSize uniformly distributed calibrators from the first groupSize+searchDepth flux sorted calibrators
-        The number of operations scales as : (groupSize + searchDepth) Choose (groupSize) = (groupSize + searchDepth)! / (searchDepth! * groupSize!)
-        Assumuption is that if we sort the calibrators by flux then uniformly selecting the first groupSize calibrators is more valuable than
-        waiting for a complete search that includes the weaker calibrators. We then iteratively choose chunks of remaining flux sorted calibrators.
-        
-        K : int
-            Number of calibrators that will need to be selected.
-        ncpu : int, optional
-            Number of threads that can be run.
-        timeFactor : float, optional
-            Convert complexity to time (I calibrated on Leiden Paracluster)
-        Calibrated for big enough groupSize0,searchDepth0 as Ncpu*time(groupSize0,searchDepth0)[seconds]/computations(groupSize0,searchDepth0)
-        maxTime : float, optional
-            Max time in minutes to let it run approximately
-        minGroupSize : int, optional
-            Have at least this many per searchGroup
+    '''
+    The sum of uniformly distributed ensembles should be uniform, so choose
+    groupSizes to search within maxTime. Chooses the partitioning of
+    combinatorial space to search for uniform calibrators in terms of a
+    groupSize <= K and a searchDepth. I.e. we search for groupSize uniformly
+    distributed calibrators from the first groupSize+searchDepth flux sorted
+    calibrators The number of operations scales as : (groupSize + searchDepth)
+    Choose (groupSize) = (groupSize + searchDepth)! / (searchDepth! *
+    groupSize!) Assumuption is that if we sort the calibrators by flux then
+    uniformly selecting the first groupSize calibrators is more valuable than
+    waiting for a complete search that includes the weaker calibrators. We then
+    iteratively choose chunks of remaining flux sorted calibrators.
+
+    Parameters
+    ----------
+    K : int
+        Number of calibrators that will need to be selected.
+    ncpu : int, optional
+        Number of threads that can be run.
+    timeFactor : float, optional
+        Convert complexity to time (I calibrated on Leiden Paracluster)
+        Calibrated for big enough groupSize0,searchDepth0 as
+        Ncpu*time(groupSize0,searchDepth0)[seconds]/computations(groupSize0,
+        searchDepth0)
+    maxTime : float, optional
+        Max time in minutes to let it run approximately
+    minGroupSize : int, optional
+        Have at least this many per searchGroup
     '''
     groupSize = minGroupSize
     if maxTime is None:
@@ -164,7 +174,7 @@ def chooseGroupSize(K,ncpu=1,timeFactor=32*11.7/3.17e6,maxTime=None,minGroupSize
                 G.append(groupSize)
                 N.append(n)
         groupSize += 1
-    
+
     if len(G) == 0:#try lower constraint
         resG,resN = chooseGroupSize(K,ncpu=ncpu,timeFactor=timeFactor,maxTime=maxTime,minGroupSize=minGroupSize - 1)
         return resG,resN
@@ -177,8 +187,9 @@ def chooseGroupSize(K,ncpu=1,timeFactor=32*11.7/3.17e6,maxTime=None,minGroupSize
     return resG,resN
 
 def NU(arg):
-    '''L2 non-uniformity of the spacings between the calibrators. 
-        arg is a nest tuple for multiprocessing. This could be sped up definitely by precomputing spacings, 
+    '''
+    L2 non-uniformity of the spacings between the calibrators.
+    arg is a nest tuple for multiprocessing. This could be sped up definitely by precomputing spacings,
     essentially getting rid of the nest while loops. Ask Joshua Albert
     '''
     cals = arg[0]#idicies of calibrators to calculate over
@@ -259,15 +270,15 @@ def make_directions_file_from_skymodel_uniform(s, flux_min_Jy, size_max_arcmin,
     ncpu : int, optional
         Maximum number of threads to run uniformity optimization on
     maxTime : float, optional
-        Maximum time in minutes to allow uniformity search, determines the 
+        Maximum time in minutes to allow uniformity search, determines the
         combinatorial depth. None -> up to infinite time and exact solution
     groupSize : int, optional
-        size of iterative groups to search for to locate directions_max_num 
-        final calibrators. Should be less than directions_max_num and greater 
-        than ~15. The remainder of directions_max_num/groupSize should be large 
+        size of iterative groups to search for to locate directions_max_num
+        final calibrators. Should be less than directions_max_num and greater
+        than ~15. The remainder of directions_max_num/groupSize should be large
         so that the final iteration is meaningful.
     searchDepth : int, optional
-        how deep to search iteratively. You will iteratively search groupSize + searchDepth 
+        how deep to search iteratively. You will iteratively search groupSize + searchDepth
         of the **remaining brightest** calbrators for uniformly distributed ones.
 
     Returns
@@ -316,13 +327,13 @@ def make_directions_file_from_skymodel_uniform(s, flux_min_Jy, size_max_arcmin,
     log.info('Found {0} sources or merged groups with total flux densities above {1} Jy'.format(
         len(s.getPatchNames()), flux_min_Jy))
 
-    ## 
+    ##
     # Indead of just trimming to some max number in decending flux
     # we calcualte a partitioning that minimizes L2 non-uniformity
     # - ask Joshua Albert for details
     ##
     if directions_max_num is not None:
-        pRA, pDec = s.getPatchPositions(asArray=True) 
+        pRA, pDec = s.getPatchPositions(asArray=True)
         dir_fluxes = s.getColValues('I', aggregate='sum').tolist()
         dir_fluxes_sorted_arg = np.argsort(dir_fluxes)[::-1]#reverse view of sorted args
 
@@ -1441,7 +1452,8 @@ def _float_approx_equal(x, y, tol=1e-18, rel=1e-7):
 
 
 def approx_equal(x, y, *args, **kwargs):
-    """approx_equal(float1, float2[, tol=1e-18, rel=1e-7]) -> True|False
+    """
+    approx_equal(float1, float2[, tol=1e-18, rel=1e-7]) -> True|False
     approx_equal(obj1, obj2[, *args, **kwargs]) -> True|False
 
     Return True if x and y are approximately equal, otherwise False.

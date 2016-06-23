@@ -109,14 +109,15 @@ class Scheduler(object):
 
         The following attributes of the direction object of each operation are
         set:
-            max_cpus_per_node : maximum number of cores that the pipeline
-                should use
-            max_io_proc_per_node : maximum number of IO-intensive processes
-            max_cpus_per_chunk : number of threads in NDPPP calls that are run
-                "ntimes" times
-            max_cpus_per_band : number of threads in NDPPP calls that are run
-                "nfiles" times
-            max_percent_memory : percentage of memory to give to WSClean
+
+        max_cpus_per_node : maximum number of cores that the pipeline
+            should use
+        max_io_proc_per_node : maximum number of IO-intensive processes
+        max_cpus_per_chunk : number of threads in NDPPP calls that are run
+            "ntimes" times
+        max_cpus_per_band : number of threads in NDPPP calls that are run
+            "nfiles" times
+        max_percent_memory : percentage of memory to give to WSClean
 
         """
         if operation_list is None:
