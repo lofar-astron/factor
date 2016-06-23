@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} average_image_data, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, add_imaging_cols, regroup_shift_empty_map, {% block model_data_steps %}expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, {% endblock model_data_steps %} corrupt_final_model, add_model_to_empty_data, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} {% block full_image_steps %}premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
+pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, add_imaging_cols, regroup_shift_empty_map, {% block model_data_steps %}expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, {% endblock model_data_steps %} corrupt_final_model, add_model_to_empty_data, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} {% block full_image_steps %}premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -16,9 +16,17 @@ update_image_data_mapfile_hosts.control.mapfile_in    =   {{ image_data_mapfile 
 update_image_data_mapfile_hosts.control.hosts         =   {{ hosts }}
 
 {% if average_image_data %}
+# make an uncompressed mapfile of the concatenated data, length = 1
+concat_averaged_uncompressed_map.control.kind         =   plugin
+concat_averaged_uncompressed_map.control.type         =   uncompressMapfile
+concat_averaged_uncompressed_map.control.mapfile_in   =   {{ image_data_mapfile }}
+concat_averaged_uncompressed_map.control.mapfile_dir  =   input.output.mapfile_dir
+concat_averaged_uncompressed_map.control.hosts        =   {{ hosts }}
+concat_averaged_uncompressed_map.control.filename     =   concat_averaged_uncompressed.mapfile
+
 # average if necessary
 average_image_data.control.type                       =   dppp
-average_image_data.control.mapfile_in                 =   {{ image_data_mapfile }}
+average_image_data.control.mapfile_in                 =   concat_averaged_uncompressed_map.output.mapfile
 average_image_data.control.inputkey                   =   msin
 average_image_data.argument.numthreads                =   {{ max_cpus_per_band }}
 average_image_data.argument.msin.datacolumn           =   DATA
@@ -29,6 +37,13 @@ average_image_data.argument.steps                     =   [avg]
 average_image_data.argument.avg.type                  =   squash
 average_image_data.argument.avg.freqstep              =   {{ facetimage_freqstep }}
 average_image_data.argument.avg.timestep              =   {{ facetimage_timestep }}
+
+# make a compressed mapfile of the reaveraged data, length = 1
+concat_reaveraged_compressed_map.control.kind         =   plugin
+concat_reaveraged_compressed_map.control.type         =   compressMapfile
+concat_reaveraged_compressed_map.control.mapfile_in   =   average_image_data.output.mapfile
+concat_reaveraged_compressed_map.control.mapfile_dir  =   input.output.mapfile_dir
+concat_reaveraged_compressed_map.control.filename     =   concat_reaveraged_compressed.mapfile
 {% endif %}
 
 {% else %}
@@ -255,7 +270,7 @@ premask.argument.cellsize_deg                           =   {{ cellsize_facet_de
 # do the first round of imaging, length = 1
 wsclean_image_full1.control.type                      =   wsclean
 {% if average_image_data %}
-wsclean_image_full1.control.mapfiles_in               =   [average_image_data.output.mapfile,premask.output.mapfile]
+wsclean_image_full1.control.mapfiles_in               =   [concat_reaveraged_compressed_map.output.mapfile,premask.output.mapfile]
 {% else %}
 wsclean_image_full1.control.mapfiles_in               =   [{{ image_data_mapfile }},premask.output.mapfile]
 {% endif %}
@@ -316,7 +331,7 @@ mask.argument.vertices_file                           =   {{ vertices_file }}
 # second round of imaging with the mask, length = 1
 wsclean_image_full2.control.type                      =   wsclean
 {% if average_image_data %}
-wsclean_image_full2.control.mapfiles_in               =   [average_image_data.output.mapfile,mask.output.mapfile,mask.output.threshold_5sig.mapfile]
+wsclean_image_full2.control.mapfiles_in               =   [concat_reaveraged_compressed_map.output.mapfile,mask.output.mapfile,mask.output.threshold_5sig.mapfile]
 {% else %}
 wsclean_image_full2.control.mapfiles_in               =   [{{ image_data_mapfile }},mask.output.mapfile,mask.output.threshold_5sig.mapfile]
 {% endif %}
