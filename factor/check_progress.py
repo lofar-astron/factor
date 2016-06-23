@@ -104,6 +104,15 @@ def load_directions(parset_file):
     parset = factor.parset.parset_read(parset_file, use_log_file=False)
     options = parset['checkfactor']
 
+    # Figure out whether reimaging is going to be done and if so how
+    # many images are to be made.
+    imaging_parset = parset['imaging_specific']
+    if not(imaging_parset['reimage_selfcaled']):
+        reimages=0
+    else:
+        reimages=len(imaging_parset['facet_cellsize_arcsec'])
+    options['reimages']=reimages
+
     # Load directions. First check for user-supplied directions file then for
     # Factor-generated file from a previous run
     direction_list = []
@@ -258,8 +267,16 @@ def plot_state(directions_list, trim_names=True):
         facecolor='#A9F5A9', linewidth=2)
     selfcal_not_ok_patch =plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9',
         facecolor='#F5A9A9', linewidth=2)
-    l = ax.legend([not_processed_patch, processing_patch, selfcal_ok_patch, selfcal_not_ok_patch],
-              ['Unprocessed', 'Processing', 'Completed', 'Failed'])
+    patch_list=[not_processed_patch, processing_patch, selfcal_ok_patch, selfcal_not_ok_patch]
+    label_list=['Unprocessed', 'Processing', 'Completed', 'Failed']
+    for i in range(options['reimages']):
+        label_list.append('Reimage '+str(i+1))
+        color=(0.66/(i+2)**0.5,0.96/(i+2)**0.5,0.66/(i+2)**0.5,1.0)
+        reimage_patch=plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9',
+        facecolor=color, linewidth=2)
+        patch_list.append(reimage_patch)
+    l = ax.legend(patch_list,label_list)
+
     l.set_zorder(1002)
 
     # Add check for mouse clicks and key presses
@@ -558,12 +575,14 @@ def set_patch_color(a, d):
     a.completed_ops = get_completed_ops(d)
     a.started_ops = get_started_ops(d)
     a.current_op = get_current_op(d)
+    if a.current_op is not None:
+        a.current_step, current_index, num_steps, start_time = get_current_step(d)
     total_completed = max(0, len(a.completed_ops)-1)
     # treat facetselfcal and facetsub as one op for consistency with old code
     if total_completed==0:
         total_completed=1
     completed_color=(0.66/total_completed**0.5,0.96/total_completed**0.5,0.66/total_completed**0.5,1.0)
-    if a.current_op is not None:
+    if a.current_op is not None and a.current_step is not None:
         # Means this facet is currently processing
         a.set_edgecolor('#a9a9a9')
         a.set_facecolor('#F2F5A9')
