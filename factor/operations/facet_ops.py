@@ -391,9 +391,13 @@ class FacetImage(Operation):
             existing_data_freqstep=self.direction.full_res_facetimage_freqstep,
             existing_data_timestep=self.direction.full_res_facetimage_timestep)
         if self.direction.use_existing_data:
+            self.log.debug('Suitable calibrated data exist and will be used for reimaging')
             # Set flag that determines whether additional averaging is to be done
             if (self.direction.facetimage_freqstep != 1 or self.direction.facetimage_timestep != 1):
                 self.direction.average_image_data = True
+        else:
+            self.log.debug('No suitable calibrated data exist for reimaging. They will be generated')
+
         ms_files = [band.files for band in self.bands]
         ms_files_single = []
         for bandfiles in ms_files:

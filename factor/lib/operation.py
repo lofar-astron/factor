@@ -275,6 +275,7 @@ class Operation(object):
         from lofarpipe.support.data_map import DataMap
 
         all_exist = True
+        self.log.debug('Checking whether files referenced in {} exist...'.format(mapfile))
         try:
             datamap = DataMap.load(mapfile)
             for item in datamap:
@@ -286,6 +287,11 @@ class Operation(object):
                 for f in files:
                     if not os.path.exists(f):
                         all_exist = False
+            if all_exist:
+                self.log.debug('...all files exist')
+            else:
+                self.log.debug('...one or more files not found')
             return all_exist
         except IOError:
+            self.log.debug('Could not read mapfile {}. Skipping it'.format(mapfile))
             return False
