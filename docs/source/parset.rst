@@ -364,11 +364,14 @@ The available options are described below under their respective sections.
     dir_local
         Full path to a local disk on the nodes for I/O-intensive processing. The path
         must be the same for all nodes. Note: do not specify this parameter if you are
-        running on a single machine, as it will cause conflicts between directions
+        running more than one direction simultaneously on a single machine, as it will cause conflicts between directions
         that are processed in parallel (no default).
 
     ncpu
         Maximum number of CPUs per node to use (default = all).
+
+    nthreads_io
+        Maximum number of IO-intensive threads to run per node (default = sqrt(ncpu/ndir_per_node))
 
     wsclean_fmem
         Maximum fraction of the total memory per node that WSClean may use (default = 0.9).
