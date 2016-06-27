@@ -6,6 +6,7 @@ import os
 import glob
 import logging
 import ConfigParser
+import numpy as np
 from factor._logging import set_log_file
 
 log = logging.getLogger('factor:parset')
@@ -872,9 +873,24 @@ def get_cluster_options(parset):
             'ndir_per_node')
     else:
         parset_dict['ndir_per_node'] = 1
-    log.info("Processing up to %s direction(s) in parallel per node" %
+    log.info("Processing up to %i direction(s) in parallel per node" %
         (parset_dict['ndir_per_node']))
 
+    # Maximum number of io-intensive threads to run per node (per
+    # direction). If unset, defaults to sqrt of the number of compute
+    # threads that will be used.
+
+    if 'nthread_io' in parset_dict:
+        parset_dict['nthread_io'] = parset.getint('cluster',
+            'nthread_io')
+    else:
+        # code originally in lib/scheduler.py
+        max_cpus_per_node =  max(1, int(round(parset_dict['ncpu'] / float(parset_dict['ndir_per_node']))))
+        parset_dict['nthread_io'] = int(np.ceil(np.sqrt(max_cpus_per_node)))
+
+    log.info("Will use up to %i IO-intensive thread(s) in parallel per node" %
+        (parset_dict['nthread_io']))
+    
     # Full path to cluster description file. Use clusterdesc_file = PBS to use the
     # PBS / torque reserved nodes. If not given, the clusterdesc file for a single
     # (i.e., local) node is used
@@ -897,7 +913,7 @@ def get_cluster_options(parset):
     # Check for unused options
     allowed_options = ['ncpu', 'fmem', 'wsclean_fmem', 'ndir_per_node',
         'clusterdesc_file', 'cluster_type', 'dir_local',
-        'node_list', 'lofarroot', 'lofarpythonpath']
+        'node_list', 'lofarroot', 'lofarpythonpath', 'nthread_io']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [cluster] section of the '

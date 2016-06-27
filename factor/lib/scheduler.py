@@ -125,6 +125,7 @@ class Scheduler(object):
 
         node_list = self.operation_list[0].node_list
         ncpu_max = self.operation_list[0].parset['cluster_specific']['ncpu']
+        nthread_io = self.operation_list[0].parset['cluster_specific']['nthread_io']
         fmem_max = self.operation_list[0].parset['cluster_specific']['wsclean_fmem']
         nops_per_node = self.operation_list[0].parset['cluster_specific']['ndir_per_node']
         nbands = len(self.operation_list[0].bands)
@@ -159,7 +160,8 @@ class Scheduler(object):
                 op.direction.hosts = h
                 op.direction.max_cpus_per_node =  max(1, int(round(ncpu_max /
                     float(nops_per_node))))
-                op.direction.max_io_proc_per_node = int(np.ceil(np.sqrt(op.direction.max_cpus_per_node)))
+                # op.direction.max_io_proc_per_node = int(np.ceil(np.sqrt(op.direction.max_cpus_per_node)))
+                op.direction.max_io_proc_per_node = nthread_io
                 op.direction.max_cpus_per_chunk = int(round(op.direction.max_cpus_per_node /
                     nchunks_per_node))
                 op.direction.max_cpus_per_band = max(1, int(round(op.direction.max_cpus_per_node *
