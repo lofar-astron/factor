@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, add_imaging_cols_empty, shift_cal, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, expand_parmdb_map, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, make_fast_phase_parmdb_map, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_slow_gain_parmdb_map, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_compressed_mapfile_ft, create_model4_map, blank_model, casa_ft4, {% else %} apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_cal, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, expand_parmdb_map, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, make_fast_phase_parmdb_map, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_slow_gain_parmdb_map, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, shift_empty, add_imaging_cols_empty, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_compressed_mapfile_ft, create_model4_map, blank_model, casa_ft4, {% else %} predict_all_model_data, add_all_facet_sources, apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -84,45 +84,6 @@ expand_sourcedb_cal_facet_sources.control.mapfile_in       =   make_sourcedb_cal
 expand_sourcedb_cal_facet_sources.control.mapfile_groups   =   create_msmulti_map.output.mapfile
 expand_sourcedb_cal_facet_sources.control.mapfile_dir      =   input.output.mapfile_dir
 expand_sourcedb_cal_facet_sources.control.filename         =   expand_sourcedb_cal_facet_sources.mapfile
-
-# shift full-res data to facet position, length = nfiles
-shift_empty.control.type                                   =   dppp
-shift_empty.control.opts.mapfile_in                        =   create_ms_map.output.mapfile
-shift_empty.control.opts.inputkey                          =   msin
-shift_empty.argument.numthreads                            =   {{ max_cpus_per_band }}
-shift_empty.argument.msin.datacolumn                       =   {{ subtracted_data_colname }}
-shift_empty.argument.msout.overwrite                       =   True
-shift_empty.argument.msout.writefullresflag                =   False
-shift_empty.argument.local_scratch_dir                     =   {{ local_dir }}
-shift_empty.argument.steps                                 =   [shift]
-shift_empty.argument.shift.type                            =   phaseshifter
-shift_empty.argument.shift.phasecenter                     =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
-
-# predict the skymodel data for the full facet into the phase-shifted measurement sets, length = nfiles
-predict_all_model_data.control.type                        =   dppp
-predict_all_model_data.control.opts.mapfiles_in            =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
-predict_all_model_data.control.opts.inputkeys              =   [msin,sourcedb,parmdb]
-predict_all_model_data.argument.numthreads                 =   {{ max_cpus_per_band }}
-predict_all_model_data.argument.msout.overwrite            =   True
-predict_all_model_data.argument.msout.writefullresflag     =   False
-predict_all_model_data.argument.local_scratch_dir          =   {{ local_dir }}
-predict_all_model_data.argument.steps                      =   [pred]
-predict_all_model_data.argument.pred.type                  =   predict
-predict_all_model_data.argument.pred.sourcedb              =   sourcedb
-predict_all_model_data.argument.pred.operation             =   replace
-predict_all_model_data.argument.pred.applycal.parmdb       =   parmdb
-
-# add predicted facet data to phase-shifted empty data, length = nfiles
-add_all_facet_sources.control.type                         =   add_subtract_columns
-add_all_facet_sources.control.opts.mapfiles_in             =   [shift_empty.output.mapfile,predict_all_model_data.output.mapfile]
-add_all_facet_sources.control.opts.inputkeys               =   [file1,file2]
-add_all_facet_sources.argument.flags                       =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
-
-# add the imaging columns to the phase-shifted data, length = nfiles
-add_imaging_cols_empty.control.type                        =   add_imaging_columns
-add_imaging_cols_empty.control.mapfile_in                  =   shift_empty.output.mapfile
-add_imaging_cols_empty.control.inputkey                    =   msfile
-add_imaging_cols_empty.argument.flags                      =   [msfile]
 
 {% if not is_patch %}
 # For normal (non-patch) facets, we need to phase shift the empty data, add the
@@ -1363,6 +1324,25 @@ expand_merged_parmdb_map.control.mapfile_to_match          =   shift_empty.outpu
 expand_merged_parmdb_map.control.mapfile_dir               =   input.output.mapfile_dir
 expand_merged_parmdb_map.control.filename                  =   expand_merged_parmdbs.mapfile
 
+# shift full-res data to facet position to accept result of ft step below, length = nfiles
+shift_empty.control.type                                   =   dppp
+shift_empty.control.opts.mapfile_in                        =   create_ms_map.output.mapfile
+shift_empty.control.opts.inputkey                          =   msin
+shift_empty.argument.numthreads                            =   {{ max_cpus_per_band }}
+shift_empty.argument.msin.datacolumn                       =   {{ subtracted_data_colname }}
+shift_empty.argument.msout.overwrite                       =   True
+shift_empty.argument.msout.writefullresflag                =   False
+shift_empty.argument.local_scratch_dir                     =   {{ local_dir }}
+shift_empty.argument.steps                                 =   [shift]
+shift_empty.argument.shift.type                            =   phaseshifter
+shift_empty.argument.shift.phasecenter                     =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+
+# add the imaging columns to the phase-shifted data, length = nfiles
+add_imaging_cols_empty.control.type                        =   add_imaging_columns
+add_imaging_cols_empty.control.mapfile_in                  =   shift_empty.output.mapfile
+add_imaging_cols_empty.control.inputkey                    =   msfile
+add_imaging_cols_empty.argument.flags                      =   [msfile]
+
 {% if is_patch %}
 # The calibrator is the full patch. (No need to re-image the facet.)
 
@@ -1418,7 +1398,27 @@ casa_ft4.control.inputkeys                                 =   [inputms,modelimg
 casa_ft4.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft_multi.py,modelimg,{{ nterms }},{{ facet_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py,inputms]
 {% else %}
 
-# apply the fast part of the gain solutions, length = nfiles
+# predict the skymodel data for the full facet, length = nfiles
+predict_all_model_data.control.type                        =   dppp
+predict_all_model_data.control.opts.mapfiles_in            =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
+predict_all_model_data.control.opts.inputkeys              =   [msin,sourcedb,parmdb]
+predict_all_model_data.argument.numthreads                 =   {{ max_cpus_per_band }}
+predict_all_model_data.argument.msout.overwrite            =   True
+predict_all_model_data.argument.msout.writefullresflag     =   False
+predict_all_model_data.argument.local_scratch_dir          =   {{ local_dir }}
+predict_all_model_data.argument.steps                      =   [pred]
+predict_all_model_data.argument.pred.type                  =   predict
+predict_all_model_data.argument.pred.sourcedb              =   sourcedb
+predict_all_model_data.argument.pred.operation             =   replace
+predict_all_model_data.argument.pred.applycal.parmdb       =   parmdb
+
+# add predicted facet data to phase-shifted empty data, length = nfiles
+add_all_facet_sources.control.type                         =   add_subtract_columns
+add_all_facet_sources.control.opts.mapfiles_in             =   [shift_empty.output.mapfile,predict_all_model_data.output.mapfile]
+add_all_facet_sources.control.opts.inputkeys               =   [file1,file2]
+add_all_facet_sources.argument.flags                       =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
+
+# apply the direction-dependent solutions and average, length = nfiles
 apply_dir_dep.control.type                                 =   dppp
 apply_dir_dep.control.opts.mapfiles_in                     =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 apply_dir_dep.control.opts.inputkeys                       =   [msin,dir_dep_parmdb]

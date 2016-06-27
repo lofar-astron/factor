@@ -40,10 +40,10 @@ class OutlierPeel(Operation):
 
         # Parset for slow gain solve
         if self.direction.solve_all_correlations:
-            selfcal_gain_parset = 'facet_dirdep_amponly_solve_allcorr_skymodel.parset'
+            selfcal_caltype = 'fulljones'
             fourpol = True # plot all correlations
         else:
-            selfcal_gain_parset = 'facet_dirdep_amponly_solve_skymodel.parset'
+            selfcal_caltype = 'diagonal'
             fourpol = False
 
         # Task for smoothing

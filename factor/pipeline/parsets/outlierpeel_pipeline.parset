@@ -31,6 +31,29 @@ create_parmdb_map.control.files                          =   {{ dir_indep_parmDB
 create_parmdb_map.control.mapfile_dir                    =   input.output.mapfile_dir
 create_parmdb_map.control.filename                       =   dir_indep_instrument_parmdbs.mapfile
 
+# create a mapfile with the outlier skymodel from supplied list, length = 1
+create_peel_skymodel_map.control.kind                   =   plugin
+create_peel_skymodel_map.control.type                   =   addListMapfile
+create_peel_skymodel_map.control.hosts                  =   {{ hosts }}
+create_peel_skymodel_map.control.files                  =   [{{ peel_skymodel }}]
+create_peel_skymodel_map.control.mapfile_dir            =   input.output.mapfile_dir
+create_peel_skymodel_map.control.filename               =   peel_skymodel.mapfile
+
+# convert the outlier skymodel into a sourcedb, length = 1
+make_peel_sourcedb.control.type                          =   make_sourcedb
+make_peel_sourcedb.control.opts.mapfile_in               =   create_peel_skymodel_map.output.mapfile
+make_peel_sourcedb.control.opts.inputkey                 =   in
+make_peel_sourcedb.argument.format                       =   <
+make_peel_sourcedb.argument.outtype                      =   blob
+
+# expand the outlier sourcedb mapfile so that there is one entry for every file, length = nfiles
+expand_peel_sourcedb.control.kind                        =   plugin
+expand_peel_sourcedb.control.type                        =   mapfileSingleToGroup
+expand_peel_sourcedb.control.mapfile_in                  =   make_peel_sourcedb.output.mapfile
+expand_peel_sourcedb.control.mapfile_groups              =   create_msmulti_map.output.mapfile
+expand_peel_sourcedb.control.mapfile_dir                 =   input.output.mapfile_dir
+expand_peel_sourcedb.control.filename                    =   expand_peel_sourcedb.mapfile
+
 # create a mapfile with the current skymodels from supplied list, length = nbands
 create_full_skymodels_map.control.kind                   =   plugin
 create_full_skymodels_map.control.type                   =   addListMapfile
@@ -206,6 +229,15 @@ switch_weights_col1.control.mapfile_in                   =   concat_data.output.
 switch_weights_col1.control.inputkey                     =   msfiles
 switch_weights_col1.argument.flags                       =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
+# generate mapfile for the fast-phase parmDBs generated in the solve_ampphase11 step
+make_fast_phase_parmdb_map.control.kind                    =  plugin
+make_fast_phase_parmdb_map.control.type                    =  createMapfile
+make_fast_phase_parmdb_map.control.method                  =  add_suffix_to_file
+make_fast_phase_parmdb_map.control.mapfile_in              =  concat_data.output.mapfile
+make_fast_phase_parmdb_map.control.add_suffix_to_file      =  /instrument
+make_fast_phase_parmdb_map.control.mapfile_dir             =  input.output.mapfile_dir
+make_fast_phase_parmdb_map.control.filename                =  fast_parmdb.mapfile
+
 # run BBS on freq-concatenated files to solve for (fast) phases, length = ntimes
 solve_ampphase11.control.type                            =   calibrate-stand-alone_new
 solve_ampphase11.argument.observation                    =   concat_data.output.mapfile
@@ -223,11 +255,23 @@ switch_weights_col2.control.mapfile_in                   =   concat_data.output.
 switch_weights_col2.control.inputkey                     =   msfiles
 switch_weights_col2.argument.flags                       =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
-# apply the phase-only solutions from the previous BBS-run, length = ntimes
-apply_ampphase11.control.type                            =   calibrate-stand-alone_new
-apply_ampphase11.argument.observation                    =   concat_data.output.mapfile
-apply_ampphase11.argument.parset                         =   {{ parset_dir }}/facet_dirdep_phaseonly_apply.parset
-apply_ampphase11.argument.catalog                        =   {{ skymodel_dir }}/empty.skymodel
+# apply the phase-only solutions from the previous calibration, length = ntimes
+apply_ampphase11.control.type                            =   dppp_inplace
+apply_ampphase11.control.opts.mapfiles_in                =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+apply_ampphase11.control.opts.inputkeys                  =   [msin,parmdb]
+apply_ampphase11.argument.numthreads                     =   {{ max_cpus_per_band }}
+apply_ampphase11.argument.msin.datacolumn                =   DATA
+apply_ampphase11.argument.msout                          =   .
+apply_ampphase11.argument.msout.datacolumn               =   CORRECTED_DATA
+apply_ampphase11.argument.steps                          =   [correct_fast1,correct_fast2]
+apply_ampphase11.argument.correct_fast1.type             =   applycal
+apply_ampphase11.argument.correct_fast1.parmdb           =   parmdb
+apply_ampphase11.argument.correct_fast1.correction       =   tec
+apply_ampphase11.argument.correct_fast1.invert           =   True
+apply_ampphase11.argument.correct_fast2.type             =   applycal
+apply_ampphase11.argument.correct_fast2.parmdb           =   parmdb
+apply_ampphase11.argument.correct_fast2.correction       =   commonscalarphase
+apply_ampphase11.argument.correct_fast2.invert           =   True
 
 # merge the parmDBs with the phase solutions into one, length = 1
 merge_phase_parmdbs.control.type                         =   merge_parmdbs_in_time
@@ -236,22 +280,43 @@ merge_phase_parmdbs.control.inputkey                     =   mslist
 merge_phase_parmdbs.control.outputkey                    =   outparmdb
 merge_phase_parmdbs.argument.flags                       =   [mslist,instrument,outparmdb]
 
-# run BBS on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
-solve_ampphase12.control.type                            =   calibrate-stand-alone_new
-solve_ampphase12.argument.observation                    =   concat_data.output.mapfile
-solve_ampphase12.argument.parset                         =   {{ parset_dir }}/{{ selfcal_gain_parset }}
-solve_ampphase12.argument.catalog                        =   {{ peel_skymodel }}
-solve_ampphase12.argument.replace-sourcedb               =   True
-solve_ampphase12.argument.replace-parmdb                 =   True
-solve_ampphase12.argument.Step.solve.Solve.CellSize.Time =   {{ solint_time_a }}
-solve_ampphase12.argument.Step.solve.Solve.CellSize.Freq =   {{ solint_freq_a }}
+# generate mapfile for the slow-gain parmDBs generated in the solve_ampphase12 step
+make_slow_gain_parmdb_map.control.kind                   =  plugin
+make_slow_gain_parmdb_map.control.type                   =  createMapfile
+make_slow_gain_parmdb_map.control.method                 =  add_suffix_to_file
+make_slow_gain_parmdb_map.control.mapfile_in             =  concat_data.output.mapfile
+make_slow_gain_parmdb_map.control.add_suffix_to_file     =  /instrument_slow
+make_slow_gain_parmdb_map.control.mapfile_dir            =  input.output.mapfile_dir
+make_slow_gain_parmdb_map.control.filename               =  slow_parmdb.mapfile
+
+# run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
+# note: for now, we write out a new dataset even though it's never used, as this
+# is the only way to add a uv cut without affecting the original dataset. Once
+# GainCal has a filter parameter, we can use dppp_inplace instead and save on I/O
+solve_ampphase12.control.type                            =   dppp
+solve_ampphase12.control.mapfiles_in                     =   [concat_data.output.mapfile,make_slow_gain_parmdb_map.output.mapfile,expand_peel_sourcedb.output.mapfile]
+solve_ampphase12.control.inputkeys                       =   [msin,parmdb,sourcedb]
+solve_ampphase12.argument.numthreads                     =   {{ max_cpus_per_chunk }}
+solve_ampphase12.argument.msin.datacolumn                =   CORRECTED_DATA
+solve_ampphase12.argument.msout.overwrite                =   True
+solve_ampphase12.argument.msout.writefullresflag         =   False
+solve_ampphase12.argument.local_scratch_dir              =   {{ local_dir }}
+solve_ampphase12.argument.steps                          =   [uvcut,solvegain]
+solve_ampphase12.argument.uvcut.type                     =   uvwflagger
+solve_ampphase12.argument.uvcut.uvlambdamin              =   {{ solve_min_uv_lambda }}
+solve_ampphase12.argument.solvegain.type                 =   gaincal
+solve_ampphase12.argument.solvegain.caltype              =   {{ selfcal_caltype }}
+solve_ampphase12.argument.solvegain.parmdb               =   parmdb
+solve_ampphase12.argument.solvegain.sourcedb             =   sourcedb
+solve_ampphase12.argument.solvegain.solint               =   {{ solint_time_a }}
+solve_ampphase12.argument.solvegain.nchan                =   {{ solint_freq_a }}
 
 # merge the parmDBs with the amplitude solutions into one, length = 1
 merge_amp_parmdbs.control.type                           =   merge_parmdbs_in_time
 merge_amp_parmdbs.control.mapfile_in                     =   concat_data_compressed_mapfile.output.mapfile
 merge_amp_parmdbs.control.inputkey                       =   mslist
 merge_amp_parmdbs.control.outputkey                      =   outparmdb
-merge_amp_parmdbs.argument.flags                         =   [mslist,instrument,outparmdb]
+merge_amp_parmdbs.argument.flags                         =   [mslist,instrument_slow,outparmdb]
 
 # Smooth the amplitude solutions, but do not normalize them as the sky model is  // length = 1
 # in absolute flux and not apparent flux

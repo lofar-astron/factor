@@ -85,45 +85,6 @@ expand_sourcedb_cal_facet_sources.control.mapfile_groups   =   create_msmulti_ma
 expand_sourcedb_cal_facet_sources.control.mapfile_dir      =   input.output.mapfile_dir
 expand_sourcedb_cal_facet_sources.control.filename         =   expand_sourcedb_cal_facet_sources.mapfile
 
-# shift full-res data to facet position, length = nfiles
-shift_empty.control.type                                   =   dppp
-shift_empty.control.opts.mapfile_in                        =   create_ms_map.output.mapfile
-shift_empty.control.opts.inputkey                          =   msin
-shift_empty.argument.numthreads                            =   {{ max_cpus_per_band }}
-shift_empty.argument.msin.datacolumn                       =   {{ subtracted_data_colname }}
-shift_empty.argument.msout.overwrite                       =   True
-shift_empty.argument.msout.writefullresflag                =   False
-shift_empty.argument.local_scratch_dir                     =   {{ local_dir }}
-shift_empty.argument.steps                                 =   [shift]
-shift_empty.argument.shift.type                            =   phaseshifter
-shift_empty.argument.shift.phasecenter                     =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
-
-# predict the skymodel data for the full facet into the phase-shifted measurement sets, length = nfiles
-predict_all_model_data.control.type                        =   dppp
-predict_all_model_data.control.opts.mapfiles_in            =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
-predict_all_model_data.control.opts.inputkeys              =   [msin,sourcedb,parmdb]
-predict_all_model_data.argument.numthreads                 =   {{ max_cpus_per_band }}
-predict_all_model_data.argument.msout.overwrite            =   True
-predict_all_model_data.argument.msout.writefullresflag     =   False
-predict_all_model_data.argument.local_scratch_dir          =   {{ local_dir }}
-predict_all_model_data.argument.steps                      =   [pred]
-predict_all_model_data.argument.pred.type                  =   predict
-predict_all_model_data.argument.pred.sourcedb              =   sourcedb
-predict_all_model_data.argument.pred.operation             =   replace
-predict_all_model_data.argument.pred.applycal.parmdb       =   parmdb
-
-# add predicted facet data to phase-shifted empty data, length = nfiles
-add_all_facet_sources.control.type                         =   add_subtract_columns
-add_all_facet_sources.control.opts.mapfiles_in             =   [shift_empty.output.mapfile,predict_all_model_data.output.mapfile]
-add_all_facet_sources.control.opts.inputkeys               =   [file1,file2]
-add_all_facet_sources.argument.flags                       =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
-
-# add the imaging columns to the phase-shifted data, length = nfiles
-add_imaging_cols_empty.control.type                        =   add_imaging_columns
-add_imaging_cols_empty.control.mapfile_in                  =   shift_empty.output.mapfile
-add_imaging_cols_empty.control.inputkey                    =   msfile
-add_imaging_cols_empty.argument.flags                      =   [msfile]
-
 {% if not is_patch %}
 # For normal (non-patch) facets, we need to phase shift the empty data, add the
 # calibrator source, and average
@@ -418,11 +379,20 @@ casa_ft0.control.mapfiles_in                               =   [concat_chunks.ou
 casa_ft0.control.inputkeys                                 =   [inputms,modelimg]
 casa_ft0.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft.py,inputms,modelimg,{{ nterms }},{{ cal_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
-# switch "normal" weights with block-average weigthts, length = ntimes
+# switch "normal" weights with block-average weights, length = ntimes
 switch_weights_col1.control.type                           =   switch_columns
 switch_weights_col1.control.mapfile_in                     =   concat_data.output.mapfile
 switch_weights_col1.control.inputkey                       =   msfiles
 switch_weights_col1.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
+
+# generate mapfile for the fast-phase parmDBs generated in the solve_phaseonly steps
+make_fast_phase_parmdb_map.control.kind                    =  plugin
+make_fast_phase_parmdb_map.control.type                    =  createMapfile
+make_fast_phase_parmdb_map.control.method                  =  add_suffix_to_file
+make_fast_phase_parmdb_map.control.mapfile_in              =  concat_data.output.mapfile
+make_fast_phase_parmdb_map.control.add_suffix_to_file      =  /instrument
+make_fast_phase_parmdb_map.control.mapfile_dir             =  input.output.mapfile_dir
+make_fast_phase_parmdb_map.control.filename                =  fast_parmdb.mapfile
 
 # run BBS with model column on freq-concatenated files, length = ntimes
 solve_phaseonly1.control.type                              =   calibrate-stand-alone_new
@@ -442,33 +412,35 @@ switch_weights_col2.control.mapfile_in                     =   concat_data.outpu
 switch_weights_col2.control.inputkey                       =   msfiles
 switch_weights_col2.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
-# apply the solutions from the previous BBS-run, length = ntimes
-apply_phaseonly1.control.type                              =   calibrate-stand-alone_new
-apply_phaseonly1.argument.observation                      =   concat_data.output.mapfile
-apply_phaseonly1.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_apply.parset
-apply_phaseonly1.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
-
 ########## end of first round of selfcal (20" resolution)
 ########## start of second round of selfcal (10" resolution)
 
-# average the output pf the previous BBS step, length = ntimes
-average1.control.type                                      =   dppp
-average1.control.mapfile_in                                =   concat_data.output.mapfile
-average1.control.inputkey                                  =   msin
-average1.argument.numthreads                               =   {{ max_cpus_per_chunk }}
-average1.argument.msin.datacolumn                          =   CORRECTED_DATA
-average1.argument.msout.overwrite                          =   True
-average1.argument.msout.writefullresflag                   =   False
-average1.argument.local_scratch_dir                        =   {{ local_dir }}
-average1.argument.steps                                    =   [avg]
-average1.argument.avg.type                                 =   squash
-average1.argument.avg.freqstep                             =   1
-average1.argument.avg.timestep                             =   {{ facetselfcal_timestep }}
+# apply the previous calibration and average, length = ntimes
+apply_phaseonly1.control.type                              =   dppp
+apply_phaseonly1.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+apply_phaseonly1.control.opts.inputkeys                    =   [msin,parmdb]
+apply_phaseonly1.argument.numthreads                       =   {{ max_cpus_per_band }}
+apply_phaseonly1.argument.msin.datacolumn                  =   DATA
+apply_phaseonly1.argument.msout.overwrite                  =   True
+apply_phaseonly1.argument.msout.writefullresflag           =   False
+apply_phaseonly1.argument.local_scratch_dir                =   {{ local_dir }}
+apply_phaseonly1.argument.steps                            =   [correct_fast1,correct_fast2,avg]
+apply_phaseonly1.argument.correct_fast1.type               =   applycal
+apply_phaseonly1.argument.correct_fast1.parmdb             =   parmdb
+apply_phaseonly1.argument.correct_fast1.correction         =   tec
+apply_phaseonly1.argument.correct_fast1.invert             =   True
+apply_phaseonly1.argument.correct_fast2.type               =   applycal
+apply_phaseonly1.argument.correct_fast2.parmdb             =   parmdb
+apply_phaseonly1.argument.correct_fast2.correction         =   commonscalarphase
+apply_phaseonly1.argument.correct_fast2.invert             =   True
+apply_phaseonly1.argument.avg.type                         =   squash
+apply_phaseonly1.argument.avg.freqstep                     =   1
+apply_phaseonly1.argument.avg.timestep                     =   {{ facetselfcal_timestep }}
 
 # make compressed mapfile of averaged data, length = 1
 create_compressed_mapfile1.control.kind                    =   plugin
 create_compressed_mapfile1.control.type                    =   compressMapfile
-create_compressed_mapfile1.control.mapfile_in              =   average1.output.mapfile
+create_compressed_mapfile1.control.mapfile_in              =   apply_phaseonly1.output.mapfile
 create_compressed_mapfile1.control.mapfile_dir             =   input.output.mapfile_dir
 create_compressed_mapfile1.control.filename                =   concat1_input.mapfile
 
@@ -629,39 +601,35 @@ switch_weights_col4.control.mapfile_in                     =   concat_data.outpu
 switch_weights_col4.control.inputkey                       =   msfiles
 switch_weights_col4.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
-# apply the solutions from the previous BBS-run, length = ntimes
-apply_phaseonly2.control.type                              =   calibrate-stand-alone_new
-apply_phaseonly2.argument.observation                      =   concat_data.output.mapfile
-apply_phaseonly2.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_apply.parset
-apply_phaseonly2.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
-
 ########## end of second round of selfcal (10" resolution)
 ########## start of phase-only selfcal loop
 
-# loop step
-loop_phasecal.control.kind                                 =   loop
-loop_phasecal.control.type                                 =   conditional
-loop_phasecal.control.loopcount                            =   {{ loopcount }}
-loop_phasecal.control.loopsteps                            =   [average2,create_compressed_mapfile2,concat2,delete_image1,casa_image21,adjust_casa_mapfile2,mask2,casa_image22,create_model2_map,casa_ft2,{% if pre_average %}switch_weights_col5,{% endif %}solve_ampphase11,{% if pre_average %}switch_weights_col6,{% endif %}apply_ampphase11,adjust_casa_mapfile_phaseloop,copy_image1,check_image1]
-
-# average the output of the previous BBS step, length = ntimes
-average2.control.type                                      =   dppp
-average2.control.mapfile_in                                =   concat_data.output.mapfile
-average2.control.inputkey                                  =   msin
-average2.argument.numthreads                               =   {{ max_cpus_per_chunk }}
-average2.argument.msin.datacolumn                          =   CORRECTED_DATA
-average2.argument.msout.overwrite                          =   True
-average2.argument.msout.writefullresflag                   =   False
-average2.argument.local_scratch_dir                        =   {{ local_dir }}
-average2.argument.steps                                    =   [avg]
-average2.argument.avg.type                                 =   squash
-average2.argument.avg.freqstep                             =   1
-average2.argument.avg.timestep                             =   {{ facetselfcal_timestep }}
+# apply the previous calibration and average, length = ntimes
+apply_phaseonly2.control.type                              =   dppp
+apply_phaseonly2.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+apply_phaseonly2.control.opts.inputkeys                    =   [msin,parmdb]
+apply_phaseonly2.argument.numthreads                       =   {{ max_cpus_per_band }}
+apply_phaseonly2.argument.msin.datacolumn                  =   DATA
+apply_phaseonly2.argument.msout.overwrite                  =   True
+apply_phaseonly2.argument.msout.writefullresflag           =   False
+apply_phaseonly2.argument.local_scratch_dir                =   {{ local_dir }}
+apply_phaseonly2.argument.steps                            =   [correct_fast1,correct_fast2,avg]
+apply_phaseonly2.argument.correct_fast1.type               =   applycal
+apply_phaseonly2.argument.correct_fast1.parmdb             =   parmdb
+apply_phaseonly2.argument.correct_fast1.correction         =   tec
+apply_phaseonly2.argument.correct_fast1.invert             =   True
+apply_phaseonly2.argument.correct_fast2.type               =   applycal
+apply_phaseonly2.argument.correct_fast2.parmdb             =   parmdb
+apply_phaseonly2.argument.correct_fast2.correction         =   commonscalarphase
+apply_phaseonly2.argument.correct_fast2.invert             =   True
+apply_phaseonly2.argument.avg.type                         =   squash
+apply_phaseonly2.argument.avg.freqstep                     =   1
+apply_phaseonly2.argument.avg.timestep                     =   {{ facetselfcal_timestep }}
 
 # make compressed mapfile of averaged data, length = 1
 create_compressed_mapfile2.control.kind                    =   plugin
 create_compressed_mapfile2.control.type                    =   compressMapfile
-create_compressed_mapfile2.control.mapfile_in              =   average2.output.mapfile
+create_compressed_mapfile2.control.mapfile_in              =   apply_phaseonly2.output.mapfile
 create_compressed_mapfile2.control.mapfile_dir             =   input.output.mapfile_dir
 create_compressed_mapfile2.control.filename                =   concat2_input.mapfile
 
@@ -825,11 +793,23 @@ switch_weights_col6.control.mapfile_in                     =   concat_data.outpu
 switch_weights_col6.control.inputkey                       =   msfiles
 switch_weights_col6.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
-# apply the phase-only solutions from the previous BBS-run, length = ntimes
-apply_ampphase11.control.type                              =   calibrate-stand-alone_new
-apply_ampphase11.argument.observation                      =   concat_data.output.mapfile
-apply_ampphase11.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_apply.parset
-apply_ampphase11.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
+# apply the phase-only solutions from the previous calibration, length = ntimes
+apply_ampphase11.control.type                              =   dppp_inplace
+apply_ampphase11.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+apply_ampphase11.control.opts.inputkeys                    =   [msin,parmdb]
+apply_ampphase11.argument.numthreads                       =   {{ max_cpus_per_band }}
+apply_ampphase11.argument.msin.datacolumn                  =   DATA
+apply_ampphase11.argument.msout                            =   .
+apply_ampphase11.argument.msout.datacolumn                 =   CORRECTED_DATA
+apply_ampphase11.argument.steps                            =   [correct_fast1,correct_fast2]
+apply_ampphase11.argument.correct_fast1.type               =   applycal
+apply_ampphase11.argument.correct_fast1.parmdb             =   parmdb
+apply_ampphase11.argument.correct_fast1.correction         =   tec
+apply_ampphase11.argument.correct_fast1.invert             =   True
+apply_ampphase11.argument.correct_fast2.type               =   applycal
+apply_ampphase11.argument.correct_fast2.parmdb             =   parmdb
+apply_ampphase11.argument.correct_fast2.correction         =   commonscalarphase
+apply_ampphase11.argument.correct_fast2.invert             =   True
 
 # fiddle with the casa mapfiles, length = 1
 adjust_casa_mapfile_phaseloop.control.kind                 =   plugin
@@ -854,22 +834,21 @@ check_image1.argument.flags                                =   [image_new,image_
 ###### end of phase-only selfcal loop
 ###### continue to amplitude calibration
 
-# run BBS with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
-# generate mapfile with the direction-independent parmDBs
-make_instrument_parmdb_map.control.kind                       =  plugin
-make_instrument_parmdb_map.control.type                       =  createMapfile
-make_instrument_parmdb_map.control.method                     =  add_suffix_to_file
-make_instrument_parmdb_map.control.mapfile_in                 =  concat_data.output.mapfile
-make_instrument_parmdb_map.control.add_suffix_to_file         =  /instrument_slow
-make_instrument_parmdb_map.control.mapfile_dir                =  input.output.mapfile_dir
-make_instrument_parmdb_map.control.filename                   =  instrument_parmdb.mapfile
+# generate mapfile for the slow-gain parmDBs generated in the solve_ampphase12 step
+make_slow_gain_parmdb_map.control.kind                     =  plugin
+make_slow_gain_parmdb_map.control.type                     =  createMapfile
+make_slow_gain_parmdb_map.control.method                   =  add_suffix_to_file
+make_slow_gain_parmdb_map.control.mapfile_in               =  concat_data.output.mapfile
+make_slow_gain_parmdb_map.control.add_suffix_to_file       =  /instrument_slow
+make_slow_gain_parmdb_map.control.mapfile_dir              =  input.output.mapfile_dir
+make_slow_gain_parmdb_map.control.filename                 =  slow_parmdb.mapfile
 
 # run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
 # note: for now, we write out a new dataset even though it's never used, as this
 # is the only way to add a uv cut without affecting the original dataset. Once
 # GainCal has a filter parameter, we can use dppp_inplace instead and save on I/O
 solve_ampphase12.control.type                              =   dppp
-solve_ampphase12.control.mapfiles_in                       =   [concat_data.output.mapfile,make_instrument_parmdb_map.output.mapfile]
+solve_ampphase12.control.mapfiles_in                       =   [concat_data.output.mapfile,make_slow_gain_parmdb_map.output.mapfile]
 solve_ampphase12.control.inputkeys                         =   [msin,parmdb]
 solve_ampphase12.argument.numthreads                       =   {{ max_cpus_per_chunk }}
 solve_ampphase12.argument.msin.datacolumn                  =   CORRECTED_DATA
@@ -1099,11 +1078,23 @@ switch_weights_col8.control.mapfile_in                     =   concat_data.outpu
 switch_weights_col8.control.inputkey                       =   msfiles
 switch_weights_col8.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
-# apply the phase-only solutions from the previous BBS-run, length = ntimes
-apply_ampphase21.control.type                              =   calibrate-stand-alone_new
-apply_ampphase21.argument.observation                      =   concat_data.output.mapfile
-apply_ampphase21.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_apply.parset
-apply_ampphase21.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
+# apply the phase-only solutions from the previous calibration, length = ntimes
+apply_ampphase21.control.type                              =   dppp_inplace
+apply_ampphase21.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+apply_ampphase21.control.opts.inputkeys                    =   [msin,parmdb]
+apply_ampphase21.argument.numthreads                       =   {{ max_cpus_per_band }}
+apply_ampphase21.argument.msin.datacolumn                  =   DATA
+apply_ampphase21.argument.msout                            =   .
+apply_ampphase21.argument.msout.datacolumn                 =   CORRECTED_DATA
+apply_ampphase21.argument.steps                            =   [correct_fast1,correct_fast2]
+apply_ampphase21.argument.correct_fast1.type               =   applycal
+apply_ampphase21.argument.correct_fast1.parmdb             =   parmdb
+apply_ampphase21.argument.correct_fast1.correction         =   tec
+apply_ampphase21.argument.correct_fast1.invert             =   True
+apply_ampphase21.argument.correct_fast2.type               =   applycal
+apply_ampphase21.argument.correct_fast2.parmdb             =   parmdb
+apply_ampphase21.argument.correct_fast2.correction         =   commonscalarphase
+apply_ampphase21.argument.correct_fast2.invert             =   True
 
 # merge the parmDBs with the phase solutions into one, length = 1
 # This is needed later when the loop is done and we want to apply the solutions to the original data
@@ -1118,7 +1109,7 @@ merge_phase_parmdbs.argument.flags                         =   [mslist,instrumen
 # is the only way to add a uv cut without affecting the original dataset. Once
 # GainCal has a filter parameter, we can use dppp_inplace instead and save on I/O
 solve_ampphase22.control.type                              =   dppp
-solve_ampphase22.control.mapfiles_in                       =   [concat_data.output.mapfile,make_instrument_parmdb_map.output.mapfile]
+solve_ampphase22.control.mapfiles_in                       =   [concat_data.output.mapfile,make_slow_gain_parmdb_map.output.mapfile]
 solve_ampphase22.control.inputkeys                         =   [msin,parmdb]
 solve_ampphase22.argument.numthreads                       =   {{ max_cpus_per_chunk }}
 solve_ampphase22.argument.msin.datacolumn                  =   CORRECTED_DATA
@@ -1143,7 +1134,7 @@ merge_amp_parmdbs2.control.inputkey                        =   mslist
 merge_amp_parmdbs2.control.outputkey                       =   outparmdb
 merge_amp_parmdbs2.argument.flags                          =   [mslist,instrument_slow,outparmdb]
 
-# smooth the amplitues in the merged parmDB, length = 1
+# smooth the amplitudes in the merged parmDB, length = 1
 # smooth_amps uses only ANTENNA subtable of inputms, so it should work on virtual concatenated MS
 smooth_amp2.control.type                                   =   {{ smooth_amps_task }}
 smooth_amp2.control.mapfile_in                             =   merge_amp_parmdbs2.output.mapfile
@@ -1339,7 +1330,7 @@ merge_selfcal_parmdbs.control.inputkeys                    =   [parmdb_p,parmdb_
 merge_selfcal_parmdbs.control.outputkey                    =   parmdb_out
 merge_selfcal_parmdbs.argument.flags                       =   [parmdb_p,parmdb_a,parmdb_out]
 
-# make plots of the selfcal results from the marged parmDB, length = 1
+# make plots of the selfcal solutions from the marged parmDB, length = 1
 make_selfcal_plots.control.type                            =   make_selfcal_plots
 make_selfcal_plots.control.mapfile_in                      =   merge_selfcal_parmdbs.output.mapfile
 make_selfcal_plots.control.inputkeys                       =   parmdb
@@ -1368,6 +1359,25 @@ expand_merged_parmdb_map.control.mapfile_in                =   merge_selfcal_par
 expand_merged_parmdb_map.control.mapfile_to_match          =   shift_empty.output.mapfile
 expand_merged_parmdb_map.control.mapfile_dir               =   input.output.mapfile_dir
 expand_merged_parmdb_map.control.filename                  =   expand_merged_parmdbs.mapfile
+
+# shift full-res data to facet position to accept result of ft step below, length = nfiles
+shift_empty.control.type                                   =   dppp
+shift_empty.control.opts.mapfile_in                        =   create_ms_map.output.mapfile
+shift_empty.control.opts.inputkey                          =   msin
+shift_empty.argument.numthreads                            =   {{ max_cpus_per_band }}
+shift_empty.argument.msin.datacolumn                       =   {{ subtracted_data_colname }}
+shift_empty.argument.msout.overwrite                       =   True
+shift_empty.argument.msout.writefullresflag                =   False
+shift_empty.argument.local_scratch_dir                     =   {{ local_dir }}
+shift_empty.argument.steps                                 =   [shift]
+shift_empty.argument.shift.type                            =   phaseshifter
+shift_empty.argument.shift.phasecenter                     =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+
+# add the imaging columns to the phase-shifted data, length = nfiles
+add_imaging_cols_empty.control.type                        =   add_imaging_columns
+add_imaging_cols_empty.control.mapfile_in                  =   shift_empty.output.mapfile
+add_imaging_cols_empty.control.inputkey                    =   msfile
+add_imaging_cols_empty.argument.flags                      =   [msfile]
 
 {% if is_patch %}
 # The calibrator is the full patch. (No need to re-image the facet.)
@@ -1424,73 +1434,81 @@ casa_ft4.control.inputkeys                                 =   [inputms,modelimg
 casa_ft4.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft_multi.py,modelimg,{{ nterms }},{{ facet_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py,inputms]
 {% else %}
 
-# apply the fast part of the gain solutions, length = nfiles
-apply_dir_dep_fast.control.type                            =   calibrate-stand-alone_new
-apply_dir_dep_fast.control.mapfiles_in                     =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-apply_dir_dep_fast.control.inputkeys                       =   [inputms,inputparmdb]
-apply_dir_dep_fast.argument.observation                    =   inputms
-apply_dir_dep_fast.argument.parset                         =   {{ parset_dir }}/facet_dirdep_apply_fast.parset
-apply_dir_dep_fast.argument.catalog                        =   {{ skymodel_dir }}/empty.skymodel
-apply_dir_dep_fast.argument.parmdb                         =   inputparmdb
-apply_dir_dep_fast.argument.replace-sourcedb               =   True
-apply_dir_dep_fast.argument.replace-parmdb                 =   True
-apply_dir_dep_fast.argument.Strategy.InputColumn           =   FACET_DATA_ALL
+# predict the skymodel data for the full facet, length = nfiles
+predict_all_model_data.control.type                        =   dppp
+predict_all_model_data.control.opts.mapfiles_in            =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
+predict_all_model_data.control.opts.inputkeys              =   [msin,sourcedb,parmdb]
+predict_all_model_data.argument.numthreads                 =   {{ max_cpus_per_band }}
+predict_all_model_data.argument.msout.overwrite            =   True
+predict_all_model_data.argument.msout.writefullresflag     =   False
+predict_all_model_data.argument.local_scratch_dir          =   {{ local_dir }}
+predict_all_model_data.argument.steps                      =   [pred]
+predict_all_model_data.argument.pred.type                  =   predict
+predict_all_model_data.argument.pred.sourcedb              =   sourcedb
+predict_all_model_data.argument.pred.operation             =   replace
+predict_all_model_data.argument.pred.applycal.parmdb       =   parmdb
 
-# apply the slow part of the gain solutions, length = nfiles
-apply_dir_dep_slow.control.type                            =   calibrate-stand-alone_new
-apply_dir_dep_slow.control.mapfiles_in                     =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-apply_dir_dep_slow.control.inputkeys                       =   [inputms,inputparmdb]
-apply_dir_dep_slow.argument.observation                    =   inputms
-apply_dir_dep_slow.argument.parset                         =   {{ parset_dir }}/facet_dirdep_apply_slow.parset
-apply_dir_dep_slow.argument.catalog                        =   {{ skymodel_dir }}/empty.skymodel
-apply_dir_dep_slow.argument.parmdb                         =   inputparmdb
-apply_dir_dep_slow.argument.replace-sourcedb               =   True
-apply_dir_dep_slow.argument.replace-parmdb                 =   True
+# add predicted facet data to phase-shifted empty data, length = nfiles
+add_all_facet_sources.control.type                         =   add_subtract_columns
+add_all_facet_sources.control.opts.mapfiles_in             =   [shift_empty.output.mapfile,predict_all_model_data.output.mapfile]
+add_all_facet_sources.control.opts.inputkeys               =   [file1,file2]
+add_all_facet_sources.argument.flags                       =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
 
-# average the corrected data, length = nfiles
-average5.control.type                                      =   dppp
-average5.control.mapfile_in                                =   shift_empty.output.mapfile
-average5.control.inputkey                                  =   msin
-average5.argument.numthreads                               =   {{ max_cpus_per_band }}
-average5.argument.msin.datacolumn                          =   CORRECTED_DATA
-average5.argument.msout.overwrite                          =   True
-average5.argument.msout.writefullresflag                   =   False
-average5.argument.local_scratch_dir                        =   {{ local_dir }}
-average5.argument.steps                                    =   [flagzero,avg]
-average5.argument.avg.type                                 =   squash
-average5.argument.avg.freqstep                             =   {{ facetimage_freqstep }}
-average5.argument.avg.timestep                             =   {{ facetimage_timestep }}
-average5.argument.flagzero.type                            =   preflagger
-average5.argument.flagzero.amplmin                         =   1e-20
+# apply the direction-dependent solutions and average, length = nfiles
+apply_dir_dep.control.type                                 =   dppp
+apply_dir_dep.control.opts.mapfiles_in                     =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+apply_dir_dep.control.opts.inputkeys                       =   [msin,dir_dep_parmdb]
+apply_dir_dep.argument.numthreads                          =   {{ max_cpus_per_chunk }}
+apply_dir_dep.argument.msin.datacolumn                     =   FACET_DATA_ALL
+apply_dir_dep.argument.msout.overwrite                     =   True
+apply_dir_dep.argument.msout.writefullresflag              =   False
+apply_dir_dep.argument.local_scratch_dir                   =   {{ local_dir }}
+apply_dir_dep.argument.steps                               =   [correct_fast1,correct_fast2,correct_slow,flagzero,avg]
+apply_dir_dep.argument.correct_fast1.type                  =   applycal
+apply_dir_dep.argument.correct_fast1.parmdb                =   dir_dep_parmdb
+apply_dir_dep.argument.correct_fast1.correction            =   tec
+apply_dir_dep.argument.correct_fast1.invert                =   True
+apply_dir_dep.argument.correct_fast2.type                  =   applycal
+apply_dir_dep.argument.correct_fast2.parmdb                =   dir_dep_parmdb
+apply_dir_dep.argument.correct_fast2.correction            =   commonscalarphase
+apply_dir_dep.argument.correct_fast2.invert                =   True
+apply_dir_dep.argument.correct_slow.type                   =   applycal
+apply_dir_dep.argument.correct_slow.parmdb                 =   dir_dep_parmdb
+apply_dir_dep.argument.correct_slow.invert                 =   True
+apply_dir_dep.argument.flagzero.type                       =   preflagger
+apply_dir_dep.argument.flagzero.amplmin                    =   1e-20
+apply_dir_dep.argument.avg.type                            =   squash
+apply_dir_dep.argument.avg.freqstep                        =   {{ facetimage_freqstep }}
+apply_dir_dep.argument.avg.timestep                        =   {{ facetimage_timestep }}
 
 # compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile5.control.kind                    =   plugin
 create_compressed_mapfile5.control.type                    =   compressMapfile
-create_compressed_mapfile5.control.mapfile_in              =   average5.output.mapfile
+create_compressed_mapfile5.control.mapfile_in              =   apply_dir_dep.output.mapfile
 create_compressed_mapfile5.control.mapfile_dir             =   input.output.mapfile_dir
 create_compressed_mapfile5.control.filename                =   concat_averaged_input.mapfile
 
 # sort compressed mapfile so that there is one group per timestamp, length = ntimes
 # not sure if this is needed / useful
-sort_average5.control.type                                 =   sort_times_into_freqGroups
-sort_average5.argument.flags                               =   [create_compressed_mapfile5.output.mapfile]
-sort_average5.argument.filename                            =   average5_sorted_groups.mapfile
-sort_average5.argument.mapfile_dir                         =   input.output.mapfile_dir
-sort_average5.argument.hosts                               =   {{ hosts }}
-sort_average5.argument.stepname                            =   sort_average5
-sort_average5.argument.nband_pad                           =   {{ nband_pad }}
+sort_averaged.control.type                                 =   sort_times_into_freqGroups
+sort_averaged.argument.flags                               =   [create_compressed_mapfile5.output.mapfile]
+sort_averaged.argument.filename                            =   apply_dir_dep_sorted_groups.mapfile
+sort_averaged.argument.mapfile_dir                         =   input.output.mapfile_dir
+sort_averaged.argument.hosts                               =   {{ hosts }}
+sort_averaged.argument.stepname                            =   sort_averaged
+sort_averaged.argument.nband_pad                           =   {{ nband_pad }}
 
 # convert the output of sort_average5 into usable mapfiles, len = 1 / ntimes
-sort_average5_maps.control.kind                            =   plugin
-sort_average5_maps.control.type                            =   mapfilenamesFromMapfiles
-sort_average5_maps.control.mapfile_groupmap                =   sort_average5.output.groupmapfile.mapfile
-sort_average5_maps.control.mapfile_filesmap                =   sort_average5.output.mapfile.mapfile
+sort_averaged_maps.control.kind                            =   plugin
+sort_averaged_maps.control.type                            =   mapfilenamesFromMapfiles
+sort_averaged_maps.control.mapfile_groupmap                =   sort_averaged.output.groupmapfile.mapfile
+sort_averaged_maps.control.mapfile_filesmap                =   sort_averaged.output.mapfile.mapfile
 
 # concatenate data in frequency, length = ntimes
 # not sure if this is needed / useful
 concat_averaged.control.type                               =   dppp
-concat_averaged.control.mapfile_out                        =   sort_average5_maps.output.groupmap
-concat_averaged.control.mapfile_in                         =   sort_average5_maps.output.filesmap
+concat_averaged.control.mapfile_out                        =   sort_averaged_maps.output.groupmap
+concat_averaged.control.mapfile_in                         =   sort_averaged_maps.output.filesmap
 concat_averaged.control.inputkey                           =   msin
 concat_averaged.argument.msin.datacolumn                   =   DATA
 concat_averaged.argument.msin.missingdata                  =   True
@@ -1680,17 +1698,14 @@ corrupt_final_model.argument.corrupt_fast1.type            =   applycal
 corrupt_final_model.argument.corrupt_fast1.parmdb          =   parmdb
 corrupt_final_model.argument.corrupt_fast1.correction      =   tec
 corrupt_final_model.argument.corrupt_fast1.invert          =   False
-corrupt_final_model.argument.corrupt_fast1.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 corrupt_final_model.argument.corrupt_fast2.type            =   applycal
 corrupt_final_model.argument.corrupt_fast2.parmdb          =   parmdb
 corrupt_final_model.argument.corrupt_fast2.correction      =   commonscalarphase
 corrupt_final_model.argument.corrupt_fast2.invert          =   False
-corrupt_final_model.argument.corrupt_fast2.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 corrupt_final_model.argument.corrupt_slow.type             =   applycal
 corrupt_final_model.argument.corrupt_slow.parmdb           =   parmdb
 corrupt_final_model.argument.corrupt_slow.correction       =   gain
 corrupt_final_model.argument.corrupt_slow.invert           =   False
-corrupt_final_model.argument.corrupt_slow.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 
 # subtract new model vis from original model+residual vis, length = nfiles
 subtract_initial_final.control.type                        =   add_subtract_columns
@@ -1775,7 +1790,7 @@ average_pre_compressed_map.control.mapfile_in              =   average_pre.outpu
 average_pre_compressed_map.control.mapfile_dir             =   input.output.mapfile_dir
 average_pre_compressed_map.control.filename                =   average_pre_compressed.mapfile
 
-# image the of old empty data, length = 1
+# image the old empty data, length = 1
 wsclean_pre.control.type                                   =   wsclean
 wsclean_pre.control.mapfile_in                             =   average_pre_compressed_map.output.mapfile
 wsclean_pre.control.inputkey                               =   msfiles
@@ -1801,7 +1816,7 @@ average_post_compressed_map.control.mapfile_in             =   average_post.outp
 average_post_compressed_map.control.mapfile_dir            =   input.output.mapfile_dir
 average_post_compressed_map.control.filename               =   average_post_compressed.mapfile
 
-# image the of new empty data, length = 1
+# image the new empty data, length = 1
 wsclean_post.control.type                                  =   wsclean
 wsclean_post.control.mapfile_in                            =   average_post_compressed_map.output.mapfile
 wsclean_post.control.inputkey                              =   msfiles

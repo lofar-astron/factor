@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, add_imaging_cols, regroup_shift_empty_map, {% block model_data_steps %}expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, {% endblock model_data_steps %} corrupt_final_model, add_model_to_empty_data, apply_dir_dep_fast, apply_dir_dep_slow, average, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} {% block full_image_steps %}premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
+pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, add_imaging_cols, regroup_shift_empty_map, {% block model_data_steps %}expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, {% endblock model_data_steps %} corrupt_final_model, add_model_to_empty_data, apply_dir_dep, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} {% block full_image_steps %}premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -166,49 +166,37 @@ add_model_to_empty_data.control.opts.mapfiles_in      =   [shift_empty.output.ma
 add_model_to_empty_data.control.opts.inputkeys        =   [file1,file2]
 add_model_to_empty_data.argument.flags                =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
 
-# apply the fast part of the dir-dependent gain solutions, length = nfiles
-apply_dir_dep_fast.control.type                       =   calibrate-stand-alone_new
-apply_dir_dep_fast.control.mapfiles_in                =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-apply_dir_dep_fast.control.inputkeys                  =   [inputms,inputparmdb]
-apply_dir_dep_fast.argument.observation               =   inputms
-apply_dir_dep_fast.argument.parset                    =   {{ parset_dir }}//facet_dirdep_apply_fast.parset
-apply_dir_dep_fast.argument.catalog                   =   {{ skymodel_dir }}/empty.skymodel
-apply_dir_dep_fast.argument.parmdb                    =   inputparmdb
-apply_dir_dep_fast.argument.replace-sourcedb          =   True
-apply_dir_dep_fast.argument.replace-parmdb            =   True
-apply_dir_dep_fast.argument.Strategy.InputColumn      =   FACET_DATA_ALL
-
-# apply the slow part of the dir-dependent gain solutions, length = nfiles
-apply_dir_dep_slow.control.type                       =   calibrate-stand-alone_new
-apply_dir_dep_slow.control.mapfiles_in                =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-apply_dir_dep_slow.control.inputkeys                  =   [inputms,inputparmdb]
-apply_dir_dep_slow.argument.observation               =   inputms
-apply_dir_dep_slow.argument.parset                    =   {{ parset_dir }}//facet_dirdep_apply_slow.parset
-apply_dir_dep_slow.argument.catalog                   =   {{ skymodel_dir }}/empty.skymodel
-apply_dir_dep_slow.argument.parmdb                    =   inputparmdb
-apply_dir_dep_slow.argument.replace-sourcedb          =   True
-apply_dir_dep_slow.argument.replace-parmdb            =   True
-
-# average calibrated data to imaging resolution, length = nfiles
-average.control.type                                  =   dppp
-average.control.mapfile_in                            =   shift_empty.output.mapfile
-average.control.inputkey                              =   msin
-average.argument.numthreads                           =   {{ max_cpus_per_band }}
-average.argument.msin.datacolumn                      =   CORRECTED_DATA
-average.argument.msout.overwrite                      =   True
-average.argument.msout.writefullresflag               =   False
-average.argument.local_scratch_dir                    =   {{ local_dir }}
-average.argument.steps                                =   [flagzero,avg]
-average.argument.avg.type                             =   squash
-average.argument.avg.freqstep                         =   {{ facetimage_freqstep }}
-average.argument.avg.timestep                         =   {{ facetimage_timestep }}
-average.argument.flagzero.type                        =   preflagger
-average.argument.flagzero.amplmin                     =   1e-20
+# apply the direction-dependent solutions and average, length = nfiles
+apply_dir_dep.control.type                                 =   dppp
+apply_dir_dep.control.opts.mapfiles_in                     =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+apply_dir_dep.control.opts.inputkeys                       =   [msin,dir_dep_parmdb]
+apply_dir_dep.argument.numthreads                          =   {{ max_cpus_per_chunk }}
+apply_dir_dep.argument.msin.datacolumn                     =   FACET_DATA_ALL
+apply_dir_dep.argument.msout.overwrite                     =   True
+apply_dir_dep.argument.msout.writefullresflag              =   False
+apply_dir_dep.argument.local_scratch_dir                   =   {{ local_dir }}
+apply_dir_dep.argument.steps                               =   [correct_fast1,correct_fast2,correct_slow,flagzero,avg]
+apply_dir_dep.argument.correct_fast1.type                  =   applycal
+apply_dir_dep.argument.correct_fast1.parmdb                =   dir_dep_parmdb
+apply_dir_dep.argument.correct_fast1.correction            =   tec
+apply_dir_dep.argument.correct_fast1.invert                =   True
+apply_dir_dep.argument.correct_fast2.type                  =   applycal
+apply_dir_dep.argument.correct_fast2.parmdb                =   dir_dep_parmdb
+apply_dir_dep.argument.correct_fast2.correction            =   commonscalarphase
+apply_dir_dep.argument.correct_fast2.invert                =   True
+apply_dir_dep.argument.correct_slow.type                   =   applycal
+apply_dir_dep.argument.correct_slow.parmdb                 =   dir_dep_parmdb
+apply_dir_dep.argument.correct_slow.invert                 =   True
+apply_dir_dep.argument.flagzero.type                       =   preflagger
+apply_dir_dep.argument.flagzero.amplmin                    =   1e-20
+apply_dir_dep.argument.avg.type                            =   squash
+apply_dir_dep.argument.avg.freqstep                        =   {{ facetimage_freqstep }}
+apply_dir_dep.argument.avg.timestep                        =   {{ facetimage_timestep }}
 
 # make the compressed mapfile, length = 1
 create_compressed_mapfile.control.kind                =   plugin
 create_compressed_mapfile.control.type                =   compressMapfile
-create_compressed_mapfile.control.mapfile_in          =   average.output.mapfile
+create_compressed_mapfile.control.mapfile_in          =   apply_dir_dep.output.mapfile
 create_compressed_mapfile.control.mapfile_dir         =   input.output.mapfile_dir
 create_compressed_mapfile.control.filename            =   concat_averaged_input.mapfile
 
