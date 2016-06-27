@@ -1,48 +1,18 @@
-{% extends "facetimage_imgmodel_pipeline.parset" %}
-
-{% block model_data_steps %}concat_unaveraged, create_compressed_unaveraged, casa_ft4, {% endblock model_data_steps %}
-
-{% block full_image_steps %}virtual_concat_averaged, premask, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2{% endblock full_image_steps %}
-
-{% block model_data_parms %}
-## virtual concat of the re-grouped unaveraged data, length = some
-concat_unaveraged.control.type                    =   virtual_concat
-concat_unaveraged.control.mapfile_in              =   regroup_shift_empty_map.output.mapfile
-concat_unaveraged.control.inputkey                =   msfiles
-concat_unaveraged.control.outputkey               =   msconcat
-concat_unaveraged.argument.flags                  =   [msfiles,msconcat]
-
-# create a compressed mapfile with the virtual concated files, length = 1
-# needed because the following casa-step can run only once.
-create_compressed_unaveraged.control.kind         =   plugin
-create_compressed_unaveraged.control.type         =   compressMapfile
-create_compressed_unaveraged.control.mapfile_in   =   concat_unaveraged.output.mapfile
-create_compressed_unaveraged.control.mapfile_dir  =   input.output.mapfile_dir
-create_compressed_unaveraged.control.filename     =   concat_unaveraged_compressed.mapfile
-
-# make model visibilities on the unaveraged data, length = 1
-# can run only once, because (may) create files in the directory of input data
-casa_ft4.control.type                             =   casa
-casa_ft4.control.mapfiles_in                      =   [create_compressed_unaveraged.output.mapfile,{{ facet_model_mapfile }}]
-casa_ft4.control.inputkeys                        =   [inputms,modelimg]
-casa_ft4.control.arguments                        =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft_multi.py,modelimg,{{ nterms }},{{ facet_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py,inputms]
-{% endblock model_data_parms %}
-
+{% extends "facetpeelimage_pipeline.parset" %}
+{% block full_image_steps %}virtual_concat, premask, casa_image_full1, adjust_casa_mapfile, mask, casa_image_full2, adjust_casa_mapfile2{% endblock full_image_steps %}
+{% block ft_steps %}create_model4_map, regroup_add_all_map, concat_unaveraged, create_compressed_mapfile6, casa_ft{% endblock ft_steps %}
 {% block full_image_parms %}
+
 # make a virtual concatenated map, length = 1
-virtual_concat_averaged.control.type              =   virtual_concat
-{% if average_image_data %}
-virtual_concat_averaged.control.mapfile_in        =   concat_reaveraged_compressed_map.output.mapfile
-{% else %}
-virtual_concat_averaged.control.mapfile_in        =   {{ image_data_mapfile }}
-{% endif %}
-virtual_concat_averaged.control.inputkey          =   msfiles
-virtual_concat_averaged.control.outputkey         =   msconcat
-virtual_concat_averaged.argument.flags            =   [msfiles,msconcat]
+virtual_concat.control.type                       =   virtual_concat
+virtual_concat.control.mapfile_in                 =   concat_averaged_compressed_map.output.mapfile
+virtual_concat.control.inputkey                   =   msfiles
+virtual_concat.control.outputkey                  =   msconcat
+virtual_concat.argument.flags                     =   [msfiles,msconcat]
 
 # Make a preliminary clean mask from the facet region, length = 1
 premask.control.type                              =   make_clean_mask
-premask.control.mapfile_in                        =   {{ image_data_mapfile }}
+premask.control.mapfile_in                        =   concat_averaged_compressed_map.output.mapfile
 premask.control.inputkey                          =   imagefile
 premask.control.outputkey                         =   maskfile
 premask.argument.flags                            =   [imagefile,maskfile]
@@ -56,17 +26,17 @@ premask.argument.cellsize_deg                     =   {{ cellsize_facet_deg }}
 
 # image the virtual concatenated data, length = 1
 casa_image_full1.control.type                     =   casa_clean
-casa_image_full1.control.mapfiles_in              =   [virtual_concat_averaged.output.mapfile,premask.output.mapfile]
+casa_image_full1.control.mapfiles_in              =   [virtual_concat.output.mapfile,premask.output.mapfile]
 casa_image_full1.control.inputkeys                =   [clean.vis,clean.mask]
 casa_image_full1.control.outputkey                =   clean.imagename
 casa_image_full1.control.arguments                =   [--nologger,--nogui,-c]
 casa_image_full1.argument.clean.wprojplanes       =   {{ facet_wplanes }}
-casa_image_full1.argument.clean.uvrange           =   '>{{ facet_min_uv_lambda }}lambda'
+casa_image_full1.argument.clean.uvrange           =   '>{{ selfcal_min_uv_lambda }}lambda'
 casa_image_full1.argument.clean.nterms            =   {{ nterms }}
 casa_image_full1.argument.clean.niter             =   {{ casa_full1_image_niter }}
-casa_image_full1.argument.clean.threshold         =   '0mJy'
+casa_image_full1.argument.clean.threshold         =   '{{ casa_full_image_threshold_mjy }}'
 casa_image_full1.argument.clean.imsize            =   [{{ facet_imsize }}, {{ facet_imsize }}]
-casa_image_full1.argument.clean.cell              =   ['{{ cellsize_facet_deg * 3600.0 }}arcsec', '{{ cellsize_facet_deg * 3600.0 }}arcsec']
+casa_image_full1.argument.clean.cell              =   ['{{ cellsize_selfcal_deg * 3600.0 }}arcsec', '{{ cellsize_selfcal_deg * 3600.0 }}arcsec']
 casa_image_full1.argument.clean.robust            =   {{ robust_facet }}
 casa_image_full1.argument.clean.multiscale        =   {{ casa_full_multiscale }}
 casa_image_full1.argument.clean.selectdata        =   True
@@ -124,16 +94,16 @@ mask.argument.threshold_format                    =   str_with_units
 
 # image the virtual concatenated data with the updated mask, length = 1
 casa_image_full2.control.type                     =   casa_clean
-casa_image_full2.control.mapfiles_in              =   [virtual_concat_averaged.output.mapfile,mask.output.mapfile,mask.output.threshold_5sig.mapfile]
+casa_image_full2.control.mapfiles_in              =   [virtual_concat.output.mapfile,mask.output.mapfile,mask.output.threshold_5sig.mapfile]
 casa_image_full2.control.inputkeys                =   [clean.vis,clean.mask,clean.threshold]
 casa_image_full2.control.outputkey                =   clean.imagename
 casa_image_full2.control.arguments                =   [--nologger,--nogui,-c]
 casa_image_full2.argument.clean.wprojplanes       =   {{ facet_wplanes }}
-casa_image_full2.argument.clean.uvrange           =   '>{{ facet_min_uv_lambda }}lambda'
+casa_image_full2.argument.clean.uvrange           =   '>{{ selfcal_min_uv_lambda }}lambda'
 casa_image_full2.argument.clean.nterms            =   {{ nterms }}
 casa_image_full2.argument.clean.niter             =   {{ casa_full2_image_niter }}
 casa_image_full2.argument.clean.imsize            =   [{{ facet_imsize }}, {{ facet_imsize }}]
-casa_image_full2.argument.clean.cell              =   ['{{ cellsize_facet_deg * 3600.0 }}arcsec', '{{ cellsize_facet_deg * 3600.0 }}arcsec']
+casa_image_full2.argument.clean.cell              =   ['{{ cellsize_selfcal_deg * 3600.0 }}arcsec', '{{ cellsize_selfcal_deg * 3600.0 }}arcsec']
 casa_image_full2.argument.clean.robust            =   {{ robust_facet }}
 casa_image_full2.argument.clean.multiscale        =   {{ casa_full_multiscale }}
 casa_image_full2.argument.clean.selectdata        =   True
@@ -151,7 +121,7 @@ casa_image_full2.argument.clean.pbcor             =   False
 casa_image_full2.argument.clean.minpb             =   0.2
 casa_image_full2.argument.clean.npixels           =   0
 casa_image_full2.argument.clean.npercycle         =   100
-casa_image_full2.argument.clean.cyclefactor       =   2.5
+casa_image_full2.argument.clean.cyclefactor       =   3.0
 casa_image_full2.argument.clean.cyclespeedup      =   -1
 casa_image_full2.argument.clean.chaniter          =   False
 casa_image_full2.argument.clean.flatnoise         =   True
@@ -171,3 +141,48 @@ adjust_casa_mapfile2.control.append               =   {{ casa_suffix }}
 adjust_casa_mapfile2.control.mapfile_dir          =   input.output.mapfile_dir
 adjust_casa_mapfile2.control.filename             =   final_image.mapfile
 {% endblock full_image_parms %}
+
+{% block ft_parms %}
+# create a mapfile with the model image, length = 1
+create_model4_map.control.kind                    =   plugin
+create_model4_map.control.type                    =   trimMapfile
+create_model4_map.control.mapfile_in              =   casa_image_full2.output.casa_image_full2.model.mapfile
+create_model4_map.control.trim                    =   .model
+create_model4_map.control.mapfile_dir             =   input.output.mapfile_dir
+create_model4_map.control.filename                =   final_model_rootnames.mapfile
+
+# sort the "add_all" unaveraged data into groups that can be concatenated, length = some
+# needed because virtual concatenating all files results in a "too many open files" error.
+regroup_add_all_map.control.kind                  =   plugin
+regroup_add_all_map.control.type                  =   reGroupMapfile
+regroup_add_all_map.control.mapfile_in            =   add_all_facet_sources.output.mapfile
+regroup_add_all_map.control.mapfile_groups        =   create_msmulti_map.output.mapfile
+regroup_add_all_map.control.mapfile_dir           =   input.output.mapfile_dir
+regroup_add_all_map.control.join_max_files        =   100
+regroup_add_all_map.control.rotate_groups         =   True
+regroup_add_all_map.control.filename              =   regroup_add_all.mapfile
+
+## virtual concat of the re-grouped unaveraged data, length = some
+concat_unaveraged.control.type                    =   virtual_concat
+concat_unaveraged.control.mapfile_in              =   regroup_add_all_map.output.mapfile
+concat_unaveraged.control.inputkey                =   msfiles
+concat_unaveraged.control.outputkey               =   msconcat
+concat_unaveraged.argument.flags                  =   [msfiles,msconcat]
+
+# create a compressed mapfile with the virtual concated files, length = 1
+# needed because the following casa-step can run only once.
+create_compressed_mapfile6.control.kind           =   plugin
+create_compressed_mapfile6.control.type           =   compressMapfile
+create_compressed_mapfile6.control.mapfile_in     =   concat_unaveraged.output.mapfile
+create_compressed_mapfile6.control.mapfile_dir    =   input.output.mapfile_dir
+create_compressed_mapfile6.control.filename       =   concat_unaveraged_compressed.mapfile
+
+# make model visibilities on the unaveraged data, length = 1
+# can run only once, because (may) create files in the directory of input data
+casa_ft.control.type                              =   casa
+casa_ft.control.mapfiles_in                       =   [create_compressed_mapfile6.output.mapfile,create_model4_map.output.mapfile]
+casa_ft.control.inputkeys                         =   [inputms,modelimg]
+casa_ft.control.arguments                         =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft_multi.py,modelimg,{{ nterms }},{{ facet_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py,inputms]
+
+{% endblock ft_parms %}
+

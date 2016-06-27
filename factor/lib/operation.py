@@ -141,11 +141,11 @@ class Operation(object):
         if self.parset['cluster_specific']['clustertype'] == 'local':
             self.cfg_dict['remote'] = '[remote]\n'\
                 + 'method = local\n'\
-                + 'max_per_node = {0}\n'.format(self.direction.max_cpus_per_node)
+                + 'max_per_node = {0}\n'.format(self.parset['cluster_specific']['ncpu'])
         elif self.parset['cluster_specific']['clustertype'] == 'juropa_slurm':
             self.cfg_dict['remote'] = '[remote]\n'\
                 + 'method = slurm_srun\n'\
-                + 'max_per_node = {0}\n'.format(self.direction.max_cpus_per_node)
+                + 'max_per_node = {0}\n'.format(self.parset['cluster_specific']['ncpu'])
         elif self.parset['cluster_specific']['clustertype'] == 'pbs':
             self.cfg_dict['remote'] = ''
         else:
@@ -245,7 +245,7 @@ class Operation(object):
         """
         if self.name not in self.direction.started_operations:
             self.direction.started_operations.append(self.name)
-            self.direction.save_state()
+        self.direction.save_state()
 
 
     def set_completed(self):
@@ -254,4 +254,44 @@ class Operation(object):
         """
         if self.name not in self.direction.completed_operations:
             self.direction.completed_operations.append(self.name)
-            self.direction.save_state()
+        self.direction.save_state()
+
+
+    def check_existing_files(self, mapfile):
+        """
+        Checks if files in input mapfile exist
+
+        Paramters
+        ---------
+        mapfile : str
+            Filename of mapfile to check
+
+        Returns
+        -------
+        all_exist : bool
+            True if all files in mapfile exist, False if not
+
+        """
+        from lofarpipe.support.data_map import DataMap
+
+        all_exist = True
+        self.log.debug('Checking whether files referenced in {} exist...'.format(mapfile))
+        try:
+            datamap = DataMap.load(mapfile)
+            for item in datamap:
+                # Handle case in which item.file is a Python list
+                if item.file[0] == '[' and item.file[-1] == ']':
+                    files = item.file.strip('[]').split(',')
+                else:
+                    files = [item.file]
+                for f in files:
+                    if not os.path.exists(f):
+                        all_exist = False
+            if all_exist:
+                self.log.debug('...all files exist')
+            else:
+                self.log.debug('...one or more files not found')
+            return all_exist
+        except IOError:
+            self.log.debug('Could not read mapfile {}. Skipping it'.format(mapfile))
+            return False

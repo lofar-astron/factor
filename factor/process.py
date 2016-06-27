@@ -68,7 +68,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     # Prepare vis data
     bands = _set_up_bands(parset, test_run)
 
-    # Define directions and groups
+    # Set up directions and groups
     directions, direction_groups = _set_up_directions(parset, bands, dry_run,
     test_run, reset_directions, reset_operations)
 
@@ -79,14 +79,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     peel_directions.extend([d for d in directions if d.peel_calibrator])
     if len(peel_directions) > 0:
         log.info('Peeling {0} direction(s)'.format(len(peel_directions)))
-
-        # Combine the nodes and cores for the peeling operation
-        outlier_directions = factor.cluster.combine_nodes(peel_directions,
-            parset['cluster_specific']['node_list'],
-            parset['cluster_specific']['nimg_per_node'],
-            parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['wsclean_fmem'],
-            len(bands))
 
         # Do the peeling
         for d in peel_directions:
@@ -133,7 +125,10 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         direction_group_reset = [d for d in direction_group if d.do_reset]
         direction_group_reset_facetsub = [d for d in direction_group_reset if
             'facetsub' in d.completed_operations]
-        if len(direction_group_reset_facetsub) > 0:
+        if (len(direction_group_reset_facetsub) > 0 and
+            ('facetselfcal' in reset_operations or
+            'facetsub' in reset_operations or
+            'facetsubreset' in reset_operations)):
             for d in direction_group_reset_facetsub:
                 if ('facetsubreset' in d.completed_operations or
                     'facetsubreset' in reset_operations):
@@ -141,41 +136,31 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     # or is explicitly specified for reset (to allow one to resume
                     # facetsubreset instead of always resetting and restarting it)
                     d.reset_state('facetsubreset')
-
-                # Ensure that the subtracted data column is set the new one
-                # that facetsubreset produces
-                d.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
-
-            direction_group_reset_facetsub = factor.cluster.combine_nodes(
-                direction_group_reset_facetsub,
-                parset['cluster_specific']['node_list'],
-                parset['cluster_specific']['nimg_per_node'],
-                parset['cluster_specific']['ncpu'],
-                parset['cluster_specific']['wsclean_fmem'],
-                len(bands))
             ops = [FacetSubReset(parset, bands, d) for d in direction_group_reset_facetsub]
             for op in ops:
                 scheduler.run(op)
         for d in direction_group_reset:
             d.reset_state(['facetselfcal', 'facetsub'])
 
-        # Divide up the nodes and cores among the directions for the parallel
-        # selfcal operations
-        direction_group = factor.cluster.divide_nodes(direction_group,
-            parset['cluster_specific']['node_list'],
-            parset['cluster_specific']['ndir_per_node'],
-            parset['cluster_specific']['nimg_per_node'],
-            parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['wsclean_fmem'],
-            len(bands))
+        # Check for any directions within transfer radius that have successfully
+        # gone through selfcal
+        dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
+        if len(dirs_with_selfcal) > 0:
+            for d in direction_group:
+                nearest, sep = factor.directions.find_nearest(d, dirs_with_selfcal)
+                if sep < parset['direction_specific']['transfer_radius_deg']:
+                    log.debug('Initializing self calibration for direction {0} with '
+                        'solutions from direction {1}.'.format(d.name, nearest.name))
+                    d.dir_dep_parmdb_mapfile = nearest.dir_dep_parmdb_mapfile
+                    d.save_state()
+                    d.transfer_nearest_solutions = True
 
         # Do selfcal or peeling on calibrator only
-        to_peel = [d for d in direction_group if d.peel_calibrator]
-        to_selfcal = [d for d in direction_group if not d.peel_calibrator]
         ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
         scheduler.run(ops)
+
         if dry_run:
-            # For dryrun, skip check
+            # For dryrun, skip selfcal verification
             for d in direction_group:
                 d.selfcal_ok = True
         direction_group_ok = [d for d in direction_group if d.selfcal_ok]
@@ -187,14 +172,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     if d.name != direction_group_ok[0].name:
                         d.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
                 set_sub_data_colname = False
-
-        # Combine the nodes and cores for the serial subtract operations
-        direction_group_ok = factor.cluster.combine_nodes(direction_group_ok,
-            parset['cluster_specific']['node_list'],
-            parset['cluster_specific']['nimg_per_node'],
-            parset['cluster_specific']['ncpu'],
-            parset['cluster_specific']['wsclean_fmem'],
-            len(bands))
 
         # Subtract final model(s) for directions for which selfcal went OK
         ops = [FacetSub(parset, bands, d) for d in direction_group_ok]
@@ -216,7 +193,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         log.error('Self calibration failed for all directions. Exiting...')
         sys.exit(1)
 
-    # (Re)image facets for each set of cellsize, robust, and taper settings
+    # (Re)image facets for each set of cellsize, robust, taper, and uv cut settings
     dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
     dirs_with_selfcal_to_reimage = [d for d in dirs_with_selfcal if not d.is_patch
         and not d.is_outlier]
@@ -228,8 +205,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     for d in dirs_without_selfcal:
         # Search for nearest direction with successful selfcal
         nearest, sep = factor.directions.find_nearest(d, dirs_with_selfcal)
-        log.debug('Using solutions from direction {0} for direction {1}.'.format(
-            nearest.name, d.name))
+        log.debug('Using solutions from direction {0} for direction {1} '
+            '(separation = {2} deg).'.format(nearest.name, d.name, sep))
         d.dir_dep_parmdb_mapfile = nearest.dir_dep_parmdb_mapfile
         d.save_state()
 
@@ -238,16 +215,20 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         tapers = parset['imaging_specific']['facet_taper_arcsec']
         robusts = parset['imaging_specific']['facet_robust']
         min_uvs = parset['imaging_specific']['facet_min_uv_lambda']
+        nimages = len(cellsizes)
 
-        for cellsize_arcsec, taper_arcsec, robust, min_uv_lambda in zip(cellsizes,
-            tapers, robusts, min_uvs):
+        for image_indx, (cellsize_arcsec, taper_arcsec, robust, min_uv_lambda) in enumerate(
+            zip(cellsizes, tapers, robusts, min_uvs)):
             # Always image directions that did not go through selfcal
             dirs_to_image = dirs_without_selfcal[:]
 
             # Only reimage facets with selfcal imaging parameters if reimage_selfcal flag is set
+            if parset['imaging_specific']['facet_imager'] == 'wsclean':
+                selfcal_robust = parset['imaging_specific']['selfcal_robust_wsclean']
+            else:
+                selfcal_robust = parset['imaging_specific']['selfcal_robust']
             if (cellsize_arcsec == parset['imaging_specific']['selfcal_cellsize_arcsec'] and
-                robust == parset['imaging_specific']['selfcal_robust'] and
-                taper_arcsec == 0.0):
+                robust == selfcal_robust and taper_arcsec == 0.0):
                 if parset['imaging_specific']['reimage_selfcaled']:
                     dirs_to_image += dirs_with_selfcal_to_reimage
             else:
@@ -260,41 +241,21 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 log.info('Imaging the following direction(s):')
                 log.info('{0}'.format([d.name for d in dirs_to_image]))
 
-            # Set up reset of any directions that need it
+            # Reset facetimage op for any directions that need it
             directions_reset = [d for d in dirs_to_image if d.do_reset]
             for d in directions_reset:
-                if (cellsize_arcsec != parset['imaging_specific']['selfcal_cellsize_arcsec'] or
-                    robust != parset['imaging_specific']['selfcal_robust'] or
-                    taper_arcsec != 0.0):
-                    name = 'facetimage_c{1}r{2}t{3}'.format(round(cellsize_arcsec,1),
-                            round(robust,2), round(taper_arcsec,1))
-                else:
-                    name = 'facetimage'
-                d.reset_state(name)
+                op = FacetImage(parset, bands, d, cellsize_arcsec, robust,
+                    taper_arcsec, min_uv_lambda)
+                d.reset_state(op.name)
 
-            # Group directions. This is done to ensure that multiple directions
-            # aren't competing for the same resources
-            ndir_simul = (len(parset['cluster_specific']['node_list']) *
-                parset['cluster_specific']['ndir_per_node'])
-            for i in range(int(np.ceil(len(dirs_to_image)/float(ndir_simul)))):
-                dir_group = dirs_to_image[i*ndir_simul:(i+1)*ndir_simul]
+            # Do facet imaging
+            ops = [FacetImage(parset, bands, d, cellsize_arcsec, robust,
+                taper_arcsec, min_uv_lambda) for d in dirs_to_image]
+            scheduler.run(ops)
 
-                # Divide up the nodes and cores among the directions for the parallel
-                # imaging operations
-                dir_group = factor.cluster.divide_nodes(dir_group,
-                    parset['cluster_specific']['node_list'],
-                    parset['cluster_specific']['ndir_per_node'],
-                    parset['cluster_specific']['nimg_per_node'],
-                    parset['cluster_specific']['ncpu'],
-                    parset['cluster_specific']['wsclean_fmem'],
-                    len(bands))
-
-                # Do facet imaging
-                ops = [FacetImage(parset, bands, d, cellsize_arcsec, robust,
-                    taper_arcsec, min_uv_lambda) for d in dir_group]
-                scheduler.run(ops)
-
-            # Mosaic the final facet images together
+        # Mosaic the final facet images together
+        for i, (cellsize_arcsec, taper_arcsec, robust, min_uv_lambda) in enumerate(
+            zip(cellsizes, tapers, robusts, min_uvs)):
             if parset['imaging_specific']['make_mosaic']:
                 # Make direction object for the field and load previous state (if any)
                 field = Direction('field', bands[0].ra, bands[0].dec,
@@ -307,13 +268,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
                 # Reset the field direction if specified
                 if 'field' in reset_directions:
-                    if (cellsize_arcsec != parset['imaging_specific']['selfcal_cellsize_arcsec'] or
-                        robust != parset['imaging_specific']['selfcal_robust'] or
-                        taper_arcsec != 0.0):
-                        name = 'fieldmosaic_c{1}r{2}t{3}'.format(round(cellsize_arcsec,1),
-                                round(robust,2), round(taper_arcsec,1))
-                    else:
-                        field.reset_state('fieldmosaic')
+                    op = FieldMosaic(parset, bands, field, cellsize_arcsec, robust,
+                        taper_arcsec, min_uv_lambda)
+                    field.reset_state(op.name)
 
                 field.facet_image_filenames = []
                 field.facet_vertices_filenames = []
@@ -322,14 +279,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                         facet_image = DataMap.load(d.facet_image_mapfile)[0].file
                         field.facet_image_filenames.append(facet_image)
                         field.facet_vertices_filenames.append(d.save_file)
-
-                # Combine the nodes and cores for the mosaic operation
-                field = factor.cluster.combine_nodes([field],
-                    parset['cluster_specific']['node_list'],
-                    parset['cluster_specific']['nimg_per_node'],
-                    parset['cluster_specific']['ncpu'],
-                    parset['cluster_specific']['wsclean_fmem'],
-                    len(bands))[0]
 
                 # Do mosaicking
                 op = FieldMosaic(parset, bands, field, cellsize_arcsec, robust,
@@ -363,19 +312,20 @@ def _set_up_compute_parameters(parset, dry_run=False):
         log.warn('Did not find \"clusterdesc_file\" in parset-dict! This shouldn\'t happen, but trying to continue anyhow.')
         parset['cluster_specific']['clusterdesc'] = 'local.clusterdesc'
     else:
-        if cluster_parset['clusterdesc_file'].lower() == 'pbs' or ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'pbs'):
-            log.info('Using cluster setting: \"PBS\".')
+        if (cluster_parset['clusterdesc_file'].lower() == 'pbs' or
+            ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'pbs')):
+            log.info('Using cluster setting: "PBS".')
             parset['cluster_specific']['clusterdesc'] = factor.cluster.make_pbs_clusterdesc()
             parset['cluster_specific']['clustertype'] = 'pbs'
-        elif cluster_parset['clusterdesc_file'].lower() == 'juropa_slurm' \
-                or ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'juropa_slurm'):
-            log.info('Using cluster setting: \"JUROPA_slurm\" (Single genericpipeline using multiple nodes).')
+        elif (cluster_parset['clusterdesc_file'].lower() == 'juropa_slurm' or
+            ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'juropa_slurm')):
+            log.info('Using cluster setting: "JUROPA_slurm" (Single genericpipeline using multiple nodes).')
             # slurm_srun on JUROPA uses the local.clusterdesc
-            parset['cluster_specific']['clusterdesc'] = parset['lofarroot'] + '/share/local.clusterdesc'
+            parset['cluster_specific']['clusterdesc'] = os.path.join(parset['lofarroot'], 'share', 'local.clusterdesc')
             parset['cluster_specific']['clustertype'] = 'juropa_slurm'
             parset['cluster_specific']['node_list'] = ['localhost']
         else:
-            log.info('Using cluster setting: \"local\" (Single node).')
+            log.info('Using cluster setting: "local" (Single node).')
             parset['cluster_specific']['clusterdesc'] = cluster_parset['clusterdesc_file']
             parset['cluster_specific']['clustertype'] = 'local'
     if not 'node_list' in parset['cluster_specific']:

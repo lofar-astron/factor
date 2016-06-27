@@ -178,10 +178,11 @@ def get_global_options(parset):
     if 'facet_imager' in parset_dict:
         parset._sections['imaging']['facet_imager'] = parset_dict['facet_imager']
 
-    # Keep calibrated data for each facet to allow re-imaging by hand (default =
-    # True for averaged data and False for unaveraged data). If a target is
-    # specified (see below), the averaged data for the target is always kept,
-    # regardless of this setting
+    # Keep calibrated data for each facet (default = True for averaged data and
+    # False for unaveraged data). If a target is specified (see below), the averaged
+    # data for the target is always kept, regardless of this setting. If the
+    # averaged data are kept, reimaging will be dramatically faster if multiple
+    # images per facet are made
     if 'keep_avg_facet_data' in parset_dict:
         parset_dict['keep_avg_facet_data'] = parset.getboolean('global', 'keep_avg_facet_data')
     else:
@@ -443,6 +444,18 @@ def get_imaging_options(parset):
     else:
         parset_dict['wsclean_nchannels_factor'] = 4
 
+    # Allow flagged data to be added during WSClean imaging to allow
+    # wsclean_nchannels_factor to be a divisor of the number bands (default = True).
+    # Enabling this option can dramatically speed up imaging with WSClean when the
+    # number of bands before padding does not allow wsclean_nchannels_factor to be
+    # greater than 1 (e.g., wsclean_nchannels_factor must be 1 to be an even divisor
+    # of 29 bands, so activating this option would add 1 band of flagged data to
+    # produce 30 bands, which will work with wsclean_nchannels_factor = 3, 5, or 6)
+    if 'wsclean_add_bands' in parset_dict:
+        parset_dict['wsclean_add_bands'] = parset.getboolean('imaging', 'wsclean_add_bands')
+    else:
+        parset_dict['wsclean_add_bands'] = True
+
     # Use WSClean or CASA for imaging of entire facet (default = wsclean). For large
     # bandwidths, the CASA imager is typically faster
     if 'facet_imager' not in parset_dict:
@@ -542,6 +555,11 @@ def get_imaging_options(parset):
     if 'facet_taper_arcsec' not in parset_dict:
         parset_dict['facet_taper_arcsec'] = [0.0] * nvals
     if 'facet_robust' not in parset_dict:
+        if parset_dict['facet_imager'] == 'wsclean':
+            selfcal_robust = parset_dict['selfcal_robust_wsclean']
+        else:
+            selfcal_robust = parset_dict['selfcal_robust']
+
         parset_dict['facet_robust'] = [parset_dict['selfcal_robust']] * nvals
     if 'facet_min_uv_lambda' not in parset_dict:
         parset_dict['facet_min_uv_lambda'] = [parset_dict['selfcal_min_uv_lambda']] * nvals
@@ -564,7 +582,7 @@ def get_imaging_options(parset):
         'selfcal_robust_wsclean', 'selfcal_clean_threshold', 'selfcal_adaptive_threshold',
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
         'reimage_selfcaled', 'wsclean_image_padding', 'wsclean_model_padding',
-        'selfcal_min_uv_lambda', 'facet_min_uv_lambda',
+        'selfcal_min_uv_lambda', 'facet_min_uv_lambda', 'wsclean_add_bands',
         'selfcal_robust_wsclean']
     for option in given_options:
         if option not in allowed_options:
@@ -845,11 +863,10 @@ def get_cluster_options(parset):
         parset_dict['wsclean_fmem'] = 0.9
     log.info("Using up to {0}% of the memory per node for WSClean jobs".format(parset_dict['wsclean_fmem']*100.0))
 
-    # Number of directions to process in parallel on each node (default = 1). If
-    # directions are split into groups to be processed in parallel (with the
-    # groupings parameter), this parameter controls how many directions are run
-    # simultaneously on a single node. Note that the number of CPUs (set with the
-    # ncpu parameter) will be divided among the directions on each node
+    # Maximum number of directions to process in parallel on each node (default =
+    # 1). Note that the number of CPUs (set with the ncpu parameter) and the amount
+    # of memory available to WSClean (set with the wsclean_fmem parameter) will be
+    # divided among the directions on each node
     if 'ndir_per_node' in parset_dict:
         parset_dict['ndir_per_node'] = parset.getint('cluster',
             'ndir_per_node')
@@ -857,15 +874,6 @@ def get_cluster_options(parset):
         parset_dict['ndir_per_node'] = 1
     log.info("Processing up to %s direction(s) in parallel per node" %
         (parset_dict['ndir_per_node']))
-
-    # Number of imager jobs to run per node (affects initsubtract and facetimage
-    # operationa; default = 1). If your nodes have many CPUs and > 32 GB of memory,
-    # it may be advantageous to set this to 2 or more
-    if 'nimg_per_node' in parset_dict:
-        parset_dict['nimg_per_node'] = parset.getint('cluster',
-            'nimg_per_node')
-    else:
-        parset_dict['nimg_per_node'] = 1
 
     # Full path to cluster description file. Use clusterdesc_file = PBS to use the
     # PBS / torque reserved nodes. If not given, the clusterdesc file for a single
@@ -888,7 +896,7 @@ def get_cluster_options(parset):
 
     # Check for unused options
     allowed_options = ['ncpu', 'fmem', 'wsclean_fmem', 'ndir_per_node',
-        'nimg_per_node', 'clusterdesc_file', 'cluster_type', 'dir_local',
+        'clusterdesc_file', 'cluster_type', 'dir_local',
         'node_list', 'lofarroot', 'lofarpythonpath']
     for option in given_options:
         if option not in allowed_options:

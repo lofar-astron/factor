@@ -9,6 +9,15 @@ from factor.lib.polygon import Polygon
 import sys
 from scipy.spatial import Delaunay
 
+#multiprocessing required to faster uniformity search
+from multiprocessing import Pool
+#for groupSize calculation
+from scipy.special import binom
+#for uniformity search
+import itertools
+import time
+
+
 
 log = logging.getLogger('factor:directions')
 
@@ -117,6 +126,267 @@ def directions_read(directions_file, factor_working_dir):
 
     return data
 
+
+def chooseGroupSize(K,ncpu=1,timeFactor=32*11.7/3.17e6,maxTime=None,minGroupSize=5,plot=False):
+    '''
+    The sum of uniformly distributed ensembles should be uniform, so choose
+    groupSizes to search within maxTime. Chooses the partitioning of
+    combinatorial space to search for uniform calibrators in terms of a
+    groupSize <= K and a searchDepth. I.e. we search for groupSize uniformly
+    distributed calibrators from the first groupSize+searchDepth flux sorted
+    calibrators The number of operations scales as : (groupSize + searchDepth)
+    Choose (groupSize) = (groupSize + searchDepth)! / (searchDepth! *
+    groupSize!) Assumuption is that if we sort the calibrators by flux then
+    uniformly selecting the first groupSize calibrators is more valuable than
+    waiting for a complete search that includes the weaker calibrators. We then
+    iteratively choose chunks of remaining flux sorted calibrators.
+
+    Parameters
+    ----------
+    K : int
+        Number of calibrators that will need to be selected.
+    ncpu : int, optional
+        Number of threads that can be run.
+    timeFactor : float, optional
+        Convert complexity to time (I calibrated on Leiden Paracluster)
+        Calibrated for big enough groupSize0,searchDepth0 as
+        Ncpu*time(groupSize0,searchDepth0)[seconds]/computations(groupSize0,
+        searchDepth0)
+    maxTime : float, optional
+        Max time in minutes to let it run approximately
+    minGroupSize : int, optional
+        Have at least this many per searchGroup
+    '''
+    groupSize = minGroupSize
+    if maxTime is None:
+        maxTime = np.inf
+    G,N = [],[]
+    while groupSize < K:
+        computeSize = (groupSize*(groupSize - 1)/2.)**2
+        for n in [2,3,4,5]:
+            if (K % groupSize) < minGroupSize + n:#remainder will be less than 5 (so not good uniformity)
+                groupSize += 1
+                continue
+            searchSize = groupSize + n
+            nCr = binom(searchSize,groupSize)
+            computeTime = timeFactor*computeSize*nCr/float(ncpu)*float(K)/groupSize
+            if computeTime < maxTime:
+                G.append(groupSize)
+                N.append(n)
+        groupSize += 1
+
+    if len(G) == 0:#try lower constraint
+        resG,resN = chooseGroupSize(K,ncpu=ncpu,timeFactor=timeFactor,maxTime=maxTime,minGroupSize=minGroupSize - 1)
+        return resG,resN
+    N = np.array(N)
+    G = np.array(G)
+    maxInd = np.argmax(G)
+    resG = G[maxInd]
+    resN = np.max(N[G==resG])
+    log.info("Using search groupSize and searchDepth: %d %d"%(resG,resN))
+    return resG,resN
+
+def NU(arg):
+    '''
+    L2 non-uniformity of the spacings between the calibrators.
+    arg is a nest tuple for multiprocessing. This could be sped up definitely by precomputing spacings,
+    essentially getting rid of the nest while loops. Ask Joshua Albert
+    '''
+    cals = arg[0]#idicies of calibrators to calculate over
+    subarg = arg[1]#nest tuple
+    x = subarg[0]#ra of all calibrators
+    y = subarg[1]#dec of all calibrators
+    numClusters = np.size(cals)#number of calibrators
+    if numClusters == 1:#otherwise you get divide by zero
+        nonuni = numClusters**2/(numClusters**4*(numClusters**2 - 2*numClusters + 3)**2/4.)
+        return nonuni
+
+    #get nyquist sampling size
+    maxU = 0.
+    maxV = 0.
+    i = 0
+    while i < numClusters:
+        ic = cals[i]#Index of calibrator
+        j = 0
+        while j < numClusters:
+            jc = cals[j]#Index of cal_j
+            maxU = max(np.abs(x[ic] - x[jc]),maxU)
+            maxV = max(np.abs(y[ic] - y[jc]),maxV)
+            j += 1
+        i += 1
+    dU_ = 2./maxU
+    dV_ = 2./maxV
+    vecU_ = np.linspace(-numClusters*dU_,numClusters*dU_,2*numClusters+1)
+    vecV_ = np.linspace(-numClusters*dV_,numClusters*dV_,2*numClusters+1)
+    #S_uv carries information on distribution.
+    S_uv = np.ones([np.size(vecU_),np.size(vecV_)])*numClusters**2
+    U_,V_ = np.meshgrid(vecU_,vecV_)
+    ip = 0
+    while ip < numClusters:
+        ipc = cals[ip]
+        jp = 0
+        while jp < numClusters:
+            jpc = cals[jp]
+            i = 0
+            while i < ip:
+                ic = cals[i]
+                j = 0
+                while j < jp:
+                    jc = cals[j]
+                    #was too lazy to efficiently code this loop, precomputing things is possible
+                    S_uv += 2.*np.cos((x[ic]-x[jc] - x[ipc]+x[jpc])*U_ + (y[ic]-y[jc] - y[ipc]+y[jpc])*V_)
+                    j += 1
+                i += 1
+            jp += 1
+        ip += 1
+    S_mu = np.mean(S_uv)
+    nonuni = np.sum(np.abs(S_uv - S_mu)**2)/(numClusters**4*(numClusters**2 - 2*numClusters + 3)**2/4.)
+    return nonuni
+
+def make_directions_file_from_skymodel_uniform(s, flux_min_Jy, size_max_arcmin,
+    directions_separation_max_arcmin, directions_max_num=None, interactive=False,
+    flux_min_for_merging_Jy=0.1,ncpu=1,maxTime=5.,groupSize=None,searchDepth=None):
+    """
+    (parallel using mp)
+    Selects appropriate calibrators from sky models and makes the directions file
+
+    Parameters
+    ----------
+    s : LSMTool SkyModel object
+        Skymodel made by grouping clean components of dir-independent model
+    flux_min_Jy : float
+        Minimum flux density for a calibrator in Jy
+    size_max_arcmin : float
+        Maximum size for a calibrator in arcmin
+    directions_separation_max_arcmin : float
+        Maximum separation in arcmin between two calibrators for gouping into a
+        single direction
+    directions_max_num : int, optional
+        Limit total number of directions to this value
+    interactive : bool, optional
+        If True, plot the directions and ask for approval
+    flux_min_for_merging_Jy : float, optional
+        Minimum flux density for a source to be considered for merging
+    ncpu : int, optional
+        Maximum number of threads to run uniformity optimization on
+    maxTime : float, optional
+        Maximum time in minutes to allow uniformity search, determines the
+        combinatorial depth. None -> up to infinite time and exact solution
+    groupSize : int, optional
+        size of iterative groups to search for to locate directions_max_num
+        final calibrators. Should be less than directions_max_num and greater
+        than ~15. The remainder of directions_max_num/groupSize should be large
+        so that the final iteration is meaningful.
+    searchDepth : int, optional
+        how deep to search iteratively. You will iteratively search groupSize + searchDepth
+        of the **remaining brightest** calbrators for uniformly distributed ones.
+
+    Returns
+    -------
+    directions_file : str
+        Filename of resulting Factor-formatted directions file
+
+    """
+    directions_file = 'factor_directions.txt'
+    ds9_directions_file = 'factor_directions_ds9.reg'
+
+    # Filter larger patches
+    sizes = s.getPatchSizes(units='arcmin', weight=True)
+    s.select(sizes < size_max_arcmin, aggregate=True, force=True)
+    if len(s) == 0:
+        log.critical("No sources found that meet the specified max size criteria.")
+        sys.exit(1)
+    log.info('Found {0} sources with sizes below {1} '
+        'arcmin'.format(len(s.getPatchNames()), size_max_arcmin))
+
+    # Filter fainter patches on merge flux-density limit
+    s.select('I > {0} Jy'.format(flux_min_for_merging_Jy), aggregate='sum', force=True)
+    if len(s) == 0:
+        log.critical("No sources found above {} Jy.".format(flux_min_for_merging_Jy))
+        sys.exit(1)
+    log.info('Found {0} sources with flux densities above {1} Jy'.format(
+        len(s.getPatchNames()), flux_min_for_merging_Jy))
+
+    # Look for nearby pairs
+    log.info('Merging sources within {0} arcmin of each other...'.format(
+        directions_separation_max_arcmin))
+    pRA, pDec = s.getPatchPositions(asArray=True)
+    for ra, dec in zip(pRA.tolist()[:], pDec.tolist()[:]):
+        dist = s.getDistance(ra, dec, byPatch=True, units='arcmin')
+        nearby = np.where(dist < directions_separation_max_arcmin)
+        if len(nearby[0]) > 1:
+            patches = s.getPatchNames()[nearby]
+            s.merge(patches.tolist())
+
+    # Filter fainter patches on user flux-density limit
+    s.select('I > {0} Jy'.format(flux_min_Jy), aggregate='sum', force=True)
+    if len(s) == 0:
+        log.critical("No sources or merged groups found that meet the specified "
+            "min total flux density criteria.")
+        sys.exit(1)
+    log.info('Found {0} sources or merged groups with total flux densities above {1} Jy'.format(
+        len(s.getPatchNames()), flux_min_Jy))
+
+    ##
+    # Indead of just trimming to some max number in decending flux
+    # we calcualte a partitioning that minimizes L2 non-uniformity
+    # - ask Joshua Albert for details
+    ##
+    if directions_max_num is not None:
+        pRA, pDec = s.getPatchPositions(asArray=True)
+        dir_fluxes = s.getColValues('I', aggregate='sum').tolist()
+        dir_fluxes_sorted_arg = np.argsort(dir_fluxes)[::-1]#reverse view of sorted args
+
+        p = Pool(ncpu)
+        # if you want to set a time limit then let this do that, otherwise you might wait a long time.
+        # Will search iteratively in groups of (groupSize + searchDepth) for groupSize calibrators until directions_max_num are found or calibrator set is empty
+        if maxTime is not None:
+            groupSize,searchDepth = chooseGroupSize(directions_max_num,ncpu=ncpu,maxTime=maxTime)
+        else:
+            groupSize,searchDepth = directions_max_num, 5 #search the top (directions_max_num + 5) brightest for uniform selection
+        calibratorSet = []
+        while (len(calibratorSet) < directions_max_num) and (len(dir_fluxes) - len(calibratorSet) > 0):
+            searchGroup = dir_fluxes_sorted_arg[:min(groupSize+nDepth,np.size(dir_fluxes_sorted_arg))]
+            calibratorGroupCombinations = itertools.combinations(searchGroup,groupSize)
+            t1 = time.time()
+            NU_Grouping = p.map(NU,itertools.product(calibratorGroupCombinations,[[pRA,pDec]]))
+            log.info('Time for groupSearch: {0} was {1} seconds'.format(groupSize,(time.time()-t1)))
+            min_NU_i = np.argmin(NU_Grouping)
+            c = 0#retrieve the winner
+            while c <= min_NU_i:
+                combination = calibratorGroupCombinations.next()
+                c += 1
+            #Create new reduced list and iterate the next group until desired number selected
+            new_dir_fluxes_sorted_arg = []
+            for calibrator in dir_fluxes_sorted_arg:
+                if calibrator not in combination:
+                    new_dir_fluxes_sorted_arg.append(calibrator)
+                else:
+                    calibratorSet.append(calibrator)
+                dir_fluxes_sorted_arg = np.array(new_dir_fluxes_sorted_arg)
+        #calibratorSet contains the indices of the selected calibrators
+        #keep only indices that are in the set
+        selection = np.in1d(np.arange(np.size(s.getColValues('I', aggregate='sum').tolist())),calibratorSet)
+        patches = s.getPatchNames()[selection]
+        s.merge(patches.tolist())
+
+    if directions_max_num is not None:
+        dir_fluxes = s.getColValues('I', aggregate='sum')
+        dir_fluxes_sorted = dir_fluxes.tolist()
+        dir_fluxes_sorted.sort(reverse=True)
+        cut_jy = dir_fluxes_sorted[-1]
+        while len(dir_fluxes_sorted) > directions_max_num:
+            cut_jy = dir_fluxes_sorted.pop() + 0.00001
+        s.remove('I < {0} Jy'.format(cut_jy), aggregate='sum')
+
+    log.info('Kept {0} directions in total'.format(len(s.getPatchNames())))
+
+    # Write the file
+    s.setPatchPositions(method='mid')
+    log.info("Writing directions file: %s" % (directions_file))
+    s.write(fileName=directions_file, format='factor', sortBy='I', clobber=True)
+
+    return directions_file
 
 def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
     directions_separation_max_arcmin, directions_max_num=None, interactive=False,
@@ -1182,7 +1452,8 @@ def _float_approx_equal(x, y, tol=1e-18, rel=1e-7):
 
 
 def approx_equal(x, y, *args, **kwargs):
-    """approx_equal(float1, float2[, tol=1e-18, rel=1e-7]) -> True|False
+    """
+    approx_equal(float1, float2[, tol=1e-18, rel=1e-7]) -> True|False
     approx_equal(obj1, obj2[, *args, **kwargs]) -> True|False
 
     Return True if x and y are approximately equal, otherwise False.

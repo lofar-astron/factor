@@ -128,10 +128,13 @@ class Direction(object):
         self.cleanup_mapfiles = []
         self.do_reset = False # whether to reset this direction
         self.is_patch = False # whether direction is just a patch (not full facet)
-        self.nchunks = 1
         self.num_selfcal_groups = 1
         self.timeSlotsPerParmUpdate = 100
         self.skymodel = None
+        self.use_existing_data = False
+        self.existing_data_freqstep = None
+        self.existing_data_timestep = None
+        self.average_image_data = False
 
         # Define some directories and files
         self.working_dir = factor_working_dir
@@ -171,7 +174,8 @@ class Direction(object):
 
     def set_imcal_parameters(self, parset, bands, facet_cellsize_arcsec=None,
         facet_robust=None, facet_taper_arcsec=None, facet_min_uv_lambda=None,
-        imaging_only=False):
+        imaging_only=False, use_existing_data=False, existing_data_freqstep=None,
+        existing_data_timestep=None):
         """
         Sets various parameters for imaging and calibration
 
@@ -189,6 +193,13 @@ class Direction(object):
             Taper in arcsec for facet imaging
         imaging_only : bool, optional
             If True, set only imaging-related parameters
+        use_existing_data : bool, optional
+            If True, existing, potentially averaged, data are to be used instead
+            of the unaveraged data
+        existing_data_freqstep : int, optional
+            The freqstep used to average the existing data
+        existing_data_timestep : int, optional
+            The timestep used to average the existing data
 
         """
         mean_freq_mhz = np.mean([b.freq for b in bands]) / 1e6
@@ -204,6 +215,14 @@ class Direction(object):
         nchan = bands[0].nchan
         timestep_sec = bands[0].timepersample
         ntimes = bands[0].minSamplesPerFile
+        if (use_existing_data and existing_data_freqstep is not None and
+            existing_data_timestep is not None):
+            # Adjust the above values to match the existing data if necessary
+            chan_width_hz *= existing_data_freqstep
+            nchan /= existing_data_freqstep
+            timestep_sec *= existing_data_timestep
+            ntimes /= existing_data_timestep
+
         nbands = len(bands)
         preaverage_flux_jy = parset['calibration_specific']['preaverage_flux_jy']
         tec_block_mhz = parset['calibration_specific']['tec_block_mhz']
@@ -252,10 +271,16 @@ class Direction(object):
         # Also define the image suffixes (which depend on whether or not
         # wide-band clean is done)
         if self.use_wideband:
-            self.wsclean_nchannels = nbands / wsclean_nchannels_factor
+            self.wsclean_nchannels = max(1, nbands / wsclean_nchannels_factor)
             nchan_after_avg = nchan * nbands / self.facetimage_freqstep
-            while nchan_after_avg % self.wsclean_nchannels:
-                self.wsclean_nchannels += 1
+            self.nband_pad = 0 # padding to allow self.wsclean_nchannels to be a divisor
+            if parset['imaging_specific']['wsclean_add_bands']:
+                while nchan_after_avg % self.wsclean_nchannels:
+                    self.nband_pad += 1
+                    nchan_after_avg = nchan * (nbands + self.nband_pad) / self.facetimage_freqstep
+            else:
+                while nchan_after_avg % self.wsclean_nchannels:
+                    self.wsclean_nchannels += 1
             if self.wsclean_nchannels > nbands:
                 self.wsclean_nchannels = nbands
             self.nterms = 2
@@ -263,6 +288,7 @@ class Direction(object):
             self.wsclean_suffix = '-MFS-image.fits'
         else:
             self.wsclean_nchannels = 1
+            self.nband_pad = 0
             self.nterms = 1
             self.casa_suffix = None
             self.wsclean_suffix = '-image.fits'

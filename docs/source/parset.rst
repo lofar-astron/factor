@@ -62,9 +62,11 @@ The available options are described below under their respective sections.
         internally derived DDE calibrators and facets.
 
     keep_avg_facet_data
-        Keep averaged calibrated data for each facet to allow re-imaging by hand (default =
-        ``True``). If a target is specified (see below), the averaged data for the target is always kept,
-        regardless of this setting.
+        Keep averaged calibrated data for each facet to allow re-imaging by hand
+        (default = ``True``). If a target is specified (see below), the averaged
+        data for the target is always kept, regardless of this setting. If the
+        averaged data are kept, reimaging will be dramatically faster if
+        multiple images per facet are made (e.g., at different scales)
 
     keep_unavg_facet_data
         Keep unaveraged calibrated data for each facet (default = ``False``).
@@ -166,6 +168,15 @@ The available options are described below under their respective sections.
         dividing the number of bands by the nearest divisor to this factor. Smaller
         values produce better results but require longer run times. Wide-band clean is
         activated when there are more than 5 bands.
+
+    wsclean_add_bands
+        Allow flagged data to be added during WSClean imaging to allow
+        :term:`wsclean_nchannels_factor` to be a divisor of the number bands (default = ``True``).
+        Enabling this option can dramatically speed up imaging with WSClean when the
+        number of bands before padding does not allow :term:`wsclean_nchannels_factor` to be
+        greater than 1 (e.g., :term:`wsclean_nchannels_factor` must be 1 to be an even divisor
+        of 29 bands, so activating this option would add 1 band of flagged data to
+        produce 30 bands, which will work with :term:`wsclean_nchannels_factor` = 3, 5, or 6)
 
     selfcal_cellsize_arcsec
         Self calibration pixel size in arcsec (default = 1.5).
@@ -305,7 +316,8 @@ The available options are described below under their respective sections.
 
     target_radius_arcmin
         Radius in arcmin of a circular region that encloses the target source (to ensure
-        that it falls entirely within a single facet; no default).
+        that it falls entirely within a single facet; no default). Note that :term:`check_edges`
+        must be True for the facet boundaries to be adjusted.
 
     target_has_own_facet
         The target can be placed in a facet of its own. In this case, it will
@@ -355,16 +367,11 @@ The available options are described below under their respective sections.
         Maximum fraction of the total memory per node that WSClean may use (default = 0.9).
 
     ndir_per_node
-        Number of directions to process in parallel on each node (default = 1). If
-        directions are split into groups to be processed in parallel (with the
-        groupings parameter), this parameter controls how many directions are run
-        simultaneously on a single node. Note that the number of CPUs (set with the
-        ncpu parameter) will be divided among the directions on each node.
-
-    nimg_per_node
-        Number of imager jobs to run per node (affects facetimage
-        operations; default = 1). If your nodes have many CPUs and > 32 GB of memory,
-        it may be advantageous to set this to 2 or more.
+        Maximum umber of directions to process in parallel on each node (default
+        = 1). Note that the number of CPUs (set with the
+        :term:`ncpu` parameter) and the amount of memory available to WSClean
+        :(set with the term:`wsclean_fmem` parameter) will be divided among the
+        :directions on each node.
 
 
 .. _parset_checkfactor_options:

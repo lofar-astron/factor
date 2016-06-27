@@ -34,10 +34,11 @@ dir_ms = /data/bands
 # internally derived DDE calibrators and facets
 # interactive = False
 
-# Keep calibrated data for each facet to allow re-imaging by hand (default =
-# True for averaged data and False for unaveraged data). If a target is
-# specified (see below), the averaged data for the target is always kept,
-# regardless of this setting
+# Keep calibrated data for each facet (default = True for averaged data and
+# False for unaveraged data). If a target is specified (see below), the averaged
+# data for the target is always kept, regardless of this setting. If the
+# averaged data are kept, reimaging will be dramatically faster if multiple
+# images per facet are made (e.g., at different scales)
 # keep_avg_facet_data = True
 # keep_unavg_facet_data = False
 
@@ -125,6 +126,15 @@ dir_ms = /data/bands
 # activated when there are more than 5 bands
 # wsclean_nchannels_factor = 4
 
+# Allow flagged data to be added during WSClean imaging to allow
+# wsclean_nchannels_factor to be a divisor of the number bands (default = True).
+# Enabling this option can dramatically speed up imaging with WSClean when the
+# number of bands before padding does not allow wsclean_nchannels_factor to be
+# greater than 1 (e.g., wsclean_nchannels_factor must be 1 to be an even divisor
+# of 29 bands, so activating this option would add 1 band of flagged data to
+# produce 30 bands, which will work with wsclean_nchannels_factor = 3, 5, or 6)
+# wsclean_add_bands = True
+
 # Selfcal imaging parameters: pixel size in arcsec (default = 1.5), Briggs
 # robust parameter (default = -0.25 for casa and -0.5 for wsclean), minimum uv
 # distance in lambda (default = 80), and multiscale clean scales (default = [0,
@@ -164,10 +174,11 @@ dir_ms = /data/bands
 # directions_file = /data/directions.txt
 
 # Full path to sky model (in makesourcedb format) to be used for calibrator
-# selection and facet-boundary source avoidance (default is to use
+# selection and facet-boundary source avoidance (default is to use re-grouped
 # direction-independent sky model of the highest-frequency band). The sky
-# model must be grouped into patches by source (in PyBDSM, this grouping can be
-# done by setting bbs_patches = 'source' in the write_catalog task)
+# model must be grouped into patches by source, it is not re-grouped like the
+# direction-independent sky model would be. (In PyBDSM, this grouping can be
+# done by setting bbs_patches = 'source' in the write_catalog task.)
 # faceting_skymodel = full_band.skymodel
 
 # Radius from phase center within which to consider sources as potential
@@ -227,7 +238,8 @@ flux_min_Jy = 0.3
 
 # A target can be specified to ensure that it falls entirely within a single
 # facet. The values should be those of a circular region that encloses the
-# source and not those of the target itself. Lastly, the target can be placed in
+# source and not those of the target itself. Note that check_edges must be True
+# for the facet boundaries to be adjusted. Lastly, the target can be placed in
 # a facet of its own. In this case, it will not go through selfcal but will
 # instead use the selfcal solutions of the nearest facet for which selfcal was
 # done
@@ -257,17 +269,11 @@ flux_min_Jy = 0.3
 # 0.9)
 # wsclean_fmem = 0.9
 
-# Number of directions to process in parallel on each node (default = 1). If
-# directions are split into groups to be processed in parallel (with the
-# groupings parameter), this parameter controls how many directions are run
-# simultaneously on a single node. Note that the number of CPUs (set with the
-# ncpu parameter) will be divided among the directions on each node
+# Maximum number of directions to process in parallel on each node (default =
+# 1). Note that the number of CPUs (set with the ncpu parameter) and the amount
+# of memory available to WSClean (set with the wsclean_fmem parameter) will be
+# divided among the directions on each node
 # ndir_per_node = 1
-
-# Number of imager jobs to run per node (affects facetimage operation; default =
-# 1). If your nodes have many CPUs and > 32 GB of memory, it may be advantageous
-# to set this to 2 or more
-# nimg_per_node = 1
 
 
 [ms1.ms]

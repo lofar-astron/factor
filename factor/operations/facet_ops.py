@@ -147,6 +147,14 @@ class FacetSelfcal(Operation):
             'shift_diff_model_to_field.mapfile')
         self.direction.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'verify_subtract.break.mapfile')
+        self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'concat_averaged_compressed.mapfile')
+
+        # We also need to save the averaging steps for the image_data, so that for
+        # any subsequent imaging runs that use these data, we can determine
+        # new averaging steps that will give the correct cumulative averaging
+        self.direction.full_res_facetimage_freqstep = self.direction.facetimage_freqstep
+        self.direction.full_res_facetimage_timestep = self.direction.facetimage_timestep
 
         # Store results of verify_subtract check. This will work if the verification
         # was done using multiple bands although we use only one at the moment
@@ -320,9 +328,12 @@ class FacetImage(Operation):
         # Set name from the facet imaging parameters. If the parameters are all
         # the same as those used for selfcal, just use 'FacetImage'; otherwise,
         # append the parameters
+        if parset['imaging_specific']['facet_imager'] == 'wsclean':
+            selfcal_robust = parset['imaging_specific']['selfcal_robust_wsclean']
+        else:
+            selfcal_robust = parset['imaging_specific']['selfcal_robust']
         if (cellsize_arcsec != parset['imaging_specific']['selfcal_cellsize_arcsec'] or
-            robust != parset['imaging_specific']['selfcal_robust'] or
-            taper_arcsec != 0.0 or
+            robust != selfcal_robust or taper_arcsec != 0.0 or
             min_uv_lambda != parset['imaging_specific']['selfcal_min_uv_lambda']):
             name = 'FacetImage_c{0}r{1}t{2}u{3}'.format(round(cellsize_arcsec, 1),
                     round(robust, 2), round(taper_arcsec, 1), round(min_uv_lambda, 1))
@@ -331,23 +342,65 @@ class FacetImage(Operation):
         super(FacetImage, self).__init__(parset, bands, direction,
             name=name)
 
+        # Set flag for full-resolution run (used in finalize() to ensure that averaging
+        # of the calibrated data is not too much for use by later imaging runs)
+        if cellsize_arcsec == parset['imaging_specific']['selfcal_cellsize_arcsec']:
+            self.full_res = True
+        else:
+            self.full_res = False
+
         # Set imager infix for pipeline parset names
         if self.parset['imaging_specific']['facet_imager'].lower() == 'casa':
             infix = '_casa'
         else:
             infix = ''
 
-        # Set the pipeline parset to use
+        # Check whether data files needed for imaging exist already or need to
+        # be regenerated
+        if hasattr(self.direction, 'image_data_mapfile'):
+            self.direction.use_existing_data = self.check_existing_files(self.direction.image_data_mapfile)
+            if (self.direction.use_existing_data and
+                'facetselfcal' in self.direction.image_data_mapfile and
+                self.parset['imaging_specific']['reimage_selfcaled']):
+                # Old data exist but are from facetselfcal. Since reimage_selfcal is True,
+                # we will not use these data but instead generate new updated ones
+                self.direction.use_existing_data = False
+
+                # Store mapfile for old data from selfcal for later clean up
+                self.direction.image_data_mapfile_selfcal = self.direction.image_data_mapfile
+        else:
+            self.direction.use_existing_data = False
+
+        # Set the pipeline parset and existing data to use
         if not self.direction.selfcal_ok:
             # Set parset template to sky-model parset
             self.pipeline_parset_template = 'facetimage_skymodel{}_pipeline.parset'.format(infix)
+
+            # Set mapfile to use for imaging
+            if not self.direction.use_existing_data:
+                self.direction.image_data_mapfile = 'concat_averaged_compressed_map.output.mapfile'
         else:
             # Set parset template to facet model-image parset
             self.pipeline_parset_template = 'facetimage_imgmodel{}_pipeline.parset'.format(infix)
 
+            # Set mapfile to use for imaging
+            if not self.direction.use_existing_data:
+                self.direction.image_data_mapfile = 'concat_averaged_compressed_map.output.mapfile'
+
         # Define extra parameters needed for this operation
         self.direction.set_imcal_parameters(parset, bands, cellsize_arcsec, robust,
-            taper_arcsec, min_uv_lambda, imaging_only=True)
+            taper_arcsec, min_uv_lambda, imaging_only=True,
+            use_existing_data=self.direction.use_existing_data,
+            existing_data_freqstep=self.direction.full_res_facetimage_freqstep,
+            existing_data_timestep=self.direction.full_res_facetimage_timestep)
+        if self.direction.use_existing_data:
+            self.log.debug('Suitable calibrated data exist and will be used for reimaging')
+            # Set flag that determines whether additional averaging is to be done
+            if (self.direction.facetimage_freqstep != 1 or self.direction.facetimage_timestep != 1):
+                self.direction.average_image_data = True
+        else:
+            self.log.debug('No suitable calibrated data exist for reimaging. They will be generated')
+
         ms_files = [band.files for band in self.bands]
         ms_files_single = []
         for bandfiles in ms_files:
@@ -374,22 +427,38 @@ class FacetImage(Operation):
         self.direction.facet_premask_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'premask.mapfile')
 
+        # Store the image_data_mapfile for use by other imaging runs. We do not
+        # update this if use_existing_data is True, as in this case it should
+        # point to the mapfile of the existing data for this direction. Also, we
+        # set this only if this is a full-res imaging run, to ensure that the
+        # averaging is not too much for use by later imaging runs
+        if not self.direction.use_existing_data and self.full_res:
+            self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
+                'concat_averaged_compressed.mapfile')
+
+            # We also need to save the averaging steps for these data, so that
+            # for the next imaging run, we can determine new averaging steps
+            # that will give the correct cumulative averaging
+            self.direction.full_res_facetimage_freqstep = self.direction.facetimage_freqstep
+            self.direction.full_res_facetimage_timestep = self.direction.facetimage_timestep
+
         # Delete temp data
         self.direction.cleanup_mapfiles = [
             os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_input.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'image1.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'sorted_groups.mapfile_groups')]
+            os.path.join(self.pipeline_mapfile_dir, 'corrupt_final_model.mapfile')]
         if not self.parset['keep_avg_facet_data'] and self.direction.name != 'target':
             # Add averaged calibrated data for the facet to files to be deleted.
             # These are only needed if the user wants to reimage by hand (e.g.,
-            # with a different weighting). They are always kept for the target
+            # with a different weighting) or for subsequent imaging runs. They
+            # are always kept for the target direction
             self.direction.cleanup_mapfiles.append(
                 os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_compressed.mapfile'))
+        if not self.direction.use_existing_data and hasattr(self.direction, 'image_data_mapfile_selfcal'):
+            # Add old data from selfcal to files to be deleted, as we have made new improved versions
+            self.direction.cleanup_mapfiles.append(self.direction.image_data_mapfile_selfcal)
         if not self.parset['keep_unavg_facet_data']:
-            # Add unaveraged calibrated data for the facet to files to be deleted.
-            # These are only needed if the user wants to phase shift them to
-            # another direction (e.g., to combine several facets together before
-            # imaging them all at once)
+            # Add unaveraged calibrated data for the facet to files to be deleted
             self.direction.cleanup_mapfiles.append(
                 os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'))
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
@@ -414,7 +483,7 @@ class FacetPeelImage(Operation):
             infix = ''
 
         # Set the pipeline parset to use
-        self.pipeline_parset_template = 'facetimage_skymodel{0}_pipeline.parset'.format(infix)
+        self.pipeline_parset_template = 'facetpeelimage{0}_pipeline.parset'.format(infix)
 
         # Define extra parameters needed for this operation
         self.direction.set_imcal_parameters(parset, bands, imaging_only=True)
@@ -453,8 +522,7 @@ class FacetPeelImage(Operation):
         # Delete temp data
         self.direction.cleanup_mapfiles = [
             os.path.join(self.pipeline_mapfile_dir, 'corrupt_final_model.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_input.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'sorted_groups.mapfile_groups')]
+            os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_input.mapfile')]
         if not self.parset['keep_avg_facet_data'] and self.direction.name != 'target':
             # Add averaged calibrated data for the facet to files to be deleted.
             # These are only needed if the user wants to reimage by hand (e.g.,
@@ -462,10 +530,7 @@ class FacetPeelImage(Operation):
             self.direction.cleanup_mapfiles.append(
                 os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_compressed.mapfile'))
         if not self.parset['keep_unavg_facet_data']:
-            # Add unaveraged calibrated data for the facet to files to be deleted.
-            # These are only needed if the user wants to phase shift them to
-            # another direction (e.g., to combine several facets together before
-            # imaging them all at once)
+            # Add unaveraged calibrated data for the facet to files to be deleted
             self.direction.cleanup_mapfiles.append(
                 os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'))
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
