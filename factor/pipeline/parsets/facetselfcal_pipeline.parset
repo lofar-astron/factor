@@ -414,7 +414,7 @@ casa_ft0.control.mapfiles_in                               =   [concat_chunks.ou
 casa_ft0.control.inputkeys                                 =   [inputms,modelimg]
 casa_ft0.control.arguments                                 =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft.py,inputms,modelimg,{{ nterms }},{{ cal_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py]
 
-# switch "normal" weights with block-average weigthts, length = ntimes
+# switch "normal" weights with block-average weights, length = ntimes
 switch_weights_col1.control.type                           =   switch_columns
 switch_weights_col1.control.mapfile_in                     =   concat_data.output.mapfile
 switch_weights_col1.control.inputkey                       =   msfiles
