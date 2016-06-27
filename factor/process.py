@@ -142,19 +142,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         for d in direction_group_reset:
             d.reset_state(['facetselfcal', 'facetsub'])
 
-        # Check for any directions within transfer radius that have successfully
-        # gone through selfcal
-        dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
-        if len(dirs_with_selfcal) > 0:
-            for d in direction_group:
-                nearest, sep = factor.directions.find_nearest(d, dirs_with_selfcal)
-                if sep < parset['direction_specific']['transfer_radius_deg']:
-                    log.debug('Initializing self calibration for direction {0} with '
-                        'solutions from direction {1}.'.format(d.name, nearest.name))
-                    d.dir_dep_parmdb_mapfile = nearest.dir_dep_parmdb_mapfile
-                    d.save_state()
-                    d.transfer_nearest_solutions = True
-
         # Do selfcal or peeling on calibrator only
         ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
         scheduler.run(ops)
