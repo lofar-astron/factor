@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, add_imaging_cols_empty, shift_cal, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, expand_parmdb_map, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, make_fast_phase_parmdb_map, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_slow_gain_parmdb_map, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_compressed_mapfile_ft, create_model4_map, blank_model, casa_ft4, {% else %} apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, sort_average5, sort_average5_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, add_imaging_cols_empty, shift_cal, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, expand_parmdb_map, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, make_fast_phase_parmdb_map, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_slow_gain_parmdb_map, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_compressed_mapfile_ft, create_model4_map, blank_model, casa_ft4, {% else %} apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -1419,72 +1419,60 @@ casa_ft4.control.arguments                                 =   [--nologger,--nog
 {% else %}
 
 # apply the fast part of the gain solutions, length = nfiles
-apply_dir_dep_fast.control.type                            =   calibrate-stand-alone_new
-apply_dir_dep_fast.control.mapfiles_in                     =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-apply_dir_dep_fast.control.inputkeys                       =   [inputms,inputparmdb]
-apply_dir_dep_fast.argument.observation                    =   inputms
-apply_dir_dep_fast.argument.parset                         =   {{ parset_dir }}/facet_dirdep_apply_fast.parset
-apply_dir_dep_fast.argument.catalog                        =   {{ skymodel_dir }}/empty.skymodel
-apply_dir_dep_fast.argument.parmdb                         =   inputparmdb
-apply_dir_dep_fast.argument.replace-sourcedb               =   True
-apply_dir_dep_fast.argument.replace-parmdb                 =   True
-apply_dir_dep_fast.argument.Strategy.InputColumn           =   FACET_DATA_ALL
-
-# apply the slow part of the gain solutions, length = nfiles
-apply_dir_dep_slow.control.type                            =   calibrate-stand-alone_new
-apply_dir_dep_slow.control.mapfiles_in                     =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-apply_dir_dep_slow.control.inputkeys                       =   [inputms,inputparmdb]
-apply_dir_dep_slow.argument.observation                    =   inputms
-apply_dir_dep_slow.argument.parset                         =   {{ parset_dir }}/facet_dirdep_apply_slow.parset
-apply_dir_dep_slow.argument.catalog                        =   {{ skymodel_dir }}/empty.skymodel
-apply_dir_dep_slow.argument.parmdb                         =   inputparmdb
-apply_dir_dep_slow.argument.replace-sourcedb               =   True
-apply_dir_dep_slow.argument.replace-parmdb                 =   True
-
-# average the corrected data, length = nfiles
-average5.control.type                                      =   dppp
-average5.control.mapfile_in                                =   shift_empty.output.mapfile
-average5.control.inputkey                                  =   msin
-average5.argument.numthreads                               =   {{ max_cpus_per_band }}
-average5.argument.msin.datacolumn                          =   CORRECTED_DATA
-average5.argument.msout.overwrite                          =   True
-average5.argument.msout.writefullresflag                   =   False
-average5.argument.local_scratch_dir                        =   {{ local_dir }}
-average5.argument.steps                                    =   [flagzero,avg]
-average5.argument.avg.type                                 =   squash
-average5.argument.avg.freqstep                             =   {{ facetimage_freqstep }}
-average5.argument.avg.timestep                             =   {{ facetimage_timestep }}
-average5.argument.flagzero.type                            =   preflagger
-average5.argument.flagzero.amplmin                         =   1e-20
+apply_dir_dep.control.type                                 =   dppp
+apply_dir_dep.control.opts.mapfiles_in                     =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+apply_dir_dep.control.opts.inputkeys                       =   [msin,dir_dep_parmdb]
+apply_dir_dep.argument.numthreads                          =   {{ max_cpus_per_chunk }}
+apply_dir_dep.argument.msin.datacolumn                     =   FACET_DATA_ALL
+apply_dir_dep.argument.msout.overwrite                     =   True
+apply_dir_dep.argument.msout.writefullresflag              =   False
+apply_dir_dep.argument.local_scratch_dir                   =   {{ local_dir }}
+apply_dir_dep.argument.steps                               =   [correct_fast1,correct_fast2,correct_slow,flagzero,avg]
+apply_dir_dep.argument.correct_fast1.type                  =   applycal
+apply_dir_dep.argument.correct_fast1.parmdb                =   dir_dep_parmdb
+apply_dir_dep.argument.correct_fast1.correction            =   tec
+apply_dir_dep.argument.correct_fast1.invert                =   True
+apply_dir_dep.argument.correct_fast2.type                  =   applycal
+apply_dir_dep.argument.correct_fast2.parmdb                =   dir_dep_parmdb
+apply_dir_dep.argument.correct_fast2.correction            =   commonscalarphase
+apply_dir_dep.argument.correct_fast2.invert                =   True
+apply_dir_dep.argument.correct_slow.type                   =   applycal
+apply_dir_dep.argument.correct_slow.parmdb                 =   dir_dep_parmdb
+apply_dir_dep.argument.correct_slow.invert                 =   True
+apply_dir_dep.argument.flagzero.type                       =   preflagger
+apply_dir_dep.argument.flagzero.amplmin                    =   1e-20
+apply_dir_dep.argument.avg.type                            =   squash
+apply_dir_dep.argument.avg.freqstep                        =   {{ facetimage_freqstep }}
+apply_dir_dep.argument.avg.timestep                        =   {{ facetimage_timestep }}
 
 # compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile5.control.kind                    =   plugin
 create_compressed_mapfile5.control.type                    =   compressMapfile
-create_compressed_mapfile5.control.mapfile_in              =   average5.output.mapfile
+create_compressed_mapfile5.control.mapfile_in              =   apply_dir_dep.output.mapfile
 create_compressed_mapfile5.control.mapfile_dir             =   input.output.mapfile_dir
 create_compressed_mapfile5.control.filename                =   concat_averaged_input.mapfile
 
 # sort compressed mapfile so that there is one group per timestamp, length = ntimes
 # not sure if this is needed / useful
-sort_average5.control.type                                 =   sort_times_into_freqGroups
-sort_average5.argument.flags                               =   [create_compressed_mapfile5.output.mapfile]
-sort_average5.argument.filename                            =   average5_sorted_groups.mapfile
-sort_average5.argument.mapfile_dir                         =   input.output.mapfile_dir
-sort_average5.argument.hosts                               =   {{ hosts }}
-sort_average5.argument.stepname                            =   sort_average5
-sort_average5.argument.nband_pad                           =   {{ nband_pad }}
+sort_averaged.control.type                                 =   sort_times_into_freqGroups
+sort_averaged.argument.flags                               =   [create_compressed_mapfile5.output.mapfile]
+sort_averaged.argument.filename                            =   apply_dir_dep_sorted_groups.mapfile
+sort_averaged.argument.mapfile_dir                         =   input.output.mapfile_dir
+sort_averaged.argument.hosts                               =   {{ hosts }}
+sort_averaged.argument.stepname                            =   sort_averaged
+sort_averaged.argument.nband_pad                           =   {{ nband_pad }}
 
 # convert the output of sort_average5 into usable mapfiles, len = 1 / ntimes
-sort_average5_maps.control.kind                            =   plugin
-sort_average5_maps.control.type                            =   mapfilenamesFromMapfiles
-sort_average5_maps.control.mapfile_groupmap                =   sort_average5.output.groupmapfile.mapfile
-sort_average5_maps.control.mapfile_filesmap                =   sort_average5.output.mapfile.mapfile
+sort_averaged_maps.control.kind                            =   plugin
+sort_averaged_maps.control.type                            =   mapfilenamesFromMapfiles
+sort_averaged_maps.control.mapfile_groupmap                =   sort_averaged.output.groupmapfile.mapfile
+sort_averaged_maps.control.mapfile_filesmap                =   sort_averaged.output.mapfile.mapfile
 
 # concatenate data in frequency, length = ntimes
 # not sure if this is needed / useful
 concat_averaged.control.type                               =   dppp
-concat_averaged.control.mapfile_out                        =   sort_average5_maps.output.groupmap
-concat_averaged.control.mapfile_in                         =   sort_average5_maps.output.filesmap
+concat_averaged.control.mapfile_out                        =   sort_averaged_maps.output.groupmap
+concat_averaged.control.mapfile_in                         =   sort_averaged_maps.output.filesmap
 concat_averaged.control.inputkey                           =   msin
 concat_averaged.argument.msin.datacolumn                   =   DATA
 concat_averaged.argument.msin.missingdata                  =   True
