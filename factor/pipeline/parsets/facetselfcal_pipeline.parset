@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, add_imaging_cols_empty, shift_cal, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, expand_parmdb_map, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, average1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, average2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_instrument_parmdb_map, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_compressed_mapfile_ft, create_model4_map, blank_model, casa_ft4, {% else %} apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, sort_average5, sort_average5_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, add_imaging_cols_empty, shift_cal, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, expand_parmdb_map, average0, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, make_fast_phase_parmdb_map, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_slow_gain_parmdb_map, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_compressed_mapfile_ft, create_model4_map, blank_model, casa_ft4, {% else %} apply_dir_dep_fast, apply_dir_dep_slow, average5, create_compressed_mapfile5, sort_average5, sort_average5_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -420,6 +420,15 @@ switch_weights_col1.control.mapfile_in                     =   concat_data.outpu
 switch_weights_col1.control.inputkey                       =   msfiles
 switch_weights_col1.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
+# generate mapfile for the fast-phase parmDBs generated in the solve_phaseonly steps
+make_fast_phase_parmdb_map.control.kind                    =  plugin
+make_fast_phase_parmdb_map.control.type                    =  createMapfile
+make_fast_phase_parmdb_map.control.method                  =  add_suffix_to_file
+make_fast_phase_parmdb_map.control.mapfile_in              =  concat_data.output.mapfile
+make_fast_phase_parmdb_map.control.add_suffix_to_file      =  /instrument
+make_fast_phase_parmdb_map.control.mapfile_dir             =  input.output.mapfile_dir
+make_fast_phase_parmdb_map.control.filename                =  fast_parmdb.mapfile
+
 # run BBS with model column on freq-concatenated files, length = ntimes
 solve_phaseonly1.control.type                              =   calibrate-stand-alone_new
 solve_phaseonly1.argument.observation                      =   concat_data.output.mapfile
@@ -438,33 +447,35 @@ switch_weights_col2.control.mapfile_in                     =   concat_data.outpu
 switch_weights_col2.control.inputkey                       =   msfiles
 switch_weights_col2.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
-# apply the solutions from the previous BBS-run, length = ntimes
-apply_phaseonly1.control.type                              =   calibrate-stand-alone_new
-apply_phaseonly1.argument.observation                      =   concat_data.output.mapfile
-apply_phaseonly1.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_apply.parset
-apply_phaseonly1.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
-
 ########## end of first round of selfcal
 ########## start of second round of selfcal
 
-# average the output pf the previous BBS step, length = ntimes
-average1.control.type                                      =   dppp
-average1.control.mapfile_in                                =   concat_data.output.mapfile
-average1.control.inputkey                                  =   msin
-average1.argument.numthreads                               =   {{ max_cpus_per_chunk }}
-average1.argument.msin.datacolumn                          =   CORRECTED_DATA
-average1.argument.msout.overwrite                          =   True
-average1.argument.msout.writefullresflag                   =   False
-average1.argument.local_scratch_dir                        =   {{ local_dir }}
-average1.argument.steps                                    =   [avg]
-average1.argument.avg.type                                 =   squash
-average1.argument.avg.freqstep                             =   1
-average1.argument.avg.timestep                             =   {{ facetselfcal_timestep }}
+# apply the previous calibration and average, length = ntimes
+apply_phaseonly1.control.type                              =   dppp
+apply_phaseonly1.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+apply_phaseonly1.control.opts.inputkeys                    =   [msin,parmdb]
+apply_phaseonly1.argument.numthreads                       =   {{ max_cpus_per_band }}
+apply_phaseonly1.argument.msin.datacolumn                  =   DATA
+apply_phaseonly1.argument.msout.overwrite                  =   True
+apply_phaseonly1.argument.msout.writefullresflag           =   False
+apply_phaseonly1.argument.local_scratch_dir                =   {{ local_dir }}
+apply_phaseonly1.argument.steps                            =   [correct_fast1,correct_fast2,avg]
+apply_phaseonly1.argument.correct_fast1.type               =   applycal
+apply_phaseonly1.argument.correct_fast1.parmdb             =   parmdb
+apply_phaseonly1.argument.correct_fast1.correction         =   tec
+apply_phaseonly1.argument.correct_fast1.invert             =   True
+apply_phaseonly1.argument.correct_fast2.type               =   applycal
+apply_phaseonly1.argument.correct_fast2.parmdb             =   parmdb
+apply_phaseonly1.argument.correct_fast2.correction         =   commonscalarphase
+apply_phaseonly1.argument.correct_fast2.invert             =   True
+apply_phaseonly1.argument.avg.type                         =   squash
+apply_phaseonly1.argument.avg.freqstep                     =   1
+apply_phaseonly1.argument.avg.timestep                     =   {{ facetselfcal_timestep }}
 
 # make compressed mapfile of averaged data, length = 1
 create_compressed_mapfile1.control.kind                    =   plugin
 create_compressed_mapfile1.control.type                    =   compressMapfile
-create_compressed_mapfile1.control.mapfile_in              =   average1.output.mapfile
+create_compressed_mapfile1.control.mapfile_in              =   apply_phaseonly1.output.mapfile
 create_compressed_mapfile1.control.mapfile_dir             =   input.output.mapfile_dir
 create_compressed_mapfile1.control.filename                =   concat1_input.mapfile
 
@@ -622,33 +633,35 @@ switch_weights_col4.control.mapfile_in                     =   concat_data.outpu
 switch_weights_col4.control.inputkey                       =   msfiles
 switch_weights_col4.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
-# apply the solutions from the previous BBS-run, length = ntimes
-apply_phaseonly2.control.type                              =   calibrate-stand-alone_new
-apply_phaseonly2.argument.observation                      =   concat_data.output.mapfile
-apply_phaseonly2.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_apply.parset
-apply_phaseonly2.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
-
 ########## end of second round of selfcal
 ########## start of third round of selfcal
 
-# average the output pf the previous BBS step, length = ntimes
-average2.control.type                                      =   dppp
-average2.control.mapfile_in                                =   concat_data.output.mapfile
-average2.control.inputkey                                  =   msin
-average2.argument.numthreads                               =   {{ max_cpus_per_chunk }}
-average2.argument.msin.datacolumn                          =   CORRECTED_DATA
-average2.argument.msout.overwrite                          =   True
-average2.argument.msout.writefullresflag                   =   False
-average2.argument.local_scratch_dir                        =   {{ local_dir }}
-average2.argument.steps                                    =   [avg]
-average2.argument.avg.type                                 =   squash
-average2.argument.avg.freqstep                             =   1
-average2.argument.avg.timestep                             =   {{ facetselfcal_timestep }}
+# apply the previous calibration and average, length = ntimes
+apply_phaseonly2.control.type                              =   dppp
+apply_phaseonly2.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+apply_phaseonly2.control.opts.inputkeys                    =   [msin,parmdb]
+apply_phaseonly2.argument.numthreads                       =   {{ max_cpus_per_band }}
+apply_phaseonly2.argument.msin.datacolumn                  =   DATA
+apply_phaseonly2.argument.msout.overwrite                  =   True
+apply_phaseonly2.argument.msout.writefullresflag           =   False
+apply_phaseonly2.argument.local_scratch_dir                =   {{ local_dir }}
+apply_phaseonly2.argument.steps                            =   [correct_fast1,correct_fast2,avg]
+apply_phaseonly2.argument.correct_fast1.type               =   applycal
+apply_phaseonly2.argument.correct_fast1.parmdb             =   parmdb
+apply_phaseonly2.argument.correct_fast1.correction         =   tec
+apply_phaseonly2.argument.correct_fast1.invert             =   True
+apply_phaseonly2.argument.correct_fast2.type               =   applycal
+apply_phaseonly2.argument.correct_fast2.parmdb             =   parmdb
+apply_phaseonly2.argument.correct_fast2.correction         =   commonscalarphase
+apply_phaseonly2.argument.correct_fast2.invert             =   True
+apply_phaseonly2.argument.avg.type                         =   squash
+apply_phaseonly2.argument.avg.freqstep                     =   1
+apply_phaseonly2.argument.avg.timestep                     =   {{ facetselfcal_timestep }}
 
 # make compressed mapfile of averaged data, length = 1
 create_compressed_mapfile2.control.kind                    =   plugin
 create_compressed_mapfile2.control.type                    =   compressMapfile
-create_compressed_mapfile2.control.mapfile_in              =   average2.output.mapfile
+create_compressed_mapfile2.control.mapfile_in              =   apply_phaseonly2.output.mapfile
 create_compressed_mapfile2.control.mapfile_dir             =   input.output.mapfile_dir
 create_compressed_mapfile2.control.filename                =   concat2_input.mapfile
 
@@ -806,28 +819,39 @@ switch_weights_col6.control.mapfile_in                     =   concat_data.outpu
 switch_weights_col6.control.inputkey                       =   msfiles
 switch_weights_col6.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
-# apply the phase-only solutions from the previous BBS-run, length = ntimes
-apply_ampphase11.control.type                              =   calibrate-stand-alone_new
-apply_ampphase11.argument.observation                      =   concat_data.output.mapfile
-apply_ampphase11.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_apply.parset
-apply_ampphase11.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
+# apply the phase-only solutions from the previous calibration, length = ntimes
+apply_ampphase11.control.type                              =   dppp_inplace
+apply_ampphase11.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+apply_ampphase11.control.opts.inputkeys                    =   [msin,parmdb]
+apply_ampphase11.argument.numthreads                       =   {{ max_cpus_per_band }}
+apply_ampphase11.argument.msin.datacolumn                  =   DATA
+apply_ampphase11.argument.msout                            =   .
+apply_ampphase11.argument.msout.datacolumn                 =   CORRECTED_DATA
+apply_ampphase11.argument.steps                            =   [correct_fast1,correct_fast2]
+apply_ampphase11.argument.correct_fast1.type               =   applycal
+apply_ampphase11.argument.correct_fast1.parmdb             =   parmdb
+apply_ampphase11.argument.correct_fast1.correction         =   tec
+apply_ampphase11.argument.correct_fast1.invert             =   True
+apply_ampphase11.argument.correct_fast2.type               =   applycal
+apply_ampphase11.argument.correct_fast2.parmdb             =   parmdb
+apply_ampphase11.argument.correct_fast2.correction         =   commonscalarphase
+apply_ampphase11.argument.correct_fast2.invert             =   True
 
-# run BBS with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
-# generate mapfile with the direction-independent parmDBs
-make_instrument_parmdb_map.control.kind                       =  plugin
-make_instrument_parmdb_map.control.type                       =  createMapfile
-make_instrument_parmdb_map.control.method                     =  add_suffix_to_file
-make_instrument_parmdb_map.control.mapfile_in                 =  concat_data.output.mapfile
-make_instrument_parmdb_map.control.add_suffix_to_file         =  /instrument_slow
-make_instrument_parmdb_map.control.mapfile_dir                =  input.output.mapfile_dir
-make_instrument_parmdb_map.control.filename                   =  instrument_parmdb.mapfile
+# generate mapfile for the slow-gain parmDBs generated in the solve_ampphase12 step
+make_slow_gain_parmdb_map.control.kind                     =  plugin
+make_slow_gain_parmdb_map.control.type                     =  createMapfile
+make_slow_gain_parmdb_map.control.method                   =  add_suffix_to_file
+make_slow_gain_parmdb_map.control.mapfile_in               =  concat_data.output.mapfile
+make_slow_gain_parmdb_map.control.add_suffix_to_file       =  /instrument_slow
+make_slow_gain_parmdb_map.control.mapfile_dir              =  input.output.mapfile_dir
+make_slow_gain_parmdb_map.control.filename                 =  slow_parmdb.mapfile
 
 # run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
 # note: for now, we write out a new dataset even though it's never used, as this
 # is the only way to add a uv cut without affecting the original dataset. Once
 # GainCal has a filter parameter, we can use dppp_inplace instead and save on I/O
 solve_ampphase12.control.type                              =   dppp
-solve_ampphase12.control.mapfiles_in                       =   [concat_data.output.mapfile,make_instrument_parmdb_map.output.mapfile]
+solve_ampphase12.control.mapfiles_in                       =   [concat_data.output.mapfile,make_slow_gain_parmdb_map.output.mapfile]
 solve_ampphase12.control.inputkeys                         =   [msin,parmdb]
 solve_ampphase12.argument.numthreads                       =   {{ max_cpus_per_chunk }}
 solve_ampphase12.argument.msin.datacolumn                  =   CORRECTED_DATA
@@ -1057,11 +1081,23 @@ switch_weights_col8.control.mapfile_in                     =   concat_data.outpu
 switch_weights_col8.control.inputkey                       =   msfiles
 switch_weights_col8.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
-# apply the phase-only solutions from the previous BBS-run, length = ntimes
-apply_ampphase21.control.type                              =   calibrate-stand-alone_new
-apply_ampphase21.argument.observation                      =   concat_data.output.mapfile
-apply_ampphase21.argument.parset                           =   {{ parset_dir }}/facet_dirdep_phaseonly_apply.parset
-apply_ampphase21.argument.catalog                          =   {{ skymodel_dir }}/empty.skymodel
+# apply the phase-only solutions from the previous calibration, length = ntimes
+apply_ampphase21.control.type                              =   dppp_inplace
+apply_ampphase21.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+apply_ampphase21.control.opts.inputkeys                    =   [msin,parmdb]
+apply_ampphase21.argument.numthreads                       =   {{ max_cpus_per_band }}
+apply_ampphase21.argument.msin.datacolumn                  =   DATA
+apply_ampphase21.argument.msout                            =   .
+apply_ampphase21.argument.msout.datacolumn                 =   CORRECTED_DATA
+apply_ampphase21.argument.steps                            =   [correct_fast1,correct_fast2]
+apply_ampphase21.argument.correct_fast1.type               =   applycal
+apply_ampphase21.argument.correct_fast1.parmdb             =   parmdb
+apply_ampphase21.argument.correct_fast1.correction         =   tec
+apply_ampphase21.argument.correct_fast1.invert             =   True
+apply_ampphase21.argument.correct_fast2.type               =   applycal
+apply_ampphase21.argument.correct_fast2.parmdb             =   parmdb
+apply_ampphase21.argument.correct_fast2.correction         =   commonscalarphase
+apply_ampphase21.argument.correct_fast2.invert             =   True
 
 # merge the parmDBs with the phase solutions into one, length = 1
 # This is needed later when the loop is done and we want to apply the solutions to the original data
@@ -1076,7 +1112,7 @@ merge_phase_parmdbs.argument.flags                         =   [mslist,instrumen
 # is the only way to add a uv cut without affecting the original dataset. Once
 # GainCal has a filter parameter, we can use dppp_inplace instead and save on I/O
 solve_ampphase22.control.type                              =   dppp
-solve_ampphase22.control.mapfiles_in                       =   [concat_data.output.mapfile,make_instrument_parmdb_map.output.mapfile]
+solve_ampphase22.control.mapfiles_in                       =   [concat_data.output.mapfile,make_slow_gain_parmdb_map.output.mapfile]
 solve_ampphase22.control.inputkeys                         =   [msin,parmdb]
 solve_ampphase22.argument.numthreads                       =   {{ max_cpus_per_chunk }}
 solve_ampphase22.argument.msin.datacolumn                  =   CORRECTED_DATA
@@ -1101,7 +1137,7 @@ merge_amp_parmdbs2.control.inputkey                        =   mslist
 merge_amp_parmdbs2.control.outputkey                       =   outparmdb
 merge_amp_parmdbs2.argument.flags                          =   [mslist,instrument_slow,outparmdb]
 
-# smooth the amplitues in the merged parmDB, length = 1
+# smooth the amplitudes in the merged parmDB, length = 1
 # smooth_amps uses only ANTENNA subtable of inputms, so it should work on virtual concatenated MS
 smooth_amp2.control.type                                   =   {{ smooth_amps_task }}
 smooth_amp2.control.mapfile_in                             =   merge_amp_parmdbs2.output.mapfile
@@ -1500,6 +1536,7 @@ wsclean_image_full1.argument.channelsout                   =   {{ wsclean_nchann
 wsclean_image_full1.argument.mem                           =   {{ max_percent_memory }}
 wsclean_image_full1.argument.j                             =   {{ max_cpus_per_node }}
 wsclean_image_full1.argument.tempdir                       =   {{ local_dir }}
+wsclean_image_full1.argument.weighting-rank-filter         =   3
 
 # make a mapfile with the root-name of the WSClean images, length = 1
 create_imagebase_map.control.kind                          =   plugin
@@ -1636,17 +1673,14 @@ corrupt_final_model.argument.corrupt_fast1.type            =   applycal
 corrupt_final_model.argument.corrupt_fast1.parmdb          =   parmdb
 corrupt_final_model.argument.corrupt_fast1.correction      =   tec
 corrupt_final_model.argument.corrupt_fast1.invert          =   False
-corrupt_final_model.argument.corrupt_fast1.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 corrupt_final_model.argument.corrupt_fast2.type            =   applycal
 corrupt_final_model.argument.corrupt_fast2.parmdb          =   parmdb
 corrupt_final_model.argument.corrupt_fast2.correction      =   commonscalarphase
 corrupt_final_model.argument.corrupt_fast2.invert          =   False
-corrupt_final_model.argument.corrupt_fast2.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 corrupt_final_model.argument.corrupt_slow.type             =   applycal
 corrupt_final_model.argument.corrupt_slow.parmdb           =   parmdb
 corrupt_final_model.argument.corrupt_slow.correction       =   gain
 corrupt_final_model.argument.corrupt_slow.invert           =   False
-corrupt_final_model.argument.corrupt_slow.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 
 # subtract new model vis from original model+residual vis, length = nfiles
 subtract_initial_final.control.type                        =   add_subtract_columns
@@ -1731,7 +1765,7 @@ average_pre_compressed_map.control.mapfile_in              =   average_pre.outpu
 average_pre_compressed_map.control.mapfile_dir             =   input.output.mapfile_dir
 average_pre_compressed_map.control.filename                =   average_pre_compressed.mapfile
 
-# image the of old empty data, length = 1
+# image the old empty data, length = 1
 wsclean_pre.control.type                                   =   wsclean
 wsclean_pre.control.mapfile_in                             =   average_pre_compressed_map.output.mapfile
 wsclean_pre.control.inputkey                               =   msfiles
@@ -1757,7 +1791,7 @@ average_post_compressed_map.control.mapfile_in             =   average_post.outp
 average_post_compressed_map.control.mapfile_dir            =   input.output.mapfile_dir
 average_post_compressed_map.control.filename               =   average_post_compressed.mapfile
 
-# image the of new empty data, length = 1
+# image the new empty data, length = 1
 wsclean_post.control.type                                  =   wsclean
 wsclean_post.control.mapfile_in                            =   average_post_compressed_map.output.mapfile
 wsclean_post.control.inputkey                              =   msfiles
