@@ -66,10 +66,8 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
 
     for i, inparmdb in enumerate(inparmdbs):
         pdb_add = pdb.parmdb(inparmdb)
-
+        parms = pdb_add.getValuesGrid('*')
         for parmname in pdb_add.getNames():
-            parms = pdb_add.getValuesGrid(parmname)
-
             # Adjust last timewidth if necessary, as DPPP GainCal (as of 2.16.4) does not
             # truncate last solution timewidth to end of MS
             if i < len(inparmdbs) - 1:

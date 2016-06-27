@@ -40,19 +40,19 @@ def main(parmdb_p, parmdb_a, parmdb_out, clobber=True):
             return
 
     os.system('cp -r {0} {1}'.format(parmdb_p,parmdb_out))
-    
+
     ## Copy over the Gains
     pdb_out = pdb.parmdb(parmdb_out)
     pdb_a = pdb.parmdb(parmdb_a)
+    parms = pdb_a.getValuesGrid('*')
     for parmname in pdb_a.getNames():
-        parms = pdb_a.getValuesGrid(parmname)
         ValueHolder = pdb_out.makeValue(values=parms[parmname]['values'],
                                         sfreq=parms[parmname]['freqs'],
                                         efreq=parms[parmname]['freqwidths'],
                                         stime=parms[parmname]['times'],
                                         etime=parms[parmname]['timewidths'],
                                         asStartEnd=False)
-        pdb_out.addValues(parmname,ValueHolder)       
+        pdb_out.addValues(parmname,ValueHolder)
     pdb_out.flush()
 
 
