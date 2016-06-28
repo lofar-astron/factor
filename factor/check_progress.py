@@ -74,7 +74,7 @@ def run(parset_file, trim_names=True):
     all_directions, options = load_directions(parset_file)
     if len(all_directions) == 0:
         log.error('No directions found. Please check the parset or wait until '
-            'FACTOR has initialized the directions')
+            'Factor has initialized the directions')
         sys.exit(1)
 
     # Check for other assignments of the shortcuts we want to use and, if found,
@@ -189,7 +189,7 @@ def plot_state(directions_list, trim_names=True):
         factor_working_dir=directions_list[0].working_dir)
     directions_list.append(field)
 
-    ax.set_title('Overview of FACTOR run in\n{}'.format(directions_list[0].working_dir))
+    ax.set_title('Overview of Factor run in\n{}'.format(directions_list[0].working_dir))
 
     # Plot facets
     markers = []
