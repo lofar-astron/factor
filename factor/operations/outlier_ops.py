@@ -56,7 +56,6 @@ class OutlierPeel(Operation):
                                 'ms_files_grouped' : str(ms_files),
                                 'skymodels': skymodels,
                                 'dir_indep_parmDBs': dir_indep_parmDBs,
-                                'selfcal_gain_parset': selfcal_gain_parset,
                                 'fourpol': fourpol,
                                 'smooth_amps_task': smooth_amps_task})
 
