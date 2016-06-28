@@ -886,7 +886,7 @@ def get_cluster_options(parset):
         # code originally in lib/scheduler.py
         max_proc_per_node =  max(1, int(round(parset_dict['ncpu'] / float(parset_dict['ndir_per_node']))))
         parset_dict['nthread_io'] = int(np.ceil(np.sqrt(max_proc_per_node)))
-    log.info("Will use up to %i IO-intensive thread(s) in parallel per node" %
+    log.info("Running up to %i IO-intensive job(s) in parallel per node per direction" %
         (parset_dict['nthread_io']))
 
     # Full path to cluster description file. Use clusterdesc_file = PBS to use the
