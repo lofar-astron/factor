@@ -83,15 +83,15 @@ dir_ms = /data/bands
 # Minimum uv distance in lambda for calibration (default = 80.0)
 # solve_min_uv_lambda = 80.0
 
-# Smooth amplitudes with spline fit + 2-D median (default = True). If
-# ``False``, smoothing is done with a 1-D median.
+# Smooth amplitudes with spline fit + 2-D median (default = True). If False,
+# smoothing is done with a 1-D median.
 # spline_smooth2D = True
 
 # Include XY and YX correlations during the slow gain solve for sources above
 # this flux density (default = 1000.0 i.e. effectively off). Below this value,
 # only the XX and YY correlations are included. Note that spline_smooth2D must
-# be True to solve for all correlations.
-# If you want to use it, then an useful value would be e.g.: 5.0
+# be True to solve for all correlations. If you want to use it, then an useful
+# value would be e.g.: 5.0
 # solve_all_correlations_flux_Jy = 1000.0
 
 
@@ -252,14 +252,14 @@ flux_min_Jy = 0.3
 [cluster]
 # Full path to cluster description file. Use clusterdesc_file = PBS to use the
 # PBS / torque reserved nodes, or use  clusterdesc_file = JUROPA_slurm to use
-# multiple nodes in a slurm reservation on JUROPA.
-# If not given, the clusterdesc file for a single (i.e., local) node is used
+# multiple nodes in a slurm reservation on JUROPA. If not given, the clusterdesc
+# file for a single (i.e., local) node is used
 # clusterdesc_file = PBS
 
 # Full path to a local disk on the nodes for I/O-intensive processing. The path
 # must be the same for all nodes. Note: do not specify this parameter if you are
-# running on a single machine, as it will cause conflicts between directions
-# that are processed in parallel
+# running more than one direction simultaneously on a single machine, as it will
+# cause conflicts between directions that are processed in parallel (no default)
 # dir_local = /tmp
 
 # Maximum number of CPUs per node to use (default = all)
@@ -274,6 +274,10 @@ flux_min_Jy = 0.3
 # of memory available to WSClean (set with the wsclean_fmem parameter) will be
 # divided among the directions on each node
 # ndir_per_node = 1
+
+# Maximum number of IO-intensive threads to run per node (default = sqrt(ncpu /
+# ndir_per_node))
+# nthread_io = 3
 
 
 [ms1.ms]

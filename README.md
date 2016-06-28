@@ -1,22 +1,22 @@
-FACTOR: Facet Calibration for LOFAR
+Factor: Facet Calibration for LOFAR
 ===================================
 
 Installation
 ------------
 
-FACTOR is currently installed on the LOFAR CEP3 cluster. Users on CEP3
-should run the following command before using FACTOR:
+Factor is currently installed on the LOFAR CEP3 cluster. Users on CEP3
+should run the following command before using Factor:
 
     source ~rafferty/init_factor
 
-If you want to install FACTOR yourself, follow the instructions below.
+If you want to install Factor yourself, follow the instructions below.
 
 ### Dependencies
 
-FACTOR requires the following:
+Factor requires the following:
 
-* The LOFAR offline trunk from the LOFAR software repository (version 2.15 or later)
-* [CASA](http://casa.nrao.edu) (version 4.2 or version 4.5 -- versions 4.3, 4.4, and 4.6 do not work; note that CASA requires Java for the buildmytasks script that is needed by FACTOR, so you will need Java as well)
+* The LOFAR offline trunk from the LOFAR software repository (version 2.16.4 or later)
+* [CASA](http://casa.nrao.edu) (version 4.2 or version 4.5 -- versions 4.3, 4.4, and 4.6 do not work; note that CASA requires Java for the buildmytasks script that is needed by Factor, so you will need Java as well)
 * [WSClean](http://sourceforge.net/p/wsclean/wiki/Home) (version 1.10 or later)
 * [LSMTool](https://github.com/darafferty/LSMTool) (version 1.1 or later)
 * [jinja2](http://jinja.pocoo.org/docs/dev)
@@ -44,7 +44,7 @@ The top-level directories are:
 * `examples`: contains example parset and directions file
 * `factor`: main code tree
 
-FACTOR may be thought of as a tool to set up and run LOFAR pipeline scripts that
+Factor may be thought of as a tool to set up and run LOFAR pipeline scripts that
 perform facet calibration. As such, the main code tree is comprised of the
 following directories:
 
@@ -62,13 +62,13 @@ In addition, the `factor` directory contains the following files:
 * `check_progress.py`: runs the interactive progress tool
 * `cluster.py`: handles the compute cluster setup
 * `directions.py`: handles the setup of directions (facets)
-* `parset.py`: handles the reading of the FACTOR parset
+* `parset.py`: handles the reading of the Factor parset
 * `process.py`: performs the actual processing (running of pipelines, etc.)
 
 Usage
 -----
 
-The FACTOR executable (named `runfactor`) can be used from the command line with
+The Factor executable (named `runfactor`) can be used from the command line with
 a parset that defines the parameters of the run. E.g.:
 
     $ runfactor factor.parset
@@ -78,7 +78,7 @@ You can check the progress of a run with `checkfactor`:
     $ checkfactor factor.parset
 
 The parset defines the data and working directories, various options, etc.
-FACTOR handles all the initialization and sets up the directories, pipeline
+Factor handles all the initialization and sets up the directories, pipeline
 parsets, etc.
 
 For details on the usage, please see the [full documentation](http://www.astron.nl/citt/facet-doc/)
