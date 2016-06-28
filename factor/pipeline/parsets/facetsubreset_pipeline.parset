@@ -101,16 +101,13 @@ corrupt_final_model.argument.corrupt_fast1.type              =   applycal
 corrupt_final_model.argument.corrupt_fast1.parmdb            =   parmdb
 corrupt_final_model.argument.corrupt_fast1.correction        =   tec
 corrupt_final_model.argument.corrupt_fast1.invert            =   False
-corrupt_final_model.argument.corrupt_fast1.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 corrupt_final_model.argument.corrupt_fast2.type              =   applycal
 corrupt_final_model.argument.corrupt_fast2.parmdb            =   parmdb
 corrupt_final_model.argument.corrupt_fast2.correction        =   commonscalarphase
 corrupt_final_model.argument.corrupt_fast2.invert            =   False
-corrupt_final_model.argument.corrupt_fast2.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 corrupt_final_model.argument.corrupt_slow.type               =   applycal
 corrupt_final_model.argument.corrupt_slow.parmdb             =   parmdb
 corrupt_final_model.argument.corrupt_slow.invert             =   False
-corrupt_final_model.argument.corrupt_slow.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 
 # create a mapfile with the direction-independent parmDBs from supplied list, length = nfiles
 create_parmdb_map.control.kind                               =   plugin
@@ -164,7 +161,6 @@ predict_all_model_data.argument.pred.type                    =   predict
 predict_all_model_data.argument.pred.sourcedb                =   sourcedb
 predict_all_model_data.argument.pred.operation               =   replace
 predict_all_model_data.argument.pred.applycal.parmdb         =   parmdb
-predict_all_model_data.argument.pred.applycal.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 
 # subtract original model vis from new model vis, length = nfiles
 subtract_final_initial.control.type                          =   add_subtract_columns

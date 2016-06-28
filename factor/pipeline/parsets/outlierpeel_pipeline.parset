@@ -101,7 +101,6 @@ add_all_facet_sources.argument.add.type                  =   predict
 add_all_facet_sources.argument.add.sourcedb              =   sourcedb
 add_all_facet_sources.argument.add.operation             =   add
 add_all_facet_sources.argument.add.applycal.parmdb       =   parmdb
-add_all_facet_sources.argument.add.applycal.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 
 # Phase shift and average in preparation for calibration, length = nfiles
 shift_and_average.control.type                           =   dppp
@@ -417,16 +416,13 @@ corrupt_outlier_model.argument.corrupt_fast1.type        =   applycal
 corrupt_outlier_model.argument.corrupt_fast1.parmdb      =   parmdb
 corrupt_outlier_model.argument.corrupt_fast1.correction  =   tec
 corrupt_outlier_model.argument.corrupt_fast1.invert      =   False
-corrupt_outlier_model.argument.corrupt_fast1.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 corrupt_outlier_model.argument.corrupt_fast2.type        =   applycal
 corrupt_outlier_model.argument.corrupt_fast2.parmdb      =   parmdb
 corrupt_outlier_model.argument.corrupt_fast2.correction  =   commonscalarphase
 corrupt_outlier_model.argument.corrupt_fast2.invert      =   False
-corrupt_outlier_model.argument.corrupt_fast2.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 corrupt_outlier_model.argument.corrupt_slow.type         =   applycal
 corrupt_outlier_model.argument.corrupt_slow.parmdb       =   parmdb
 corrupt_outlier_model.argument.corrupt_slow.invert       =   False
-corrupt_outlier_model.argument.corrupt_slow.timeslotsperparmupdate = {{ timeSlotsPerParmUpdate }}
 
 # Subtract the corrupted model from the data to make improved subtracted datasets, length = nfiles
 subtract_outlier_model.control.type                      =   add_subtract_columns

@@ -879,7 +879,6 @@ def get_cluster_options(parset):
     # Maximum number of io-intensive threads to run per node (per
     # direction). If unset, defaults to sqrt of the number of compute
     # threads that will be used.
-
     if 'nthread_io' in parset_dict:
         parset_dict['nthread_io'] = parset.getint('cluster',
             'nthread_io')
@@ -887,10 +886,9 @@ def get_cluster_options(parset):
         # code originally in lib/scheduler.py
         max_cpus_per_node =  max(1, int(round(parset_dict['ncpu'] / float(parset_dict['ndir_per_node']))))
         parset_dict['nthread_io'] = int(np.ceil(np.sqrt(max_cpus_per_node)))
-
     log.info("Will use up to %i IO-intensive thread(s) in parallel per node" %
         (parset_dict['nthread_io']))
-    
+
     # Full path to cluster description file. Use clusterdesc_file = PBS to use the
     # PBS / torque reserved nodes. If not given, the clusterdesc file for a single
     # (i.e., local) node is used

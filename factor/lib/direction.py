@@ -122,19 +122,18 @@ class Direction(object):
         self.blavg_weight_column = 'WEIGHT_SPECTRUM' # name of weights column
         self.peel_calibrator = False # whether to peel calibrator before imaging
         self.solve_all_correlations = False # whether to solve for all corrs for slow gain
+        self.do_reset = False # whether to reset this direction
+        self.is_patch = False # whether direction is just a patch (not full facet)
+        self.num_selfcal_groups = 1 # number of blocks for TEC solve
+        self.skymodel = None # direction's sky model
+        self.use_existing_data = False # whether to use existing data for reimaging
+        self.existing_data_freqstep = None # frequency step of existing data
+        self.existing_data_timestep = None # time step of existing data
+        self.average_image_data = False # whether to average the existing data before imaging them
         self.started_operations = []
         self.completed_operations = []
         self.reset_operations = []
         self.cleanup_mapfiles = []
-        self.do_reset = False # whether to reset this direction
-        self.is_patch = False # whether direction is just a patch (not full facet)
-        self.num_selfcal_groups = 1
-        self.timeSlotsPerParmUpdate = 100
-        self.skymodel = None
-        self.use_existing_data = False
-        self.existing_data_freqstep = None
-        self.existing_data_timestep = None
-        self.average_image_data = False
 
         # Define some directories and files
         self.working_dir = factor_working_dir
@@ -653,15 +652,6 @@ class Direction(object):
             self.facetimage_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
             self.log.debug('Using averaging steps of {0} channels and {1} time slots '
                 'for facet imaging'.format(self.facetimage_freqstep, self.facetimage_timestep))
-
-        # Set timeSlotsPerParmUpdate to an even divisor of the number of time slots
-        # to work around a bug in DPPP ApplyCal
-        self.timeSlotsPerParmUpdate = 100
-        if ntimes_min<self.timeSlotsPerParmUpdate:
-            self.timeSlotsPerParmUpdate = ntimes_min
-        else:
-            while ntimes_min % self.timeSlotsPerParmUpdate:
-                self.timeSlotsPerParmUpdate += 1
 
         # Set time intervals for selfcal solve steps
         if not imaging_only:
