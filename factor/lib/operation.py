@@ -275,7 +275,7 @@ class Operation(object):
         from lofarpipe.support.data_map import DataMap
 
         all_exist = True
-        self.log.debug('Checking whether files referenced in {} exist...'.format(mapfile))
+        self.log.debug('Checking for existing files...')
         try:
             datamap = DataMap.load(mapfile)
             for item in datamap:

@@ -186,12 +186,13 @@ class FacetSelfcal(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'final_image1.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'make_concat_corr.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'make_blavg_data.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'sorted_groups.mapfile_groups'),
+            os.path.join(self.pipeline_mapfile_dir, 'average0.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat0_input.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat1_input.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat2_input.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat3_input.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat4_input.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'sorted_groups.mapfile_groups'),
             os.path.join(self.pipeline_mapfile_dir, 'solve_ampphase12.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'solve_ampphase22.mapfile')]
         if not self.parset['keep_avg_facet_data'] and self.direction.name != 'target':
@@ -364,6 +365,7 @@ class FacetImage(Operation):
                 self.parset['imaging_specific']['reimage_selfcaled']):
                 # Old data exist but are from facetselfcal. Since reimage_selfcal is True,
                 # we will not use these data but instead generate new updated ones
+                self.log.debug('All files exist but are not up-to-date. They will be regenerated')
                 self.direction.use_existing_data = False
 
                 # Store mapfile for old data from selfcal for later clean up
