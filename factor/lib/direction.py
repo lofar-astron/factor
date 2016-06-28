@@ -720,8 +720,11 @@ class Direction(object):
                 self.solint_freq_a = num_chan_per_band_after_avg
 
             # The interval for fast (phase) selfcal should be the number of
-            # channels in tec_block_mhz, but no less than 8 MHz if possible
-            min_block_mhz = 8.0
+            # channels in tec_block_mhz, but no less than 2 MHz
+            min_block_mhz = 2.0
+            if tec_block_mhz < min_block_mhz:
+                self.log.warn('Minimum TEC block size is {} MHz. Setting it this value'.format(min_block_mhz))
+                tec_block_mhz = min_block_mhz
             mhz_per_chan_after_avg = self.facetselfcal_freqstep * chan_width_hz / 1e6
             total_bandwidth_mhz = nchan * nbands * chan_width_hz / 1e6
             num_cal_blocks = np.ceil(total_bandwidth_mhz / tec_block_mhz)
@@ -735,8 +738,6 @@ class Direction(object):
                     num_cal_blocks)
                 partial_block_mhz = (num_chan_per_band_after_avg * nbands %
                     nchan_per_block) * mhz_per_chan_after_avg
-            if nchan_per_block * mhz_per_chan_after_avg < min_block_mhz:
-                num_cal_blocks = 1
             self.solint_freq_p = int(np.ceil(num_chan_per_band_after_avg * nbands /
                 num_cal_blocks))
 
