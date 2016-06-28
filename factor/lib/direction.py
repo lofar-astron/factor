@@ -911,6 +911,10 @@ class Direction(object):
                     self.facet_model_mapfile = d['facet_model_mapfile']
                 if 'wsclean_modelimg_size_mapfile' in d:
                     self.wsclean_modelimg_size_mapfile = d['wsclean_modelimg_size_mapfile']
+
+                # Load mapfile needed for reimaging with existing data
+                if 'image_data_mapfile' in d:
+                    self.image_data_mapfile = d['image_data_mapfile']
             return True
         except:
             return False
