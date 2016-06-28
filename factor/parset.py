@@ -884,8 +884,8 @@ def get_cluster_options(parset):
             'nthread_io')
     else:
         # code originally in lib/scheduler.py
-        max_cpus_per_node =  max(1, int(round(parset_dict['ncpu'] / float(parset_dict['ndir_per_node']))))
-        parset_dict['nthread_io'] = int(np.ceil(np.sqrt(max_cpus_per_node)))
+        max_proc_per_node =  max(1, int(round(parset_dict['ncpu'] / float(parset_dict['ndir_per_node']))))
+        parset_dict['nthread_io'] = int(np.ceil(np.sqrt(max_proc_per_node)))
     log.info("Will use up to %i IO-intensive thread(s) in parallel per node" %
         (parset_dict['nthread_io']))
 

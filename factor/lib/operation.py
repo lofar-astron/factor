@@ -173,7 +173,7 @@ class Operation(object):
         # Update the dictionaries with the attributes of the operation's
         # direction object. Any attributes set in the direction object that are
         # also in the parms_dict will be set to those of the direction object
-        # (e.g., 'max_cpus_per_node', which is set in the direction object by
+        # (e.g., 'max_proc_per_node', which is set in the direction object by
         # factor.cluster.divide_nodes() will override the value set above)
         self.update_dicts()
 

@@ -107,18 +107,6 @@ class Scheduler(object):
             Input list of operations over which to distribute the resources. If
             None, self.operation_list is used
 
-        The following attributes of the direction object of each operation are
-        set:
-
-        max_cpus_per_node : maximum number of cores that the pipeline
-            should use
-        max_io_proc_per_node : maximum number of IO-intensive processes
-        max_cpus_per_chunk : number of threads in NDPPP calls that are run
-            "ntimes" times
-        max_cpus_per_band : number of threads in NDPPP calls that are run
-            "nfiles" times
-        max_percent_memory : percentage of memory to give to WSClean
-
         """
         if operation_list is None:
             operation_list = self.operation_list
@@ -129,6 +117,8 @@ class Scheduler(object):
         fmem_max = self.operation_list[0].parset['cluster_specific']['wsclean_fmem']
         nops_per_node = self.operation_list[0].parset['cluster_specific']['ndir_per_node']
         nbands = len(self.operation_list[0].bands)
+        nfiles = len(self.operation_list[0].files)
+        ntimes = nfiles / nbands
         nops_simul = self.max_procs
 
         for i in range(int(np.ceil(len(operation_list)/float(nops_simul)))):
@@ -154,20 +144,52 @@ class Scheduler(object):
                     nops_per_node = min(nops_per_node, c[h[0]])
                 else:
                     nops_per_node = 1
-                nchunks_per_node = max(1, int(round(float(
-                    len(op.bands[0].files)) / len(h))))
-
                 op.direction.hosts = h
-                op.direction.max_cpus_per_node =  max(1, int(round(ncpu_max /
+
+                # Maximum number of normal and IO-intensive processes that the
+                # pipeline should run at once
+                op.direction.max_proc_per_node =  max(1, int(np.ceil(ncpu_max /
                     float(nops_per_node))))
-                # op.direction.max_io_proc_per_node = int(np.ceil(np.sqrt(op.direction.max_cpus_per_node)))
                 op.direction.max_io_proc_per_node = nthread_io
-                op.direction.max_cpus_per_chunk = int(round(op.direction.max_cpus_per_node /
-                    nchunks_per_node))
-                op.direction.max_cpus_per_band = max(1, int(round(op.direction.max_cpus_per_node *
-                    len(op.direction.hosts) / float(nbands))))
+
+            # Adjust resources to stay within limits for each node by adding or
+            # subtracting CPUs from the most appropriate operation(s)
+            imsizes = [op.direction.facet_imsize if op.direction.facet_imsize is
+                not None else 0.0 for op in op_group]
+            j = 0
+            while sum([op.direction.max_proc_per_node for op in op_group]) > ncpu_max * len(hosts):
+                op_take = op_group[imsizes.index(sorted(imsizes)[j])]
+                op_take.direction.max_proc_per_node -= 1
+                op_take.direction.save_state()
+                if j < len(op_group)-1:
+                    j += 1
+                else:
+                    j = 0
+
+            for op in op_group:
+                # Set maximum number of threads for normal and IO-intensive
+                # multithreaded processes (e.g., DPPP jobs) when run nfiles and
+                # ntimes times per step (the two most common cases)
+                op.direction.max_cpus_per_proc_nfiles = int(np.ceil(
+                    op.direction.max_proc_per_node /
+                    float(min(nfiles, op.direction.max_proc_per_node))))
+                op.direction.max_cpus_per_proc_ntimes = int(np.ceil(
+                    op.direction.max_proc_per_node /
+                    float(min(ntimes, op.direction.max_proc_per_node))))
+                op.direction.max_cpus_per_io_proc_nfiles = int(np.ceil(
+                    op.direction.max_proc_per_node /
+                    float(min(nfiles, op.direction.max_io_proc_per_node))))
+                op.direction.max_cpus_per_io_proc_ntimes = int(np.ceil(
+                    op.direction.max_proc_per_node /
+                    float(min(ntimes, op.direction.max_io_proc_per_node))))
+
+                # Maximum percentage of memory to give to jobs that allow memory
+                # limits (e.g., WSClean jobs)
                 op.direction.max_percent_memory = fmem_max / float(nops_per_node) * 100.0
+
+                # Save the state
                 op.direction.save_state()
+
 
 
     def result_callback(self, result):
