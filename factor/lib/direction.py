@@ -723,23 +723,28 @@ class Direction(object):
             # channels in tec_block_mhz, but no less than 2 MHz
             min_block_mhz = 2.0
             if tec_block_mhz < min_block_mhz:
-                self.log.warn('Minimum TEC block size is {} MHz. Setting it this value'.format(min_block_mhz))
+                self.log.warn('Setting TEC block size to minimum allowed value of {} MHz'.format(min_block_mhz))
                 tec_block_mhz = min_block_mhz
             mhz_per_chan_after_avg = self.facetselfcal_freqstep * chan_width_hz / 1e6
             total_bandwidth_mhz = nchan * nbands * chan_width_hz / 1e6
             num_cal_blocks = np.ceil(total_bandwidth_mhz / tec_block_mhz)
             nchan_per_block = np.ceil(num_chan_per_band_after_avg * nbands /
                 num_cal_blocks)
+
+            # Check for a partial block, and adjust the number to ensure that
+            # it is at least half of the desired block size
             partial_block_mhz = (num_chan_per_band_after_avg * nbands %
                 nchan_per_block) * mhz_per_chan_after_avg
-            while (partial_block_mhz > 0.0 and partial_block_mhz < min_block_mhz):
+            while (partial_block_mhz > 0.0 and partial_block_mhz < tec_block_mhz/2.0):
                 num_cal_blocks -= 1
                 nchan_per_block = np.ceil(num_chan_per_band_after_avg * nbands /
                     num_cal_blocks)
                 partial_block_mhz = (num_chan_per_band_after_avg * nbands %
                     nchan_per_block) * mhz_per_chan_after_avg
+            if num_cal_blocks < 1:
+                num_cal_blocks = 1
             self.solint_freq_p = int(np.ceil(num_chan_per_band_after_avg * nbands /
-                num_cal_blocks))
+                float(num_cal_blocks)))
 
         # Set name of column to use for data and averaged weights
         if self.pre_average:
