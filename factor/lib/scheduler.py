@@ -117,8 +117,8 @@ class Scheduler(object):
         fmem_max = self.operation_list[0].parset['cluster_specific']['wsclean_fmem']
         nops_per_node = self.operation_list[0].parset['cluster_specific']['ndir_per_node']
         nbands = len(self.operation_list[0].bands)
-        nfiles = len(self.operation_list[0].bands[0].files)
-        ntimes = nfiles / nbands
+        ntimes = len(self.operation_list[0].bands[0].files)
+        nfiles = ntimes * nbands
         nops_simul = self.max_procs
 
         for i in range(int(np.ceil(len(operation_list)/float(nops_simul)))):
