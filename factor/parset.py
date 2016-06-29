@@ -876,17 +876,16 @@ def get_cluster_options(parset):
     log.info("Processing up to %i direction(s) in parallel per node" %
         (parset_dict['ndir_per_node']))
 
-    # Maximum number of io-intensive threads to run per node (per
-    # direction). If unset, defaults to sqrt of the number of compute
-    # threads that will be used.
+    # Maximum number of io-intensive threads to run per node. If unset, defaults
+    # to sqrt of the number of CPUs that will be used (set with the ncpu
+    # parameter). Note that this number will be divided among the directions on
+    # each node
     if 'nthread_io' in parset_dict:
         parset_dict['nthread_io'] = parset.getint('cluster',
             'nthread_io')
     else:
-        # code originally in lib/scheduler.py
-        max_proc_per_node =  max(1, int(round(parset_dict['ncpu'] / float(parset_dict['ndir_per_node']))))
-        parset_dict['nthread_io'] = int(np.ceil(np.sqrt(max_proc_per_node)))
-    log.info("Running up to %i IO-intensive job(s) in parallel per node per direction" %
+        parset_dict['nthread_io'] = int(np.ceil(np.sqrt(parset_dict['ncpu'])))
+    log.info("Running up to %i IO-intensive job(s) in parallel per node" %
         (parset_dict['nthread_io']))
 
     # Full path to cluster description file. Use clusterdesc_file = PBS to use the
@@ -901,12 +900,6 @@ def get_cluster_options(parset):
     # working directory is used
     if 'dir_local' not in parset_dict:
         parset_dict['dir_local'] = None
-    #elif parset_dict['clusterdesc_file'] != 'PBS':
-        # The local directory only works when the dppp_scratch.py node recipe is
-        # used, which is only done when clusterdesc_file = PBS, so exit if not
-    #    log.critical('A local scratch directory can only be used when '
-    #        'clusterdesc_file = PBS (i.e., on a cluster with many nodes)')
-    #    sys.exit(1)
 
     # Check for unused options
     allowed_options = ['ncpu', 'fmem', 'wsclean_fmem', 'ndir_per_node',

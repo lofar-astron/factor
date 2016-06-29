@@ -51,13 +51,13 @@ The available options are described below under their respective sections.
 
     chunk_size_sec
         Size of time chunks in seconds (default = 2400; minimum allowed value is
-        1200). Ideally, the number of chunks should be evenly divisible by the total
-        number of CPUs available to each direction (e.g., if you want to process 2
-        directions in parallel and have 24 CPUS in total = 12 per direction, you
-        should set the chunk size to produce 12 chunks). To prevent Factor from
-        chunking the data, set this value to be larger than the length of the longest
-        dataset (in this case, Factor will not make copies of the files but will
-        make symbolic links to them instead, so please make backup copies yourself)
+        1200). Ideally, the number of chunks should be evenly divisible by the
+        total number of CPUs available to each direction (controlled by the
+        options under :ref:`parset_cluster_options`). To prevent Factor from
+        chunking the data, set this value to be larger than the length of the
+        longest dataset (in this case, Factor will not make copies of the files
+        but will make symbolic links to them instead, so please make backup
+        copies yourself)
 
     interactive
         Use interactive mode (default = ``False``). Factor will ask for confirmation of
@@ -345,7 +345,7 @@ The available options are described below under their respective sections.
             On a cluster that uses torque and PBS, Factor will automatically determine the nodes for which you have a
             PBS reservation and use them. Note that you must ask for all the nodes you need
             in a single PBS script, so that all nodes are available for the full Factor run. An
-            example PBS script is shown below::
+            example PBS script that uses 6 nodes (with 6 CPUs each) is shown below::
 
                 #!/bin/bash
                 #PBS -N Factor
@@ -363,10 +363,19 @@ The available options are described below under their respective sections.
         that are processed in parallel (no default).
 
     ncpu
-        Maximum number of CPUs per node to use (default = all).
+        Maximum number of CPUs per node to use (default = all). Note that this
+        number will be divided among the directions to be run in parallel on
+        each node (controlled by the :term:`ndir_per_node` option). Ideally, the
+        number of time chunks (controlled by the :term:`chunk_size_sec` option)
+        should be evenly divisible by the number of CPUs per direction.
 
     nthreads_io
-        Maximum number of IO-intensive threads to run per node (default = sqrt(:term:`ncpu`/:term:`ndir_per_node`)).
+        Maximum number of IO-intensive threads to run per node (default =
+        sqrt(:term:`ncpu`)). Note that this number will be divided among the
+        directions to be run in parallel on each node (controlled by the
+        :term:`ndir_per_node` option). Ideally, the number of time chunks (controlled
+        by the :term:`chunk_size_sec` option) should be evenly divisible by the
+        number of IO-intensive threads per direction.
 
     wsclean_fmem
         Maximum fraction of the total memory per node that WSClean may use (default = 0.9).

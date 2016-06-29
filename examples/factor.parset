@@ -24,12 +24,11 @@ dir_ms = /data/bands
 
 # Size of time chunks in seconds (default = 2400; minimum allowed value is
 # 1200). Ideally, the number of chunks should be evenly divisible by the total
-# number of CPUs available to each direction (e.g., if you want to process 2
-# directions in parallel and have 24 CPUS in total = 12 per direction, you
-# should set the chunk size to produce 12 chunks). To prevent Factor from
-# chunking the data, set this value to be larger than the length of the longest
-# dataset (in this case, Factor will not make copies of the files but will
-# make symbolic links to them instead, so please make backup copies yourself)
+# number of CPUs available to each direction (controlled by the options under
+# [cluster]). To prevent Factor from chunking the data, set this value to be
+# larger than the length of the longest dataset (in this case, Factor will not
+# make copies of the files but will make symbolic links to them instead, so
+# please make backup copies yourself)
 # chunk_size_sec = 2400
 
 # Use interactive mode (default = False). Factor will ask for confirmation of
@@ -264,8 +263,19 @@ flux_min_Jy = 0.3
 # cause conflicts between directions that are processed in parallel (no default)
 # dir_local = /tmp
 
-# Maximum number of CPUs per node to use (default = all)
+# Maximum number of CPUs per node to use (default = all). Note that this number
+# will be divided among the directions to be run in parallel on each node
+# (controlled by the ndir_per_node option). Ideally, the number of time chunks
+# (controlled by the chunk_size_sec option) should be evenly divisible by the
+# number of CPUs per direction.
 # ncpu = 6
+
+# Maximum number of IO-intensive threads to run per node (default = sqrt(ncpu)).
+# Note that this number will be divided among the directions to be run in
+# parallel on each node (controlled by the ndir_per_node option). Ideally, the
+# number of time chunks (controlled by the chunk_size_sec option) should be
+# evenly divisible by the number of IO-intensive threads per direction.
+# nthread_io = 3
 
 # Maximum fraction of the total memory per node that WSClean may use (default =
 # 0.9)
@@ -276,10 +286,6 @@ flux_min_Jy = 0.3
 # of memory available to WSClean (set with the wsclean_fmem parameter) will be
 # divided among the directions on each node
 # ndir_per_node = 1
-
-# Maximum number of IO-intensive threads to run per node (default = sqrt(ncpu /
-# ndir_per_node))
-# nthread_io = 3
 
 
 [ms1.ms]

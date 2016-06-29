@@ -115,7 +115,7 @@ class Scheduler(object):
         ncpu_max = self.operation_list[0].parset['cluster_specific']['ncpu']
         nthread_io = self.operation_list[0].parset['cluster_specific']['nthread_io']
         fmem_max = self.operation_list[0].parset['cluster_specific']['wsclean_fmem']
-        nops_per_node = self.operation_list[0].parset['cluster_specific']['ndir_per_node']
+        ndir_per_node = self.operation_list[0].parset['cluster_specific']['ndir_per_node']
         nbands = len(self.operation_list[0].bands)
         ntimes = len(self.operation_list[0].bands[0].files)
         nfiles = ntimes * nbands
@@ -141,7 +141,7 @@ class Scheduler(object):
 
             for op, h in zip(op_group, hosts):
                 if len(h) == 1:
-                    nops_per_node = min(nops_per_node, c[h[0]])
+                    nops_per_node = min(ndir_per_node, c[h[0]])
                 else:
                     nops_per_node = 1
                 op.direction.hosts = h
@@ -150,7 +150,8 @@ class Scheduler(object):
                 # pipeline should run at once
                 op.direction.max_proc_per_node =  max(1, int(np.ceil(ncpu_max /
                     float(nops_per_node))))
-                op.direction.max_io_proc_per_node = nthread_io
+                op.direction.max_io_proc_per_node = max(1, int(np.ceil(nthread_io /
+                    float(nops_per_node))))
 
             # Adjust resources to stay within limits for each node by adding or
             # subtracting CPUs from the most appropriate operation(s)
