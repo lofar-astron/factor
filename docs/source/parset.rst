@@ -266,6 +266,11 @@ The available options are described below under their respective sections.
     flux_min_Jy
         Minimum total flux density of a source (or group) to be considered as a calibrator (no default).
 
+    minimize_nonuniformity
+        When identifying calibrators with the above selection criteria, search for the
+        set of calibrators that minimizes non-uniformity (default = ``False``). Generally,
+        enabling this option will result in facets that are more uniform in size
+
     ndir_max
         Number of internally derived directions can be limited to a maximum number
         of directions if desired (default = all).

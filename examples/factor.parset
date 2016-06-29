@@ -199,6 +199,11 @@ size_max_arcmin = 2.0
 separation_max_arcmin = 7.0
 flux_min_Jy = 0.3
 
+# When identifying calibrators with the above selection criteria, search for the
+# set of calibrators that minimizes non-uniformity (default = False). Generally,
+# enabling this option will result in facets that are more uniform in size
+# minimize_nonuniformity = False
+
 # Number of internally derived directions can be limited to a maximum number
 # of directions if desired with max_num (default = all).
 # ndir_max = 50

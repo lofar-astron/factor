@@ -703,12 +703,20 @@ def _initialize_directions(parset, initial_skymodel, ref_band, max_radius_deg=No
             s.remove(dist > max_radius_deg, aggregate=True)
 
             # Generate the directions file
-            dir_parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(
-                s, dir_parset['flux_min_jy'], dir_parset['size_max_arcmin'],
-                dir_parset['separation_max_arcmin'],
-                directions_max_num=dir_parset['ndir_max'],
-                interactive=parset['interactive'],
-                flux_min_for_merging_Jy=dir_parset['flux_min_for_merging_jy'])
+            if dir_parset['minimize_nonuniformity']:
+                dir_parset['directions_file'] = factor.directions.make_directions_file_from_skymodel_uniform(
+                    s, dir_parset['flux_min_jy'], dir_parset['size_max_arcmin'],
+                    dir_parset['separation_max_arcmin'],
+                    directions_max_num=dir_parset['ndir_max'],
+                    interactive=parset['interactive'],
+                    flux_min_for_merging_Jy=dir_parset['flux_min_for_merging_jy'])
+            else:
+                dir_parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(
+                    s, dir_parset['flux_min_jy'], dir_parset['size_max_arcmin'],
+                    dir_parset['separation_max_arcmin'],
+                    directions_max_num=dir_parset['ndir_max'],
+                    interactive=parset['interactive'],
+                    flux_min_for_merging_Jy=dir_parset['flux_min_for_merging_jy'])
             directions = factor.directions.directions_read(dir_parset['directions_file'],
                 parset['dir_working'])
 

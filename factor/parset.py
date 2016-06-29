@@ -678,6 +678,16 @@ def get_directions_options(parset):
     else:
         parset_dict['flux_min_jy'] = None
 
+    # When identifying calibrators with the above selection criteria, search for
+    # the set of calibrators that minimizes non-uniformity (default = False).
+    # Generally, enabling this option will result in facets that are more
+    # uniform in size
+     if 'minimize_nonuniformity' in parset_dict:
+        parset_dict['minimize_nonuniformity'] = parset.getboolean('directions',
+            'minimize_nonuniformity')
+    else:
+        parset_dict['minimize_nonuniformity'] = False
+
     # Number of internally derived directions can be limited to a maximum number
     # of directions if desired with max_num (default = all).
     if 'ndir_max' in parset_dict:
@@ -786,7 +796,7 @@ def get_directions_options(parset):
     # Check for unused options
     allowed_options = ['faceting_skymodel', 'directions_file', 'max_radius_deg',
         'flux_min_for_merging_jy', 'flux_min_jy', 'size_max_arcmin',
-        'separation_max_arcmin', 'max_num', 'ndir_max',
+        'separation_max_arcmin', 'max_num', 'ndir_max', 'minimize_nonuniformity',
         'faceting_radius_deg', 'check_edges', 'ndir_total', 'ndir_process',
         'ndir_selfcal', 'groupings', 'allow_reordering', 'target_ra', 'target_dec',
         'target_radius_arcmin', 'target_has_own_facet']
