@@ -696,14 +696,28 @@ class Direction(object):
             # Set slow (gain) solution time interval
             if self.solint_time_a == 0:
                 # Slow gain solve is per band, so don't scale the interval with
-                # the number of bands but only with the effective flux
+                # the number of bands but only with the effective flux. Also,
+                # avoid cases in which the last solution interval is much smaller
+                # than the target interval
                 ref_flux_jy = 1.4
                 target_timewidth_s = 1200.0 * (ref_flux_jy / effective_flux_jy)**2
                 if target_timewidth_s < 240.0:
                     target_timewidth_s = 240.0
                 if target_timewidth_s > 1200.0:
                     target_timewidth_s = 1200.0
-                self.solint_time_a = int(round(target_timewidth_s / timestep_sec))
+                solint_time_a = int(round(target_timewidth_s / timestep_sec))
+                solint_time_a_lower = solint_time_a
+                solint_time_a_upper = solint_time_a
+                while (ntimes_min % solint_time_a_lower > 0 and
+                    ntimes_min % solint_time_a_lower < solint_time_a_lower / 2.0):
+                    solint_time_a_lower -= 1
+                while (ntimes_min % solint_time_a_upper > 0 and
+                    ntimes_min % solint_time_a_upper < solint_time_a_upper / 2.0):
+                    solint_time_a_upper += 1
+                if solint_time_a - solint_time_a_lower <= solint_time_a_upper - solint_time_a:
+                    self.solint_time_a = solint_time_a_lower
+                else:
+                    self.solint_time_a = solint_time_a_upper
 
             self.log.debug('Using solution intervals of {0} (fast) and {1} '
                 '(slow) time slots'.format(self.solint_time_p, self.solint_time_a))
@@ -733,14 +747,24 @@ class Direction(object):
 
             # Check for a partial block, and adjust the number to ensure that
             # it is at least half of the desired block size
-            partial_block_mhz = (num_chan_per_band_after_avg * nbands %
-                nchan_per_block) * mhz_per_chan_after_avg
+            num_cal_blocks_lower = num_cal_blocks
+            num_cal_blocks_upper = num_cal_blocks
+            partial_block_mhz = self.calc_partial_block(num_chan_per_band_after_avg,
+                nbands, num_cal_blocks, mhz_per_chan_after_avg)
             while (partial_block_mhz > 0.0 and partial_block_mhz < tec_block_mhz/2.0):
-                num_cal_blocks -= 1
-                nchan_per_block = np.ceil(num_chan_per_band_after_avg * nbands /
-                    num_cal_blocks)
-                partial_block_mhz = (num_chan_per_band_after_avg * nbands %
-                    nchan_per_block) * mhz_per_chan_after_avg
+                num_cal_blocks_lower -= 1
+                partial_block_mhz = self.calc_partial_block(num_chan_per_band_after_avg,
+                    nbands, num_cal_blocks_lower, mhz_per_chan_after_avg)
+            partial_block_mhz = self.calc_partial_block(num_chan_per_band_after_avg,
+                nbands, num_cal_blocks, mhz_per_chan_after_avg)
+            while (partial_block_mhz > 0.0 and partial_block_mhz < tec_block_mhz/2.0):
+                num_cal_blocks_upper += 1
+                partial_block_mhz = self.calc_partial_block(num_chan_per_band_after_avg,
+                    nbands, num_cal_blocks_upper, mhz_per_chan_after_avg)
+            if num_cal_blocks - num_cal_blocks_lower <= num_cal_blocks_upper - num_cal_blocks:
+                num_cal_blocks = num_cal_blocks_lower
+            else:
+                num_cal_blocks = num_cal_blocks_upper
             if num_cal_blocks < 1:
                 num_cal_blocks = 1
             self.solint_freq_p = int(np.ceil(num_chan_per_band_after_avg * nbands /
@@ -753,6 +777,18 @@ class Direction(object):
         else:
             self.data_column = 'DATA'
             self.blavg_weight_column = 'WEIGHT_SPECTRUM'
+
+
+    def calc_partial_block(self, num_chan_per_band_after_avg, nbands,
+        num_cal_blocks, mhz_per_chan_after_avg):
+        """
+        Returns size of partial block in MHz
+        """
+        nchan_per_block = np.ceil(num_chan_per_band_after_avg * nbands /
+            num_cal_blocks_upper)
+        partial_block_mhz = (num_chan_per_band_after_avg * nbands %
+            nchan_per_block) * mhz_per_chan_after_avg
+        return partial_block_mhz
 
 
     def get_target_timewidth(self, delta_theta, resolution, reduction_factor):
