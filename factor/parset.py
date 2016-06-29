@@ -682,7 +682,7 @@ def get_directions_options(parset):
     # the set of calibrators that minimizes non-uniformity (default = False).
     # Generally, enabling this option will result in facets that are more
     # uniform in size
-     if 'minimize_nonuniformity' in parset_dict:
+    if 'minimize_nonuniformity' in parset_dict:
         parset_dict['minimize_nonuniformity'] = parset.getboolean('directions',
             'minimize_nonuniformity')
     else:
