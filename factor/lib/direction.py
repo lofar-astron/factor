@@ -562,7 +562,7 @@ class Direction(object):
         timestep_sec : float
             Time step
         ntimes_min : int
-            Minimum number of timeslots per band, currently not used
+            Minimum number of timeslots in a chunk
         nbands : int
             Number of bands
         mean_freq_mhz : float
@@ -698,7 +698,8 @@ class Direction(object):
                 # Slow gain solve is per band, so don't scale the interval with
                 # the number of bands but only with the effective flux. Also,
                 # avoid cases in which the last solution interval is much smaller
-                # than the target interval
+                # than the target interval (for the smallest time chunk, this
+                # assumes that the chunks are all about the same length)
                 ref_flux_jy = 1.4
                 target_timewidth_s = 1200.0 * (ref_flux_jy / effective_flux_jy)**2
                 if target_timewidth_s < 240.0:
@@ -761,7 +762,7 @@ class Direction(object):
                 num_cal_blocks_upper += 1
                 partial_block_mhz = self.calc_partial_block(num_chan_per_band_after_avg,
                     nbands, num_cal_blocks_upper, mhz_per_chan_after_avg)
-            if num_cal_blocks - num_cal_blocks_lower <= num_cal_blocks_upper - num_cal_blocks:
+            if num_cal_blocks - num_cal_blocks_lower < num_cal_blocks_upper - num_cal_blocks:
                 num_cal_blocks = num_cal_blocks_lower
             else:
                 num_cal_blocks = num_cal_blocks_upper
