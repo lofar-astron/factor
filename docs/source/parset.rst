@@ -51,11 +51,13 @@ The available options are described below under their respective sections.
 
     chunk_size_sec
         Size of time chunks in seconds (default = 2400; minimum allowed value is
-        1200). Generally, the number of chunks should be at least the number of
-        available CPUs. To prevent Factor from chunking the data, set this value to be
-        larger than the length of the longest dataset (in this case, Factor will not
-        make copies of the files but will instead make symbolic links to them instead,
-        so please make backup copies yourself).
+        1200). Ideally, the number of chunks should be evenly divisible by the total
+        number of CPUs available to each direction (e.g., if you want to process 2
+        directions in parallel and have 24 CPUS in total = 12 per direction, you
+        should set the chunk size to produce 12 chunks). To prevent Factor from
+        chunking the data, set this value to be larger than the length of the longest
+        dataset (in this case, Factor will not make copies of the files but will
+        make symbolic links to them instead, so please make backup copies yourself)
 
     interactive
         Use interactive mode (default = ``False``). Factor will ask for confirmation of
