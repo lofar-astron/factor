@@ -763,6 +763,7 @@ apply_phaseonly2.argument.correct_fast2.type               =   applycal
 apply_phaseonly2.argument.correct_fast2.parmdb             =   parmdb
 apply_phaseonly2.argument.correct_fast2.correction         =   commonscalarphase
 apply_phaseonly2.argument.correct_fast2.invert             =   True
+{% endif %}
 
 ########## end of second round of selfcal (10" resolution)
 ########## start of phase-only selfcal loop
