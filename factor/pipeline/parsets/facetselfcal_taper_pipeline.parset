@@ -458,7 +458,7 @@ make_fast_phase_parmdb_map.control.filename                =  fast_parmdb.mapfil
 remove_parmdbs1.control.type                               =   remove_file
 remove_parmdbs1.control.mapfile_in                         =   make_fast_phase_parmdb_map.output.mapfile
 remove_parmdbs1.control.inputkey                           =   parmdb
-remove_parmdbs1.argument.flags                             =   [-r,parmdb]
+remove_parmdbs1.argument.flags                             =   [-rf,parmdb]
 
 {% if use_gaincal %}
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
@@ -677,7 +677,7 @@ switch_weights_col3.argument.flags                         =   [msfiles,WEIGHT_S
 remove_parmdbs2.control.type                               =   remove_file
 remove_parmdbs2.control.mapfile_in                         =   make_fast_phase_parmdb_map.output.mapfile
 remove_parmdbs2.control.inputkey                           =   parmdb
-remove_parmdbs2.argument.flags                             =   [-r,parmdb]
+remove_parmdbs2.argument.flags                             =   [-rf,parmdb]
 
 {% if use_gaincal %}
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
@@ -915,7 +915,7 @@ switch_weights_col5.argument.flags                         =   [msfiles,WEIGHT_S
 remove_parmdbs11.control.type                              =   remove_file
 remove_parmdbs11.control.mapfile_in                        =   make_fast_phase_parmdb_map.output.mapfile
 remove_parmdbs11.control.inputkey                          =   parmdb
-remove_parmdbs11.argument.flags                            =   [-r,parmdb]
+remove_parmdbs11.argument.flags                            =   [-rf,parmdb]
 
 {% if use_gaincal %}
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
@@ -1013,7 +1013,7 @@ make_slow_gain_parmdb_map.control.filename                 =  slow_parmdb.mapfil
 remove_parmdbs12.control.type                              =   remove_file
 remove_parmdbs12.control.mapfile_in                        =   make_slow_gain_parmdb_map.output.mapfile
 remove_parmdbs12.control.inputkey                          =   parmdb
-remove_parmdbs12.argument.flags                            =   [-r,parmdb]
+remove_parmdbs12.argument.flags                            =   [-rf,parmdb]
 
 # run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
 # note: for now, we write out a new dataset even though it's never used, as this
@@ -1236,7 +1236,7 @@ switch_weights_col7.argument.flags                         =   [msfiles,WEIGHT_S
 remove_parmdbs21.control.type                              =   remove_file
 remove_parmdbs21.control.mapfile_in                        =   make_fast_phase_parmdb_map.output.mapfile
 remove_parmdbs21.control.inputkey                          =   parmdb
-remove_parmdbs21.argument.flags                            =   [-r,parmdb]
+remove_parmdbs21.argument.flags                            =   [-rf,parmdb]
 
 {% if use_gaincal %}
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
@@ -1310,7 +1310,7 @@ merge_phase_parmdbs.argument.flags                         =   [mslist,instrumen
 remove_parmdbs22.control.type                              =   remove_file
 remove_parmdbs22.control.mapfile_in                        =   make_slow_gain_parmdb_map.output.mapfile
 remove_parmdbs22.control.inputkey                          =   parmdb
-remove_parmdbs22.argument.flags                            =   [-r,parmdb]
+remove_parmdbs22.argument.flags                            =   [-rf,parmdb]
 
 # run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
 # note: for now, we write out a new dataset even though it's never used, as this
