@@ -231,6 +231,7 @@ class Direction(object):
         self.use_selfcal_clean_threshold = parset['imaging_specific']['selfcal_clean_threshold']
         self.use_selfcal_adaptive_threshold = parset['imaging_specific']['selfcal_adaptive_threshold']
         self.casa_multiscale = parset['imaging_specific']['selfcal_scales']
+        self.use_gaincal = parset['calibration_specific']['use_gaincal']
 
         if facet_cellsize_arcsec is None:
             facet_cellsize_arcsec = parset['imaging_specific']['selfcal_cellsize_arcsec']

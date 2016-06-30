@@ -45,6 +45,9 @@ dir_ms = /data/bands
 
 
 [calibration]
+# Use DPPP GainCal for fast phase-only solve (default = False)
+# use_gaincal = False
+
 # Exit if selfcal fails for any direction (default = True). If False, processing
 # will continue and the failed direction will receive the selfcal solutions of
 # the nearest successful direction unless skip_selfcal_check is True, in which

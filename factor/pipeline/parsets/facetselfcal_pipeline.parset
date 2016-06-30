@@ -450,6 +450,29 @@ make_fast_phase_parmdb_map.control.add_suffix_to_file      =  /instrument
 make_fast_phase_parmdb_map.control.mapfile_dir             =  input.output.mapfile_dir
 make_fast_phase_parmdb_map.control.filename                =  fast_parmdb.mapfile
 
+{% if use_gaincal %}
+# run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
+# note: for now, we write out a new dataset even though it's never used, as this
+# is the only way to add a uv cut without affecting the original dataset. Once
+# GainCal has a filter parameter, we can use dppp_inplace instead and save on I/O
+solve_phaseonly1.control.type                              =   dppp
+solve_phaseonly1.control.mapfiles_in                       =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+solve_phaseonly1.control.inputkeys                         =   [msin,parmdb]
+solve_phaseonly1.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
+solve_phaseonly1.argument.msin.datacolumn                  =   {{ data_column }}
+solve_phaseonly1.argument.msout.overwrite                  =   True
+solve_phaseonly1.argument.msout.writefullresflag           =   False
+solve_phaseonly1.argument.local_scratch_dir                =   {{ local_dir }}
+solve_phaseonly1.argument.steps                            =   [uvcut,solvetec]
+solve_phaseonly1.argument.uvcut.type                       =   uvwflagger
+solve_phaseonly1.argument.uvcut.uvlambdamin                =   {{ solve_min_uv_lambda }}
+solve_phaseonly1.argument.solvetec.type                    =   gaincal
+solve_phaseonly1.argument.solvetec.caltype                 =   tec
+solve_phaseonly1.argument.solvetec.parmdb                  =   parmdb
+solve_phaseonly1.argument.solvetec.usemodelcolumn          =   True
+solve_phaseonly1.argument.solvetec.solint                  =   {{ solint_time_p }}
+solve_phaseonly1.argument.solvetec.nchan                   =   {{ solint_freq_p }}
+{% else %}
 # run BBS with model column on freq-concatenated files, length = ntimes
 solve_phaseonly1.control.type                              =   calibrate-stand-alone_new
 solve_phaseonly1.argument.observation                      =   concat_data.output.mapfile
@@ -461,6 +484,7 @@ solve_phaseonly1.argument.Strategy.InputColumn             =   {{ data_column }}
 solve_phaseonly1.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_time_p }}
 solve_phaseonly1.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq_p }}
 solve_phaseonly1.argument.Step.solve.Solve.UVRange         =   [{{ solve_min_uv_lambda }}]
+{% endif %}
 
 # switch the weights back, length = ntimes
 switch_weights_col2.control.type                           =   switch_columns
@@ -472,6 +496,24 @@ switch_weights_col2.argument.flags                         =   [msfiles,WEIGHT_S
 ########## start of second round of selfcal
 
 # apply the previous calibration and average, length = ntimes
+{% if use_gaincal %}
+apply_phaseonly1.control.type                              =   dppp
+apply_phaseonly1.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+apply_phaseonly1.control.opts.inputkeys                    =   [msin,parmdb]
+apply_phaseonly1.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
+apply_phaseonly1.argument.msin.datacolumn                  =   DATA
+apply_phaseonly1.argument.msout.overwrite                  =   True
+apply_phaseonly1.argument.msout.writefullresflag           =   False
+apply_phaseonly1.argument.local_scratch_dir                =   {{ local_dir }}
+apply_phaseonly1.argument.steps                            =   [correct_tec,avg]
+apply_phaseonly1.argument.correct_tec.type                 =   applycal
+apply_phaseonly1.argument.correct_tec.parmdb               =   parmdb
+apply_phaseonly1.argument.correct_tec.correction           =   tec
+apply_phaseonly1.argument.correct_tec.invert               =   True
+apply_phaseonly1.argument.avg.type                         =   squash
+apply_phaseonly1.argument.avg.freqstep                     =   1
+apply_phaseonly1.argument.avg.timestep                     =   {{ facetselfcal_timestep }}
+{% else %}
 apply_phaseonly1.control.type                              =   dppp
 apply_phaseonly1.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
 apply_phaseonly1.control.opts.inputkeys                    =   [msin,parmdb]
@@ -492,6 +534,7 @@ apply_phaseonly1.argument.correct_fast2.invert             =   True
 apply_phaseonly1.argument.avg.type                         =   squash
 apply_phaseonly1.argument.avg.freqstep                     =   1
 apply_phaseonly1.argument.avg.timestep                     =   {{ facetselfcal_timestep }}
+{% endif %}
 
 # make compressed mapfile of averaged data, length = 1
 create_compressed_mapfile1.control.kind                    =   plugin
@@ -636,6 +679,29 @@ switch_weights_col3.control.mapfile_in                     =   concat_data.outpu
 switch_weights_col3.control.inputkey                       =   msfiles
 switch_weights_col3.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
+{% if use_gaincal %}
+# run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
+# note: for now, we write out a new dataset even though it's never used, as this
+# is the only way to add a uv cut without affecting the original dataset. Once
+# GainCal has a filter parameter, we can use dppp_inplace instead and save on I/O
+solve_phaseonly2.control.type                              =   dppp
+solve_phaseonly2.control.mapfiles_in                       =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+solve_phaseonly2.control.inputkeys                         =   [msin,parmdb]
+solve_phaseonly2.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
+solve_phaseonly2.argument.msin.datacolumn                  =   {{ data_column }}
+solve_phaseonly2.argument.msout.overwrite                  =   True
+solve_phaseonly2.argument.msout.writefullresflag           =   False
+solve_phaseonly2.argument.local_scratch_dir                =   {{ local_dir }}
+solve_phaseonly2.argument.steps                            =   [uvcut,solvetec]
+solve_phaseonly2.argument.uvcut.type                       =   uvwflagger
+solve_phaseonly2.argument.uvcut.uvlambdamin                =   {{ solve_min_uv_lambda }}
+solve_phaseonly2.argument.solvetec.type                    =   gaincal
+solve_phaseonly2.argument.solvetec.caltype                 =   tec
+solve_phaseonly2.argument.solvetec.parmdb                  =   parmdb
+solve_phaseonly2.argument.solvetec.usemodelcolumn          =   True
+solve_phaseonly2.argument.solvetec.solint                  =   {{ solint_time_p }}
+solve_phaseonly2.argument.solvetec.nchan                   =   {{ solint_freq_p }}
+{% else %}
 # run BBS with model column on freq-concatenated files, length = ntimes
 solve_phaseonly2.control.type                              =   calibrate-stand-alone_new
 solve_phaseonly2.argument.observation                      =   concat_data.output.mapfile
@@ -647,6 +713,7 @@ solve_phaseonly2.argument.Strategy.InputColumn             =   {{ data_column }}
 solve_phaseonly2.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_time_p }}
 solve_phaseonly2.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq_p }}
 solve_phaseonly2.argument.Step.solve.Solve.UVRange         =   [{{ solve_min_uv_lambda }}]
+{% endif %}
 
 # switch the weigthts back, length = ntimes
 switch_weights_col4.control.type                           =   switch_columns
@@ -658,6 +725,24 @@ switch_weights_col4.argument.flags                         =   [msfiles,WEIGHT_S
 ########## start of third round of selfcal
 
 # apply the previous calibration and average, length = ntimes
+{% if use_gaincal %}
+apply_phaseonly2.control.type                              =   dppp
+apply_phaseonly2.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+apply_phaseonly2.control.opts.inputkeys                    =   [msin,parmdb]
+apply_phaseonly2.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
+apply_phaseonly2.argument.msin.datacolumn                  =   DATA
+apply_phaseonly2.argument.msout.overwrite                  =   True
+apply_phaseonly2.argument.msout.writefullresflag           =   False
+apply_phaseonly2.argument.local_scratch_dir                =   {{ local_dir }}
+apply_phaseonly2.argument.steps                            =   [correct_tec,avg]
+apply_phaseonly2.argument.correct_tec.type                 =   applycal
+apply_phaseonly2.argument.correct_tec.parmdb               =   parmdb
+apply_phaseonly2.argument.correct_tec.correction           =   tec
+apply_phaseonly2.argument.correct_tec.invert               =   True
+apply_phaseonly2.argument.avg.type                         =   squash
+apply_phaseonly2.argument.avg.freqstep                     =   1
+apply_phaseonly2.argument.avg.timestep                     =   {{ facetselfcal_timestep }}
+{% else %}
 apply_phaseonly2.control.type                              =   dppp
 apply_phaseonly2.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
 apply_phaseonly2.control.opts.inputkeys                    =   [msin,parmdb]
@@ -678,6 +763,7 @@ apply_phaseonly2.argument.correct_fast2.invert             =   True
 apply_phaseonly2.argument.avg.type                         =   squash
 apply_phaseonly2.argument.avg.freqstep                     =   1
 apply_phaseonly2.argument.avg.timestep                     =   {{ facetselfcal_timestep }}
+{% endif %}
 
 # make compressed mapfile of averaged data, length = 1
 create_compressed_mapfile2.control.kind                    =   plugin
@@ -822,6 +908,29 @@ switch_weights_col5.control.mapfile_in                     =   concat_data.outpu
 switch_weights_col5.control.inputkey                       =   msfiles
 switch_weights_col5.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
+{% if use_gaincal %}
+# run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
+# note: for now, we write out a new dataset even though it's never used, as this
+# is the only way to add a uv cut without affecting the original dataset. Once
+# GainCal has a filter parameter, we can use dppp_inplace instead and save on I/O
+solve_ampphase11.control.type                              =   dppp
+solve_ampphase11.control.mapfiles_in                       =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+solve_ampphase11.control.inputkeys                         =   [msin,parmdb]
+solve_ampphase11.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
+solve_ampphase11.argument.msin.datacolumn                  =   {{ data_column }}
+solve_ampphase11.argument.msout.overwrite                  =   True
+solve_ampphase11.argument.msout.writefullresflag           =   False
+solve_ampphase11.argument.local_scratch_dir                =   {{ local_dir }}
+solve_ampphase11.argument.steps                            =   [uvcut,solvetec]
+solve_ampphase11.argument.uvcut.type                       =   uvwflagger
+solve_ampphase11.argument.uvcut.uvlambdamin                =   {{ solve_min_uv_lambda }}
+solve_ampphase11.argument.solvetec.type                    =   gaincal
+solve_ampphase11.argument.solvetec.caltype                 =   tec
+solve_ampphase11.argument.solvetec.parmdb                  =   parmdb
+solve_ampphase11.argument.solvetec.usemodelcolumn          =   True
+solve_ampphase11.argument.solvetec.solint                  =   {{ solint_time_p }}
+solve_ampphase11.argument.solvetec.nchan                   =   {{ solint_freq_p }}
+{% else %}
 # run BBS with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
 solve_ampphase11.control.type                              =   calibrate-stand-alone_new
 solve_ampphase11.argument.observation                      =   concat_data.output.mapfile
@@ -833,6 +942,7 @@ solve_ampphase11.argument.Strategy.InputColumn             =   {{ data_column }}
 solve_ampphase11.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_time_p }}
 solve_ampphase11.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq_p }}
 solve_ampphase11.argument.Step.solve.Solve.UVRange         =   [{{ solve_min_uv_lambda }}]
+{% endif %}
 
 # switch weights back, length = ntimes
 switch_weights_col6.control.type                           =   switch_columns
@@ -841,6 +951,20 @@ switch_weights_col6.control.inputkey                       =   msfiles
 switch_weights_col6.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
 # apply the phase-only solutions from the previous calibration, length = ntimes
+{% if use_gaincal %}
+apply_ampphase11.control.type                              =   dppp_inplace
+apply_ampphase11.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+apply_ampphase11.control.opts.inputkeys                    =   [msin,parmdb]
+apply_ampphase11.argument.numthreads                       =   {{ max_cpus_per_proc_ntimes }}
+apply_ampphase11.argument.msin.datacolumn                  =   DATA
+apply_ampphase11.argument.msout                            =   .
+apply_ampphase11.argument.msout.datacolumn                 =   CORRECTED_DATA
+apply_ampphase11.argument.steps                            =   [correct_fast]
+apply_ampphase11.argument.correct_fast.type                =   applycal
+apply_ampphase11.argument.correct_fast.parmdb              =   parmdb
+apply_ampphase11.argument.correct_fast.correction          =   tec
+apply_ampphase11.argument.correct_fast.invert              =   True
+{% else %}
 apply_ampphase11.control.type                              =   dppp_inplace
 apply_ampphase11.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
 apply_ampphase11.control.opts.inputkeys                    =   [msin,parmdb]
@@ -857,6 +981,7 @@ apply_ampphase11.argument.correct_fast2.type               =   applycal
 apply_ampphase11.argument.correct_fast2.parmdb             =   parmdb
 apply_ampphase11.argument.correct_fast2.correction         =   commonscalarphase
 apply_ampphase11.argument.correct_fast2.invert             =   True
+{% endif %}
 
 # generate mapfile for the slow-gain parmDBs generated in the solve_ampphase12 step
 make_slow_gain_parmdb_map.control.kind                     =  plugin
@@ -1084,6 +1209,29 @@ switch_weights_col7.control.mapfile_in                     =   concat_data.outpu
 switch_weights_col7.control.inputkey                       =   msfiles
 switch_weights_col7.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
+{% if use_gaincal %}
+# run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
+# note: for now, we write out a new dataset even though it's never used, as this
+# is the only way to add a uv cut without affecting the original dataset. Once
+# GainCal has a filter parameter, we can use dppp_inplace instead and save on I/O
+solve_ampphase21.control.type                              =   dppp
+solve_ampphase21.control.mapfiles_in                       =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+solve_ampphase21.control.inputkeys                         =   [msin,parmdb]
+solve_ampphase21.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
+solve_ampphase21.argument.msin.datacolumn                  =   {{ data_column }}
+solve_ampphase21.argument.msout.overwrite                  =   True
+solve_ampphase21.argument.msout.writefullresflag           =   False
+solve_ampphase21.argument.local_scratch_dir                =   {{ local_dir }}
+solve_ampphase21.argument.steps                            =   [uvcut,solvetec]
+solve_ampphase21.argument.uvcut.type                       =   uvwflagger
+solve_ampphase21.argument.uvcut.uvlambdamin                =   {{ solve_min_uv_lambda }}
+solve_ampphase21.argument.solvetec.type                    =   gaincal
+solve_ampphase21.argument.solvetec.caltype                 =   tec
+solve_ampphase21.argument.solvetec.parmdb                  =   parmdb
+solve_ampphase21.argument.solvetec.usemodelcolumn          =   True
+solve_ampphase21.argument.solvetec.solint                  =   {{ solint_time_p }}
+solve_ampphase21.argument.solvetec.nchan                   =   {{ solint_freq_p }}
+{% else %}
 # run BBS with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
 solve_ampphase21.control.type                              =   calibrate-stand-alone_new
 solve_ampphase21.argument.observation                      =   concat_data.output.mapfile
@@ -1095,6 +1243,7 @@ solve_ampphase21.argument.Strategy.InputColumn             =   {{ data_column }}
 solve_ampphase21.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_time_p }}
 solve_ampphase21.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq_p }}
 solve_ampphase21.argument.Step.solve.Solve.UVRange         =   [{{ solve_min_uv_lambda }}]
+{% endif %}
 
 # switch weights back, length = ntimes
 switch_weights_col8.control.type                           =   switch_columns
@@ -1103,6 +1252,20 @@ switch_weights_col8.control.inputkey                       =   msfiles
 switch_weights_col8.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
 # apply the phase-only solutions from the previous calibration, length = ntimes
+{% if use_gaincal %}
+apply_ampphase21.control.type                              =   dppp_inplace
+apply_ampphase21.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+apply_ampphase21.control.opts.inputkeys                    =   [msin,parmdb]
+apply_ampphase21.argument.numthreads                       =   {{ max_cpus_per_proc_ntimes }}
+apply_ampphase21.argument.msin.datacolumn                  =   DATA
+apply_ampphase21.argument.msout                            =   .
+apply_ampphase21.argument.msout.datacolumn                 =   CORRECTED_DATA
+apply_ampphase21.argument.steps                            =   [correct_fast]
+apply_ampphase21.argument.correct_fast.type                =   applycal
+apply_ampphase21.argument.correct_fast.parmdb              =   parmdb
+apply_ampphase21.argument.correct_fast.correction          =   tec
+apply_ampphase21.argument.correct_fast.invert              =   True
+{% else %}
 apply_ampphase21.control.type                              =   dppp_inplace
 apply_ampphase21.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
 apply_ampphase21.control.opts.inputkeys                    =   [msin,parmdb]
@@ -1119,6 +1282,7 @@ apply_ampphase21.argument.correct_fast2.type               =   applycal
 apply_ampphase21.argument.correct_fast2.parmdb             =   parmdb
 apply_ampphase21.argument.correct_fast2.correction         =   commonscalarphase
 apply_ampphase21.argument.correct_fast2.invert             =   True
+{% endif %}
 
 # merge the parmDBs with the phase solutions into one, length = 1
 # This is needed later when the loop is done and we want to apply the solutions to the original data
@@ -1446,6 +1610,29 @@ casa_ft4.control.arguments                                 =   [--nologger,--nog
 {% else %}
 
 # apply the direction-dependent solutions and average, length = nfiles
+{% if use_gaincal %}
+apply_dir_dep.control.type                                 =   dppp
+apply_dir_dep.control.opts.mapfiles_in                     =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+apply_dir_dep.control.opts.inputkeys                       =   [msin,dir_dep_parmdb]
+apply_dir_dep.argument.numthreads                          =   {{ max_cpus_per_io_proc_nfiles }}
+apply_dir_dep.argument.msin.datacolumn                     =   FACET_DATA_ALL
+apply_dir_dep.argument.msout.overwrite                     =   True
+apply_dir_dep.argument.msout.writefullresflag              =   False
+apply_dir_dep.argument.local_scratch_dir                   =   {{ local_dir }}
+apply_dir_dep.argument.steps                               =   [correct_fast,correct_slow,flagzero,avg]
+apply_dir_dep.argument.correct_fast.type                   =   applycal
+apply_dir_dep.argument.correct_fast.parmdb                 =   dir_dep_parmdb
+apply_dir_dep.argument.correct_fast.correction             =   tec
+apply_dir_dep.argument.correct_fast.invert                 =   True
+apply_dir_dep.argument.correct_slow.type                   =   applycal
+apply_dir_dep.argument.correct_slow.parmdb                 =   dir_dep_parmdb
+apply_dir_dep.argument.correct_slow.invert                 =   True
+apply_dir_dep.argument.flagzero.type                       =   preflagger
+apply_dir_dep.argument.flagzero.amplmin                    =   1e-20
+apply_dir_dep.argument.avg.type                            =   squash
+apply_dir_dep.argument.avg.freqstep                        =   {{ facetimage_freqstep }}
+apply_dir_dep.argument.avg.timestep                        =   {{ facetimage_timestep }}
+{% else %}
 apply_dir_dep.control.type                                 =   dppp
 apply_dir_dep.control.opts.mapfiles_in                     =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 apply_dir_dep.control.opts.inputkeys                       =   [msin,dir_dep_parmdb]
@@ -1471,6 +1658,7 @@ apply_dir_dep.argument.flagzero.amplmin                    =   1e-20
 apply_dir_dep.argument.avg.type                            =   squash
 apply_dir_dep.argument.avg.freqstep                        =   {{ facetimage_freqstep }}
 apply_dir_dep.argument.avg.timestep                        =   {{ facetimage_timestep }}
+{% endif %}
 
 # compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile5.control.kind                    =   plugin
@@ -1677,6 +1865,25 @@ wsclean_ft.argument.nwlayers-for-size                      =   12288 12288
 ########## end of the "is the calibrator the full facet" if-clause
 
 # corrupt the model visibilities, length = nfiles
+{% if use_gaincal %}
+corrupt_final_model.control.type                           =   dppp
+corrupt_final_model.control.opts.mapfiles_in               =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+corrupt_final_model.control.opts.inputkeys                 =   [msin,parmdb]
+corrupt_final_model.argument.numthreads                    =   {{ max_cpus_per_io_proc_nfiles }}
+corrupt_final_model.argument.msin.datacolumn               =   MODEL_DATA
+corrupt_final_model.argument.msout.overwrite               =   True
+corrupt_final_model.argument.msout.writefullresflag        =   False
+corrupt_final_model.argument.local_scratch_dir             =   {{ local_dir }}
+corrupt_final_model.argument.steps                         =   [corrupt_fast,corrupt_slow]
+corrupt_final_model.argument.corrupt_fast.type             =   applycal
+corrupt_final_model.argument.corrupt_fast.parmdb           =   parmdb
+corrupt_final_model.argument.corrupt_fast.correction       =   tec
+corrupt_final_model.argument.corrupt_fast.invert           =   False
+corrupt_final_model.argument.corrupt_slow.type             =   applycal
+corrupt_final_model.argument.corrupt_slow.parmdb           =   parmdb
+corrupt_final_model.argument.corrupt_slow.correction       =   gain
+corrupt_final_model.argument.corrupt_slow.invert           =   False
+{% else %}
 corrupt_final_model.control.type                           =   dppp
 corrupt_final_model.control.opts.mapfiles_in               =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 corrupt_final_model.control.opts.inputkeys                 =   [msin,parmdb]
@@ -1698,6 +1905,7 @@ corrupt_final_model.argument.corrupt_slow.type             =   applycal
 corrupt_final_model.argument.corrupt_slow.parmdb           =   parmdb
 corrupt_final_model.argument.corrupt_slow.correction       =   gain
 corrupt_final_model.argument.corrupt_slow.invert           =   False
+{% endif %}
 
 # subtract new model vis from original model+residual vis, length = nfiles
 subtract_initial_final.control.type                        =   add_subtract_columns
