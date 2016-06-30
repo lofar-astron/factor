@@ -154,12 +154,13 @@ class Scheduler(object):
                     float(nops_per_node))))
 
             # Adjust resources to stay within limits for each node by adding or
-            # subtracting CPUs from the most appropriate operation(s)
-            imsizes = [op.direction.facet_imsize if op.direction.facet_imsize is
+            # subtracting CPUs from the most appropriate operation(s). For now,
+            # we use the size of the facet image to determine the weights
+            resource_weights = [op.direction.facet_imsize if op.direction.facet_imsize is
                 not None else 0.0 for op in op_group]
             j = 0
             while sum([op.direction.max_proc_per_node for op in op_group]) > ncpu_max * len(hosts):
-                op_take = op_group[imsizes.index(sorted(imsizes)[j])]
+                op_take = op_group[resource_weights.index(sorted(resource_weights)[j])]
                 op_take.direction.max_proc_per_node -= 1
                 op_take.direction.save_state()
                 if j < len(op_group)-1:
