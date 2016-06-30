@@ -109,10 +109,7 @@ class Direction(object):
         self.cal_size_deg = cal_size_deg
 
         # Initialize some parameters to default/initial values
-        self.loop_amp_selfcal = False
         self.selfcal_ok = False # whether selfcal succeeded
-        self.skip_add_subtract = None # whether to skip add/subtract in facetsub op
-        self.max_residual_val = 0.5 # maximum residual in Jy for facet subtract test
         self.wsclean_nchannels = 1 # set number of wide-band channels
         self.use_new_sub_data = False # set flag that tells which subtracted-data column to use
         self.cellsize_verify_deg = 0.00833 # verify subtract cell size
@@ -124,12 +121,12 @@ class Direction(object):
         self.solve_all_correlations = False # whether to solve for all corrs for slow gain
         self.do_reset = False # whether to reset this direction
         self.is_patch = False # whether direction is just a patch (not full facet)
-        self.num_selfcal_groups = 1 # number of blocks for TEC solve
         self.skymodel = None # direction's sky model
         self.use_existing_data = False # whether to use existing data for reimaging
         self.existing_data_freqstep = None # frequency step of existing data
         self.existing_data_timestep = None # time step of existing data
         self.average_image_data = False # whether to average the existing data before imaging them
+        self.facet_imsize = None # size of facet image (None for patch and field directions)
         self.started_operations = []
         self.completed_operations = []
         self.reset_operations = []
@@ -144,7 +141,7 @@ class Direction(object):
 
     def set_cal_size(self, selfcal_cellsize_arcsec):
         """
-        Sets the calibrator image size from calibrator size (or vice versa)
+        Sets the calibrator image size from the calibrator size (or vice versa)
 
         Parameters
         ----------
@@ -310,9 +307,8 @@ class Direction(object):
         if hasattr(self, 'width'):
             self.facet_imsize = max(512, self.get_optimum_size(self.width
                 / self.cellsize_facet_deg * padding))
-        else:
-            self.facet_imsize = None
 
+        # Set number of w planes for imaging / ft
         self.cal_wplanes = self.set_wplanes(self.cal_imsize)
         self.facet_wplanes = self.set_wplanes(self.facet_imsize)
 
