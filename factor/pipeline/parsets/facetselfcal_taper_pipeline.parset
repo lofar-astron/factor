@@ -500,24 +500,6 @@ switch_weights_col2.argument.flags                         =   [msfiles,WEIGHT_S
 ########## start of second round of selfcal (10" resolution)
 
 # apply the previous calibration and average, length = ntimes
-{% if use_gaincal %}
-apply_phaseonly1.control.type                              =   dppp
-apply_phaseonly1.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
-apply_phaseonly1.control.opts.inputkeys                    =   [msin,parmdb]
-apply_phaseonly1.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
-apply_phaseonly1.argument.msin.datacolumn                  =   DATA
-apply_phaseonly1.argument.msout.overwrite                  =   True
-apply_phaseonly1.argument.msout.writefullresflag           =   False
-apply_phaseonly1.argument.local_scratch_dir                =   {{ local_dir }}
-apply_phaseonly1.argument.steps                            =   [correct_tec,avg]
-apply_phaseonly1.argument.correct_tec.type                 =   applycal
-apply_phaseonly1.argument.correct_tec.parmdb               =   parmdb
-apply_phaseonly1.argument.correct_tec.correction           =   tec
-apply_phaseonly1.argument.correct_tec.invert               =   True
-apply_phaseonly1.argument.avg.type                         =   squash
-apply_phaseonly1.argument.avg.freqstep                     =   1
-apply_phaseonly1.argument.avg.timestep                     =   {{ facetselfcal_timestep }}
-{% else %}
 apply_phaseonly1.control.type                              =   dppp
 apply_phaseonly1.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
 apply_phaseonly1.control.opts.inputkeys                    =   [msin,parmdb]
@@ -538,7 +520,6 @@ apply_phaseonly1.argument.correct_fast2.invert             =   True
 apply_phaseonly1.argument.avg.type                         =   squash
 apply_phaseonly1.argument.avg.freqstep                     =   1
 apply_phaseonly1.argument.avg.timestep                     =   {{ facetselfcal_timestep }}
-{% endif %}
 
 # make compressed mapfile of averaged data, length = 1
 create_compressed_mapfile1.control.kind                    =   plugin
@@ -729,24 +710,6 @@ switch_weights_col4.control.inputkey                       =   msfiles
 switch_weights_col4.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
 # apply the previous calibration, length = ntimes
-{% if use_gaincal %}
-apply_phaseonly2.control.type                              =   dppp_inplace
-apply_phaseonly2.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
-apply_phaseonly2.control.opts.inputkeys                    =   [msin,parmdb]
-apply_phaseonly2.argument.numthreads                       =   {{ max_cpus_per_proc_ntimes }}
-apply_phaseonly2.argument.msin.datacolumn                  =   DATA
-apply_phaseonly2.argument.msout                            =   .
-apply_phaseonly2.argument.msout.datacolumn                 =   CORRECTED_DATA
-apply_phaseonly2.argument.local_scratch_dir                =   {{ local_dir }}
-apply_phaseonly2.argument.steps                            =   [correct_tec,avg]
-apply_phaseonly2.argument.correct_tec.type                 =   applycal
-apply_phaseonly2.argument.correct_tec.parmdb               =   parmdb
-apply_phaseonly2.argument.correct_tec.correction           =   tec
-apply_phaseonly2.argument.correct_tec.invert               =   True
-apply_phaseonly2.argument.avg.type                         =   squash
-apply_phaseonly2.argument.avg.freqstep                     =   1
-apply_phaseonly2.argument.avg.timestep                     =   {{ facetselfcal_timestep }}
-{% else %}
 apply_phaseonly2.control.type                              =   dppp_inplace
 apply_phaseonly2.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
 apply_phaseonly2.control.opts.inputkeys                    =   [msin,parmdb]
@@ -763,7 +726,6 @@ apply_phaseonly2.argument.correct_fast2.type               =   applycal
 apply_phaseonly2.argument.correct_fast2.parmdb             =   parmdb
 apply_phaseonly2.argument.correct_fast2.correction         =   commonscalarphase
 apply_phaseonly2.argument.correct_fast2.invert             =   True
-{% endif %}
 
 ########## end of second round of selfcal (10" resolution)
 ########## start of phase-only selfcal loop
@@ -980,20 +942,6 @@ switch_weights_col6.control.inputkey                       =   msfiles
 switch_weights_col6.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
 # apply the phase-only solutions from the previous calibration, length = ntimes
-{% if use_gaincal %}
-apply_ampphase11.control.type                              =   dppp_inplace
-apply_ampphase11.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
-apply_ampphase11.control.opts.inputkeys                    =   [msin,parmdb]
-apply_ampphase11.argument.numthreads                       =   {{ max_cpus_per_proc_ntimes }}
-apply_ampphase11.argument.msin.datacolumn                  =   DATA
-apply_ampphase11.argument.msout                            =   .
-apply_ampphase11.argument.msout.datacolumn                 =   CORRECTED_DATA
-apply_ampphase11.argument.steps                            =   [correct_fast]
-apply_ampphase11.argument.correct_fast.type                =   applycal
-apply_ampphase11.argument.correct_fast.parmdb              =   parmdb
-apply_ampphase11.argument.correct_fast.correction          =   tec
-apply_ampphase11.argument.correct_fast.invert              =   True
-{% else %}
 apply_ampphase11.control.type                              =   dppp_inplace
 apply_ampphase11.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
 apply_ampphase11.control.opts.inputkeys                    =   [msin,parmdb]
@@ -1010,7 +958,6 @@ apply_ampphase11.argument.correct_fast2.type               =   applycal
 apply_ampphase11.argument.correct_fast2.parmdb             =   parmdb
 apply_ampphase11.argument.correct_fast2.correction         =   commonscalarphase
 apply_ampphase11.argument.correct_fast2.invert             =   True
-{% endif %}
 
 # fiddle with the casa mapfiles, length = 1
 adjust_casa_mapfile_phaseloop.control.kind                 =   plugin
@@ -1304,20 +1251,6 @@ switch_weights_col8.control.inputkey                       =   msfiles
 switch_weights_col8.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
 # apply the phase-only solutions from the previous calibration, length = ntimes
-{% if use_gaincal %}
-apply_ampphase21.control.type                              =   dppp_inplace
-apply_ampphase21.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
-apply_ampphase21.control.opts.inputkeys                    =   [msin,parmdb]
-apply_ampphase21.argument.numthreads                       =   {{ max_cpus_per_proc_ntimes }}
-apply_ampphase21.argument.msin.datacolumn                  =   DATA
-apply_ampphase21.argument.msout                            =   .
-apply_ampphase21.argument.msout.datacolumn                 =   CORRECTED_DATA
-apply_ampphase21.argument.steps                            =   [correct_fast]
-apply_ampphase21.argument.correct_fast.type                =   applycal
-apply_ampphase21.argument.correct_fast.parmdb              =   parmdb
-apply_ampphase21.argument.correct_fast.correction          =   tec
-apply_ampphase21.argument.correct_fast.invert              =   True
-{% else %}
 apply_ampphase21.control.type                              =   dppp_inplace
 apply_ampphase21.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
 apply_ampphase21.control.opts.inputkeys                    =   [msin,parmdb]
@@ -1334,7 +1267,6 @@ apply_ampphase21.argument.correct_fast2.type               =   applycal
 apply_ampphase21.argument.correct_fast2.parmdb             =   parmdb
 apply_ampphase21.argument.correct_fast2.correction         =   commonscalarphase
 apply_ampphase21.argument.correct_fast2.invert             =   True
-{% endif %}
 
 # merge the parmDBs with the phase solutions into one, length = 1
 # This is needed later when the loop is done and we want to apply the solutions to the original data

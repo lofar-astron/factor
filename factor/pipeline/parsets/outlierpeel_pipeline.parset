@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, add_all_facet_sources, shift_and_average,  create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_data, concat_data_compressed_mapfile, {% if pre_average %} regroup_shift_and_average, regroup_parmdb, pre_average, make_blavg_data_mapfile, concat_blavg_data, copy_column1, copy_column2, {% endif %} switch_weights_col1, make_fast_phase_parmdb_map, solve_ampphase11, switch_weights_col2, apply_ampphase11, merge_phase_parmdbs, make_slow_gain_parmdb_map, solve_ampphase12, merge_amp_parmdbs, smooth_amps, smooth_amps_normalized, merge_selfcal_parmdbs, merge_normalized_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, create_outlier_skymodel_map, make_sourcedb_outlier_model, expand_sourcedb_outlier_map, predict_outlier_model, corrupt_outlier_model, subtract_outlier_model, create_middle_pre_band_mapfile, create_middle_post_mapfile, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract, expand_verify_subtract_map, copy_to_empty_data]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, add_all_facet_sources, shift_and_average,  create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_data, concat_data_compressed_mapfile, {% if pre_average %} regroup_shift_and_average, regroup_parmdb, pre_average, make_blavg_data_mapfile, concat_blavg_data, copy_column1, copy_column2, {% endif %} switch_weights_col1, make_fast_phase_parmdb_map, create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, solve_ampphase11, switch_weights_col2, apply_ampphase11, merge_phase_parmdbs, make_slow_gain_parmdb_map, solve_ampphase12, merge_amp_parmdbs, smooth_amps, smooth_amps_normalized, merge_selfcal_parmdbs, merge_normalized_selfcal_parmdbs, make_selfcal_plots, expand_merged_parmdb_map, create_outlier_skymodel_map, make_sourcedb_outlier_model, expand_sourcedb_outlier_map, predict_outlier_model, corrupt_outlier_model, subtract_outlier_model, create_middle_pre_band_mapfile, create_middle_post_mapfile, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract, expand_verify_subtract_map, copy_to_empty_data]
 
 pipeline.pluginpath                                      =   {{ pipeline_dir }}/plugins
 
@@ -229,14 +229,61 @@ switch_weights_col1.control.inputkey                     =   msfiles
 switch_weights_col1.argument.flags                       =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
 # generate mapfile for the fast-phase parmDBs generated in the solve_ampphase11 step
-make_fast_phase_parmdb_map.control.kind                    =  plugin
-make_fast_phase_parmdb_map.control.type                    =  createMapfile
-make_fast_phase_parmdb_map.control.method                  =  add_suffix_to_file
-make_fast_phase_parmdb_map.control.mapfile_in              =  concat_data.output.mapfile
-make_fast_phase_parmdb_map.control.add_suffix_to_file      =  /instrument
-make_fast_phase_parmdb_map.control.mapfile_dir             =  input.output.mapfile_dir
-make_fast_phase_parmdb_map.control.filename                =  fast_parmdb.mapfile
+make_fast_phase_parmdb_map.control.kind                  =  plugin
+make_fast_phase_parmdb_map.control.type                  =  createMapfile
+make_fast_phase_parmdb_map.control.method                =  add_suffix_to_file
+make_fast_phase_parmdb_map.control.mapfile_in            =  concat_data.output.mapfile
+make_fast_phase_parmdb_map.control.add_suffix_to_file    =  /instrument
+make_fast_phase_parmdb_map.control.mapfile_dir           =  input.output.mapfile_dir
+make_fast_phase_parmdb_map.control.filename              =  fast_parmdb.mapfile
 
+# create a mapfile with the peel skymodel, length = 1
+create_peel_skymodel_map.control.kind                    =   plugin
+create_peel_skymodel_map.control.type                    =   addListMapfile
+create_peel_skymodel_map.control.hosts                   =   {{ hosts }}
+create_peel_skymodel_map.control.files                   =   [{{ peel_skymodel }}]
+create_peel_skymodel_map.control.mapfile_dir             =   input.output.mapfile_dir
+create_peel_skymodel_map.control.filename                =   peel_skymodel.mapfile
+
+# convert the peel skymodel into a sourcedb, length = 1
+make_peel_sourcedb.control.type                          =   make_sourcedb
+make_peel_sourcedb.control.opts.mapfile_in               =   create_peel_skymodel_map.output.mapfile
+make_peel_sourcedb.control.opts.inputkey                 =   in
+make_peel_sourcedb.argument.format                       =   <
+make_peel_sourcedb.argument.outtype                      =   blob
+
+# expand the sourcedb mapfile so that there is one entry for every file, length = ntimes
+expand_peel_sourcedb_map.control.kind                    =   plugin
+expand_peel_sourcedb_map.control.type                    =   expandMapfile
+expand_peel_sourcedb_map.control.mapfile_in              =   make_peel_sourcedb.output.mapfile
+expand_peel_sourcedb_map.control.mapfile_to_match        =   concat_data.output.mapfile
+expand_peel_sourcedb_map.control.mapfile_dir             =   input.output.mapfile_dir
+expand_peel_sourcedb_map.control.filename                =   expand_peel_sourcedb.mapfile
+
+{% if use_gaincal %}
+# run GainCal with peel sourcedb on freq-concatenated files, to solve for (fast) phases, length = ntimes
+# note: for now, we write out a new dataset even though it's never used, as this
+# is the only way to add a uv cut without affecting the original dataset. Once
+# GainCal has a filter parameter, we can use dppp_inplace instead and save on I/O
+solve_ampphase11.control.type                            =   dppp
+solve_ampphase11.control.mapfiles_in                     =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile,expand_peel_sourcedb_map.output.mapfile]
+solve_ampphase11.control.inputkeys                       =   [msin,parmdb,sourcedb]
+solve_ampphase11.argument.numthreads                     =   {{ max_cpus_per_io_proc_ntimes }}
+solve_ampphase11.argument.msin.datacolumn                =   {{ data_column }}
+solve_ampphase11.argument.msout.overwrite                =   True
+solve_ampphase11.argument.msout.writefullresflag         =   False
+solve_ampphase11.argument.local_scratch_dir              =   {{ local_dir }}
+solve_ampphase11.argument.steps                          =   [uvcut,solvetec]
+solve_ampphase11.argument.uvcut.type                     =   uvwflagger
+solve_ampphase11.argument.uvcut.uvlambdamin              =   {{ solve_min_uv_lambda }}
+solve_ampphase11.argument.solvetec.type                  =   gaincal
+solve_ampphase11.argument.solvetec.caltype               =   tec
+solve_ampphase11.argument.solvetec.parmdb                =   parmdb
+solve_ampphase11.argument.solvetec.usemodelcolumn        =   False
+solve_ampphase11.argument.solvetec.sourcedb              =   sourcedb
+solve_ampphase11.argument.solvetec.solint                =   {{ solint_time_p }}
+solve_ampphase11.argument.solvetec.nchan                 =   {{ solint_freq_p }}
+{% else %}
 # run BBS on freq-concatenated files to solve for (fast) phases, length = ntimes
 solve_ampphase11.control.type                            =   calibrate-stand-alone_new
 solve_ampphase11.argument.observation                    =   concat_data.output.mapfile
@@ -247,6 +294,7 @@ solve_ampphase11.argument.replace-parmdb                 =   True
 solve_ampphase11.argument.Strategy.InputColumn           =   {{ data_column }}
 solve_ampphase11.argument.Step.solve.Solve.CellSize.Time =   {{ solint_time_p }}
 solve_ampphase11.argument.Step.solve.Solve.CellSize.Freq =   {{ solint_freq_p }}
+{% endif %}
 
 # switch the weights back, length = ntimes
 switch_weights_col2.control.type                         =   switch_columns
