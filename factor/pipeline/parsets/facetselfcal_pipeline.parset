@@ -471,7 +471,7 @@ solve_phaseonly1.argument.solvetec.caltype                 =   tec
 solve_phaseonly1.argument.solvetec.parmdb                  =   parmdb
 solve_phaseonly1.argument.solvetec.usemodelcolumn          =   True
 solve_phaseonly1.argument.solvetec.solint                  =   {{ solint_time_p }}
-solve_phaseonly1.argument.solvetec.nchan                   =   {{ solint_freq_p }}
+solve_phaseonly1.argument.solvetec.nchan                   =   {{ solint_freq_a }}
 {% else %}
 # run BBS with model column on freq-concatenated files, length = ntimes
 solve_phaseonly1.control.type                              =   calibrate-stand-alone_new
@@ -681,7 +681,7 @@ solve_phaseonly2.argument.solvetec.caltype                 =   tec
 solve_phaseonly2.argument.solvetec.parmdb                  =   parmdb
 solve_phaseonly2.argument.solvetec.usemodelcolumn          =   True
 solve_phaseonly2.argument.solvetec.solint                  =   {{ solint_time_p }}
-solve_phaseonly2.argument.solvetec.nchan                   =   {{ solint_freq_p }}
+solve_phaseonly2.argument.solvetec.nchan                   =   {{ solint_freq_a }}
 {% else %}
 # run BBS with model column on freq-concatenated files, length = ntimes
 solve_phaseonly2.control.type                              =   calibrate-stand-alone_new
@@ -891,7 +891,7 @@ solve_ampphase11.argument.solvetec.caltype                 =   tec
 solve_ampphase11.argument.solvetec.parmdb                  =   parmdb
 solve_ampphase11.argument.solvetec.usemodelcolumn          =   True
 solve_ampphase11.argument.solvetec.solint                  =   {{ solint_time_p }}
-solve_ampphase11.argument.solvetec.nchan                   =   {{ solint_freq_p }}
+solve_ampphase11.argument.solvetec.nchan                   =   {{ solint_freq_a }}
 {% else %}
 # run BBS with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
 solve_ampphase11.control.type                              =   calibrate-stand-alone_new
@@ -1177,7 +1177,7 @@ solve_ampphase21.argument.solvetec.caltype                 =   tec
 solve_ampphase21.argument.solvetec.parmdb                  =   parmdb
 solve_ampphase21.argument.solvetec.usemodelcolumn          =   True
 solve_ampphase21.argument.solvetec.solint                  =   {{ solint_time_p }}
-solve_ampphase21.argument.solvetec.nchan                   =   {{ solint_freq_p }}
+solve_ampphase21.argument.solvetec.nchan                   =   {{ solint_freq_a }}
 {% else %}
 # run BBS with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
 solve_ampphase21.control.type                              =   calibrate-stand-alone_new
