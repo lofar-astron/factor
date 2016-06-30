@@ -441,7 +441,7 @@ switch_weights_col1.control.mapfile_in                     =   concat_data.outpu
 switch_weights_col1.control.inputkey                       =   msfiles
 switch_weights_col1.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
-# generate mapfile for the fast-phase parmDBs generated in the solve_phaseonly steps
+# generate mapfile for the fast-phase parmDBs generated in the solve_phaseonly steps, length = ntimes
 make_fast_phase_parmdb_map.control.kind                    =  plugin
 make_fast_phase_parmdb_map.control.type                    =  createMapfile
 make_fast_phase_parmdb_map.control.method                  =  add_suffix_to_file
