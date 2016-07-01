@@ -261,8 +261,8 @@ class Operation(object):
         """
         Checks if files in input mapfile exist
 
-        Paramters
-        ---------
+        Parameters
+        ----------
         mapfile : str
             Filename of mapfile to check
 
