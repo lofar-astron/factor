@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, shift_cal, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile_avgdata, sort_avg_into_Groups, sort_avg_into_Groups_maps, concat_avgdata, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, make_fast_phase_parmdb_map, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_slow_gain_parmdb_map, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, shift_empty, expand_merged_parmdb_map, add_imaging_cols_empty, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_compressed_mapfile_ft, create_model4_map, blank_model, casa_ft4, {% else %} predict_all_model_data, add_all_facet_sources, apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, shift_cal, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile_avgdata, sort_avg_into_Groups, sort_avg_into_Groups_maps, concat_avgdata, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, make_fast_phase_parmdb_map, remove_parmdbs1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, remove_parmdbs2, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, create_compressed_mapfile2, concat2, casa_image21, adjust_casa_mapfile2, mask2, casa_image22, create_model2_map, casa_ft2, switch_weights_col5, remove_parmdbs11, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, shift_empty, expand_merged_parmdb_map, add_imaging_cols_empty, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_compressed_mapfile_ft, create_model4_map, blank_model, casa_ft4, {% else %} predict_all_model_data, add_all_facet_sources, apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -450,6 +450,12 @@ make_fast_phase_parmdb_map.control.add_suffix_to_file      =  /instrument
 make_fast_phase_parmdb_map.control.mapfile_dir             =  input.output.mapfile_dir
 make_fast_phase_parmdb_map.control.filename                =  fast_parmdb.mapfile
 
+# remove any existing parmdbs before solving, length = ntimes
+remove_parmdbs1.control.type                               =   remove_file
+remove_parmdbs1.control.mapfile_in                         =   make_fast_phase_parmdb_map.output.mapfile
+remove_parmdbs1.control.inputkey                           =   parmdb
+remove_parmdbs1.argument.flags                             =   [-rf,parmdb]
+
 {% if use_gaincal %}
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
 # note: for now, we write out a new dataset even though it's never used, as this
@@ -659,6 +665,12 @@ switch_weights_col3.control.type                           =   switch_columns
 switch_weights_col3.control.mapfile_in                     =   concat_data.output.mapfile
 switch_weights_col3.control.inputkey                       =   msfiles
 switch_weights_col3.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
+
+# remove any existing parmdbs before solving, length = ntimes
+remove_parmdbs2.control.type                               =   remove_file
+remove_parmdbs2.control.mapfile_in                         =   make_fast_phase_parmdb_map.output.mapfile
+remove_parmdbs2.control.inputkey                           =   parmdb
+remove_parmdbs2.argument.flags                             =   [-rf,parmdb]
 
 {% if use_gaincal %}
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
@@ -870,6 +882,12 @@ switch_weights_col5.control.mapfile_in                     =   concat_data.outpu
 switch_weights_col5.control.inputkey                       =   msfiles
 switch_weights_col5.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
+# remove any existing parmdbs before solving, length = ntimes
+remove_parmdbs11.control.type                              =   remove_file
+remove_parmdbs11.control.mapfile_in                        =   make_fast_phase_parmdb_map.output.mapfile
+remove_parmdbs11.control.inputkey                          =   parmdb
+remove_parmdbs11.argument.flags                            =   [-rf,parmdb]
+
 {% if use_gaincal %}
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
 # note: for now, we write out a new dataset even though it's never used, as this
@@ -938,6 +956,12 @@ make_slow_gain_parmdb_map.control.mapfile_in               =  concat_data.output
 make_slow_gain_parmdb_map.control.add_suffix_to_file       =  /instrument_slow
 make_slow_gain_parmdb_map.control.mapfile_dir              =  input.output.mapfile_dir
 make_slow_gain_parmdb_map.control.filename                 =  slow_parmdb.mapfile
+
+# remove any existing parmdbs before solving, length = ntimes
+remove_parmdbs12.control.type                              =   remove_file
+remove_parmdbs12.control.mapfile_in                        =   make_slow_gain_parmdb_map.output.mapfile
+remove_parmdbs12.control.inputkey                          =   parmdb
+remove_parmdbs12.argument.flags                            =   [-rf,parmdb]
 
 # run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
 # note: for now, we write out a new dataset even though it's never used, as this
@@ -1132,7 +1156,7 @@ casa_image32.argument.clean.allowchunk                     =   False
 loop_ampcal.control.kind                                   =   loop
 loop_ampcal.control.type                                   =   conditional
 loop_ampcal.control.loopcount                              =   {{ loopcount }}
-loop_ampcal.control.loopsteps                              =   [create_model3_map,casa_ft3,{% if pre_average %}switch_weights_col7,{% endif %}solve_ampphase21,{% if pre_average %}switch_weights_col8,{% endif %}apply_ampphase21,merge_phase_parmdbs,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,create_compressed_mapfile4,concat4,delete_image,casa_image41,adjust_casa_mapfile4,mask4,casa_image42,adjust_casa_mapfile5,copy_image,check_image]
+loop_ampcal.control.loopsteps                              =   [create_model3_map,casa_ft3,{% if pre_average %}switch_weights_col7,{% endif %}remove_parmdbs21,solve_ampphase21,{% if pre_average %}switch_weights_col8,{% endif %}apply_ampphase21,merge_phase_parmdbs,remove_parmdbs22,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,create_compressed_mapfile4,concat4,delete_image,casa_image41,adjust_casa_mapfile4,mask4,casa_image42,adjust_casa_mapfile5,copy_image,check_image]
 
 # create a mapfile with the model image, uses loop counter to select image32 or image42, length = 1
 create_model3_map.control.kind                             =   plugin
@@ -1155,6 +1179,12 @@ switch_weights_col7.control.type                           =   switch_columns
 switch_weights_col7.control.mapfile_in                     =   concat_data.output.mapfile
 switch_weights_col7.control.inputkey                       =   msfiles
 switch_weights_col7.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
+
+# remove any existing parmdbs before solving, length = ntimes
+remove_parmdbs21.control.type                              =   remove_file
+remove_parmdbs21.control.mapfile_in                        =   make_fast_phase_parmdb_map.output.mapfile
+remove_parmdbs21.control.inputkey                          =   parmdb
+remove_parmdbs21.argument.flags                            =   [-rf,parmdb]
 
 {% if use_gaincal %}
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
@@ -1223,6 +1253,12 @@ merge_phase_parmdbs.control.mapfile_in                     =   concat_data_compr
 merge_phase_parmdbs.control.inputkey                       =   mslist
 merge_phase_parmdbs.control.outputkey                      =   outparmdb
 merge_phase_parmdbs.argument.flags                         =   [mslist,instrument,outparmdb]
+
+# remove any existing parmdbs before solving, length = ntimes
+remove_parmdbs22.control.type                              =   remove_file
+remove_parmdbs22.control.mapfile_in                        =   make_slow_gain_parmdb_map.output.mapfile
+remove_parmdbs22.control.inputkey                          =   parmdb
+remove_parmdbs22.argument.flags                            =   [-rf,parmdb]
 
 # run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
 # note: for now, we write out a new dataset even though it's never used, as this
@@ -1542,29 +1578,6 @@ casa_ft4.control.arguments                                 =   [--nologger,--nog
 {% else %}
 
 # apply the direction-dependent solutions and average, length = nfiles
-{% if use_gaincal %}
-apply_dir_dep.control.type                                 =   dppp
-apply_dir_dep.control.opts.mapfiles_in                     =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-apply_dir_dep.control.opts.inputkeys                       =   [msin,dir_dep_parmdb]
-apply_dir_dep.argument.numthreads                          =   {{ max_cpus_per_io_proc_nfiles }}
-apply_dir_dep.argument.msin.datacolumn                     =   FACET_DATA_ALL
-apply_dir_dep.argument.msout.overwrite                     =   True
-apply_dir_dep.argument.msout.writefullresflag              =   False
-apply_dir_dep.argument.local_scratch_dir                   =   {{ local_dir }}
-apply_dir_dep.argument.steps                               =   [correct_fast,correct_slow,flagzero,avg]
-apply_dir_dep.argument.correct_fast.type                   =   applycal
-apply_dir_dep.argument.correct_fast.parmdb                 =   dir_dep_parmdb
-apply_dir_dep.argument.correct_fast.correction             =   tec
-apply_dir_dep.argument.correct_fast.invert                 =   True
-apply_dir_dep.argument.correct_slow.type                   =   applycal
-apply_dir_dep.argument.correct_slow.parmdb                 =   dir_dep_parmdb
-apply_dir_dep.argument.correct_slow.invert                 =   True
-apply_dir_dep.argument.flagzero.type                       =   preflagger
-apply_dir_dep.argument.flagzero.amplmin                    =   1e-20
-apply_dir_dep.argument.avg.type                            =   squash
-apply_dir_dep.argument.avg.freqstep                        =   {{ facetimage_freqstep }}
-apply_dir_dep.argument.avg.timestep                        =   {{ facetimage_timestep }}
-{% else %}
 apply_dir_dep.control.type                                 =   dppp
 apply_dir_dep.control.opts.mapfiles_in                     =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 apply_dir_dep.control.opts.inputkeys                       =   [msin,dir_dep_parmdb]
@@ -1590,7 +1603,6 @@ apply_dir_dep.argument.flagzero.amplmin                    =   1e-20
 apply_dir_dep.argument.avg.type                            =   squash
 apply_dir_dep.argument.avg.freqstep                        =   {{ facetimage_freqstep }}
 apply_dir_dep.argument.avg.timestep                        =   {{ facetimage_timestep }}
-{% endif %}
 
 # compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile5.control.kind                    =   plugin
@@ -1797,25 +1809,6 @@ wsclean_ft.argument.nwlayers-for-size                      =   12288 12288
 ########## end of the "is the calibrator the full facet" if-clause
 
 # corrupt the model visibilities, length = nfiles
-{% if use_gaincal %}
-corrupt_final_model.control.type                           =   dppp
-corrupt_final_model.control.opts.mapfiles_in               =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-corrupt_final_model.control.opts.inputkeys                 =   [msin,parmdb]
-corrupt_final_model.argument.numthreads                    =   {{ max_cpus_per_io_proc_nfiles }}
-corrupt_final_model.argument.msin.datacolumn               =   MODEL_DATA
-corrupt_final_model.argument.msout.overwrite               =   True
-corrupt_final_model.argument.msout.writefullresflag        =   False
-corrupt_final_model.argument.local_scratch_dir             =   {{ local_dir }}
-corrupt_final_model.argument.steps                         =   [corrupt_fast,corrupt_slow]
-corrupt_final_model.argument.corrupt_fast.type             =   applycal
-corrupt_final_model.argument.corrupt_fast.parmdb           =   parmdb
-corrupt_final_model.argument.corrupt_fast.correction       =   tec
-corrupt_final_model.argument.corrupt_fast.invert           =   False
-corrupt_final_model.argument.corrupt_slow.type             =   applycal
-corrupt_final_model.argument.corrupt_slow.parmdb           =   parmdb
-corrupt_final_model.argument.corrupt_slow.correction       =   gain
-corrupt_final_model.argument.corrupt_slow.invert           =   False
-{% else %}
 corrupt_final_model.control.type                           =   dppp
 corrupt_final_model.control.opts.mapfiles_in               =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 corrupt_final_model.control.opts.inputkeys                 =   [msin,parmdb]
@@ -1837,7 +1830,6 @@ corrupt_final_model.argument.corrupt_slow.type             =   applycal
 corrupt_final_model.argument.corrupt_slow.parmdb           =   parmdb
 corrupt_final_model.argument.corrupt_slow.correction       =   gain
 corrupt_final_model.argument.corrupt_slow.invert           =   False
-{% endif %}
 
 # subtract new model vis from original model+residual vis, length = nfiles
 subtract_initial_final.control.type                        =   add_subtract_columns
