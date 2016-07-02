@@ -346,7 +346,7 @@ def make_directions_file_from_skymodel_uniform(s, flux_min_Jy, size_max_arcmin,
             groupSize,searchDepth = directions_max_num, 5 #search the top (directions_max_num + 5) brightest for uniform selection
         calibratorSet = []
         while (len(calibratorSet) < directions_max_num) and (len(dir_fluxes) - len(calibratorSet) > 0):
-            searchGroup = dir_fluxes_sorted_arg[:min(groupSize+nDepth,np.size(dir_fluxes_sorted_arg))]
+            searchGroup = dir_fluxes_sorted_arg[:min(groupSize+searchDepth,np.size(dir_fluxes_sorted_arg))]
             calibratorGroupCombinations = itertools.combinations(searchGroup,groupSize)
             t1 = time.time()
             NU_Grouping = p.map(NU,itertools.product(calibratorGroupCombinations,[[pRA,pDec]]))

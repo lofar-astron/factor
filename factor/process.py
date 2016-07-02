@@ -708,7 +708,7 @@ def _initialize_directions(parset, initial_skymodel, ref_band, max_radius_deg=No
                     s, dir_parset['flux_min_jy'], dir_parset['size_max_arcmin'],
                     dir_parset['separation_max_arcmin'],
                     directions_max_num=dir_parset['ndir_max'],
-                    interactive=parset['interactive'],
+                    interactive=parset['interactive'], ncpu=parset['cluster_specific']['ncpu'],
                     flux_min_for_merging_Jy=dir_parset['flux_min_for_merging_jy'])
             else:
                 dir_parset['directions_file'] = factor.directions.make_directions_file_from_skymodel(
