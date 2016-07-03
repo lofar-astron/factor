@@ -57,6 +57,7 @@ class OutlierPeel(Operation):
                                 'skymodels': skymodels,
                                 'dir_indep_parmDBs': dir_indep_parmDBs,
                                 'fourpol': fourpol,
+                                'selfcal_caltype': selfcal_caltype,
                                 'smooth_amps_task': smooth_amps_task})
 
 
