@@ -123,8 +123,8 @@ class Direction(object):
         self.is_patch = False # whether direction is just a patch (not full facet)
         self.skymodel = None # direction's sky model
         self.use_existing_data = False # whether to use existing data for reimaging
-        self.existing_data_freqstep = None # frequency step of existing data
-        self.existing_data_timestep = None # time step of existing data
+        self.full_res_facetimage_freqstep = None # frequency step of existing data
+        self.full_res_facetimage_timestep = None # time step of existing data
         self.average_image_data = False # whether to average the existing data before imaging them
         self.facet_imsize = None # size of facet image (None for patch and field directions)
         self.started_operations = []
