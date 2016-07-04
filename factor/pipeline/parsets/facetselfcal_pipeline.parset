@@ -96,7 +96,7 @@ shift_empty.argument.msout.writefullresflag                =   False
 shift_empty.argument.local_scratch_dir                     =   {{ local_dir }}
 shift_empty.argument.steps                                 =   [shift]
 shift_empty.argument.shift.type                            =   phaseshifter
-{% if is_patch or skip_facet_image %}
+{% if is_patch or skip_facet_imaging %}
 shift_empty.argument.shift.phasecenter                     =   [{{ ra }}deg, {{ dec }}deg]
 {% else %}
 shift_empty.argument.shift.phasecenter                     =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
@@ -104,7 +104,7 @@ shift_empty.argument.shift.phasecenter                     =   [{{ facet_ra }}de
 
 # predict the skymodel data for the full facet, length = nfiles
 predict_all_model_data.control.type                        =   dppp
-{% if is_patch or skip_facet_image %}
+{% if is_patch or skip_facet_imaging %}
 predict_all_model_data.control.opts.mapfiles_in            =   [shift_empty.output.mapfile,expand_sourcedb_cal_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
 {% else %}
 predict_all_model_data.control.opts.mapfiles_in            =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
@@ -126,7 +126,7 @@ add_all_facet_sources.control.opts.mapfiles_in             =   [shift_empty.outp
 add_all_facet_sources.control.opts.inputkeys               =   [file1,file2]
 add_all_facet_sources.argument.flags                       =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
 
-{% if not is_patch and not skip_facet_image %}
+{% if not is_patch and not skip_facet_imaging %}
 # For normal (non-patch) facets, we need to phase shift the empty data, add the
 # calibrator source, and average
 
@@ -1530,7 +1530,7 @@ add_imaging_cols_empty.control.mapfile_in                  =   shift_empty.outpu
 add_imaging_cols_empty.control.inputkey                    =   msfile
 add_imaging_cols_empty.argument.flags                      =   [msfile]
 
-{% if is_patch or skip_facet_image%}
+{% if is_patch or skip_facet_imaging%}
 # The calibrator is the full patch. (No need to re-image the facet.)
 
 # sort the "shift_empty" unaveraged data into groups that can be concatenated, length = some

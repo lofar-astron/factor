@@ -163,7 +163,7 @@ add_model_to_empty_data.control.opts.mapfiles_in      =   [shift_empty.output.ma
 add_model_to_empty_data.control.opts.inputkeys        =   [file1,file2]
 add_model_to_empty_data.argument.flags                =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
 
-{% if skip_facet_image %}
+{% if skip_facet_imaging %}
 # create a mapfile with the current skymodels from supplied list, length = nbands
 create_full_skymodels_map.control.kind                  =   plugin
 create_full_skymodels_map.control.type                  =   addListMapfile
@@ -257,7 +257,7 @@ apply_dir_dep.argument.avg.timestep                   =   {{ facetimage_timestep
 # make the compressed mapfile, length = 1
 create_compressed_mapfile.control.kind                =   plugin
 create_compressed_mapfile.control.type                =   compressMapfile
-{% if skip_facet_image %}
+{% if skip_facet_imaging %}
 create_compressed_mapfile.control.mapfile_in          =   add_all_facet_sources.output.mapfile
 {% else %}
 create_compressed_mapfile.control.mapfile_in          =   apply_dir_dep.output.mapfile
