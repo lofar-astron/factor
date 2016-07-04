@@ -606,6 +606,9 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
                 sys.exit(1)
             direction.solve_all_correlations = True
 
+        # Set skip_facet_image flag
+        direction.skip_facet_image = parset['imaging_specific']['skip_facet_image']
+
         # Set field center to that of first band (all bands have the same phase
         # center)
         direction.field_ra = bands[0].ra
