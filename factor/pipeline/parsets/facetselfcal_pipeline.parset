@@ -1530,7 +1530,7 @@ add_imaging_cols_empty.control.mapfile_in                  =   shift_empty.outpu
 add_imaging_cols_empty.control.inputkey                    =   msfile
 add_imaging_cols_empty.argument.flags                      =   [msfile]
 
-{% if is_patch or skip_facet_imaging%}
+{% if is_patch or skip_facet_imaging %}
 # The calibrator is the full patch. (No need to re-image the facet.)
 
 # sort the "shift_empty" unaveraged data into groups that can be concatenated, length = some
