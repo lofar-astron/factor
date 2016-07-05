@@ -672,21 +672,21 @@ def find_selfcal_images(direction):
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
     if os.path.exists(selfcal_dir):
-        selfcal_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image[01]2.image.tt0'))
-        tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22_iter*.image.tt0'))
+        selfcal_images = glob.glob(os.path.join(selfcal_dir, '*.wsclean_image[01]2-MFS-image.fits'))
+        tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.wsclean_image22_iter*-MFS-image.fits'))
         if len(tec_iter_images) == 0:
-            tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22.image.tt0'))
+            tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.wsclean_image22-MFS-image.fits'))
         selfcal_images += tec_iter_images
-        selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image[3]2.image.tt0'))
-        selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image42_iter*.image.tt0'))
+        selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.wsclean_image[3]2-MFS-image.fits'))
+        selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.wsclean_image42_iter*-MFS-image.fits'))
         if len(selfcal_images) == 0:
-            selfcal_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image[01]2.image'))
-            tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22_iter*.image'))
+            selfcal_images = glob.glob(os.path.join(selfcal_dir, '*.wsclean_image[01]2-image.fits'))
+            tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.wsclean_image22_iter*-image.fits'))
             if len(tec_iter_images) == 0:
-                tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22.image'))
+                tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.wsclean_image22-image.fits'))
             selfcal_images += tec_iter_images
-            selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image[3]2.image'))
-            selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image42_iter*.image'))
+            selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.wsclean_image[3]2-image.fits'))
+            selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.wsclean_image42_iter*-image.fits'))
         selfcal_images.sort()
     else:
         selfcal_images = []
