@@ -211,7 +211,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
                 if indx >= 0:
                     break
             imageroot = imagefile.split('.fits')[0]
-            imageroot.replace('image{}2'.format(indx), 'image{}1'.format(indx))
+            imageroot.replace('image{}2'.format(i), 'image{}1'.format(i))
             maskfile = glob.glob(imageroot + '.mask?')[0]
             if os.path.exists(maskfile):
                 maskfiles.append(maskfile)
