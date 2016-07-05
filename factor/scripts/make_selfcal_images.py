@@ -212,7 +212,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
                     break
             imageroot = imagefile.split('.fits')[0].replace('image{}2'.format(i), 'image{}1'.format(i))
             try:
-                maskfile = glob.glob(imageroot + '.mask?')[0]
+                maskfiles.append(glob.glob(imageroot + '.mask?')[0])
             except IndexError:
                 maskfiles.append(None)
     else:
@@ -224,8 +224,6 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
     fitsfiles = []
     fitsmaskfiles = []
     for f, m in zip(imagefiles, maskfiles):
-        print(f)
-        print(m)
         if os.path.isdir(f):
             if not os.path.exists('{0}.fits'.format(f)):
                 subprocess.call('image2fits in={0} out={0}.fits'.format(f),
