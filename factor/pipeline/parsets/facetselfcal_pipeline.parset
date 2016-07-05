@@ -1115,7 +1115,7 @@ wsclean_image32.argument.weighting-rank-filter             =   3
 loop_ampcal.control.kind                                   =   loop
 loop_ampcal.control.type                                   =   conditional
 loop_ampcal.control.loopcount                              =   {{ loopcount }}
-loop_ampcal.control.loopsteps                              =   [create_imagebase_map32,create_expanded_model3_mapfile,wsclean_ft3,{% if pre_average %}switch_weights_col7,{% endif %}remove_parmdbs21,solve_ampphase21,{% if pre_average %}switch_weights_col8,{% endif %}apply_ampphase21,merge_phase_parmdbs,remove_parmdbs22,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,create_compressed_mapfile4,concat4,delete_image,wsclean_image41,create_imagebase_map41,adjust_wsclean_mapfile41,mask4,wsclean_image42,create_imagebase_map42,adjust_wsclean_mapfile42,copy_image,check_image]
+loop_ampcal.control.loopsteps                              =   [create_imagebase_map32,create_expanded_model3_mapfile,wsclean_ft3,{% if pre_average %}switch_weights_col7,{% endif %}remove_parmdbs21,solve_ampphase21,{% if pre_average %}switch_weights_col8,{% endif %}apply_ampphase21,merge_phase_parmdbs,remove_parmdbs22,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,create_compressed_mapfile4,concat4,wsclean_image41,create_imagebase_map41,adjust_wsclean_mapfile41,mask4,wsclean_image42,create_imagebase_map42,adjust_wsclean_mapfile42,copy_image,check_image]
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map32.control.kind                        =   plugin
@@ -1313,12 +1313,6 @@ concat4.control.mapfile_in                                 =   create_compressed
 concat4.control.inputkey                                   =   msfiles
 concat4.control.outputkey                                  =   msconcat
 concat4.argument.flags                                     =   [msfiles,msconcat]
-
-# delete image from previous selfcal step, length = 1
-delete_image.control.type                                  =   delete_image
-delete_image.control.mapfile_in                            =   create_model4_map.output.mapfile
-delete_image.control.inputkey                              =   imageroot
-delete_image.argument.flags                                =   [imageroot,loop_ampcal.output.counter,4]
 
 # image the virtual concatenated data with wsclean, length = 1
 wsclean_image41.control.type                               =   wsclean
