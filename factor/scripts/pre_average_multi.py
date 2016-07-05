@@ -41,7 +41,6 @@ def main(ms_input, parmdb_input, input_colname, output_data_colname, output_weig
     # convert input to needed types
     ms_list = input2strlist(ms_input)
     parmdb_list = input2strlist(parmdb_input)
-    pre_average = input2bool(pre_average)
     verbose = input2bool(verbose)
     if len(ms_list) != len(parmdb_list):
         raise ValueError('pre_average_multi: Length of MS-list ({0}) and length of parmdb-list ({1}) differ.'.format(len(ms_list),len(parmdb_list)))

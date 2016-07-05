@@ -828,7 +828,7 @@ def get_current_step(direction):
     current_steps = get_current_op_step_names(direction)
     while not found_prev:
         # Work backward to find a valid step (i.e., not a plugin step)
-        previous_step_name = os.path.splitext(os.path.basename(d[1][prev_indx][1]['mapfile']))[0]
+        previous_step_name = os.path.splitext(os.path.basename(d[1][prev_indx][1]['ok.mapfile']))[0]
         if previous_step_name in current_steps:
             found_prev = True
         else:
