@@ -206,7 +206,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
     if maskfiles is None:
         maskfiles = []
         for imagefile in imagefiles:
-            for i in range(4):
+            for i in range(5):
                 indx = imagefile.find('image{}2'.format(i))
                 if indx >= 0:
                     break
