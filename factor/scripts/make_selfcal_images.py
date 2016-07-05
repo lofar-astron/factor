@@ -206,7 +206,13 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
     if maskfiles is None:
         maskfiles = []
         for imagefile in imagefiles:
-            maskfile = glob.glob(imagefile.split('.fits')[0] + '.mask?')
+            for i in range(4):
+                indx = imagefile.find('image{}2'.format(i))
+                if indx >= 0:
+                    break
+            imageroot = imagefile.split('.fits')[0]
+            imageroot.replace('image{}2'.format(indx), 'image{}1'.format(indx))
+            maskfile = glob.glob(imageroot + '.mask?')[0]
             if os.path.exists(maskfile):
                 maskfiles.append(maskfile)
             else:
