@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, shift_cal, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile_avgdata, sort_avg_into_Groups, sort_avg_into_Groups_maps, concat_avgdata, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, make_fast_phase_parmdb_map, remove_parmdbs1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, remove_parmdbs2, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, loop_phasecal, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, add_imaging_cols_empty, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_compressed_mapfile_ft, create_model4_map, blank_model, casa_ft4, {% else %} apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, shift_cal, create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, switch_weights_col_shift_cal1, concat_blavg_data, switch_weights_col_shift_cal2, copy_column1, copy_column2, {% endif %} add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile_avgdata, sort_avg_into_Groups, sort_avg_into_Groups_maps, concat_avgdata, create_compressed_mapfile0, concat0, casa_image01, adjust_casa_mapfile0, mask0, casa_image02, create_model0_map, casa_ft0, switch_weights_col1, make_fast_phase_parmdb_map, remove_parmdbs1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, concat1, casa_image11, adjust_casa_mapfile1, mask1, casa_image12, create_model1_map, casa_ft1, switch_weights_col3, remove_parmdbs2, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, loop_phasecal, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, concat3, casa_image31, adjust_casa_mapfile3, mask3, casa_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, add_imaging_cols_empty, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_compressed_mapfile_ft, create_model4_map, blank_model, casa_ft4, {% else %} apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -170,32 +170,6 @@ shift_cal.argument.avg.freqstep                            =   {{ facetselfcal_f
 shift_cal.argument.avg.timestep                            =   1
 {% endif %}
 
-{% if pre_average %}
-# re-group shift_cal mapfile to have one group per band, length = nbands
-regroup_shift_cal.control.kind                             =   plugin
-regroup_shift_cal.control.type                             =   reGroupMapfile
-regroup_shift_cal.control.mapfile_in                       =   shift_cal.output.mapfile
-regroup_shift_cal.control.mapfile_groups                   =   create_msmulti_map.output.mapfile
-regroup_shift_cal.control.mapfile_dir                      =   input.output.mapfile_dir
-regroup_shift_cal.control.filename                         =   re_grouped_shift_cal.mapfile
-
-# re-group dir-independent parmdb mapfile to have one group per band, length = nbands
-regroup_parmdb.control.kind                                =   plugin
-regroup_parmdb.control.type                                =   reGroupMapfile
-regroup_parmdb.control.mapfile_in                          =   create_parmdb_map.output.mapfile
-regroup_parmdb.control.mapfile_groups                      =   create_msmulti_map.output.mapfile
-regroup_parmdb.control.check_basename                      =   False
-regroup_parmdb.control.mapfile_dir                         =   input.output.mapfile_dir
-regroup_parmdb.control.filename                            =   re_grouped_parmdb.mapfile
-
-# Do the baseline-dependent preaveraging
-# overwrite the WEIGHT_SPECTRUM column
-pre_average.control.type                                   =   pre_average
-pre_average.control.mapfiles_in                            =   [regroup_shift_cal.output.mapfile,regroup_parmdb.output.mapfile]
-pre_average.control.inputkeys                              =   [datafiles,parmdbs]
-pre_average.argument.flags                                 =   [datafiles,parmdbs,DATA,BLAVG_DATA,BLAVG_WEIGHT_SPECTRUM,{{ target_rms_rad }}]
-{% endif %}
-
 # compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile_data.control.kind                =   plugin
 create_compressed_mapfile_data.control.type                =   compressMapfile
@@ -230,6 +204,79 @@ concat_data.argument.msout.overwrite                       =   True
 concat_data.argument.msout.writefullresflag                =   False
 concat_data.argument.local_scratch_dir                     =   {{ local_dir }}
 concat_data.argument.steps                                 =   []
+
+{% if pre_average %}
+# re-group shift_cal mapfile to have one group per band, length = nbands
+regroup_shift_cal.control.kind                             =   plugin
+regroup_shift_cal.control.type                             =   reGroupMapfile
+regroup_shift_cal.control.mapfile_in                       =   shift_cal.output.mapfile
+regroup_shift_cal.control.mapfile_groups                   =   create_msmulti_map.output.mapfile
+regroup_shift_cal.control.mapfile_dir                      =   input.output.mapfile_dir
+regroup_shift_cal.control.filename                         =   re_grouped_shift_cal.mapfile
+
+# re-group dir-independent parmdb mapfile to have one group per band, length = nbands
+regroup_parmdb.control.kind                                =   plugin
+regroup_parmdb.control.type                                =   reGroupMapfile
+regroup_parmdb.control.mapfile_in                          =   create_parmdb_map.output.mapfile
+regroup_parmdb.control.mapfile_groups                      =   create_msmulti_map.output.mapfile
+regroup_parmdb.control.check_basename                      =   False
+regroup_parmdb.control.mapfile_dir                         =   input.output.mapfile_dir
+regroup_parmdb.control.filename                            =   re_grouped_parmdb.mapfile
+
+# Do the baseline-dependent preaveraging
+# overwrite the WEIGHT_SPECTRUM column
+pre_average.control.type                                   =   pre_average
+pre_average.control.mapfiles_in                            =   [regroup_shift_cal.output.mapfile,regroup_parmdb.output.mapfile]
+pre_average.control.inputkeys                              =   [datafiles,parmdbs]
+pre_average.argument.flags                                 =   [datafiles,parmdbs,DATA,BLAVG_DATA,BLAVG_WEIGHT_SPECTRUM,{{ target_rms_rad }}]
+
+# make mapfile for concatenated preaveraged data, length = ntimes
+make_blavg_data_mapfile.control.kind                       =  plugin
+make_blavg_data_mapfile.control.type                       =  createMapfile
+make_blavg_data_mapfile.control.method                     =  add_suffix_to_file
+make_blavg_data_mapfile.control.mapfile_in                 =  sort_into_Groups_maps.output.groupmap
+make_blavg_data_mapfile.control.add_suffix_to_file         =  "_blavg.ms"
+make_blavg_data_mapfile.control.mapfile_dir                =  input.output.mapfile_dir
+make_blavg_data_mapfile.control.filename                   =  make_blavg_data.mapfile
+
+# switch "normal" weights with block-average weights, length = ntimes
+switch_weights_col_shift_cal1.control.type                 =   switch_columns
+switch_weights_col_shift_cal1.control.mapfile_in           =   shift_cal.output.mapfile
+switch_weights_col_shift_cal1.control.inputkey             =   msfiles
+switch_weights_col_shift_cal1.argument.flags               =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
+
+# Concat the preaveraged data (and weights), length = ntimes
+concat_blavg_data.control.type                             =   dppp
+concat_blavg_data.control.mapfile_out                      =   make_blavg_data_mapfile.output.mapfile
+concat_blavg_data.control.mapfile_in                       =   sort_into_Groups_maps.output.filesmap
+concat_blavg_data.control.inputkey                         =   msin
+concat_blavg_data.argument.numthreads                      =   {{ max_cpus_per_node }}
+concat_blavg_data.argument.msin.datacolumn                 =   BLAVG_DATA
+concat_blavg_data.argument.msin.missingdata                =   True
+concat_blavg_data.argument.msin.orderms                    =   False
+concat_blavg_data.argument.msout.overwrite                 =   True
+concat_blavg_data.argument.msout.writefullresflag          =   False
+concat_blavg_data.argument.local_scratch_dir               =   {{ local_dir }}
+concat_blavg_data.argument.steps                           =   []
+
+# switch "normal" weights with block-average weights, length = ntimes
+switch_weights_col_shift_cal2.control.type                 =   switch_columns
+switch_weights_col_shift_cal2.control.mapfile_in           =   shift_cal.output.mapfile
+switch_weights_col_shift_cal2.control.inputkey             =   msfiles
+switch_weights_col_shift_cal2.argument.flags               =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
+
+# Copy BLAVG_DATA, length = ntimes
+copy_column1.control.type                                  =   copy_column
+copy_column1.control.mapfiles_in                           =   [concat_blavg_data.output.mapfile,concat_data.output.mapfile]
+copy_column1.control.inputkeys                             =   [blavgfile,datafile]
+copy_column1.argument.flags                                =   [blavgfile,datafile,DATA,BLAVG_DATA]
+
+# Copy BLAVG_WEIGHT_SPECTRUM, length = ntimes
+copy_column2.control.type                                  =   copy_column
+copy_column2.control.mapfiles_in                           =   [concat_blavg_data.output.mapfile,concat_data.output.mapfile]
+copy_column2.control.inputkeys                             =   [blavgfile,datafile]
+copy_column2.argument.flags                                =   [blavgfile,datafile,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
+{% endif %}
 
 # add imaging columns to concatenated data MSs, length = ntimes
 add_imaging_cols.control.type                              =   add_imaging_columns
