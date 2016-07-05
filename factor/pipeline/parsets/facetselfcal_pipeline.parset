@@ -369,7 +369,8 @@ mask0.argument.use_adaptive_threshold                      =   {{ use_selfcal_ad
 
 # image the virtual concatenated data again with wsclean, length = 1
 wsclean_image02.control.type                               =   wsclean
-wsclean_image02.control.mapfiles_in                        =   [concat0.output.mapfile,mask0.output.mapfile,mask0.output.threshold_5sig.mapfile]
+wsclean_image02.control.mapfiles_in                        =   [concat0.output.mapfile,mask0.output.mapfile]
+# wsclean_image02.control.mapfiles_in                        =   [concat0.output.mapfile,mask0.output.mapfile,mask0.output.threshold_5sig.mapfile]
 wsclean_image02.control.inputkeys                          =   [msfile,fitsmask]
 wsclean_image02.argument.flags                             =   [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
 wsclean_image02.argument.fitsmask                          =   fitsmask
