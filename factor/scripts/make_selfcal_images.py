@@ -11,6 +11,7 @@ import astropy.io.fits
 import subprocess
 import logging
 import warnings
+import glob
 warnings.filterwarnings("ignore") # Needed to suppress excessive output from matplotlib 1.5 that hangs the pipeline
 
 
@@ -205,7 +206,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
     if maskfiles is None:
         maskfiles = []
         for imagefile in imagefiles:
-            maskfile = imagefile.split('.image')[0] + '.mask'
+            maskfile = glob.glob(imagefile.split('.fits')[0] + '.mask?')
             if os.path.exists(maskfile):
                 maskfiles.append(maskfile)
             else:
