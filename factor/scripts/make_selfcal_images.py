@@ -214,7 +214,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
                     break
             imageroot = imagefile.split('.fits')[0]
             print(imageroot)
-            imageroot.replace('image{}2'.format(i), 'image{}1'.format(i))
+            imageroot = imageroot.replace('image{}2'.format(i), 'image{}1'.format(i))
             print(imageroot)
             try:
                 maskfile = glob.glob(imageroot + '.mask?')[0]
