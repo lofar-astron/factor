@@ -1628,7 +1628,7 @@ concat_averaged_compressed_map.control.filename            =   concat_averaged_c
 {% block full_image_parms %}
 # make a mask from the last selfcal image, length = 1
 premask.control.type                                       =   make_clean_mask
-premask.control.mapfile_in                                 =   adjust_casa_mapfile4.output.mapfile
+premask.control.mapfile_in                                 =   create_imagebase_map42.output.mapfile
 premask.control.inputkey                                   =   imagefile
 premask.control.outputkey                                  =   maskfile
 premask.argument.flags                                     =   [imagefile,maskfile]
