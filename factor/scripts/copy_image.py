@@ -38,11 +38,14 @@ def main(image, counter, indx):
     shutil.copyfile(image, image_copy)
 
     imageroot = image.split('.fits')[0].replace('image{}2'.format(indx), 'image{}1'.format(indx))
-    mask = glob.glob(imageroot + '.mask?')[0]
-    mask_copy = mask.replace('image{0}2'.format(indx), 'image{0}1_iter{1}'.format(indx, counter))
-    if os.path.exists(mask_copy):
-        os.remove(mask_copy)
-    shutil.copyfile(mask, mask_copy)
+    try:
+        mask = glob.glob(imageroot + '.mask?')[0]
+        mask_copy = mask.replace('image{0}2'.format(indx), 'image{0}1_iter{1}'.format(indx, counter))
+        if os.path.exists(mask_copy):
+            os.remove(mask_copy)
+        shutil.copyfile(mask, mask_copy)
+    except:
+        pass
 
     if counter > 0:
         # Use image from previous iteration of the current imaging step
