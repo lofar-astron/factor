@@ -36,7 +36,7 @@ def main(image, counter, indx):
         os.remove(image_copy)
     shutil.copyfile(image, image_copy)
 
-    imageroot = imagefile.split('.fits')[0].replace('image{}2'.format(i), 'image{}1'.format(i))
+    imageroot = image.split('.fits')[0].replace('image{}2'.format(i), 'image{}1'.format(i))
     mask = glob.glob(imageroot + '.mask?')[0]
     mask_copy = mask.replace('image{0}2'.format(indx), 'image{0}1_iter{1}'.format(indx, counter))
     if os.path.exists(mask_copy):
