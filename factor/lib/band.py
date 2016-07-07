@@ -5,7 +5,7 @@ import os
 import sys
 import shutil
 import logging
-import pyrap.tables as pt
+import casacore.tables as pt
 import lofar.parmdb
 import numpy as np
 import multiprocessing
