@@ -147,6 +147,8 @@ class Direction(object):
         ----------
         selfcal_cellsize_arcsec : float
             Cellsize for selfcal imaging
+        padding : float, optional
+            Padding factor for image. Padded regions to
 
         """
         self.cellsize_selfcal_deg = selfcal_cellsize_arcsec / 3600.0
@@ -161,8 +163,10 @@ class Direction(object):
                 self.cal_size_deg = self.cal_imsize * self.cellsize_selfcal_deg / 1.5
         else:
             if self.cal_imsize == 0:
+                # Set image size to size of calibrator, padded to 40% extra
+                # (the padded region is not cleaned)
                 self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
-                    / self.cellsize_selfcal_deg * 1.2)) # cal imsize has 20% padding
+                    / self.cellsize_selfcal_deg * 1.0 / 0.6))
 
         self.cal_radius_deg = self.cal_size_deg / 2.0
         self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg

@@ -857,11 +857,11 @@ def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
         # Make calibrator patch
         sx, sy = radec2xy([d.ra], [d.dec], refRA=field_ra_deg, refDec=field_dec_deg)
 
-        # Compute size of patch in pixels, with a factor of 0.8 so that
-        # sources are not added along the edges (the areas outside of this 80%
+        # Compute size of patch in pixels, with a factor of 0.6 so that
+        # sources are not added along the edges (the areas outside of this 60%
         # region are masked during imaging in the make_clean_mask() call with
-        # trim_by = 0.2
-        patch_width = d.cal_imsize * 0.8 * d.cellsize_selfcal_deg / 0.066667
+        # trim_by = 0.4)
+        patch_width = d.cal_imsize * 0.6 * d.cellsize_selfcal_deg / 0.066667
         x0 = sx[0] - patch_width / 2.0
         y0 = sy[0] - patch_width / 2.0
         selfcal_poly = [np.array([x0, y0]),
