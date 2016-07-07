@@ -4,7 +4,7 @@ Script to split a dataset into chunks of equal time
 """
 import argparse
 from argparse import RawTextHelpFormatter
-import pyrap.tables as pt
+import casacore.tables as pt
 import numpy as np
 import sys
 import os

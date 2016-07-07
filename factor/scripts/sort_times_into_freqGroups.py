@@ -2,7 +2,7 @@
 """
 Script to sort a list of MSs by into frequency groups by time-stamp
 """
-import pyrap.tables as pt
+import casacore.tables as pt
 import sys, os
 import numpy as np
 from lofarpipe.support.data_map import DataMap, DataProduct

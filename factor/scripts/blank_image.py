@@ -4,7 +4,7 @@ Script to blank regions (with zeros or NaNs) in a fits or casa image
 """
 import argparse
 from argparse import RawTextHelpFormatter
-import pyrap.images as pim
+import casacore.images as pim
 import numpy as np
 import sys
 import os

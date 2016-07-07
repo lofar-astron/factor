@@ -4,9 +4,9 @@ Script to create a mosaic from facet images
 """
 import argparse
 from argparse import RawTextHelpFormatter
-import pyrap.tables
-import pyrap.images as pim
-from pyrap import quanta
+import casacore.tables
+import casacore.images as pim
+from casacore import quanta
 import numpy as np
 import pyfits
 import os
@@ -67,7 +67,7 @@ def main(images, vertices, outfits, maxwidth=0):
     raright = []
     rainc = [] # store the r.a. increments in case they differ
     decinc = [] # store the dec increments in case they differ
-    pims = [] # stores the pyrap images of the data
+    pims = [] # stores the casacore images of the data
 
     # Get image frames for input images
     for im in images:
@@ -148,7 +148,7 @@ def main(images, vertices, outfits, maxwidth=0):
     # Write fits
     new_pim.tofits(outfits, overwrite=True)
 
-    # need to add new beam info (not sure if this is possible with pyrap)
+    # need to add new beam info (not sure if this is possible with casacore)
     hdu = pyfits.open(outfits,mode='update')
     header = hdu[0].header
     header.update('BMAJ',mean_psf_fwhm[0])

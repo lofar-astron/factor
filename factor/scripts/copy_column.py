@@ -4,7 +4,7 @@ Script to copy a column between MS files
 """
 import argparse
 from argparse import RawTextHelpFormatter
-import pyrap.tables as pt
+import casacore.tables as pt
 import numpy
 import sys
 

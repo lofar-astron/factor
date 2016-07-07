@@ -8,7 +8,7 @@ import numpy as np
 import logging
 import pickle
 import collections
-import pyrap.tables as pt
+import casacore.tables as pt
 from lofarpipe.support.data_map import DataMap
 import factor
 import factor.directions
