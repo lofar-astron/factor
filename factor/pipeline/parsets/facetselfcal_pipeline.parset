@@ -1501,7 +1501,7 @@ blank_model.control.outputkey                              =   outfile
 blank_model.argument.flags                                 =   [infile,{{ vertices_file }},outfile]
 blank_model.argument.blank_value                           =   zero
 blank_model.argument.img_format                            =   fits
-blank_model.argument.image_is_casa_model                   =   False
+blank_model.argument.image_is_wsclean_model                =   True
 
 # pad the model image with zeros, length = 1
 pad_model_images.control.type                              =   pad_image

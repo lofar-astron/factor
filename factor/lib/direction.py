@@ -284,6 +284,20 @@ class Direction(object):
                     self.wsclean_nchannels += 1
             if self.wsclean_nchannels > nbands:
                 self.wsclean_nchannels = nbands
+
+            self.wsclean_nchannels_selfcal = max(1, nbands / wsclean_nchannels_factor)
+            nchan_after_avg = nchan * nbands / self.facetselfcal_freqstep
+            self.nband_pad_selfcal = 0 # padding to allow self.wsclean_nchannels_selfcal to be a divisor
+            if parset['imaging_specific']['wsclean_add_bands']:
+                while nchan_after_avg % self.wsclean_nchannels:
+                    self.nband_pad_selfcal += 1
+                    nchan_after_avg = nchan * (nbands + self.nband_pad_selfcal) / self.facetselfcal_freqstep
+            else:
+                while nchan_after_avg % self.wsclean_nchannels_selfcal:
+                    self.wsclean_nchannels_selfcal += 1
+            if self.wsclean_nchannels_selfcal > nbands:
+                self.wsclean_nchannels_selfcal = nbands
+
             self.nterms = 2
             self.casa_suffix = '.tt0'
             self.wsclean_suffix = '-MFS-image.fits'

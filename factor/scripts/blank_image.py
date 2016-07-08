@@ -9,6 +9,7 @@ import numpy as np
 import sys
 import os
 import pickle
+import glob
 from factor.lib.polygon import Polygon
 
 
@@ -22,7 +23,8 @@ def read_vertices(filename):
 
 
 def main(input_image_file, vertices_file, output_image_file, blank_value='zero',
-    img_format='fits', image_is_casa_model=False, nterms=1):
+    img_format='fits', image_is_casa_model=False, image_is_wsclean_model=False,
+    nterms=1):
     """
     Blank a region in an image
 
@@ -44,6 +46,9 @@ def main(input_image_file, vertices_file, output_image_file, blank_value='zero',
     image_is_casa_model : bool, optional
         If True, the input and output image files are treated as the root name
         of a casa model image (or images)
+    image_is_wsclean_model : bool, optional
+        If True, the input and output image files are treated as the root name
+        of a WSClean model image (or images)
     nterms : int, optional
         If image_is_casa_model is True, this argument sets the number of nterms
         for the model
@@ -72,6 +77,9 @@ def main(input_image_file, vertices_file, output_image_file, blank_value='zero',
                 input_image_file+'.model.tt1', input_image_file+'.model.tt2']
             output_image_files = [output_image_file+'.model.tt0',
                 output_image_file+'.model.tt1', output_image_file+'.model.tt2']
+    elif image_is_wsclean_model:
+        input_image_files = glob.glob(input_image_file+'*-model.fits')
+        output_image_files = [f.replace(input_image_file, output_image_file) for f in input_image_files]
     else:
         input_image_files = [input_image_file]
         output_image_files = [output_image_file]
