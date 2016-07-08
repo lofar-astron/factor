@@ -129,9 +129,9 @@ wsclean_ft.control.mapfiles_in                        =   [regroup_shift_empty_m
 wsclean_ft.control.inputkeys                          =   [msfile,name,size]
 wsclean_ft.argument.flags                             =   [-predict,msfile]
 wsclean_ft.argument.scale                             =   0.000417
-wsclean_ft.argument.mem                               =   {{ max_percent_memory }}
+wsclean_ft.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_ft.argument.channelsout                       =   {{ wsclean_nchannels }}
-wsclean_ft.argument.j                                 =   {{ max_proc_per_node }}
+wsclean_ft.argument.j                                 =   {{ max_cpus_per_proc_single }}
 wsclean_ft.argument.tempdir                           =   {{ local_dir }}
 {% endblock model_data_parms %}
 
@@ -273,8 +273,8 @@ wsclean_image_full1.argument.cleanborder              =   0
 wsclean_image_full1.argument.minuv-l                  =   {{ facet_min_uv_lambda }}
 wsclean_image_full1.argument.scale                    =   {{ cellsize_facet_deg }}
 wsclean_image_full1.argument.channelsout              =   {{ wsclean_nchannels }}
-wsclean_image_full1.argument.mem                      =   {{ max_percent_memory }}
-wsclean_image_full1.argument.j                        =   {{ max_proc_per_node }}
+wsclean_image_full1.argument.mem                      =   {{ max_percent_memory_per_proc_single }}
+wsclean_image_full1.argument.j                        =   {{ max_cpus_per_proc_single }}
 wsclean_image_full1.argument.tempdir                  =   {{ local_dir }}
 wsclean_image_full1.argument.weighting-rank-filter    =   3
 {% if taper_facet_arcsec > 0.0 %}
@@ -334,8 +334,8 @@ wsclean_image_full2.argument.cleanborder              =   0
 wsclean_image_full2.argument.minuv-l                  =   {{ facet_min_uv_lambda }}
 wsclean_image_full2.argument.scale                    =   {{ cellsize_facet_deg }}
 wsclean_image_full2.argument.channelsout              =   {{ wsclean_nchannels }}
-wsclean_image_full2.argument.mem                      =   {{ max_percent_memory }}
-wsclean_image_full2.argument.j                        =   {{ max_proc_per_node }}
+wsclean_image_full2.argument.mem                      =   {{ max_percent_memory_per_proc_single }}
+wsclean_image_full2.argument.j                        =   {{ max_cpus_per_proc_single }}
 wsclean_image_full2.argument.tempdir                  =   {{ local_dir }}
 wsclean_image_full2.argument.weighting-rank-filter    =   3
 {% if taper_facet_arcsec > 0.0 %}

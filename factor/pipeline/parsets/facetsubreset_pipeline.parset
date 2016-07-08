@@ -80,9 +80,9 @@ wsclean_ft.control.mapfiles_in                               =   [regroup_shift_
 wsclean_ft.control.inputkeys                                 =   [msfile,name,size]
 wsclean_ft.argument.flags                                    =   [-predict,msfile]
 wsclean_ft.argument.scale                                    =   {{ cellsize_facet_deg }}
-wsclean_ft.argument.mem                                      =   {{ max_percent_memory }}
+wsclean_ft.argument.mem                                      =   {{ max_percent_memory_per_proc_single }}
 wsclean_ft.argument.channelsout                              =   {{ wsclean_nchannels }}
-wsclean_ft.argument.j                                        =   {{ max_proc_per_node }}
+wsclean_ft.argument.j                                        =   {{ max_cpus_per_proc_single }}
 wsclean_ft.argument.tempdir                                  =   {{ local_dir }}
 wsclean_ft.argument.nwlayers-for-size                        =   12288 12288
 {% endblock model_data_parms %}
