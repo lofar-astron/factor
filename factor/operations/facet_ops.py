@@ -119,7 +119,6 @@ class FacetSelfcal(Operation):
         """
         Finalize this operation
         """
-
         # Add output datamaps to direction object for later use
         self.direction.input_files_single_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'input_files_single.mapfile')
@@ -137,8 +136,12 @@ class FacetSelfcal(Operation):
             'make_selfcal_plots.mapfile')
         self.direction.facet_image_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'final_image.mapfile')
-        self.direction.facet_model_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'final_model_rootnames.mapfile')
+        if self.direction.skip_facet_imaging:
+            self.direction.facet_model_mapfile = os.path.join(self.pipeline_mapfile_dir,
+                'blank_model.mapfile')
+        else:
+            self.direction.facet_model_mapfile = os.path.join(self.pipeline_mapfile_dir,
+                'final_model_rootnames.mapfile')
         self.direction.facet_premask_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'premask.mapfile')
         self.direction.wsclean_modelimg_size_mapfile = os.path.join(self.pipeline_mapfile_dir,
