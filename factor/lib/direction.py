@@ -369,6 +369,10 @@ class Direction(object):
                 self.atrous_do = True
             else:
                 self.atrous_do = False
+        if not self.atrous_do:
+            if len(self.casa_multiscale) > 2:
+                # Only use first two scales if source is small
+                self.casa_multiscale = self.casa_multiscale[:2]
 
 
     def set_wplanes(self, imsize):
