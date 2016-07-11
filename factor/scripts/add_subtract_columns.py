@@ -4,7 +4,7 @@ Script to add or subtract two columns between one or two MS files
 """
 import argparse
 from argparse import RawTextHelpFormatter
-import pyrap.tables as pt
+import casacore.tables as pt
 import sys
 import os
 

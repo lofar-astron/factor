@@ -8,7 +8,7 @@ dir_working = /data/wdir
 
 # Full path to directory containing input bands. It will be scanned for all
 # .MS and .ms files (required). Note that if the input files are longer than
-# chunk_size_sec in time, then FACTOR works on a (chunked) copy of these files  
+# chunk_size_sec in time, then FACTOR works on a (chunked) copy of these files
 # and does not modify the originals in any way. If the data is alerady in small
 # enough chunks, then it will not make a copy but modify the input files.
 dir_ms = /data/bands
@@ -129,6 +129,13 @@ dir_ms = /data/bands
 # activated when there are more than 5 bands
 # wsclean_nchannels_factor = 4
 
+# The number of wavelengths that WSClean is allowed to average over when
+# performing baseline-dependent time averaging during full-resolution imaging
+# (default = 0; i.e., disabled). This value is scaled automatically to other
+# resolutions if needed
+# NOTE: this option requires WSClean v1.12 or higher
+# wsclean_blavg_nwavelengths = 0
+
 # Allow flagged data to be added during WSClean imaging to allow
 # wsclean_nchannels_factor to be a divisor of the number bands (default = True).
 # Enabling this option can dramatically speed up imaging with WSClean when the
@@ -143,7 +150,9 @@ dir_ms = /data/bands
 # distance in lambda (default = 80), and multiscale clean scales (default = [0,
 # 3, 7, 25, 60, 150]; set to [0] to disable multiscale clean). These settings
 # apply both to selfcal images and to the full facet image used to make the
-# improved facet model that is subtracted from the data
+# improved facet model that is subtracted from the data. Note that only the
+# first two clean scales are used unless the calibrator is determined to be
+# large or atrous_do = True for the source in the directions file
 # selfcal_cellsize_arcsec = 1.5
 # selfcal_robust = -0.25
 # selfcal_robust_wsclean = -0.5

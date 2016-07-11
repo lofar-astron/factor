@@ -6,7 +6,7 @@ import argparse
 from argparse import RawTextHelpFormatter
 import os
 import lofar.parmdb as pdb
-import pyrap.tables as pt
+import casacore.tables as pt
 import shutil
 
 

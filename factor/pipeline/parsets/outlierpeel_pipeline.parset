@@ -537,8 +537,8 @@ wsclean_pre.argument.cleanborder                         =   0
 wsclean_pre.argument.minuv-l                             =   {{ facet_min_uv_lambda }}
 wsclean_pre.argument.maxuv-l                             =   2500
 wsclean_pre.argument.scale                               =   0.00833
-wsclean_pre.argument.mem                                 =   {{ max_percent_memory }}
-wsclean_pre.argument.j                                   =   {{ max_proc_per_node }}
+wsclean_pre.argument.mem                                 =   {{ max_percent_memory_per_proc_single }}
+wsclean_pre.argument.j                                   =   {{ max_cpus_per_proc_single }}
 
 # make compressed mapfile of new empty data, length = 1
 average_post_compressed_map.control.kind                 =   plugin
@@ -563,8 +563,8 @@ wsclean_post.argument.cleanborder                        =   0
 wsclean_post.argument.minuv-l                            =   {{ facet_min_uv_lambda }}
 wsclean_post.argument.maxuv-l                            =   2500
 wsclean_post.argument.scale                              =   0.00833
-wsclean_post.argument.mem                                =   {{ max_percent_memory }}
-wsclean_post.argument.j                                  =   {{ max_proc_per_node }}
+wsclean_post.argument.mem                                =   {{ max_percent_memory_per_proc_single }}
+wsclean_post.argument.j                                  =   {{ max_cpus_per_proc_single }}
 
 # do a "verify_subtract" on the two "empty" images, length = 1
 verify_subtract.control.type                             =   verify_subtract

@@ -5,7 +5,7 @@ Script to make a clean mask
 import argparse
 from argparse import RawTextHelpFormatter
 from lofar import bdsm
-import pyrap.images as pim
+import casacore.images as pim
 from astropy.io import fits as pyfits
 from astropy.coordinates import Angle
 import pickle

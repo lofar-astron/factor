@@ -1,5 +1,5 @@
 import os
-import pyrap.tables as pt
+import casacore.tables as pt
 from lofarpipe.support.data_map import DataMap, DataProduct
 
 

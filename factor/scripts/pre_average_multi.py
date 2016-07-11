@@ -11,7 +11,7 @@ import os
 import itertools
 import pickle
 from scipy.ndimage.filters import gaussian_filter1d as gfilter
-import pyrap.tables as pt
+import casacore.tables as pt
 import lofar.parmdb
 from astropy.stats import median_absolute_deviation
 

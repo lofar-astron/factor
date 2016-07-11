@@ -1363,7 +1363,7 @@ def mask_vertices(mask_im, vertices_file):
 
     Parameters
     ----------
-    mask_im : pyrap.images image() object
+    mask_im : casacore.images image() object
         Mask image to modify
     vertices_file: str
         Filename of pickle file that contains direction dictionary with
@@ -1371,13 +1371,13 @@ def mask_vertices(mask_im, vertices_file):
 
     Returns
     -------
-    new_im:  pyrap.images image() object
+    new_im:  casacore.images image() object
         Modified mask image
-    bool_mask :  pyrap.images image() object
+    bool_mask :  casacore.images image() object
         Modified mask image
 
     """
-    import pyrap.images as pim
+    import casacore.images as pim
 
     ma = mask_im.coordinates()
     new_im = pim.image('',shape=mask_im.shape(), coordsys=ma)

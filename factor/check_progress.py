@@ -13,7 +13,7 @@ import ConfigParser
 import factor
 import factor.directions
 import factor.parset
-import pyrap.images as pim
+import casacore.images as pim
 import ast
 from astropy.coordinates import Angle
 from shapely.geometry import Polygon as SPolygon
@@ -291,7 +291,7 @@ def plot_state(directions_list, trim_names=True):
     plt.show()
     plt.close(fig)
 
-    # Clean up any temp pyrap images
+    # Clean up any temp casacore images
     if not hasaplpy:
         if os.path.exists('/tmp/tempimage'):
             try:

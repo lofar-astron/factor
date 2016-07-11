@@ -308,6 +308,16 @@ class Direction(object):
             self.casa_suffix = None
             self.wsclean_suffix = '-image.fits'
 
+        # Set the baseline-averaging limit for WSClean, which depends on the
+        # integration time given the specified maximum allowed smearing. We scale
+        # it from the full-resolution imaging cell size
+        #
+        # Note: at the moment, the user must set the limit, but we can calculate
+        # it for them from self.facetselfcal_target_timewidth_s once we know the
+        # best values
+        self.wsclean_nwavelengths = (parset['imaging_specific']['wsclean_blavg_nwavelengths'] *
+            facet_cellsize_arcsec / parset['imaging_specific']['selfcal_cellsize_arcsec'])
+
 
     def set_imaging_parameters(self, nbands, padding=1.05):
         """
@@ -377,6 +387,10 @@ class Direction(object):
                 self.atrous_do = True
             else:
                 self.atrous_do = False
+        if not self.atrous_do:
+            if len(self.casa_multiscale) > 2:
+                # Only use first two scales if source is small
+                self.casa_multiscale = self.casa_multiscale[:2]
 
 
     def set_wplanes(self, imsize):
@@ -620,6 +634,7 @@ class Direction(object):
             resolution_deg = 3.0 * self.cellsize_selfcal_deg # assume normal sampling of restoring beam
             target_timewidth_s = min(120.0, self.get_target_timewidth(delta_theta_deg,
                 resolution_deg, peak_smearing_factor))
+            self.facetselfcal_target_timewidth_s = target_timewidth_s
             if self.dynamic_range.lower() == 'hd':
                 # For high-dynamic range calibration, we use 0.2 MHz per channel
                 target_bandwidth_mhz = 0.2
@@ -656,6 +671,7 @@ class Direction(object):
             resolution_deg = 3.0 * self.cellsize_facet_deg # assume normal sampling of restoring beam
             target_timewidth_s = min(120.0, self.get_target_timewidth(delta_theta_deg,
                 resolution_deg, peak_smearing_factor))
+            self.facetimage_target_timewidth_s = target_timewidth_s
             target_bandwidth_mhz = min(2.0, self.get_target_bandwidth(mean_freq_mhz,
                 delta_theta_deg, resolution_deg, peak_smearing_factor))
             self.log.debug('Target timewidth for facet imaging is {} s'.format(target_timewidth_s))
