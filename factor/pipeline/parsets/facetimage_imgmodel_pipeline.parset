@@ -204,12 +204,14 @@ create_parmdb_map.control.mapfile_dir                   =   input.output.mapfile
 create_parmdb_map.control.filename                      =   dir_indep_instrument_parmdbs.mapfile
 
 # "do nearly everything" call to NDPPP: phaseshift, add, correct, and average in one NDPPP call, length = nfiles
-add_all_facet_sources.control.type                      =   dppp_inplace
+add_all_facet_sources.control.type                      =   dppp
 add_all_facet_sources.control.opts.mapfiles_in          =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 add_all_facet_sources.control.opts.inputkeys            =   [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb]
 add_all_facet_sources.argument.numthreads               =   {{ max_cpus_per_io_proc_nfiles }}
 add_all_facet_sources.argument.msin.datacolumn          =   FACET_DATA_ALL
-add_all_facet_sources.argument.msout                    =   .
+add_all_facet_sources.argument.msout.overwrite          =   True
+add_all_facet_sources.argument.msout.writefullresflag   =   False
+add_all_facet_sources.argument.local_scratch_dir        =   {{ local_dir }}
 add_all_facet_sources.argument.steps                    =   [add,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
 add_all_facet_sources.argument.add.type                 =   predict
 add_all_facet_sources.argument.add.sourcedb             =   sourcedb
