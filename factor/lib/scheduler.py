@@ -250,6 +250,7 @@ class Scheduler(object):
             completed_ops = [op for op in operation_list if op.check_completed()]
         for op in completed_ops:
             op.finalize()
+            op.set_completed()
 
         # Filter out completed ops
         self.operation_list = [op for op in operation_list if not op.check_completed()]
