@@ -88,9 +88,9 @@ def main(input_image_file, vertices_file, output_image_file, blank_value='zero',
 
     for input_image, output_image in zip(input_image_files, output_image_files):
         if image_is_wsclean_model:
-            hdu = pyfits.open(infile)
+            hdu = pyfits.open(input_image)
             data = hdu[0].data
-            head = pyfits.getheader(infile)
+            head = pyfits.getheader(input_image)
             if head['CDELT4'] == 0.0:
                 # Causes WCS init problems if zero
                 head['CDELT4'] = -8.236827542606E+07
