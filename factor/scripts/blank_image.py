@@ -5,6 +5,8 @@ Script to blank regions (with zeros or NaNs) in a fits or casa image
 import argparse
 from argparse import RawTextHelpFormatter
 import pyrap.images as pim
+from astropy.io import fits as pyfits
+import astropy.wcs as pywcs
 import numpy as np
 import sys
 import os
@@ -85,11 +87,20 @@ def main(input_image_file, vertices_file, output_image_file, blank_value='zero',
         output_image_files = [output_image_file]
 
     for input_image, output_image in zip(input_image_files, output_image_files):
-        im = pim.image(input_image)
-        data = im.getdata()
-        coordsys = im.coordinates()
-        imshape = im.shape()
-        new_im = pim.image('', shape=imshape, coordsys=coordsys)
+        if image_is_wsclean_model:
+            hdu = pyfits.open(infile)
+            data = hdu[0].data
+            head = pyfits.getheader(infile)
+            if head['CDELT4'] == 0.0:
+                # Causes WCS init problems if zero
+                head['CDELT4'] = -8.236827542606E+07
+            wcs = pywcs.WCS(head)
+        else:
+            im = pim.image(input_image)
+            data = im.getdata()
+            coordsys = im.coordinates()
+            imshape = im.shape()
+            new_im = pim.image('', shape=imshape, coordsys=coordsys)
 
         # Construct polygon
         vertices = read_vertices(vertices_file)
@@ -98,8 +109,12 @@ def main(input_image_file, vertices_file, output_image_file, blank_value='zero',
         xvert = []
         yvert = []
         for RAvert, Decvert in zip(RAverts, Decverts):
-            pixels = new_im.topixel([0, 1, Decvert*np.pi/180.0,
-                RAvert*np.pi/180.0])
+            if image_is_wsclean_model:
+                pixels = wcs.wcs_world2pix([0, 1, Decvert*np.pi/180.0,
+                    RAvert*np.pi/180.0])
+            else:
+                pixels = new_im.topixel([0, 1, Decvert*np.pi/180.0,
+                    RAvert*np.pi/180.0])
             xvert.append(pixels[2]) # x -> Dec
             yvert.append(pixels[3]) # y -> RA
         poly = Polygon(xvert, yvert)
@@ -120,14 +135,18 @@ def main(input_image_file, vertices_file, output_image_file, blank_value='zero',
             data[0, 0, pix_ind[0][outside_ind], pix_ind[1][outside_ind]] = blank_val
 
         # Save changes
-        new_im.putdata(data)
-        if img_format == 'fits':
-            new_im.tofits(output_image, overwrite=True)
-        elif img_format == 'casa':
-            new_im.saveas(output_image, overwrite=True)
+        if image_is_wsclean_model:
+            hdu[0].data = data
+            hdu.writeto(output_image, clobber=True)
         else:
-            print('Output image format "{}" not understood.'.format(img_format))
-            sys.exit(1)
+            new_im.putdata(data)
+            if img_format == 'fits':
+                new_im.tofits(output_image, overwrite=True)
+            elif img_format == 'casa':
+                new_im.saveas(output_image, overwrite=True)
+            else:
+                print('Output image format "{}" not understood.'.format(img_format))
+                sys.exit(1)
 
 
 if __name__ == '__main__':
