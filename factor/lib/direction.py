@@ -303,6 +303,7 @@ class Direction(object):
             self.wsclean_suffix = '-MFS-image.fits'
         else:
             self.wsclean_nchannels = 1
+            self.wsclean_nchannels_selfcal = 1
             self.nband_pad = 0
             self.nterms = 1
             self.casa_suffix = None
