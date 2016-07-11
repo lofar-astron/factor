@@ -292,13 +292,24 @@ class Direction(object):
 
         # Set the baseline-averaging limit for WSClean, which depends on the
         # integration time given the specified maximum allowed smearing. We scale
-        # it from the full-resolution imaging cell size
+        # it from the imaging cell size assuming normal sampling as:
         #
-        # Note: at the moment, the user must set the limit, but we can calculate
-        # it for them from self.facetselfcal_target_timewidth_s once we know the
-        # best values
-        self.wsclean_nwavelengths = (parset['imaging_specific']['wsclean_blavg_nwavelengths'] *
-            facet_cellsize_arcsec / parset['imaging_specific']['selfcal_cellsize_arcsec'])
+        # max baseline in nwavelengths = 1 / theta_rad ~= 1 / (cellsize_deg * 3 * pi / 180)
+        #
+        # nwavelengths = max baseline in nwavelengths * 2 * pi * integration time in seconds / (24 * 60 * 60)
+        #
+        if (hasattr(self, 'facetselfcal_timestep_sec') and
+            parset['imaging_specific']['wsclean_bl_averaging']):
+            max_baseline = 1 / (3 * self.cellsize_selfcal_deg * np.pi / 180)
+            self.facetselfcal_wsclean_nwavelengths = int(max_baseline * 2*np.pi * self.facetselfcal_timestep_sec / (24*60*60))
+        else:
+            self.facetselfcal_wsclean_nwavelengths = 0
+        if (hasattr(self, 'facetimage_timestep_sec') and
+            parset['imaging_specific']['wsclean_bl_averaging']):
+            max_baseline = 1 / (3 * self.cellsize_facet_deg * np.pi / 180)
+            self.facetimage_wsclean_nwavelengths = int(max_baseline * 2*np.pi * self.facetimage_timestep_sec / (24*60*60))
+        else:
+            self.facetimage_wsclean_nwavelengths = 0
 
 
     def set_imaging_parameters(self, nbands, padding=1.05):
@@ -316,6 +327,7 @@ class Direction(object):
         """
         # Set facet image size
         if hasattr(self, 'width'):
+            self.facet_imsize_nopadding = int(self.width / self.cellsize_facet_deg)
             self.facet_imsize = max(512, self.get_optimum_size(self.width
                 / self.cellsize_facet_deg * padding))
 
@@ -616,7 +628,6 @@ class Direction(object):
             resolution_deg = 3.0 * self.cellsize_selfcal_deg # assume normal sampling of restoring beam
             target_timewidth_s = min(120.0, self.get_target_timewidth(delta_theta_deg,
                 resolution_deg, peak_smearing_factor))
-            self.facetselfcal_target_timewidth_s = target_timewidth_s
             if self.dynamic_range.lower() == 'hd':
                 # For high-dynamic range calibration, we use 0.2 MHz per channel
                 target_bandwidth_mhz = 0.2
@@ -630,6 +641,7 @@ class Direction(object):
             self.facetselfcal_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
             self.facetselfcal_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors - self.facetselfcal_freqstep))]
             self.facetselfcal_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
+            self.facetselfcal_timestep_sec = self.facetselfcal_timestep * timestep_sec
             self.log.debug('Using averaging steps of {0} channels and {1} time slots '
                 'for selfcal'.format(self.facetselfcal_freqstep, self.facetselfcal_timestep))
 
@@ -639,7 +651,7 @@ class Direction(object):
             self.verify_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors - self.verify_freqstep))]
             self.verify_timestep = max(1, int(round(120.0 / timestep_sec)))
 
-        # For facet imaging, use the facet image size to set the averaging steps
+        # For facet imaging, use the facet image size (before padding) to set the averaging steps
         if self.facet_imsize is not None:
             # Set min allowable smearing reduction factor for bandwidth and time
             # smearing so that they are equal and their product is
@@ -647,13 +659,12 @@ class Direction(object):
             peak_smearing_factor = np.sqrt(min_peak_smearing_factor)
 
             # Get target time and frequency averaging steps
-            delta_theta_deg = self.facet_imsize * self.cellsize_facet_deg / 2.0
-            self.log.debug('Facet image is {0} x {0} pixels ({1} x {1} deg)'.format(
-                self.facet_imsize, delta_theta_deg*2.0))
+            delta_theta_deg = self.facet_imsize_nopadding * self.cellsize_facet_deg / 2.0
+            self.log.debug('Facet image before padding is {0} x {0} pixels ({1} x {1} deg)'.format(
+                self.facet_imsize_nopadding, delta_theta_deg*2.0))
             resolution_deg = 3.0 * self.cellsize_facet_deg # assume normal sampling of restoring beam
             target_timewidth_s = min(120.0, self.get_target_timewidth(delta_theta_deg,
                 resolution_deg, peak_smearing_factor))
-            self.facetimage_target_timewidth_s = target_timewidth_s
             target_bandwidth_mhz = min(2.0, self.get_target_bandwidth(mean_freq_mhz,
                 delta_theta_deg, resolution_deg, peak_smearing_factor))
             self.log.debug('Target timewidth for facet imaging is {} s'.format(target_timewidth_s))
@@ -663,6 +674,7 @@ class Direction(object):
             self.facetimage_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
             self.facetimage_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors - self.facetimage_freqstep))]
             self.facetimage_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
+            self.facetimage_timestep_sec = self.facetimage_timestep * timestep_sec
             self.log.debug('Using averaging steps of {0} channels and {1} time slots '
                 'for facet imaging'.format(self.facetimage_freqstep, self.facetimage_timestep))
 

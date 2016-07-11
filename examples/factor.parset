@@ -129,12 +129,10 @@ dir_ms = /data/bands
 # activated when there are more than 5 bands
 # wsclean_nchannels_factor = 4
 
-# The number of wavelengths that WSClean is allowed to average over when
-# performing baseline-dependent time averaging during full-resolution imaging
-# (default = 0; i.e., disabled). This value is scaled automatically to other
-# resolutions if needed
+# Use baseline-dependent averaging in WSClean (default = False). If enabled,
+# this option can dramatically speed up imaging with WSClean.
 # NOTE: this option requires WSClean v1.12 or higher
-# wsclean_blavg_nwavelengths = 0
+# wsclean_bl_averaging = False
 
 # Allow flagged data to be added during WSClean imaging to allow
 # wsclean_nchannels_factor to be a divisor of the number bands (default = True).
