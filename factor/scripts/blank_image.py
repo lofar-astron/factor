@@ -110,8 +110,8 @@ def main(input_image_file, vertices_file, output_image_file, blank_value='zero',
         yvert = []
         for RAvert, Decvert in zip(RAverts, Decverts):
             if image_is_wsclean_model:
-                pixels = wcs.wcs_world2pix([0, 1, Decvert*np.pi/180.0,
-                    RAvert*np.pi/180.0])
+                pixels = wcs.wcs_world2pix(np.array([0, 1, Decvert*np.pi/180.0,
+                    RAvert*np.pi/180.0]), 0)
             else:
                 pixels = new_im.topixel([0, 1, Decvert*np.pi/180.0,
                     RAvert*np.pi/180.0])
