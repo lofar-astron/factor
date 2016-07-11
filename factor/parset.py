@@ -452,6 +452,15 @@ def get_imaging_options(parset):
     else:
         parset_dict['wsclean_nchannels_factor'] = 4
 
+    # The number of wavelengths that WSClean is allowed to average over when
+    # performing baseline-dependent time averaging during full-resolution imaging
+    # (default = 0; i.e., disabled). A reasonable value for full resolution imaging
+    # is 5. This value is scaled automatically to other resolutions if needed
+    if 'wsclean_blavg_nwavelengths' in parset_dict:
+        parset_dict['wsclean_blavg_nwavelengths'] = parset.getfloat('imaging', 'wsclean_blavg_nwavelengths')
+    else:
+        parset_dict['wsclean_blavg_nwavelengths'] = 0.0
+
     # Allow flagged data to be added during WSClean imaging to allow
     # wsclean_nchannels_factor to be a divisor of the number bands (default = True).
     # Enabling this option can dramatically speed up imaging with WSClean when the
@@ -591,7 +600,7 @@ def get_imaging_options(parset):
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
         'reimage_selfcaled', 'wsclean_image_padding', 'wsclean_model_padding',
         'selfcal_min_uv_lambda', 'facet_min_uv_lambda', 'wsclean_add_bands',
-        'selfcal_robust_wsclean']
+        'selfcal_robust_wsclean', 'wsclean_blavg_nwavelengths']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [imaging] section of the '

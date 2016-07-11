@@ -233,6 +233,9 @@ wsclean_image_full1.argument.weighting-rank-filter      =   3
 {% if taper_facet_arcsec > 0.0 %}
 wsclean_image_full1.argument.taper-gaussian             =  {{ taper_facet_arcsec }}
 {% endif %}
+{% if wsclean_nwavelengths > 0.0 %}
+wsclean_image_full1.argument.baseline-averaging         =   {{ wsclean_nwavelengths }}
+{% endif %}
 
 # make a mapfile with the root-name of the WSClean images, length = 1
 create_imagebase_map1.control.kind                      =   plugin
@@ -292,6 +295,9 @@ wsclean_image_full2.argument.tempdir                    =   {{ local_dir }}
 wsclean_image_full2.argument.weighting-rank-filter      =   3
 {% if taper_facet_arcsec > 0.0 %}
 wsclean_image_full2.argument.taper-gaussian             =  {{ taper_facet_arcsec }}
+{% endif %}
+{% if wsclean_nwavelengths > 0.0 %}
+wsclean_image_full2.argument.baseline-averaging         =   {{ wsclean_nwavelengths }}
 {% endif %}
 
 # make a mapfile with the root-name of the WSClean images, length = 1

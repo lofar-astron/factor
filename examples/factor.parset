@@ -8,7 +8,7 @@ dir_working = /data/wdir
 
 # Full path to directory containing input bands. It will be scanned for all
 # .MS and .ms files (required). Note that if the input files are longer than
-# chunk_size_sec in time, then FACTOR works on a (chunked) copy of these files  
+# chunk_size_sec in time, then FACTOR works on a (chunked) copy of these files
 # and does not modify the originals in any way. If the data is alerady in small
 # enough chunks, then it will not make a copy but modify the input files.
 dir_ms = /data/bands
@@ -128,6 +128,13 @@ dir_ms = /data/bands
 # values produce better results but require longer run times. Wide-band clean is
 # activated when there are more than 5 bands
 # wsclean_nchannels_factor = 4
+
+# The number of wavelengths that WSClean is allowed to average over when
+# performing baseline-dependent time averaging during full-resolution imaging
+# (default = 0; i.e., disabled). This value is scaled automatically to other
+# resolutions if needed
+# NOTE: this option requires WSClean v1.12 or higher
+# wsclean_blavg_nwavelengths = 0
 
 # Allow flagged data to be added during WSClean imaging to allow
 # wsclean_nchannels_factor to be a divisor of the number bands (default = True).
