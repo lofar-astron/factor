@@ -4,7 +4,7 @@ Script to perform a virtual concatenation
 """
 import argparse
 from argparse import RawTextHelpFormatter
-import pyrap.tables as pt
+import casacore.tables as pt
 import os
 
 

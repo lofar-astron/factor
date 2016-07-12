@@ -4,7 +4,7 @@ Script to zero the corners of avgpb images
 """
 import argparse
 from argparse import RawTextHelpFormatter
-import pyrap.images as pim
+import casacore.images as pim
 import numpy as np
 
 

@@ -8,8 +8,8 @@ problems with casapy2bbs.py
 """
 import argparse
 from argparse import RawTextHelpFormatter
-import pyrap.images as pim
-import pyrap.tables as pt
+import casacore.images as pim
+import casacore.tables as pt
 import numpy as np
 
 

@@ -4,7 +4,7 @@ Script to compare the dynamic range of two images
 """
 import argparse
 from argparse import RawTextHelpFormatter
-import pyrap.images as pim
+import casacore.images as pim
 import numpy
 import sys
 import os

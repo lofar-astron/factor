@@ -1737,10 +1737,13 @@ wsclean_image_full1.argument.cleanborder                   =   0
 wsclean_image_full1.argument.minuv-l                       =   {{ facet_min_uv_lambda }}
 wsclean_image_full1.argument.scale                         =   {{ cellsize_selfcal_deg }}
 wsclean_image_full1.argument.channelsout                   =   {{ wsclean_nchannels }}
-wsclean_image_full1.argument.mem                           =   {{ max_percent_memory }}
-wsclean_image_full1.argument.j                             =   {{ max_proc_per_node }}
+wsclean_image_full1.argument.mem                           =   {{ max_percent_memory_per_proc_single }}
+wsclean_image_full1.argument.j                             =   {{ max_cpus_per_proc_single }}
 wsclean_image_full1.argument.tempdir                       =   {{ local_dir }}
 wsclean_image_full1.argument.weighting-rank-filter         =   3
+{% if facetimage_wsclean_nwavelengths > 0.0 %}
+wsclean_image_full1.argument.baseline-averaging            =   {{ facetimage_wsclean_nwavelengths }}
+{% endif %}
 
 # make a mapfile with the root-name of the WSClean images, length = 1
 create_imagebase_map.control.kind                          =   plugin
@@ -1791,10 +1794,13 @@ wsclean_image_full2.argument.cleanborder                   =   0
 wsclean_image_full2.argument.minuv-l                       =   {{ facet_min_uv_lambda }}
 wsclean_image_full2.argument.scale                         =   {{ cellsize_selfcal_deg }}
 wsclean_image_full2.argument.channelsout                   =   {{ wsclean_nchannels }}
-wsclean_image_full2.argument.mem                           =   {{ max_percent_memory }}
-wsclean_image_full2.argument.j                             =   {{ max_proc_per_node }}
+wsclean_image_full2.argument.mem                           =   {{ max_percent_memory_per_proc_single }}
+wsclean_image_full2.argument.j                             =   {{ max_cpus_per_proc_single }}
 wsclean_image_full2.argument.tempdir                       =   {{ local_dir }}
 wsclean_image_full2.argument.weighting-rank-filter         =   3
+{% if facetimage_wsclean_nwavelengths > 0.0 %}
+wsclean_image_full2.argument.baseline-averaging            =   {{ facetimage_wsclean_nwavelengths }}
+{% endif %}
 
 # make a mapfile with the root-name of the final WSClean images, length = 1
 create_model4_map.control.kind                             =   plugin
@@ -1853,9 +1859,9 @@ wsclean_ft.control.mapfiles_in                             =   [regroup_shift_em
 wsclean_ft.control.inputkeys                               =   [msfile,name,size]
 wsclean_ft.argument.flags                                  =   [-predict,msfile]
 wsclean_ft.argument.scale                                  =   {{ cellsize_facet_deg }}
-wsclean_ft.argument.mem                                    =   {{ max_percent_memory }}
+wsclean_ft.argument.mem                                    =   {{ max_percent_memory_per_proc_ngroups }}
 wsclean_ft.argument.channelsout                            =   {{ wsclean_nchannels }}
-wsclean_ft.argument.j                                      =   {{ max_proc_per_node }}
+wsclean_ft.argument.j                                      =   {{ max_cpus_per_proc_ngroups }}
 wsclean_ft.argument.tempdir                                =   {{ local_dir }}
 wsclean_ft.argument.nwlayers-for-size                      =   12288 12288
 {% endblock full_image_parms %}
@@ -1985,8 +1991,8 @@ wsclean_pre.argument.cleanborder                           =   0
 wsclean_pre.argument.minuv-l                               =   {{ facet_min_uv_lambda }}
 wsclean_pre.argument.maxuv-l                               =   2500
 wsclean_pre.argument.scale                                 =   0.00833
-wsclean_pre.argument.mem                                   =   {{ max_percent_memory }}
-wsclean_pre.argument.j                                     =   {{ max_proc_per_node }}
+wsclean_pre.argument.mem                                   =   {{ max_percent_memory_per_proc_single }}
+wsclean_pre.argument.j                                     =   {{ max_cpus_per_proc_single }}
 
 # make compressed mapfile of new empty data, length = 1
 average_post_compressed_map.control.kind                   =   plugin
@@ -2011,8 +2017,8 @@ wsclean_post.argument.cleanborder                          =   0
 wsclean_post.argument.minuv-l                              =   {{ facet_min_uv_lambda }}
 wsclean_post.argument.maxuv-l                              =   2500
 wsclean_post.argument.scale                                =   0.00833
-wsclean_post.argument.mem                                  =   {{ max_percent_memory }}
-wsclean_post.argument.j                                    =   {{ max_proc_per_node }}
+wsclean_post.argument.mem                                  =   {{ max_percent_memory_per_proc_single }}
+wsclean_post.argument.j                                    =   {{ max_cpus_per_proc_single }}
 
 # do a "verify_subtract" on the two "empty" images, length = 1
 verify_subtract.control.type                               =   verify_subtract

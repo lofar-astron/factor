@@ -5,7 +5,7 @@ Script to verify selfcal subtract
 import argparse
 from argparse import RawTextHelpFormatter
 import numpy
-import pyrap.images as pim
+import casacore.images as pim
 import os
 
 

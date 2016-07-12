@@ -459,6 +459,13 @@ def get_imaging_options(parset):
     else:
         parset_dict['wsclean_nchannels_factor'] = 4
 
+    # Use baseline-dependent averaging in WSClean (default = False). If enabled,
+    # this option can dramatically speed up imaging with WSClean.
+    if 'wsclean_bl_averaging' in parset_dict:
+        parset_dict['wsclean_bl_averaging'] = parset.getboolean('imaging', 'wsclean_bl_averaging')
+    else:
+        parset_dict['wsclean_bl_averaging'] = False
+
     # Allow flagged data to be added during WSClean imaging to allow
     # wsclean_nchannels_factor to be a divisor of the number bands (default = True).
     # Enabling this option can dramatically speed up imaging with WSClean when the
@@ -598,7 +605,7 @@ def get_imaging_options(parset):
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
         'reimage_selfcaled', 'wsclean_image_padding', 'wsclean_model_padding',
         'selfcal_min_uv_lambda', 'facet_min_uv_lambda', 'wsclean_add_bands',
-        'selfcal_robust_wsclean', 'skip_facet_imaging']
+        'selfcal_robust_wsclean', 'skip_facet_imaging', 'wsclean_bl_averaging']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [imaging] section of the '

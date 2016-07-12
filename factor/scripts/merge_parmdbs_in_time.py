@@ -5,7 +5,7 @@ Script to merge parmdbs in time
 import argparse
 from argparse import RawTextHelpFormatter
 import os
-import pyrap.tables as pt
+import casacore.tables as pt
 import lofar.parmdb as pdb
 import sys
 import numpy as np

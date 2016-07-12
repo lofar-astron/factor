@@ -119,6 +119,7 @@ class Scheduler(object):
         nbands = len(self.operation_list[0].bands)
         ntimes = len(self.operation_list[0].bands[0].files)
         nfiles = ntimes * nbands
+        ngroups = int(np.ceil(nfiles / 100))
         nops_simul = self.max_procs
 
         for i in range(int(np.ceil(len(operation_list)/float(nops_simul)))):
@@ -170,8 +171,13 @@ class Scheduler(object):
 
             for op in op_group:
                 # Set maximum number of threads for normal and IO-intensive
-                # multithreaded processes (e.g., DPPP jobs) when run nfiles and
-                # ntimes times per step (the two most common cases)
+                # multithreaded processes (e.g., DPPP jobs) when run once,
+                # nfiles, ntimes, and ngroups times per step (the most common
+                # cases)
+                op.direction.max_cpus_per_proc_single = op.direction.max_proc_per_node
+                op.direction.max_cpus_per_proc_ntimes = int(np.ceil(
+                    op.direction.max_proc_per_node /
+                    float(min(ntimes, op.direction.max_proc_per_node))))
                 op.direction.max_cpus_per_proc_nfiles = int(np.ceil(
                     op.direction.max_proc_per_node /
                     float(min(nfiles, op.direction.max_proc_per_node))))
@@ -184,10 +190,19 @@ class Scheduler(object):
                 op.direction.max_cpus_per_io_proc_ntimes = int(np.ceil(
                     op.direction.max_proc_per_node /
                     float(min(ntimes, op.direction.max_io_proc_per_node))))
+                op.direction.max_cpus_per_io_proc_ngroups = int(np.ceil(
+                    op.direction.max_proc_per_node /
+                    float(min(ngroups, op.direction.max_io_proc_per_node))))
+                op.direction.max_cpus_per_proc_ngroups = int(np.ceil(
+                    op.direction.max_proc_per_node /
+                    float(min(ngroups, op.direction.max_io_proc_per_node))))
 
                 # Maximum percentage of memory to give to jobs that allow memory
                 # limits (e.g., WSClean jobs)
-                op.direction.max_percent_memory = fmem_max / float(nops_per_node) * 100.0
+                op.direction.max_percent_memory_per_proc_single = (fmem_max /
+                    float(nops_per_node) * 100.0)
+                op.direction.max_percent_memory_per_proc_ngroups = (fmem_max /
+                    float(nops_per_node) * 100.0 / ngroups)
 
                 # Save the state
                 op.direction.save_state()

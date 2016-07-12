@@ -4,7 +4,7 @@ Script to check a list of MS files for missing frequencies
 """
 import argparse
 from argparse import RawTextHelpFormatter
-import pyrap.tables as pt
+import casacore.tables as pt
 import sys
 
 
