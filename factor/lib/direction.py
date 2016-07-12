@@ -401,9 +401,13 @@ class Direction(object):
             else:
                 self.atrous_do = False
         if not self.atrous_do:
-            if len(self.casa_multiscale) > 2:
+            # For selfcal, only use the first two scales unless atrous_do was
+            # activated
+            multiscale_list = self.casa_multiscale.strip('[]').split(',')
+            multiscale_list = [s.strip() for s in multiscale_list]
+            if len(multiscale_list) > 2:
                 # Only use first two scales if source is small
-                self.casa_multiscale = self.casa_multiscale[:2]
+                self.casa_multiscale = '[{}]'.format(', '.join(multiscale_list[:2]))
 
 
     def set_wplanes(self, imsize):
