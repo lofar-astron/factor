@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, regroup_shift_empty_map, {% block model_data_steps %}expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, {% endblock model_data_steps %} corrupt_final_model, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, predict_all_model_data, subtract_final_initial, shift_diff_model_to_field, subtract_diff_model_from_empty_data]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, regroup_shift_empty_map, expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, predict_all_model_data, subtract_final_initial, shift_diff_model_to_field, subtract_diff_model_from_empty_data]
 
 pipeline.pluginpath                                          =   {{ pipeline_dir }}/plugins
 
@@ -57,7 +57,6 @@ regroup_shift_empty_map.control.join_max_files               =   100
 regroup_shift_empty_map.control.rotate_groups                =   True
 regroup_shift_empty_map.control.filename                     =   regroup_shift_empty.mapfile
 
-{% block model_data_parms %}
 # expand mapfile of the facet-model to all groups, length = some
 expand_facet_model_map.control.kind                          =   plugin
 expand_facet_model_map.control.type                          =   expandMapfile
@@ -85,7 +84,6 @@ wsclean_ft.argument.channelsout                              =   {{ wsclean_ncha
 wsclean_ft.argument.j                                        =   {{ max_cpus_per_proc_single }}
 wsclean_ft.argument.tempdir                                  =   {{ local_dir }}
 wsclean_ft.argument.nwlayers-for-size                        =   12288 12288
-{% endblock model_data_parms %}
 
 # corrupt the facet-model visibilities
 corrupt_final_model.control.type                             =   dppp

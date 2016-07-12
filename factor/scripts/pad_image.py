@@ -11,6 +11,66 @@ import sys
 import os
 
 
+def get_optimum_size(size):
+    """
+    Gets the nearest optimum image size
+
+    Taken from the casa source code (cleanhelper.py)
+
+    Parameters
+    ----------
+    size : int
+        Target image size in pixels
+
+    Returns
+    -------
+    optimum_size : int
+        Optimum image size nearest to target size
+
+    """
+    def prime_factors(n, douniq=True):
+        """ Return the prime factors of the given number. """
+        factors = []
+        lastresult = n
+        sqlast=int(np.sqrt(n))+1
+        if n == 1:
+            return [1]
+        c=2
+        while 1:
+             if (lastresult == 1) or (c > sqlast):
+                 break
+             sqlast=int(np.sqrt(lastresult))+1
+             while 1:
+                 if(c > sqlast):
+                     c=lastresult
+                     break
+                 if lastresult % c == 0:
+                     break
+                 c += 1
+
+             factors.append(c)
+             lastresult /= c
+
+        if (factors==[]): factors=[n]
+        return np.unique(factors).tolist() if douniq else factors
+
+    n = int(size)
+    if (n%2 != 0):
+        n+=1
+    fac=prime_factors(n, False)
+    for k in range(len(fac)):
+        if (fac[k] > 7):
+            val=fac[k]
+            while (np.max(prime_factors(val)) > 7):
+                val +=1
+            fac[k]=val
+    newlarge=np.product(fac)
+    for k in range(n, newlarge, 2):
+        if ((np.max(prime_factors(k)) < 8)):
+            return k
+    return newlarge
+
+
 def main(root, scalefactor=1.5):
     model_images = glob.glob(root + '-model.fits') + glob.glob(root + '-0*-model.fits') + glob.glob(root + '-MFS-model.fits')
 
@@ -24,7 +84,7 @@ def main(root, scalefactor=1.5):
         assert(xsize == ysize)
         print 'size is', xsize
 
-        padsize = int(xsize * scalefactor)
+        padsize = get_optimum_size(int(xsize * scalefactor))
         offset = (padsize - xsize) / 2
         print 'padding to', padsize
         print 'offset is', offset

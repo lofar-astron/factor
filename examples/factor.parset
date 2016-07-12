@@ -123,10 +123,6 @@ dir_ms = /data/bands
 # facet imaging (selfcal always uses a value of 0.15)
 # max_peak_smearing = 0.15
 
-# Use WSClean or CASA for imaging of entire facet (default = wsclean). For large
-# bandwidths, the CASA imager is typically faster
-# facet_imager = wsclean
-
 # Max factor used to set the number of WSClean channel images when wide-band
 # clean is used (default = 4). The number of channel images is determined by
 # dividing the number of bands by the nearest divisor to this factor. Smaller
@@ -149,18 +145,12 @@ dir_ms = /data/bands
 # wsclean_add_bands = True
 
 # Selfcal imaging parameters: pixel size in arcsec (default = 1.5), Briggs
-# robust parameter (default = -0.25 for casa and -0.5 for wsclean), minimum uv
-# distance in lambda (default = 80), and multiscale clean scales (default = [0,
-# 3, 7, 25, 60, 150]; set to [0] to disable multiscale clean). These settings
-# apply both to selfcal images and to the full facet image used to make the
-# improved facet model that is subtracted from the data. Note that only the
-# first two clean scales are used unless the calibrator is determined to be
-# large or atrous_do = True for the source in the directions file
+# robust parameter (default = -0.5) and minimum uv distance in lambda (default =
+# 80). These settings apply both to selfcal images and to the full facet image
+# used to make the improved facet model that is subtracted from the data
 # selfcal_cellsize_arcsec = 1.5
-# selfcal_robust = -0.25
-# selfcal_robust_wsclean = -0.5
+# selfcal_robust = -0.5
 # selfcal_min_uv_lambda = 80.0
-# selfcal_scales = [0, 3, 7, 25, 60, 150]
 
 # Facet imaging parameters: pixel size in arcsec, Briggs robust parameter, uv
 # taper in arcsec, and minimum uv distance in lambda. These parameters are used

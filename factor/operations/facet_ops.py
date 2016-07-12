@@ -33,12 +33,12 @@ class FacetSelfcal(Operation):
     """
     Operation to selfcal a facet
 
-    Two pipelines can be run, depending on whether casapy or wsclean is used
-    for the full facet imaging:
+    Two pipelines can be run, depending on whether multiresolution selfcal is
+    desired or not:
 
-    facetselfcal_casa_pipeline.parset - runs selfcal with casa
+    facetselfcal_pipeline.parset - normal selfcal
 
-    facetselfcal_pipeline.parset - runs selfcal with wsclean
+    facetselfcal_taper_pipeline.parset - multiresolution selfcal
 
     """
     def __init__(self, parset, bands, direction):
@@ -46,21 +46,11 @@ class FacetSelfcal(Operation):
             name='FacetSelfcal')
 
         # Set the pipeline parset to use
-        if (self.parset['imaging_specific']['facet_imager'].lower() == 'casa' or
-            self.parset['imaging_specific']['facet_imager'].lower() == 'casapy'):
-            # Set parset template to CASA parset
-            if self.parset['calibration_specific']['multires_selfcal']:
-                # Set parset template to multi-resolution selfcal parset
-                self.pipeline_parset_template = '{0}_taper_casa_pipeline.parset'.format(self.name)
-            else:
-                self.pipeline_parset_template = '{0}_casa_pipeline.parset'.format(self.name)
+        if self.parset['calibration_specific']['multires_selfcal']:
+            # Set parset template to multi-resolution selfcal parset
+            self.pipeline_parset_template = '{0}_taper_pipeline.parset'.format(self.name)
         else:
-            # Set parset template to default (i.e., WSClean) parset
-            if self.parset['calibration_specific']['multires_selfcal']:
-                # Set parset template to multi-resolution selfcal parset
-                self.pipeline_parset_template = '{0}_taper_pipeline.parset'.format(self.name)
-            else:
-                self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
+            self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
 
         # Define extra parameters needed for this operation
         self.direction.set_imcal_parameters(parset, bands)
@@ -266,15 +256,6 @@ class FacetSubReset(Operation):
         super(FacetSubReset, self).__init__(parset, bands, direction,
             name='FacetSubReset')
 
-        # Set imager infix for pipeline parset names
-        if self.parset['imaging_specific']['facet_imager'].lower() == 'casa':
-            infix = '_casa'
-        else:
-            infix = ''
-
-        # Set the pipeline parset to use
-        self.pipeline_parset_template = 'facetsubreset{0}_pipeline.parset'.format(infix)
-
         # Define extra parameters needed for this operation
         self.direction.set_imcal_parameters(parset, bands)
         ms_files = [band.files for band in self.bands]
@@ -311,20 +292,14 @@ class FacetImage(Operation):
     """
     Operation to make the full image of a facet
 
-    Four pipelines can be run, depending on whether casapy or wsclean is used
-    for imaging and on whether an improved model (from selfcal) exists:
-
-    facetimage_skymodel_casa_pipeline.parset - runs imaging with original
-        skymodel using casa
-
-    facetimage_imgmodel_casa_pipeline.parset - runs imaging with improved
-        model using casa
+    Two pipelines can be run, depending on whether an improved model (from
+    selfcal) exists:
 
     facetimage_skymodel_pipeline.parset - runs imaging with original
-        skymodel using wsclean
+        skymodel
 
     facetimage_imgmodel_pipeline.parset - runs imaging with improved
-        model using wsclean
+        model
 
     """
     def __init__(self, parset, bands, direction, cellsize_arcsec, robust,
@@ -332,10 +307,7 @@ class FacetImage(Operation):
         # Set name from the facet imaging parameters. If the parameters are all
         # the same as those used for selfcal, just use 'FacetImage'; otherwise,
         # append the parameters
-        if parset['imaging_specific']['facet_imager'] == 'wsclean':
-            selfcal_robust = parset['imaging_specific']['selfcal_robust_wsclean']
-        else:
-            selfcal_robust = parset['imaging_specific']['selfcal_robust']
+        selfcal_robust = parset['imaging_specific']['selfcal_robust']
         if (cellsize_arcsec != parset['imaging_specific']['selfcal_cellsize_arcsec'] or
             robust != selfcal_robust or taper_arcsec != 0.0 or
             min_uv_lambda != parset['imaging_specific']['selfcal_min_uv_lambda']):
@@ -352,12 +324,6 @@ class FacetImage(Operation):
             self.full_res = True
         else:
             self.full_res = False
-
-        # Set imager infix for pipeline parset names
-        if self.parset['imaging_specific']['facet_imager'].lower() == 'casa':
-            infix = '_casa'
-        else:
-            infix = ''
 
         # Check whether data files needed for imaging exist already or need to
         # be regenerated
@@ -379,14 +345,14 @@ class FacetImage(Operation):
         # Set the pipeline parset and existing data to use
         if not self.direction.selfcal_ok:
             # Set parset template to sky-model parset
-            self.pipeline_parset_template = 'facetimage_skymodel{}_pipeline.parset'.format(infix)
+            self.pipeline_parset_template = 'facetimage_skymodel_pipeline.parset'
 
             # Set mapfile to use for imaging
             if not self.direction.use_existing_data:
                 self.direction.image_data_mapfile = 'concat_averaged_compressed_map.output.mapfile'
         else:
             # Set parset template to facet model-image parset
-            self.pipeline_parset_template = 'facetimage_imgmodel{}_pipeline.parset'.format(infix)
+            self.pipeline_parset_template = 'facetimage_imgmodel_pipeline.parset'
 
             # Set mapfile to use for imaging
             if not self.direction.use_existing_data:
@@ -480,15 +446,6 @@ class FacetPeelImage(Operation):
     def __init__(self, parset, bands, direction):
         super(FacetPeelImage, self).__init__(parset, bands, direction,
             name='FacetPeelImage')
-
-        # Set imager infix for pipeline parset names
-        if self.parset['imaging_specific']['facet_imager'].lower() == 'casa':
-            infix = '_casa'
-        else:
-            infix = ''
-
-        # Set the pipeline parset to use
-        self.pipeline_parset_template = 'facetpeelimage{0}_pipeline.parset'.format(infix)
 
         # Define extra parameters needed for this operation
         self.direction.set_imcal_parameters(parset, bands, imaging_only=True)

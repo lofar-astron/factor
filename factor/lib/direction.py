@@ -81,7 +81,7 @@ class Direction(object):
             self.log.error('Dynamic range is "{}" but must be either "LD" or "HD".'.format(self.dynamic_range))
             sys.exit(1)
         if region_selfcal.lower() == 'empty':
-            # Set to empty list (casapy format)
+            # Set to empty list (casa format)
             self.region_selfcal = '[]'
         else:
             if not os.path.exists(region_selfcal):
@@ -204,12 +204,8 @@ class Direction(object):
         """
         mean_freq_mhz = np.mean([b.freq for b in bands]) / 1e6
         min_peak_smearing_factor = 1.0 - parset['imaging_specific']['max_peak_smearing']
-        if parset['imaging_specific']['facet_imager'].lower() == 'wsclean':
-            # Use larger padding for WSClean images
-            padding = parset['imaging_specific']['wsclean_image_padding']
-            self.wsclean_model_padding = parset['imaging_specific']['wsclean_model_padding']
-        else:
-            padding = 1.05
+        padding = parset['imaging_specific']['wsclean_image_padding']
+        self.wsclean_model_padding = parset['imaging_specific']['wsclean_model_padding']
         wsclean_nchannels_factor = parset['imaging_specific']['wsclean_nchannels_factor']
         chan_width_hz = bands[0].chan_width_hz
         nchan = bands[0].nchan
@@ -229,12 +225,10 @@ class Direction(object):
         peel_flux_jy = parset['calibration_specific']['peel_flux_jy']
 
         self.robust_selfcal = parset['imaging_specific']['selfcal_robust']
-        self.robust_selfcal_wsclean = parset['imaging_specific']['selfcal_robust_wsclean']
         self.solve_min_uv_lambda = parset['calibration_specific']['solve_min_uv_lambda']
         self.selfcal_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
         self.use_selfcal_clean_threshold = parset['imaging_specific']['selfcal_clean_threshold']
         self.use_selfcal_adaptive_threshold = parset['imaging_specific']['selfcal_adaptive_threshold']
-        self.casa_multiscale = parset['imaging_specific']['selfcal_scales']
         self.use_gaincal = parset['calibration_specific']['use_gaincal']
 
         if facet_cellsize_arcsec is None:
@@ -242,11 +236,7 @@ class Direction(object):
         self.cellsize_facet_deg = facet_cellsize_arcsec / 3600.0
 
         if facet_robust is None:
-            # Use the selfcal values
-            if parset['imaging_specific']['facet_imager'].lower() == 'wsclean':
-                facet_robust = parset['imaging_specific']['selfcal_robust_wsclean']
-            else:
-                facet_robust = parset['imaging_specific']['selfcal_robust']
+            facet_robust = parset['imaging_specific']['selfcal_robust']
         self.robust_facet = facet_robust
 
         if facet_taper_arcsec is None:
@@ -263,11 +253,10 @@ class Direction(object):
             preaverage_flux_jy, min_peak_smearing_factor, tec_block_mhz,
             peel_flux_jy, imaging_only=imaging_only)
 
-        # Set channelsout for wide-band imaging with WSClean and nterms
-        # for the CASA imager. Note that the number of WSClean channels must be
-        # an even divisor of the total number of channels in the full bandwidth
-        # after averaging to prevent mismatches during the predict step on the
-        # unaveraged data
+        # Set channelsout for wide-band imaging with WSClean. Note that the
+        # number of WSClean channels must be an even divisor of the total number
+        # of channels in the full bandwidth after averaging to prevent
+        # mismatches during the predict step on the unaveraged data
         #
         # Also define the image suffixes (which depend on whether or not
         # wide-band clean is done)
@@ -297,16 +286,11 @@ class Direction(object):
                     self.wsclean_nchannels_selfcal += 1
             if self.wsclean_nchannels_selfcal > nbands:
                 self.wsclean_nchannels_selfcal = nbands
-
-            self.nterms = 2
-            self.casa_suffix = '.tt0'
             self.wsclean_suffix = '-MFS-image.fits'
         else:
             self.wsclean_nchannels = 1
             self.wsclean_nchannels_selfcal = 1
             self.nband_pad = 0
-            self.nterms = 1
-            self.casa_suffix = None
             self.wsclean_suffix = '-image.fits'
 
         # Set the baseline-averaging limit for WSClean, which depends on the
@@ -368,10 +352,7 @@ class Direction(object):
         scaling_factor = np.sqrt(np.float(nbands))
         self.wsclean_full1_image_niter = int(2000 * scaling_factor)
         self.wsclean_full1_image_threshold_jy =  1.5e-3 * 0.7 / scaling_factor
-        self.casa_full1_image_niter = int(2000 * scaling_factor)
-        self.casa_full1_image_threshold_mjy = "{}mJy".format(1.5 * 0.7 / scaling_factor)
         self.wsclean_full2_image_niter = int(12000 * scaling_factor)
-        self.casa_full2_image_niter = int(12000 * scaling_factor)
 
         # Set multiscale imaging mode for facet imaging: Get source sizes and
         # check for large sources (anything above 4 arcmin -- the CC sky model
@@ -385,12 +366,10 @@ class Direction(object):
             else:
                 self.mscale_field_do = False
         if self.mscale_field_do:
-            self.casa_full_multiscale = '[0, 3, 7, 25, 60, 150]'
             self.wsclean_multiscale = '-multiscale,'
             self.wsclean_full1_image_niter /= 2 # fewer iterations are needed
             self.wsclean_full2_image_niter /= 2 # fewer iterations are needed
         else:
-            self.casa_full_multiscale = '[0]'
             self.wsclean_multiscale = ''
 
         # Set whether to use wavelet module in calibrator masking
@@ -400,41 +379,10 @@ class Direction(object):
                 self.atrous_do = True
             else:
                 self.atrous_do = False
-        if not self.atrous_do:
-            # For selfcal, only use the first two scales unless atrous_do was
-            # activated
-            multiscale_list = self.casa_multiscale.strip('[]').split(',')
-            multiscale_list = [s.strip() for s in multiscale_list]
-            if len(multiscale_list) > 2:
-                # Only use first two scales if source is small
-                self.casa_multiscale = '[{}]'.format(', '.join(multiscale_list[:2]))
-
-
-    def set_wplanes(self, imsize):
-        """
-        Sets number of wplanes for casa clean
-
-        Parameters
-        ----------
-        imsize : int
-            Image size in pixels
-
-        """
-        wplanes = 64
-        if imsize > 799:
-            wplanes = 96
-        if imsize > 1023:
-            wplanes = 128
-        if imsize > 1599:
-            wplanes = 256
-        if imsize > 2047:
-            wplanes = 384
-        if imsize > 3000:
-            wplanes = 448
-        if imsize > 4095:
-            wplanes = 512
-
-        return wplanes
+        if self.atrous_do:
+            self.wsclean_selfcal_multiscale = '-multiscale,'
+        else:
+            self.wsclean_selfcal_multiscale = ''
 
 
     def get_optimum_size(self, size):

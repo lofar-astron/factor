@@ -39,8 +39,8 @@ This operation self calibrates a facet calibrator and images the facet.
 Primary products (in ``results/facetselfcal/direction_name/``):
     * ``*merge_selfcal_parmdbs`` - the (normalized) self-calibration solutions table
     * ``*make_selfcal_plots*.png`` - plots of the self-calibration solutions
-    * ``*casa_image*.image(.tt0)`` - self-calibration images (CASA format)
-    * ``*casa_image*.png`` - self-calibration images (png format)
+    * ``*wsclean_image*.image(.tt0)`` - self-calibration images
+    * ``*wsclean_image*.png`` - self-calibration images (png format)
     * ``*image_full2*`` - facet image (not made if direction is a patch)
     * ``*wsclean_pre-image.fits`` - residual image of field for middle band before subtraction of new model
     * ``*wsclean_post-image.fits`` - residual image of field for middle band after subtraction of new model

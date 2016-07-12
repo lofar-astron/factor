@@ -62,34 +62,3 @@ def plugin_main(args, **kwargs):
     result = {'mapfile': fileid}
 
     return result
-
-
-
-def find_selfcal_images(direction):
-    """
-    Returns the filenames of selfcal images
-    """
-    selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
-        direction.name)
-    if os.path.exists(selfcal_dir):
-        selfcal_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image[01]2.image.tt0'))
-        tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22_iter*.image.tt0'))
-        if len(tec_iter_images) == 0:
-            tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22.image.tt0'))
-        selfcal_images += tec_iter_images
-        selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image[3]2.image.tt0'))
-        selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image42_iter*.image.tt0'))
-        if len(selfcal_images) == 0:
-            selfcal_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image[01]2.image'))
-            tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22_iter*.image'))
-            if len(tec_iter_images) == 0:
-                tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22.image'))
-            selfcal_images += tec_iter_images
-            selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image[3]2.image'))
-            selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image42_iter*.image'))
-        selfcal_images.sort()
-    else:
-        selfcal_images = []
-
-    return selfcal_images
-

@@ -784,8 +784,6 @@ def find_facet_images(direction):
     for d in dirs:
         facet_images += glob.glob(os.path.join(d, '*.wsclean_image_full2-MFS-image.fits'))
         facet_images += glob.glob(os.path.join(d, '*.wsclean_image_full2-image.fits'))
-        facet_images += glob.glob(os.path.join(d, '*.casa_image_full2.image.tt0'))
-        facet_images += glob.glob(os.path.join(d, '*.casa_image_full2.image'))
 
     facetimage_ops = []
     for facet_image in facet_images:

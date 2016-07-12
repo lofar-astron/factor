@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources,  add_all_facet_sources, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2 {% endblock full_image_steps %}]
+pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources,  add_all_facet_sources, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -152,7 +152,6 @@ create_compressed_mapfile.control.filename              =   concat_averaged_inpu
 
 #############################
 # need to test: is it faster to first concatenate, or to have WSClean run on hundreds of small files?
-# Same for Casa!
 #############################
 # sort compressed mapfile so that there is one group pre timestamp, length = ntimes
 sort_into_Groups.control.type                           =   sort_times_into_freqGroups
@@ -189,8 +188,6 @@ concat_averaged_compressed_map.control.mapfile_in       =   concat_averaged.outp
 concat_averaged_compressed_map.control.mapfile_dir      =   input.output.mapfile_dir
 concat_averaged_compressed_map.control.filename         =   concat_averaged_compressed.mapfile
 {% endif %}
-
-{% block full_image_parms %}
 
 # Make a preliminary clean mask from the facet region, length = 1
 premask.control.type                                    =   make_clean_mask
@@ -316,5 +313,3 @@ adjust_wsclean_mapfile2.control.mapfile_in              =   create_imagebase_map
 adjust_wsclean_mapfile2.control.append                  =   {{ wsclean_suffix }}
 adjust_wsclean_mapfile2.control.mapfile_dir             =   input.output.mapfile_dir
 adjust_wsclean_mapfile2.control.filename                =   final_image.mapfile
-{% endblock full_image_parms %}
-########## end of a block that can be replaced by another imager.

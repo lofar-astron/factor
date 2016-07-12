@@ -56,12 +56,6 @@ def parset_read(parset_file, use_log_file=True):
     parset_dict['checkfactor'].update(get_checkfactor_options(parset))
 
     # Set up working directory. All output will be placed in this directory
-    if '+' in parset_dict['dir_working']:
-        # Check if "+" is in path, as casapy buildmytasks will not work
-        # correctly (due to its use of sed)
-        log.critical("A '+' appears in the working dir path {}. FACTOR's custom "
-            "CASA ft task will not work correctly".format(parset_dict['dir_working']))
-        sys.exit(1)
     if not os.path.isdir(parset_dict['dir_working']):
         os.mkdir(parset_dict['dir_working'])
     try:
@@ -174,11 +168,6 @@ def get_global_options(parset):
     if 'wsclean_model_padding' in parset_dict:
         parset._sections['imaging']['wsclean_model_padding'] = parset_dict['wsclean_model_padding']
 
-    # Use WSClean or CASA for imaging of entire facet (default = wsclean). For large
-    # bandwidths, the CASA imager is typically faster
-    if 'facet_imager' in parset_dict:
-        parset._sections['imaging']['facet_imager'] = parset_dict['facet_imager']
-
     # Keep calibrated data for each facet (default = True for averaged data and
     # False for unaveraged data). If a target is specified (see below), the averaged
     # data for the target is always kept, regardless of this setting. If the
@@ -247,7 +236,7 @@ def get_global_options(parset):
     given_options = parset.options('global')
     allowed_options = ['dir_working', 'dir_ms', 'parmdb_name', 'interactive',
         'make_mosaic', 'exit_on_selfcal_failure', 'skip_selfcal_check',
-        'wsclean_nbands', 'facet_imager', 'keep_avg_facet_data', 'chunk_size_sec',
+        'wsclean_nbands', 'keep_avg_facet_data', 'chunk_size_sec',
         'wsclean_image_padding', 'wsclean_model_padding', 'peel_flux_jy',
         'keep_unavg_facet_data', 'max_selfcal_loops', 'preaverage_flux_jy',
         'multiscale_selfcal', 'skymodel_extension', 'max_peak_smearing',
@@ -478,11 +467,6 @@ def get_imaging_options(parset):
     else:
         parset_dict['wsclean_add_bands'] = True
 
-    # Use WSClean or CASA for imaging of entire facet (default = wsclean). For large
-    # bandwidths, the CASA imager is typically faster
-    if 'facet_imager' not in parset_dict:
-        parset_dict['facet_imager'] = 'wsclean'
-
     # Max desired peak flux density reduction at center of the facet edges due to
     # bandwidth smearing (at the mean frequency) and time smearing (default = 0.15 =
     # 15% reduction in peak flux). Higher values result in shorter run times but
@@ -494,11 +478,10 @@ def get_imaging_options(parset):
         parset_dict['max_peak_smearing'] = 0.15
 
     # Selfcal imaging parameters: pixel size in arcsec (default = 1.5), Briggs
-    # robust parameter (default = -0.25 for casa and -0.5 for wsclean), minimum uv
-    # distance in lambda (default = 80), and multiscale clean scales (default = [0,
-    # 3, 7, 25, 60, 150]). These settings apply both to selfcal images and to the
-    # full facet image used to make the improved facet model that is subtracted from
-    # the data
+    # robust parameter (default = -0.5) and minimum uv distance in lambda
+    # (default = 80). These settings apply both to selfcal images and to the
+    # full facet image used to make the improved facet model that is subtracted
+    # from the data
     if 'selfcal_cellsize_arcsec' in parset_dict:
         parset_dict['selfcal_cellsize_arcsec'] = parset.getfloat('imaging', 'selfcal_cellsize_arcsec')
     else:
@@ -506,17 +489,11 @@ def get_imaging_options(parset):
     if 'selfcal_robust' in parset_dict:
         parset_dict['selfcal_robust'] = parset.getfloat('imaging', 'selfcal_robust')
     else:
-        parset_dict['selfcal_robust'] = -0.25
-    if 'selfcal_robust_wsclean' in parset_dict:
-        parset_dict['selfcal_robust_wsclean'] = parset.getfloat('imaging', 'selfcal_robust_wsclean')
-    else:
-        parset_dict['selfcal_robust_wsclean'] = -0.5
+        parset_dict['selfcal_robust'] = -0.5
     if 'selfcal_min_uv_lambda' in parset_dict:
         parset_dict['selfcal_min_uv_lambda'] = parset.getfloat('imaging', 'selfcal_min_uv_lambda')
     else:
         parset_dict['selfcal_min_uv_lambda'] = 80.0
-    if not 'selfcal_scales' in parset_dict:
-        parset_dict['selfcal_scales'] = '[0, 3, 7, 25, 60, 150]'
 
     # Use a clean threshold during selfcal imaging (default = False). If False,
     # clean will always stop at 1000 iterations. If True, clean will go to 1 sigma
@@ -599,9 +576,9 @@ def get_imaging_options(parset):
         parset_dict['wsclean_model_padding'] = 1.4
 
     # Check for unused options
-    allowed_options = ['make_mosaic', 'wsclean_nchannels_factor', 'facet_imager',
+    allowed_options = ['make_mosaic', 'wsclean_nchannels_factor',
         'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
-        'selfcal_robust_wsclean', 'selfcal_clean_threshold', 'selfcal_adaptive_threshold',
+        'selfcal_clean_threshold', 'selfcal_adaptive_threshold',
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
         'reimage_selfcaled', 'wsclean_image_padding', 'wsclean_model_padding',
         'selfcal_min_uv_lambda', 'facet_min_uv_lambda', 'wsclean_add_bands',

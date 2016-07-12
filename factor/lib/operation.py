@@ -120,7 +120,6 @@ class Operation(object):
                          'factorroot': self.factor_root_dir,
                          'pipeline_working_dir': self.pipeline_working_dir,
                          'pipeline_runtime_dir': self.pipeline_runtime_dir,
-                         'casa_executable': parset['casa_executable'],
                          'wsclean_executable': parset['wsclean_executable'],
                          'image2fits_executable': parset['image2fits_executable'],
                          'dppp_nodescript': self.dppp_nodescript}

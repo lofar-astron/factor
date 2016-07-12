@@ -165,10 +165,6 @@ The available options are described below under their respective sections.
         more smearing away from the facet centers. This value only applies to the
         facet imaging (self calibration always uses a value of 0.15).
 
-    facet_imager
-        Use WSClean or CASA for imaging of entire facet (default = ``wsclean``). For large
-        bandwidths, the CASA imager is typically faster.
-
     wsclean_nchannels_factor
         Max factor used to set the number of WSClean channel images when wide-band
         clean is used (default = 4). The number of channel images is determined by
@@ -194,10 +190,7 @@ The available options are described below under their respective sections.
         Self calibration pixel size in arcsec (default = 1.5).
 
     selfcal_robust
-        Self calibration Briggs robust parameter for CASA (default = -0.25).
-
-    selfcal_robust_wsclean
-        Self calibration Briggs robust parameter for WSClean (default = -0.5).
+        Self calibration Briggs robust parameter (default = -0.5).
 
     selfcal_min_uv_lambda
         Self calibration minimum uv distance in lambda (default = 80).
