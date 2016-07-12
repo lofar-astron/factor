@@ -334,10 +334,6 @@ class Direction(object):
             self.facet_imsize = max(512, self.get_optimum_size(self.width
                 / self.cellsize_facet_deg * padding))
 
-        # Set number of w planes for imaging / ft
-        self.cal_wplanes = self.set_wplanes(self.cal_imsize)
-        self.facet_wplanes = self.set_wplanes(self.facet_imsize)
-
         # Determine whether the total bandwidth is large enough that wide-band
         # imaging is needed
         if nbands > 5:
