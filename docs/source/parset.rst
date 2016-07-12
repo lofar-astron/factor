@@ -147,6 +147,11 @@ The available options are described below under their respective sections.
     reimage_selfcaled
         Re-image all directions for which selfcal was successful (default = ``True``).
 
+    skip_facet_imaging
+        Skip imaging of facets during selfcal (default = ``False``). Note that enabling
+        this option will not produce full-resolution facet images unless
+        :term:`reimage_selfcaled` is ``True``.
+
     wsclean_image_padding
         Padding factor for WSClean images (default = 1.6).
 
@@ -170,6 +175,11 @@ The available options are described below under their respective sections.
         dividing the number of bands by the nearest divisor to this factor. Smaller
         values produce better results but require longer run times. Wide-band clean is
         activated when there are more than 5 bands.
+
+    wsclean_bl_averaging
+        Use baseline-dependent averaging in WSClean (default = ``False``). If enabled,
+        this option can dramatically speed up imaging with WSClean.
+        NOTE: this option requires WSClean v1.12a or higher.
 
     wsclean_add_bands
         Allow flagged data to be added during WSClean imaging to allow

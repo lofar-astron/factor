@@ -105,6 +105,11 @@ dir_ms = /data/bands
 # Re-image directions for which selfcal was successful (default = True)
 # reimage_selfcaled = True
 
+# Skip imaging of facets during selfcal (default = False). Note that enabling
+# this option will not produce full-resolution facet images unless
+# reimage_selfcaled is True.
+# skip_facet_imaging = False
+
 # Padding factor for WSClean images (default = 1.6)
 # wsclean_image_padding = 1.6
 
@@ -131,7 +136,7 @@ dir_ms = /data/bands
 
 # Use baseline-dependent averaging in WSClean (default = False). If enabled,
 # this option can dramatically speed up imaging with WSClean.
-# NOTE: this option requires WSClean v1.12 or higher
+# NOTE: this option requires WSClean v1.12a or higher
 # wsclean_bl_averaging = False
 
 # Allow flagged data to be added during WSClean imaging to allow

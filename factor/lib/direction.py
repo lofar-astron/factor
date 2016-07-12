@@ -994,8 +994,8 @@ class Direction(object):
                     self.wsclean_modelimg_size_mapfile = d['wsclean_modelimg_size_mapfile']
 
                 # Load mapfile needed for reimaging with existing data
-                if 'image_data_mapfile' in d:
-                    self.image_data_mapfile = d['image_data_mapfile']
+#                 if 'image_data_mapfile' in d:
+#                     self.image_data_mapfile = d['image_data_mapfile']
             return True
         except:
             return False

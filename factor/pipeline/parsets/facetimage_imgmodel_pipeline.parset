@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, add_imaging_cols, regroup_shift_empty_map, {% block model_data_steps %}expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, {% endblock model_data_steps %} corrupt_final_model, add_model_to_empty_data, apply_dir_dep, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} {% block full_image_steps %}premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
+pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, add_imaging_cols, regroup_shift_empty_map, {% block model_data_steps %}expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, {% endblock model_data_steps %} corrupt_final_model, add_model_to_empty_data, {% if skip_facet_imaging %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, create_parmdb_map, add_all_facet_sources, {% else %} apply_dir_dep, {% endif %} create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} {% block full_image_steps %}premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -163,6 +163,79 @@ add_model_to_empty_data.control.opts.mapfiles_in      =   [shift_empty.output.ma
 add_model_to_empty_data.control.opts.inputkeys        =   [file1,file2]
 add_model_to_empty_data.argument.flags                =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
 
+{% if skip_facet_imaging %}
+# create a mapfile with the current skymodels from supplied list, length = nbands
+create_full_skymodels_map.control.kind                  =   plugin
+create_full_skymodels_map.control.type                  =   addListMapfile
+create_full_skymodels_map.control.hosts                 =   {{ hosts }}
+create_full_skymodels_map.control.files                 =   {{ skymodels }}
+create_full_skymodels_map.control.mapfile_dir           =   input.output.mapfile_dir
+create_full_skymodels_map.control.filename              =   full_skymodels.mapfile
+
+# extract the skymodel for this facet from global skymodel, length = nbands
+make_facet_skymodels_all.control.type                   =   make_facet_skymodel
+make_facet_skymodels_all.control.mapfile_in             =   create_full_skymodels_map.output.mapfile
+make_facet_skymodels_all.control.inputkey               =   fullmodelfile
+make_facet_skymodels_all.control.outputkey              =   outfile
+make_facet_skymodels_all.argument.flags                 =   [fullmodelfile,outfile,{{ vertices_file }}]
+make_facet_skymodels_all.argument.remove_cal            =   True
+
+# convert the facet skymodel into a sourcedb, length = nbands
+make_sourcedb_all_facet_sources.control.type            =   make_sourcedb
+make_sourcedb_all_facet_sources.control.opts.mapfile_in =   make_facet_skymodels_all.output.mapfile
+make_sourcedb_all_facet_sources.control.opts.inputkey   =   in
+make_sourcedb_all_facet_sources.argument.format         =   <
+make_sourcedb_all_facet_sources.argument.outtype        =   blob
+
+# expand the sourcedb mapfile so that there is one entry for every file, length = nfiles
+expand_sourcedb_all_facet_sources.control.kind          =   plugin
+expand_sourcedb_all_facet_sources.control.type          =   mapfileSingleToGroup
+expand_sourcedb_all_facet_sources.control.mapfile_in    =   make_sourcedb_all_facet_sources.output.mapfile
+expand_sourcedb_all_facet_sources.control.mapfile_groups =   create_msmulti_map.output.mapfile
+expand_sourcedb_all_facet_sources.control.mapfile_dir   =   input.output.mapfile_dir
+expand_sourcedb_all_facet_sources.control.filename      =   expand_sourcedb_all_facet_sources.mapfile
+
+# create a mapfile with the direction-independent parmDBs from supplied list, length = nfiles
+create_parmdb_map.control.kind                          =   plugin
+create_parmdb_map.control.type                          =   addListMapfile
+create_parmdb_map.control.hosts                         =   {{ hosts }}
+create_parmdb_map.control.files                         =   {{ dir_indep_parmDBs }}
+create_parmdb_map.control.mapfile_dir                   =   input.output.mapfile_dir
+create_parmdb_map.control.filename                      =   dir_indep_instrument_parmdbs.mapfile
+
+# "do nearly everything" call to NDPPP: phaseshift, add, correct, and average in one NDPPP call, length = nfiles
+add_all_facet_sources.control.type                      =   dppp
+add_all_facet_sources.control.opts.mapfiles_in          =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+add_all_facet_sources.control.opts.inputkeys            =   [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb]
+add_all_facet_sources.argument.numthreads               =   {{ max_cpus_per_io_proc_nfiles }}
+add_all_facet_sources.argument.msin.datacolumn          =   FACET_DATA_ALL
+add_all_facet_sources.argument.msout.overwrite          =   True
+add_all_facet_sources.argument.msout.writefullresflag   =   False
+add_all_facet_sources.argument.local_scratch_dir        =   {{ local_dir }}
+add_all_facet_sources.argument.steps                    =   [add,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
+add_all_facet_sources.argument.add.type                 =   predict
+add_all_facet_sources.argument.add.sourcedb             =   sourcedb
+add_all_facet_sources.argument.add.operation            =   add
+add_all_facet_sources.argument.add.applycal.parmdb      =   dir_indep_parmdb
+add_all_facet_sources.argument.correct_fast1.type       =   applycal
+add_all_facet_sources.argument.correct_fast1.parmdb     =   dir_dep_parmdb
+add_all_facet_sources.argument.correct_fast1.correction =   tec
+add_all_facet_sources.argument.correct_fast1.invert     =   True
+add_all_facet_sources.argument.correct_fast2.type       =   applycal
+add_all_facet_sources.argument.correct_fast2.parmdb     =   dir_dep_parmdb
+add_all_facet_sources.argument.correct_fast2.correction =   commonscalarphase
+add_all_facet_sources.argument.correct_fast2.invert     =   True
+add_all_facet_sources.argument.correct_slow.type        =   applycal
+add_all_facet_sources.argument.correct_slow.parmdb      =   dir_dep_parmdb
+add_all_facet_sources.argument.correct_slow.invert      =   True
+add_all_facet_sources.argument.flagzero.type            =   preflagger
+add_all_facet_sources.argument.flagzero.amplmin         =   1e-20
+add_all_facet_sources.argument.avg.type                 =   squash
+add_all_facet_sources.argument.avg.freqstep             =   {{ facetimage_freqstep }}
+add_all_facet_sources.argument.avg.timestep             =   {{ facetimage_timestep }}
+
+{% else %}
+
 # apply the direction-dependent solutions and average, length = nfiles
 apply_dir_dep.control.type                            =   dppp
 apply_dir_dep.control.opts.mapfiles_in                =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
@@ -189,11 +262,16 @@ apply_dir_dep.argument.flagzero.amplmin               =   1e-20
 apply_dir_dep.argument.avg.type                       =   squash
 apply_dir_dep.argument.avg.freqstep                   =   {{ facetimage_freqstep }}
 apply_dir_dep.argument.avg.timestep                   =   {{ facetimage_timestep }}
+{% endif %}
 
 # make the compressed mapfile, length = 1
 create_compressed_mapfile.control.kind                =   plugin
 create_compressed_mapfile.control.type                =   compressMapfile
+{% if skip_facet_imaging %}
+create_compressed_mapfile.control.mapfile_in          =   add_all_facet_sources.output.mapfile
+{% else %}
 create_compressed_mapfile.control.mapfile_in          =   apply_dir_dep.output.mapfile
+{% endif %}
 create_compressed_mapfile.control.mapfile_dir         =   input.output.mapfile_dir
 create_compressed_mapfile.control.filename            =   concat_averaged_input.mapfile
 
