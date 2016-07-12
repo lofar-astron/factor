@@ -105,8 +105,9 @@ dir_ms = /data/bands
 # Re-image directions for which selfcal was successful (default = True)
 # reimage_selfcaled = True
 
-# Skip imaging of facets (default = False). Note that enabling this
-# option will not produce facet images unless reimage_selfcaled is True.
+# Skip imaging of facets during selfcal (default = False). Note that enabling
+# this option will not produce full-resolution facet images unless
+# reimage_selfcaled is True.
 # skip_facet_imaging = False
 
 # Padding factor for WSClean images (default = 1.6)
