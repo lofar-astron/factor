@@ -611,6 +611,9 @@ wsclean_image11.argument.mem                               =   {{ max_percent_me
 wsclean_image11.argument.j                                 =   {{ max_proc_per_node }}
 wsclean_image11.argument.tempdir                           =   {{ local_dir }}
 wsclean_image11.argument.weighting-rank-filter             =   3
+{% if facetselfcal_wsclean_nwavelengths > 0.0 %}
+wsclean_image11.argument.baseline-averaging                =   {{ facetselfcal_wsclean_nwavelengths }}
+{% endif %}
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map11.control.kind                        =   plugin
@@ -667,6 +670,9 @@ wsclean_image12.argument.mem                               =   {{ max_percent_me
 wsclean_image12.argument.j                                 =   {{ max_proc_per_node }}
 wsclean_image12.argument.tempdir                           =   {{ local_dir }}
 wsclean_image12.argument.weighting-rank-filter             =   3
+{% if facetselfcal_wsclean_nwavelengths > 0.0 %}
+wsclean_image12.argument.baseline-averaging                =   {{ facetselfcal_wsclean_nwavelengths }}
+{% endif %}
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map12.control.kind                        =   plugin
@@ -809,6 +815,9 @@ wsclean_image21.argument.mem                               =   {{ max_percent_me
 wsclean_image21.argument.j                                 =   {{ max_proc_per_node }}
 wsclean_image21.argument.tempdir                           =   {{ local_dir }}
 wsclean_image21.argument.weighting-rank-filter             =   3
+{% if facetselfcal_wsclean_nwavelengths > 0.0 %}
+wsclean_image21.argument.baseline-averaging                =   {{ facetselfcal_wsclean_nwavelengths }}
+{% endif %}
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map21.control.kind                        =   plugin
@@ -865,6 +874,9 @@ wsclean_image22.argument.mem                               =   {{ max_percent_me
 wsclean_image22.argument.j                                 =   {{ max_proc_per_node }}
 wsclean_image22.argument.tempdir                           =   {{ local_dir }}
 wsclean_image22.argument.weighting-rank-filter             =   3
+{% if facetselfcal_wsclean_nwavelengths > 0.0 %}
+wsclean_image22.argument.baseline-averaging                =   {{ facetselfcal_wsclean_nwavelengths }}
+{% endif %}
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map22.control.kind                        =   plugin
@@ -1080,6 +1092,9 @@ wsclean_image31.argument.mem                               =   {{max_percent_mem
 wsclean_image31.argument.j                                 =   {{ max_proc_per_node }}
 wsclean_image31.argument.tempdir                           =   {{ local_dir }}
 wsclean_image31.argument.weighting-rank-filter             =   3
+{% if facetselfcal_wsclean_nwavelengths > 0.0 %}
+wsclean_image31.argument.baseline-averaging                =   {{ facetselfcal_wsclean_nwavelengths }}
+{% endif %}
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map31.control.kind                        =   plugin
@@ -1136,6 +1151,9 @@ wsclean_image32.argument.mem                               =   {{max_percent_mem
 wsclean_image32.argument.j                                 =   {{ max_proc_per_node }}
 wsclean_image32.argument.tempdir                           =   {{ local_dir }}
 wsclean_image32.argument.weighting-rank-filter             =   3
+{% if facetselfcal_wsclean_nwavelengths > 0.0 %}
+wsclean_image32.argument.baseline-averaging                =   {{ facetselfcal_wsclean_nwavelengths }}
+{% endif %}
 
 ########## start of selfcal loop
 
@@ -1362,6 +1380,9 @@ wsclean_image41.argument.mem                               =   {{max_percent_mem
 wsclean_image41.argument.j                                 =   {{ max_proc_per_node }}
 wsclean_image41.argument.tempdir                           =   {{ local_dir }}
 wsclean_image41.argument.weighting-rank-filter             =   3
+{% if facetselfcal_wsclean_nwavelengths > 0.0 %}
+wsclean_image41.argument.baseline-averaging                =   {{ facetselfcal_wsclean_nwavelengths }}
+{% endif %}
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map41.control.kind                        =   plugin
@@ -1418,6 +1439,9 @@ wsclean_image42.argument.mem                               =   {{max_percent_mem
 wsclean_image42.argument.j                                 =   {{ max_proc_per_node }}
 wsclean_image42.argument.tempdir                           =   {{ local_dir }}
 wsclean_image42.argument.weighting-rank-filter             =   3
+{% if facetselfcal_wsclean_nwavelengths > 0.0 %}
+wsclean_image42.argument.baseline-averaging                =   {{ facetselfcal_wsclean_nwavelengths }}
+{% endif %}
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map42.control.kind                        =   plugin
