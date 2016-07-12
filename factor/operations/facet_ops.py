@@ -346,17 +346,9 @@ class FacetImage(Operation):
         if not self.direction.selfcal_ok:
             # Set parset template to sky-model parset
             self.pipeline_parset_template = 'facetimage_skymodel_pipeline.parset'
-
-            # Set mapfile to use for imaging
-            if not self.direction.use_existing_data:
-                self.direction.image_data_mapfile = 'concat_averaged_compressed_map.output.mapfile'
         else:
             # Set parset template to facet model-image parset
             self.pipeline_parset_template = 'facetimage_imgmodel_pipeline.parset'
-
-            # Set mapfile to use for imaging
-            if not self.direction.use_existing_data:
-                self.direction.image_data_mapfile = 'concat_averaged_compressed_map.output.mapfile'
 
         # Define extra parameters needed for this operation
         self.direction.set_imcal_parameters(parset, bands, cellsize_arcsec, robust,
@@ -370,6 +362,7 @@ class FacetImage(Operation):
             if (self.direction.facetimage_freqstep != 1 or self.direction.facetimage_timestep != 1):
                 self.direction.average_image_data = True
         else:
+            self.direction.image_data_mapfile = 'concat_averaged_compressed_map.output.mapfile'
             self.log.debug('No suitable calibrated data exist for reimaging. They will be generated')
 
         ms_files = [band.files for band in self.bands]
