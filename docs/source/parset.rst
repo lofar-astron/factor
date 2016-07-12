@@ -171,6 +171,11 @@ The available options are described below under their respective sections.
         values produce better results but require longer run times. Wide-band clean is
         activated when there are more than 5 bands.
 
+    wsclean_bl_averaging
+        Use baseline-dependent averaging in WSClean (default = ``False``). If enabled,
+        this option can dramatically speed up imaging with WSClean.
+        NOTE: this option requires WSClean v1.12a or higher.
+
     wsclean_add_bands
         Allow flagged data to be added during WSClean imaging to allow
         :term:`wsclean_nchannels_factor` to be a divisor of the number bands (default = ``True``).
