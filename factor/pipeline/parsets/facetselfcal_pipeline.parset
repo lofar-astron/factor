@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, shift_cal, create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, switch_weights_col_shift_cal1, concat_blavg_data, switch_weights_col_shift_cal2, copy_column1, copy_column2, {% endif %} add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile_avgdata, sort_avg_into_Groups, sort_avg_into_Groups_maps, concat_avgdata, create_compressed_mapfile0, concat0, wsclean_image01, create_imagebase_map01, adjust_wsclean_mapfile0, mask0, wsclean_image02, create_imagebase_map02, create_expanded_model0_mapfile, wsclean_ft0, switch_weights_col1, make_fast_phase_parmdb_map, remove_parmdbs1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, concat1, wsclean_image11, create_imagebase_map11, adjust_wsclean_mapfile11, mask1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, wsclean_ft1, switch_weights_col3, remove_parmdbs2, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, create_compressed_mapfile2, concat2, wsclean_image21, create_imagebase_map21, adjust_wsclean_mapfile21, mask2, wsclean_image22, create_imagebase_map22, create_expanded_model2_mapfile, wsclean_ft2, switch_weights_col5, remove_parmdbs11, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, concat3, wsclean_image31, create_imagebase_map31, adjust_wsclean_mapfile31, mask3, wsclean_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, shift_empty, expand_merged_parmdb_map, add_imaging_cols_empty, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_model4_map, blank_model, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% else %} apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, concat_averaged, concat_averaged_compressed_map, {% block full_image_steps %} premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% endblock full_image_steps %} {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, shift_cal, create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, switch_weights_col_shift_cal1, concat_blavg_data, switch_weights_col_shift_cal2, copy_column1, copy_column2, {% endif %} add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile_avgdata, sort_avg_into_Groups, sort_avg_into_Groups_maps, concat_avgdata, create_compressed_mapfile0, concat0, premask_selfcal, wsclean_image01, create_imagebase_map01, adjust_wsclean_mapfile0, mask0, wsclean_image02, create_imagebase_map02, create_expanded_model0_mapfile, wsclean_ft0, switch_weights_col1, make_fast_phase_parmdb_map, remove_parmdbs1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, concat1, wsclean_image11, create_imagebase_map11, adjust_wsclean_mapfile11, mask1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, wsclean_ft1, switch_weights_col3, remove_parmdbs2, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, create_compressed_mapfile2, concat2, wsclean_image21, create_imagebase_map21, adjust_wsclean_mapfile21, mask2, wsclean_image22, create_imagebase_map22, create_expanded_model2_mapfile, wsclean_ft2, switch_weights_col5, remove_parmdbs11, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, concat3, wsclean_image31, create_imagebase_map31, adjust_wsclean_mapfile31, mask3, wsclean_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, shift_empty, expand_merged_parmdb_map, add_imaging_cols_empty, {% if is_patch %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_model4_map, blank_model, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% else %} apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, concat_averaged, concat_averaged_compressed_map, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -362,11 +362,28 @@ concat0.control.inputkey                                   =   msfiles
 concat0.control.outputkey                                  =   msconcat
 concat0.argument.flags                                     =   [msfiles,msconcat]
 
+# make a mask using user-supplied region (if any), length = 1
+premask_selfcal.control.type                               =   make_clean_mask
+premask_selfcal.control.mapfile_in                         =   concat0.output.mapfile
+premask_selfcal.control.inputkey                           =   imagefile
+premask_selfcal.control.outputkey                          =   maskfile
+premask_selfcal.argument.flags                             =   [imagefile,maskfile]
+premask_selfcal.argument.img_format                        =   fits
+premask_selfcal.argument.pad_to_size                       =   {{ cal_imsize }}
+premask_selfcal.argument.skip_source_detection             =   True
+premask_selfcal.argument.vertices_file                     =   {{ vertices_file }}
+premask_selfcal.argument.reference_ra_deg                  =   {{ ra }}
+premask_selfcal.argument.reference_dec_deg                 =   {{ dec }}
+premask_selfcal.argument.cellsize_deg                      =   {{ cellsize_selfcal_deg }}
+premask_selfcal.argument.region_file                       =   {{ region_selfcal }}
+premask_selfcal.argument.make_blank_image                  =   True
+
 # image the virtual concatenated data with wsclean, length = 1
 wsclean_image01.control.type                               =   wsclean
-wsclean_image01.control.mapfiles_in                        =   [concat0.output.mapfile]
-wsclean_image01.control.inputkeys                          =   [msfile]
+wsclean_image01.control.mapfiles_in                        =   [concat0.output.mapfile,premask_selfcal.output.mapfile]
+wsclean_image01.control.inputkeys                          =   [msfile,fitsmask]
 wsclean_image01.argument.flags                             =   [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image01.argument.fitsmask                          =   fitsmask
 wsclean_image01.argument.size                              =   {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image01.argument.niter                             =   1000
 wsclean_image01.argument.threshold                         =   0.0
@@ -381,6 +398,9 @@ wsclean_image01.argument.mem                               =   {{ max_percent_me
 wsclean_image01.argument.j                                 =   {{ max_proc_per_node }}
 wsclean_image01.argument.tempdir                           =   {{ local_dir }}
 wsclean_image01.argument.weighting-rank-filter             =   3
+{% if facetselfcal_wsclean_nwavelengths > 0.0 %}
+wsclean_image01.argument.baseline-averaging                =   {{ facetselfcal_wsclean_nwavelengths }}
+{% endif %}
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map01.control.kind                         =   plugin
@@ -437,6 +457,9 @@ wsclean_image02.argument.mem                               =   {{ max_percent_me
 wsclean_image02.argument.j                                 =   {{ max_proc_per_node }}
 wsclean_image02.argument.tempdir                           =   {{ local_dir }}
 wsclean_image02.argument.weighting-rank-filter             =   3
+{% if facetselfcal_wsclean_nwavelengths > 0.0 %}
+wsclean_image02.argument.baseline-averaging                =   {{ facetselfcal_wsclean_nwavelengths }}
+{% endif %}
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map02.control.kind                        =   plugin
@@ -570,9 +593,10 @@ concat1.argument.flags                                     =   [msfiles,msconcat
 
 # image the virtual concatenated data with wsclean, length = 1
 wsclean_image11.control.type                               =   wsclean
-wsclean_image11.control.mapfiles_in                        =   [concat1.output.mapfile]
-wsclean_image11.control.inputkeys                          =   [msfile]
+wsclean_image11.control.mapfiles_in                        =   [concat1.output.mapfile,premask_selfcal.output.mapfile]
+wsclean_image11.control.inputkeys                          =   [msfile,fitsmask]
 wsclean_image11.argument.flags                             =   [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image11.argument.fitsmask                          =   fitsmask
 wsclean_image11.argument.size                              =   {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image11.argument.niter                             =   1000
 wsclean_image11.argument.threshold                         =   0.0
@@ -767,9 +791,10 @@ concat2.argument.flags                                     =   [msfiles,msconcat
 
 # image the virtual concatenated data with wsclean, length = 1
 wsclean_image21.control.type                               =   wsclean
-wsclean_image21.control.mapfiles_in                        =   [concat2.output.mapfile]
-wsclean_image21.control.inputkeys                          =   [msfile]
+wsclean_image21.control.mapfiles_in                        =   [concat2.output.mapfile,premask_selfcal.output.mapfile]
+wsclean_image21.control.inputkeys                          =   [msfile,fitsmask]
 wsclean_image21.argument.flags                             =   [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image21.argument.fitsmask                          =   fitsmask
 wsclean_image21.argument.size                              =   {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image21.argument.niter                             =   1000
 wsclean_image21.argument.threshold                         =   0.0
@@ -1037,9 +1062,10 @@ concat3.argument.flags                                     =   [msfiles,msconcat
 
 # image the virtual concatenated data with wsclean, length = 1
 wsclean_image31.control.type                               =   wsclean
-wsclean_image31.control.mapfiles_in                        =   [concat3.output.mapfile]
-wsclean_image31.control.inputkeys                          =   [msfile]
+wsclean_image31.control.mapfiles_in                        =   [concat3.output.mapfile,premask_selfcal.output.mapfile]
+wsclean_image31.control.inputkeys                          =   [msfile,fitsmask]
 wsclean_image31.argument.flags                             =   [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image31.argument.fitsmask                          =   fitsmask
 wsclean_image31.argument.size                              =   {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image31.argument.niter                             =   1000
 wsclean_image31.argument.threshold                         =   0.0
@@ -1318,9 +1344,10 @@ concat4.argument.flags                                     =   [msfiles,msconcat
 
 # image the virtual concatenated data with wsclean, length = 1
 wsclean_image41.control.type                               =   wsclean
-wsclean_image41.control.mapfiles_in                        =   [concat4.output.mapfile]
-wsclean_image41.control.inputkeys                          =   [msfile]
+wsclean_image41.control.mapfiles_in                        =   [concat4.output.mapfile,premask_selfcal.output.mapfile]
+wsclean_image41.control.inputkeys                          =   [msfile,fitsmask]
 wsclean_image41.argument.flags                             =   [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image41.argument.fitsmask                          =   fitsmask
 wsclean_image41.argument.size                              =   {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image41.argument.niter                             =   1000
 wsclean_image41.argument.threshold                         =   0.0
@@ -1544,7 +1571,7 @@ wsclean_ft.control.mapfiles_in                             =   [regroup_shift_em
 wsclean_ft.control.inputkeys                               =   [msfile,name,size]
 wsclean_ft.argument.flags                                  =   [-predict,msfile]
 wsclean_ft.argument.scale                                  =   {{ cellsize_facet_deg }}
-wsclean_ft.argument.mem                                    =   {{max_percent_memory_per_proc_ngroups}}
+wsclean_ft.argument.mem                                    =   {{ max_percent_memory_per_proc_ngroups }}
 wsclean_ft.argument.channelsout                            =   {{ wsclean_nchannels }}
 wsclean_ft.argument.j                                      =   {{ max_proc_per_node }}
 wsclean_ft.argument.tempdir                                =   {{ local_dir }}
@@ -1623,9 +1650,6 @@ concat_averaged_compressed_map.control.mapfile_in          =   concat_averaged.o
 concat_averaged_compressed_map.control.mapfile_dir         =   input.output.mapfile_dir
 concat_averaged_compressed_map.control.filename            =   concat_averaged_compressed.mapfile
 
-########## start of a block that can be replaced by another imager.
-
-{% block full_image_parms %}
 # make a mask from the last selfcal image, length = 1
 premask.control.type                                       =   make_clean_mask
 premask.control.mapfile_in                                 =   create_imagebase_map42.output.mapfile
@@ -1783,8 +1807,6 @@ wsclean_ft.argument.channelsout                            =   {{ wsclean_nchann
 wsclean_ft.argument.j                                      =   {{ max_cpus_per_proc_ngroups }}
 wsclean_ft.argument.tempdir                                =   {{ local_dir }}
 wsclean_ft.argument.nwlayers-for-size                      =   12288 12288
-{% endblock full_image_parms %}
-########## end of a block that can be replaced by another imager.
 {% endif %}
 ########## end of the "is the calibrator the full facet" if-clause
 

@@ -364,6 +364,22 @@ concat0.control.inputkey                                   =   msfiles
 concat0.control.outputkey                                  =   msconcat
 concat0.argument.flags                                     =   [msfiles,msconcat]
 
+# make a mask using user-supplied region (if any), length = 1
+premask_selfcal.control.type                               =   make_clean_mask
+premask_selfcal.control.mapfile_in                         =   concat0.output.mapfile
+premask_selfcal.control.inputkey                           =   imagefile
+premask_selfcal.control.outputkey                          =   maskfile
+premask_selfcal.argument.flags                             =   [imagefile,maskfile]
+premask_selfcal.argument.img_format                        =   fits
+premask_selfcal.argument.pad_to_size                       =   {{ cal_imsize }}
+premask_selfcal.argument.skip_source_detection             =   True
+premask_selfcal.argument.vertices_file                     =   {{ vertices_file }}
+premask_selfcal.argument.reference_ra_deg                  =   {{ ra }}
+premask_selfcal.argument.reference_dec_deg                 =   {{ dec }}
+premask_selfcal.argument.cellsize_deg                      =   {{ cellsize_selfcal_deg }}
+premask_selfcal.argument.region_file                       =   {{ region_selfcal }}
+premask_selfcal.argument.make_blank_image                  =   True
+
 # image the virtual concatenated data with wsclean, length = 1
 wsclean_image01.control.type                               =   wsclean
 wsclean_image01.control.mapfiles_in                        =   [concat0.output.mapfile]

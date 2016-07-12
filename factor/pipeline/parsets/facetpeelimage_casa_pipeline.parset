@@ -23,6 +23,7 @@ premask.argument.vertices_file                    =   {{ vertices_file }}
 premask.argument.reference_ra_deg                 =   {{ facet_ra }}
 premask.argument.reference_dec_deg                =   {{ facet_dec }}
 premask.argument.cellsize_deg                     =   {{ cellsize_facet_deg }}
+premask.argument.make_blank_image                 =   True
 
 # image the virtual concatenated data, length = 1
 casa_image_full1.control.type                     =   casa_clean

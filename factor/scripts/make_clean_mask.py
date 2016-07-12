@@ -220,7 +220,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
          threshold_format='float', trim_by=0.0, vertices_file=None, atrous_jmax=6,
          pad_to_size=None, skip_source_detection=False, region_file=None, nsig=1.0,
          reference_ra_deg=None, reference_dec_deg=None, cellsize_deg=0.000417,
-         use_adaptive_threshold=False):
+         use_adaptive_threshold=False, make_blank_image=False):
     """
     Make a clean mask and return clean threshold
 
@@ -228,8 +228,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     ----------
     image_name : str
         Filename of input image from which mask will be made. If the image does
-        not exist, a template image with center at (reference_ra_deg,
-        reference_dec_deg) will be made internally
+        not exist or make_blank_image is True, a template image with center at
+        (reference_ra_deg, reference_dec_deg) will be made internally
     mask_name : str
         Filename of output mask image
     atrous_do : bool, optional
@@ -277,6 +277,9 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     use_adaptive_threshold : bool, optional
         If True, use an adaptive threshold estimated from the negative values in
         the image
+    make_blank_image : bool, optional
+        If True, a blank template image is made. In this case, reference_ra_deg
+        and reference_dec_deg must be specified
 
     Returns
     -------
@@ -328,8 +331,16 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         reference_ra_deg = float(reference_ra_deg)
         reference_dec_deg = float(reference_dec_deg)
 
+    if type(make_blank_image) is str:
+        if make_blank_image.lower() == 'true':
+            make_blank_image = True
+        else:
+            make_blank_image = False
     if not os.path.exists(image_name):
-        print('Input image not found. Making empty image...')
+        make_blank_image = True
+
+    if make_blank_image:
+        print('Making empty template image...')
         if not skip_source_detection:
             print('ERROR: Source detection cannot be done on an empty image')
             sys.exit(1)
@@ -338,7 +349,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             make_template_image(image_name, reference_ra_deg, reference_dec_deg,
                 cellsize_deg=float(cellsize_deg))
         else:
-            print('ERROR: if image not found, a refernce position must be given')
+            print('ERROR: a refernce position must be given to make an empty template image')
             sys.exit(1)
 
     trim_by = float(trim_by)
@@ -449,7 +460,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                 # a source of ~ 10 beams
                 has_large_isl = True
 
-    if (region_file is not None and region_file != '[]' and skip_source_detection):
+    if (region_file is not None and region_file != '[]' and skip_source_detection
+        and not make_blank_image):
         # Copy region file and return if source detection was not done
         os.system('cp {0} {1}'.format(region_file.strip('[]"'), mask_name))
         if threshold_format == 'float':
