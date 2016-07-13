@@ -51,7 +51,7 @@ class dppp_scratch(LOFARnodeTCP):
         self.msout_destination_dir = os.path.dirname(self.msout_original)
 
         # Set up scratch paths
-        if '[' not in self.infile and ']' not in self.infile:
+        if '[' not in self.infile or ']' not in self.infile:
             # Copy infile to scratch, but only if it is not a list of files
             self.infile_original = self.infile.rstrip('/')
             self.infile = os.path.join(self.scratch_dir, os.path.basename(self.infile_original))
