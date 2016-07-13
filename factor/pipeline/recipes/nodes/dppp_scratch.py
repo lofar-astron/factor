@@ -42,14 +42,20 @@ class dppp_scratch(LOFARnodeTCP):
         self.infile = infile
         self.executable = executable
 
-        self.msout_original = kwargs['msout'].rstrip('/')
-        kwargs.pop('msout')
-        self.msout_destination_dir = os.path.dirname(self.msout_original)
         self.scratch_dir = tempfile.mkdtemp(dir=kwargs['local_scratch_dir'])
         kwargs.pop('local_scratch_dir')
         self.logger.info('Using {} as scratch directory'.format(self.scratch_dir))
 
+        self.msout_original = kwargs['msout'].rstrip('/')
+        kwargs.pop('msout')
+        self.msout_destination_dir = os.path.dirname(self.msout_original)
+
         # Set up scratch paths
+        if '[' not in self.infile and ']' not in self.infile:
+            # Copy infile to scratch, but only if it is not a list of files
+            self.infile_original = self.infile.rstrip('/')
+            self.infile = os.path.join(self.scratch_dir, os.path.basename(self.infile_original))
+            self.copy_to_scratch()
         self.msout_scratch = os.path.join(self.scratch_dir, os.path.basename(self.msout_original))
         args.append('msout=' + self.msout_scratch)
 
@@ -133,6 +139,12 @@ class dppp_scratch(LOFARnodeTCP):
         self.copy_to_origin()
         self.cleanup()
         return 0
+
+    def copy_to_scratch(self):
+        self.logger.info("Copying input data to scratch directory")
+        args = ['-a', self.infile_original, self.scratch_dir ]
+        prog = '/usr/bin/rsync'
+        self.execute(prog, args)
 
     def copy_to_origin(self):
         self.logger.info("Copying output data to original directory")
