@@ -491,7 +491,8 @@ def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
                 patches = s.getPatchNames()[nearby].tolist()
 
                 # Ensure that calibrator patch is first in list (as merged
-                # patch will get its name)
+                # patch will get its name). If there are two calibrator patches
+                # in the list, use the first one
                 for calibrator_name in calibrator_names:
                     if calibrator_name in patches:
                         patches.remove(calibrator_name)
@@ -501,8 +502,8 @@ def make_directions_file_from_skymodel(s, flux_min_Jy, size_max_arcmin,
 
         # Remove any non-calibrator patches from the merged model
         all_names = s.getPatchNames().tolist()
-        calibrator_ind = np.array([all_names.index(calibrator_name) for calibrator_name
-            in calibrator_names])
+        calibrator_ind = np.array([all_names.index(calibrator_name) for
+            calibrator_name in calibrator_names if calibrator_name in all_names])
         s.select(calibrator_ind, aggregate=True)
 
     # Write the file
