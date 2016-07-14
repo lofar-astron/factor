@@ -256,7 +256,9 @@ class Direction(object):
         # Set channelsout for wide-band imaging with WSClean. Note that the
         # number of WSClean channels must be an even divisor of the total number
         # of channels in the full bandwidth after averaging to prevent
-        # mismatches during the predict step on the unaveraged data
+        # mismatches during the predict step on the unaveraged data. For selfcal,
+        # we use nchannels = nbands and fit a power law across the channels
+        # using 3 averaged channels
         #
         # Also define the image suffixes (which depend on whether or not
         # wide-band clean is done)
@@ -274,18 +276,7 @@ class Direction(object):
             if self.wsclean_nchannels > nbands:
                 self.wsclean_nchannels = nbands
 
-            self.wsclean_nchannels_selfcal = max(1, nbands / wsclean_nchannels_factor)
-            nchan_after_avg = nchan * nbands / self.facetselfcal_freqstep
-            self.nband_pad_selfcal = 0 # padding to allow self.wsclean_nchannels_selfcal to be a divisor
-            if parset['imaging_specific']['wsclean_add_bands']:
-                while nchan_after_avg % self.wsclean_nchannels:
-                    self.nband_pad_selfcal += 1
-                    nchan_after_avg = nchan * (nbands + self.nband_pad_selfcal) / self.facetselfcal_freqstep
-            else:
-                while nchan_after_avg % self.wsclean_nchannels_selfcal:
-                    self.wsclean_nchannels_selfcal += 1
-            if self.wsclean_nchannels_selfcal > nbands:
-                self.wsclean_nchannels_selfcal = nbands
+            self.wsclean_nchannels_selfcal = nbands
             self.wsclean_suffix = '-MFS-image.fits'
         else:
             self.wsclean_nchannels = 1
@@ -375,10 +366,12 @@ class Direction(object):
                 self.atrous_do = True
             else:
                 self.atrous_do = False
+
+        # If wavelet module is activated, also activate multiscale clean
         if self.atrous_do:
-            self.wsclean_selfcal_multiscale = '-multiscale,'
+            self.wsclean_selfcal_multiscale = True
         else:
-            self.wsclean_selfcal_multiscale = ''
+            self.wsclean_selfcal_multiscale = False
 
 
     def get_optimum_size(self, size):
