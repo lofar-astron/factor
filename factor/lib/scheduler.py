@@ -198,11 +198,19 @@ class Scheduler(object):
                     float(min(ngroups, op.direction.max_io_proc_per_node))))
 
                 # Maximum percentage of memory to give to jobs that allow memory
-                # limits (e.g., WSClean jobs)
+                # limits (e.g., WSClean jobs). We assume these aren't IO-
+                # intensive
                 op.direction.max_percent_memory_per_proc_single = (fmem_max /
                     float(nops_per_node) * 100.0)
+                op.direction.max_percent_memory_per_proc_ntimes = (fmem_max /
+                    float(nops_per_node) * 100.0 /
+                    float(min(ntimes, op.direction.max_proc_per_node)))
+                op.direction.max_percent_memory_per_proc_nfiles = (fmem_max /
+                    float(nops_per_node) * 100.0 /
+                    float(min(nfiles, op.direction.max_proc_per_node)))
                 op.direction.max_percent_memory_per_proc_ngroups = (fmem_max /
-                    float(nops_per_node) * 100.0 / ngroups)
+                    float(nops_per_node) * 100.0 /
+                    float(min(ngroups, op.direction.max_proc_per_node)))
 
                 # Save the state
                 op.direction.save_state()
