@@ -119,7 +119,7 @@ class Scheduler(object):
         nbands = len(self.operation_list[0].bands)
         ntimes = len(self.operation_list[0].bands[0].files)
         nfiles = ntimes * nbands
-        ngroups = int(np.ceil(nfiles / 100))
+        ngroups = int(np.ceil(nfiles / 100.0))
         nops_simul = self.max_procs
 
         for i in range(int(np.ceil(len(operation_list)/float(nops_simul)))):
