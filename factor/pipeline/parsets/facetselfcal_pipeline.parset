@@ -223,7 +223,7 @@ regroup_parmdb.control.check_basename                      =   False
 regroup_parmdb.control.mapfile_dir                         =   input.output.mapfile_dir
 regroup_parmdb.control.filename                            =   re_grouped_parmdb.mapfile
 
-# Do the baseline-dependent preaveraging
+# Do the baseline-dependent preaveraging, length = nbands
 # overwrite the WEIGHT_SPECTRUM column
 pre_average.control.type                                   =   pre_average
 pre_average.control.mapfiles_in                            =   [regroup_shift_cal.output.mapfile,regroup_parmdb.output.mapfile]
@@ -475,7 +475,7 @@ wsclean_image02.argument.mem                               =   {{ max_percent_me
 wsclean_image02.argument.j                                 =   {{ max_cpus_per_proc_single }}
 wsclean_image02.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
-wsclean_image01.argument.multiscale-scales                 =   0
+wsclean_image02.argument.multiscale-scales                 =   0
 {% endif %}
 {% if wsclean_nchannels_selfcal > 1 %}
 wsclean_image02.argument.deconvolution-channels            =   3
@@ -494,7 +494,7 @@ create_imagebase_map02.control.trim                        =   -
 create_imagebase_map02.control.mapfile_dir                 =   input.output.mapfile_dir
 create_imagebase_map02.control.filename                    =   wsclean_image02_image_rootname.mapfile
 
-# expand the mapfile of the model image to all files, length = some
+# expand the mapfile of the model image to all files, length = ntimes
 create_expanded_model0_mapfile.control.kind                =   plugin
 create_expanded_model0_mapfile.control.type                =   expandMapfile
 create_expanded_model0_mapfile.control.mapfile_in          =   create_imagebase_map02.output.mapfile
@@ -502,16 +502,16 @@ create_expanded_model0_mapfile.control.mapfile_to_match    =   concat_data.outpu
 create_expanded_model0_mapfile.control.mapfile_dir         =   input.output.mapfile_dir
 create_expanded_model0_mapfile.control.filename            =   expand_wsclean_model0.mapfile
 
-# predict model visibilities, length = some
+# predict model visibilities, length = ntimes
 wsclean_ft0.control.type                                   =   wsclean_ft
 wsclean_ft0.control.mapfiles_in                            =   [concat_data.output.mapfile,create_expanded_model0_mapfile.output.mapfile]
 wsclean_ft0.control.inputkeys                              =   [msfile,name]
 wsclean_ft0.argument.flags                                 =   [-predict,msfile]
 wsclean_ft0.argument.size                                  =   {{ cal_imsize }} {{ cal_imsize }}
 wsclean_ft0.argument.scale                                 =   {{ cellsize_selfcal_deg }}
-wsclean_ft0.argument.mem                                   =   {{ max_percent_memory_per_proc_single }}
+wsclean_ft0.argument.mem                                   =   {{ max_percent_memory_per_proc_ntimes }}
 wsclean_ft0.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
-wsclean_ft0.argument.j                                     =   {{ max_cpus_per_proc_single }}
+wsclean_ft0.argument.j                                     =   {{ max_cpus_per_proc_ntimes }}
 wsclean_ft0.argument.tempdir                               =   {{ local_dir }}
 
 # switch "normal" weights with block-average weights, length = ntimes
@@ -727,7 +727,7 @@ create_imagebase_map12.control.trim                        =   -
 create_imagebase_map12.control.mapfile_dir                 =   input.output.mapfile_dir
 create_imagebase_map12.control.filename                    =   wsclean_image12_image_rootname.mapfile
 
-# expand the mapfile of the model image to all files, length = some
+# expand the mapfile of the model image to all files, length = ntimes
 create_expanded_model1_mapfile.control.kind                =   plugin
 create_expanded_model1_mapfile.control.type                =   expandMapfile
 create_expanded_model1_mapfile.control.mapfile_in          =   create_imagebase_map12.output.mapfile
@@ -735,16 +735,16 @@ create_expanded_model1_mapfile.control.mapfile_to_match    =   concat_data.outpu
 create_expanded_model1_mapfile.control.mapfile_dir         =   input.output.mapfile_dir
 create_expanded_model1_mapfile.control.filename            =   expand_wsclean_model1.mapfile
 
-# predict model visibilities, length = some
+# predict model visibilities, length = ntimes
 wsclean_ft1.control.type                                   =   wsclean_ft
 wsclean_ft1.control.mapfiles_in                            =   [concat_data.output.mapfile,create_expanded_model1_mapfile.output.mapfile]
 wsclean_ft1.control.inputkeys                              =   [msfile,name]
 wsclean_ft1.argument.flags                                 =   [-predict,msfile]
 wsclean_ft1.argument.size                                  =   {{ cal_imsize }} {{ cal_imsize }}
 wsclean_ft1.argument.scale                                 =   {{ cellsize_selfcal_deg }}
-wsclean_ft1.argument.mem                                   =   {{ max_percent_memory_per_proc_single }}
+wsclean_ft1.argument.mem                                   =   {{ max_percent_memory_per_proc_ntimes }}
 wsclean_ft1.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
-wsclean_ft1.argument.j                                     =   {{ max_cpus_per_proc_single }}
+wsclean_ft1.argument.j                                     =   {{ max_cpus_per_proc_ntimes }}
 wsclean_ft1.argument.tempdir                               =   {{ local_dir }}
 
 # switch "normal" weights with block-average weigthts, length = ntimes
@@ -951,7 +951,7 @@ create_imagebase_map22.control.trim                        =   -
 create_imagebase_map22.control.mapfile_dir                 =   input.output.mapfile_dir
 create_imagebase_map22.control.filename                    =   wsclean_image22_image_rootname.mapfile
 
-# expand the mapfile of the model image to all files, length = some
+# expand the mapfile of the model image to all files, length = ntimes
 create_expanded_model2_mapfile.control.kind                =   plugin
 create_expanded_model2_mapfile.control.type                =   expandMapfile
 create_expanded_model2_mapfile.control.mapfile_in          =   create_imagebase_map22.output.mapfile
@@ -959,16 +959,16 @@ create_expanded_model2_mapfile.control.mapfile_to_match    =   concat_data.outpu
 create_expanded_model2_mapfile.control.mapfile_dir         =   input.output.mapfile_dir
 create_expanded_model2_mapfile.control.filename            =   expand_wsclean_model1.mapfile
 
-# predict model visibilities, length = some
+# predict model visibilities, length = ntimes
 wsclean_ft2.control.type                                   =   wsclean_ft
 wsclean_ft2.control.mapfiles_in                            =   [concat_data.output.mapfile,create_expanded_model2_mapfile.output.mapfile]
 wsclean_ft2.control.inputkeys                              =   [msfile,name]
 wsclean_ft2.argument.flags                                 =   [-predict,msfile]
 wsclean_ft2.argument.size                                  =   {{ cal_imsize }} {{ cal_imsize }}
 wsclean_ft2.argument.scale                                 =   {{ cellsize_selfcal_deg }}
-wsclean_ft2.argument.mem                                   =   {{ max_percent_memory_per_proc_single }}
+wsclean_ft2.argument.mem                                   =   {{ max_percent_memory_per_proc_ntimes }}
 wsclean_ft2.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
-wsclean_ft2.argument.j                                     =   {{ max_cpus_per_proc_single }}
+wsclean_ft2.argument.j                                     =   {{ max_cpus_per_proc_ntimes }}
 wsclean_ft2.argument.tempdir                               =   {{ local_dir }}
 
 # switch "normal" weights with block-average weigthts, length = ntimes
@@ -1256,7 +1256,7 @@ create_imagebase_map32.control.trim                        =   -
 create_imagebase_map32.control.mapfile_dir                 =   input.output.mapfile_dir
 create_imagebase_map32.control.filename                    =   wsclean_image32_image_rootname.mapfile
 
-# expand the mapfile of the model image to all files, length = some
+# expand the mapfile of the model image to all files, length = ntimes
 create_expanded_model3_mapfile.control.kind                =   plugin
 create_expanded_model3_mapfile.control.type                =   expandMapfile
 create_expanded_model3_mapfile.control.mapfile_in          =   create_imagebase_map32.output.mapfile
@@ -1264,16 +1264,16 @@ create_expanded_model3_mapfile.control.mapfile_to_match    =   concat_data.outpu
 create_expanded_model3_mapfile.control.mapfile_dir         =   input.output.mapfile_dir
 create_expanded_model3_mapfile.control.filename            =   expand_wsclean_model1.mapfile
 
-# predict model visibilities, length = some
+# predict model visibilities, length =  times
 wsclean_ft3.control.type                                   =   wsclean_ft
 wsclean_ft3.control.mapfiles_in                            =   [concat_data.output.mapfile,create_expanded_model3_mapfile.output.mapfile]
 wsclean_ft3.control.inputkeys                              =   [msfile,name]
 wsclean_ft3.argument.flags                                 =   [-predict,msfile]
 wsclean_ft3.argument.size                                  =   {{ cal_imsize }} {{ cal_imsize }}
 wsclean_ft3.argument.scale                                 =   {{ cellsize_selfcal_deg }}
-wsclean_ft3.argument.mem                                   =   {{ max_percent_memory_per_proc_single }}
+wsclean_ft3.argument.mem                                   =   {{ max_percent_memory_per_proc_ntimes }}
 wsclean_ft3.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
-wsclean_ft3.argument.j                                     =   {{ max_cpus_per_proc_single }}
+wsclean_ft3.argument.j                                     =   {{ max_cpus_per_proc_ntimes }}
 wsclean_ft3.argument.tempdir                               =   {{ local_dir }}
 
 # switch "normal" weights with block-average weigthts, length = ntimes
