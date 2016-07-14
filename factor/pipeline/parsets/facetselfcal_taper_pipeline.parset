@@ -178,14 +178,12 @@ create_compressed_mapfile_data.control.mapfile_dir         =   input.output.mapf
 create_compressed_mapfile_data.control.filename            =   concat_input.mapfile
 
 # sort compressed mapfile so that there is one group per timestamp, length = ntimes
-# we also add padding for WSClean selfcal
 sort_into_Groups.control.type                              =   sort_times_into_freqGroups
 sort_into_Groups.argument.flags                            =   [create_compressed_mapfile_data.output.mapfile]
 sort_into_Groups.argument.filename                         =   sorted_groups.mapfile
 sort_into_Groups.argument.mapfile_dir                      =   input.output.mapfile_dir
 sort_into_Groups.argument.hosts                            =   {{ hosts }}
 sort_into_Groups.argument.stepname                         =   sort_into_Groups
-sort_into_Groups.argument.nband_pad                        =   {{ nband_pad }}
 
 # convert the output of sort_into_Groups into usable mapfiles, len = 1 / ntimes
 sort_into_Groups_maps.control.kind                         =   plugin
