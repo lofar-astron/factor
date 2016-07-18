@@ -212,7 +212,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             else:
                 selfcal_robust = parset['imaging_specific']['selfcal_robust']
             if (cellsize_arcsec == parset['imaging_specific']['selfcal_cellsize_arcsec'] and
-                robust == selfcal_robust and taper_arcsec == 0.0):
+                robust == selfcal_robust and taper_arcsec == 0.0 and
+                min_uv_lambda == parset['imaging_specific']['selfcal_min_uv_lambda']):
                 if parset['imaging_specific']['reimage_selfcaled']:
                     dirs_to_image += dirs_with_selfcal_to_reimage
             else:
