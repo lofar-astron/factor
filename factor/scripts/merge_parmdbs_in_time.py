@@ -35,22 +35,6 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
         input_mslist = [f.strip() for f in input_mslist]
     inparmdbs = [os.path.join(ms, parmdb_name) for ms in input_mslist]
 
-    # Sort the parmdbs by start time (needed for the timewidth checks below)
-    if len(inparmdbs) > 1:
-        start_times = []
-        start_times_dicts = [{} for i in range(len(inparmdbs))]
-        for i, inparmdb in enumerate(inparmdbs):
-            pdb_in = pdb.parmdb(inparmdb)
-            for j, parmname in enumerate(pdb_in.getNames()):
-                parms = pdb_in.getValuesGrid(parmname)
-                if j == 0:
-                    start_times.append(parms[parmname]['times'][0])
-                start_times_dicts[i].update({parmname: parms[parmname]['times'][0]})
-            pdb_in = False
-    inparmdbs = np.array(inparmdbs)[np.argsort(start_times)].tolist()
-    start_times_dicts = np.array(start_times_dicts)[np.argsort(start_times)].tolist()
-    start_times.sort()
-
     if type(clobber) is str:
         if clobber.lower() == 'true':
             clobber = True
@@ -68,22 +52,6 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
         pdb_add = pdb.parmdb(inparmdb)
         parms = pdb_add.getValuesGrid('*')
         for parmname in pdb_add.getNames():
-            # Adjust last timewidth if necessary, as DPPP GainCal (as of 2.16.4) does not
-            # truncate last solution timewidth to end of MS
-            if i < len(inparmdbs) - 1:
-                inter_chunk_timewidth = start_times_dicts[i+1][parmname] - parms[parmname]['times'][-1]
-                if inter_chunk_timewidth < parms[parmname]['timewidths'][-1]:
-                    parms[parmname]['timewidths'][-1] = inter_chunk_timewidth
-
-                    # Adjust following chunk as well
-                    pdb_next = pdb.parmdb(inparmdbs[i+1])
-                    parms_next = pdb_next.getValuesGrid(parmname)
-                    parms_next[parmname]['timewidths'][0] = inter_chunk_timewidth
-                    pdb_next.deleteValues(parmname)
-                    pdb_next.addValues(parmname, parms_next[parmname])
-                    pdb_next.flush()
-                    pdb_next = False
-
             ValueHolder = pdb_concat.makeValue(values=parms[parmname]['values'],
                                                sfreq=parms[parmname]['freqs'],
                                                efreq=parms[parmname]['freqwidths'],
