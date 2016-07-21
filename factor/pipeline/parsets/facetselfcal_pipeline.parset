@@ -546,7 +546,7 @@ solve_phaseonly1.argument.replace-sourcedb                 =   True
 solve_phaseonly1.argument.replace-parmdb                   =   True
 solve_phaseonly1.argument.Strategy.InputColumn             =   {{ data_column }}
 solve_phaseonly1.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_time_p }}
-solve_phaseonly1.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq_p }}
+solve_phaseonly1.argument.Step.solve.Solve.CellSize.Freq   =   0
 solve_phaseonly1.argument.Step.solve.Solve.UVRange         =   [{{ solve_min_uv_lambda }}]
 {% endif %}
 
@@ -762,7 +762,7 @@ solve_phaseonly2.argument.replace-sourcedb                 =   True
 solve_phaseonly2.argument.replace-parmdb                   =   True
 solve_phaseonly2.argument.Strategy.InputColumn             =   {{ data_column }}
 solve_phaseonly2.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_time_p }}
-solve_phaseonly2.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq_p }}
+solve_phaseonly2.argument.Step.solve.Solve.CellSize.Freq   =   0
 solve_phaseonly2.argument.Step.solve.Solve.UVRange         =   [{{ solve_min_uv_lambda }}]
 {% endif %}
 
@@ -978,7 +978,7 @@ solve_ampphase11.argument.replace-sourcedb                 =   True
 solve_ampphase11.argument.replace-parmdb                   =   True
 solve_ampphase11.argument.Strategy.InputColumn             =   {{ data_column }}
 solve_ampphase11.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_time_p }}
-solve_ampphase11.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq_p }}
+solve_ampphase11.argument.Step.solve.Solve.CellSize.Freq   =   0
 solve_ampphase11.argument.Step.solve.Solve.UVRange         =   [{{ solve_min_uv_lambda }}]
 {% endif %}
 
@@ -1277,7 +1277,7 @@ solve_ampphase21.argument.replace-sourcedb                 =   True
 solve_ampphase21.argument.replace-parmdb                   =   True
 solve_ampphase21.argument.Strategy.InputColumn             =   {{ data_column }}
 solve_ampphase21.argument.Step.solve.Solve.CellSize.Time   =   {{ solint_time_p }}
-solve_ampphase21.argument.Step.solve.Solve.CellSize.Freq   =   {{ solint_freq_p }}
+solve_ampphase21.argument.Step.solve.Solve.CellSize.Freq   =   0
 solve_ampphase21.argument.Step.solve.Solve.UVRange         =   [{{ solve_min_uv_lambda }}]
 {% endif %}
 
