@@ -220,7 +220,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
          threshold_format='float', trim_by=0.0, vertices_file=None, atrous_jmax=6,
          pad_to_size=None, skip_source_detection=False, region_file=None, nsig=1.0,
          reference_ra_deg=None, reference_dec_deg=None, cellsize_deg=0.000417,
-         use_adaptive_threshold=False):
+         use_adaptive_threshold=False, adaptive_thresh=150.0):
     """
     Make a clean mask and return clean threshold
 
@@ -277,6 +277,9 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     use_adaptive_threshold : bool, optional
         If True, use an adaptive threshold estimated from the negative values in
         the image
+    adaptive_thresh : float, optional
+        If adaptive_rmsbox is True, this value sets the threshold above
+        which a source will use the small rms box
 
     Returns
     -------
@@ -346,6 +349,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     threshpix = float(threshpix)
     threshisl = float(threshisl)
     nsig = float(nsig)
+    adaptive_thresh = float(adaptive_thresh)
     threshold = 0.0
 
     if not skip_source_detection:
@@ -387,7 +391,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
                                      thresh_pix=threshpix, thresh_isl=threshisl,
                                      atrous_do=atrous_do, ini_method='curvature', thresh='hard',
-                                     adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150,
+                                     adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=adaptive_thresh,
                                      rms_box_bright=rmsbox_bright, rms_map=True, quiet=True,
                                      atrous_jmax=atrous_jmax, stop_at='isl')
 
@@ -415,7 +419,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                 img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
                                          thresh_pix=threshpix, thresh_isl=threshisl,
                                          atrous_do=atrous_do, ini_method='curvature', thresh='hard',
-                                         adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150,
+                                         adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=adaptive_thresh,
                                          rms_box_bright=rmsbox_bright, rms_map=True, quiet=True,
                                          atrous_jmax=atrous_jmax)
                 nisl = img.nisl
@@ -427,7 +431,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
                                      thresh_pix=threshpix, thresh_isl=threshisl,
                                      atrous_do=atrous_do, ini_method='curvature', thresh='hard',
-                                     adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=150,
+                                     adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=adaptive_thresh,
                                      rms_box_bright=rmsbox_bright, rms_map=True, quiet=True,
                                      atrous_jmax=atrous_jmax)
 
