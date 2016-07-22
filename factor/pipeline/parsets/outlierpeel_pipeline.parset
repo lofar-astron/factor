@@ -102,21 +102,24 @@ create_compressed_mapfile.control.mapfile_in             =   shift_and_average.o
 create_compressed_mapfile.control.mapfile_dir            =   input.output.mapfile_dir
 create_compressed_mapfile.control.filename               =   concat_averaged_input.mapfile
 
-# sort compressed mapfile so that there is one group per timestamp, length = ntimes
+# sort compressed mapfile so that there is one group per timestamp, length = ntimes * num_cal_blocks
 sort_into_Groups.control.type                            =   sort_times_into_freqGroups
 sort_into_Groups.argument.flags                          =   [create_compressed_mapfile.output.mapfile]
 sort_into_Groups.argument.filename                       =   sorted_groups.mapfile
 sort_into_Groups.argument.mapfile_dir                    =   input.output.mapfile_dir
 sort_into_Groups.argument.hosts                          =   {{ hosts }}
 sort_into_Groups.argument.stepname                       =   sort_into_Groups
+{% if num_cal_blocks > 1 %}
+sort_into_Groups.argument.numSB                          =   {{ num_bands_per_cal_block }}
+{% endif %}
 
-# convert the output of sort_into_Groups into usable mapfiles, len = ntimes
+# convert the output of sort_into_Groups into usable mapfiles, len = 1 / (ntimes * num_cal_blocks)
 sort_into_Groups_maps.control.kind                       =   plugin
 sort_into_Groups_maps.control.type                       =   mapfilenamesFromMapfiles
 sort_into_Groups_maps.control.mapfile_groupmap           =   sort_into_Groups.output.groupmapfile.mapfile
 sort_into_Groups_maps.control.mapfile_filesmap           =   sort_into_Groups.output.mapfile.mapfile
 
-# concat data in frequency, length = ntimes
+# concat data in frequency, length = ntimes * num_cal_blocks
 concat_data.control.type                                 =   dppp
 concat_data.control.mapfile_out                          =   sort_into_Groups_maps.output.groupmap
 concat_data.control.mapfile_in                           =   sort_into_Groups_maps.output.filesmap
@@ -163,7 +166,7 @@ pre_average.control.mapfiles_in                          =   [regroup_shift_and_
 pre_average.control.inputkeys                            =   [datafile,parmdb]
 pre_average.argument.flags                               =   [datafile,parmdb,DATA,BLAVG_DATA,{{ target_rms_rad }}]
 
-# make mapfile for concatenated corrected data, length = ntimes
+# make mapfile for concatenated corrected data, length = ntimes * num_cal_blocks
 make_blavg_data_mapfile.control.kind                     =  plugin
 make_blavg_data_mapfile.control.type                     =  createMapfile
 make_blavg_data_mapfile.control.method                   =  add_suffix_to_file
@@ -172,7 +175,7 @@ make_blavg_data_mapfile.control.add_suffix_to_file       =  "_blavg.ms"
 make_blavg_data_mapfile.control.mapfile_dir              =  input.output.mapfile_dir
 make_blavg_data_mapfile.control.filename                 =  make_blavg_data.mapfile
 
-# Concat the preaveraged data (and weights), len = ntimes
+# Concat the preaveraged data (and weights), len = ntimes * num_cal_blocks
 concat_blavg_data.control.type                           =   dppp
 concat_blavg_data.control.mapfile_out                    =   make_blavg_data_mapfile.output.mapfile
 concat_blavg_data.control.mapfile_in                     =   sort_into_Groups_maps.output.filesmap
@@ -186,26 +189,26 @@ concat_blavg_data.argument.msout.writefullresflag        =   False
 concat_blavg_data.argument.local_scratch_dir             =   {{ local_dir }}
 concat_blavg_data.argument.steps                         =   []
 
-# Copy BLAVG_DATA, length = ntimes
+# Copy BLAVG_DATA, length = ntimes * num_cal_blocks
 copy_column1.control.type                                =   copy_column
 copy_column1.control.mapfiles_in                         =   [concat_blavg_data.output.mapfile,concat_data.output.mapfile]
 copy_column1.control.inputkeys                           =   [blavgfile,datafile]
 copy_column1.argument.flags                              =   [blavgfile,datafile,DATA,BLAVG_DATA]
 
-# Copy BLAVG_WEIGHT_SPECTRUM, length = ntimes
+# Copy BLAVG_WEIGHT_SPECTRUM, length = ntimes * num_cal_blocks
 copy_column2.control.type                                =   copy_column
 copy_column2.control.mapfiles_in                         =   [concat_blavg_data.output.mapfile,concat_data.output.mapfile]
 copy_column2.control.inputkeys                           =   [blavgfile,datafile]
 copy_column2.argument.flags                              =   [blavgfile,datafile,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 {% endif %}
 
-# switch "normal" weights with block-average weigthts, length = ntimes
+# switch "normal" weights with block-average weigthts, length = nfiles
 switch_weights_col1.control.type                         =   switch_columns
 switch_weights_col1.control.mapfile_in                   =   concat_data.output.mapfile
 switch_weights_col1.control.inputkey                     =   msfiles
 switch_weights_col1.argument.flags                       =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
-# generate mapfile for the fast-phase parmDBs generated in the solve_ampphase11 step
+# generate mapfile for the fast-phase parmDBs generated in the solve_ampphase11 step, length = ntimes * num_cal_blocks
 make_fast_phase_parmdb_map.control.kind                  =  plugin
 make_fast_phase_parmdb_map.control.type                  =  createMapfile
 make_fast_phase_parmdb_map.control.method                =  add_suffix_to_file
@@ -229,7 +232,7 @@ make_peel_sourcedb.control.opts.inputkey                 =   in
 make_peel_sourcedb.argument.format                       =   <
 make_peel_sourcedb.argument.outtype                      =   blob
 
-# expand the sourcedb mapfile so that there is one entry for every file, length = ntimes
+# expand the sourcedb mapfile so that there is one entry for every file, length = ntimes * num_cal_blocks
 expand_peel_sourcedb_map.control.kind                    =   plugin
 expand_peel_sourcedb_map.control.type                    =   expandMapfile
 expand_peel_sourcedb_map.control.mapfile_in              =   make_peel_sourcedb.output.mapfile
@@ -237,14 +240,13 @@ expand_peel_sourcedb_map.control.mapfile_to_match        =   concat_data.output.
 expand_peel_sourcedb_map.control.mapfile_dir             =   input.output.mapfile_dir
 expand_peel_sourcedb_map.control.filename                =   expand_peel_sourcedb.mapfile
 
-# remove any existing parmdbs before solving, length = ntimes
+# remove any existing parmdbs before solving, length = ntimes * num_cal_blocks
 remove_parmdbs11.control.type                            =   remove_file
 remove_parmdbs11.control.mapfile_in                      =   make_fast_phase_parmdb_map.output.mapfile
 remove_parmdbs11.control.inputkey                        =   parmdb
 remove_parmdbs11.argument.flags                          =   [-rf,parmdb]
 
-{% if use_gaincal %}
-# run GainCal with peel sourcedb on freq-concatenated files, to solve for (fast) phases, length = ntimes
+# run GainCal with peel sourcedb on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
 # note: for now, we write out a new dataset even though it's never used, as this
 # is the only way to add a uv cut without affecting the original dataset. Once
 # GainCal has a filter parameter, we can use dppp_inplace instead and save on I/O
@@ -266,18 +268,6 @@ solve_ampphase11.argument.solvetec.usemodelcolumn        =   False
 solve_ampphase11.argument.solvetec.sourcedb              =   sourcedb
 solve_ampphase11.argument.solvetec.solint                =   {{ solint_time_p }}
 solve_ampphase11.argument.solvetec.nchan                 =   {{ solint_freq_a }}
-{% else %}
-# run BBS on freq-concatenated files to solve for (fast) phases, length = ntimes
-solve_ampphase11.control.type                            =   calibrate-stand-alone_new
-solve_ampphase11.argument.observation                    =   concat_data.output.mapfile
-solve_ampphase11.argument.parset                         =   {{ parset_dir }}/facet_dirdep_phaseonly_solve_skymodel.parset
-solve_ampphase11.argument.catalog                        =   {{ peel_skymodel }}
-solve_ampphase11.argument.replace-sourcedb               =   True
-solve_ampphase11.argument.replace-parmdb                 =   True
-solve_ampphase11.argument.Strategy.InputColumn           =   {{ data_column }}
-solve_ampphase11.argument.Step.solve.Solve.CellSize.Time =   {{ solint_time_p }}
-solve_ampphase11.argument.Step.solve.Solve.CellSize.Freq =   {{ solint_freq_p }}
-{% endif %}
 
 # switch the weights back, length = ntimes
 switch_weights_col2.control.type                         =   switch_columns
@@ -285,7 +275,7 @@ switch_weights_col2.control.mapfile_in                   =   concat_data.output.
 switch_weights_col2.control.inputkey                     =   msfiles
 switch_weights_col2.argument.flags                       =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
-# apply the phase-only solutions from the previous calibration, length = ntimes
+# apply the phase-only solutions from the previous calibration, length = ntimes * num_cal_blocks
 apply_ampphase11.control.type                            =   dppp_inplace
 apply_ampphase11.control.opts.mapfiles_in                =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
 apply_ampphase11.control.opts.inputkeys                  =   [msin,parmdb]
@@ -310,7 +300,7 @@ merge_phase_parmdbs.control.inputkey                     =   mslist
 merge_phase_parmdbs.control.outputkey                    =   outparmdb
 merge_phase_parmdbs.argument.flags                       =   [mslist,instrument,outparmdb]
 
-# generate mapfile for the slow-gain parmDBs generated in the solve_ampphase12 step
+# generate mapfile for the slow-gain parmDBs generated in the solve_ampphase12 step, length = ntimes * num_cal_blocks
 make_slow_gain_parmdb_map.control.kind                   =  plugin
 make_slow_gain_parmdb_map.control.type                   =  createMapfile
 make_slow_gain_parmdb_map.control.method                 =  add_suffix_to_file
@@ -319,13 +309,13 @@ make_slow_gain_parmdb_map.control.add_suffix_to_file     =  /instrument_slow
 make_slow_gain_parmdb_map.control.mapfile_dir            =  input.output.mapfile_dir
 make_slow_gain_parmdb_map.control.filename               =  slow_parmdb.mapfile
 
-# remove any existing parmdbs before solving, length = ntimes
+# remove any existing parmdbs before solving, length = ntimes * num_cal_blocks
 remove_parmdbs12.control.type                            =   remove_file
 remove_parmdbs12.control.mapfile_in                      =   make_slow_gain_parmdb_map.output.mapfile
 remove_parmdbs12.control.inputkey                        =   parmdb
 remove_parmdbs12.argument.flags                          =   [-rf,parmdb]
 
-# run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
+# run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes * num_cal_blocks
 # note: for now, we write out a new dataset even though it's never used, as this
 # is the only way to add a uv cut without affecting the original dataset. Once
 # GainCal has a filter parameter, we can use dppp_inplace instead and save on I/O
@@ -364,7 +354,7 @@ smooth_amps.control.arguments                            =   [ampparmdb,outparmd
 smooth_amps.argument.normalize                           =   False
 
 # Now smooth the amplitude solutions and normalize them (for use later during
-# imaging of facets for peeled calibrators)
+# imaging of facets for peeled calibrators), length = 1
 smooth_amps_normalized.control.type                      =   {{ smooth_amps_task }}
 smooth_amps_normalized.control.mapfile_in                =   merge_amp_parmdbs.output.mapfile
 smooth_amps_normalized.control.inputkey                  =   ampparmdb
