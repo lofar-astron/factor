@@ -598,7 +598,8 @@ def get_imaging_options(parset):
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
         'reimage_selfcaled', 'wsclean_image_padding', 'wsclean_model_padding',
         'selfcal_min_uv_lambda', 'facet_min_uv_lambda', 'wsclean_add_bands',
-        'selfcal_robust_wsclean', 'skip_facet_imaging', 'wsclean_bl_averaging']
+        'selfcal_robust_wsclean', 'skip_facet_imaging', 'wsclean_bl_averaging',
+        'selfcal_scales']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [imaging] section of the '
