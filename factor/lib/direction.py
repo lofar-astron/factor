@@ -268,7 +268,7 @@ class Direction(object):
         # Also define the image suffixes (which depend on whether or not
         # wide-band clean is done)
         if self.use_wideband:
-            self.wsclean_nchannels = max(1, nbands / wsclean_nchannels_factor)
+            self.wsclean_nchannels = max(1, int(np.ceil(nbands / float(wsclean_nchannels_factor))))
             nchan_after_avg = nchan * nbands / self.facetimage_freqstep
             self.nband_pad = 0 # padding to allow self.wsclean_nchannels to be a divisor
             if parset['imaging_specific']['wsclean_add_bands']:
