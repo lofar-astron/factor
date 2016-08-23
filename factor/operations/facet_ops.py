@@ -266,8 +266,11 @@ class FacetSubReset(Operation):
         super(FacetSubReset, self).__init__(parset, bands, direction,
             name='FacetSubReset')
 
-        # Set imager infix for pipeline parset names
-        if self.parset['imaging_specific']['facet_imager'].lower() == 'casa':
+        # Set imager infix for pipeline parset names. For patch-type directions,
+        # we need to use the CASA version, since the final model was that from
+        # selfcal (which uses CASA)
+        if (self.parset['imaging_specific']['facet_imager'].lower() == 'casa' or
+            self.direction.is_patch):
             infix = '_casa'
         else:
             infix = ''

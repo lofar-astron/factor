@@ -1611,7 +1611,7 @@ create_model4_map.control.type                             =   trimMapfile
 create_model4_map.control.mapfile_in                       =   casa_image42.output.casa_image42.model.mapfile
 create_model4_map.control.trim                             =   .model
 create_model4_map.control.mapfile_dir                      =   input.output.mapfile_dir
-create_model4_map.control.filename                         =   mode42_rootnames.mapfile
+create_model4_map.control.filename                         =   final_model_rootnames.mapfile
 
 # Blank (with zeros) regions of the model image that lie outside of the patch region, length = 1
 blank_model.control.type                                   =   blank_image
