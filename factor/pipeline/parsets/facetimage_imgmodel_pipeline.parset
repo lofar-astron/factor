@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, add_imaging_cols, regroup_shift_empty_map, {% block model_data_steps %}expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, {% endblock model_data_steps %} corrupt_final_model, add_model_to_empty_data, {% if skip_facet_imaging %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, create_parmdb_map, add_all_facet_sources, {% else %} apply_dir_dep, {% endif %} create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} {% block full_image_steps %}premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
+pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, add_imaging_cols, regroup_shift_empty_map, {% if skip_facet_imaging %} concat_unaveraged, create_compressed_unaveraged, casa_ft4, {% else %} {% block model_data_steps %}expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, {% endblock model_data_steps %} {% endif %} corrupt_final_model, add_model_to_empty_data, {% if skip_facet_imaging %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, create_parmdb_map, add_all_facet_sources, {% else %} apply_dir_dep, {% endif %} create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} {% block full_image_steps %}premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2{% endblock full_image_steps %}]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -103,6 +103,32 @@ regroup_shift_empty_map.control.join_max_files        =   100
 regroup_shift_empty_map.control.rotate_groups         =   True
 regroup_shift_empty_map.control.filename              =   regroup_shift_empty.mapfile
 
+{% if skip_facet_imaging %}
+# Use CASA here, even though WSClean may be used for imaging, as we need to predict
+# the model from selfcal (which always uses CASA)
+## virtual concat of the re-grouped unaveraged data, length = some
+concat_unaveraged.control.type                    =   virtual_concat
+concat_unaveraged.control.mapfile_in              =   regroup_shift_empty_map.output.mapfile
+concat_unaveraged.control.inputkey                =   msfiles
+concat_unaveraged.control.outputkey               =   msconcat
+concat_unaveraged.argument.flags                  =   [msfiles,msconcat]
+
+# create a compressed mapfile with the virtual concated files, length = 1
+# needed because the following casa-step can run only once.
+create_compressed_unaveraged.control.kind         =   plugin
+create_compressed_unaveraged.control.type         =   compressMapfile
+create_compressed_unaveraged.control.mapfile_in   =   concat_unaveraged.output.mapfile
+create_compressed_unaveraged.control.mapfile_dir  =   input.output.mapfile_dir
+create_compressed_unaveraged.control.filename     =   concat_unaveraged_compressed.mapfile
+
+# make model visibilities on the unaveraged data, length = 1
+# can run only once, because (may) create files in the directory of input data
+casa_ft4.control.type                             =   casa
+casa_ft4.control.mapfiles_in                      =   [create_compressed_unaveraged.output.mapfile,{{ facet_model_mapfile }}]
+casa_ft4.control.inputkeys                        =   [inputms,modelimg]
+casa_ft4.control.arguments                        =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft_multi.py,modelimg,{{ nterms }},{{ facet_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py,inputms]
+{% else %}
+
 {% block model_data_parms %}
 # expand mapfile of the facet-model to all groups, length = some
 expand_facet_model_map.control.kind                   =   plugin
@@ -134,6 +160,7 @@ wsclean_ft.argument.channelsout                       =   {{ wsclean_nchannels }
 wsclean_ft.argument.j                                 =   {{ max_cpus_per_proc_single }}
 wsclean_ft.argument.tempdir                           =   {{ local_dir }}
 {% endblock model_data_parms %}
+{% endif %}
 
 # corrupt the facet-model visibilities, length = nfiles
 corrupt_final_model.control.type                      =   dppp
