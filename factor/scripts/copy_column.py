@@ -102,7 +102,8 @@ def copy_column_from_bands(mslist, ms_to, inputcol, outputcol):
     for ms_id, ms in enumerate(mslist):
         if os.path.isdir(ms):
             datain = pt.table(ms, readonly=True)
-            dataout.putcolslice(outputcol, datain, [chanperms*ms_id,0], [(chanperms*(ms_id+1))-1,3])
+            data = datain.getcol(inputcol)
+            dataout.putcolslice(outputcol, data, [chanperms*ms_id,0], [(chanperms*(ms_id+1))-1,3])
             datain.close()
     dataout.flush()
     dataout.close()
