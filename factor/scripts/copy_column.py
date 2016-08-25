@@ -53,7 +53,7 @@ def copy_column_to_bands(mslist, ms_from, inputcol, outputcol):
     mslist : list
         MS files receiving copy
     ms_from : str
-        MS file to copy from.
+        MS file to copy from
     inputcol : str
         Column name to copy from
     outputcol : str
@@ -72,6 +72,39 @@ def copy_column_to_bands(mslist, ms_from, inputcol, outputcol):
             dataout.putcol(outputcol, data)
             dataout.flush()
             dataout.close()
+
+
+def copy_column_from_bands(mslist, ms_to, inputcol, outputcol):
+    """
+    Copies one column from multiple MS files (bands) to a single MS file
+
+    Note: the bands are assumed to be ordered by frequency, with 'dummy.ms'
+    denoting missing bands
+
+    Parameters
+    ----------
+    mslist : list
+        MS files to copy from
+    ms_to : str
+        MS file receiving copy
+    inputcol : str
+        Column name to copy from
+    outputcol : str
+        Column name to copy to
+
+    """
+    dataout = pt.table(ms_to, readonly=False)
+    data = dataout.getcol(outputcol, nrow=1)
+    numberofchans = numpy.int(numpy.shape(data)[1])
+    chanperms = numberofchans/numpy.int(len(mslist))
+
+    for ms_id, ms in enumerate(mslist):
+        if os.path.isdir(ms):
+            datain = pt.table(ms, readonly=True)
+            dataout.putcolslice(outputcol, datain, [chanperms*ms_id,0], [(chanperms*(ms_id+1))-1,3])
+            datain.close()
+    dataout.flush()
+    dataout.close()
 
 
 def main(ms_from, ms_to, column_from, column_to, do_copy=True):
@@ -108,9 +141,21 @@ def main(ms_from, ms_to, column_from, column_to, do_copy=True):
             ms_to = ms_to.strip('[]').split(',')
             ms_to = [m.strip() for m in ms_to]
 
+    if type(ms_from) is str:
+        if '[' in ms_from:
+            ms_from = ms_from.strip('[]').split(',')
+            ms_from = [m.strip() for m in ms_from]
+
+    if type(ms_to) is list and type(ms_from) is list:
+        print('ERROR: ms_from and ms_to cannot both be lists')
+        sys.exit(1)
+
     if type(ms_to) is list:
         # List means call copy_column_to_bands()
         copy_column_to_bands(ms_to, ms_from, column_from, column_to)
+    elif type(ms_from) is list:
+        # List means call copy_column_from_bands()
+        copy_column_from_bands(ms_from, ms_to, column_from, column_to)
     else:
         if ms_to == ms_from:
             ms_from = None
