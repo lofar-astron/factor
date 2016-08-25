@@ -7,6 +7,7 @@ from argparse import RawTextHelpFormatter
 import casacore.tables as pt
 import numpy
 import sys
+import os
 
 
 def copy_column_to_ms(ms, inputcol, outputcol, ms_from=None):
