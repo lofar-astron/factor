@@ -457,7 +457,7 @@ remove_parmdbs1.argument.flags                             =   [-rf,parmdb]
 # is the only way to add a uv cut without affecting the original dataset. Once
 # GainCal has a filter parameter, we can use dppp_inplace instead and save on I/O
 solve_phaseonly1.control.type                              =   dppp
-solve_phaseonly1.control.mapfiles_in                       =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+solve_phaseonly1.control.mapfiles_in                       =   [sort_into_Groups_maps.output.filesmap,make_fast_phase_parmdb_map.output.mapfile]
 solve_phaseonly1.control.inputkeys                         =   [msin,parmdb]
 solve_phaseonly1.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
 solve_phaseonly1.argument.msin.datacolumn                  =   {{ data_column }}
