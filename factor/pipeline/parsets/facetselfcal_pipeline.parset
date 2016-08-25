@@ -414,7 +414,7 @@ create_imagebase_map02.control.filename                    =   wsclean_image02_i
 create_expanded_model0_mapfile.control.kind                =   plugin
 create_expanded_model0_mapfile.control.type                =   expandMapfile
 create_expanded_model0_mapfile.control.mapfile_in          =   create_imagebase_map02.output.mapfile
-create_expanded_model0_mapfile.control.mapfile_to_match    =   regroup_shift_cal_ft_map.output.mapfile
+create_expanded_model0_mapfile.control.mapfile_to_match    =   regroup_shift_cal_ft.output.mapfile
 create_expanded_model0_mapfile.control.mapfile_dir         =   input.output.mapfile_dir
 create_expanded_model0_mapfile.control.filename            =   expand_wsclean_model0.mapfile
 
