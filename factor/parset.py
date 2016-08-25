@@ -550,17 +550,17 @@ def get_imaging_options(parset):
     if 'facet_min_uv_lambda' not in parset_dict:
         parset_dict['facet_min_uv_lambda'] = [parset_dict['selfcal_min_uv_lambda']] * nvals
 
-   # Padding factor for WSClean images (default = 1.6)
+   # Padding factor for WSClean images (default = 1.4)
     if 'wsclean_image_padding' in parset_dict:
         parset_dict['wsclean_image_padding'] = parset.getfloat('imaging', 'wsclean_image_padding')
     else:
-        parset_dict['wsclean_image_padding'] = 1.6
+        parset_dict['wsclean_image_padding'] = 1.4
 
-    # Padding factor for WSClean models for patches (default = 10.0)
+    # Padding factor for WSClean models for patches (default = 2.0)
     if 'wsclean_patch_model_padding' in parset_dict:
         parset._sections['imaging']['wsclean_patch_model_padding'] = parset_dict['wsclean_patch_model_padding']
     else:
-        parset_dict['wsclean_patch_model_padding'] = 10.0
+        parset_dict['wsclean_patch_model_padding'] = 2.0
 
     # Padding factor for WSClean models for full facets (default = 1.4)
     if 'wsclean_facet_model_padding' in parset_dict:

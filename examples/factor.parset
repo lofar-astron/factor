@@ -113,8 +113,8 @@ dir_ms = /data/bands
 # Padding factor for WSClean images (default = 1.6)
 # wsclean_image_padding = 1.6
 
-# Padding factor for WSClean models for patches (default = 1.4)
-# wsclean_patch_model_padding = 10.0
+# Padding factor for WSClean models for patches (default = 2.0)
+# wsclean_patch_model_padding = 2.0
 
 # Padding factor for WSClean models for full facets (default = 1.4)
 # wsclean_facet_model_padding = 1.4

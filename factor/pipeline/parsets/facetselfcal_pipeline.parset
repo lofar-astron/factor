@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, shift_cal, create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, regroup_shift_cal_ft, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, switch_weights_col_shift_cal1, concat_blavg_data, switch_weights_col_shift_cal2, copy_column1, copy_column2, {% endif %} add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, concat0, premask_selfcal, wsclean_image01, create_imagebase_map01, adjust_wsclean_mapfile0, mask0, wsclean_image02, create_imagebase_map02, create_expanded_model0_mapfile, wsclean_ft0, switch_weights_col1, copy_model_column1, make_fast_phase_parmdb_map, remove_parmdbs1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, concat1, wsclean_image11, create_imagebase_map11, adjust_wsclean_mapfile11, mask1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, wsclean_ft1, switch_weights_col3, copy_model_column2, remove_parmdbs2, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, create_compressed_mapfile2, concat2, wsclean_image21, create_imagebase_map21, adjust_wsclean_mapfile21, mask2, wsclean_image22, create_imagebase_map22, create_expanded_model2_mapfile, wsclean_ft2, switch_weights_col5, copy_model_column3, remove_parmdbs11, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, concat3, wsclean_image31, create_imagebase_map31, adjust_wsclean_mapfile31, mask3, wsclean_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, add_imaging_cols_empty, {% if is_patch or skip_facet_imaging %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_model4_map, blank_model, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% else %} apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, concat_averaged, concat_averaged_compressed_map, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, shift_cal, create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, regroup_shift_cal_ft, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, switch_weights_col_shift_cal1, concat_blavg_data, switch_weights_col_shift_cal2, copy_column1, copy_column2, {% endif %} add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, concat0, premask_selfcal, wsclean_image01, create_imagebase_map01, adjust_wsclean_mapfile0, mask0, wsclean_image02, create_imagebase_map02, create_expanded_model0_mapfile, wsclean_ft0, switch_weights_col1, make_model_data_mapfile, concat_model_data1, copy_model_column1, make_fast_phase_parmdb_map, remove_parmdbs1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, concat1, wsclean_image11, create_imagebase_map11, adjust_wsclean_mapfile11, mask1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, wsclean_ft1, switch_weights_col3, concat_model_data2, copy_model_column2, remove_parmdbs2, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, create_compressed_mapfile2, concat2, wsclean_image21, create_imagebase_map21, adjust_wsclean_mapfile21, mask2, wsclean_image22, create_imagebase_map22, create_expanded_model2_mapfile, wsclean_ft2, switch_weights_col5, concat_model_data3, copy_model_column3, remove_parmdbs11, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, concat3, wsclean_image31, create_imagebase_map31, adjust_wsclean_mapfile31, mask3, wsclean_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, add_imaging_cols_empty, {% if is_patch or skip_facet_imaging %} regroup_shift_empty_map_ft, concat_unaveraged_ft, create_model4_map, blank_model, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% else %} apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, concat_averaged, concat_averaged_compressed_map, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -261,7 +261,7 @@ concat_blavg_data.control.type                             =   dppp
 concat_blavg_data.control.mapfile_out                      =   make_blavg_data_mapfile.output.mapfile
 concat_blavg_data.control.mapfile_in                       =   sort_into_Groups_maps.output.filesmap
 concat_blavg_data.control.inputkey                         =   msin
-concat_blavg_data.argument.numthreads                      =   {{ max_cpus_per_node }}
+concat_blavg_data.argument.numthreads                      =   {{ max_cpus_per_io_proc_ntimes }}
 concat_blavg_data.argument.msin.datacolumn                 =   BLAVG_DATA
 concat_blavg_data.argument.msin.missingdata                =   True
 concat_blavg_data.argument.msin.orderms                    =   False
@@ -496,11 +496,34 @@ switch_weights_col1.control.mapfile_in                     =   concat_data.outpu
 switch_weights_col1.control.inputkey                       =   msfiles
 switch_weights_col1.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
+# make mapfile for concatenated model data, length = ntimes
+make_model_data_mapfile.control.kind                       =  plugin
+make_model_data_mapfile.control.type                       =  createMapfile
+make_model_data_mapfile.control.method                     =  add_suffix_to_file
+make_model_data_mapfile.control.mapfile_in                 =  sort_into_Groups_maps.output.groupmap
+make_model_data_mapfile.control.add_suffix_to_file         =  "_model_data.ms"
+make_model_data_mapfile.control.mapfile_dir                =  input.output.mapfile_dir
+make_model_data_mapfile.control.filename                   =  make_model_data.mapfile
+
+# Concat the model data, length = ntimes
+concat_model_data1.control.type                            =   dppp
+concat_model_data1.control.mapfile_out                     =   make_model_data_mapfile.output.mapfile
+concat_model_data1.control.mapfile_in                      =   sort_into_Groups_maps.output.filesmap
+concat_model_data1.control.inputkey                        =   msin
+concat_model_data1.argument.numthreads                     =   {{ max_cpus_per_io_proc_ntimes }}
+concat_model_data1.argument.msin.datacolumn                =   MODEL_DATA
+concat_model_data1.argument.msin.missingdata               =   True
+concat_model_data1.argument.msin.orderms                   =   False
+concat_model_data1.argument.msout.overwrite                =   True
+concat_model_data1.argument.msout.writefullresflag         =   False
+concat_model_data1.argument.local_scratch_dir              =   {{ local_dir }}
+concat_model_data1.argument.steps                          =   []
+
 # Copy new MODEL_DATA into concatenated datasets, length = ntimes
 copy_model_column1.control.type                            =   copy_column
-copy_model_column1.control.mapfiles_in                     =   [sort_into_Groups_maps.output.filesmap,concat_data.output.mapfile]
+copy_model_column1.control.mapfiles_in                     =   [concat_model_data1.output.mapfile,concat_data.output.mapfile]
 copy_model_column1.control.inputkeys                       =   [modelfile,datafile]
-copy_model_column1.argument.flags                          =   [modelfile,datafile,MODEL_DATA,MODEL_DATA]
+copy_model_column1.argument.flags                          =   [modelfile,datafile,DATA,MODEL_DATA]
 
 # generate mapfile for the fast-phase parmDBs generated in the solve_phaseonly steps, length = ntimes
 make_fast_phase_parmdb_map.control.kind                    =  plugin
@@ -525,8 +548,6 @@ solve_phaseonly1.control.mapfiles_in                       =   [concat_data.outp
 solve_phaseonly1.control.inputkeys                         =   [msin,parmdb]
 solve_phaseonly1.argument.numthreads                       =   {{ max_cpus_per_proc_ntimes }}
 solve_phaseonly1.argument.msin.datacolumn                  =   {{ data_column }}
-solve_phaseonly1.argument.msin.missingdata                 =   True
-solve_phaseonly1.argument.msin.orderms                     =   False
 solve_phaseonly1.argument.msout                            =   .
 solve_phaseonly1.argument.steps                            =   [uvcut,solvetec]
 solve_phaseonly1.argument.uvcut.type                       =   uvwflagger
@@ -720,11 +741,25 @@ switch_weights_col3.control.mapfile_in                     =   concat_data.outpu
 switch_weights_col3.control.inputkey                       =   msfiles
 switch_weights_col3.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
+# Concat the model data, length = ntimes
+concat_model_data2.control.type                            =   dppp
+concat_model_data2.control.mapfile_out                     =   make_model_data_mapfile.output.mapfile
+concat_model_data2.control.mapfile_in                      =   sort_into_Groups_maps.output.filesmap
+concat_model_data2.control.inputkey                        =   msin
+concat_model_data2.argument.numthreads                     =   {{ max_cpus_per_io_proc_ntimes }}
+concat_model_data2.argument.msin.datacolumn                =   MODEL_DATA
+concat_model_data2.argument.msin.missingdata               =   True
+concat_model_data2.argument.msin.orderms                   =   False
+concat_model_data2.argument.msout.overwrite                =   True
+concat_model_data2.argument.msout.writefullresflag         =   False
+concat_model_data2.argument.local_scratch_dir              =   {{ local_dir }}
+concat_model_data2.argument.steps                          =   []
+
 # Copy new MODEL_DATA into concatenated datasets, length = ntimes
 copy_model_column2.control.type                            =   copy_column
-copy_model_column2.control.mapfiles_in                     =   [sort_into_Groups_maps.output.filesmap,concat_data.output.mapfile]
+copy_model_column2.control.mapfiles_in                     =   [concat_model_data2.output.mapfile,concat_data.output.mapfile]
 copy_model_column2.control.inputkeys                       =   [modelfile,datafile]
-copy_model_column2.argument.flags                          =   [modelfile,datafile,MODEL_DATA,MODEL_DATA]
+copy_model_column2.argument.flags                          =   [modelfile,datafile,DATA,MODEL_DATA]
 
 # remove any existing parmdbs before solving, length = ntimes
 remove_parmdbs2.control.type                               =   remove_file
@@ -933,11 +968,25 @@ switch_weights_col5.control.mapfile_in                     =   concat_data.outpu
 switch_weights_col5.control.inputkey                       =   msfiles
 switch_weights_col5.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
+# Concat the model data, length = ntimes
+concat_model_data3.control.type                            =   dppp
+concat_model_data3.control.mapfile_out                     =   make_model_data_mapfile.output.mapfile
+concat_model_data3.control.mapfile_in                      =   sort_into_Groups_maps.output.filesmap
+concat_model_data3.control.inputkey                        =   msin
+concat_model_data3.argument.numthreads                     =   {{ max_cpus_per_io_proc_ntimes }}
+concat_model_data3.argument.msin.datacolumn                =   MODEL_DATA
+concat_model_data3.argument.msin.missingdata               =   True
+concat_model_data3.argument.msin.orderms                   =   False
+concat_model_data3.argument.msout.overwrite                =   True
+concat_model_data3.argument.msout.writefullresflag         =   False
+concat_model_data3.argument.local_scratch_dir              =   {{ local_dir }}
+concat_model_data3.argument.steps                          =   []
+
 # Copy new MODEL_DATA into concatenated datasets, length = ntimes
 copy_model_column3.control.type                            =   copy_column
-copy_model_column3.control.mapfiles_in                     =   [sort_into_Groups_maps.output.filesmap,concat_data.output.mapfile]
+copy_model_column3.control.mapfiles_in                     =   [concat_model_data3.output.mapfile,concat_data.output.mapfile]
 copy_model_column3.control.inputkeys                       =   [modelfile,datafile]
-copy_model_column3.argument.flags                          =   [modelfile,datafile,MODEL_DATA,MODEL_DATA]
+copy_model_column3.argument.flags                          =   [modelfile,datafile,DATA,MODEL_DATA]
 
 # remove any existing parmdbs before solving, length = ntimes
 remove_parmdbs11.control.type                              =   remove_file
@@ -1188,7 +1237,7 @@ wsclean_image32.argument.baseline-averaging                =   {{ facetselfcal_w
 loop_ampcal.control.kind                                   =   loop
 loop_ampcal.control.type                                   =   conditional
 loop_ampcal.control.loopcount                              =   {{ loopcount }}
-loop_ampcal.control.loopsteps                              =   [create_imagebase_map32,create_expanded_model3_mapfile,wsclean_ft3,{% if pre_average %}switch_weights_col7,{% endif %}copy_model_column4,remove_parmdbs21,solve_ampphase21,{% if pre_average %}switch_weights_col8,{% endif %}apply_ampphase21,merge_phase_parmdbs,remove_parmdbs22,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,create_compressed_mapfile4,concat4,wsclean_image41,create_imagebase_map41,adjust_wsclean_mapfile41,mask4,wsclean_image42,create_imagebase_map42,adjust_wsclean_mapfile42,copy_image,check_image]
+loop_ampcal.control.loopsteps                              =   [create_imagebase_map32,create_expanded_model3_mapfile,wsclean_ft3,{% if pre_average %}switch_weights_col7,{% endif %}concat_model_data4,copy_model_column4,remove_parmdbs21,solve_ampphase21,{% if pre_average %}switch_weights_col8,{% endif %}apply_ampphase21,merge_phase_parmdbs,remove_parmdbs22,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,create_compressed_mapfile4,concat4,wsclean_image41,create_imagebase_map41,adjust_wsclean_mapfile41,mask4,wsclean_image42,create_imagebase_map42,adjust_wsclean_mapfile42,copy_image,check_image]
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map32.control.kind                        =   plugin
@@ -1224,11 +1273,25 @@ switch_weights_col7.control.mapfile_in                     =   concat_data.outpu
 switch_weights_col7.control.inputkey                       =   msfiles
 switch_weights_col7.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
+# Concat the model data, length = ntimes
+concat_model_data4.control.type                            =   dppp
+concat_model_data4.control.mapfile_out                     =   make_model_data_mapfile.output.mapfile
+concat_model_data4.control.mapfile_in                      =   sort_into_Groups_maps.output.filesmap
+concat_model_data4.control.inputkey                        =   msin
+concat_model_data4.argument.numthreads                     =   {{ max_cpus_per_io_proc_ntimes }}
+concat_model_data4.argument.msin.datacolumn                =   MODEL_DATA
+concat_model_data4.argument.msin.missingdata               =   True
+concat_model_data4.argument.msin.orderms                   =   False
+concat_model_data4.argument.msout.overwrite                =   True
+concat_model_data4.argument.msout.writefullresflag         =   False
+concat_model_data4.argument.local_scratch_dir              =   {{ local_dir }}
+concat_model_data4.argument.steps                          =   []
+
 # Copy new MODEL_DATA into concatenated datasets, length = ntimes
 copy_model_column4.control.type                            =   copy_column
-copy_model_column4.control.mapfiles_in                     =   [sort_into_Groups_maps.output.filesmap,concat_data.output.mapfile]
+copy_model_column4.control.mapfiles_in                     =   [concat_model_data4.output.mapfile,concat_data.output.mapfile]
 copy_model_column4.control.inputkeys                       =   [modelfile,datafile]
-copy_model_column4.argument.flags                          =   [modelfile,datafile,MODEL_DATA,MODEL_DATA]
+copy_model_column4.argument.flags                          =   [modelfile,datafile,DATA,MODEL_DATA]
 
 # remove any existing parmdbs before solving, length = ntimes
 remove_parmdbs21.control.type                              =   remove_file
