@@ -205,7 +205,11 @@ class Direction(object):
         mean_freq_mhz = np.mean([b.freq for b in bands]) / 1e6
         min_peak_smearing_factor = 1.0 - parset['imaging_specific']['max_peak_smearing']
         padding = parset['imaging_specific']['wsclean_image_padding']
-        self.wsclean_model_padding = parset['imaging_specific']['wsclean_model_padding']
+        self.wsclean_patch_model_padding = parset['imaging_specific']['wsclean_patch_model_padding']
+        if parset['imaging_specific']['skip_facet_imaging']
+            self.wsclean_facet_model_padding = self.wsclean_patch_model_padding
+        else:
+            self.wsclean_facet_model_padding = parset['imaging_specific']['wsclean_facet_model_padding']
         wsclean_nchannels_factor = parset['imaging_specific']['wsclean_nchannels_factor']
         chan_width_hz = bands[0].chan_width_hz
         nchan = bands[0].nchan

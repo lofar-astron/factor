@@ -204,9 +204,6 @@ concat_data.argument.msout.overwrite                       =   True
 concat_data.argument.msout.writefullresflag                =   False
 concat_data.argument.local_scratch_dir                     =   {{ local_dir }}
 concat_data.argument.steps                                 =   []
-concat_data.control.inputkey                               =   msfiles
-concat_data.control.outputkey                              =   msconcat
-concat_data.argument.flags                                 =   [msfiles,msconcat]
 
 # sort the "shift_cal" unaveraged data into groups, length = some
 # needed to avoid a "too many open files" error in wsclean ft steps
@@ -1597,7 +1594,7 @@ blank_model.argument.image_is_wsclean_model                =   True
 pad_model_images.control.type                              =   pad_image
 pad_model_images.control.mapfile_in                        =   create_model4_map.output.mapfile
 pad_model_images.control.inputkey                          =   imagefile
-pad_model_images.argument.flags                            =   [imagefile,{{ wsclean_model_padding }}]
+pad_model_images.argument.flags                            =   [imagefile,{{ wsclean_patch_model_padding }}]
 
 # sort the "shift_empty" unaveraged data into groups that can be concatenated, length = some
 # needed because virtual concatenating all files results in a "too many open files" error.
@@ -1627,8 +1624,6 @@ expand_facet_model_size_map.control.mapfile_dir            =   input.output.mapf
 expand_facet_model_size_map.control.filename               =   expand_facet_model_size.mapfile
 
 # make model visibilities, length = some
-# For WSClean predict, we need to increase the number of wplanes so that the
-# effective model image size is larger than the FOV (to prevent aliasing issues)
 wsclean_ft.control.type                                    =   wsclean_ft
 wsclean_ft.control.mapfiles_in                             =   [regroup_shift_empty_map.output.mapfile,create_expanded_model_mapfile.output.mapfile,expand_facet_model_size_map.output.mapfile]
 wsclean_ft.control.inputkeys                               =   [msfile,name,size]
@@ -1828,7 +1823,7 @@ adjust_wsclean_mapfile2.control.filename                   =   final_image.mapfi
 pad_model_images.control.type                              =   pad_image
 pad_model_images.control.mapfile_in                        =   create_model4_map.output.mapfile
 pad_model_images.control.inputkey                          =   imagefile
-pad_model_images.argument.flags                            =   [imagefile,{{ wsclean_model_padding }}]
+pad_model_images.argument.flags                            =   [imagefile,{{ wsclean_facet_model_padding }}]
 
 # sort the "shift_empty" unaveraged data into groups that can be concatenated, length = some
 # needed because virtual concatenating all files results in a "too many open files" error.

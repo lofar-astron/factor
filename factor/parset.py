@@ -160,14 +160,6 @@ def get_global_options(parset):
     if 'skip_selfcal_check' in parset_dict:
         parset._sections['calibration']['skip_selfcal_check'] = parset_dict['skip_selfcal_check']
 
-    # Padding factor for WSClean images (default = 1.6)
-    if 'wsclean_image_padding' in parset_dict:
-        parset._sections['imaging']['wsclean_image_padding'] = parset_dict['wsclean_image_padding']
-
-    # Padding factor for WSClean images (default = 1.4)
-    if 'wsclean_model_padding' in parset_dict:
-        parset._sections['imaging']['wsclean_model_padding'] = parset_dict['wsclean_model_padding']
-
     # Keep calibrated data for each facet (default = True for averaged data and
     # False for unaveraged data). If a target is specified (see below), the averaged
     # data for the target is always kept, regardless of this setting. If the
@@ -564,18 +556,25 @@ def get_imaging_options(parset):
     else:
         parset_dict['wsclean_image_padding'] = 1.6
 
-    # Padding factor for WSClean images (default = 1.4)
-    if 'wsclean_model_padding' in parset_dict:
-        parset_dict['wsclean_model_padding'] = parset.getfloat('imaging', 'wsclean_model_padding')
+    # Padding factor for WSClean models for patches (default = 10.0)
+    if 'wsclean_patch_model_padding' in parset_dict:
+        parset._sections['imaging']['wsclean_patch_model_padding'] = parset_dict['wsclean_patch_model_padding']
     else:
-        parset_dict['wsclean_model_padding'] = 1.4
+        parset_dict['wsclean_patch_model_padding'] = 10.0
+
+    # Padding factor for WSClean models for full facets (default = 1.4)
+    if 'wsclean_facet_model_padding' in parset_dict:
+        parset._sections['imaging']['wsclean_facet_model_padding'] = parset_dict['wsclean_facet_model_padding']
+    else:
+        parset_dict['wsclean_facet_model_padding'] = 1.4
 
     # Check for unused options
     allowed_options = ['make_mosaic', 'wsclean_nchannels_factor',
         'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
         'selfcal_clean_threshold', 'selfcal_adaptive_threshold',
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
-        'reimage_selfcaled', 'wsclean_image_padding', 'wsclean_model_padding',
+        'reimage_selfcaled', 'wsclean_image_padding',
+        'wsclean_patch_model_padding', 'wsclean_facet_model_padding',
         'selfcal_min_uv_lambda', 'facet_min_uv_lambda', 'wsclean_add_bands',
         'selfcal_robust_wsclean', 'skip_facet_imaging', 'wsclean_bl_averaging']
     for option in given_options:

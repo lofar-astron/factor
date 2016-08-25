@@ -78,8 +78,8 @@ def copy_column_from_bands(mslist, ms_to, inputcol, outputcol):
     """
     Copies one column from multiple MS files (bands) to a single MS file
 
-    Note: the bands are assumed to be ordered by frequency, with 'dummy.ms'
-    denoting missing bands
+    Note: the bands are assumed to be ordered by frequency, with a nonexisting
+    file (e.g., 'dummy.ms') denoting missing bands
 
     Parameters
     ----------
