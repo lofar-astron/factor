@@ -206,7 +206,7 @@ class Direction(object):
         min_peak_smearing_factor = 1.0 - parset['imaging_specific']['max_peak_smearing']
         padding = parset['imaging_specific']['wsclean_image_padding']
         self.wsclean_patch_model_padding = parset['imaging_specific']['wsclean_patch_model_padding']
-        if parset['imaging_specific']['skip_facet_imaging']
+        if parset['imaging_specific']['skip_facet_imaging']:
             self.wsclean_facet_model_padding = self.wsclean_patch_model_padding
         else:
             self.wsclean_facet_model_padding = parset['imaging_specific']['wsclean_facet_model_padding']
