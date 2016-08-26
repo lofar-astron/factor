@@ -214,7 +214,7 @@ regroup_shift_cal_ft.control.mapfile_groups                =   create_msmulti_ma
 regroup_shift_cal_ft.control.mapfile_dir                   =   input.output.mapfile_dir
 regroup_shift_cal_ft.control.join_max_files                =   100
 regroup_shift_cal_ft.control.rotate_groups                 =   True
-regroup_shift_cal_ft.control.filename                      =   regroup_shift_cal.mapfile
+regroup_shift_cal_ft.control.filename                      =   regroup_shift_cal_ft.mapfile
 
 {% if pre_average %}
 # re-group shift_cal mapfile to have one group per band, length = nbands
@@ -453,10 +453,10 @@ wsclean_image02.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image02.argument.multiscale-scales                 =   0
 {% endif %}
-#{% if wsclean_nchannels_selfcal > 1 %}
-#wsclean_image02.argument.deconvolution-channels            =   3
-#wsclean_image02.argument.fit-spectral-log-pol              =   3
-#{% endif %}
+{% if wsclean_nchannels_selfcal > 1 %}
+wsclean_image02.argument.deconvolution-channels            =   2
+wsclean_image02.argument.fit-spectral-pol                  =   2
+{% endif %}
 wsclean_image02.argument.weighting-rank-filter             =   3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image02.argument.baseline-averaging                =   {{ facetselfcal_wsclean_nwavelengths }}
