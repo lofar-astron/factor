@@ -462,7 +462,7 @@ create_expanded_model0_mapfile.control.filename            =   expand_model0.map
 
 # pad the model image with zeros, length = 1
 pad_selfcal_model0_images.control.type                     =   pad_image
-pad_selfcal_model0_images.control.mapfile_in               =   create_expanded_model0_mapfile.output.mapfile
+pad_selfcal_model0_images.control.mapfile_in               =   create_imagebase_map02.output.mapfile
 pad_selfcal_model0_images.control.inputkey                 =   imagefile
 pad_selfcal_model0_images.argument.flags                   =   [imagefile,{{ wsclean_patch_model_padding }}]
 
