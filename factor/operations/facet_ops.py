@@ -342,7 +342,7 @@ class FacetImage(Operation):
         else:
             self.direction.use_existing_data = False
 
-        # Set the pipeline parset and existing data to use
+        # Set the pipeline parset
         if not self.direction.selfcal_ok:
             # Set parset template to sky-model parset
             self.pipeline_parset_template = 'facetimage_skymodel_pipeline.parset'

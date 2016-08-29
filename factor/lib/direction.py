@@ -233,7 +233,11 @@ class Direction(object):
         self.selfcal_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
         self.use_selfcal_clean_threshold = parset['imaging_specific']['selfcal_clean_threshold']
         self.use_selfcal_adaptive_threshold = parset['imaging_specific']['selfcal_adaptive_threshold']
+<<<<<<< HEAD
         self.use_gaincal = parset['calibration_specific']['use_gaincal']
+=======
+        self.casa_multiscale = parset['imaging_specific']['selfcal_scales']
+>>>>>>> master
 
         if facet_cellsize_arcsec is None:
             facet_cellsize_arcsec = parset['imaging_specific']['selfcal_cellsize_arcsec']
@@ -267,7 +271,7 @@ class Direction(object):
         # Also define the image suffixes (which depend on whether or not
         # wide-band clean is done)
         if self.use_wideband:
-            self.wsclean_nchannels = max(1, nbands / wsclean_nchannels_factor)
+            self.wsclean_nchannels = max(1, int(np.ceil(nbands / float(wsclean_nchannels_factor))))
             nchan_after_avg = nchan * nbands / self.facetimage_freqstep
             self.nband_pad = 0 # padding to allow self.wsclean_nchannels to be a divisor
             if parset['imaging_specific']['wsclean_add_bands']:
@@ -757,6 +761,8 @@ class Direction(object):
                 num_cal_blocks = num_cal_blocks_upper
             if num_cal_blocks < 1:
                 num_cal_blocks = 1
+            self.num_cal_blocks = num_cal_blocks
+            self.num_bands_per_cal_block = int(np.ceil(nbands / float(num_cal_blocks)))
             self.solint_freq_p = int(np.ceil(num_chan_per_band_after_avg * nbands /
                 float(num_cal_blocks)))
 

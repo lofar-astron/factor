@@ -175,7 +175,7 @@ The available options are described below under their respective sections.
     wsclean_bl_averaging
         Use baseline-dependent averaging in WSClean (default = ``False``). If enabled,
         this option can dramatically speed up imaging with WSClean.
-        NOTE: this option requires WSClean v1.12a or higher.
+        NOTE: this option requires WSClean v2.0 or higher.
 
     wsclean_add_bands
         Allow flagged data to be added during WSClean imaging to allow

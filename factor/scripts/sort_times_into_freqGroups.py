@@ -52,6 +52,7 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
     # convert input to needed types
     ms_list = input2strlist(ms_input)
     NDPPPfill = input2bool(NDPPPfill)
+    numSB = int(numSB)
     nband_pad = int(nband_pad)
 
     if type(hosts) is str:

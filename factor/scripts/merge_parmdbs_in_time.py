@@ -35,22 +35,6 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
         input_mslist = [f.strip() for f in input_mslist]
     inparmdbs = [os.path.join(ms, parmdb_name) for ms in input_mslist]
 
-    # Sort the parmdbs by start time (needed for the timewidth checks below)
-    if len(inparmdbs) > 1:
-        start_times = []
-        start_times_dicts = [{} for i in range(len(inparmdbs))]
-        for i, inparmdb in enumerate(inparmdbs):
-            pdb_in = pdb.parmdb(inparmdb)
-            for j, parmname in enumerate(pdb_in.getNames()):
-                parms = pdb_in.getValuesGrid(parmname)
-                if j == 0:
-                    start_times.append(parms[parmname]['times'][0])
-                start_times_dicts[i].update({parmname: parms[parmname]['times'][0]})
-            pdb_in = False
-    inparmdbs = np.array(inparmdbs)[np.argsort(start_times)].tolist()
-    start_times_dicts = np.array(start_times_dicts)[np.argsort(start_times)].tolist()
-    start_times.sort()
-
     if type(clobber) is str:
         if clobber.lower() == 'true':
             clobber = True

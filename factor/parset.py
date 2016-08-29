@@ -276,13 +276,6 @@ def get_calibration_options(parset):
         parset_dict = {}
         given_options = []
 
-    # Use DPPP GainCal for fast phase-only solve (default = False)
-    if 'use_gaincal' in parset_dict:
-        parset_dict['use_gaincal'] = parset.getboolean('calibration',
-            'use_gaincal')
-    else:
-        parset_dict['use_gaincal'] = False
-
     # Exit if selfcal fails for any direction (default = True). If False, processing
     # will continue and the failed direction will receive the selfcal solutions of
     # the nearest successful direction unless skip_selfcal_check is True, in which
@@ -367,7 +360,7 @@ def get_calibration_options(parset):
         parset_dict['solve_all_correlations_flux_jy'] = 1000.0
 
     # Check for unused options
-    allowed_options = ['exit_on_selfcal_failure', 'skip_selfcal_check', 'use_gaincal',
+    allowed_options = ['exit_on_selfcal_failure', 'skip_selfcal_check',
         'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal', 'multires_selfcal',
         'tec_block_mhz', 'peel_flux_jy', 'solve_min_uv_lambda', 'spline_smooth2d',
         'solve_all_correlations_flux_jy']
@@ -576,7 +569,8 @@ def get_imaging_options(parset):
         'reimage_selfcaled', 'wsclean_image_padding',
         'wsclean_patch_model_padding', 'wsclean_facet_model_padding',
         'selfcal_min_uv_lambda', 'facet_min_uv_lambda', 'wsclean_add_bands',
-        'selfcal_robust_wsclean', 'skip_facet_imaging', 'wsclean_bl_averaging']
+        'selfcal_robust_wsclean', 'skip_facet_imaging', 'wsclean_bl_averaging',
+        'selfcal_scales']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [imaging] section of the '
