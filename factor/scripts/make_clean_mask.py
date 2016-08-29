@@ -27,8 +27,6 @@ def read_vertices(filename):
 def read_casa_polys(filename, image):
     """
     Reads casa region file and returns polys
-
-    Note: only regions of type "poly" are supported
     """
     with open(filename, 'r') as f:
         lines = f.readlines()
@@ -64,7 +62,7 @@ def read_casa_polys(filename, image):
         elif line.startswith('ellipse'):
             ell_str_temp = line.split('[[')[1]
             if '], 0.0' not in ell_str_temp and '], 90.0' not in ell_str_temp:
-                print('Only position angles of 0.0 and 90.0 are support for CASA '
+                print('Only position angles of 0.0 and 90.0 are supported for CASA '
                     'regions of type "ellipse"')
                 sys.exit(1)
             if '], 0.0' in ell_str_temp:
