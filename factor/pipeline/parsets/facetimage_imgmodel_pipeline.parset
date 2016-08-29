@@ -72,6 +72,16 @@ expand_merged_parmdb_map.control.mapfile_to_match     =   create_ms_map.output.m
 expand_merged_parmdb_map.control.mapfile_dir          =   input.output.mapfile_dir
 expand_merged_parmdb_map.control.filename             =   expand_merged_parmdbs.mapfile
 
+{% if preapply_phase_cal %}
+# expand mapfile of the dir-dependent parmDB to all files, length = nfiles
+expand_preapply_parmdb_map.control.kind                    =   plugin
+expand_preapply_parmdb_map.control.type                    =   expandMapfile
+expand_preapply_parmdb_map.control.mapfile_in              =   {{ preapply_parmdb_mapfile }}
+expand_preapply_parmdb_map.control.mapfile_to_match        =   create_ms_map.output.mapfile
+expand_preapply_parmdb_map.control.mapfile_dir             =   input.output.mapfile_dir
+expand_preapply_parmdb_map.control.filename                =   expand_merged_parmdbs.mapfile
+{% endif %}
+
 # shift current residual visibilities to facet-center, length = nfiles
 shift_empty.control.type                              =   dppp
 shift_empty.control.opts.mapfile_in                   =   create_ms_map.output.mapfile
@@ -135,33 +145,54 @@ wsclean_ft.argument.j                                 =   {{ max_cpus_per_proc_s
 wsclean_ft.argument.tempdir                           =   {{ local_dir }}
 {% endblock model_data_parms %}
 
-# corrupt the facet-model visibilities, length = nfiles
-corrupt_final_model.control.type                      =   dppp
-corrupt_final_model.control.opts.mapfiles_in          =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-corrupt_final_model.control.opts.inputkeys            =   [msin,parmdb]
-corrupt_final_model.argument.numthreads               =   {{ max_cpus_per_io_proc_nfiles }}
-corrupt_final_model.argument.msin.datacolumn          =   MODEL_DATA
-corrupt_final_model.argument.msout.overwrite          =   True
-corrupt_final_model.argument.msout.writefullresflag   =   False
-corrupt_final_model.argument.local_scratch_dir        =   {{ local_dir }}
-corrupt_final_model.argument.steps                    =   [corrupt_fast1,corrupt_fast2,corrupt_slow]
-corrupt_final_model.argument.corrupt_fast1.type       =   applycal
-corrupt_final_model.argument.corrupt_fast1.parmdb     =   parmdb
-corrupt_final_model.argument.corrupt_fast1.correction =   tec
-corrupt_final_model.argument.corrupt_fast1.invert     =   False
-corrupt_final_model.argument.corrupt_fast2.type       =   applycal
-corrupt_final_model.argument.corrupt_fast2.parmdb     =   parmdb
-corrupt_final_model.argument.corrupt_fast2.correction =   commonscalarphase
-corrupt_final_model.argument.corrupt_fast2.invert     =   False
-corrupt_final_model.argument.corrupt_slow.type        =   applycal
-corrupt_final_model.argument.corrupt_slow.parmdb      =   parmdb
-corrupt_final_model.argument.corrupt_slow.invert      =   False
+# corrupt the model visibilities, length = nfiles
+corrupt_final_model.control.type                        =   dppp
+{% if preapply_phase_cal %}
+corrupt_final_model.control.opts.mapfiles_in            =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile,expand_preapply_parmdb_map.output.mapfile]
+corrupt_final_model.control.opts.inputkeys              =   [msin,dir_dep_parmdb,preapply_parmdb]
+{% else %}
+corrupt_final_model.control.opts.mapfiles_in            =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+corrupt_final_model.control.opts.inputkeys              =   [msin,dir_dep_parmdb]
+{% endif %}
+corrupt_final_model.argument.numthreads                 =   {{ max_cpus_per_io_proc_nfiles }}
+corrupt_final_model.argument.msin.datacolumn            =   MODEL_DATA
+corrupt_final_model.argument.msout.overwrite            =   True
+corrupt_final_model.argument.msout.writefullresflag     =   False
+corrupt_final_model.argument.local_scratch_dir          =   {{ local_dir }}
+{% if preapply_phase_cal %}
+corrupt_final_model.argument.steps                      =   [preapply_fast1,preapply_fast2,preapply_slow,corrupt_fast1,corrupt_fast2,corrupt_slow]
+corrupt_final_model.argument.preapply_fast1.type        =   applycal
+corrupt_final_model.argument.preapply_fast1.parmdb      =   preapply_parmdb
+corrupt_final_model.argument.preapply_fast1.correction  =   tec
+corrupt_final_model.argument.preapply_fast1.invert      =   False
+corrupt_final_model.argument.preapply_fast2.type        =   applycal
+corrupt_final_model.argument.preapply_fast2.parmdb      =   preapply_parmdb
+corrupt_final_model.argument.preapply_fast2.correction  =   commonscalarphase
+corrupt_final_model.argument.preapply_fast2.invert      =   False
+corrupt_final_model.argument.preapply_slow.type         =   applycal
+corrupt_final_model.argument.preapply_slow.parmdb       =   preapply_parmdb
+corrupt_final_model.argument.preapply_slow.invert       =   False
+{% else %}
+corrupt_final_model.argument.steps                      =   [corrupt_fast1,corrupt_fast2,corrupt_slow]
+{% endif %}
+corrupt_final_model.argument.corrupt_fast1.type         =   applycal
+corrupt_final_model.argument.corrupt_fast1.parmdb       =   dir_dep_parmdb
+corrupt_final_model.argument.corrupt_fast1.correction   =   tec
+corrupt_final_model.argument.corrupt_fast1.invert       =   False
+corrupt_final_model.argument.corrupt_fast2.type         =   applycal
+corrupt_final_model.argument.corrupt_fast2.parmdb       =   dir_dep_parmdb
+corrupt_final_model.argument.corrupt_fast2.correction   =   commonscalarphase
+corrupt_final_model.argument.corrupt_fast2.invert       =   False
+corrupt_final_model.argument.corrupt_slow.type          =   applycal
+corrupt_final_model.argument.corrupt_slow.parmdb        =   dir_dep_parmdb
+corrupt_final_model.argument.corrupt_slow.correction    =   gain
+corrupt_final_model.argument.corrupt_slow.invert        =   False
 
 # add the facet-model visibilities to the data, length = nfiles
-add_model_to_empty_data.control.type                  =   add_subtract_columns
-add_model_to_empty_data.control.opts.mapfiles_in      =   [shift_empty.output.mapfile,corrupt_final_model.output.mapfile]
-add_model_to_empty_data.control.opts.inputkeys        =   [file1,file2]
-add_model_to_empty_data.argument.flags                =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
+add_model_to_empty_data.control.type                    =   add_subtract_columns
+add_model_to_empty_data.control.opts.mapfiles_in        =   [shift_empty.output.mapfile,corrupt_final_model.output.mapfile]
+add_model_to_empty_data.control.opts.inputkeys          =   [file1,file2]
+add_model_to_empty_data.argument.flags                  =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
 
 {% if skip_facet_imaging %}
 # create a mapfile with the current skymodels from supplied list, length = nbands
@@ -205,14 +236,34 @@ create_parmdb_map.control.filename                      =   dir_indep_instrument
 
 # "do nearly everything" call to NDPPP: phaseshift, add, correct, and average in one NDPPP call, length = nfiles
 add_all_facet_sources.control.type                      =   dppp
-add_all_facet_sources.control.opts.mapfiles_in          =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+{% if preapply_phase_cal %}
+add_all_facet_sources.control.opts.mapfiles_in          =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile,expand_preapply_parmdb_map.output.mapfile]
+add_all_facet_sources.control.opts.inputkeys            =   [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb,preapply_parmdb]
+{% else %}
+add_all_facet_sources.control.opts.mapfiles_in          =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile,]
 add_all_facet_sources.control.opts.inputkeys            =   [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb]
+{% endif %}
 add_all_facet_sources.argument.numthreads               =   {{ max_cpus_per_io_proc_nfiles }}
 add_all_facet_sources.argument.msin.datacolumn          =   FACET_DATA_ALL
 add_all_facet_sources.argument.msout.overwrite          =   True
 add_all_facet_sources.argument.msout.writefullresflag   =   False
 add_all_facet_sources.argument.local_scratch_dir        =   {{ local_dir }}
-add_all_facet_sources.argument.steps                    =   [add,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
+{% if preapply_phase_cal %}
+add_all_facet_sources.argument.steps                     =   [add,preapply_fast1,preapply_fast2,preapply_slow,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
+add_all_facet_sources.argument.preapply_fast1.type       =   applycal
+add_all_facet_sources.argument.preapply_fast1.parmdb     =   preapply_parmdb
+add_all_facet_sources.argument.preapply_fast1.correction =   tec
+add_all_facet_sources.argument.preapply_fast1.invert     =   True
+add_all_facet_sources.argument.preapply_fast2.type       =   applycal
+add_all_facet_sources.argument.preapply_fast2.parmdb     =   preapply_parmdb
+add_all_facet_sources.argument.preapply_fast2.correction =   commonscalarphase
+add_all_facet_sources.argument.preapply_fast2.invert     =   True
+add_all_facet_sources.argument.preapply_slow.type        =   applycal
+add_all_facet_sources.argument.preapply_slow.parmdb      =   preapply_parmdb
+add_all_facet_sources.argument.preapply_slow.invert      =   True
+{% else %}
+add_all_facet_sources.argument.steps                     =   [add,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
+{% endif %}
 add_all_facet_sources.argument.add.type                 =   predict
 add_all_facet_sources.argument.add.sourcedb             =   sourcedb
 add_all_facet_sources.argument.add.operation            =   add
@@ -237,31 +288,51 @@ add_all_facet_sources.argument.avg.timestep             =   {{ facetimage_timest
 {% else %}
 
 # apply the direction-dependent solutions and average, length = nfiles
-apply_dir_dep.control.type                            =   dppp
-apply_dir_dep.control.opts.mapfiles_in                =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-apply_dir_dep.control.opts.inputkeys                  =   [msin,dir_dep_parmdb]
-apply_dir_dep.argument.numthreads                     =   {{ max_cpus_per_io_proc_nfiles }}
-apply_dir_dep.argument.msin.datacolumn                =   FACET_DATA_ALL
-apply_dir_dep.argument.msout.overwrite                =   True
-apply_dir_dep.argument.msout.writefullresflag         =   False
-apply_dir_dep.argument.local_scratch_dir              =   {{ local_dir }}
-apply_dir_dep.argument.steps                          =   [correct_fast1,correct_fast2,correct_slow,flagzero,avg]
-apply_dir_dep.argument.correct_fast1.type             =   applycal
-apply_dir_dep.argument.correct_fast1.parmdb           =   dir_dep_parmdb
-apply_dir_dep.argument.correct_fast1.correction       =   tec
-apply_dir_dep.argument.correct_fast1.invert           =   True
-apply_dir_dep.argument.correct_fast2.type             =   applycal
-apply_dir_dep.argument.correct_fast2.parmdb           =   dir_dep_parmdb
-apply_dir_dep.argument.correct_fast2.correction       =   commonscalarphase
-apply_dir_dep.argument.correct_fast2.invert           =   True
-apply_dir_dep.argument.correct_slow.type              =   applycal
-apply_dir_dep.argument.correct_slow.parmdb            =   dir_dep_parmdb
-apply_dir_dep.argument.correct_slow.invert            =   True
-apply_dir_dep.argument.flagzero.type                  =   preflagger
-apply_dir_dep.argument.flagzero.amplmin               =   1e-20
-apply_dir_dep.argument.avg.type                       =   squash
-apply_dir_dep.argument.avg.freqstep                   =   {{ facetimage_freqstep }}
-apply_dir_dep.argument.avg.timestep                   =   {{ facetimage_timestep }}
+apply_dir_dep.control.type                                 =   dppp
+{% if preapply_phase_cal %}
+apply_dir_dep.control.opts.mapfiles_in                     =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile,expand_preapply_parmdb_map.output.mapfile]
+apply_dir_dep.control.opts.inputkeys                       =   [msin,dir_dep_parmdb,preapply_parmdb]
+{% else %}
+apply_dir_dep.control.opts.mapfiles_in                     =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+apply_dir_dep.control.opts.inputkeys                       =   [msin,dir_dep_parmdb]
+{% endif %}
+apply_dir_dep.argument.numthreads                          =   {{ max_cpus_per_io_proc_nfiles }}
+apply_dir_dep.argument.msin.datacolumn                     =   FACET_DATA_ALL
+apply_dir_dep.argument.msout.overwrite                     =   True
+apply_dir_dep.argument.msout.writefullresflag              =   False
+apply_dir_dep.argument.local_scratch_dir                   =   {{ local_dir }}
+{% if preapply_phase_cal %}
+apply_dir_dep.argument.steps                               =   [preapply_fast1,preapply_fast2,preapply_slow,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
+apply_dir_dep.argument.preapply_fast1.type                 =   applycal
+apply_dir_dep.argument.preapply_fast1.parmdb               =   preapply_parmdb
+apply_dir_dep.argument.preapply_fast1.correction           =   tec
+apply_dir_dep.argument.preapply_fast1.invert               =   True
+apply_dir_dep.argument.preapply_fast2.type                 =   applycal
+apply_dir_dep.argument.preapply_fast2.parmdb               =   preapply_parmdb
+apply_dir_dep.argument.preapply_fast2.correction           =   commonscalarphase
+apply_dir_dep.argument.preapply_fast2.invert               =   True
+apply_dir_dep.argument.preapply_slow.type                  =   applycal
+apply_dir_dep.argument.preapply_slow.parmdb                =   preapply_parmdb
+apply_dir_dep.argument.preapply_slow.invert                =   True
+{% else %}
+apply_dir_dep.argument.steps                               =   [correct_fast1,correct_fast2,correct_slow,flagzero,avg]
+{% endif %}
+apply_dir_dep.argument.correct_fast1.type                  =   applycal
+apply_dir_dep.argument.correct_fast1.parmdb                =   dir_dep_parmdb
+apply_dir_dep.argument.correct_fast1.correction            =   tec
+apply_dir_dep.argument.correct_fast1.invert                =   True
+apply_dir_dep.argument.correct_fast2.type                  =   applycal
+apply_dir_dep.argument.correct_fast2.parmdb                =   dir_dep_parmdb
+apply_dir_dep.argument.correct_fast2.correction            =   commonscalarphase
+apply_dir_dep.argument.correct_fast2.invert                =   True
+apply_dir_dep.argument.correct_slow.type                   =   applycal
+apply_dir_dep.argument.correct_slow.parmdb                 =   dir_dep_parmdb
+apply_dir_dep.argument.correct_slow.invert                 =   True
+apply_dir_dep.argument.flagzero.type                       =   preflagger
+apply_dir_dep.argument.flagzero.amplmin                    =   1e-20
+apply_dir_dep.argument.avg.type                            =   squash
+apply_dir_dep.argument.avg.freqstep                        =   {{ facetimage_freqstep }}
+apply_dir_dep.argument.avg.timestep                        =   {{ facetimage_timestep }}
 {% endif %}
 
 # make the compressed mapfile, length = 1

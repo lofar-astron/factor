@@ -139,7 +139,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         for d in direction_group_reset:
             d.reset_state(['facetselfcal', 'facetsub'])
 
-        # Do selfcal or peeling on calibrator only
+        # Do selfcal on calibrator only
         ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
         scheduler.run(ops)
 
@@ -150,11 +150,14 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         direction_group_ok = [d for d in direction_group if d.selfcal_ok]
         if set_sub_data_colname:
             # Set the name of the subtracted data column for remaining
-            # directions (if needed)
+            # directions (if needed). Also set the flag for preapplication of
+            # selfcal solutions
             if len(direction_group_ok) > 0:
                 for d in directions:
                     if d.name != direction_group_ok[0].name:
                         d.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
+                        d.preapply_phase_cal = True
+                        d.preapply_parmdb_mapfile = direction_group_ok[0].dir_dep_parmdb_mapfile
                 set_sub_data_colname = False
 
         # Subtract final model(s) for directions for which selfcal went OK

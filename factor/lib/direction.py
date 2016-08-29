@@ -131,6 +131,7 @@ class Direction(object):
         self.completed_operations = []
         self.reset_operations = []
         self.cleanup_mapfiles = []
+        self.preapply_phase_cal = False
 
         # Define some directories and files
         self.working_dir = factor_working_dir
