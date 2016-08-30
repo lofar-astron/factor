@@ -28,7 +28,7 @@ def plugin_main(args, **kwargs):
     mapfile_dir = kwargs['mapfile_dir']
     filename = kwargs['filename']
     if 'nitems_to_compress' in kwargs:
-        nitems_to_compress = int(kwargs['nitems_to_compress'])
+        nitems_to_compress = int(float(kwargs['nitems_to_compress']))
     else:
         nitems_to_compress = -1
 
