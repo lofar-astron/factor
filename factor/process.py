@@ -74,7 +74,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
     # Run peeling operations on outlier directions and any facets
     # for which the calibrator is to be peeled
-    set_sub_data_colname = True
+    set_sub_data_colname_and_preapply_flag = True
     peel_directions = [d for d in directions if d.is_outlier]
     peel_directions.extend([d for d in directions if d.peel_calibrator])
     if len(peel_directions) > 0:
@@ -139,6 +139,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         for d in direction_group_reset:
             d.reset_state(['facetselfcal', 'facetsub'])
 
+        # Set flag for first direction to create preapply parmdb
+
+
         # Do selfcal on calibrator only
         ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
         scheduler.run(ops)
@@ -148,7 +151,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             for d in direction_group:
                 d.selfcal_ok = True
         direction_group_ok = [d for d in direction_group if d.selfcal_ok]
-        if set_sub_data_colname:
+        if set_sub_data_colname_and_preapply_flag:
             # Set the name of the subtracted data column for remaining
             # directions (if needed). Also set the flag for preapplication of
             # selfcal solutions
@@ -157,8 +160,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     if d.name != direction_group_ok[0].name:
                         d.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
                         d.preapply_phase_cal = True
-                        d.preapply_parmdb_mapfile = direction_group_ok[0].dir_dep_parmdb_mapfile
-                set_sub_data_colname = False
+                        d.preapply_parmdb_mapfile = direction_group_ok[0].preapply_parmdb_mapfile
+                set_sub_data_colname_and_preapply_flag = False
 
         # Subtract final model(s) for directions for which selfcal went OK
         ops = [FacetSub(parset, bands, d) for d in direction_group_ok]
