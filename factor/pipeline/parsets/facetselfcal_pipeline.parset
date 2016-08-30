@@ -470,6 +470,7 @@ regroup_concat_data_map.control.mapfile_groups             =   create_msmulti_ma
 regroup_concat_data_map.control.mapfile_dir                =   input.output.mapfile_dir
 regroup_concat_data_map.control.join_max_files             =   {{ num_cal_blocks }}
 regroup_concat_data_map.control.rotate_groups              =   False
+regroup_concat_data_map.control.check_basename             =   False
 regroup_concat_data_map.control.filename                   =   regroup_concat_data.mapfile
 
 # expand the mapfile of the model image to match ft files, length = ntimes
