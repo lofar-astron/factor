@@ -461,16 +461,13 @@ pad_selfcal_model0_images.control.mapfile_in               =   create_imagebase_
 pad_selfcal_model0_images.control.inputkey                 =   imagefile
 pad_selfcal_model0_images.argument.flags                   =   [imagefile,{{ wsclean_patch_model_padding }}]
 
-# re-group concat_data mapfile to have one group per time, length = ntimes
+# make compressed mapfile of concatenated data, length = ntimes
 # needed to for the wsclean_ft steps to get full frequency coverage per group
 regroup_concat_data_map.control.kind                       =   plugin
-regroup_concat_data_map.control.type                       =   reGroupMapfile
+regroup_concat_data_map.control.type                       =   compressMapfile
 regroup_concat_data_map.control.mapfile_in                 =   concat_data.output.mapfile
-regroup_concat_data_map.control.mapfile_groups             =   create_msmulti_map.output.mapfile
+regroup_concat_data_map.control.nitems_to_compress         =   {{ num_cal_blocks }}
 regroup_concat_data_map.control.mapfile_dir                =   input.output.mapfile_dir
-regroup_concat_data_map.control.join_max_files             =   {{ num_cal_blocks }}
-regroup_concat_data_map.control.rotate_groups              =   False
-regroup_concat_data_map.control.check_basename             =   False
 regroup_concat_data_map.control.filename                   =   regroup_concat_data.mapfile
 
 # expand the mapfile of the model image to match ft files, length = ntimes
