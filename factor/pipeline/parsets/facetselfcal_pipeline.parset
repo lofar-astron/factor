@@ -690,7 +690,7 @@ create_imagebase_map12.control.filename                    =   wsclean_image12_i
 create_expanded_model1_mapfile.control.kind                =   plugin
 create_expanded_model1_mapfile.control.type                =   expandMapfile
 create_expanded_model1_mapfile.control.mapfile_in          =   create_imagebase_map12.output.mapfile
-create_expanded_model1_mapfile.control.mapfile_to_match    =   concat_data.output.mapfile
+create_expanded_model1_mapfile.control.mapfile_to_match    =   regroup_concat_data_map.output.mapfile
 create_expanded_model1_mapfile.control.mapfile_dir         =   input.output.mapfile_dir
 create_expanded_model1_mapfile.control.filename            =   expand_wsclean_model1.mapfile
 
@@ -702,7 +702,7 @@ pad_selfcal_model1_images.argument.flags                   =   [imagefile,{{ wsc
 
 # predict model visibilities, length = ntimes
 wsclean_ft1.control.type                                   =   wsclean_ft
-wsclean_ft1.control.mapfiles_in                            =   [concat_data.output.mapfile,create_expanded_model1_mapfile.output.mapfile,expand_selfcal_model_size_map.output.mapfile]
+wsclean_ft1.control.mapfiles_in                            =   [regroup_concat_data_map.output.mapfile,create_expanded_model1_mapfile.output.mapfile,expand_selfcal_model_size_map.output.mapfile]
 wsclean_ft1.control.inputkeys                              =   [msfile,name,size]
 wsclean_ft1.argument.flags                                 =   [-predict,msfile]
 wsclean_ft1.argument.size                                  =   {{ cal_imsize }} {{ cal_imsize }}
@@ -896,7 +896,7 @@ create_imagebase_map22.control.filename                    =   wsclean_image22_i
 create_expanded_model2_mapfile.control.kind                =   plugin
 create_expanded_model2_mapfile.control.type                =   expandMapfile
 create_expanded_model2_mapfile.control.mapfile_in          =   create_imagebase_map22.output.mapfile
-create_expanded_model2_mapfile.control.mapfile_to_match    =   concat_data.output.mapfile
+create_expanded_model2_mapfile.control.mapfile_to_match    =   regroup_concat_data_map.output.mapfile
 create_expanded_model2_mapfile.control.mapfile_dir         =   input.output.mapfile_dir
 create_expanded_model2_mapfile.control.filename            =   expand_wsclean_model1.mapfile
 
@@ -908,7 +908,7 @@ pad_selfcal_model2_images.argument.flags                   =   [imagefile,{{ wsc
 
 # predict model visibilities, length = ntimes
 wsclean_ft2.control.type                                   =   wsclean_ft
-wsclean_ft2.control.mapfiles_in                            =   [concat_data.output.mapfile,create_expanded_model2_mapfile.output.mapfile,expand_selfcal_model_size_map.output.mapfile]
+wsclean_ft2.control.mapfiles_in                            =   [regroup_concat_data_map.output.mapfile,create_expanded_model2_mapfile.output.mapfile,expand_selfcal_model_size_map.output.mapfile]
 wsclean_ft2.control.inputkeys                              =   [msfile,name,size]
 wsclean_ft2.argument.flags                                 =   [-predict,msfile]
 wsclean_ft2.argument.size                                  =   {{ cal_imsize }} {{ cal_imsize }}
@@ -1181,7 +1181,7 @@ create_imagebase_map32.control.filename                    =   wsclean_image32_i
 create_expanded_model3_mapfile.control.kind                =   plugin
 create_expanded_model3_mapfile.control.type                =   expandMapfile
 create_expanded_model3_mapfile.control.mapfile_in          =   create_imagebase_map32.output.mapfile
-create_expanded_model3_mapfile.control.mapfile_to_match    =   concat_data.output.mapfile
+create_expanded_model3_mapfile.control.mapfile_to_match    =   regroup_concat_data_map.output.mapfile
 create_expanded_model3_mapfile.control.mapfile_dir         =   input.output.mapfile_dir
 create_expanded_model3_mapfile.control.filename            =   expand_wsclean_model1.mapfile
 
@@ -1193,7 +1193,7 @@ pad_selfcal_model3_images.argument.flags                   =   [imagefile,{{ wsc
 
 # predict model visibilities, length =  times
 wsclean_ft3.control.type                                   =   wsclean_ft
-wsclean_ft3.control.mapfiles_in                            =   [concat_data.output.mapfile,create_expanded_model3_mapfile.output.mapfile,expand_selfcal_model_size_map.output.mapfile]
+wsclean_ft3.control.mapfiles_in                            =   [regroup_concat_data_map.output.mapfile,create_expanded_model3_mapfile.output.mapfile,expand_selfcal_model_size_map.output.mapfile]
 wsclean_ft3.control.inputkeys                              =   [msfile,name,size]
 wsclean_ft3.argument.flags                                 =   [-predict,msfile]
 wsclean_ft3.argument.size                                  =   {{ cal_imsize }} {{ cal_imsize }}
