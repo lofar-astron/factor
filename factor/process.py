@@ -140,7 +140,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             d.reset_state(['facetselfcal', 'facetsub'])
 
         # Set flag for first direction to create preapply parmdb
-
+        direction_group[0].create_preapply_parmdb = True
 
         # Do selfcal on calibrator only
         ops = [FacetSelfcal(parset, bands, d) for d in direction_group]

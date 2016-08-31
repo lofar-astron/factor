@@ -152,6 +152,8 @@ class FacetSelfcal(Operation):
             'verify_subtract.break.mapfile')
         self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'concat_averaged_compressed.mapfile')
+        self.preapply_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'create_preapply_parmdb.mapfile')
 
         # We also need to save the averaging steps for the image_data, so that for
         # any subsequent imaging runs that use these data, we can determine
