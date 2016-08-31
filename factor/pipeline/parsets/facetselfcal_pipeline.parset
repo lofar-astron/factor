@@ -435,9 +435,9 @@ wsclean_image02.argument.channelsout                       =   {{ wsclean_nchann
 wsclean_image02.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image02.argument.j                                 =   {{ max_cpus_per_proc_single }}
 wsclean_image02.argument.tempdir                           =   {{ local_dir }}
-{% if not wsclean_selfcal_multiscale %}
-wsclean_image02.argument.multiscale-scales                 =   0
-{% endif %}
+# {% if not wsclean_selfcal_multiscale %}
+# wsclean_image02.argument.multiscale-scales                 =   0
+# {% endif %}
 {% if wsclean_nchannels_selfcal > 1 %}
 wsclean_image02.argument.deconvolution-channels            =   3
 wsclean_image02.argument.fit-spectral-pol                  =   3
