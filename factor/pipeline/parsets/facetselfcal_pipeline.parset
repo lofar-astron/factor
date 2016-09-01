@@ -295,13 +295,6 @@ concat_data_compressed_mapfile.control.mapfile_in          =   concat_data.outpu
 concat_data_compressed_mapfile.control.mapfile_dir         =   input.output.mapfile_dir
 concat_data_compressed_mapfile.control.filename            =   concat_chunks_input.mapfile
 
-# virtual concat of time/cal-chunks, length = 1
-concat_chunks.control.type                                 =   virtual_concat
-concat_chunks.control.mapfile_in                           =   concat_data_compressed_mapfile.output.mapfile
-concat_chunks.control.inputkey                             =   msfiles
-concat_chunks.control.outputkey                            =   msconcat
-concat_chunks.argument.flags                               =   [msfiles,msconcat]
-
 ########## start of first round of selfcal
 
 # apply dir-independent calibration and average, length = nfiles
