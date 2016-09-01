@@ -184,6 +184,7 @@ sort_into_Groups.argument.filename                         =   sorted_groups.map
 sort_into_Groups.argument.mapfile_dir                      =   input.output.mapfile_dir
 sort_into_Groups.argument.hosts                            =   {{ hosts }}
 sort_into_Groups.argument.stepname                         =   sort_into_Groups
+sort_into_Groups.argument.enforce_numSB                    =   False
 {% if num_cal_blocks > 1 %}
 sort_into_Groups.argument.numSB                            =   {{ num_bands_per_cal_block }}
 {% endif %}

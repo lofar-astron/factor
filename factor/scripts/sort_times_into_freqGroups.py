@@ -59,6 +59,7 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
     NDPPPfill = input2bool(NDPPPfill)
     numSB = int(numSB)
     nband_pad = int(nband_pad)
+    enforce_numSB = input2bool(enforce_numSB)
 
     if type(hosts) is str:
         hosts = [h.strip(' \'\"') for h in hosts.strip('[]').split(',')]
