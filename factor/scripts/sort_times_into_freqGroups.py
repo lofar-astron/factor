@@ -8,7 +8,8 @@ import numpy as np
 from lofarpipe.support.data_map import DataMap, DataProduct
 
 
-def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPfill=True, target_path=None, stepname=None, nband_pad=0):
+def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True,
+    hosts=None, NDPPPfill=True, target_path=None, stepname=None, nband_pad=0):
     """
     Check a list of MS files for missing frequencies
 
@@ -24,6 +25,10 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
         How many files should go into one frequency group. Values <= 0 mean put
         all files of the same time-step into one group.
         default = -1
+    enforce_numSB : bool, optional
+        If True and numSB > 0, then add flagged dummy data to ensure that the
+        last block has exactly numSB files. If False, then the last block can
+        have fewer files (as long as there are no gaps in frequency)
     hosts : list or str
         List of hostnames or string with list of hostnames
     NDPPPfill : bool, optional
@@ -126,14 +131,21 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
                     files.append('dummy.ms')
                 else:
                     files.append(fname)
+                    skip_this = False
                     if len(time_groups[time]['freq_names'])>0:
                         (freq,fname) = time_groups[time]['freq_names'].pop(0)
                     else:
+                        # Set freq to high value to pad the rest of the group
+                        # with dummy data
                         (freq,fname) = (1e12,'This_shouldn\'t_show_up')
-                    skip_this = False
+                        if not enforce_numSB:
+                            # Don't pad the rest of this group with dummy data
+                            break
 
-            for i in range(nband_pad):
-                files.append('dummy.ms')
+            if fgroup == ngroups-1:
+                # Append dummy data to last frequency group only
+                for i in range(nband_pad):
+                    files.append('dummy.ms')
 
             filemap.append(MultiDataProduct(hosts[hostID%numhosts], files, skip_this))
             groupname = time_groups[time]['basename']+'_%Xt_%dg.ms'%(time,fgroup)
