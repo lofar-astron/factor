@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, shift_cal, create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, switch_weights_col_shift_cal1, concat_blavg_data, switch_weights_col_shift_cal2, copy_column1, copy_column2, {% endif %} add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, premask_selfcal, wsclean_image01, create_imagebase_map01, adjust_wsclean_mapfile0, mask0, wsclean_image02, create_imagebase_map02, pad_selfcal_model0_images, regroup_concat_data_map,  create_expanded_model0_mapfile, expand_selfcal_model_size_map, wsclean_ft0, switch_weights_col1, make_fast_phase_parmdb_map, remove_parmdbs1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, wsclean_image11, create_imagebase_map11, adjust_wsclean_mapfile11, mask1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, pad_selfcal_model1_images, wsclean_ft1, switch_weights_col3, remove_parmdbs2, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, create_compressed_mapfile2, wsclean_image21, create_imagebase_map21, adjust_wsclean_mapfile21, mask2, wsclean_image22, create_imagebase_map22, create_expanded_model2_mapfile, pad_selfcal_model2_images, wsclean_ft2, switch_weights_col5, remove_parmdbs11, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, wsclean_image31, create_imagebase_map31, adjust_wsclean_mapfile31, mask3, wsclean_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, add_imaging_cols_empty, {% if is_patch or skip_facet_imaging %} create_model4_map, blank_model, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% else %} apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, concat_averaged, concat_averaged_compressed_map, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, {% endif %} corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, shift_cal, create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, switch_weights_col_shift_cal1, concat_blavg_data, switch_weights_col_shift_cal2, copy_column1, copy_column2, {% endif %} add_imaging_cols, concat_data_compressed_mapfile, concat_chunks, average0, create_compressed_mapfile0, premask_selfcal, wsclean_image01, create_imagebase_map01, adjust_wsclean_mapfile0, mask0, wsclean_image02, create_imagebase_map02, pad_selfcal_model0_images, regroup_concat_data_map,  create_expanded_model0_mapfile, expand_selfcal_model_size_map, wsclean_ft0, switch_weights_col1, make_fast_phase_parmdb_map, remove_parmdbs1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, wsclean_image11, create_imagebase_map11, adjust_wsclean_mapfile11, mask1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, pad_selfcal_model1_images, wsclean_ft1, switch_weights_col3, remove_parmdbs2, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, create_compressed_mapfile2, wsclean_image21, create_imagebase_map21, adjust_wsclean_mapfile21, mask2, wsclean_image22, create_imagebase_map22, create_expanded_model2_mapfile, pad_selfcal_model2_images, wsclean_ft2, switch_weights_col5, remove_parmdbs11, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, wsclean_image31, create_imagebase_map31, adjust_wsclean_mapfile31, mask3, wsclean_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, add_imaging_cols_empty, {% if is_patch or skip_facet_imaging %} create_model4_map, blank_model, {% else %} apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, concat_averaged, concat_averaged_compressed_map, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, {% endif %} pad_model_images, regroup_shift_empty_map, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -85,7 +85,7 @@ expand_sourcedb_cal_facet_sources.control.mapfile_groups   =   create_msmulti_ma
 expand_sourcedb_cal_facet_sources.control.mapfile_dir      =   input.output.mapfile_dir
 expand_sourcedb_cal_facet_sources.control.filename         =   expand_sourcedb_cal_facet_sources.mapfile
 
-# shift full-res data to facet position to accept result of ft step below, length = nfiles
+# shift full-res data to facet position (to accept result of final ft step), length = nfiles
 shift_empty.control.type                                   =   dppp
 shift_empty.control.opts.mapfile_in                        =   create_ms_map.output.mapfile
 shift_empty.control.opts.inputkey                          =   msin
@@ -518,7 +518,7 @@ remove_parmdbs1.control.mapfile_in                         =   make_fast_phase_p
 remove_parmdbs1.control.inputkey                           =   parmdb
 remove_parmdbs1.argument.flags                             =   [-rf,parmdb]
 
-# run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
+# run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
 # note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
 # GainCal has a filter parameter, we can switch to that
 solve_phaseonly1.control.type                              =   dppp_inplace
@@ -707,12 +707,12 @@ wsclean_ft1.control.inputkeys                              =   [msfile,name,size
 wsclean_ft1.argument.flags                                 =   [-predict,msfile]
 wsclean_ft1.argument.size                                  =   {{ cal_imsize }} {{ cal_imsize }}
 wsclean_ft1.argument.scale                                 =   {{ cellsize_selfcal_deg }}
-wsclean_ft1.argument.mem                                   =   {{ max_percent_memory_per_proc_ngroups }}
+wsclean_ft1.argument.mem                                   =   {{ max_percent_memory_per_proc_ntimes }}
 wsclean_ft1.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
-wsclean_ft1.argument.j                                     =   {{ max_cpus_per_proc_ngroups }}
+wsclean_ft1.argument.j                                     =   {{ max_cpus_per_proc_ntimes }}
 wsclean_ft1.argument.tempdir                               =   {{ local_dir }}
 
-# switch "normal" weights with BL-averaged weights, length = ntimes
+# switch "normal" weights with BL-averaged weights, length = ntimes * num_cal_blocks
 switch_weights_col3.control.type                           =   switch_columns
 switch_weights_col3.control.mapfile_in                     =   concat_data.output.mapfile
 switch_weights_col3.control.inputkey                       =   msfiles
@@ -724,7 +724,7 @@ remove_parmdbs2.control.mapfile_in                         =   make_fast_phase_p
 remove_parmdbs2.control.inputkey                           =   parmdb
 remove_parmdbs2.argument.flags                             =   [-rf,parmdb]
 
-# run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
+# run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
 # note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
 # GainCal has a filter parameter, we can switch to that
 solve_phaseonly2.control.type                              =   dppp_inplace
@@ -913,12 +913,12 @@ wsclean_ft2.control.inputkeys                              =   [msfile,name,size
 wsclean_ft2.argument.flags                                 =   [-predict,msfile]
 wsclean_ft2.argument.size                                  =   {{ cal_imsize }} {{ cal_imsize }}
 wsclean_ft2.argument.scale                                 =   {{ cellsize_selfcal_deg }}
-wsclean_ft2.argument.mem                                   =   {{ max_percent_memory_per_proc_ngroups }}
+wsclean_ft2.argument.mem                                   =   {{ max_percent_memory_per_proc_ntimes }}
 wsclean_ft2.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
-wsclean_ft2.argument.j                                     =   {{ max_cpus_per_proc_ngroups }}
+wsclean_ft2.argument.j                                     =   {{ max_cpus_per_proc_ntimes }}
 wsclean_ft2.argument.tempdir                               =   {{ local_dir }}
 
-# switch "normal" weights with BL-averaged weights, length = ntimes
+# switch "normal" weights with BL-averaged weights, length = ntimes * num_cal_blocks
 switch_weights_col5.control.type                           =   switch_columns
 switch_weights_col5.control.mapfile_in                     =   concat_data.output.mapfile
 switch_weights_col5.control.inputkey                       =   msfiles
@@ -930,7 +930,7 @@ remove_parmdbs11.control.mapfile_in                        =   make_fast_phase_p
 remove_parmdbs11.control.inputkey                          =   parmdb
 remove_parmdbs11.argument.flags                            =   [-rf,parmdb]
 
-# run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes
+# run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
 # note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
 # GainCal has a filter parameter, we can switch to that
 solve_ampphase11.control.type                              =   dppp_inplace
@@ -1197,9 +1197,9 @@ wsclean_ft3.control.mapfiles_in                            =   [regroup_concat_d
 wsclean_ft3.control.inputkeys                              =   [msfile,name,size]
 wsclean_ft3.argument.flags                                 =   [-predict,msfile]
 wsclean_ft3.argument.scale                                 =   {{ cellsize_selfcal_deg }}
-wsclean_ft3.argument.mem                                   =   {{ max_percent_memory_per_proc_ngroups }}
+wsclean_ft3.argument.mem                                   =   {{ max_percent_memory_per_proc_ntimes }}
 wsclean_ft3.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
-wsclean_ft3.argument.j                                     =   {{ max_cpus_per_proc_ngroups }}
+wsclean_ft3.argument.j                                     =   {{ max_cpus_per_proc_ntimes }}
 wsclean_ft3.argument.tempdir                               =   {{ local_dir }}
 
 # switch "normal" weights with BL-averaged weights, length = ntimes
@@ -1547,50 +1547,6 @@ blank_model.argument.blank_value                           =   zero
 blank_model.argument.img_format                            =   fits
 blank_model.argument.image_is_wsclean_model                =   True
 
-# pad the model image with zeros, length = 1
-pad_model_images.control.type                              =   pad_image
-pad_model_images.control.mapfile_in                        =   create_model4_map.output.mapfile
-pad_model_images.control.inputkey                          =   imagefile
-pad_model_images.argument.flags                            =   [imagefile,{{ wsclean_patch_model_padding }}]
-
-# sort the "shift_empty" unaveraged data into groups that can be concatenated, length = some
-# needed because virtual concatenating all files results in a "too many open files" error.
-regroup_shift_empty_map.control.kind                       =   plugin
-regroup_shift_empty_map.control.type                       =   reGroupMapfile
-regroup_shift_empty_map.control.mapfile_in                 =   shift_empty.output.mapfile
-regroup_shift_empty_map.control.mapfile_groups             =   create_msmulti_map.output.mapfile
-regroup_shift_empty_map.control.mapfile_dir                =   input.output.mapfile_dir
-regroup_shift_empty_map.control.join_max_files             =   100
-regroup_shift_empty_map.control.rotate_groups              =   True
-regroup_shift_empty_map.control.filename                   =   regroup_shift_empty.mapfile
-
-# expand the mapfile of the model image to all files, length = some
-create_expanded_model_mapfile.control.kind                 =   plugin
-create_expanded_model_mapfile.control.type                 =   expandMapfile
-create_expanded_model_mapfile.control.mapfile_in           =   create_model4_map.output.mapfile
-create_expanded_model_mapfile.control.mapfile_to_match     =   regroup_shift_empty_map.output.mapfile
-create_expanded_model_mapfile.control.mapfile_dir          =   input.output.mapfile_dir
-create_expanded_model_mapfile.control.filename             =   expand_wsclean_model.mapfile
-
-# expand mapfile of the model image sizes to all groups, length = some
-expand_facet_model_size_map.control.kind                   =   plugin
-expand_facet_model_size_map.control.type                   =   expandMapfile
-expand_facet_model_size_map.control.mapfile_in             =   pad_model_images.output.padsize.mapfile
-expand_facet_model_size_map.control.mapfile_to_match       =   regroup_shift_empty_map.output.mapfile
-expand_facet_model_size_map.control.mapfile_dir            =   input.output.mapfile_dir
-expand_facet_model_size_map.control.filename               =   expand_facet_model_size.mapfile
-
-# make model visibilities, length = some
-wsclean_ft.control.type                                    =   wsclean_ft
-wsclean_ft.control.mapfiles_in                             =   [regroup_shift_empty_map.output.mapfile,create_expanded_model_mapfile.output.mapfile,expand_facet_model_size_map.output.mapfile]
-wsclean_ft.control.inputkeys                               =   [msfile,name,size]
-wsclean_ft.argument.flags                                  =   [-predict,msfile]
-wsclean_ft.argument.scale                                  =   {{ cellsize_facet_deg }}
-wsclean_ft.argument.mem                                    =   {{ max_percent_memory_per_proc_ngroups }}
-wsclean_ft.argument.channelsout                            =   {{ wsclean_nchannels }}
-wsclean_ft.argument.j                                      =   {{ max_cpus_per_proc_ngroups }}
-wsclean_ft.argument.tempdir                                =   {{ local_dir }}
-wsclean_ft.argument.nwlayers-for-size                      =   12288 12288
 {% else %}
 
 # apply the direction-dependent solutions and average, length = nfiles
@@ -1776,6 +1732,9 @@ adjust_wsclean_mapfile2.control.append                     =   {{ wsclean_suffix
 adjust_wsclean_mapfile2.control.mapfile_dir                =   input.output.mapfile_dir
 adjust_wsclean_mapfile2.control.filename                   =   final_image.mapfile
 
+{% endif %}
+########## end of the "is the calibrator the full facet" if-clause
+
 # pad the model image with zeros, length = 1
 pad_model_images.control.type                              =   pad_image
 pad_model_images.control.mapfile_in                        =   create_model4_map.output.mapfile
@@ -1822,8 +1781,6 @@ wsclean_ft.argument.channelsout                            =   {{ wsclean_nchann
 wsclean_ft.argument.j                                      =   {{ max_cpus_per_proc_ngroups }}
 wsclean_ft.argument.tempdir                                =   {{ local_dir }}
 wsclean_ft.argument.nwlayers-for-size                      =   12288 12288
-{% endif %}
-########## end of the "is the calibrator the full facet" if-clause
 
 # corrupt the model visibilities, length = nfiles
 corrupt_final_model.control.type                           =   dppp
