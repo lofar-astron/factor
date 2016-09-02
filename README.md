@@ -15,7 +15,7 @@ If you want to install Factor yourself, follow the instructions below.
 
 Factor requires the following:
 
-* The LOFAR offline trunk from the LOFAR software repository (version 2.16.4 or later)
+* The LOFAR offline trunk from the LOFAR software repository (version as of 03.09.2016 or later)
 * [CASA](http://casa.nrao.edu) (version 4.2 or version 4.5 -- versions 4.3, 4.4, and 4.6 do not work; note that CASA requires Java for the buildmytasks script that is needed by Factor, so you will need Java as well)
 * [WSClean](http://sourceforge.net/p/wsclean/wiki/Home) (version 1.10 or later)
 * [LSMTool](https://github.com/darafferty/LSMTool) (version 1.1 or later)
