@@ -595,7 +595,7 @@ class Direction(object):
                 # For high-dynamic range calibration, we use 0.2 MHz per channel
                 target_bandwidth_mhz = 0.2
             else:
-                target_bandwidth_mhz = min(2.0, self.get_target_bandwidth(mean_freq_mhz,
+                target_bandwidth_mhz = min(1.0, self.get_target_bandwidth(mean_freq_mhz,
                     delta_theta_deg, resolution_deg, peak_smearing_factor))
             self.log.debug('Target timewidth for selfcal is {} s'.format(target_timewidth_s))
             self.log.debug('Target bandwidth for selfcal is {} MHz'.format(target_bandwidth_mhz))
