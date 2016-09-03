@@ -549,7 +549,7 @@ solve_phaseonly1.argument.steps                            =   [uvcut,solvetec]
 solve_phaseonly1.argument.uvcut.type                       =   uvwflagger
 solve_phaseonly1.argument.uvcut.uvlambdamin                =   {{ solve_min_uv_lambda }}
 solve_phaseonly1.argument.solvetec.type                    =   gaincal
-solve_phaseonly1.argument.solvetec.caltype                 =   tec
+solve_phaseonly1.argument.solvetec.caltype                 =   tecandphase
 solve_phaseonly1.argument.solvetec.parmdb                  =   parmdb
 {% if peel_skymodel is not none %}
 solve_ampphase11.argument.solvetec.usemodelcolumn          =   False
