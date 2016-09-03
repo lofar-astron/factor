@@ -330,7 +330,7 @@ class Direction(object):
 
         # Determine whether the total bandwidth is large enough that wide-band
         # imaging is needed
-        if nbands > 5:
+        if nbands > 7:
             self.use_wideband = True
         else:
             self.use_wideband = False
