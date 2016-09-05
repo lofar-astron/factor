@@ -223,7 +223,13 @@ class Direction(object):
 
         nbands = len(bands)
         preaverage_flux_jy = parset['calibration_specific']['preaverage_flux_jy']
-        tec_block_mhz = parset['calibration_specific']['tec_block_mhz']
+        if self.preapply_phase_cal:
+            # If dir-dependent phase solutions are preapplied, we can solve for
+            # just a single TEC solution across the whole bandwidth. To do this,
+            # we can just set the TEC block to a large value
+            tec_block_mhz = 100.0
+        else:
+            tec_block_mhz = parset['calibration_specific']['tec_block_mhz']
         peel_flux_jy = parset['calibration_specific']['peel_flux_jy']
 
         self.robust_selfcal = parset['imaging_specific']['selfcal_robust']

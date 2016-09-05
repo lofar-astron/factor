@@ -60,6 +60,12 @@ dir_ms = /data/bands
 # 1.25%
 # max_selfcal_loops = 10
 
+# Preapply the direction-dependent phase solutions for the first calibrator to
+# all subsequent ones (default = False). If True, residual clock errors are
+# removed before calibration and a single TEC value is fit across the whole
+# bandwidth
+# preapply_first_cal_phases = False
+
 # Use baseline-dependent preaveraging to increase the signal-to-noise of the
 # phase-only solve for sources below this flux density (default = 0.0; i.e.,
 # disabled). When activated, averaging in time is done to exploit the time

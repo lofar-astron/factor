@@ -319,6 +319,16 @@ def get_calibration_options(parset):
     else:
         parset_dict['max_selfcal_loops'] = 10
 
+    # Preapply the direction-dependent phase solutions for the first calibrator to
+    # all subsequent ones (default = False). If True, residual clock errors are
+    # removed before calibration and a single TEC value is fit across the whole
+    # bandwidth
+    if 'preapply_first_cal_phases' in parset_dict:
+        parset_dict['preapply_first_cal_phases'] = parset.getboolean('calibration',
+            'preapply_first_cal_phases')
+    else:
+        parset_dict['preapply_first_cal_phases'] = False
+
     # Use baseline-dependent preaveraging to increase the signal-to-noise of the
     # phase-only solve for sources below this flux (default = 0.0; i.e., disabled).
     # When activated, averaging in time is done to exploit the time coherence in the
@@ -379,7 +389,7 @@ def get_calibration_options(parset):
         parset_dict['solve_all_correlations_flux_jy'] = 1000.0
 
     # Check for unused options
-    allowed_options = ['exit_on_selfcal_failure', 'skip_selfcal_check',
+    allowed_options = ['exit_on_selfcal_failure', 'skip_selfcal_check', 'preapply_first_cal_phases',
         'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal', 'multires_selfcal',
         'tec_block_mhz', 'peel_flux_jy', 'solve_min_uv_lambda', 'spline_smooth2d',
         'solve_all_correlations_flux_jy']

@@ -159,8 +159,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 for d in directions:
                     if d.name != direction_group_ok[0].name:
                         d.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
-                        d.preapply_phase_cal = True
-                        d.preapply_parmdb_mapfile = direction_group_ok[0].preapply_parmdb_mapfile
+                        if parset['calibration_specific']['preapply_first_cal_phases']:
+                            d.preapply_phase_cal = True
+                            d.preapply_parmdb_mapfile = direction_group_ok[0].preapply_parmdb_mapfile
                 set_sub_data_colname_and_preapply_flag = False
 
         # Subtract final model(s) for directions for which selfcal went OK
