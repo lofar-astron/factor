@@ -1249,7 +1249,8 @@ create_imagebase_map32.control.type                        =   trimMapfile
 create_imagebase_map32.control.mapfile_in                  =   wsclean_image32.output.wsclean_image32-image.fits.mapfile
 create_imagebase_map32.control.trim                        =   -
 create_imagebase_map32.control.mapfile_dir                 =   input.output.mapfile_dir
-create_imagebase_map32.control.filename                    =   wsclean_image32_image_rootname.mapfile
+create_imagebase_map32.control.filename                    =   model3_rootnames.mapfile
+create_imagebase_map32.control.counter                     =   loop_ampcal.output.counter
 
 # expand the mapfile of the model image to all files, length = ntimes
 create_expanded_model3_mapfile.control.kind                =   plugin
