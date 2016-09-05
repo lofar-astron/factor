@@ -343,11 +343,15 @@ average0.argument.msin.datacolumn                          =   DATA
 average0.argument.msout.overwrite                          =   True
 average0.argument.msout.writefullresflag                   =   False
 average0.argument.local_scratch_dir                        =   {{ local_dir }}
+{% if preapply_phase_cal %}
+average0.argument.steps                                    =   [avg]
+{% if else %}
 average0.argument.steps                                    =   [correct,avg]
 average0.argument.correct.type                             =   applycal
 average0.argument.correct.parmdb                           =   parmdb
 average0.argument.correct.correction                       =   gain
 average0.argument.correct.invert                           =   True
+{% if endif %}
 average0.argument.avg.type                                 =   squash
 average0.argument.avg.freqstep                             =   1
 average0.argument.avg.timestep                             =   {{ facetselfcal_timestep }}
