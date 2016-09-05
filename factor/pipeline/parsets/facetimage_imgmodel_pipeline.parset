@@ -249,7 +249,11 @@ add_all_facet_sources.argument.msout.overwrite          =   True
 add_all_facet_sources.argument.msout.writefullresflag   =   False
 add_all_facet_sources.argument.local_scratch_dir        =   {{ local_dir }}
 {% if preapply_phase_cal %}
+{% if preapply_solve_tec_only %}
+add_all_facet_sources.argument.steps                     =   [add,preapply_fast1,preapply_fast2,preapply_slow,correct_fast1,correct_slow,flagzero,avg]
+{% else %}
 add_all_facet_sources.argument.steps                     =   [add,preapply_fast1,preapply_fast2,preapply_slow,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
+{% endif %}
 add_all_facet_sources.argument.preapply_fast1.type       =   applycal
 add_all_facet_sources.argument.preapply_fast1.parmdb     =   preapply_parmdb
 add_all_facet_sources.argument.preapply_fast1.correction =   tec
@@ -272,10 +276,12 @@ add_all_facet_sources.argument.correct_fast1.type       =   applycal
 add_all_facet_sources.argument.correct_fast1.parmdb     =   dir_dep_parmdb
 add_all_facet_sources.argument.correct_fast1.correction =   tec
 add_all_facet_sources.argument.correct_fast1.invert     =   True
+{% if not preapply_solve_tec_only %}
 add_all_facet_sources.argument.correct_fast2.type       =   applycal
 add_all_facet_sources.argument.correct_fast2.parmdb     =   dir_dep_parmdb
 add_all_facet_sources.argument.correct_fast2.correction =   commonscalarphase
 add_all_facet_sources.argument.correct_fast2.invert     =   True
+{% endif %}
 add_all_facet_sources.argument.correct_slow.type        =   applycal
 add_all_facet_sources.argument.correct_slow.parmdb      =   dir_dep_parmdb
 add_all_facet_sources.argument.correct_slow.invert      =   True
@@ -302,7 +308,11 @@ apply_dir_dep.argument.msout.overwrite                     =   True
 apply_dir_dep.argument.msout.writefullresflag              =   False
 apply_dir_dep.argument.local_scratch_dir                   =   {{ local_dir }}
 {% if preapply_phase_cal %}
+{% if preapply_solve_tec_only %}
+apply_dir_dep.argument.steps                               =   [preapply_fast1,preapply_fast2,preapply_slow,correct_fast1,correct_slow,flagzero,avg]
+{% else %}
 apply_dir_dep.argument.steps                               =   [preapply_fast1,preapply_fast2,preapply_slow,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
+{% endif %}
 apply_dir_dep.argument.preapply_fast1.type                 =   applycal
 apply_dir_dep.argument.preapply_fast1.parmdb               =   preapply_parmdb
 apply_dir_dep.argument.preapply_fast1.correction           =   tec
@@ -321,10 +331,12 @@ apply_dir_dep.argument.correct_fast1.type                  =   applycal
 apply_dir_dep.argument.correct_fast1.parmdb                =   dir_dep_parmdb
 apply_dir_dep.argument.correct_fast1.correction            =   tec
 apply_dir_dep.argument.correct_fast1.invert                =   True
+{% if not preapply_solve_tec_only %}
 apply_dir_dep.argument.correct_fast2.type                  =   applycal
 apply_dir_dep.argument.correct_fast2.parmdb                =   dir_dep_parmdb
 apply_dir_dep.argument.correct_fast2.correction            =   commonscalarphase
 apply_dir_dep.argument.correct_fast2.invert                =   True
+{% endif %}
 apply_dir_dep.argument.correct_slow.type                   =   applycal
 apply_dir_dep.argument.correct_slow.parmdb                 =   dir_dep_parmdb
 apply_dir_dep.argument.correct_slow.invert                 =   True

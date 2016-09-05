@@ -564,7 +564,11 @@ solve_phaseonly1.argument.steps                            =   [uvcut,solvetec]
 solve_phaseonly1.argument.uvcut.type                       =   uvwflagger
 solve_phaseonly1.argument.uvcut.uvlambdamin                =   {{ solve_min_uv_lambda }}
 solve_phaseonly1.argument.solvetec.type                    =   gaincal
+{% if preapply_solve_tec_only %}
+solve_phaseonly1.argument.solvetec.caltype                 =   tec
+{% else %}
 solve_phaseonly1.argument.solvetec.caltype                 =   tecandphase
+{% endif %}
 solve_phaseonly1.argument.solvetec.parmdb                  =   parmdb
 solve_phaseonly1.argument.solvetec.usemodelcolumn          =   True
 solve_phaseonly1.argument.solvetec.solint                  =   {{ solint_time_p }}
@@ -588,15 +592,21 @@ apply_phaseonly1.argument.msin.datacolumn                  =   DATA
 apply_phaseonly1.argument.msout.overwrite                  =   True
 apply_phaseonly1.argument.msout.writefullresflag           =   False
 apply_phaseonly1.argument.local_scratch_dir                =   {{ local_dir }}
+{% if preapply_solve_tec_only %}
+apply_phaseonly1.argument.steps                            =   [correct_fast1,avg]
+{% else %}
 apply_phaseonly1.argument.steps                            =   [correct_fast1,correct_fast2,avg]
+{% endif %}
 apply_phaseonly1.argument.correct_fast1.type               =   applycal
 apply_phaseonly1.argument.correct_fast1.parmdb             =   parmdb
 apply_phaseonly1.argument.correct_fast1.correction         =   tec
 apply_phaseonly1.argument.correct_fast1.invert             =   True
+{% if not preapply_solve_tec_only %}
 apply_phaseonly1.argument.correct_fast2.type               =   applycal
 apply_phaseonly1.argument.correct_fast2.parmdb             =   parmdb
 apply_phaseonly1.argument.correct_fast2.correction         =   commonscalarphase
 apply_phaseonly1.argument.correct_fast2.invert             =   True
+{% endif %}
 apply_phaseonly1.argument.avg.type                         =   squash
 apply_phaseonly1.argument.avg.freqstep                     =   1
 apply_phaseonly1.argument.avg.timestep                     =   {{ facetselfcal_timestep }}
@@ -790,15 +800,21 @@ apply_phaseonly2.argument.msin.datacolumn                  =   DATA
 apply_phaseonly2.argument.msout.overwrite                  =   True
 apply_phaseonly2.argument.msout.writefullresflag           =   False
 apply_phaseonly2.argument.local_scratch_dir                =   {{ local_dir }}
+{% if preapply_solve_tec_only %}
+apply_phaseonly2.argument.steps                            =   [correct_fast1,avg]
+{% else %}
 apply_phaseonly2.argument.steps                            =   [correct_fast1,correct_fast2,avg]
+{% endif %}
 apply_phaseonly2.argument.correct_fast1.type               =   applycal
 apply_phaseonly2.argument.correct_fast1.parmdb             =   parmdb
 apply_phaseonly2.argument.correct_fast1.correction         =   tec
 apply_phaseonly2.argument.correct_fast1.invert             =   True
+{% if not preapply_solve_tec_only %}
 apply_phaseonly2.argument.correct_fast2.type               =   applycal
 apply_phaseonly2.argument.correct_fast2.parmdb             =   parmdb
 apply_phaseonly2.argument.correct_fast2.correction         =   commonscalarphase
 apply_phaseonly2.argument.correct_fast2.invert             =   True
+{% endif %}
 apply_phaseonly2.argument.avg.type                         =   squash
 apply_phaseonly2.argument.avg.freqstep                     =   1
 apply_phaseonly2.argument.avg.timestep                     =   {{ facetselfcal_timestep }}
@@ -968,7 +984,11 @@ solve_ampphase11.argument.steps                            =   [uvcut,solvetec]
 solve_ampphase11.argument.uvcut.type                       =   uvwflagger
 solve_ampphase11.argument.uvcut.uvlambdamin                =   {{ solve_min_uv_lambda }}
 solve_ampphase11.argument.solvetec.type                    =   gaincal
+{% if preapply_solve_tec_only %}
+solve_ampphase11.argument.solvetec.caltype                 =   tec
+{% else %}
 solve_ampphase11.argument.solvetec.caltype                 =   tecandphase
+{% endif %}
 solve_ampphase11.argument.solvetec.parmdb                  =   parmdb
 solve_ampphase11.argument.solvetec.usemodelcolumn          =   True
 solve_ampphase11.argument.solvetec.solint                  =   {{ solint_time_p }}
@@ -988,15 +1008,21 @@ apply_ampphase11.argument.numthreads                       =   {{ max_cpus_per_p
 apply_ampphase11.argument.msin.datacolumn                  =   DATA
 apply_ampphase11.argument.msout                            =   .
 apply_ampphase11.argument.msout.datacolumn                 =   CORRECTED_DATA
+{% if preapply_solve_tec_only %}
+apply_ampphase11.argument.steps                            =   [correct_fast1]
+{% else %}
 apply_ampphase11.argument.steps                            =   [correct_fast1,correct_fast2]
+{% endif %}
 apply_ampphase11.argument.correct_fast1.type               =   applycal
 apply_ampphase11.argument.correct_fast1.parmdb             =   parmdb
 apply_ampphase11.argument.correct_fast1.correction         =   tec
 apply_ampphase11.argument.correct_fast1.invert             =   True
+{% if not preapply_solve_tec_only %}
 apply_ampphase11.argument.correct_fast2.type               =   applycal
 apply_ampphase11.argument.correct_fast2.parmdb             =   parmdb
 apply_ampphase11.argument.correct_fast2.correction         =   commonscalarphase
 apply_ampphase11.argument.correct_fast2.invert             =   True
+{% endif %}
 
 # generate mapfile for the slow-gain parmDBs generated in the solve_ampphase12 step
 make_slow_gain_parmdb_map.control.kind                     =  plugin
@@ -1253,7 +1279,11 @@ solve_ampphase21.argument.steps                            =   [uvcut,solvetec]
 solve_ampphase21.argument.uvcut.type                       =   uvwflagger
 solve_ampphase21.argument.uvcut.uvlambdamin                =   {{ solve_min_uv_lambda }}
 solve_ampphase21.argument.solvetec.type                    =   gaincal
+{% if preapply_solve_tec_only %}
+solve_ampphase21.argument.solvetec.caltype                 =   tec
+{% else %}
 solve_ampphase21.argument.solvetec.caltype                 =   tecandphase
+{% endif %}
 solve_ampphase21.argument.solvetec.parmdb                  =   parmdb
 solve_ampphase21.argument.solvetec.usemodelcolumn          =   True
 solve_ampphase21.argument.solvetec.solint                  =   {{ solint_time_p }}
@@ -1273,15 +1303,21 @@ apply_ampphase21.argument.numthreads                       =   {{ max_cpus_per_p
 apply_ampphase21.argument.msin.datacolumn                  =   DATA
 apply_ampphase21.argument.msout                            =   .
 apply_ampphase21.argument.msout.datacolumn                 =   CORRECTED_DATA
+{% if preapply_solve_tec_only %}
+apply_ampphase21.argument.steps                            =   [correct_fast1]
+{% else %}
 apply_ampphase21.argument.steps                            =   [correct_fast1,correct_fast2]
+{% endif %}
 apply_ampphase21.argument.correct_fast1.type               =   applycal
 apply_ampphase21.argument.correct_fast1.parmdb             =   parmdb
 apply_ampphase21.argument.correct_fast1.correction         =   tec
 apply_ampphase21.argument.correct_fast1.invert             =   True
+{% if not preapply_solve_tec_only %}
 apply_ampphase21.argument.correct_fast2.type               =   applycal
 apply_ampphase21.argument.correct_fast2.parmdb             =   parmdb
 apply_ampphase21.argument.correct_fast2.correction         =   commonscalarphase
 apply_ampphase21.argument.correct_fast2.invert             =   True
+{% endif %}
 
 # merge the parmDBs with the phase solutions into one, length = 1
 # This is needed later when the loop is done and we want to apply the solutions to the original data
@@ -1637,7 +1673,11 @@ apply_dir_dep.argument.msout.overwrite                     =   True
 apply_dir_dep.argument.msout.writefullresflag              =   False
 apply_dir_dep.argument.local_scratch_dir                   =   {{ local_dir }}
 {% if preapply_phase_cal %}
+{% if preapply_solve_tec_only %}
+apply_dir_dep.argument.steps                               =   [preapply_fast1,preapply_fast2,preapply_slow,correct_fast1,correct_slow,flagzero,avg]
+{% else %}
 apply_dir_dep.argument.steps                               =   [preapply_fast1,preapply_fast2,preapply_slow,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
+{% endif %}
 apply_dir_dep.argument.preapply_fast1.type                 =   applycal
 apply_dir_dep.argument.preapply_fast1.parmdb               =   preapply_parmdb
 apply_dir_dep.argument.preapply_fast1.correction           =   tec
@@ -1656,10 +1696,12 @@ apply_dir_dep.argument.correct_fast1.type                  =   applycal
 apply_dir_dep.argument.correct_fast1.parmdb                =   dir_dep_parmdb
 apply_dir_dep.argument.correct_fast1.correction            =   tec
 apply_dir_dep.argument.correct_fast1.invert                =   True
+{% if not preapply_solve_tec_only %}
 apply_dir_dep.argument.correct_fast2.type                  =   applycal
 apply_dir_dep.argument.correct_fast2.parmdb                =   dir_dep_parmdb
 apply_dir_dep.argument.correct_fast2.correction            =   commonscalarphase
 apply_dir_dep.argument.correct_fast2.invert                =   True
+{% endif %}
 apply_dir_dep.argument.correct_slow.type                   =   applycal
 apply_dir_dep.argument.correct_slow.parmdb                 =   dir_dep_parmdb
 apply_dir_dep.argument.correct_slow.invert                 =   True
@@ -1894,7 +1936,11 @@ corrupt_final_model.argument.msout.overwrite               =   True
 corrupt_final_model.argument.msout.writefullresflag        =   False
 corrupt_final_model.argument.local_scratch_dir             =   {{ local_dir }}
 {% if preapply_phase_cal %}
+{% if preapply_solve_tec_only %}
+corrupt_final_model.argument.steps                         =   [preapply_fast1,preapply_fast2,preapply_slow,corrupt_fast1,corrupt_slow]
+{% else %}
 corrupt_final_model.argument.steps                         =   [preapply_fast1,preapply_fast2,preapply_slow,corrupt_fast1,corrupt_fast2,corrupt_slow]
+{% endif %}
 corrupt_final_model.argument.preapply_fast1.type           =   applycal
 corrupt_final_model.argument.preapply_fast1.parmdb         =   preapply_parmdb
 corrupt_final_model.argument.preapply_fast1.correction     =   tec
@@ -1913,10 +1959,12 @@ corrupt_final_model.argument.corrupt_fast1.type            =   applycal
 corrupt_final_model.argument.corrupt_fast1.parmdb          =   dir_dep_parmdb
 corrupt_final_model.argument.corrupt_fast1.correction      =   tec
 corrupt_final_model.argument.corrupt_fast1.invert          =   False
+{% if not preapply_solve_tec_only %}
 corrupt_final_model.argument.corrupt_fast2.type            =   applycal
 corrupt_final_model.argument.corrupt_fast2.parmdb          =   dir_dep_parmdb
 corrupt_final_model.argument.corrupt_fast2.correction      =   commonscalarphase
 corrupt_final_model.argument.corrupt_fast2.invert          =   False
+{% endif %}
 corrupt_final_model.argument.corrupt_slow.type             =   applycal
 corrupt_final_model.argument.corrupt_slow.parmdb           =   dir_dep_parmdb
 corrupt_final_model.argument.corrupt_slow.correction       =   gain

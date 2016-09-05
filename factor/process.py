@@ -162,6 +162,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                         if parset['calibration_specific']['preapply_first_cal_phases']:
                             d.preapply_phase_cal = True
                             d.preapply_parmdb_mapfile = direction_group_ok[0].preapply_parmdb_mapfile
+                            if parset['calibration_specific']['preapply_solve_tec_only']:
+                                d.preapply_solve_tec_only = True
                 set_sub_data_colname_and_preapply_flag = False
 
         # Subtract final model(s) for directions for which selfcal went OK
