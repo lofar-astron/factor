@@ -137,7 +137,7 @@ class dppp_scratch(LOFARnodeTCP):
     def copy_to_origin(self):
         self.logger.info("Copying output data to original directory")
         args = ['-r', self.msout_scratch, self.msout_destination_dir ]
-        prog = '/usr/bin/cp'
+        prog = '/bin/cp'
         self.execute(prog, args)
 
     def cleanup(self):
