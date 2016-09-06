@@ -76,6 +76,8 @@ class OutlierPeel(Operation):
             'full_skymodels.mapfile')
         self.direction.selfcal_plots_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'make_selfcal_plots.mapfile')
+        self.direction.preapply_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'create_preapply_parmdb.mapfile')
 
         # Store results of verify_subtract check. This will work if the verification
         # was done using multiple bands although we use only one at the moment

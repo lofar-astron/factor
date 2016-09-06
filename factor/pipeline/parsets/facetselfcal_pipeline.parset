@@ -1584,6 +1584,7 @@ merge_selfcal_parmdbs.control.outputkey                    =   parmdb_out
 merge_selfcal_parmdbs.argument.flags                       =   [parmdb_p,parmdb_a,parmdb_out]
 
 {% if create_preapply_parmdb %}
+# make a phase-only parmDB suitable for preapplication, length = 1
 create_preapply_parmdb.control.type                        =   reset_amps
 create_preapply_parmdb.control.mapfile_in                  =   merge_selfcal_parmdbs.output.mapfile
 create_preapply_parmdb.control.inputkey                    =   inparmdb

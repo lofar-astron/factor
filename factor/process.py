@@ -74,7 +74,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
     # Run peeling operations on outlier directions and any facets
     # for which the calibrator is to be peeled
-    set_sub_data_colname_and_preapply_flag = True
+    set_sub_data_colname = True
+    set_preapply_flag = True
     peel_directions = [d for d in directions if d.is_outlier]
     peel_directions.extend([d for d in directions if d.peel_calibrator])
     if len(peel_directions) > 0:
@@ -92,14 +93,28 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 op = FacetPeel(parset, bands, d)
             scheduler.run(op)
 
-            # Check whether direction went through selfcal successfully. If
-            # not, exit
+            # Check whether direction went through peeling successfully. If so,
+            # set various flags if needed. If not successful, exit
             if d.selfcal_ok:
-                # Set the name of the subtracted data column for all directions
+                # Set the name of the subtracted data column
                 if set_sub_data_colname:
                     for direction in directions:
                         direction.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
                     set_sub_data_colname = False
+
+                # Set the flag for preapplication of selfcal solutions, but only
+                # if this direction is not an outlier (as its solutions are likely
+                # too different to be useful)
+                if (set_preapply_flag and
+                    parset['calibration_specific']['preapply_first_cal_phases'] and
+                    not d.is_outlier):
+                    for direction in directions:
+                        if direction.name != d.name:
+                            direction.preapply_phase_cal = True
+                            direction.preapply_parmdb_mapfile = d.preapply_parmdb_mapfile
+                            if parset['calibration_specific']['preapply_solve_tec_only']:
+                                direction.preapply_solve_tec_only = True
+                    set_preapply_flag = False
             else:
                 log.error('Peeling failed for direction {0}.'.format(d.name))
                 log.info('Exiting...')
@@ -151,20 +166,24 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             for d in direction_group:
                 d.selfcal_ok = True
         direction_group_ok = [d for d in direction_group if d.selfcal_ok]
-        if set_sub_data_colname_and_preapply_flag:
+        if set_sub_data_colname:
             # Set the name of the subtracted data column for remaining
-            # directions (if needed). Also set the flag for preapplication of
-            # selfcal solutions
+            # directions (if needed)
             if len(direction_group_ok) > 0:
                 for d in directions:
                     if d.name != direction_group_ok[0].name:
                         d.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
-                        if parset['calibration_specific']['preapply_first_cal_phases']:
-                            d.preapply_phase_cal = True
-                            d.preapply_parmdb_mapfile = direction_group_ok[0].preapply_parmdb_mapfile
-                            if parset['calibration_specific']['preapply_solve_tec_only']:
-                                d.preapply_solve_tec_only = True
-                set_sub_data_colname_and_preapply_flag = False
+                set_sub_data_colname = False
+        if set_preapply_flag and parset['calibration_specific']['preapply_first_cal_phases']:
+            # Set the flag for preapplication of selfcal solutions (if needed)
+            if len(direction_group_ok) > 0:
+                for d in directions:
+                    if d.name != direction_group_ok[0].name:
+                        d.preapply_phase_cal = True
+                        d.preapply_parmdb_mapfile = direction_group_ok[0].preapply_parmdb_mapfile
+                        if parset['calibration_specific']['preapply_solve_tec_only']:
+                            d.preapply_solve_tec_only = True
+                set_preapply_flag = False
 
         # Subtract final model(s) for directions for which selfcal went OK
         ops = [FacetSub(parset, bands, d) for d in direction_group_ok]
