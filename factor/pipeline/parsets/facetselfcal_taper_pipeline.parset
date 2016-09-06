@@ -1650,6 +1650,9 @@ make_selfcal_plots.control.inputkeys                       =   parmdb
 make_selfcal_plots.control.outputkey                       =   plots_root
 make_selfcal_plots.argument.flags                          =   [parmdb,plots_root]
 make_selfcal_plots.argument.fourpol                        =   {{ fourpol }}
+{% if preapply_solve_tec_only %}
+make_selfcal_plots.argument.plot_tec_scalarphase           =   False
+{% endif %}
 
 # create a mapfile with the selfcal images, length = 1
 create_selfcal_images_mapfile.control.kind                 =   plugin
