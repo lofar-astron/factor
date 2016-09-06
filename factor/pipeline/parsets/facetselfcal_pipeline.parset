@@ -1755,7 +1755,11 @@ adjust_wsclean_mapfile2.control.filename                   =   final_image.mapfi
 
 # pad the model image with zeros, length = 1
 pad_model_images.control.type                              =   pad_image
+{% if is_patch or skip_facet_imaging %}
+pad_model_images.control.mapfile_in                        =   blank_model.output.mapfile
+{% else %}
 pad_model_images.control.mapfile_in                        =   create_model4_map.output.mapfile
+{% endif %}
 pad_model_images.control.inputkey                          =   imagefile
 pad_model_images.argument.flags                            =   [imagefile,{{ wsclean_facet_model_padding }}]
 
