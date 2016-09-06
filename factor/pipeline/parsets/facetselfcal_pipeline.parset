@@ -195,6 +195,9 @@ sort_into_Groups_maps.control.type                         =   mapfilenamesFromM
 sort_into_Groups_maps.control.mapfile_groupmap             =   sort_into_Groups.output.groupmapfile.mapfile
 sort_into_Groups_maps.control.mapfile_filesmap             =   sort_into_Groups.output.mapfile.mapfile
 
+# concat data in frequency, length = ntimes * num_cal_blocks
+# Note, this step is done because DPPP cannot datasets with multiple spectral
+# windows, as occurs when MSs at several frequencies are virtually concatenated
 concat_data.control.type                                   =   dppp
 concat_data.control.mapfile_out                            =   sort_into_Groups_maps.output.groupmap
 concat_data.control.mapfile_in                             =   sort_into_Groups_maps.output.filesmap
@@ -1608,6 +1611,38 @@ create_compressed_mapfile5.control.mapfile_in              =   apply_dir_dep.out
 create_compressed_mapfile5.control.mapfile_dir             =   input.output.mapfile_dir
 create_compressed_mapfile5.control.filename                =   concat_averaged_input.mapfile
 
+# sort compressed mapfile so that there is one group per timestamp, length = ntimes
+sort_averaged.control.type                                 =   sort_times_into_freqGroups
+sort_averaged.argument.flags                               =   [create_compressed_mapfile5.output.mapfile]
+sort_averaged.argument.filename                            =   apply_dir_dep_sorted_groups.mapfile
+sort_averaged.argument.mapfile_dir                         =   input.output.mapfile_dir
+sort_averaged.argument.hosts                               =   {{ hosts }}
+sort_averaged.argument.stepname                            =   sort_averaged
+sort_averaged.argument.nband_pad                           =   {{ nband_pad }}
+
+# convert the output of sort_average5 into usable mapfiles, len = 1 / ntimes
+sort_averaged_maps.control.kind                            =   plugin
+sort_averaged_maps.control.type                            =   mapfilenamesFromMapfiles
+sort_averaged_maps.control.mapfile_groupmap                =   sort_averaged.output.groupmapfile.mapfile
+sort_averaged_maps.control.mapfile_filesmap                =   sort_averaged.output.mapfile.mapfile
+
+# concatenate data in frequency, length = ntimes
+# this step is needed to allow the desired channelsout for WSClean to be a
+# divisor of the number of bands
+concat_averaged.control.type                               =   virtual_concat
+concat_averaged.control.mapfile_out                        =   sort_averaged_maps.output.groupmap
+concat_averaged.control.mapfile_in                         =   sort_averaged_maps.output.filesmap
+concat_averaged.control.inputkey                           =   msfiles
+concat_averaged.control.outputkey                          =   msconcat
+concat_averaged.argument.flags                             =   [msfiles,msconcat]
+
+# make compressed mapfile of averaged data, length = 1
+create_compressed_mapfile6.control.kind                    =   plugin
+create_compressed_mapfile6.control.type                    =   compressMapfile
+create_compressed_mapfile6.control.mapfile_in              =   concat_averaged.output.mapfile
+create_compressed_mapfile6.control.mapfile_dir             =   input.output.mapfile_dir
+create_compressed_mapfile6.control.filename                =   full_image_input.mapfile
+
 # make a mask from the last selfcal image, length = 1
 premask.control.type                                       =   make_clean_mask
 premask.control.mapfile_in                                 =   create_imagebase_map42.output.mapfile
@@ -1622,9 +1657,8 @@ premask.argument.reference_ra_deg                          =   {{ facet_ra }}
 premask.argument.reference_dec_deg                         =   {{ facet_dec }}
 
 # image the concatenated data with the preliminary mask, length = 1
-# maybe this can better run on all single files without concatenation
 wsclean_image_full1.control.type                           =   wsclean
-wsclean_image_full1.control.mapfiles_in                    =   [create_compressed_mapfile5.output.mapfile,premask.output.mapfile]
+wsclean_image_full1.control.mapfiles_in                    =   [create_compressed_mapfile6.output.mapfile,premask.output.mapfile]
 wsclean_image_full1.control.inputkeys                      =   [msfile,fitsmask]
 wsclean_image_full1.argument.flags                         =   [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
 wsclean_image_full1.argument.fitsmask                      =   fitsmask
@@ -1681,7 +1715,7 @@ mask5.argument.vertices_file                               =   {{ vertices_file 
 
 # image the concatenated data with the updated mask, length = 1
 wsclean_image_full2.control.type                           =   wsclean
-wsclean_image_full2.control.mapfiles_in                    =   [create_compressed_mapfile5.output.mapfile,mask5.output.mapfile,mask5.output.threshold_5sig.mapfile]
+wsclean_image_full2.control.mapfiles_in                    =   [create_compressed_mapfile6.output.mapfile,mask5.output.mapfile,mask5.output.threshold_5sig.mapfile]
 wsclean_image_full2.control.inputkeys                      =   [msfile,fitsmask,threshold]
 wsclean_image_full2.argument.flags                         =   [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
 wsclean_image_full2.argument.fitsmask                      =   fitsmask
@@ -1732,38 +1766,63 @@ pad_model_images.control.mapfile_in                        =   create_model4_map
 pad_model_images.control.inputkey                          =   imagefile
 pad_model_images.argument.flags                            =   [imagefile,{{ wsclean_facet_model_padding }}]
 
-# sort the "shift_empty" unaveraged data into groups that can be concatenated, length = some
-# needed because virtual concatenating all files results in a "too many open files" error.
-regroup_shift_empty_map.control.kind                       =   plugin
-regroup_shift_empty_map.control.type                       =   reGroupMapfile
-regroup_shift_empty_map.control.mapfile_in                 =   shift_empty.output.mapfile
-regroup_shift_empty_map.control.mapfile_groups             =   create_msmulti_map.output.mapfile
-regroup_shift_empty_map.control.mapfile_dir                =   input.output.mapfile_dir
-regroup_shift_empty_map.control.join_max_files             =   100
-regroup_shift_empty_map.control.rotate_groups              =   True
-regroup_shift_empty_map.control.filename                   =   regroup_shift_empty.mapfile
+# compress mapfile so that all files are in one group, length = 1
+create_compressed_mapfile_shift_empty.control.kind         =   plugin
+create_compressed_mapfile_shift_empty.control.type         =   compressMapfile
+create_compressed_mapfile_shift_empty.control.mapfile_in   =   shift_empty.output.mapfile
+create_compressed_mapfile_shift_empty.control.mapfile_dir  =   input.output.mapfile_dir
+create_compressed_mapfile_shift_empty.control.filename     =   concat_shift_empty_input.mapfile
 
-# expand the mapfile of the model image to all files, length = some
+# sort compressed mapfile so that there is one group per timestamp, length = ntimes
+sort_shift_empty_into_Groups.control.type                  =   sort_times_into_freqGroups
+sort_shift_empty_into_Groups.argument.flags                =   [create_compressed_mapfile_shift_empty.output.mapfile]
+sort_shift_empty_into_Groups.argument.filename             =   sorted_groups_shift_empty.mapfile
+sort_shift_empty_into_Groups.argument.mapfile_dir          =   input.output.mapfile_dir
+sort_shift_empty_into_Groups.argument.hosts                =   {{ hosts }}
+sort_shift_empty_into_Groups.argument.stepname             =   sort_into_Groups
+{% if is_patch or skip_facet_imaging %}
+sort_shift_empty_into_Groups.argument.nband_pad            =   0
+{% else %}
+sort_shift_empty_into_Groups.argument.nband_pad            =   {{ nband_pad }}
+{% endif %}
+
+# convert the output of sort_into_Groups into usable mapfiles, len = 1 / ntimes
+sort_shift_empty_into_Groups_maps.control.kind             =   plugin
+sort_shift_empty_into_Groups_maps.control.type             =   mapfilenamesFromMapfiles
+sort_shift_empty_into_Groups_maps.control.mapfile_groupmap =   sort_shift_empty_into_Groups.output.groupmapfile.mapfile
+sort_shift_empty_into_Groups_maps.control.mapfile_filesmap =   sort_shift_empty_into_Groups.output.mapfile.mapfile
+
+# concat data in frequency, length = ntimes
+# this step is needed to ensure that the shift empty datasets have the same
+# padding as the ones used for the full/patch images
+concat_shift_empty.control.type                            =   virtual_concat
+concat_shift_empty.control.mapfile_out                     =   sort_shift_empty_into_Groups_maps.output.groupmap
+concat_shift_empty.control.mapfile_in                      =   sort_shift_empty_into_Groups_maps.output.filesmap
+concat_shift_empty.control.inputkey                        =   msfiles
+concat_shift_empty.control.outputkey                       =   msconcat
+concat_shift_empty.argument.flags                          =   [msfiles,msconcat]
+
+# expand the mapfile of the model image to all files, length = ntimes
 create_expanded_model_mapfile.control.kind                 =   plugin
 create_expanded_model_mapfile.control.type                 =   expandMapfile
 create_expanded_model_mapfile.control.mapfile_in           =   create_model4_map.output.mapfile
-create_expanded_model_mapfile.control.mapfile_to_match     =   regroup_shift_empty_map.output.mapfile
+create_expanded_model_mapfile.control.mapfile_to_match     =   concat_shift_empty.output.mapfile
 create_expanded_model_mapfile.control.mapfile_dir          =   input.output.mapfile_dir
 create_expanded_model_mapfile.control.filename             =   expand_wsclean_model.mapfile
 
-# expand mapfile of the model image sizes to all groups, length = some
+# expand mapfile of the model image sizes to all groups, length = ntimes
 expand_facet_model_size_map.control.kind                   =   plugin
 expand_facet_model_size_map.control.type                   =   expandMapfile
 expand_facet_model_size_map.control.mapfile_in             =   pad_model_images.output.padsize.mapfile
-expand_facet_model_size_map.control.mapfile_to_match       =   regroup_shift_empty_map.output.mapfile
+expand_facet_model_size_map.control.mapfile_to_match       =   concat_shift_empty.output.mapfile
 expand_facet_model_size_map.control.mapfile_dir            =   input.output.mapfile_dir
 expand_facet_model_size_map.control.filename               =   expand_facet_model_size.mapfile
 
-# make model visibilities, length = some
+# make model visibilities, length = ntimes
 # For WSClean predict, we need to increase the number of wplanes so that the
 # effective model image size is larger than the FOV (to prevent aliasing issues)
 wsclean_ft.control.type                                    =   wsclean_ft
-wsclean_ft.control.mapfiles_in                             =   [regroup_shift_empty_map.output.mapfile,create_expanded_model_mapfile.output.mapfile,expand_facet_model_size_map.output.mapfile]
+wsclean_ft.control.mapfiles_in                             =   [concat_shift_empty.output.mapfile,create_expanded_model_mapfile.output.mapfile,expand_facet_model_size_map.output.mapfile]
 wsclean_ft.control.inputkeys                               =   [msfile,name,size]
 wsclean_ft.argument.flags                                  =   [-predict,msfile]
 wsclean_ft.argument.scale                                  =   {{ cellsize_facet_deg }}
