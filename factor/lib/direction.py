@@ -223,7 +223,7 @@ class Direction(object):
             timestep_sec *= existing_data_timestep
             ntimes /= existing_data_timestep
 
-        nbands = len(bands)
+        nbands = self.get_nbands(bands)
         preaverage_flux_jy = parset['calibration_specific']['preaverage_flux_jy']
         tec_block_mhz = parset['calibration_specific']['tec_block_mhz']
         peel_flux_jy = parset['calibration_specific']['peel_flux_jy']
@@ -260,7 +260,7 @@ class Direction(object):
         # number of WSClean channels must be an even divisor of the total number
         # of channels in the full bandwidth after averaging to prevent
         # mismatches during the predict step on the unaveraged data. For selfcal,
-        # we use nchannels = nbands and fit a power law across the channels
+        # we use nchannels = nbands and fit a third-order polynomial
         # using 3 averaged channels
         #
         # Also define the image suffixes (which depend on whether or not
@@ -886,6 +886,30 @@ class Direction(object):
                 pass
 
 
+    def get_nbands(self, bands):
+        """
+        Returns total number of bands including missing ones
+
+        Parameters
+        ----------
+        bands : list of Band objects
+            Bands for this operation
+
+        """"
+        freqs_hz = [b.freq for b in bands]
+        chan_width_hz = bands[0].chan_width_hz
+        nchan = bands[0].nchan
+        freq_width_hz = chan_width_hz * nchan
+
+        # Find gaps, if any
+        missing_bands = []
+        for i, (freq1, freq2) in enumerate(zip(freqs_hz[:-1], freqs_hz[1:])):
+            ngap = int(round((freq2 - freq1)/freq_width_hz))
+            missing_bands.extend([i + j + 1 for j in range(ngap-1)])
+
+        return len(bands) + len(missing_bands)
+
+
     def save_state(self):
         """
         Saves the direction state to a file
@@ -934,10 +958,6 @@ class Direction(object):
                     self.facet_model_mapfile = d['facet_model_mapfile']
                 if 'wsclean_modelimg_size_mapfile' in d:
                     self.wsclean_modelimg_size_mapfile = d['wsclean_modelimg_size_mapfile']
-
-                # Load mapfile needed for reimaging with existing data
-#                 if 'image_data_mapfile' in d:
-#                     self.image_data_mapfile = d['image_data_mapfile']
             return True
         except:
             return False

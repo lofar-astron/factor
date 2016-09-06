@@ -124,6 +124,7 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
     hostID = 0
     for time in timestamps:
         (freq,fname) = time_groups[time]['freq_names'].pop(0)
+        nbands = 0
         for fgroup in range(ngroups):
             files = []
             skip_this = True
@@ -147,6 +148,8 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
                 # Append dummy data to last frequency group only
                 for i in range(nband_pad):
                     files.append('dummy.ms')
+            if not skip_this:
+                nbands += len(files)
 
             filemap.append(MultiDataProduct(hosts[hostID%numhosts], files, skip_this))
             groupname = time_groups[time]['basename']+'_%Xt_%dg.ms'%(time,fgroup)
@@ -162,7 +165,7 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
     filemap.save(filemapname)
     groupmapname = os.path.join(mapfile_dir, filename+'_groups')
     groupmap.save(groupmapname)
-    result = {'mapfile': filemapname, 'groupmapfile': groupmapname}
+    result = {'mapfile': filemapname, 'groupmapfile': groupmapname, 'nbands': nbands}
     return result
 
 def input2bool(invar):
