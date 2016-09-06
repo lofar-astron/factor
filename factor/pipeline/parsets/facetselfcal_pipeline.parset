@@ -225,9 +225,9 @@ sort_into_Groups_maps.control.mapfile_filesmap             =   sort_into_Groups.
 concat_data.control.type                                   =   virtual_concat
 concat_data.control.mapfile_out                            =   sort_into_Groups_maps.output.groupmap
 concat_data.control.mapfile_in                             =   sort_into_Groups_maps.output.filesmap
-concat.control.inputkey                                    =   msfiles
-concat.control.outputkey                                   =   msconcat
-concat.argument.flags                                      =   [msfiles,msconcat]
+concat_data.control.inputkey                               =   msfiles
+concat_data.control.outputkey                              =   msconcat
+concat_data.argument.flags                                 =   [msfiles,msconcat]
 
 # make compressed mapfile for concatenated data MSs, length = 1
 concat_data_compressed_mapfile.control.kind                =   plugin
