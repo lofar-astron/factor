@@ -796,7 +796,11 @@ solve_phaseonly2.argument.steps                            =   [uvcut,solvetec]
 solve_phaseonly2.argument.uvcut.type                       =   uvwflagger
 solve_phaseonly2.argument.uvcut.uvlambdamin                =   {{ solve_min_uv_lambda }}
 solve_phaseonly2.argument.solvetec.type                    =   gaincal
+{% if preapply_solve_tec_only %}
+solve_phaseonly2.argument.solvetec.caltype                 =   tec
+{% else %}
 solve_phaseonly2.argument.solvetec.caltype                 =   tecandphase
+{% endif %}
 solve_phaseonly2.argument.solvetec.parmdb                  =   parmdb
 solve_phaseonly2.argument.solvetec.usemodelcolumn          =   True
 solve_phaseonly2.argument.solvetec.solint                  =   {{ solint_time_p }}
