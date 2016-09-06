@@ -223,7 +223,7 @@ class Direction(object):
             timestep_sec *= existing_data_timestep
             ntimes /= existing_data_timestep
 
-        nbands = self.get_nbands(bands)
+        nbands = self.get_nbasnds(bands)
         preaverage_flux_jy = parset['calibration_specific']['preaverage_flux_jy']
         tec_block_mhz = parset['calibration_specific']['tec_block_mhz']
         peel_flux_jy = parset['calibration_specific']['peel_flux_jy']
@@ -895,7 +895,7 @@ class Direction(object):
         bands : list of Band objects
             Bands for this operation
 
-        """"
+        """
         freqs_hz = [b.freq for b in bands]
         chan_width_hz = bands[0].chan_width_hz
         nchan = bands[0].nchan
