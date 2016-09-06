@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, add_imaging_cols, regroup_shift_empty_map, expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, add_model_to_empty_data, {% if skip_facet_imaging %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, create_parmdb_map, add_all_facet_sources, {% else %} apply_dir_dep, {% endif %} create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
+pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, regroup_shift_empty_map, expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, add_model_to_empty_data, {% if skip_facet_imaging %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, create_parmdb_map, add_all_facet_sources, {% else %} apply_dir_dep, {% endif %} create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -86,12 +86,6 @@ shift_empty.argument.steps                            =   [shift]
 shift_empty.argument.shift.type                       =   phaseshifter
 shift_empty.argument.shift.phasecenter                =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
 
-# add the imaging columns to the MS files, length = nfiles
-add_imaging_cols.control.type                         =   add_imaging_columns
-add_imaging_cols.control.mapfile_in                   =   shift_empty.output.mapfile
-add_imaging_cols.control.inputkey                     =   msfile
-add_imaging_cols.argument.flags                       =   [msfile]
-
 # sort the "shift_empty" unaveraged data into groups that can be concatenated, length = some
 # needed because virtual concatenating all files results in a "too many open files" error.
 regroup_shift_empty_map.control.kind                  =   plugin
@@ -129,7 +123,11 @@ wsclean_ft.control.inputkeys                          =   [msfile,name,size]
 wsclean_ft.argument.flags                             =   [-predict,msfile]
 wsclean_ft.argument.scale                             =   0.000417
 wsclean_ft.argument.mem                               =   {{ max_percent_memory_per_proc_ngroups }}
+{% if skip_facet_imaging %}
+wsclean_ft.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
+{% else %}
 wsclean_ft.argument.channelsout                       =   {{ wsclean_nchannels }}
+{% endif %}
 wsclean_ft.argument.j                                 =   {{ max_cpus_per_proc_single }}
 wsclean_ft.argument.tempdir                           =   {{ local_dir }}
 
