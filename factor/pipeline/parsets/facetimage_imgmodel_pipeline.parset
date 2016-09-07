@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, regroup_shift_empty_map, expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, add_model_to_empty_data, {% if skip_facet_imaging %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, create_parmdb_map, add_all_facet_sources, {% else %} apply_dir_dep, {% endif %} create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
+pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, sort_shift_empty_into_Groups, sort_shift_empty_into_Groups_maps, concat_shift_empty, expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, add_model_to_empty_data, {% if skip_facet_imaging %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, create_parmdb_map, add_all_facet_sources, {% else %} apply_dir_dep, {% endif %} create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -86,22 +86,47 @@ shift_empty.argument.steps                            =   [shift]
 shift_empty.argument.shift.type                       =   phaseshifter
 shift_empty.argument.shift.phasecenter                =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
 
-# sort the "shift_empty" unaveraged data into groups that can be concatenated, length = some
-# needed because virtual concatenating all files results in a "too many open files" error.
-regroup_shift_empty_map.control.kind                  =   plugin
-regroup_shift_empty_map.control.type                  =   reGroupMapfile
-regroup_shift_empty_map.control.mapfile_in            =   shift_empty.output.mapfile
-regroup_shift_empty_map.control.mapfile_groups        =   create_msmulti_map.output.mapfile
-regroup_shift_empty_map.control.mapfile_dir           =   input.output.mapfile_dir
-regroup_shift_empty_map.control.join_max_files        =   100
-regroup_shift_empty_map.control.rotate_groups         =   True
-regroup_shift_empty_map.control.filename              =   regroup_shift_empty.mapfile
+# compress mapfile so that all files are in one group, length = 1
+create_compressed_mapfile_shift_empty.control.kind         =   plugin
+create_compressed_mapfile_shift_empty.control.type         =   compressMapfile
+create_compressed_mapfile_shift_empty.control.mapfile_in   =   shift_empty.output.mapfile
+create_compressed_mapfile_shift_empty.control.mapfile_dir  =   input.output.mapfile_dir
+create_compressed_mapfile_shift_empty.control.filename     =   concat_shift_empty_input.mapfile
+
+# sort compressed mapfile so that there is one group per timestamp, length = ntimes
+sort_shift_empty_into_Groups.control.type                  =   sort_times_into_freqGroups
+sort_shift_empty_into_Groups.argument.flags                =   [create_compressed_mapfile_shift_empty.output.mapfile]
+sort_shift_empty_into_Groups.argument.filename             =   sorted_groups_shift_empty.mapfile
+sort_shift_empty_into_Groups.argument.mapfile_dir          =   input.output.mapfile_dir
+sort_shift_empty_into_Groups.argument.hosts                =   {{ hosts }}
+sort_shift_empty_into_Groups.argument.stepname             =   sort_into_Groups
+{% if skip_facet_imaging %}
+sort_shift_empty_into_Groups.argument.nband_pad            =   {{ nband_pad_selfcal }}
+{% else %}
+sort_shift_empty_into_Groups.argument.nband_pad            =   {{ nband_pad }}
+{% endif %}
+
+# convert the output of sort_into_Groups into usable mapfiles, len = 1 / ntimes
+sort_shift_empty_into_Groups_maps.control.kind             =   plugin
+sort_shift_empty_into_Groups_maps.control.type             =   mapfilenamesFromMapfiles
+sort_shift_empty_into_Groups_maps.control.mapfile_groupmap =   sort_shift_empty_into_Groups.output.groupmapfile.mapfile
+sort_shift_empty_into_Groups_maps.control.mapfile_filesmap =   sort_shift_empty_into_Groups.output.mapfile.mapfile
+
+# concat data in frequency, length = ntimes
+# this step is needed to ensure that the shift empty datasets have the same
+# padding as the ones used for the full/patch images
+concat_shift_empty.control.type                            =   virtual_concat
+concat_shift_empty.control.mapfile_out                     =   sort_shift_empty_into_Groups_maps.output.groupmap
+concat_shift_empty.control.mapfile_in                      =   sort_shift_empty_into_Groups_maps.output.filesmap
+concat_shift_empty.control.inputkey                        =   msfiles
+concat_shift_empty.control.outputkey                       =   msconcat
+concat_shift_empty.argument.flags                          =   [msfiles,msconcat]
 
 # expand mapfile of the facet-model to all groups, length = some
 expand_facet_model_map.control.kind                   =   plugin
 expand_facet_model_map.control.type                   =   expandMapfile
 expand_facet_model_map.control.mapfile_in             =   {{ facet_model_mapfile }}
-expand_facet_model_map.control.mapfile_to_match       =   regroup_shift_empty_map.output.mapfile
+expand_facet_model_map.control.mapfile_to_match       =   concat_shift_empty.output.mapfile
 expand_facet_model_map.control.mapfile_dir            =   input.output.mapfile_dir
 expand_facet_model_map.control.filename               =   expand_facet_model.mapfile
 
@@ -109,7 +134,7 @@ expand_facet_model_map.control.filename               =   expand_facet_model.map
 expand_facet_model_size_map.control.kind              =   plugin
 expand_facet_model_size_map.control.type              =   expandMapfile
 expand_facet_model_size_map.control.mapfile_in        =   {{ wsclean_modelimg_size_mapfile }}
-expand_facet_model_size_map.control.mapfile_to_match  =   regroup_shift_empty_map.output.mapfile
+expand_facet_model_size_map.control.mapfile_to_match  =   concat_shift_empty.output.mapfile
 expand_facet_model_size_map.control.mapfile_dir       =   input.output.mapfile_dir
 expand_facet_model_size_map.control.filename          =   expand_facet_model_size.mapfile
 
@@ -118,7 +143,7 @@ expand_facet_model_size_map.control.filename          =   expand_facet_model_siz
 # done for the predict step used for subtraction), as we do not care about
 # regions outside of the facet image
 wsclean_ft.control.type                               =   wsclean_ft
-wsclean_ft.control.mapfiles_in                        =   [regroup_shift_empty_map.output.mapfile,expand_facet_model_map.output.mapfile,expand_facet_model_size_map.output.mapfile]
+wsclean_ft.control.mapfiles_in                        =   [concat_shift_empty.output.mapfile,expand_facet_model_map.output.mapfile,expand_facet_model_size_map.output.mapfile]
 wsclean_ft.control.inputkeys                          =   [msfile,name,size]
 wsclean_ft.argument.flags                             =   [-predict,msfile]
 wsclean_ft.argument.scale                             =   0.000417
@@ -289,18 +314,12 @@ sort_into_Groups_maps.control.mapfile_groupmap        =   sort_into_Groups.outpu
 sort_into_Groups_maps.control.mapfile_filesmap        =   sort_into_Groups.output.mapfile.mapfile
 
 # concat data in frequency, length = ntimes
-concat_averaged.control.type                          =   dppp
+concat_averaged.control.type                          =   virtual_concat
 concat_averaged.control.mapfile_out                   =   sort_into_Groups_maps.output.groupmap
 concat_averaged.control.mapfile_in                    =   sort_into_Groups_maps.output.filesmap
-concat_averaged.control.inputkey                      =   msin
-concat_averaged.argument.numthreads                   =   {{ max_cpus_per_io_proc_ntimes }}
-concat_averaged.argument.msin.datacolumn              =   DATA
-concat_averaged.argument.msin.missingdata             =   True
-concat_averaged.argument.msin.orderms                 =   False
-concat_averaged.argument.msout.overwrite              =   True
-concat_averaged.argument.msout.writefullresflag       =   False
-concat_averaged.argument.local_scratch_dir            =   {{ local_dir }}
-concat_averaged.argument.steps                        =   []
+concat_averaged.control.inputkey                      =   msfiles
+concat_averaged.control.outputkey                     =   msconcat
+concat_averaged.argument.flags                        =   [msfiles,msconcat]
 
 # make a compressed mapfile of the concatenated data, length = 1
 concat_averaged_compressed_map.control.kind           =   plugin

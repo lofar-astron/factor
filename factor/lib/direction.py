@@ -223,7 +223,7 @@ class Direction(object):
             timestep_sec *= existing_data_timestep
             ntimes /= existing_data_timestep
 
-        nbands = self.get_nbands(bands)
+        nbands, max_gap = self.get_nbands(bands)
         preaverage_flux_jy = parset['calibration_specific']['preaverage_flux_jy']
         tec_block_mhz = parset['calibration_specific']['tec_block_mhz']
         peel_flux_jy = parset['calibration_specific']['peel_flux_jy']
@@ -260,26 +260,34 @@ class Direction(object):
         # number of WSClean channels must be an even divisor of the total number
         # of channels in the full bandwidth after averaging to prevent
         # mismatches during the predict step on the unaveraged data. For selfcal,
-        # we use nchannels = nbands and fit a third-order polynomial
+        # we want 2 bands per WSClean channel and fit a third-order polynomial
         # using 3 averaged channels
         #
         # Also define the image suffixes (which depend on whether or not
         # wide-band clean is done)
+        if wsclean_nchannels_factor < max_gap + 1:
+            # Ensure we can cover any frequency gaps with a single WSClean channel
+            wsclean_nchannels_factor = max_gap + 1
+            self.log.info('Detected a frequency gap of {0} bands; setting wsclean_nchannels_factor '
+                'to {1} to avoid having a fully flagged WSClean channel'.format(max_gap, wsclean_nchannels_factor))
         if self.use_wideband:
             self.wsclean_nchannels = max(1, int(np.ceil(nbands / float(wsclean_nchannels_factor))))
             nchan_after_avg = nchan * nbands / self.facetimage_freqstep
             self.nband_pad = 0 # padding to allow self.wsclean_nchannels to be a divisor
-            if parset['imaging_specific']['wsclean_add_bands']:
-                while nchan_after_avg % self.wsclean_nchannels:
-                    self.nband_pad += 1
-                    nchan_after_avg = nchan * (nbands + self.nband_pad) / self.facetimage_freqstep
-            else:
-                while nchan_after_avg % self.wsclean_nchannels:
-                    self.wsclean_nchannels += 1
+            while nchan_after_avg % self.wsclean_nchannels:
+                self.nband_pad += 1
+                nchan_after_avg = nchan * (nbands + self.nband_pad) / self.facetimage_freqstep
             if self.wsclean_nchannels > nbands:
                 self.wsclean_nchannels = nbands
 
-            self.wsclean_nchannels_selfcal = nbands
+            wsclean_nchannels_factor_selfcal = max(2, max_gap + 1)
+            self.wsclean_nchannels_selfcal = max(1, int(np.ceil(nbands / float(wsclean_nchannels_factor_selfcal))))
+            self.nband_pad_selfcal = 0 # padding to allow self.wsclean_nchannels to be a divisor
+            nchan_after_avg = nchan * nbands / self.facetselfcal_freqstep
+            while nchan_after_avg % self.wsclean_nchannels_selfcal:
+                self.nband_pad_selfcal += 1
+                nchan_after_avg = nchan * (nbands + self.nband_pad_selfcal) / self.facetselfcal_freqstep
+
             self.wsclean_suffix = '-MFS-image.fits'
         else:
             self.wsclean_nchannels = 1
@@ -895,6 +903,12 @@ class Direction(object):
         bands : list of Band objects
             Bands for this operation
 
+        Returns
+        -------
+        nbands, max_gap : int, int
+            The total number of bands (including gaps) and the size in number
+            of bands of the maximum gap
+
         """
         freqs_hz = [b.freq for b in bands]
         chan_width_hz = bands[0].chan_width_hz
@@ -903,11 +917,15 @@ class Direction(object):
 
         # Find gaps, if any
         missing_bands = []
+        max_gap = 0
         for i, (freq1, freq2) in enumerate(zip(freqs_hz[:-1], freqs_hz[1:])):
             ngap = int(round((freq2 - freq1)/freq_width_hz))
+            if ngap > max_gap:
+                max_gap = ngap
             missing_bands.extend([i + j + 1 for j in range(ngap-1)])
+        nbands = len(bands) + len(missing_bands)
 
-        return len(bands) + len(missing_bands)
+        return (nbands, max_gap)
 
 
     def save_state(self):

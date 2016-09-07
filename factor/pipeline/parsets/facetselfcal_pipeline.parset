@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, shift_cal, create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, switch_weights_col_shift_cal1, concat_blavg_data, switch_weights_col_shift_cal2, copy_column1, copy_column2, {% endif %} concat_data_compressed_mapfile, expand_dir_indep_parmdb_map, average0, create_compressed_mapfile0, premask_selfcal, wsclean_image01, create_imagebase_map01, adjust_wsclean_mapfile0, mask0, wsclean_image02, create_imagebase_map02, pad_selfcal_model0_images, regroup_concat_data_map,  create_expanded_model0_mapfile, expand_selfcal_model_size_map, wsclean_ft0, switch_weights_col1, make_fast_phase_parmdb_map, {% if peel_skymodel is not none %} create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, {% endif %} remove_parmdbs1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, wsclean_image11, create_imagebase_map11, adjust_wsclean_mapfile11, mask1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, pad_selfcal_model1_images, wsclean_ft1, switch_weights_col3, remove_parmdbs2, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, create_compressed_mapfile2, wsclean_image21, create_imagebase_map21, adjust_wsclean_mapfile21, mask2, wsclean_image22, create_imagebase_map22, create_expanded_model2_mapfile, pad_selfcal_model2_images, wsclean_ft2, switch_weights_col5, remove_parmdbs11, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, wsclean_image31, create_imagebase_map31, adjust_wsclean_mapfile31, mask3, wsclean_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, {% if is_patch or skip_facet_imaging %} create_model4_map, blank_model, {% else %} apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, concat_averaged, create_compressed_mapfile6, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, {% endif %} pad_model_images, create_compressed_mapfile_shift_empty, sort_shift_empty_into_Groups, sort_shift_empty_into_Groups_maps, concat_shift_empty, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, shift_cal, create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, switch_weights_col_shift_cal1, concat_blavg_data, switch_weights_col_shift_cal2, copy_column1, copy_column2, {% endif %} concat_data_compressed_mapfile, average0, create_compressed_mapfile0, sort_average0_into_Groups, sort_average0_into_Groups_maps, concat_average0_data, create_compressed_mapfile01, premask_selfcal, wsclean_image01, create_imagebase_map01, adjust_wsclean_mapfile0, mask0, wsclean_image02, create_imagebase_map02, pad_selfcal_model0_images, regroup_concat_data_map, create_expanded_model0_mapfile, expand_selfcal_model_size_map, wsclean_ft0, switch_weights_col1, make_fast_phase_parmdb_map, {% if peel_skymodel is not none %} create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, {% endif %} remove_parmdbs1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, wsclean_image11, create_imagebase_map11, adjust_wsclean_mapfile11, mask1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, pad_selfcal_model1_images, wsclean_ft1, switch_weights_col3, remove_parmdbs2, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, create_compressed_mapfile2, wsclean_image21, create_imagebase_map21, adjust_wsclean_mapfile21, mask2, wsclean_image22, create_imagebase_map22, create_expanded_model2_mapfile, pad_selfcal_model2_images, wsclean_ft2, switch_weights_col5, remove_parmdbs11, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, wsclean_image31, create_imagebase_map31, adjust_wsclean_mapfile31, mask3, wsclean_image32, loop_ampcal, merge_selfcal_parmdbs, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, {% if is_patch or skip_facet_imaging %} create_model4_map, blank_model, {% else %} apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, concat_averaged, create_compressed_mapfile6, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, {% endif %} pad_model_images, create_compressed_mapfile_shift_empty, sort_shift_empty_into_Groups, sort_shift_empty_into_Groups_maps, concat_shift_empty, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -188,6 +188,7 @@ sort_into_Groups.argument.enforce_numSB                    =   False
 {% if num_cal_blocks > 1 %}
 sort_into_Groups.argument.numSB                            =   {{ num_bands_per_cal_block }}
 {% endif %}
+sort_into_Groups.argument.nband_pad                        =   {{ nband_pad_selfcal }}
 
 # convert the output of sort_into_Groups into usable mapfiles, len = 1 / (ntimes * num_cal_blocks)
 sort_into_Groups_maps.control.kind                         =   plugin
@@ -196,7 +197,7 @@ sort_into_Groups_maps.control.mapfile_groupmap             =   sort_into_Groups.
 sort_into_Groups_maps.control.mapfile_filesmap             =   sort_into_Groups.output.mapfile.mapfile
 
 # concat data in frequency, length = ntimes * num_cal_blocks
-# Note, this step is done because DPPP cannot datasets with multiple spectral
+# Note, this step is done because DPPP cannot handle datasets with multiple spectral
 # windows, as occurs when MSs at several frequencies are virtually concatenated
 concat_data.control.type                                   =   dppp
 concat_data.control.mapfile_out                            =   sort_into_Groups_maps.output.groupmap
@@ -293,17 +294,10 @@ concat_data_compressed_mapfile.control.filename            =   concat_chunks_inp
 
 ########## start of first round of selfcal
 
-# expand the dir-indep parmdb mapfile, length = ntimes * num_cal_blocks
-expand_dir_indep_parmdb_map.control.kind                   =   plugin
-expand_dir_indep_parmdb_map.control.type                   =   expandMapfile
-expand_dir_indep_parmdb_map.control.mapfile_in             =   create_parmdb_map.output.mapfile
-expand_dir_indep_parmdb_map.control.mapfile_to_match       =   concat_data.output.mapfile
-expand_dir_indep_parmdb_map.control.mapfile_dir            =   input.output.mapfile_dir
-expand_dir_indep_parmdb_map.control.filename               =   expand_dir_indep_parmdbs.mapfile
-
-# apply dir-independent calibration and average, length = ntimes * num_cal_blocks
+# apply dir-independent calibration and average, length = nfiles
+# this step must be done band-by-band, as each band has its own parmdb
 average0.control.type                                      =   dppp
-average0.control.opts.mapfiles_in                          =   [concat_data.output.mapfile,expand_dir_indep_parmdb_map.output.mapfile]
+average0.control.opts.mapfiles_in                          =   [shift_cal.output.mapfile,create_parmdb_map.output.mapfile]
 average0.control.opts.inputkeys                            =   [msin,parmdb]
 average0.argument.numthreads                               =   {{ max_cpus_per_io_proc_nfiles }}
 average0.argument.msin.datacolumn                          =   DATA
@@ -324,11 +318,50 @@ create_compressed_mapfile0.control.kind                    =   plugin
 create_compressed_mapfile0.control.type                    =   compressMapfile
 create_compressed_mapfile0.control.mapfile_in              =   average0.output.mapfile
 create_compressed_mapfile0.control.mapfile_dir             =   input.output.mapfile_dir
-create_compressed_mapfile0.control.filename                =   image0_input.mapfile
+create_compressed_mapfile0.control.filename                =   concat_average0_input.mapfile
+
+# sort compressed mapfile so that there is one group per timestamp, length = ntimes
+sort_average0_into_Groups.control.type                     =   sort_times_into_freqGroups
+sort_average0_into_Groups.argument.flags                   =   [create_compressed_mapfile0.output.mapfile]
+sort_average0_into_Groups.argument.filename                =   sorted_average0_groups.mapfile
+sort_average0_into_Groups.argument.mapfile_dir             =   input.output.mapfile_dir
+sort_average0_into_Groups.argument.hosts                   =   {{ hosts }}
+sort_average0_into_Groups.argument.stepname                =   sort_average0_into_Groups
+sort_average0_into_Groups.argument.enforce_numSB           =   False
+sort_average0_into_Groups.argument.nband_pad               =   {{ nband_pad_selfcal }}
+
+# convert the output of sort_average0_into_Groups into usable mapfiles, len = 1 / ntimes
+sort_average0_into_Groups_maps.control.kind                =   plugin
+sort_average0_into_Groups_maps.control.type                =   mapfilenamesFromMapfiles
+sort_average0_into_Groups_maps.control.mapfile_groupmap    =   sort_average0_into_Groups.output.groupmapfile.mapfile
+sort_average0_into_Groups_maps.control.mapfile_filesmap    =   sort_average0_into_Groups.output.mapfile.mapfile
+
+# concat averaged data in frequency, length = ntimes
+# Note, this step is done to ensure that we get WSClean channel images that match
+# the datasets used for selfcal so that predict will work properly
+concat_average0_data.control.type                          =   dppp
+concat_average0_data.control.mapfile_out                   =   sort_average0_into_Groups_maps.output.groupmap
+concat_average0_data.control.mapfile_in                    =   sort_average0_into_Groups_maps.output.filesmap
+concat_average0_data.control.inputkey                      =   msin
+concat_average0_data.argument.numthreads                   =   {{ max_cpus_per_io_proc_ntimes }}
+concat_average0_data.argument.msin.datacolumn              =   DATA
+concat_average0_data.argument.msin.missingdata             =   True
+concat_average0_data.argument.msin.orderms                 =   False
+concat_average0_data.argument.msout.overwrite              =   True
+concat_average0_data.argument.msout.writefullresflag       =   False
+concat_average0_data.argument.local_scratch_dir            =   {{ local_dir }}
+concat_average0_data.argument.steps                        =   []
+
+# make compressed mapfile for concatenated averaged data MSs, length = 1
+create_compressed_mapfile01.control.kind                   =   plugin
+create_compressed_mapfile01.control.type                   =   compressMapfile
+create_compressed_mapfile01.control.mapfile_in             =   concat_average0_data.output.mapfile
+create_compressed_mapfile01.control.mapfile_dir            =   input.output.mapfile_dir
+create_compressed_mapfile01.control.filename               =   image0_input.mapfile
 
 # make a mask using user-supplied region (if any), length = 1
 premask_selfcal.control.type                               =   make_clean_mask
-premask_selfcal.control.mapfile_in                         =   create_compressed_mapfile0.output.mapfile
+premask_selfcal.control.mapfile_in                         =   create_compressed_mapfile01.output.mapfile
 premask_selfcal.control.inputkey                           =   imagefile
 premask_selfcal.control.outputkey                          =   maskfile
 premask_selfcal.argument.flags                             =   [imagefile,maskfile]
@@ -344,7 +377,7 @@ premask_selfcal.argument.make_blank_image                  =   True
 
 # image the virtual concatenated data with wsclean, length = 1
 wsclean_image01.control.type                               =   wsclean
-wsclean_image01.control.mapfiles_in                        =   [create_compressed_mapfile0.output.mapfile,premask_selfcal.output.mapfile]
+wsclean_image01.control.mapfiles_in                        =   [create_compressed_mapfile01.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image01.control.inputkeys                          =   [msfile,fitsmask]
 wsclean_image01.argument.flags                             =   [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
 wsclean_image01.argument.fitsmask                          =   fitsmask
@@ -364,7 +397,7 @@ wsclean_image01.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image01.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 1 %}
+{% if wsclean_nchannels_selfcal > 3 %}
 wsclean_image01.argument.deconvolution-channels            =   3
 wsclean_image01.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -410,12 +443,12 @@ mask0.argument.use_adaptive_threshold                      =   {{ use_selfcal_ad
 # image the virtual concatenated data again with wsclean, length = 1
 wsclean_image02.control.type                               =   wsclean
 {% if use_selfcal_clean_threshold %}
-wsclean_image02.control.mapfiles_in                        =   [create_compressed_mapfile0.output.mapfile,mask0.output.mapfile,mask0.output.threshold_5sig.mapfile]
+wsclean_image02.control.mapfiles_in                        =   [create_compressed_mapfile01.output.mapfile,mask0.output.mapfile,mask0.output.threshold_5sig.mapfile]
 wsclean_image02.control.inputkeys                          =   [msfile,fitsmask,threshold]
 wsclean_image02.argument.threshold                         =   threshold
 wsclean_image02.argument.niter                             =   10000
 {% else %}
-wsclean_image02.control.mapfiles_in                        =   [create_compressed_mapfile0.output.mapfile,mask0.output.mapfile]
+wsclean_image02.control.mapfiles_in                        =   [create_compressed_mapfile01.output.mapfile,mask0.output.mapfile]
 wsclean_image02.control.inputkeys                          =   [msfile,fitsmask]
 wsclean_image02.argument.threshold                         =   0.0
 wsclean_image02.argument.niter                             =   1000
@@ -436,7 +469,7 @@ wsclean_image02.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image02.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 1 %}
+{% if wsclean_nchannels_selfcal > 3 %}
 wsclean_image02.argument.deconvolution-channels            =   3
 wsclean_image02.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -630,7 +663,7 @@ wsclean_image11.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image11.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 1 %}
+{% if wsclean_nchannels_selfcal > 3 %}
 wsclean_image11.argument.deconvolution-channels            =   3
 wsclean_image11.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -702,7 +735,7 @@ wsclean_image12.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image12.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 1 %}
+{% if wsclean_nchannels_selfcal > 3 %}
 wsclean_image12.argument.deconvolution-channels            =   3
 wsclean_image12.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -836,7 +869,7 @@ wsclean_image21.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image21.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 1 %}
+{% if wsclean_nchannels_selfcal > 3 %}
 wsclean_image21.argument.deconvolution-channels            =   3
 wsclean_image21.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -908,7 +941,7 @@ wsclean_image22.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image22.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 1 %}
+{% if wsclean_nchannels_selfcal > 3 %}
 wsclean_image22.argument.deconvolution-channels            =   3
 wsclean_image22.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -1112,7 +1145,7 @@ wsclean_image31.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image31.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 1 %}
+{% if wsclean_nchannels_selfcal > 3 %}
 wsclean_image21.argument.deconvolution-channels            =   3
 wsclean_image21.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -1185,7 +1218,7 @@ wsclean_image32.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image32.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 1 %}
+{% if wsclean_nchannels_selfcal > 3 %}
 wsclean_image32.argument.deconvolution-channels            =   3
 wsclean_image32.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -1405,7 +1438,7 @@ wsclean_image41.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image41.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 1 %}
+{% if wsclean_nchannels_selfcal > 3 %}
 wsclean_image41.argument.deconvolution-channels            =   3
 wsclean_image41.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -1478,7 +1511,7 @@ wsclean_image42.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image42.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 1 %}
+{% if wsclean_nchannels_selfcal > 3 %}
 wsclean_image42.argument.deconvolution-channels            =   3
 wsclean_image42.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -1676,6 +1709,10 @@ wsclean_image_full1.argument.mem                           =   {{ max_percent_me
 wsclean_image_full1.argument.j                             =   {{ max_cpus_per_proc_single }}
 wsclean_image_full1.argument.tempdir                       =   {{ local_dir }}
 wsclean_image_full1.argument.weighting-rank-filter         =   3
+{% if wsclean_nchannels > 3 %}
+wsclean_image_full1.argument.deconvolution-channels        =   3
+wsclean_image_full1.argument.fit-spectral-pol              =   3
+{% endif %}
 {% if facetimage_wsclean_nwavelengths > 0.0 %}
 wsclean_image_full1.argument.baseline-averaging            =   {{ facetimage_wsclean_nwavelengths }}
 {% endif %}
@@ -1733,6 +1770,10 @@ wsclean_image_full2.argument.mem                           =   {{ max_percent_me
 wsclean_image_full2.argument.j                             =   {{ max_cpus_per_proc_single }}
 wsclean_image_full2.argument.tempdir                       =   {{ local_dir }}
 wsclean_image_full2.argument.weighting-rank-filter         =   3
+{% if wsclean_nchannels > 3 %}
+wsclean_image_full2.argument.deconvolution-channels        =   3
+wsclean_image_full2.argument.fit-spectral-pol              =   3
+{% endif %}
 {% if facetimage_wsclean_nwavelengths > 0.0 %}
 wsclean_image_full2.argument.baseline-averaging            =   {{ facetimage_wsclean_nwavelengths }}
 {% endif %}
@@ -1781,7 +1822,7 @@ sort_shift_empty_into_Groups.argument.mapfile_dir          =   input.output.mapf
 sort_shift_empty_into_Groups.argument.hosts                =   {{ hosts }}
 sort_shift_empty_into_Groups.argument.stepname             =   sort_into_Groups
 {% if is_patch or skip_facet_imaging %}
-sort_shift_empty_into_Groups.argument.nband_pad            =   0
+sort_shift_empty_into_Groups.argument.nband_pad            =   {{ nband_pad_selfcal }}
 {% else %}
 sort_shift_empty_into_Groups.argument.nband_pad            =   {{ nband_pad }}
 {% endif %}
