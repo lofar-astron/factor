@@ -920,8 +920,8 @@ class Direction(object):
         max_gap = 0
         for i, (freq1, freq2) in enumerate(zip(freqs_hz[:-1], freqs_hz[1:])):
             ngap = int(round((freq2 - freq1)/freq_width_hz))
-            if ngap > max_gap:
-                max_gap = ngap
+            if ngap > max_gap - 1:
+                max_gap = ngap - 1
             missing_bands.extend([i + j + 1 for j in range(ngap-1)])
         nbands = len(bands) + len(missing_bands)
 
