@@ -293,6 +293,7 @@ class Direction(object):
             self.wsclean_nchannels = 1
             self.wsclean_nchannels_selfcal = 1
             self.nband_pad = 0
+            self.nband_pad_selfcal = 0
             self.wsclean_suffix = '-image.fits'
 
         # Set the baseline-averaging limit for WSClean, which depends on the
