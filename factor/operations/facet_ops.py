@@ -140,8 +140,10 @@ class FacetSelfcal(Operation):
             'shift_diff_model_to_field.mapfile')
         self.direction.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'verify_subtract.break.mapfile')
+        self.direction.image_data_mapfile_unconcat = os.path.join(self.pipeline_mapfile_dir,
+            'create_compressed_mapfile5.mapfile')
         self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'concat_averaged_compressed.mapfile')
+            'create_compressed_mapfile6.mapfile')
 
         # We also need to save the averaging steps for the image_data, so that for
         # any subsequent imaging runs that use these data, we can determine
@@ -397,6 +399,8 @@ class FacetImage(Operation):
         # set this only if this is a full-res imaging run, to ensure that the
         # averaging is not too much for use by later imaging runs
         if not self.direction.use_existing_data and self.full_res:
+            self.direction.image_data_mapfile_unconcat = os.path.join(self.pipeline_mapfile_dir,
+                'create_compressed_mapfile.mapfile')
             self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
                 'concat_averaged_compressed.mapfile')
 
