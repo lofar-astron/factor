@@ -764,7 +764,7 @@ class Direction(object):
                 num_cal_blocks = num_cal_blocks_upper
             if num_cal_blocks < 1:
                 num_cal_blocks = 1
-            self.num_cal_blocks = num_cal_blocks
+            self.num_cal_blocks = int(num_cal_blocks)
             self.num_bands_per_cal_block = int(np.ceil(nbands / float(num_cal_blocks)))
             self.solint_freq_p = int(np.ceil(num_chan_per_band_after_avg * nbands /
                 float(num_cal_blocks)))
