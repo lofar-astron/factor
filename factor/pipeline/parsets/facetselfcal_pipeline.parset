@@ -137,7 +137,7 @@ expand_preapply_parmdb_map.control.type                    =   expandMapfile
 expand_preapply_parmdb_map.control.mapfile_in              =   {{ preapply_parmdb_mapfile }}
 expand_preapply_parmdb_map.control.mapfile_to_match        =   create_ms_map.output.mapfile
 expand_preapply_parmdb_map.control.mapfile_dir             =   input.output.mapfile_dir
-expand_preapply_parmdb_map.control.filename                =   expand_merged_parmdbs.mapfile
+expand_preapply_parmdb_map.control.filename                =   expand_preapply_parmdbs.mapfile
 {% endif %}
 
 # shift full-res data to calibrator position and average in frequency, length = nfiles
