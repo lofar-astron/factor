@@ -138,15 +138,6 @@ dir_ms = /data/bands
 # NOTE: this option requires WSClean v2.0 or higher
 # wsclean_bl_averaging = False
 
-# Allow flagged data to be added during WSClean imaging to allow
-# wsclean_nchannels_factor to be a divisor of the number bands (default = True).
-# Enabling this option can dramatically speed up imaging with WSClean when the
-# number of bands before padding does not allow wsclean_nchannels_factor to be
-# greater than 1 (e.g., wsclean_nchannels_factor must be 1 to be an even divisor
-# of 29 bands, so activating this option would add 1 band of flagged data to
-# produce 30 bands, which will work with wsclean_nchannels_factor = 3, 5, or 6)
-# wsclean_add_bands = True
-
 # Selfcal imaging parameters: pixel size in arcsec (default = 1.5), Briggs
 # robust parameter (default = -0.5) and minimum uv distance in lambda (default =
 # 80). These settings apply both to selfcal images and to the full facet image

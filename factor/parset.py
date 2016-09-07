@@ -440,18 +440,6 @@ def get_imaging_options(parset):
     else:
         parset_dict['wsclean_bl_averaging'] = False
 
-    # Allow flagged data to be added during WSClean imaging to allow
-    # wsclean_nchannels_factor to be a divisor of the number bands (default = True).
-    # Enabling this option can dramatically speed up imaging with WSClean when the
-    # number of bands before padding does not allow wsclean_nchannels_factor to be
-    # greater than 1 (e.g., wsclean_nchannels_factor must be 1 to be an even divisor
-    # of 29 bands, so activating this option would add 1 band of flagged data to
-    # produce 30 bands, which will work with wsclean_nchannels_factor = 3, 5, or 6)
-    if 'wsclean_add_bands' in parset_dict:
-        parset_dict['wsclean_add_bands'] = parset.getboolean('imaging', 'wsclean_add_bands')
-    else:
-        parset_dict['wsclean_add_bands'] = True
-
     # Max desired peak flux density reduction at center of the facet edges due to
     # bandwidth smearing (at the mean frequency) and time smearing (default = 0.15 =
     # 15% reduction in peak flux). Higher values result in shorter run times but
@@ -568,7 +556,7 @@ def get_imaging_options(parset):
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
         'reimage_selfcaled', 'wsclean_image_padding',
         'wsclean_patch_model_padding', 'wsclean_facet_model_padding',
-        'selfcal_min_uv_lambda', 'facet_min_uv_lambda', 'wsclean_add_bands',
+        'selfcal_min_uv_lambda', 'facet_min_uv_lambda',
         'selfcal_robust_wsclean', 'skip_facet_imaging', 'wsclean_bl_averaging',
         'selfcal_scales']
     for option in given_options:

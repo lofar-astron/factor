@@ -177,15 +177,6 @@ The available options are described below under their respective sections.
         this option can dramatically speed up imaging with WSClean.
         NOTE: this option requires WSClean v2.0 or higher.
 
-    wsclean_add_bands
-        Allow flagged data to be added during WSClean imaging to allow
-        :term:`wsclean_nchannels_factor` to be a divisor of the number bands (default = ``True``).
-        Enabling this option can dramatically speed up imaging with WSClean when the
-        number of bands before padding does not allow :term:`wsclean_nchannels_factor` to be
-        greater than 1 (e.g., :term:`wsclean_nchannels_factor` must be 1 to be an even divisor
-        of 29 bands, so activating this option would add 1 band of flagged data to
-        produce 30 bands, which will work with :term:`wsclean_nchannels_factor` = 3, 5, or 6)
-
     selfcal_cellsize_arcsec
         Self calibration pixel size in arcsec (default = 1.5).
 
