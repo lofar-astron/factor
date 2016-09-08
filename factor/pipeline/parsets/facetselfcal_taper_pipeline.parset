@@ -1864,7 +1864,7 @@ sort_shift_empty_into_Groups.argument.flags                =   [create_compresse
 sort_shift_empty_into_Groups.argument.filename             =   sorted_groups_shift_empty.mapfile
 sort_shift_empty_into_Groups.argument.mapfile_dir          =   input.output.mapfile_dir
 sort_shift_empty_into_Groups.argument.hosts                =   {{ hosts }}
-sort_shift_empty_into_Groups.argument.stepname             =   sort_into_Groups
+sort_shift_empty_into_Groups.argument.stepname             =   sort_shift_empty_into_Groups
 {% if is_patch or skip_facet_imaging %}
 sort_shift_empty_into_Groups.argument.nband_pad            =   {{ nband_pad_selfcal }}
 {% else %}
