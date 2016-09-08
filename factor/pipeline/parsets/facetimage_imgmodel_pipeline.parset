@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} shift_empty, create_compressed_mapfile_shift_empty, sort_shift_empty_into_Groups, sort_shift_empty_into_Groups_maps, concat_shift_empty, expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, add_model_to_empty_data, {% if skip_facet_imaging %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, create_parmdb_map, add_all_facet_sources, {% else %} apply_dir_dep, {% endif %} create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
+pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} shift_empty, create_compressed_mapfile_shift_empty, sort_shift_empty_into_Groups, sort_shift_empty_into_Groups_maps, add_model_data_col, concat_shift_empty, expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, add_model_to_empty_data, {% if skip_facet_imaging %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, create_parmdb_map, add_all_facet_sources, {% else %} apply_dir_dep, {% endif %} create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
 
 pipeline.pluginpath                                   =   {{ pipeline_dir }}/plugins
 
@@ -155,6 +155,14 @@ sort_shift_empty_into_Groups_maps.control.kind             =   plugin
 sort_shift_empty_into_Groups_maps.control.type             =   mapfilenamesFromMapfiles
 sort_shift_empty_into_Groups_maps.control.mapfile_groupmap =   sort_shift_empty_into_Groups.output.groupmapfile.mapfile
 sort_shift_empty_into_Groups_maps.control.mapfile_filesmap =   sort_shift_empty_into_Groups.output.mapfile.mapfile
+
+# add MODEL_DATA column to shift_empty MSs, length = nfiles
+# because the concat_shift_empty concat step below is virtual, we need to add this column
+# before concatenating
+add_model_data_col.control.type                            =   add_model_data_column
+add_model_data_col.control.mapfile_in                      =   shift_empty.output.mapfile
+add_model_data_col.control.inputkey                        =   msfile
+add_model_data_col.argument.flags                          =   [msfile]
 
 # concat data in frequency, length = ntimes
 # this step is needed to ensure that the shift empty datasets have the same
