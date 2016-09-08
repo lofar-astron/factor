@@ -1910,14 +1910,15 @@ wsclean_ft.control.type                                    =   wsclean_ft
 wsclean_ft.control.mapfiles_in                             =   [concat_shift_empty.output.mapfile,create_expanded_model_mapfile.output.mapfile,expand_facet_model_size_map.output.mapfile]
 wsclean_ft.control.inputkeys                               =   [msfile,name,size]
 wsclean_ft.argument.flags                                  =   [-predict,msfile]
-wsclean_ft.argument.scale                                  =   {{ cellsize_facet_deg }}
-wsclean_ft.argument.mem                                    =   {{ max_percent_memory_per_proc_ngroups }}
+wsclean_ft.argument.mem                                    =   {{ max_percent_memory_per_proc_ntimes }}
 {% if is_patch or skip_facet_imaging %}
+wsclean_ft.argument.scale                                  =   {{ cellsize_selfcal_deg }}
 wsclean_ft.argument.channelsout                            =   {{ wsclean_nchannels_selfcal }}
 {% else %}
+wsclean_ft.argument.scale                                  =   {{ cellsize_facet_deg }}
 wsclean_ft.argument.channelsout                            =   {{ wsclean_nchannels }}
 {% endif %}
-wsclean_ft.argument.j                                      =   {{ max_cpus_per_proc_ngroups }}
+wsclean_ft.argument.j                                      =   {{ max_cpus_per_proc_ntimes }}
 wsclean_ft.argument.tempdir                                =   {{ local_dir }}
 wsclean_ft.argument.nwlayers-for-size                      =   12288 12288
 

@@ -325,7 +325,7 @@ concat_add_all.control.inputkey                         =   msfiles
 concat_add_all.control.outputkey                        =   msconcat
 concat_add_all.argument.flags                           =   [msfiles,msconcat]
 
-# expand the mapfile of the model image to all files, length = some
+# expand the mapfile of the model image to all files, length = ntimes
 create_expanded_model_mapfile.control.kind              =   plugin
 create_expanded_model_mapfile.control.type              =   expandMapfile
 create_expanded_model_mapfile.control.mapfile_in        =   create_model_map.output.mapfile
@@ -333,7 +333,7 @@ create_expanded_model_mapfile.control.mapfile_to_match  =   concat_add_all.outpu
 create_expanded_model_mapfile.control.mapfile_dir       =   input.output.mapfile_dir
 create_expanded_model_mapfile.control.filename          =   expand_wsclean_model.mapfile
 
-# expand mapfile of the model image sizes to all groups, length = some
+# expand mapfile of the model image sizes to all groups, length = ntimes
 expand_facet_model_size_map.control.kind                =   plugin
 expand_facet_model_size_map.control.type                =   expandMapfile
 expand_facet_model_size_map.control.mapfile_in          =   pad_model_images.output.padsize.mapfile
@@ -341,7 +341,7 @@ expand_facet_model_size_map.control.mapfile_to_match    =   concat_add_all.outpu
 expand_facet_model_size_map.control.mapfile_dir         =   input.output.mapfile_dir
 expand_facet_model_size_map.control.filename            =   expand_facet_model_size.mapfile
 
-# make model visibilities, length = some
+# make model visibilities, length = ntimes
 # For WSClean predict, we need to increase the number of wplanes so that the
 # effective model image size is larger than the FOV (to prevent aliasing issues)
 wsclean_ft.control.type                                 =   wsclean_ft
@@ -349,9 +349,9 @@ wsclean_ft.control.mapfiles_in                          =   [concat_add_all.outp
 wsclean_ft.control.inputkeys                            =   [msfile,name,size]
 wsclean_ft.argument.flags                               =   [-predict,msfile]
 wsclean_ft.argument.scale                               =   {{ cellsize_facet_deg }}
-wsclean_ft.argument.mem                                 =   {{ max_percent_memory_per_proc_ngroups }}
+wsclean_ft.argument.mem                                 =   {{ max_percent_memory_per_proc_ntimes }}
 wsclean_ft.argument.channelsout                         =   {{ wsclean_nchannels }}
-wsclean_ft.argument.j                                   =   {{ max_cpus_per_proc_ngroups }}
+wsclean_ft.argument.j                                   =   {{ max_cpus_per_proc_ntimes }}
 wsclean_ft.argument.tempdir                             =   {{ local_dir }}
 wsclean_ft.argument.nwlayers-for-size                   =   12288 12288
 

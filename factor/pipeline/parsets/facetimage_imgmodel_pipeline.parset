@@ -1,6 +1,6 @@
 pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, create_compressed_mapfile_shift_empty, sort_shift_empty_into_Groups, sort_shift_empty_into_Groups_maps, concat_shift_empty, expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, add_model_to_empty_data, {% if skip_facet_imaging %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, create_parmdb_map, add_all_facet_sources, {% else %} apply_dir_dep, {% endif %} create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
 
-pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
+pipeline.pluginpath                                   =   {{ pipeline_dir }}/plugins
 
 # update host entries in all mapfiles
 update_mapfile_hosts.control.kind                     =   plugin
@@ -9,6 +9,7 @@ update_mapfile_hosts.control.mapfile_dir              =   input.output.mapfile_d
 update_mapfile_hosts.control.hosts                    =   {{ hosts }}
 
 {% if use_existing_data %}
+# beginning of use-existing-data block
 # update host entry in existing image_data_mapfile, length = 1
 update_image_data_mapfile_hosts.control.kind          =   plugin
 update_image_data_mapfile_hosts.control.type          =   updateHosts
@@ -16,6 +17,7 @@ update_image_data_mapfile_hosts.control.mapfile_in    =   {{ image_data_mapfile 
 update_image_data_mapfile_hosts.control.hosts         =   {{ hosts }}
 
 {% if average_image_data %}
+# existing data can be averaged futher
 # make an uncompressed mapfile of the concatenated data, length = ntimes
 concat_averaged_uncompressed_map.control.kind         =   plugin
 concat_averaged_uncompressed_map.control.type         =   uncompressMapfile
@@ -74,9 +76,11 @@ concat_averaged_compressed_map.control.mapfile_in     =   concat_averaged.output
 concat_averaged_compressed_map.control.mapfile_dir    =   input.output.mapfile_dir
 concat_averaged_compressed_map.control.filename       =   concat_averaged_compressed.mapfile
 
+# end of average-existing-data block
 {% endif %}
 
 {% else %}
+# beginning of no-existing-data block
 
 # create a mapfile with all single MSs from supplied list, length = nfiles
 create_ms_map.control.kind                            =   plugin
@@ -152,7 +156,7 @@ concat_shift_empty.control.inputkey                        =   msfiles
 concat_shift_empty.control.outputkey                       =   msconcat
 concat_shift_empty.argument.flags                          =   [msfiles,msconcat]
 
-# expand mapfile of the facet-model to all groups, length = some
+# expand mapfile of the facet-model to all groups, length = ntimes
 expand_facet_model_map.control.kind                   =   plugin
 expand_facet_model_map.control.type                   =   expandMapfile
 expand_facet_model_map.control.mapfile_in             =   {{ facet_model_mapfile }}
@@ -160,7 +164,7 @@ expand_facet_model_map.control.mapfile_to_match       =   concat_shift_empty.out
 expand_facet_model_map.control.mapfile_dir            =   input.output.mapfile_dir
 expand_facet_model_map.control.filename               =   expand_facet_model.mapfile
 
-# expand mapfile of the model image sizes to all groups, length = some
+# expand mapfile of the model image sizes to all groups, length = ntimes
 expand_facet_model_size_map.control.kind              =   plugin
 expand_facet_model_size_map.control.type              =   expandMapfile
 expand_facet_model_size_map.control.mapfile_in        =   {{ wsclean_modelimg_size_mapfile }}
@@ -168,7 +172,7 @@ expand_facet_model_size_map.control.mapfile_to_match  =   concat_shift_empty.out
 expand_facet_model_size_map.control.mapfile_dir       =   input.output.mapfile_dir
 expand_facet_model_size_map.control.filename          =   expand_facet_model_size.mapfile
 
-# add the facet-model visibilities to the data, length = some
+# add the facet-model visibilities to the data, length = ntimes
 # For WSClean predict, we do not need to increase the number of wplanes (as is
 # done for the predict step used for subtraction), as we do not care about
 # regions outside of the facet image
@@ -176,14 +180,15 @@ wsclean_ft.control.type                               =   wsclean_ft
 wsclean_ft.control.mapfiles_in                        =   [concat_shift_empty.output.mapfile,expand_facet_model_map.output.mapfile,expand_facet_model_size_map.output.mapfile]
 wsclean_ft.control.inputkeys                          =   [msfile,name,size]
 wsclean_ft.argument.flags                             =   [-predict,msfile]
-wsclean_ft.argument.scale                             =   0.000417
-wsclean_ft.argument.mem                               =   {{ max_percent_memory_per_proc_ngroups }}
+wsclean_ft.argument.mem                               =   {{ max_percent_memory_per_proc_ntimes }}
 {% if skip_facet_imaging %}
+wsclean_ft.argument.scale                             =   {{ cellsize_selfcal_deg }}
 wsclean_ft.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 {% else %}
+wsclean_ft.argument.scale                             =   {{ cellsize_facet_deg }}
 wsclean_ft.argument.channelsout                       =   {{ wsclean_nchannels }}
 {% endif %}
-wsclean_ft.argument.j                                 =   {{ max_cpus_per_proc_single }}
+wsclean_ft.argument.j                                 =   {{ max_cpus_per_proc_ntimes }}
 wsclean_ft.argument.tempdir                           =   {{ local_dir }}
 
 # corrupt the facet-model visibilities, length = nfiles
@@ -286,7 +291,7 @@ add_all_facet_sources.argument.avg.freqstep             =   {{ facetimage_freqst
 add_all_facet_sources.argument.avg.timestep             =   {{ facetimage_timestep }}
 
 {% else %}
-
+# beginning of normal facet-imaging block
 # apply the direction-dependent solutions and average, length = nfiles
 apply_dir_dep.control.type                            =   dppp
 apply_dir_dep.control.opts.mapfiles_in                =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
@@ -313,6 +318,8 @@ apply_dir_dep.argument.flagzero.amplmin               =   1e-20
 apply_dir_dep.argument.avg.type                       =   squash
 apply_dir_dep.argument.avg.freqstep                   =   {{ facetimage_freqstep }}
 apply_dir_dep.argument.avg.timestep                   =   {{ facetimage_timestep }}
+
+# end of normal facet-imaging block
 {% endif %}
 
 # make the compressed mapfile, length = 1
@@ -356,6 +363,8 @@ concat_averaged_compressed_map.control.type           =   compressMapfile
 concat_averaged_compressed_map.control.mapfile_in     =   concat_averaged.output.mapfile
 concat_averaged_compressed_map.control.mapfile_dir    =   input.output.mapfile_dir
 concat_averaged_compressed_map.control.filename       =   concat_averaged_compressed.mapfile
+
+# end of no-existing-data block
 {% endif %}
 
 # Make a preliminary clean mask from the facet region, length = 1
