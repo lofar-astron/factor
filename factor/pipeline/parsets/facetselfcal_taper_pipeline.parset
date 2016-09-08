@@ -126,10 +126,6 @@ add_all_facet_sources.control.opts.mapfiles_in             =   [shift_empty.outp
 add_all_facet_sources.control.opts.inputkeys               =   [file1,file2]
 add_all_facet_sources.argument.flags                       =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
 
-{% if not is_patch and not skip_facet_imaging %}
-# For normal (non-patch) facets, we need to phase shift the empty data, add the
-# calibrator source, and average
-
 {% if preapply_phase_cal %}
 # expand mapfile of the dir-dependent parmDB to all files, length = nfiles
 expand_preapply_parmdb_map.control.kind                    =   plugin
@@ -139,6 +135,10 @@ expand_preapply_parmdb_map.control.mapfile_to_match        =   create_ms_map.out
 expand_preapply_parmdb_map.control.mapfile_dir             =   input.output.mapfile_dir
 expand_preapply_parmdb_map.control.filename                =   expand_preapply_parmdbs.mapfile
 {% endif %}
+
+{% if not is_patch and not skip_facet_imaging %}
+# For normal (non-patch) facets, we need to phase shift the empty data, add the
+# calibrator source, and average
 
 # shift full-res data to calibrator position and average in frequency, length = nfiles
 shift_cal.control.type                                     =   dppp
