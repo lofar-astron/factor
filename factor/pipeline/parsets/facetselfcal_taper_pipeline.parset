@@ -952,9 +952,9 @@ apply_phaseonly2.argument.msin.datacolumn                  =   DATA
 apply_phaseonly2.argument.msout                            =   .
 apply_phaseonly2.argument.msout.datacolumn                 =   CORRECTED_DATA
 {% if preapply_solve_tec_only %}
-apply_phaseonly2.argument.steps                            =   [correct_fast1,avg]
+apply_phaseonly2.argument.steps                            =   [correct_fast1]
 {% else %}
-apply_phaseonly2.argument.steps                            =   [correct_fast1,correct_fast2,avg]
+apply_phaseonly2.argument.steps                            =   [correct_fast1,correct_fast2]
 {% endif %}
 apply_phaseonly2.argument.correct_fast1.type               =   applycal
 apply_phaseonly2.argument.correct_fast1.parmdb             =   parmdb
