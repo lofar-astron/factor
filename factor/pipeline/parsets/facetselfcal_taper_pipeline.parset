@@ -419,15 +419,15 @@ average0.argument.avg.timestep                             =   {{ facetselfcal_t
 {% endif %}
 
 # compress mapfile so that all files are in one group, length = 1
-create_compressed_mapfile_avgdata.control.kind             =   plugin
-create_compressed_mapfile_avgdata.control.type             =   compressMapfile
+create_compressed_mapfile0.control.kind                    =   plugin
+create_compressed_mapfile0.control.type                    =   compressMapfile
 {% if preapply_phase_cal %}
-create_compressed_mapfile_avgdata.control.mapfile_in       =   shift_cal_dir_indep.output.mapfile
-{% else %}
-create_compressed_mapfile_avgdata.control.mapfile_in       =   average0.output.mapfile
-{% endif %}
-create_compressed_mapfile_avgdata.control.mapfile_dir      =   input.output.mapfile_dir
-create_compressed_mapfile_avgdata.control.filename         =   concat_average0_input.mapfile
+create_compressed_mapfile0.control.mapfile_in              =   shift_cal_dir_indep.output.mapfile
+{% else %}0
+create_compressed_mapfile0.control.mapfile_in              =   average0.output.mapfile
+{% endif %}0
+create_compressed_mapfile0.control.mapfile_dir             =   input.output.mapfile_dir
+create_compressed_mapfile0.control.filename                =   concat_average0_input.mapfile
 
 # sort compressed mapfile so that there is one group per timestamp, length = ntimes
 sort_average0_into_Groups.control.type                     =   sort_times_into_freqGroups
