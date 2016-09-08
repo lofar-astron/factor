@@ -423,9 +423,9 @@ create_compressed_mapfile0.control.kind                    =   plugin
 create_compressed_mapfile0.control.type                    =   compressMapfile
 {% if preapply_phase_cal %}
 create_compressed_mapfile0.control.mapfile_in              =   shift_cal_dir_indep.output.mapfile
-{% else %}0
+{% else %}
 create_compressed_mapfile0.control.mapfile_in              =   average0.output.mapfile
-{% endif %}0
+{% endif %}
 create_compressed_mapfile0.control.mapfile_dir             =   input.output.mapfile_dir
 create_compressed_mapfile0.control.filename                =   concat_average0_input.mapfile
 
