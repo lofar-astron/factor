@@ -113,6 +113,32 @@ regroup_shift_empty_map.control.join_max_files        =   100
 regroup_shift_empty_map.control.rotate_groups         =   True
 regroup_shift_empty_map.control.filename              =   regroup_shift_empty.mapfile
 
+{% if skip_facet_imaging %}
+# Use CASA here, even though WSClean may be used for imaging, as we need to predict
+# the model from selfcal (which always uses CASA)
+## virtual concat of the re-grouped unaveraged data, length = some
+concat_unaveraged.control.type                    =   virtual_concat
+concat_unaveraged.control.mapfile_in              =   regroup_shift_empty_map.output.mapfile
+concat_unaveraged.control.inputkey                =   msfiles
+concat_unaveraged.control.outputkey               =   msconcat
+concat_unaveraged.argument.flags                  =   [msfiles,msconcat]
+
+# create a compressed mapfile with the virtual concated files, length = 1
+# needed because the following casa-step can run only once.
+create_compressed_unaveraged.control.kind         =   plugin
+create_compressed_unaveraged.control.type         =   compressMapfile
+create_compressed_unaveraged.control.mapfile_in   =   concat_unaveraged.output.mapfile
+create_compressed_unaveraged.control.mapfile_dir  =   input.output.mapfile_dir
+create_compressed_unaveraged.control.filename     =   concat_unaveraged_compressed.mapfile
+
+# make model visibilities on the unaveraged data, length = 1
+# can run only once, because (may) create files in the directory of input data
+casa_ft4.control.type                             =   casa
+casa_ft4.control.mapfiles_in                      =   [create_compressed_unaveraged.output.mapfile,{{ facet_model_mapfile }}]
+casa_ft4.control.inputkeys                        =   [inputms,modelimg]
+casa_ft4.control.arguments                        =   [--nologger,--nogui,-c,{{ script_dir }}/do_ft_multi.py,modelimg,{{ nterms }},{{ facet_wplanes }},{{ script_dir }}/ftw.xml,{{ script_dir }}/task_ftw.py,inputms]
+{% else %}
+
 {% block model_data_parms %}
 # expand mapfile of the facet-model to all groups, length = some
 expand_facet_model_map.control.kind                   =   plugin
@@ -144,6 +170,7 @@ wsclean_ft.argument.channelsout                       =   {{ wsclean_nchannels }
 wsclean_ft.argument.j                                 =   {{ max_cpus_per_proc_single }}
 wsclean_ft.argument.tempdir                           =   {{ local_dir }}
 {% endblock model_data_parms %}
+{% endif %}
 
 # corrupt the model visibilities, length = nfiles
 corrupt_final_model.control.type                        =   dppp
