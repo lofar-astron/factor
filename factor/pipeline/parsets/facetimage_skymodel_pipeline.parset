@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources,  add_all_facet_sources, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
+pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources,  add_all_facet_sources, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
 
 pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
 
@@ -80,6 +80,16 @@ expand_merged_parmdb_map.control.mapfile_to_match       =   create_ms_map.output
 expand_merged_parmdb_map.control.mapfile_dir            =   input.output.mapfile_dir
 expand_merged_parmdb_map.control.filename               =   expand_merged_parmdbs.mapfile
 
+{% if preapply_phase_cal %}
+# expand mapfile of the dir-dependent parmDB to all files, length = nfiles
+expand_preapply_parmdb_map.control.kind               =   plugin
+expand_preapply_parmdb_map.control.type               =   expandMapfile
+expand_preapply_parmdb_map.control.mapfile_in         =   {{ preapply_parmdb_mapfile }}
+expand_preapply_parmdb_map.control.mapfile_to_match   =   create_ms_map.output.mapfile
+expand_preapply_parmdb_map.control.mapfile_dir        =   input.output.mapfile_dir
+expand_preapply_parmdb_map.control.filename           =   expand_preapply_parmdbs.mapfile
+{% endif %}
+
 # create a mapfile with the current skymodels from supplied list, length = nbands
 create_full_skymodels_map.control.kind                  =   plugin
 create_full_skymodels_map.control.type                  =   addListMapfile
@@ -112,14 +122,38 @@ expand_sourcedb_all_facet_sources.control.filename      =   expand_sourcedb_all_
 
 # "do nearly everything" call to NDPPP: phaseshift, add, correct, and average in one NDPPP call, length = nfiles
 add_all_facet_sources.control.type                      =   dppp
+{% if preapply_phase_cal %}
+add_all_facet_sources.control.opts.mapfiles_in          =   [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile,expand_preapply_parmdb_map.output.mapfile]
+add_all_facet_sources.control.opts.inputkeys            =   [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb,preapply_parmdb]
+{% else %}
 add_all_facet_sources.control.opts.mapfiles_in          =   [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 add_all_facet_sources.control.opts.inputkeys            =   [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb]
+{% endif %}
 add_all_facet_sources.argument.numthreads               =   {{ max_cpus_per_io_proc_nfiles }}
 add_all_facet_sources.argument.msin.datacolumn          =   SUBTRACTED_DATA_ALL_NEW
 add_all_facet_sources.argument.msout.overwrite          =   True
 add_all_facet_sources.argument.msout.writefullresflag   =   False
 add_all_facet_sources.argument.local_scratch_dir        =   {{ local_dir }}
+{% if preapply_phase_cal %}
+{% if preapply_solve_tec_only %}
+add_all_facet_sources.argument.steps                    =   [shift,add,preapply_fast1,preapply_fast2,preapply_slow,correct_fast1,correct_slow,flagzero,avg]
+{% else %}
+add_all_facet_sources.argument.steps                    =   [shift,add,preapply_fast1,preapply_fast2,preapply_slow,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
+{% endif %}
+add_all_facet_sources.argument.preapply_fast1.type      =   applycal
+add_all_facet_sources.argument.preapply_fast1.parmdb    =   preapply_parmdb
+add_all_facet_sources.argument.preapply_fast1.correction=   tec
+add_all_facet_sources.argument.preapply_fast1.invert    =   True
+add_all_facet_sources.argument.preapply_fast2.type      =   applycal
+add_all_facet_sources.argument.preapply_fast2.parmdb    =   preapply_parmdb
+add_all_facet_sources.argument.preapply_fast2.correction=   commonscalarphase
+add_all_facet_sources.argument.preapply_fast2.invert    =   True
+add_all_facet_sources.argument.preapply_slow.type       =   applycal
+add_all_facet_sources.argument.preapply_slow.parmdb     =   preapply_parmdb
+add_all_facet_sources.argument.preapply_slow.invert     =   True
+{% else %}
 add_all_facet_sources.argument.steps                    =   [shift,add,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
+{% endif %}
 add_all_facet_sources.argument.shift.type               =   phaseshifter
 add_all_facet_sources.argument.shift.phasecenter        =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
 add_all_facet_sources.argument.add.type                 =   predict
@@ -130,10 +164,12 @@ add_all_facet_sources.argument.correct_fast1.type       =   applycal
 add_all_facet_sources.argument.correct_fast1.parmdb     =   dir_dep_parmdb
 add_all_facet_sources.argument.correct_fast1.correction =   tec
 add_all_facet_sources.argument.correct_fast1.invert     =   True
+{% if not preapply_solve_tec_only %}
 add_all_facet_sources.argument.correct_fast2.type       =   applycal
 add_all_facet_sources.argument.correct_fast2.parmdb     =   dir_dep_parmdb
 add_all_facet_sources.argument.correct_fast2.correction =   commonscalarphase
 add_all_facet_sources.argument.correct_fast2.invert     =   True
+{% endif %}
 add_all_facet_sources.argument.correct_slow.type        =   applycal
 add_all_facet_sources.argument.correct_slow.parmdb      =   dir_dep_parmdb
 add_all_facet_sources.argument.correct_slow.invert      =   True

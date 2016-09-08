@@ -123,7 +123,7 @@ def solplot_tec(parmdb, imageroot, refstationi, plot_international=False, freq=N
     Nstat = len(stationsnames)
 
     refstation = stationsnames[refstationi]
-    times = soldict['CommonScalarPhase:{s}'.format(s=refstation)]['times']
+    times = soldict['TEC:{s}'.format(s=refstation)]['times']
     times = scaletimes(times)
     tec_ref = soldict['TEC:{s}'.format(s=refstation)]['values']
     num_channels = tec_ref.shape[1]

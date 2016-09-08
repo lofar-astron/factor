@@ -131,6 +131,9 @@ class Direction(object):
         self.completed_operations = []
         self.reset_operations = []
         self.cleanup_mapfiles = []
+        self.preapply_phase_cal = False
+        self.preapply_solve_tec_only = False
+        self.create_preapply_parmdb = False
 
         # Define some directories and files
         self.working_dir = factor_working_dir
@@ -225,7 +228,13 @@ class Direction(object):
 
         nbands, max_gap = self.get_nbands(bands)
         preaverage_flux_jy = parset['calibration_specific']['preaverage_flux_jy']
-        tec_block_mhz = parset['calibration_specific']['tec_block_mhz']
+        if self.preapply_phase_cal:
+            # If dir-dependent phase solutions are preapplied, we can solve for
+            # just a single TEC solution across the whole bandwidth. To do this,
+            # we can just set the TEC block to a large value
+            tec_block_mhz = 100.0
+        else:
+            tec_block_mhz = parset['calibration_specific']['tec_block_mhz']
         peel_flux_jy = parset['calibration_specific']['peel_flux_jy']
 
         self.robust_selfcal = parset['imaging_specific']['selfcal_robust']
