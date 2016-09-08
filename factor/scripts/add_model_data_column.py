@@ -35,4 +35,4 @@ if __name__ == '__main__':
     parser.add_argument('ms', help='name of MS file')
     args = parser.parse_args()
 
-    main(args.ms_list)
+    main(args.ms)
