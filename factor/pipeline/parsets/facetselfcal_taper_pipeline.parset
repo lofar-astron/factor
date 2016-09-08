@@ -1890,7 +1890,11 @@ concat_shift_empty.argument.flags                          =   [msfiles,msconcat
 # expand the mapfile of the model image to all files, length = ntimes
 create_expanded_model_mapfile.control.kind                 =   plugin
 create_expanded_model_mapfile.control.type                 =   expandMapfile
+{% if is_patch or skip_facet_imaging %}
+create_expanded_model_mapfile.control.mapfile_in           =   blank_model.output.mapfile
+{% else %}
 create_expanded_model_mapfile.control.mapfile_in           =   create_model4_map.output.mapfile
+{% endif %}
 create_expanded_model_mapfile.control.mapfile_to_match     =   concat_shift_empty.output.mapfile
 create_expanded_model_mapfile.control.mapfile_dir          =   input.output.mapfile_dir
 create_expanded_model_mapfile.control.filename             =   expand_wsclean_model.mapfile
