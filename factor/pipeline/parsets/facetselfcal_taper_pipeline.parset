@@ -634,9 +634,9 @@ wsclean_ft0.control.mapfiles_in                            =   [regroup_concat_d
 wsclean_ft0.control.inputkeys                              =   [msfile,name,size]
 wsclean_ft0.argument.flags                                 =   [-predict,msfile]
 wsclean_ft0.argument.scale                                 =   {{ cellsize_selfcal_deg }}
-wsclean_ft0.argument.mem                                   =   {{ max_percent_memory_per_proc_ntimes }}
+wsclean_ft0.argument.mem                                   =   {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft0.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
-wsclean_ft0.argument.j                                     =   {{ max_cpus_per_proc_ntimes }}
+wsclean_ft0.argument.j                                     =   {{ max_cpus_per_io_proc_ntimes }}
 wsclean_ft0.argument.tempdir                               =   {{ local_dir }}
 
 # switch "normal" weights with BL-averaged weights, length = ntimes
@@ -897,9 +897,9 @@ wsclean_ft1.control.inputkeys                              =   [msfile,name,size
 wsclean_ft1.argument.flags                                 =   [-predict,msfile]
 wsclean_ft1.argument.size                                  =   {{ cal_imsize }} {{ cal_imsize }}
 wsclean_ft1.argument.scale                                 =   {{ cellsize_selfcal_deg }}
-wsclean_ft1.argument.mem                                   =   {{ max_percent_memory_per_proc_ntimes }}
+wsclean_ft1.argument.mem                                   =   {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft1.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
-wsclean_ft1.argument.j                                     =   {{ max_cpus_per_proc_ntimes }}
+wsclean_ft1.argument.j                                     =   {{ max_cpus_per_io_proc_ntimes }}
 wsclean_ft1.argument.tempdir                               =   {{ local_dir }}
 
 # switch "normal" weights with BL-averaged weights, length = ntimes * num_cal_blocks
@@ -1129,9 +1129,9 @@ wsclean_ft2.control.inputkeys                              =   [msfile,name,size
 wsclean_ft2.argument.flags                                 =   [-predict,msfile]
 wsclean_ft2.argument.size                                  =   {{ cal_imsize }} {{ cal_imsize }}
 wsclean_ft2.argument.scale                                 =   {{ cellsize_selfcal_deg }}
-wsclean_ft2.argument.mem                                   =   {{ max_percent_memory_per_proc_ntimes }}
+wsclean_ft2.argument.mem                                   =   {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft2.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
-wsclean_ft2.argument.j                                     =   {{ max_cpus_per_proc_ntimes }}
+wsclean_ft2.argument.j                                     =   {{ max_cpus_per_io_proc_ntimes }}
 wsclean_ft2.argument.tempdir                               =   {{ local_dir }}
 
 # switch "normal" weights with BL-averaged weights, length = ntimes * num_cal_blocks
@@ -1447,9 +1447,9 @@ wsclean_ft3.control.mapfiles_in                            =   [regroup_concat_d
 wsclean_ft3.control.inputkeys                              =   [msfile,name,size]
 wsclean_ft3.argument.flags                                 =   [-predict,msfile]
 wsclean_ft3.argument.scale                                 =   {{ cellsize_selfcal_deg }}
-wsclean_ft3.argument.mem                                   =   {{ max_percent_memory_per_proc_ntimes }}
+wsclean_ft3.argument.mem                                   =   {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft3.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
-wsclean_ft3.argument.j                                     =   {{ max_cpus_per_proc_ntimes }}
+wsclean_ft3.argument.j                                     =   {{ max_cpus_per_io_proc_ntimes }}
 wsclean_ft3.argument.tempdir                               =   {{ local_dir }}
 
 # switch "normal" weights with BL-averaged weights, length = ntimes
@@ -2104,19 +2104,23 @@ expand_facet_model_size_map.control.filename               =   expand_facet_mode
 # make model visibilities, length = ntimes
 # For WSClean predict, we need to increase the number of wplanes so that the
 # effective model image size is larger than the FOV (to prevent aliasing issues)
+# For patches, we use the selfcal and I/O-limited values (since the model
+# tends to be small/simple)
 wsclean_ft.control.type                                    =   wsclean_ft
 wsclean_ft.control.mapfiles_in                             =   [concat_shift_empty.output.mapfile,create_expanded_model_mapfile.output.mapfile,expand_facet_model_size_map.output.mapfile]
 wsclean_ft.control.inputkeys                               =   [msfile,name,size]
 wsclean_ft.argument.flags                                  =   [-predict,msfile]
-wsclean_ft.argument.mem                                    =   {{ max_percent_memory_per_proc_ntimes }}
 {% if is_patch or skip_facet_imaging %}
+wsclean_ft.argument.mem                                    =   {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft.argument.scale                                  =   {{ cellsize_selfcal_deg }}
 wsclean_ft.argument.channelsout                            =   {{ wsclean_nchannels_selfcal }}
+wsclean_ft.argument.j                                      =   {{ max_cpus_per_io_proc_ntimes }}
 {% else %}
+wsclean_ft.argument.mem                                    =   {{ max_percent_memory_per_proc_ntimes }}
 wsclean_ft.argument.scale                                  =   {{ cellsize_facet_deg }}
 wsclean_ft.argument.channelsout                            =   {{ wsclean_nchannels }}
-{% endif %}
 wsclean_ft.argument.j                                      =   {{ max_cpus_per_proc_ntimes }}
+{% endif %}
 wsclean_ft.argument.tempdir                                =   {{ local_dir }}
 wsclean_ft.argument.nwlayers-for-size                      =   12288 12288
 
