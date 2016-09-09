@@ -53,6 +53,7 @@ sort_into_Groups.argument.flags                       =   [concat_reaveraged_com
 sort_into_Groups.argument.filename                    =   sorted_groups.mapfile
 sort_into_Groups.argument.mapfile_dir                 =   input.output.mapfile_dir
 sort_into_Groups.argument.hosts                       =   {{ hosts }}
+sort_into_Groups.argument.stepname                    =   sort_into_Groups
 sort_into_Groups.argument.nband_pad                   =   {{ nband_pad }}
 
 # convert the output of sort_into_Groups into usable mapfiles, len = ntimes
@@ -148,14 +149,14 @@ sort_shift_empty_into_Groups.argument.flags                =   [create_compresse
 sort_shift_empty_into_Groups.argument.filename             =   sorted_groups_shift_empty.mapfile
 sort_shift_empty_into_Groups.argument.mapfile_dir          =   input.output.mapfile_dir
 sort_shift_empty_into_Groups.argument.hosts                =   {{ hosts }}
-sort_shift_empty_into_Groups.argument.stepname             =   sort_into_Groups
+sort_shift_empty_into_Groups.argument.stepname             =   sort_shift_empty_into_Groups
 {% if skip_facet_imaging %}
 sort_shift_empty_into_Groups.argument.nband_pad            =   {{ nband_pad_selfcal }}
 {% else %}
 sort_shift_empty_into_Groups.argument.nband_pad            =   {{ nband_pad }}
 {% endif %}
 
-# convert the output of sort_into_Groups into usable mapfiles, len = 1 / ntimes
+# convert the output of sort_shift_empty_into_Groups into usable mapfiles, len = 1 / ntimes
 sort_shift_empty_into_Groups_maps.control.kind             =   plugin
 sort_shift_empty_into_Groups_maps.control.type             =   mapfilenamesFromMapfiles
 sort_shift_empty_into_Groups_maps.control.mapfile_groupmap =   sort_shift_empty_into_Groups.output.groupmapfile.mapfile
@@ -424,7 +425,6 @@ apply_dir_dep.argument.avg.freqstep                        =   {{ facetimage_fre
 apply_dir_dep.argument.avg.timestep                        =   {{ facetimage_timestep }}
 
 # end of normal facet-imaging block
-
 {% endif %}
 
 # make the compressed mapfile, length = 1
@@ -444,6 +444,7 @@ sort_into_Groups.argument.flags                       =   [create_compressed_map
 sort_into_Groups.argument.filename                    =   sorted_groups.mapfile
 sort_into_Groups.argument.mapfile_dir                 =   input.output.mapfile_dir
 sort_into_Groups.argument.hosts                       =   {{ hosts }}
+sort_into_Groups.argument.stepname                    =   sort_into_Groups
 sort_into_Groups.argument.nband_pad                   =   {{ nband_pad }}
 
 # convert the output of sort_into_Groups into usable mapfiles, len = ntimes
