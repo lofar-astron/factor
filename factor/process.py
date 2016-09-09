@@ -253,9 +253,15 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             # Reset facetimage op for any directions that need it
             directions_reset = [d for d in dirs_to_image if d.do_reset]
             for d in directions_reset:
-                op = FacetImage(parset, bands, d, cellsize_arcsec, robust,
-                    taper_arcsec, min_uv_lambda)
-                d.reset_state(op.name)
+                selfcal_robust = parset['imaging_specific']['selfcal_robust']
+                if (cellsize_arcsec != parset['imaging_specific']['selfcal_cellsize_arcsec'] or
+                    robust != selfcal_robust or taper_arcsec != 0.0 or
+                    min_uv_lambda != parset['imaging_specific']['selfcal_min_uv_lambda']):
+                    opname = 'facetimage_c{0}r{1}t{2}u{3}'.format(round(cellsize_arcsec, 1),
+                            round(robust, 2), round(taper_arcsec, 1), round(min_uv_lambda, 1))
+                else:
+                    opname = 'facetimage'
+                d.reset_state(opname)
 
             # Do facet imaging
             ops = [FacetImage(parset, bands, d, cellsize_arcsec, robust,
