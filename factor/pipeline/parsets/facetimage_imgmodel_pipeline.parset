@@ -116,10 +116,11 @@ expand_preapply_parmdb_map.control.mapfile_dir        =   input.output.mapfile_d
 expand_preapply_parmdb_map.control.filename           =   expand_preapply_parmdbs.mapfile
 {% endif %}
 
-# shift current residual visibilities to facet-center, length = nfiles
+# shift current residual visibilities to facet or calibrator center, length = nfiles
+# If facet imaging was skipped, we need to shift to the location of the calibrator
+# so that WSClean will properly predict
 shift_empty.control.type                              =   dppp
 shift_empty.control.opts.mapfile_in                   =   create_ms_map.output.mapfile
-shift_empty.control.opts.inputkey                     =   msin
 shift_empty.control.opts.inputkey                     =   msin
 shift_empty.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
 shift_empty.argument.msin.datacolumn                  =   SUBTRACTED_DATA_ALL_NEW
@@ -128,7 +129,11 @@ shift_empty.argument.msout.writefullresflag           =   False
 shift_empty.argument.local_scratch_dir                =   {{ local_dir }}
 shift_empty.argument.steps                            =   [shift]
 shift_empty.argument.shift.type                       =   phaseshifter
+{% if skip_facet_imaging %}
+shift_empty.argument.shift.phasecenter                =   [{{ ra }}deg, {{ dec }}deg]
+{% else %}
 shift_empty.argument.shift.phasecenter                =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+{% endif %}
 
 # compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile_shift_empty.control.kind         =   plugin
@@ -263,6 +268,7 @@ add_model_to_empty_data.control.opts.inputkeys          =   [file1,file2]
 add_model_to_empty_data.argument.flags                  =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add]
 
 {% if skip_facet_imaging %}
+
 # create a mapfile with the current skymodels from supplied list, length = nbands
 create_full_skymodels_map.control.kind                  =   plugin
 create_full_skymodels_map.control.type                  =   addListMapfile
@@ -302,7 +308,8 @@ create_parmdb_map.control.files                         =   {{ dir_indep_parmDBs
 create_parmdb_map.control.mapfile_dir                   =   input.output.mapfile_dir
 create_parmdb_map.control.filename                      =   dir_indep_instrument_parmdbs.mapfile
 
-# "do nearly everything" call to NDPPP: phaseshift, add, correct, and average in one NDPPP call, length = nfiles
+# "do nearly everything" call to NDPPP: phaseshift residual + calibrator visibilities
+# to the facet center, add all other facet sources, correct, and average in one NDPPP call, length = nfiles
 add_all_facet_sources.control.type                      =   dppp
 {% if preapply_phase_cal %}
 add_all_facet_sources.control.opts.mapfiles_in          =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile,expand_preapply_parmdb_map.output.mapfile]
@@ -318,9 +325,9 @@ add_all_facet_sources.argument.msout.writefullresflag   =   False
 add_all_facet_sources.argument.local_scratch_dir        =   {{ local_dir }}
 {% if preapply_phase_cal %}
 {% if preapply_solve_tec_only %}
-add_all_facet_sources.argument.steps                     =   [add,preapply_fast1,preapply_fast2,preapply_slow,correct_fast1,correct_slow,flagzero,avg]
+add_all_facet_sources.argument.steps                     =   [shift,add,preapply_fast1,preapply_fast2,preapply_slow,correct_fast1,correct_slow,flagzero,avg]
 {% else %}
-add_all_facet_sources.argument.steps                     =   [add,preapply_fast1,preapply_fast2,preapply_slow,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
+add_all_facet_sources.argument.steps                     =   [shift,add,preapply_fast1,preapply_fast2,preapply_slow,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
 {% endif %}
 add_all_facet_sources.argument.preapply_fast1.type       =   applycal
 add_all_facet_sources.argument.preapply_fast1.parmdb     =   preapply_parmdb
@@ -334,8 +341,10 @@ add_all_facet_sources.argument.preapply_slow.type        =   applycal
 add_all_facet_sources.argument.preapply_slow.parmdb      =   preapply_parmdb
 add_all_facet_sources.argument.preapply_slow.invert      =   True
 {% else %}
-add_all_facet_sources.argument.steps                     =   [add,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
+add_all_facet_sources.argument.steps                     =   [shift,add,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
 {% endif %}
+add_all_facet_sources.argument.shift.type                =   phaseshifter
+add_all_facet_sources.argument.shift.phasecenter         =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
 add_all_facet_sources.argument.add.type                 =   predict
 add_all_facet_sources.argument.add.sourcedb             =   sourcedb
 add_all_facet_sources.argument.add.operation            =   add
