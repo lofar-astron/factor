@@ -1420,17 +1420,14 @@ remove_parmdbs21.control.inputkey                          =   parmdb
 remove_parmdbs21.argument.flags                            =   [-rf,parmdb]
 
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
-# note: for now, we write out a new dataset even though it's never used, as this
-# is the only way to add a uv cut without affecting the original dataset. Once
-# GainCal has a filter parameter, we can use dppp_inplace instead and save on I/O
-solve_ampphase21.control.type                              =   dppp
+# note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
+# GainCal has a filter parameter, we can switch to that
+solve_ampphase21.control.type                              =   dppp_inplace
 solve_ampphase21.control.mapfiles_in                       =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
 solve_ampphase21.control.inputkeys                         =   [msin,parmdb]
 solve_ampphase21.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
 solve_ampphase21.argument.msin.datacolumn                  =   {{ data_column }}
-solve_ampphase21.argument.msout.overwrite                  =   True
-solve_ampphase21.argument.msout.writefullresflag           =   False
-solve_ampphase21.argument.local_scratch_dir                =   {{ local_dir }}
+solve_ampphase21.argument.msout                            =   .
 solve_ampphase21.argument.steps                            =   [uvcut,solvetec]
 solve_ampphase21.argument.uvcut.type                       =   uvwflagger
 solve_ampphase21.argument.uvcut.uvlambdamin                =   {{ solve_min_uv_lambda }}
@@ -1456,7 +1453,7 @@ apply_ampphase21.control.type                              =   dppp_inplace
 apply_ampphase21.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
 apply_ampphase21.control.opts.inputkeys                    =   [msin,parmdb]
 apply_ampphase21.argument.numthreads                       =   {{ max_cpus_per_proc_ntimes }}
-apply_ampphase21.argument.msin.datacolumn                  =   DATA
+apply_ampphase21.argument.msin.datacolumn                  =   {{ data_column }}
 apply_ampphase21.argument.msout                            =   .
 apply_ampphase21.argument.msout.datacolumn                 =   CORRECTED_DATA
 {% if preapply_solve_tec_only %}
@@ -1490,17 +1487,14 @@ remove_parmdbs22.control.inputkey                          =   parmdb
 remove_parmdbs22.argument.flags                            =   [-rf,parmdb]
 
 # run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes * num_cal_blocks
-# note: for now, we write out a new dataset even though it's never used, as this
-# is the only way to add a uv cut without affecting the original dataset. Once
-# GainCal has a filter parameter, we can use dppp_inplace instead and save on I/O
-solve_ampphase22.control.type                              =   dppp
+# note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
+# GainCal has a filter parameter, we can switch to that
+solve_ampphase22.control.type                              =   dppp_inplace
 solve_ampphase22.control.mapfiles_in                       =   [concat_data.output.mapfile,make_slow_gain_parmdb_map.output.mapfile]
 solve_ampphase22.control.inputkeys                         =   [msin,parmdb]
 solve_ampphase22.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
 solve_ampphase22.argument.msin.datacolumn                  =   CORRECTED_DATA
-solve_ampphase22.argument.msout.overwrite                  =   True
-solve_ampphase22.argument.msout.writefullresflag           =   False
-solve_ampphase22.argument.local_scratch_dir                =   {{ local_dir }}
+solve_ampphase22.argument.msout                            =   .
 solve_ampphase22.argument.steps                            =   [uvcut,solvegain]
 solve_ampphase22.argument.uvcut.type                       =   uvwflagger
 solve_ampphase22.argument.uvcut.uvlambdamin                =   {{ solve_min_uv_lambda }}
