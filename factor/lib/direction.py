@@ -1058,6 +1058,13 @@ class Direction(object):
                         if os.path.exists(f):
                             os.system('rm -rf {0}'.format(f))
 
+                            # Also delete associated "_CONCAT" files that result
+                            # from virtual concatenation
+                            extra_files = glob.glob(f+'_CONCAT')
+                            for e in extra_files:
+                                if os.path.exists(e):
+                                    os.system('rm -rf {0}'.format(e))
+
                         # Deal with special case of f being a WSClean image
                         if f.endswith('MFS-image.fits'):
                             # Search for related images and delete if found

@@ -141,9 +141,9 @@ class FacetSelfcal(Operation):
         self.direction.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'verify_subtract.break.mapfile')
         self.direction.image_data_mapfile_unconcat = os.path.join(self.pipeline_mapfile_dir,
-            'create_compressed_mapfile5.mapfile')
+            'concat_averaged_input.mapfile')
         self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'create_compressed_mapfile6.mapfile')
+            'full_image_input.mapfile')
         self.direction.preapply_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'create_preapply_parmdb.mapfile')
 
@@ -190,21 +190,30 @@ class FacetSelfcal(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'concat2_input.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat3_input.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat4_input.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'solve_ampphase12.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'solve_ampphase22.mapfile')]
+            os.path.join(self.pipeline_mapfile_dir, 'wsclean_image01_imagename.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'wsclean_image11_imagename.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'wsclean_image21_imagename.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'wsclean_image31_imagename.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'wsclean_image41_imagename.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'apply_amp1.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'apply_amp2.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'apply_phaseonly1.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'apply_phaseonly2.mapfile')]
         if not self.parset['keep_avg_facet_data'] and self.direction.name != 'target':
             # Add averaged calibrated data for the facet to files to be deleted.
             # These are only needed if the user wants to reimage by hand (e.g.,
             # with a different weighting). They are always kept for the target
-            self.direction.cleanup_mapfiles.append(
-                os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_compressed.mapfile'))
+            self.direction.cleanup_mapfiles.extend([
+                os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_input.mapfile'),
+                os.path.join(self.pipeline_mapfile_dir, 'concat_averaged.mapfile')])
         if not self.parset['keep_unavg_facet_data']:
             # Add unaveraged calibrated data for the facet to files to be deleted.
             # These are only needed if the user wants to phase shift them to
             # another direction (e.g., to combine several facets together before
             # imaging them all at once)
-            self.direction.cleanup_mapfiles.append(
-                os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'))
+            self.direction.cleanup_mapfiles.extend([
+                os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'),
+                os.path.join(self.pipeline_mapfile_dir, 'concat_shift_empty.mapfile')])
         if self.direction.selfcal_ok or not self.parset['calibration_specific']['exit_on_selfcal_failure']:
             self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
             self.direction.cleanup()
@@ -414,7 +423,6 @@ class FacetImage(Operation):
 
         # Delete temp data
         self.direction.cleanup_mapfiles = [
-            os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_input.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'image1.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'corrupt_final_model.mapfile')]
         if not self.parset['keep_avg_facet_data'] and self.direction.name != 'target':
@@ -422,15 +430,17 @@ class FacetImage(Operation):
             # These are only needed if the user wants to reimage by hand (e.g.,
             # with a different weighting) or for subsequent imaging runs. They
             # are always kept for the target direction
-            self.direction.cleanup_mapfiles.append(
-                os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_compressed.mapfile'))
+            self.direction.cleanup_mapfiles.extend([
+                os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_input.mapfile'),
+                os.path.join(self.pipeline_mapfile_dir, 'concat_averaged.mapfile')])
         if not self.direction.use_existing_data and hasattr(self.direction, 'image_data_mapfile_selfcal'):
             # Add old data from selfcal to files to be deleted, as we have made new improved versions
             self.direction.cleanup_mapfiles.append(self.direction.image_data_mapfile_selfcal)
         if not self.parset['keep_unavg_facet_data']:
             # Add unaveraged calibrated data for the facet to files to be deleted
-            self.direction.cleanup_mapfiles.append(
-                os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'))
+            self.direction.cleanup_mapfiles.extend([
+                os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'),
+                os.path.join(self.pipeline_mapfile_dir, 'concat_shift_empty.mapfile')])
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()
 
