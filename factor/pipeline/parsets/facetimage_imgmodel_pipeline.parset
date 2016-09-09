@@ -267,7 +267,7 @@ add_all_facet_sources.control.type                      =   dppp
 add_all_facet_sources.control.opts.mapfiles_in          =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile,expand_preapply_parmdb_map.output.mapfile]
 add_all_facet_sources.control.opts.inputkeys            =   [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb,preapply_parmdb]
 {% else %}
-add_all_facet_sources.control.opts.mapfiles_in          =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile,]
+add_all_facet_sources.control.opts.mapfiles_in          =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 add_all_facet_sources.control.opts.inputkeys            =   [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb]
 {% endif %}
 add_all_facet_sources.argument.numthreads               =   {{ max_cpus_per_io_proc_nfiles }}
