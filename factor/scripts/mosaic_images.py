@@ -8,7 +8,7 @@ import casacore.tables
 import casacore.images as pim
 from casacore import quanta
 import numpy as np
-import pyfits
+from astropy.io import fits as pyfits
 import os
 from factor.directions import mask_vertices
 
@@ -151,12 +151,12 @@ def main(images, vertices, outfits, maxwidth=0):
     # need to add new beam info (not sure if this is possible with casacore)
     hdu = pyfits.open(outfits,mode='update')
     header = hdu[0].header
-    header.update('BMAJ',mean_psf_fwhm[0])
-    header.update('BMIN',mean_psf_fwhm[1])
-    header.update('BPA',mean_psf_fwhm[2])
-    header.update('BUNIT',pims[-1].info()['unit'])
-    header.update('RESTFRQ',mean_frequency)
-    header.update('RESTFREQ',mean_frequency)
+    header['BMAJ'] = mean_psf_fwhm[0]
+    header['BMIN'] = mean_psf_fwhm[1]
+    header['BPA'] = mean_psf_fwhm[2]
+    header['BUNIT'] = pims[-1].info()['unit']
+    header['RESTFRQ'] = mean_frequency
+    header['RESTFREQ'] = mean_frequency
     newhdu = pyfits.PrimaryHDU(data=hdu[0].data, header=header)
     newhdu.writeto(outfits,clobber=True)
 
