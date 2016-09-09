@@ -9,6 +9,7 @@ update_mapfile_hosts.control.mapfile_dir                =   input.output.mapfile
 update_mapfile_hosts.control.hosts                      =   {{ hosts }}
 
 {% if use_existing_data %}
+# beginning of use-existing-data block
 # update host entry in existing image_data_mapfile, length = 1
 update_image_data_mapfile_hosts.control.kind            =   plugin
 update_image_data_mapfile_hosts.control.type            =   updateHosts
@@ -16,6 +17,7 @@ update_image_data_mapfile_hosts.control.mapfile_in      =   {{ image_data_mapfil
 update_image_data_mapfile_hosts.control.hosts           =   {{ hosts }}
 
 {% if average_image_data %}
+# existing data can be averaged futher
 # make an uncompressed mapfile of the concatenated data, length = ntimes
 concat_averaged_uncompressed_map.control.kind           =   plugin
 concat_averaged_uncompressed_map.control.type           =   uncompressMapfile
@@ -44,9 +46,12 @@ concat_reaveraged_compressed_map.control.type           =   compressMapfile
 concat_reaveraged_compressed_map.control.mapfile_in     =   average_image_data.output.mapfile
 concat_reaveraged_compressed_map.control.mapfile_dir    =   input.output.mapfile_dir
 concat_reaveraged_compressed_map.control.filename       =   concat_reaveraged_compressed.mapfile
+
+# end of average-existing-data block
 {% endif %}
 
 {% else %}
+# beginning of no-existing-data block
 
 # create a mapfile with all single MSs from supplied list, length = nfiles
 create_ms_map.control.kind                              =   plugin
@@ -204,18 +209,14 @@ sort_into_Groups_maps.control.mapfile_groupmap          =   sort_into_Groups.out
 sort_into_Groups_maps.control.mapfile_filesmap          =   sort_into_Groups.output.mapfile.mapfile
 
 # concat data in frequency, length = ntimes
-concat_averaged.control.type                            =   dppp
+# this step is needed to allow the desired channelsout for WSClean to be a
+# divisor of the number of bands
+concat_averaged.control.type                            =   virtual_concat
 concat_averaged.control.mapfile_out                     =   sort_into_Groups_maps.output.groupmap
 concat_averaged.control.mapfile_in                      =   sort_into_Groups_maps.output.filesmap
-concat_averaged.control.inputkey                        =   msin
-concat_averaged.argument.numthreads                     =   {{ max_cpus_per_io_proc_ntimes }}
-concat_averaged.argument.msin.datacolumn                =   DATA
-concat_averaged.argument.msin.missingdata               =   True
-concat_averaged.argument.msin.orderms                   =   False
-concat_averaged.argument.msout.overwrite                =   True
-concat_averaged.argument.msout.writefullresflag         =   False
-concat_averaged.argument.local_scratch_dir              =   {{ local_dir }}
-concat_averaged.argument.steps                          =   []
+concat_averaged.control.inputkey                        =   msfiles
+concat_averaged.control.outputkey                       =   msconcat
+concat_averaged.argument.flags                          =   [msfiles,msconcat]
 
 # make a compressed mapfile of the concatenated data, length = 1
 concat_averaged_compressed_map.control.kind             =   plugin
@@ -223,6 +224,8 @@ concat_averaged_compressed_map.control.type             =   compressMapfile
 concat_averaged_compressed_map.control.mapfile_in       =   concat_averaged.output.mapfile
 concat_averaged_compressed_map.control.mapfile_dir      =   input.output.mapfile_dir
 concat_averaged_compressed_map.control.filename         =   concat_averaged_compressed.mapfile
+
+# end of no-existing-data block
 {% endif %}
 
 # Make a preliminary clean mask from the facet region, length = 1
