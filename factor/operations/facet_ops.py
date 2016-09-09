@@ -402,7 +402,7 @@ class FacetImage(Operation):
         # averaging is not too much for use by later imaging runs
         if not self.direction.use_existing_data and self.full_res:
             self.direction.image_data_mapfile_unconcat = os.path.join(self.pipeline_mapfile_dir,
-                'create_compressed_mapfile.mapfile')
+                'concat_averaged_input.mapfile')
             self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
                 'concat_averaged_compressed.mapfile')
 
