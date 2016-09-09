@@ -169,8 +169,6 @@ def solplot_tec_scalarphase(parmdb, imageroot, refstationi, plot_international=F
         print 'freq', freq/1e6, 'MHz'
 
     names = parmdbmtable.getNames()
-
-    'Gain:1:1:Phase:RS508HBA'
     stationsnames = np.array([name.split(':')[-1] for name in names])
     stationsnames = np.unique(stationsnames)
     if not plot_international:
@@ -601,7 +599,7 @@ def solplot_amp(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp=F
 
 def main(parmdb, imageroot, freq=150.0, plot_tec=True, plot_tec_scalarphase=True, plot_amp=True,
     plot_phase=True, plot_scalarphase=False, median_amp=False, norm_amp_lim=False,
-    plot_clock=False, phasors=False, plot_international=False, refstation=0, fourpol=False):
+    plot_clock=False, phasors=False, plot_international=False, refstation=1, fourpol=False):
     """
     Make various plots
     """
