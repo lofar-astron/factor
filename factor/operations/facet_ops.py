@@ -205,7 +205,7 @@ class FacetSelfcal(Operation):
             # with a different weighting). They are always kept for the target
             self.direction.cleanup_mapfiles.extend([
                 os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_input.mapfile'),
-                os.path.join(self.pipeline_mapfile_dir, 'concat_averaged.mapfile')])
+                os.path.join(self.pipeline_mapfile_dir, 'apply_dir_dep_sorted_groups.mapfile_groups')])
         if not self.parset['keep_unavg_facet_data']:
             # Add unaveraged calibrated data for the facet to files to be deleted.
             # These are only needed if the user wants to phase shift them to
@@ -213,7 +213,7 @@ class FacetSelfcal(Operation):
             # imaging them all at once)
             self.direction.cleanup_mapfiles.extend([
                 os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'),
-                os.path.join(self.pipeline_mapfile_dir, 'concat_shift_empty.mapfile')])
+                os.path.join(self.pipeline_mapfile_dir, 'sorted_groups_shift_empty.mapfile_groups')])
         if self.direction.selfcal_ok or not self.parset['calibration_specific']['exit_on_selfcal_failure']:
             self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
             self.direction.cleanup()
@@ -432,7 +432,7 @@ class FacetImage(Operation):
             # are always kept for the target direction
             self.direction.cleanup_mapfiles.extend([
                 os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_input.mapfile'),
-                os.path.join(self.pipeline_mapfile_dir, 'concat_averaged.mapfile')])
+                os.path.join(self.pipeline_mapfile_dir, 'sorted_groups.mapfile_groups')])
         if not self.direction.use_existing_data and hasattr(self.direction, 'image_data_mapfile_selfcal'):
             # Add old data from selfcal to files to be deleted, as we have made new improved versions
             self.direction.cleanup_mapfiles.append(self.direction.image_data_mapfile_selfcal)
@@ -440,7 +440,7 @@ class FacetImage(Operation):
             # Add unaveraged calibrated data for the facet to files to be deleted
             self.direction.cleanup_mapfiles.extend([
                 os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'),
-                os.path.join(self.pipeline_mapfile_dir, 'concat_shift_empty.mapfile')])
+                os.path.join(self.pipeline_mapfile_dir, 'sorted_groups_shift_empty.mapfile_groups')])
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()
 
