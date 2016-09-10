@@ -993,7 +993,7 @@ average2.argument.avg.timestep                             =   {{ facetselfcal_t
 # make compressed mapfile of averaged data, length = 1
 create_compressed_mapfile2.control.kind                    =   plugin
 create_compressed_mapfile2.control.type                    =   compressMapfile
-create_compressed_mapfile2.control.mapfile_in              =   apply_phaseonly2.output.mapfile
+create_compressed_mapfile2.control.mapfile_in              =   average2.output.mapfile
 create_compressed_mapfile2.control.mapfile_dir             =   input.output.mapfile_dir
 create_compressed_mapfile2.control.filename                =   image2_input.mapfile
 

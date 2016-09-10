@@ -185,6 +185,7 @@ class FacetSelfcal(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'make_blavg_data.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'sorted_groups.mapfile_groups'),
             os.path.join(self.pipeline_mapfile_dir, 'average0.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'average2.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat0_input.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat1_input.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat2_input.mapfile'),
