@@ -1,6 +1,6 @@
 pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources,  add_all_facet_sources, shift_and_average, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2, create_model_map, pad_model_images, create_add_all_compressed_mapfile, sort_add_all_into_Groups, sort_add_all_into_Groups_maps, concat_add_all, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, subtract_facet_model]
 
-pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
+pipeline.pluginpath                                     =   {{ pipeline_dir }}/plugins
 
 # update host entries in all mapfiles
 update_mapfile_hosts.control.kind                       =   plugin
@@ -67,7 +67,7 @@ make_sourcedb_all_facet_sources.argument.outtype        =   blob
 expand_sourcedb_all_facet_sources.control.kind          =   plugin
 expand_sourcedb_all_facet_sources.control.type          =   mapfileSingleToGroup
 expand_sourcedb_all_facet_sources.control.mapfile_in    =   make_sourcedb_all_facet_sources.output.mapfile
-expand_sourcedb_all_facet_sources.control.mapfile_groups =   create_msmulti_map.output.mapfile
+expand_sourcedb_all_facet_sources.control.mapfile_groups=   create_msmulti_map.output.mapfile
 expand_sourcedb_all_facet_sources.control.mapfile_dir   =   input.output.mapfile_dir
 expand_sourcedb_all_facet_sources.control.filename      =   expand_sourcedb_all_facet_sources.mapfile
 
@@ -190,12 +190,8 @@ wsclean_image_full1.argument.mem                        =   {{ max_percent_memor
 wsclean_image_full1.argument.j                          =   {{ max_cpus_per_proc_single }}
 wsclean_image_full1.argument.tempdir                    =   {{ local_dir }}
 wsclean_image_full1.argument.weighting-rank-filter      =   3
-{% if wsclean_nchannels > 3 %}
-wsclean_image_full1.argument.deconvolution-channels     =   3
-wsclean_image_full1.argument.fit-spectral-pol           =   3
-{% endif %}
 {% if taper_facet_arcsec > 0.0 %}
-wsclean_image_full1.argument.taper-gaussian             =  {{ taper_facet_arcsec }}
+wsclean_image_full1.argument.taper-gaussian             =   {{ taper_facet_arcsec }}
 {% endif %}
 {% if facetimage_wsclean_nwavelengths > 0.0 %}
 wsclean_image_full1.argument.baseline-averaging         =   {{ facetimage_wsclean_nwavelengths }}
@@ -253,12 +249,8 @@ wsclean_image_full2.argument.mem                        =   {{ max_percent_memor
 wsclean_image_full2.argument.j                          =   {{ max_cpus_per_proc_single }}
 wsclean_image_full2.argument.tempdir                    =   {{ local_dir }}
 wsclean_image_full2.argument.weighting-rank-filter      =   3
-{% if wsclean_nchannels > 3 %}
-wsclean_image_full2.argument.deconvolution-channels     =   3
-wsclean_image_full2.argument.fit-spectral-pol           =   3
-{% endif %}
 {% if taper_facet_arcsec > 0.0 %}
-wsclean_image_full2.argument.taper-gaussian             =  {{ taper_facet_arcsec }}
+wsclean_image_full2.argument.taper-gaussian             =   {{ taper_facet_arcsec }}
 {% endif %}
 {% if facetimage_wsclean_nwavelengths > 0.0 %}
 wsclean_image_full2.argument.baseline-averaging         =   {{ facetimage_wsclean_nwavelengths }}

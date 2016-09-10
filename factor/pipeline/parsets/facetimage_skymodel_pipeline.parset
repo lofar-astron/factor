@@ -1,6 +1,6 @@
 pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources,  add_all_facet_sources, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
 
-pipeline.pluginpath                               =   {{ pipeline_dir }}/plugins
+pipeline.pluginpath                                     =   {{ pipeline_dir }}/plugins
 
 # update host entries in all mapfiles
 update_mapfile_hosts.control.kind                       =   plugin
@@ -87,12 +87,12 @@ expand_merged_parmdb_map.control.filename               =   expand_merged_parmdb
 
 {% if preapply_phase_cal %}
 # expand mapfile of the dir-dependent parmDB to all files, length = nfiles
-expand_preapply_parmdb_map.control.kind               =   plugin
-expand_preapply_parmdb_map.control.type               =   expandMapfile
-expand_preapply_parmdb_map.control.mapfile_in         =   {{ preapply_parmdb_mapfile }}
-expand_preapply_parmdb_map.control.mapfile_to_match   =   create_ms_map.output.mapfile
-expand_preapply_parmdb_map.control.mapfile_dir        =   input.output.mapfile_dir
-expand_preapply_parmdb_map.control.filename           =   expand_preapply_parmdbs.mapfile
+expand_preapply_parmdb_map.control.kind                 =   plugin
+expand_preapply_parmdb_map.control.type                 =   expandMapfile
+expand_preapply_parmdb_map.control.mapfile_in           =   {{ preapply_parmdb_mapfile }}
+expand_preapply_parmdb_map.control.mapfile_to_match     =   create_ms_map.output.mapfile
+expand_preapply_parmdb_map.control.mapfile_dir          =   input.output.mapfile_dir
+expand_preapply_parmdb_map.control.filename             =   expand_preapply_parmdbs.mapfile
 {% endif %}
 
 # create a mapfile with the current skymodels from supplied list, length = nbands
@@ -121,7 +121,7 @@ make_sourcedb_all_facet_sources.argument.outtype        =   blob
 expand_sourcedb_all_facet_sources.control.kind          =   plugin
 expand_sourcedb_all_facet_sources.control.type          =   mapfileSingleToGroup
 expand_sourcedb_all_facet_sources.control.mapfile_in    =   make_sourcedb_all_facet_sources.output.mapfile
-expand_sourcedb_all_facet_sources.control.mapfile_groups =   create_msmulti_map.output.mapfile
+expand_sourcedb_all_facet_sources.control.mapfile_groups=   create_msmulti_map.output.mapfile
 expand_sourcedb_all_facet_sources.control.mapfile_dir   =   input.output.mapfile_dir
 expand_sourcedb_all_facet_sources.control.filename      =   expand_sourcedb_all_facet_sources.mapfile
 
