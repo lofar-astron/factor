@@ -124,16 +124,16 @@ class FacetSelfcal(Operation):
             'merge_selfcal_parmdbs.mapfile')
         self.direction.selfcal_plots_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'make_selfcal_plots.mapfile')
-        self.direction.facet_image_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'final_image.mapfile')
         if self.direction.skip_facet_imaging:
             self.direction.facet_model_mapfile = os.path.join(self.pipeline_mapfile_dir,
                 'blank_model.mapfile')
         else:
             self.direction.facet_model_mapfile = os.path.join(self.pipeline_mapfile_dir,
                 'final_model_rootnames.mapfile')
-        self.direction.facet_premask_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'premask.mapfile')
+        self.direction.facet_image_mapfile = {'facetimage': os.path.join(self.pipeline_mapfile_dir,
+            'final_image.mapfile')} # this attribute is a dictionary to allow multiple image mapfiles
+        self.direction.facet_premask_mapfile = {'facetimage': os.path.join(self.pipeline_mapfile_dir,
+            'premask.mapfile')} # this attribute is a dictionary to allow multiple mask mapfiles
         self.direction.wsclean_modelimg_size_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'pad_model_images.padsize.mapfile')
         self.direction.diff_models_field_mapfile = os.path.join(self.pipeline_mapfile_dir,
@@ -399,9 +399,9 @@ class FacetImage(Operation):
         Finalize this operation
         """
         # Add output datamaps to direction object for later use
-        self.direction.facet_image_mapfile = os.path.join(self.pipeline_mapfile_dir,
+        self.direction.facet_image_mapfile[self.name.lower()] = os.path.join(self.pipeline_mapfile_dir,
             'final_image.mapfile')
-        self.direction.facet_premask_mapfile = os.path.join(self.pipeline_mapfile_dir,
+        self.direction.facet_premask_mapfile[self.name.lower()] = os.path.join(self.pipeline_mapfile_dir,
             'premask.mapfile')
 
         # Store the image_data_mapfile for use by other imaging runs. We do not
@@ -480,14 +480,14 @@ class FacetPeelImage(Operation):
         Finalize this operation
         """
         # Add output datamaps to direction object for later use
-        self.direction.facet_image_mapfile = os.path.join(self.pipeline_mapfile_dir,
+        self.direction.facet_image_mapfile['facetimage'] = os.path.join(self.pipeline_mapfile_dir,
             'final_image.mapfile')
+        self.direction.facet_premask_mapfile['facetimage'] = os.path.join(self.pipeline_mapfile_dir,
+            'premask.mapfile')
         self.direction.subtracted_data_new_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'subtract_facet_model.mapfile')
         self.direction.facet_model_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'final_model_rootnames.mapfile')
-        self.direction.facet_premask_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'premask.mapfile')
         self.direction.wsclean_modelimg_size_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'pad_model_images.padsize.mapfile')
 
