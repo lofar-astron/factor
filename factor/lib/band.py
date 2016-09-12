@@ -126,26 +126,24 @@ class Band(object):
             if len(self.files) == 0:
                 self.log.error('No data left after checking input files for band: {}. '
                                'Probably too little unflagged data.'.format(self.name))
-                self.log.info('Exiting!')
-                sys.exit(1)
-
-            # Calculate times and number of samples
-            self.sumsamples = 0
-            self.minSamplesPerFile = 4294967295  # If LOFAR lasts that many seconds then I buy you a beer.
-            self.starttime = np.finfo('d').max
-            self.endtime = 0.
-            for MSid in xrange(self.numMS):
-                tab = pt.table(self.files[MSid], ack=False)
-                self.starttime = min(self.starttime,np.min(tab.getcol('TIME')))
-                self.endtime = max(self.endtime,np.min(tab.getcol('TIME')))
-                for t2 in tab.iter(["ANTENNA1","ANTENNA2"]):
-                    if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
-                        self.timepersample = t2.col('TIME')[1] - t2.col('TIME')[0]
-                        numsamples = t2.nrows()
-                        self.sumsamples += numsamples
-                        self.minSamplesPerFile = min(self.minSamplesPerFile,numsamples)
-                        break
-                tab.close()
+            else:
+                # Calculate times and number of samples
+                self.sumsamples = 0
+                self.minSamplesPerFile = 4294967295  # If LOFAR lasts that many seconds then I buy you a beer.
+                self.starttime = np.finfo('d').max
+                self.endtime = 0.
+                for MSid in xrange(self.numMS):
+                    tab = pt.table(self.files[MSid], ack=False)
+                    self.starttime = min(self.starttime,np.min(tab.getcol('TIME')))
+                    self.endtime = max(self.endtime,np.min(tab.getcol('TIME')))
+                    for t2 in tab.iter(["ANTENNA1","ANTENNA2"]):
+                        if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
+                            self.timepersample = t2.col('TIME')[1] - t2.col('TIME')[0]
+                            numsamples = t2.nrows()
+                            self.sumsamples += numsamples
+                            self.minSamplesPerFile = min(self.minSamplesPerFile,numsamples)
+                            break
+                    tab.close()
             self.save_state()
 
         self.log.debug("Using {0} files.".format(len(self.files)))

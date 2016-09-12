@@ -121,6 +121,12 @@ def get_global_options(parset):
                         'imaging_specific': {}, 'cluster_specific': {},
                         'checkfactor': {}})
 
+    # Exit if a band is has too little useable data (default = False)
+    if 'exit_on_bad_band' in parset_dict:
+        parset_dict['exit_on_bad_band'] = parset.getboolean('global', 'exit_on_bad_band')
+    else:
+        parset_dict['exit_on_bad_band'] = False
+
     # Parmdb name for dir-indep. selfcal solutions (stored inside the input band
     # measurement sets, so path should be relative to those; default =
     # instrument_directionindependent)
@@ -226,13 +232,14 @@ def get_global_options(parset):
 
     # Check for unused options
     given_options = parset.options('global')
-    allowed_options = ['dir_working', 'dir_ms', 'parmdb_name', 'interactive',
-        'make_mosaic', 'exit_on_selfcal_failure', 'skip_selfcal_check',
-        'wsclean_nbands', 'keep_avg_facet_data', 'chunk_size_sec',
-        'wsclean_image_padding', 'wsclean_model_padding', 'peel_flux_jy',
-        'keep_unavg_facet_data', 'max_selfcal_loops', 'preaverage_flux_jy',
-        'multiscale_selfcal', 'skymodel_extension', 'max_peak_smearing',
-        'tec_block_mhz', 'selfcal_cellsize_arcsec', 'selfcal_robust']
+    allowed_options = ['dir_working', 'dir_ms', 'exit_on_bad_band', 'parmdb_name',
+        'interactive', 'make_mosaic', 'exit_on_selfcal_failure',
+        'skip_selfcal_check', 'wsclean_nbands', 'keep_avg_facet_data',
+        'chunk_size_sec', 'wsclean_image_padding', 'wsclean_model_padding',
+        'peel_flux_jy', 'keep_unavg_facet_data', 'max_selfcal_loops',
+        'preaverage_flux_jy', 'multiscale_selfcal', 'skymodel_extension',
+        'max_peak_smearing', 'tec_block_mhz', 'selfcal_cellsize_arcsec',
+        'selfcal_robust']
     allowed_options.extend(['direction_specific', 'calibration_specific',
         'imaging_specific', 'cluster_specific']) # add dicts needed for deprecated options
     deprecated_options_imaging = ['make_mosaic', 'facet_imager',

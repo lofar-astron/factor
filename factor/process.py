@@ -428,7 +428,16 @@ def _set_up_bands(parset, test_run=False):
         band = Band(msdict[MSkey], parset['dir_working'], parset['parmdb_name'],
             skymodel_dirindep, local_dir=parset['cluster_specific']['dir_local'],
             test_run=test_run, chunk_size_sec=parset['chunk_size_sec'])
-        bands.append(band)
+        if len(band.files) == 0:
+            # No useable files found for this band (likely due to too little
+            # unflagged data)
+            if parset['exit_on_bad_band']:
+                self.log.info('Exiting!')
+                sys.exit(1)
+            else:
+                self.log.info('Skipping {} in further processing'.format(band.name))
+        else:
+            bands.append(band)
 
     # Sort bands by frequency
     band_freqs = [band.freq for band in bands]
