@@ -398,10 +398,10 @@ class FacetImage(Operation):
         Finalize this operation
         """
         # Add output datamaps to direction object for later use
-        self.direction.facet_image_mapfile[self.name.lower()] = os.path.join(self.pipeline_mapfile_dir,
-            'final_image.mapfile')
-        self.direction.facet_premask_mapfile[self.name.lower()] = os.path.join(self.pipeline_mapfile_dir,
-            'premask.mapfile')
+        self.direction.facet_image_mapfile = {'facetimage': os.path.join(self.pipeline_mapfile_dir,
+            'final_image.mapfile')} # this attribute is a dictionary to allow multiple image mapfiles
+        self.direction.facet_premask_mapfile = {'facetimage': os.path.join(self.pipeline_mapfile_dir,
+            'premask.mapfile')} # this attribute is a dictionary to allow multiple mask mapfiles
 
         # Store the image_data_mapfile for use by other imaging runs. We do not
         # update this if use_existing_data is True, as in this case it should
