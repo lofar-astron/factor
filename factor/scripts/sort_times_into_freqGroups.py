@@ -194,6 +194,8 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
                             # Flag all data
                             t = pt.table(ms_new, readonly=False)
                             t.putcol('FLAG_ROW', np.ones(len(t), dtype=bool))
+                            f = t.getcol('FLAG')
+                            t.putcol('FLAG', np.ones(f.shape, dtype=bool))
                             t.close()
 
                             # Replace dummy.ms in files list with new filename
