@@ -40,7 +40,10 @@ def plugin_main(args, **kwargs):
     if nitems_to_compress > 0:
         all_files = []
         for item in map_in:
-            all_files.extend(item.file)
+            if type(item.file) is list:
+                all_files.extend(item.file)
+            else:
+                all_files.append(item.file)
         file_groups = [all_files[i:i+nitems_to_compress] for i  in range(0, len(all_files), nitems_to_compress)]
         all_hosts = [item.host for item in map_in]
         host_groups = [all_hosts[i:i+nitems_to_compress] for i  in range(0, len(all_hosts), nitems_to_compress)]
@@ -49,7 +52,10 @@ def plugin_main(args, **kwargs):
     else:
         file_list = []
         for item in map_in:
-            file_list.extend(item.file)
+            if type(item.file) is list:
+                file_list.extend(item.file)
+            else:
+                file_list.append(item.file)
         host_list = [item.host for item in map_in]
         map_out.data.append(MultiDataProduct(host_list[0], file_list, False))
 
