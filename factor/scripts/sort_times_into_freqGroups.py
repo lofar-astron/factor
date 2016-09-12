@@ -162,6 +162,7 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
                     for ms in files:
                         if os.path.exists(ms):
                             ms_exists = ms
+                            dirname = os.path.dirname(ms_exists)
                             sw = pt.table('{}::SPECTRAL_WINDOW'.format(ms))
                             ms_exists_ref_freq = sw.getcol('REF_FREQUENCY')[0]
                             sw.close()
@@ -169,7 +170,7 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
 
                     for i, ms in enumerate(files):
                         if ms == 'dummy.ms':
-                            ms_new = '{0}_{1}.ms'.format(os.path.splitext(ms)[0], uuid.uuid4().urn.split('-')[-1])
+                            ms_new = os.path.join(dirname, '{0}_{1}.ms'.format(os.path.splitext(ms)[0], uuid.uuid4().urn.split('-')[-1])
                             pt.tableutil.tablecopy(ms_exists, ms_new)
 
                             # Alter SPECTRAL_WINDOW subtable as appropriate to fill gap
