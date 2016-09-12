@@ -398,7 +398,7 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
 
             for chan, (amp_cleaned, model, noisevec, scatter, n_knots, idxbad, weights) in enumerate(results):
                 # put back the results
-                phase = numpy.arctan2(channel_parms_imag[chan], channel_parms_real[chan]**2)
+                phase = numpy.arctan2(channel_parms_imag[chan], channel_parms_real[chan])
                 parms[gain + ':' + pol + ':Real:' + antenna]['values'][:, chan] = numpy.copy(amp_cleaned*numpy.cos(phase))
                 parms[gain + ':' + pol + ':Imag:' + antenna]['values'][:, chan] = numpy.copy(amp_cleaned*numpy.sin(phase))
 
@@ -452,7 +452,7 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
                 channel_amp_orig = [numpy.sqrt(channel_parms_real[chan]**2 +
                     channel_parms_imag[chan]**2) for chan in range(nchans)]
                 amp_orig = numpy.sqrt(channel_parms_real[:]**2 + channel_parms_imag[:]**2)
-                phase    = numpy.arctan2(channel_parms_imag[:], channel_parms_real[:]**2)
+                phase    = numpy.arctan2(channel_parms_imag[:], channel_parms_real[:])
 
                 amp_cleaned, amp_median, baddata = median2Dampfilter(numpy.copy(amp_orig))
 
@@ -517,12 +517,6 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
                     imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
                     phase = numpy.arctan2(imag, real)
                     amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
-
-                    # Clip extremely low amplitude solutions to prevent very high
-                    # amplitudes in the corrected data
-                    if pol == '1:1' or pol == '0:0':
-                        low_ind = numpy.where(amp < 0.2)
-                        amp[low_ind] = 0.2
 
                     parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = numpy.copy(amp *
                         numpy.cos(phase) * norm_factor)
