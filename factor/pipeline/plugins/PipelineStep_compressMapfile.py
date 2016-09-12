@@ -11,8 +11,10 @@ def plugin_main(args, **kwargs):
     mapfile_in : str
         Filename of datamap containing MS files
     nitems_to_compress: int
-        Number of input items to compress into each output item. Set to negative
-        to compress all input items to a single output item (default = -1)
+        Number of input items to compress into each output item. Set to zero or
+        negative number to compress all input items to a single output item
+        (default = -1). If greater than 0, the input map must have only one file
+        per group (i.e., it must be a normal DataMap)
     mapfile_dir : str
         Directory for output mapfile
     filename: str
@@ -32,18 +34,22 @@ def plugin_main(args, **kwargs):
     else:
         nitems_to_compress = -1
 
-    map_in = DataMap.load(mapfile_in)
+    map_in = MultiDataMap.load(mapfile_in)
     map_out = MultiDataMap([])
     map_in.iterator = DataMap.SkipIterator
     if nitems_to_compress > 0:
-        all_files = [item.file for item in map_in]
+        all_files = []
+        for item in map_in:
+            all_files.extend(item.file)
         file_groups = [all_files[i:i+nitems_to_compress] for i  in range(0, len(all_files), nitems_to_compress)]
         all_hosts = [item.host for item in map_in]
         host_groups = [all_hosts[i:i+nitems_to_compress] for i  in range(0, len(all_hosts), nitems_to_compress)]
         for file_list, host_list in zip(file_groups, host_groups):
             map_out.data.append(MultiDataProduct(host_list[0], file_list, False))
     else:
-        file_list = [item.file for item in map_in]
+        file_list = []
+        for item in map_in:
+            file_list.extend(item.file)
         host_list = [item.host for item in map_in]
         map_out.data.append(MultiDataProduct(host_list[0], file_list, False))
 
@@ -52,6 +58,17 @@ def plugin_main(args, **kwargs):
     result = {'mapfile': fileid}
 
     return result
+
+
+def string2bool(instring):
+    if not isinstance(instring, basestring):
+        raise ValueError('string2bool: Input is not a basic string!')
+    if instring.upper() == 'TRUE' or instring == '1':
+        return True
+    elif instring.upper() == 'FALSE' or instring == '0':
+        return False
+    else:
+        raise ValueError('string2bool: Cannot convert string "'+instring+'" to boolean!')
 
 
 class MultiDataProduct(DataProduct):

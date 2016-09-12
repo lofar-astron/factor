@@ -9,7 +9,8 @@ from lofarpipe.support.data_map import DataMap, DataProduct
 
 
 def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True,
-    hosts=None, NDPPPfill=True, target_path=None, stepname=None, nband_pad=0):
+    hosts=None, NDPPPfill=True, target_path=None, stepname=None, nband_pad=0,
+    make_dummy_files=False):
     """
     Check a list of MS files for missing frequencies
 
@@ -44,6 +45,8 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
     nband_pad : int, optional
         Add this number of bands of dummy data to the high-frequency end
         of the list
+    make_dummy_files : bool, optional
+        If True, make MS files for all dummy data
 
     Returns
     -------
@@ -60,6 +63,7 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
     numSB = int(numSB)
     nband_pad = int(nband_pad)
     enforce_numSB = input2bool(enforce_numSB)
+    make_dummy_files = input2bool(make_dummy_files)
 
     if type(hosts) is str:
         hosts = [h.strip(' \'\"') for h in hosts.strip('[]').split(',')]
@@ -150,6 +154,39 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
                     files.append('dummy.ms')
             if not skip_this:
                 nbands += len(files)
+
+            if make_dummy_files:
+                for i, ms in enumerate(files):
+                    if ms == 'dummy.ms':
+                        ms_new = '{0}_{1}.ms'.format(os.path.splitext(ms)[0], uuid.uuid4().urn.split('-')[-1])
+                        pt.tableutil.tablecopy(ms_exists, ms_new)
+
+                        # Alter SPECTRAL_WINDOW subtable as appropriate to fill gap
+                        sw = pt.table('{}::SPECTRAL_WINDOW'.format(ms_new), readonly=False)
+                        tot_bandwidth = sw.getcol('TOTAL_BANDWIDTH')[0]
+                        if i > 0:
+                            sw_low = pt.table('{}::SPECTRAL_WINDOW'.format(files[i-1]))
+                            ref_freq = sw_low.getcol('REF_FREQUENCY') + tot_bandwidth
+                            sw_low.close()
+                        else:
+                            for j in range(1, len(files)-1):
+                                if os.path.exists(files[j]):
+                                    sw_high = pt.table('{}::SPECTRAL_WINDOW'.format(files[j]))
+                                    ref_freq = sw_high.getcol('REF_FREQUENCY') - tot_bandwidth * j
+                                    sw_high.close()
+                                    break
+                        chan_freq = sw.getcol('CHAN_FREQ') - ms_exists_ref_freq + ref_freq
+                        sw.putcol('REF_FREQUENCY', ref_freq)
+                        sw.putcol('CHAN_FREQ', chan_freq)
+                        sw.close()
+
+                        # Flag all data
+                        t = pt.table(ms_new, readonly=False)
+                        t.putcol('FLAG_ROW', np.ones(len(t), dtype=bool))
+                        t.close()
+
+                        # Replace dummy.ms in files list with new filename
+                        files[i] = ms_new
 
             filemap.append(MultiDataProduct(hosts[hostID%numhosts], files, skip_this))
             groupname = time_groups[time]['basename']+'_%Xt_%dg.ms'%(time,fgroup)
