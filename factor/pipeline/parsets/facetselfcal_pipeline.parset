@@ -85,7 +85,7 @@ expand_sourcedb_cal_facet_sources.control.mapfile_groups   =   create_msmulti_ma
 expand_sourcedb_cal_facet_sources.control.mapfile_dir      =   input.output.mapfile_dir
 expand_sourcedb_cal_facet_sources.control.filename         =   expand_sourcedb_cal_facet_sources.mapfile
 
-# shift full-res data to facet position (to accept result of final ft step), length = nfiles
+# shift full-res data to facet position to accept result of ft step below, length = nfiles
 shift_empty.control.type                                   =   dppp
 shift_empty.control.opts.mapfile_in                        =   create_ms_map.output.mapfile
 shift_empty.control.opts.inputkey                          =   msin

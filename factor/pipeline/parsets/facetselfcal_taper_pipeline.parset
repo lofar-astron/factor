@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} shift_cal, {% if preapply_phase_cal %} shift_cal_dir_indep, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, switch_weights_col_shift_cal1, concat_blavg_data, switch_weights_col_shift_cal2, copy_column1, copy_column2, {% endif %} concat_data_compressed_mapfile, {% if not preapply_phase_cal %} average0, {% endif %} create_compressed_mapfile0, sort_average0_into_Groups, sort_average0_into_Groups_maps, concat_average0_data, create_compressed_mapfile01, premask_selfcal, wsclean_image01, create_imagebase_map01, adjust_wsclean_mapfile0, mask0, wsclean_image02, create_imagebase_map02, pad_selfcal_model0_images, regroup_concat_data_map, create_expanded_model0_mapfile, expand_selfcal_model_size_map, wsclean_ft0, switch_weights_col1, make_fast_phase_parmdb_map, {% if peel_skymodel is not none %} create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, {% endif %} remove_parmdbs1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, wsclean_image11, create_imagebase_map11, adjust_wsclean_mapfile11, mask1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, pad_selfcal_model1_images, wsclean_ft1, switch_weights_col3, remove_parmdbs2, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, loop_phasecal, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, wsclean_image31, create_imagebase_map31, adjust_wsclean_mapfile31, mask3, wsclean_image32, loop_ampcal, merge_selfcal_parmdbs, {% if create_preapply_parmdb %} create_preapply_parmdb, {% endif %} make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, {% if is_patch or skip_facet_imaging %} create_model4_map, blank_model, {% else %} apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, concat_averaged, create_compressed_mapfile6, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, {% endif %} pad_model_images, create_compressed_mapfile_shift_empty, sort_shift_empty_into_Groups, sort_shift_empty_into_Groups_maps, add_model_data_col, concat_shift_empty, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} shift_cal, {% if preapply_phase_cal %} shift_cal_dir_indep, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, switch_weights_col_shift_cal1, concat_blavg_data, switch_weights_col_shift_cal2, copy_column1, copy_column2, {% endif %} concat_data_compressed_mapfile, {% if not preapply_phase_cal %} average0, {% endif %} create_compressed_mapfile0, sort_average0_into_Groups, sort_average0_into_Groups_maps, concat_average0_data, create_compressed_mapfile01, premask_selfcal, wsclean_image01, create_imagebase_map01, adjust_wsclean_mapfile0, mask0, wsclean_image02, create_imagebase_map02, pad_selfcal_model0_images, regroup_concat_data_map, create_expanded_model0_mapfile, expand_selfcal_model_size_map, wsclean_ft0, switch_weights_col1, make_fast_phase_parmdb_map, {% if peel_skymodel is not none %} create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, {% endif %} remove_parmdbs1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, wsclean_image11, create_imagebase_map11, adjust_wsclean_mapfile11, mask1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, pad_selfcal_model1_images, wsclean_ft1, switch_weights_col3, remove_parmdbs2, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, loop_phasecal, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, wsclean_image31, create_imagebase_map31, adjust_wsclean_mapfile31, mask3, wsclean_image32, loop_ampcal, merge_selfcal_parmdbs, {% if create_preapply_parmdb %} create_preapply_parmdb, {% endif %} make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, {% if is_patch or skip_facet_imaging %} create_model4_map, blank_model, {% else %} apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, create_compressed_mapfile6, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, {% endif %} pad_model_images, create_compressed_mapfile_shift_empty, add_model_data_col, sort_shift_empty_into_Groups, sort_shift_empty_into_Groups_maps,  create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -1745,6 +1745,7 @@ merge_selfcal_parmdbs.control.outputkey                    =   parmdb_out
 merge_selfcal_parmdbs.argument.flags                       =   [parmdb_p,parmdb_a,parmdb_out]
 
 {% if create_preapply_parmdb %}
+# make a phase-only parmDB suitable for preapplication, length = 1
 create_preapply_parmdb.control.type                        =   reset_amps
 create_preapply_parmdb.control.mapfile_in                  =   merge_selfcal_parmdbs.output.mapfile
 create_preapply_parmdb.control.inputkey                    =   inparmdb
@@ -1869,6 +1870,7 @@ create_compressed_mapfile5.control.mapfile_dir             =   input.output.mapf
 create_compressed_mapfile5.control.filename                =   concat_averaged_input.mapfile
 
 # sort compressed mapfile so that there is one group per timestamp, length = ntimes
+# we also make dummy data to fill gaps and pad as needed
 sort_averaged.control.type                                 =   sort_times_into_freqGroups
 sort_averaged.argument.flags                               =   [create_compressed_mapfile5.output.mapfile]
 sort_averaged.argument.filename                            =   apply_dir_dep_sorted_groups.mapfile
@@ -1876,27 +1878,18 @@ sort_averaged.argument.mapfile_dir                         =   input.output.mapf
 sort_averaged.argument.hosts                               =   {{ hosts }}
 sort_averaged.argument.stepname                            =   sort_averaged
 sort_averaged.argument.nband_pad                           =   {{ nband_pad }}
+sort_averaged.argument.make_dummy_files                    =   True
 
-# convert the output of sort_averageed into usable mapfiles, len = 1 / ntimes
+# convert the output of sort_averaged into usable mapfiles, len = 1 / ntimes
 sort_averaged_maps.control.kind                            =   plugin
 sort_averaged_maps.control.type                            =   mapfilenamesFromMapfiles
 sort_averaged_maps.control.mapfile_groupmap                =   sort_averaged.output.groupmapfile.mapfile
 sort_averaged_maps.control.mapfile_filesmap                =   sort_averaged.output.mapfile.mapfile
 
-# concatenate data in frequency, length = ntimes
-# this step is needed to allow the desired channelsout for WSClean to be a
-# divisor of the number of bands
-concat_averaged.control.type                               =   virtual_concat
-concat_averaged.control.mapfile_out                        =   sort_averaged_maps.output.groupmap
-concat_averaged.control.mapfile_in                         =   sort_averaged_maps.output.filesmap
-concat_averaged.control.inputkey                           =   msfiles
-concat_averaged.control.outputkey                          =   msconcat
-concat_averaged.argument.flags                             =   [msfiles,msconcat]
-
 # make compressed mapfile of averaged data, length = 1
 create_compressed_mapfile6.control.kind                    =   plugin
 create_compressed_mapfile6.control.type                    =   compressMapfile
-create_compressed_mapfile6.control.mapfile_in              =   concat_averaged.output.mapfile
+create_compressed_mapfile6.control.mapfile_in              =   sort_averaged_maps.output.filesmap
 create_compressed_mapfile6.control.mapfile_dir             =   input.output.mapfile_dir
 create_compressed_mapfile6.control.filename                =   full_image_input.mapfile
 
@@ -2030,6 +2023,14 @@ create_compressed_mapfile_shift_empty.control.mapfile_in   =   shift_empty.outpu
 create_compressed_mapfile_shift_empty.control.mapfile_dir  =   input.output.mapfile_dir
 create_compressed_mapfile_shift_empty.control.filename     =   concat_shift_empty_input.mapfile
 
+# add MODEL_DATA column to shift_empty MSs, length = nfiles
+# because the sort_shift_empty_into_Groups concat step below makes dummy files,
+# we need to add this column first so that the dummy files have them too
+add_model_data_col.control.type                            =   add_model_data_column
+add_model_data_col.control.mapfile_in                      =   shift_empty.output.mapfile
+add_model_data_col.control.inputkey                        =   msfile
+add_model_data_col.argument.flags                          =   [msfile]
+
 # sort compressed mapfile so that there is one group per timestamp, length = ntimes
 sort_shift_empty_into_Groups.control.type                  =   sort_times_into_freqGroups
 sort_shift_empty_into_Groups.argument.flags                =   [create_compressed_mapfile_shift_empty.output.mapfile]
@@ -2042,30 +2043,13 @@ sort_shift_empty_into_Groups.argument.nband_pad            =   {{ nband_pad_self
 {% else %}
 sort_shift_empty_into_Groups.argument.nband_pad            =   {{ nband_pad }}
 {% endif %}
+sort_shift_empty_into_Groups.argument.make_dummy_files     =   True
 
 # convert the output of sort_into_Groups into usable mapfiles, len = 1 / ntimes
 sort_shift_empty_into_Groups_maps.control.kind             =   plugin
 sort_shift_empty_into_Groups_maps.control.type             =   mapfilenamesFromMapfiles
 sort_shift_empty_into_Groups_maps.control.mapfile_groupmap =   sort_shift_empty_into_Groups.output.groupmapfile.mapfile
 sort_shift_empty_into_Groups_maps.control.mapfile_filesmap =   sort_shift_empty_into_Groups.output.mapfile.mapfile
-
-# add MODEL_DATA column to shift_empty MSs, length = nfiles
-# because the concat_shift_empty concat step below is virtual, we need to add this column
-# before concatenating
-add_model_data_col.control.type                            =   add_model_data_column
-add_model_data_col.control.mapfile_in                      =   shift_empty.output.mapfile
-add_model_data_col.control.inputkey                        =   msfile
-add_model_data_col.argument.flags                          =   [msfile]
-
-# concat data in frequency, length = ntimes
-# this step is needed to ensure that the shift empty datasets have the same
-# padding as the ones used for the full/patch images
-concat_shift_empty.control.type                            =   virtual_concat
-concat_shift_empty.control.mapfile_out                     =   sort_shift_empty_into_Groups_maps.output.groupmap
-concat_shift_empty.control.mapfile_in                      =   sort_shift_empty_into_Groups_maps.output.filesmap
-concat_shift_empty.control.inputkey                        =   msfiles
-concat_shift_empty.control.outputkey                       =   msconcat
-concat_shift_empty.argument.flags                          =   [msfiles,msconcat]
 
 # expand the mapfile of the model image to all files, length = ntimes
 create_expanded_model_mapfile.control.kind                 =   plugin
@@ -2075,7 +2059,7 @@ create_expanded_model_mapfile.control.mapfile_in           =   blank_model.outpu
 {% else %}
 create_expanded_model_mapfile.control.mapfile_in           =   create_model4_map.output.mapfile
 {% endif %}
-create_expanded_model_mapfile.control.mapfile_to_match     =   concat_shift_empty.output.mapfile
+create_expanded_model_mapfile.control.mapfile_to_match     =   sort_shift_empty_into_Groups_maps.output.groupmap
 create_expanded_model_mapfile.control.mapfile_dir          =   input.output.mapfile_dir
 create_expanded_model_mapfile.control.filename             =   expand_wsclean_model.mapfile
 
@@ -2083,17 +2067,17 @@ create_expanded_model_mapfile.control.filename             =   expand_wsclean_mo
 expand_facet_model_size_map.control.kind                   =   plugin
 expand_facet_model_size_map.control.type                   =   expandMapfile
 expand_facet_model_size_map.control.mapfile_in             =   pad_model_images.output.padsize.mapfile
-expand_facet_model_size_map.control.mapfile_to_match       =   concat_shift_empty.output.mapfile
+expand_facet_model_size_map.control.mapfile_to_match       =   sort_shift_empty_into_Groups_maps.output.groupmap
 expand_facet_model_size_map.control.mapfile_dir            =   input.output.mapfile_dir
 expand_facet_model_size_map.control.filename               =   expand_facet_model_size.mapfile
 
 # make model visibilities, length = ntimes
 # For WSClean predict, we need to increase the number of wplanes so that the
-# effective model image size is larger than the FOV (to prevent aliasing issues)
+# effective model image size is larger than the FOV (to prevent aliasing issues).
 # For patches, we use the selfcal and I/O-limited values (since the model
 # tends to be small/simple)
 wsclean_ft.control.type                                    =   wsclean_ft
-wsclean_ft.control.mapfiles_in                             =   [concat_shift_empty.output.mapfile,create_expanded_model_mapfile.output.mapfile,expand_facet_model_size_map.output.mapfile]
+wsclean_ft.control.mapfiles_in                             =   [sort_shift_empty_into_Groups_maps.output.filesmap,create_expanded_model_mapfile.output.mapfile,expand_facet_model_size_map.output.mapfile]
 wsclean_ft.control.inputkeys                               =   [msfile,name,size]
 wsclean_ft.argument.flags                                  =   [-predict,msfile]
 {% if is_patch or skip_facet_imaging %}

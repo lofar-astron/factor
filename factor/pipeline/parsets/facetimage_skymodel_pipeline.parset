@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources,  add_all_facet_sources, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
+pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources,  add_all_facet_sources, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged_compressed_map, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
 
 pipeline.pluginpath                                     =   {{ pipeline_dir }}/plugins
 
@@ -17,8 +17,10 @@ update_image_data_mapfile_hosts.control.mapfile_in      =   {{ image_data_mapfil
 update_image_data_mapfile_hosts.control.hosts           =   {{ hosts }}
 
 {% if average_image_data %}
-# existing data can be averaged futher
-# make an uncompressed mapfile of the concatenated data, length = ntimes
+# existing data can be averaged further
+
+# make an uncompressed mapfile of the concatenated data, length = nfiles
+# note: these MSs include any dummy MS files inserted to fill gaps or pad
 concat_averaged_uncompressed_map.control.kind           =   plugin
 concat_averaged_uncompressed_map.control.type           =   uncompressMapfile
 concat_averaged_uncompressed_map.control.mapfile_in     =   {{ image_data_mapfile }}
@@ -26,11 +28,11 @@ concat_averaged_uncompressed_map.control.mapfile_dir    =   input.output.mapfile
 concat_averaged_uncompressed_map.control.hosts          =   {{ hosts }}
 concat_averaged_uncompressed_map.control.filename       =   concat_averaged_uncompressed.mapfile
 
-# average if necessary, length = ntimes
+# average if necessary, length = nfiles
 average_image_data.control.type                         =   dppp
 average_image_data.control.mapfile_in                   =   concat_averaged_uncompressed_map.output.mapfile
 average_image_data.control.inputkey                     =   msin
-average_image_data.argument.numthreads                  =   {{ max_cpus_per_io_proc_ntimes }}
+average_image_data.argument.numthreads                  =   {{ max_cpus_per_io_proc_nfiles }}
 average_image_data.argument.msin.datacolumn             =   DATA
 average_image_data.argument.msout.overwrite             =   True
 average_image_data.argument.msout.writefullresflag      =   False
@@ -191,16 +193,15 @@ create_compressed_mapfile.control.mapfile_in            =   add_all_facet_source
 create_compressed_mapfile.control.mapfile_dir           =   input.output.mapfile_dir
 create_compressed_mapfile.control.filename              =   concat_averaged_input.mapfile
 
-#############################
-# need to test: is it faster to first concatenate, or to have WSClean run on hundreds of small files?
-#############################
 # sort compressed mapfile so that there is one group pre timestamp, length = ntimes
 sort_into_Groups.control.type                           =   sort_times_into_freqGroups
 sort_into_Groups.argument.flags                         =   [create_compressed_mapfile.output.mapfile]
 sort_into_Groups.argument.filename                      =   sorted_groups.mapfile
 sort_into_Groups.argument.mapfile_dir                   =   input.output.mapfile_dir
 sort_into_Groups.argument.hosts                         =   {{ hosts }}
+sort_into_Groups.argument.stepname                      =   sort_into_Groups
 sort_into_Groups.argument.nband_pad                     =   {{ nband_pad }}
+sort_into_Groups.argument.make_dummy_files              =   True
 
 # convert the output of sort_into_Groups into usable mapfiles, len = 1 / ntimes
 sort_into_Groups_maps.control.kind                      =   plugin
@@ -208,20 +209,10 @@ sort_into_Groups_maps.control.type                      =   mapfilenamesFromMapf
 sort_into_Groups_maps.control.mapfile_groupmap          =   sort_into_Groups.output.groupmapfile.mapfile
 sort_into_Groups_maps.control.mapfile_filesmap          =   sort_into_Groups.output.mapfile.mapfile
 
-# concat data in frequency, length = ntimes
-# this step is needed to allow the desired channelsout for WSClean to be a
-# divisor of the number of bands
-concat_averaged.control.type                            =   virtual_concat
-concat_averaged.control.mapfile_out                     =   sort_into_Groups_maps.output.groupmap
-concat_averaged.control.mapfile_in                      =   sort_into_Groups_maps.output.filesmap
-concat_averaged.control.inputkey                        =   msfiles
-concat_averaged.control.outputkey                       =   msconcat
-concat_averaged.argument.flags                          =   [msfiles,msconcat]
-
 # make a compressed mapfile of the concatenated data, length = 1
 concat_averaged_compressed_map.control.kind             =   plugin
 concat_averaged_compressed_map.control.type             =   compressMapfile
-concat_averaged_compressed_map.control.mapfile_in       =   concat_averaged.output.mapfile
+concat_averaged_compressed_map.control.mapfile_in       =   sort_into_Groups_maps.output.filesmap
 concat_averaged_compressed_map.control.mapfile_dir      =   input.output.mapfile_dir
 concat_averaged_compressed_map.control.filename         =   concat_averaged_compressed.mapfile
 
