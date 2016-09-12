@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources,  add_all_facet_sources, shift_and_average, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged, concat_averaged_compressed_map, premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2, create_model_map, pad_model_images, create_add_all_compressed_mapfile, sort_add_all_into_Groups, sort_add_all_into_Groups_maps, concat_add_all, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, subtract_facet_model]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, add_all_facet_sources, shift_and_average, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged_compressed_map, premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2, create_model_map, pad_model_images, create_add_all_compressed_mapfile, add_model_data_col, sort_add_all_into_Groups, sort_add_all_into_Groups_maps, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, subtract_facet_model]
 
 pipeline.pluginpath                                     =   {{ pipeline_dir }}/plugins
 
@@ -130,7 +130,9 @@ sort_into_Groups.argument.flags                         =   [create_compressed_m
 sort_into_Groups.argument.filename                      =   sorted_groups.mapfile
 sort_into_Groups.argument.mapfile_dir                   =   input.output.mapfile_dir
 sort_into_Groups.argument.hosts                         =   {{ hosts }}
+sort_into_Groups.argument.stepname                      =   sort_into_Groups
 sort_into_Groups.argument.nband_pad                     =   {{ nband_pad }}
+sort_into_Groups.argument.make_dummy_files              =   True
 
 # convert the output of sort_into_Groups into usable mapfiles, len = 1 / ntimes
 sort_into_Groups_maps.control.kind                      =   plugin
@@ -138,20 +140,10 @@ sort_into_Groups_maps.control.type                      =   mapfilenamesFromMapf
 sort_into_Groups_maps.control.mapfile_groupmap          =   sort_into_Groups.output.groupmapfile.mapfile
 sort_into_Groups_maps.control.mapfile_filesmap          =   sort_into_Groups.output.mapfile.mapfile
 
-# concat data in frequency, length = ntimes
-# this step is needed to allow the desired channelsout for WSClean to be a
-# divisor of the number of bands
-concat_averaged.control.type                            =   virtual_concat
-concat_averaged.control.mapfile_out                     =   sort_into_Groups_maps.output.groupmap
-concat_averaged.control.mapfile_in                      =   sort_into_Groups_maps.output.filesmap
-concat_averaged.control.inputkey                        =   msfiles
-concat_averaged.control.outputkey                       =   msconcat
-concat_averaged.argument.flags                          =   [msfiles,msconcat]
-
 # make a compressed mapfile of the concatenated data, length = 1
 concat_averaged_compressed_map.control.kind             =   plugin
 concat_averaged_compressed_map.control.type             =   compressMapfile
-concat_averaged_compressed_map.control.mapfile_in       =   concat_averaged.output.mapfile
+concat_averaged_compressed_map.control.mapfile_in       =   sort_into_Groups_maps.output.filesmap
 concat_averaged_compressed_map.control.mapfile_dir      =   input.output.mapfile_dir
 concat_averaged_compressed_map.control.filename         =   concat_averaged_compressed.mapfile
 
@@ -293,29 +285,29 @@ create_add_all_compressed_mapfile.control.mapfile_in    =   add_all_facet_source
 create_add_all_compressed_mapfile.control.mapfile_dir   =   input.output.mapfile_dir
 create_add_all_compressed_mapfile.control.filename      =   concat_add_all_input.mapfile
 
+# add MODEL_DATA column to add_all MSs, length = nfiles
+# because the sort_add_all_into_Groups step below makes dummy files,
+# we need to add this column first so that the dummy files have them too
+add_model_data_col.control.type                         =   add_model_data_column
+add_model_data_col.control.mapfile_in                   =   add_all_facet_sources.output.mapfile
+add_model_data_col.control.inputkey                     =   msfile
+add_model_data_col.argument.flags                       =   [msfile]
+
 # sort compressed mapfile so that there is one group per timestamp, length = ntimes
 sort_add_all_into_Groups.control.type                   =   sort_times_into_freqGroups
 sort_add_all_into_Groups.argument.flags                 =   [create_add_all_compressed_mapfile.output.mapfile]
 sort_add_all_into_Groups.argument.filename              =   sorted_add_all_groups.mapfile
 sort_add_all_into_Groups.argument.mapfile_dir           =   input.output.mapfile_dir
 sort_add_all_into_Groups.argument.hosts                 =   {{ hosts }}
+sort_add_all_into_Groups.argument.stepname              =   sort_add_all_into_Groups
 sort_add_all_into_Groups.argument.nband_pad             =   {{ nband_pad }}
+sort_add_all_into_Groups.argument.make_dummy_files      =   True
 
 # convert the output of sort_into_Groups into usable mapfiles, len = 1 / ntimes
 sort_add_all_into_Groups_maps.control.kind              =   plugin
 sort_add_all_into_Groups_maps.control.type              =   mapfilenamesFromMapfiles
 sort_add_all_into_Groups_maps.control.mapfile_groupmap  =   sort_add_all_into_Groups.output.groupmapfile.mapfile
 sort_add_all_into_Groups_maps.control.mapfile_filesmap  =   sort_add_all_into_Groups.output.mapfile.mapfile
-
-# concat "add_all" data in frequency, length = ntimes
-# this step is needed so that predict with WSClean will match when padding or
-# missing bands were inserted
-concat_add_all.control.type                             =   virtual_concat
-concat_add_all.control.mapfile_out                      =   sort_add_all_into_Groups_maps.output.groupmap
-concat_add_all.control.mapfile_in                       =   sort_add_all_into_Groups_maps.output.filesmap
-concat_add_all.control.inputkey                         =   msfiles
-concat_add_all.control.outputkey                        =   msconcat
-concat_add_all.argument.flags                           =   [msfiles,msconcat]
 
 # expand the mapfile of the model image to all files, length = ntimes
 create_expanded_model_mapfile.control.kind              =   plugin
@@ -337,7 +329,7 @@ expand_facet_model_size_map.control.filename            =   expand_facet_model_s
 # For WSClean predict, we need to increase the number of wplanes so that the
 # effective model image size is larger than the FOV (to prevent aliasing issues)
 wsclean_ft.control.type                                 =   wsclean_ft
-wsclean_ft.control.mapfiles_in                          =   [concat_add_all.output.mapfile,create_expanded_model_mapfile.output.mapfile,expand_facet_model_size_map.output.mapfile]
+wsclean_ft.control.mapfiles_in                          =   [sort_add_all_into_Groups_maps.output.filesmap,create_expanded_model_mapfile.output.mapfile,expand_facet_model_size_map.output.mapfile]
 wsclean_ft.control.inputkeys                            =   [msfile,name,size]
 wsclean_ft.argument.flags                               =   [-predict,msfile]
 wsclean_ft.argument.scale                               =   {{ cellsize_facet_deg }}

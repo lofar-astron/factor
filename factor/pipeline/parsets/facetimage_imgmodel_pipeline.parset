@@ -95,7 +95,7 @@ expand_preapply_parmdb_map.control.filename                 =   expand_preapply_
 shift_empty.control.type                                    =   dppp
 shift_empty.control.opts.mapfile_in                         =   create_ms_map.output.mapfile
 shift_empty.control.opts.inputkey                           =   msin
-shift_empty.argument.numthreads                             =   {{ max_cpus_per_io_proc_ntimes }}
+shift_empty.argument.numthreads                             =   {{ max_cpus_per_io_proc_nfiles }}
 shift_empty.argument.msin.datacolumn                        =   SUBTRACTED_DATA_ALL_NEW
 shift_empty.argument.msout.overwrite                        =   True
 shift_empty.argument.msout.writefullresflag                 =   False
@@ -116,8 +116,8 @@ create_compressed_mapfile_shift_empty.control.mapfile_dir   =   input.output.map
 create_compressed_mapfile_shift_empty.control.filename      =   concat_shift_empty_input.mapfile
 
 # add MODEL_DATA column to shift_empty MSs, length = nfiles
-# because the concat_shift_empty concat step below is virtual, we need to add this column
-# before concatenating
+# because the sort_shift_empty_into_Groups step below makes dummy files,
+# we need to add this column first so that the dummy files have them too
 add_model_data_col.control.type                             =   add_model_data_column
 add_model_data_col.control.mapfile_in                       =   shift_empty.output.mapfile
 add_model_data_col.control.inputkey                         =   msfile
@@ -196,7 +196,11 @@ corrupt_final_model.argument.msout.overwrite                =   True
 corrupt_final_model.argument.msout.writefullresflag         =   False
 corrupt_final_model.argument.local_scratch_dir              =   {{ local_dir }}
 {% if preapply_phase_cal %}
+{% if preapply_solve_tec_only %}
+corrupt_final_model.argument.steps                          =   [preapply_fast1,preapply_fast2,preapply_slow,corrupt_fast1,corrupt_slow]
+{% else %}
 corrupt_final_model.argument.steps                          =   [preapply_fast1,preapply_fast2,preapply_slow,corrupt_fast1,corrupt_fast2,corrupt_slow]
+{% endif %}
 corrupt_final_model.argument.preapply_fast1.type            =   applycal
 corrupt_final_model.argument.preapply_fast1.parmdb          =   preapply_parmdb
 corrupt_final_model.argument.preapply_fast1.correction      =   tec
@@ -215,10 +219,12 @@ corrupt_final_model.argument.corrupt_fast1.type             =   applycal
 corrupt_final_model.argument.corrupt_fast1.parmdb           =   dir_dep_parmdb
 corrupt_final_model.argument.corrupt_fast1.correction       =   tec
 corrupt_final_model.argument.corrupt_fast1.invert           =   False
+{% if not preapply_solve_tec_only %}
 corrupt_final_model.argument.corrupt_fast2.type             =   applycal
 corrupt_final_model.argument.corrupt_fast2.parmdb           =   dir_dep_parmdb
 corrupt_final_model.argument.corrupt_fast2.correction       =   commonscalarphase
 corrupt_final_model.argument.corrupt_fast2.invert           =   False
+{% endif %}
 corrupt_final_model.argument.corrupt_slow.type              =   applycal
 corrupt_final_model.argument.corrupt_slow.parmdb            =   dir_dep_parmdb
 corrupt_final_model.argument.corrupt_slow.correction        =   gain

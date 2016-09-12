@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, expand_merged_parmdb_map, shift_empty, create_compressed_mapfile_shift_empty, sort_shift_empty_into_Groups, sort_shift_empty_into_Groups_maps, concat_shift_empty, expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, predict_all_model_data, subtract_final_initial, shift_diff_model_to_field, subtract_diff_model_from_empty_data]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, expand_merged_parmdb_map, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} shift_empty, create_compressed_mapfile_shift_empty, add_model_data_col, sort_shift_empty_into_Groups, sort_shift_empty_into_Groups_maps, expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, predict_all_model_data, subtract_final_initial, shift_diff_model_to_field, subtract_diff_model_from_empty_data]
 
 pipeline.pluginpath                                          =   {{ pipeline_dir }}/plugins
 
@@ -32,10 +32,19 @@ expand_merged_parmdb_map.control.mapfile_to_match            =   create_ms_map.o
 expand_merged_parmdb_map.control.mapfile_dir                 =   input.output.mapfile_dir
 expand_merged_parmdb_map.control.filename                    =   expand_merged_parmdbs.mapfile
 
+{% if preapply_phase_cal %}
+# expand mapfile of the dir-dependent parmDB to all files, length = nfiles
+expand_preapply_parmdb_map.control.kind                      =   plugin
+expand_preapply_parmdb_map.control.type                      =   expandMapfile
+expand_preapply_parmdb_map.control.mapfile_in                =   {{ preapply_parmdb_mapfile }}
+expand_preapply_parmdb_map.control.mapfile_to_match          =   create_ms_map.output.mapfile
+expand_preapply_parmdb_map.control.mapfile_dir               =   input.output.mapfile_dir
+expand_preapply_parmdb_map.control.filename                  =   expand_preapply_parmdbs.mapfile
+{% endif %}
+
 # shift current residual visibilities to facet-center, length = nfiles
 shift_empty.control.type                                     =   dppp
 shift_empty.control.opts.mapfile_in                          =   create_ms_map.output.mapfile
-shift_empty.control.opts.inputkey                            =   msin
 shift_empty.control.opts.inputkey                            =   msin
 shift_empty.argument.numthreads                              =   {{ max_cpus_per_io_proc_nfiles }}
 shift_empty.argument.msin.datacolumn                         =   SUBTRACTED_DATA_ALL_NEW
@@ -44,7 +53,11 @@ shift_empty.argument.msout.writefullresflag                  =   False
 shift_empty.argument.local_scratch_dir                       =   {{ local_dir }}
 shift_empty.argument.steps                                   =   [shift]
 shift_empty.argument.shift.type                              =   phaseshifter
+{% if skip_facet_imaging %}
+shift_empty.argument.shift.phasecenter                       =   [{{ ra }}deg, {{ dec }}deg]
+{% else %}
 shift_empty.argument.shift.phasecenter                       =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+{% endif %}
 
 # compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile_shift_empty.control.kind           =   plugin
@@ -52,6 +65,14 @@ create_compressed_mapfile_shift_empty.control.type           =   compressMapfile
 create_compressed_mapfile_shift_empty.control.mapfile_in     =   shift_empty.output.mapfile
 create_compressed_mapfile_shift_empty.control.mapfile_dir    =   input.output.mapfile_dir
 create_compressed_mapfile_shift_empty.control.filename       =   concat_shift_empty_input.mapfile
+
+# add MODEL_DATA column to shift_empty MSs, length = nfiles
+# because the sort_shift_empty_into_Groups step below makes dummy files,
+# we need to add this column first so that the dummy files have them too
+add_model_data_col.control.type                             =   add_model_data_column
+add_model_data_col.control.mapfile_in                       =   shift_empty.output.mapfile
+add_model_data_col.control.inputkey                         =   msfile
+add_model_data_col.argument.flags                           =   [msfile]
 
 # sort compressed mapfile so that there is one group per timestamp, length = ntimes
 sort_shift_empty_into_Groups.control.type                    =   sort_times_into_freqGroups
@@ -65,6 +86,7 @@ sort_shift_empty_into_Groups.argument.nband_pad              =   {{ nband_pad_se
 {% else %}
 sort_shift_empty_into_Groups.argument.nband_pad              =   {{ nband_pad }}
 {% endif %}
+sort_shift_empty_into_Groups.argument.make_dummy_files       =   True
 
 # convert the output of sort_into_Groups into usable mapfiles, len = 1 / ntimes
 sort_shift_empty_into_Groups_maps.control.kind               =   plugin
@@ -72,21 +94,11 @@ sort_shift_empty_into_Groups_maps.control.type               =   mapfilenamesFro
 sort_shift_empty_into_Groups_maps.control.mapfile_groupmap   =   sort_shift_empty_into_Groups.output.groupmapfile.mapfile
 sort_shift_empty_into_Groups_maps.control.mapfile_filesmap   =   sort_shift_empty_into_Groups.output.mapfile.mapfile
 
-# concat data in frequency, length = ntimes
-# this step is needed to ensure that the shift empty datasets have the same
-# padding as the ones used for the full/patch images
-concat_shift_empty.control.type                              =   virtual_concat
-concat_shift_empty.control.mapfile_out                       =   sort_shift_empty_into_Groups_maps.output.groupmap
-concat_shift_empty.control.mapfile_in                        =   sort_shift_empty_into_Groups_maps.output.filesmap
-concat_shift_empty.control.inputkey                          =   msfiles
-concat_shift_empty.control.outputkey                         =   msconcat
-concat_shift_empty.argument.flags                            =   [msfiles,msconcat]
-
 # expand mapfile of the facet-model to all groups, length = some
 expand_facet_model_map.control.kind                          =   plugin
 expand_facet_model_map.control.type                          =   expandMapfile
 expand_facet_model_map.control.mapfile_in                    =   {{ facet_model_mapfile }}
-expand_facet_model_map.control.mapfile_to_match              =   regroup_shift_empty_map.output.mapfile
+expand_facet_model_map.control.mapfile_to_match              =   sort_shift_empty_into_Groups_maps.output.groupmap
 expand_facet_model_map.control.mapfile_dir                   =   input.output.mapfile_dir
 expand_facet_model_map.control.filename                      =   expand_facet_model.mapfile
 
@@ -94,7 +106,7 @@ expand_facet_model_map.control.filename                      =   expand_facet_mo
 expand_facet_model_size_map.control.kind                     =   plugin
 expand_facet_model_size_map.control.type                     =   expandMapfile
 expand_facet_model_size_map.control.mapfile_in               =   {{ wsclean_modelimg_size_mapfile }}
-expand_facet_model_size_map.control.mapfile_to_match         =   regroup_shift_empty_map.output.mapfile
+expand_facet_model_size_map.control.mapfile_to_match         =   sort_shift_empty_into_Groups_maps.output.groupmap
 expand_facet_model_size_map.control.mapfile_dir              =   input.output.mapfile_dir
 expand_facet_model_size_map.control.filename                 =   expand_facet_model_size.mapfile
 
@@ -102,41 +114,70 @@ expand_facet_model_size_map.control.filename                 =   expand_facet_mo
 # For WSClean predict, we need to increase the number of wplanes so that the
 # effective model image size is larger than the FOV (to prevent aliasing issues)
 wsclean_ft.control.type                                      =   wsclean_ft
-wsclean_ft.control.mapfiles_in                               =   [concat_shift_empty.output.mapfile,expand_facet_model_map.output.mapfile,expand_facet_model_size_map.output.mapfile]
+wsclean_ft.control.mapfiles_in                               =   [sort_shift_empty_into_Groups_maps.output.filesmap,expand_facet_model_map.output.mapfile,expand_facet_model_size_map.output.mapfile]
 wsclean_ft.control.inputkeys                                 =   [msfile,name,size]
 wsclean_ft.argument.flags                                    =   [-predict,msfile]
 wsclean_ft.argument.mem                                      =   {{ max_percent_memory_per_proc_ntimes }}
-{% if is_patch or skip_facet_imaging %}
 wsclean_ft.argument.scale                                    =   {{ cellsize_selfcal_deg }}
+{% if is_patch or skip_facet_imaging %}
+wsclean_ft.argument.mem                                      =   {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft.argument.channelsout                              =   {{ wsclean_nchannels_selfcal }}
+wsclean_ft.argument.j                                        =   {{ max_cpus_per_io_proc_ntimes }}
 {% else %}
-wsclean_ft.argument.scale                                    =   {{ cellsize_facet_deg }}
+wsclean_ft.argument.mem                                      =   {{ max_percent_memory_per_proc_ntimes }}
 wsclean_ft.argument.channelsout                              =   {{ wsclean_nchannels }}
-{% endif %}
 wsclean_ft.argument.j                                        =   {{ max_cpus_per_proc_ntimes }}
+{% endif %}
 wsclean_ft.argument.tempdir                                  =   {{ local_dir }}
 wsclean_ft.argument.nwlayers-for-size                        =   12288 12288
 
 # corrupt the facet-model visibilities, length = nfiles
 corrupt_final_model.control.type                             =   dppp
+{% if preapply_phase_cal %}
+corrupt_final_model.control.opts.mapfiles_in                 =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile,expand_preapply_parmdb_map.output.mapfile]
+corrupt_final_model.control.opts.inputkeys                   =   [msin,dir_dep_parmdb,preapply_parmdb]
+{% else %}
 corrupt_final_model.control.opts.mapfiles_in                 =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 corrupt_final_model.control.opts.inputkeys                   =   [msin,parmdb]
+{% endif %}
 corrupt_final_model.argument.numthreads                      =   {{ max_cpus_per_io_proc_nfiles }}
 corrupt_final_model.argument.msin.datacolumn                 =   MODEL_DATA
 corrupt_final_model.argument.msout.overwrite                 =   True
 corrupt_final_model.argument.msout.writefullresflag          =   False
 corrupt_final_model.argument.local_scratch_dir               =   {{ local_dir }}
+{% if preapply_phase_cal %}
+{% if preapply_solve_tec_only %}
+corrupt_final_model.argument.steps                           =   [preapply_fast1,preapply_fast2,preapply_slow,corrupt_fast1,corrupt_slow]
+{% else %}
+corrupt_final_model.argument.steps                           =   [preapply_fast1,preapply_fast2,preapply_slow,corrupt_fast1,corrupt_fast2,corrupt_slow]
+{% endif %}
+corrupt_final_model.argument.preapply_fast1.type             =   applycal
+corrupt_final_model.argument.preapply_fast1.parmdb           =   preapply_parmdb
+corrupt_final_model.argument.preapply_fast1.correction       =   tec
+corrupt_final_model.argument.preapply_fast1.invert           =   False
+corrupt_final_model.argument.preapply_fast2.type             =   applycal
+corrupt_final_model.argument.preapply_fast2.parmdb           =   preapply_parmdb
+corrupt_final_model.argument.preapply_fast2.correction       =   commonscalarphase
+corrupt_final_model.argument.preapply_fast2.invert           =   False
+corrupt_final_model.argument.preapply_slow.type              =   applycal
+corrupt_final_model.argument.preapply_slow.parmdb            =   preapply_parmdb
+corrupt_final_model.argument.preapply_slow.invert            =   False
+{% else %}
 corrupt_final_model.argument.steps                           =   [corrupt_fast1,corrupt_fast2,corrupt_slow]
+{% endif %}
 corrupt_final_model.argument.corrupt_fast1.type              =   applycal
-corrupt_final_model.argument.corrupt_fast1.parmdb            =   parmdb
+corrupt_final_model.argument.corrupt_fast1.parmdb            =   dir_dep_parmdb
 corrupt_final_model.argument.corrupt_fast1.correction        =   tec
 corrupt_final_model.argument.corrupt_fast1.invert            =   False
+{% if not preapply_solve_tec_only %}
 corrupt_final_model.argument.corrupt_fast2.type              =   applycal
-corrupt_final_model.argument.corrupt_fast2.parmdb            =   parmdb
+corrupt_final_model.argument.corrupt_fast2.parmdb            =   dir_dep_parmdb
 corrupt_final_model.argument.corrupt_fast2.correction        =   commonscalarphase
 corrupt_final_model.argument.corrupt_fast2.invert            =   False
+{% endif %}
 corrupt_final_model.argument.corrupt_slow.type               =   applycal
-corrupt_final_model.argument.corrupt_slow.parmdb             =   parmdb
+corrupt_final_model.argument.corrupt_slow.parmdb             =   dir_dep_parmdb
+corrupt_final_model.argument.corrupt_slow.correction         =   gain
 corrupt_final_model.argument.corrupt_slow.invert             =   False
 
 # create a mapfile with the direction-independent parmDBs from supplied list, length = nfiles

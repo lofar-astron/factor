@@ -2024,7 +2024,7 @@ create_compressed_mapfile_shift_empty.control.mapfile_dir  =   input.output.mapf
 create_compressed_mapfile_shift_empty.control.filename     =   concat_shift_empty_input.mapfile
 
 # add MODEL_DATA column to shift_empty MSs, length = nfiles
-# because the sort_shift_empty_into_Groups concat step below makes dummy files,
+# because the sort_shift_empty_into_Groups step below makes dummy files,
 # we need to add this column first so that the dummy files have them too
 add_model_data_col.control.type                            =   add_model_data_column
 add_model_data_col.control.mapfile_in                      =   shift_empty.output.mapfile
