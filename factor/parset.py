@@ -574,12 +574,20 @@ def get_imaging_options(parset):
     else:
         parset_dict['wsclean_facet_model_padding'] = 1.4
 
+    # Fit a polynomial over frequency during clean (default = False). If True,
+    # WSClean will use the "-fit-spectral-pol" option to fit an nterms = 3
+    # polynomial over the channel images
+    if 'fit_spectral_pol' in parset_dict:
+        parset_dict['fit_spectral_pol'] = parset.getboolean('imaging', 'fit_spectral_pol')
+    else:
+        parset_dict['fit_spectral_pol'] = False
+
     # Check for unused options
     allowed_options = ['make_mosaic', 'wsclean_nchannels_factor',
         'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
         'selfcal_clean_threshold', 'selfcal_adaptive_threshold',
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
-        'reimage_selfcaled', 'wsclean_image_padding',
+        'reimage_selfcaled', 'wsclean_image_padding', 'fit_spectral_pol',
         'wsclean_patch_model_padding', 'wsclean_facet_model_padding',
         'selfcal_min_uv_lambda', 'facet_min_uv_lambda',
         'selfcal_robust_wsclean', 'skip_facet_imaging', 'wsclean_bl_averaging',

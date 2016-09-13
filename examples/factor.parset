@@ -177,6 +177,11 @@ dir_ms = /data/bands
 # image, which can help selfcal convergence in the presence of strong artifacts
 # selfcal_adaptive_threshold = False
 
+# Fit a polynomial over frequency during clean (default = False). If True,
+# WSClean will use the "-fit-spectral-pol" option to fit an nterms = 3
+# polynomial over the channel images
+# fit_spectral_pol = False
+
 
 [directions]
 # Full path to file containing calibrator directions. If not given, directions

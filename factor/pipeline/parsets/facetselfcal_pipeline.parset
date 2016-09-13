@@ -505,7 +505,7 @@ wsclean_image01.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image01.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 3 %}
+{% if wsclean_nchannels_selfcal > 3 and fit_spectral_pol %}
 wsclean_image01.argument.deconvolution-channels            =   3
 wsclean_image01.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -577,7 +577,7 @@ wsclean_image02.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image02.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 3 %}
+{% if wsclean_nchannels_selfcal > 3 and fit_spectral_pol %}
 wsclean_image02.argument.deconvolution-channels            =   3
 wsclean_image02.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -781,7 +781,7 @@ wsclean_image11.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image11.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 3 %}
+{% if wsclean_nchannels_selfcal > 3 and fit_spectral_pol %}
 wsclean_image11.argument.deconvolution-channels            =   3
 wsclean_image11.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -853,7 +853,7 @@ wsclean_image12.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image12.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 3 %}
+{% if wsclean_nchannels_selfcal > 3 and fit_spectral_pol %}
 wsclean_image12.argument.deconvolution-channels            =   3
 wsclean_image12.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -996,7 +996,7 @@ wsclean_image21.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image21.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 3 %}
+{% if wsclean_nchannels_selfcal > 3 and fit_spectral_pol %}
 wsclean_image21.argument.deconvolution-channels            =   3
 wsclean_image21.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -1068,7 +1068,7 @@ wsclean_image22.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image22.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 3 %}
+{% if wsclean_nchannels_selfcal > 3 and fit_spectral_pol %}
 wsclean_image22.argument.deconvolution-channels            =   3
 wsclean_image22.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -1281,7 +1281,7 @@ wsclean_image31.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image31.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 3 %}
+{% if wsclean_nchannels_selfcal > 3 and fit_spectral_pol %}
 wsclean_image21.argument.deconvolution-channels            =   3
 wsclean_image21.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -1354,7 +1354,7 @@ wsclean_image32.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image32.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 3 %}
+{% if wsclean_nchannels_selfcal > 3 and fit_spectral_pol %}
 wsclean_image32.argument.deconvolution-channels            =   3
 wsclean_image32.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -1578,7 +1578,7 @@ wsclean_image41.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image41.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 3 %}
+{% if wsclean_nchannels_selfcal > 3 and fit_spectral_pol %}
 wsclean_image41.argument.deconvolution-channels            =   3
 wsclean_image41.argument.fit-spectral-pol                  =   3
 {% endif %}
@@ -1651,7 +1651,7 @@ wsclean_image42.argument.tempdir                           =   {{ local_dir }}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image42.argument.multiscale-scales                 =   0
 {% endif %}
-{% if wsclean_nchannels_selfcal > 3 %}
+{% if wsclean_nchannels_selfcal > 3 and fit_spectral_pol %}
 wsclean_image42.argument.deconvolution-channels            =   3
 wsclean_image42.argument.fit-spectral-pol                  =   3
 {% endif %}
