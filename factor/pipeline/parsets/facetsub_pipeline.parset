@@ -19,5 +19,5 @@ update_input_bands_hosts.control.hosts                =   {{ hosts }}
 add_diff_model_to_empty_data.control.type             =   add_subtract_columns
 add_diff_model_to_empty_data.control.opts.mapfiles_in =   [{{ input_files_single_mapfile }},{{ diff_models_field_mapfile }}]
 add_diff_model_to_empty_data.control.opts.inputkeys   =   [file1,file2]
-add_diff_model_to_empty_data.argument.flags           =   [file1,file2,{{ subtracted_data_colname }},DATA,SUBTRACTED_DATA_ALL_NEW,add]
+add_diff_model_to_empty_data.argument.flags           =   [file1,file2,{{ subtracted_data_colname }},DATA,SUBTRACTED_DATA_ALL_NEW,add,True]
 {% endblock add_sub_parms %}

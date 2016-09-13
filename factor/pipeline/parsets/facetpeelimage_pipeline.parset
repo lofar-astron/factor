@@ -366,4 +366,4 @@ corrupt_final_model.argument.corrupt_slow.invert        =   False
 subtract_facet_model.control.type                       =   add_subtract_columns
 subtract_facet_model.control.opts.mapfiles_in           =   [add_all_facet_sources.output.mapfile,corrupt_final_model.output.mapfile]
 subtract_facet_model.control.opts.inputkeys             =   [file1,file2]
-subtract_facet_model.argument.flags                     =   [file1,file2,DATA,DATA,SUBTRACTED_DATA_ALL,subtract]
+subtract_facet_model.argument.flags                     =   [file1,file2,DATA,DATA,SUBTRACTED_DATA_ALL,subtract,True]

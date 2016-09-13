@@ -9,7 +9,7 @@ import sys
 import os
 
 
-def main(ms1, ms2, column1, column2, column_out, op='add'):
+def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=False):
     """
     Add/subtract columns (column_out = column1 +/- column2)
 
@@ -28,6 +28,8 @@ def main(ms1, ms2, column1, column2, column_out, op='add'):
         Name of output column (written to ms1)
     op : str
         Operation to perform: 'add' or 'subtract'
+    in_memory : bool, optional
+        If True, do the subtraction in memory rather than with taql
 
     """
     # Add the output column to ms1 if needed
@@ -38,16 +40,33 @@ def main(ms1, ms2, column1, column2, column_out, op='add'):
         t1.addcols(desc)
     t1.close()
 
-    # Add or subtract columns with TaQL
-    if op.lower() == 'add':
-        op_sym = '+'
-    elif op.lower() == 'subtract':
-        op_sym = '-'
+    if in_memory:
+        # Add or subtract columns in memory
+        t1 = pt.table(ms1, readonly=False, ack=False)
+        data1 = t1.getcol(column1)
+        t2 = pt.table(ms2, ack=False)
+        data2 = t2.getcol(column2)
+        t2.close()
+        if op.lower() == 'add':
+            t1.putcol(column_out, data1 + data2)
+        elif op.lower() == 'subtract':
+            t1.putcol(column_out, data1 - data2)
+        else:
+            print('Operation not understood. Must be either "add" or "subtract"')
+            sys.exit(1)
+        t1.flush()
+        t1.close()
     else:
-        print('Operation not understood. Must be either "add" or "subtract"')
-        sys.exit(1)
-    os.system("taql 'update {0}, {1} t2 set {2}={3}{4}t2.{5}'".format(
-        ms1, ms2, column_out, column1, op_sym, column2))
+        # Add or subtract columns with TaQL
+        if op.lower() == 'add':
+            op_sym = '+'
+        elif op.lower() == 'subtract':
+            op_sym = '-'
+        else:
+            print('Operation not understood. Must be either "add" or "subtract"')
+            sys.exit(1)
+        os.system("taql 'update {0}, {1} t2 set {2}={3}{4}t2.{5}'".format(
+            ms1, ms2, column_out, column1, op_sym, column2))
 
 
 if __name__ == '__main__':
