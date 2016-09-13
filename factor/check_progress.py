@@ -579,7 +579,10 @@ def set_patch_color(a, d):
     total_completed = max(0, len(a.completed_ops)-1)
     if d.name == 'field':
         # Increase by one to skip facetselfcal + facetsub for field, as they do not apply
-        total_completed += 1
+        total_completed += 2
+    if 'facetpeelimage' in a.completed_ops:
+        # Decrease by since we do not have facetsub
+        total_completed -= 1
 
     # treat facetselfcal and facetsub as one op for consistency with old code
     if total_completed==0:
