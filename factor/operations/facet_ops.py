@@ -130,10 +130,19 @@ class FacetSelfcal(Operation):
         else:
             self.direction.facet_model_mapfile = os.path.join(self.pipeline_mapfile_dir,
                 'final_model_rootnames.mapfile')
-        self.direction.facet_image_mapfile = {'facetimage': os.path.join(self.pipeline_mapfile_dir,
-            'final_image.mapfile')} # this attribute is a dictionary to allow multiple image mapfiles
-        self.direction.facet_premask_mapfile = {'facetimage': os.path.join(self.pipeline_mapfile_dir,
-            'premask.mapfile')} # this attribute is a dictionary to allow multiple mask mapfiles
+        # Store mapfile of facet image and mask, needed by the fieldmosaic op. Here
+        # we store it under the facetimage entry which will get overwritten later
+        # if the facet is reimaged
+        if hasattr(self.direction, 'facet_image_mapfile'):
+            self.direction.facet_image_mapfile['facetimage'] = os.path.join(self.pipeline_mapfile_dir,
+                'final_image.mapfile')
+            self.direction.facet_premask_mapfile['facetimage'] = os.path.join(self.pipeline_mapfile_dir,
+                'premask.mapfile')
+        else:
+            self.direction.facet_image_mapfile = {'facetimage': os.path.join(self.pipeline_mapfile_dir,
+                'final_image.mapfile')}
+            self.direction.facet_premask_mapfile = {'facetimage': os.path.join(self.pipeline_mapfile_dir,
+                'premask.mapfile')}
         self.direction.wsclean_modelimg_size_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'pad_model_images.padsize.mapfile')
         self.direction.diff_models_field_mapfile = os.path.join(self.pipeline_mapfile_dir,
@@ -398,10 +407,17 @@ class FacetImage(Operation):
         Finalize this operation
         """
         # Add output datamaps to direction object for later use
-        self.direction.facet_image_mapfile = {'facetimage': os.path.join(self.pipeline_mapfile_dir,
-            'final_image.mapfile')} # this attribute is a dictionary to allow multiple image mapfiles
-        self.direction.facet_premask_mapfile = {'facetimage': os.path.join(self.pipeline_mapfile_dir,
-            'premask.mapfile')} # this attribute is a dictionary to allow multiple mask mapfiles
+        # Store mapfile of facet image and mask, needed by the fieldmosaic op
+        if hasattr(self.direction, 'facet_image_mapfile'):
+            self.direction.facet_image_mapfile[self.name.lower()] = os.path.join(self.pipeline_mapfile_dir,
+                'final_image.mapfile')
+            self.direction.facet_premask_mapfile[self.name.lower()] = os.path.join(self.pipeline_mapfile_dir,
+                'premask.mapfile')
+        else:
+            self.direction.facet_image_mapfile = {self.name.lower(): os.path.join(self.pipeline_mapfile_dir,
+                'final_image.mapfile')}
+            self.direction.facet_premask_mapfile = {self.name.lower(): os.path.join(self.pipeline_mapfile_dir,
+                'premask.mapfile')}
 
         # Store the image_data_mapfile for use by other imaging runs. We do not
         # update this if use_existing_data is True, as in this case it should
@@ -477,10 +493,19 @@ class FacetPeelImage(Operation):
         Finalize this operation
         """
         # Add output datamaps to direction object for later use
-        self.direction.facet_image_mapfile['facetimage'] = os.path.join(self.pipeline_mapfile_dir,
-            'final_image.mapfile')
-        self.direction.facet_premask_mapfile['facetimage'] = os.path.join(self.pipeline_mapfile_dir,
-            'premask.mapfile')
+        # Store mapfile of facet image and mask, needed by the fieldmosaic op. Here
+        # we store it under the facetimage entry which will get overwritten later
+        # if the facet is reimaged
+        if hasattr(self.direction, 'facet_image_mapfile'):
+            self.direction.facet_image_mapfile['facetimage'] = os.path.join(self.pipeline_mapfile_dir,
+                'final_image.mapfile')
+            self.direction.facet_premask_mapfile['facetimage'] = os.path.join(self.pipeline_mapfile_dir,
+                'premask.mapfile')
+        else:
+            self.direction.facet_image_mapfile = {'facetimage': os.path.join(self.pipeline_mapfile_dir,
+                'final_image.mapfile')} # this attribute is a dictionary to allow multiple image mapfiles
+            self.direction.facet_premask_mapfile = {'facetimage': os.path.join(self.pipeline_mapfile_dir,
+                'premask.mapfile')} # this attribute is a dictionary to allow multiple mask mapfiles
         self.direction.subtracted_data_new_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'subtract_facet_model.mapfile')
         self.direction.facet_model_mapfile = os.path.join(self.pipeline_mapfile_dir,
