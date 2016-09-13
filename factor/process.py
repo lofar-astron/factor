@@ -262,23 +262,23 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
     # Mosaic the final facet images together
     if parset['imaging_specific']['make_mosaic']:
+        # Make direction object for the field and load previous state (if any)
+        field = Direction('field', bands[0].ra, bands[0].dec,
+            factor_working_dir=parset['dir_working'])
+        field.load_state()
+
+        # Set averaging for primary beam generation
+        field.avgpb_freqstep = bands[0].nchan
+        field.avgpb_timestep = int(120.0 / bands[0].timepersample)
+
         for i, (cellsize_arcsec, taper_arcsec, robust, min_uv_lambda) in enumerate(
             zip(cellsizes, tapers, robusts, min_uvs)):
 
-            # Make direction object for the field and load previous state (if any)
-            field = Direction('field', bands[0].ra, bands[0].dec,
-                factor_working_dir=parset['dir_working'])
-            field.load_state()
-
-            # Set averaging for primary beam generation
-            field.avgpb_freqstep = bands[0].nchan
-            field.avgpb_timestep = int(120.0 / bands[0].timepersample)
-
             # Reset the field direction if specified
+            full_res_im, opname = _get_image_type_and_name(cellsize_arcsec, taper_arcsec,
+                robust, selfcal_robust, min_uv_lambda, parset, opbase='fieldmosaic')
             if 'field' in reset_directions:
-                op = FieldMosaic(parset, bands, field, cellsize_arcsec, robust,
-                    taper_arcsec, min_uv_lambda)
-                field.reset_state(op.name)
+                field.reset_state(opname)
 
             # Specify appropriate image, mask, and vertices file
             field.facet_image_filenames = []
@@ -803,7 +803,7 @@ def _initialize_directions(parset, initial_skymodel, ref_band, max_radius_deg=No
 
 
 def _get_image_type_and_name(cellsize_arcsec, taper_arcsec, robust, selfcal_robust,
-    min_uv_lambda, parset):
+    min_uv_lambda, parset, opbase='facetimage'):
     """
     Checks input parameters and returns type and associated operation
 
@@ -819,6 +819,8 @@ def _get_image_type_and_name(cellsize_arcsec, taper_arcsec, robust, selfcal_robu
         Min uv cut
     parset : dict
         Factor parset
+    opbase : str, optional
+        Basename of operation
 
     Returns
     -------
@@ -829,11 +831,11 @@ def _get_image_type_and_name(cellsize_arcsec, taper_arcsec, robust, selfcal_robu
     if (cellsize_arcsec != parset['imaging_specific']['selfcal_cellsize_arcsec'] or
         robust != selfcal_robust or taper_arcsec != 0.0 or
         min_uv_lambda != parset['imaging_specific']['selfcal_min_uv_lambda']):
-        opname = 'facetimage_c{0}r{1}t{2}u{3}'.format(round(cellsize_arcsec, 1),
+        opname = '{0}_c{1}r{2}t{3}u{4}'.format(opbase, round(cellsize_arcsec, 1),
                 round(robust, 2), round(taper_arcsec, 1), round(min_uv_lambda, 1))
         full_res_im = False
     else:
-        opname = 'facetimage'
+        opname = opbase
         full_res_im = True
 
     return full_res_im, opname
