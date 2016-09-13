@@ -511,6 +511,7 @@ wsclean_image01.argument.deconvolution-channels            =   3
 wsclean_image01.argument.fit-spectral-pol                  =   3
 {% endif %}
 wsclean_image01.argument.weighting-rank-filter             =   3
+wsclean_image01.argument.taper-gaussian                    =   20arcsec
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image01.argument.baseline-averaging                =   {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
