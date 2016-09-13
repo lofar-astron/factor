@@ -266,6 +266,11 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         field = Direction('field', bands[0].ra, bands[0].dec,
             factor_working_dir=parset['dir_working'])
         field.load_state()
+        if len(reset_operations) > 0:
+            field.reset_operations = reset_operations
+        else:
+            field.reset_operations = (field.completed_operations[:] +
+                field.started_operations[:])
 
         # Set averaging for primary beam generation
         field.avgpb_freqstep = bands[0].nchan
