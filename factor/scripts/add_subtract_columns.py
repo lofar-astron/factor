@@ -32,6 +32,12 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=False):
         If True, do the subtraction in memory rather than with taql
 
     """
+    if type(in_memory) is str:
+        if in_memory.lower() == 'true':
+            in_memory = True
+        else:
+            in_memory = False
+
     # Add the output column to ms1 if needed
     t1 = pt.table(ms1, readonly=False, ack=False)
     if column_out not in t1.colnames():
@@ -79,6 +85,7 @@ if __name__ == '__main__':
     parser.add_argument('column2', help='name of column 2')
     parser.add_argument('column_out', help='name of the output column (written to ms1)')
     parser.add_argument('op', help='operation: "add" or "subtract"')
+    parser.add_argument('in_memory', help='do operation in memory')
     args = parser.parse_args()
 
-    main(args.ms1, args.ms2, args.column1, args.column2, args.column_out, args.op)
+    main(args.ms1, args.ms2, args.column1, args.column2, args.column_out, args.op, args.in_memory)
