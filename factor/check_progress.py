@@ -577,13 +577,13 @@ def set_patch_color(a, d):
     if a.current_op is not None:
         a.current_step, current_index, num_steps, start_time = get_current_step(d)
     total_completed = max(0, len(a.completed_ops)-1)
+    if d.name == 'field':
+        # Increase by one to skip facetselfcal + facetsub for field, as they do not apply
+        total_completed += 1
+
     # treat facetselfcal and facetsub as one op for consistency with old code
     if total_completed==0:
-        if d.name == 'field':
-            # Skip facetselfcal + facetsub for field, as they do not apply
-            total_completed=2
-        else:
-            total_completed=1
+        total_completed=1
     completed_color=(0.66/total_completed**0.5,0.96/total_completed**0.5,0.66/total_completed**0.5,1.0)
     if a.current_op is not None and a.current_step is not None:
         # Means this facet is currently processing
