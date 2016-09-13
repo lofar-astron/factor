@@ -545,7 +545,7 @@ mask0.argument.rmsbox                                      =   (80,20)
 mask0.argument.adaptive_rmsbox                             =   True
 mask0.argument.trim_by                                     =   0.4
 mask0.argument.img_format                                  =   fits
-mask0.argument.threshold_format                            =   str_with_units
+mask0.argument.threshold_format                            =   float
 mask0.argument.use_adaptive_threshold                      =   {{ use_selfcal_adaptive_threshold }}
 
 # image the virtual concatenated data again with wsclean, length = 1
@@ -821,7 +821,7 @@ mask1.argument.rmsbox                                      =   (80,20)
 mask1.argument.adaptive_rmsbox                             =   True
 mask1.argument.trim_by                                     =   0.4
 mask1.argument.img_format                                  =   fits
-mask1.argument.threshold_format                            =   str_with_units
+mask1.argument.threshold_format                            =   float
 mask1.argument.use_adaptive_threshold                      =   {{ use_selfcal_adaptive_threshold }}
 
 # image the virtual concatenated data again with wsclean, length = 1
@@ -1036,7 +1036,7 @@ mask2.argument.rmsbox                                      =   (80,20)
 mask2.argument.adaptive_rmsbox                             =   True
 mask2.argument.trim_by                                     =   0.4
 mask2.argument.img_format                                  =   fits
-mask2.argument.threshold_format                            =   str_with_units
+mask2.argument.threshold_format                            =   float
 mask2.argument.use_adaptive_threshold                      =   {{ use_selfcal_adaptive_threshold }}
 
 # image the virtual concatenated data again with wsclean, length = 1
@@ -1322,7 +1322,7 @@ mask3.argument.adaptive_rmsbox                             =   True
 mask3.argument.trim_by                                     =   0.4
 mask3.argument.img_format                                  =   fits
 mask3.argument.adaptive_thresh                             =   180
-mask3.argument.threshold_format                            =   str_with_units
+mask3.argument.threshold_format                            =   float
 mask3.argument.use_adaptive_threshold                      =   {{ use_selfcal_adaptive_threshold }}
 
 # image the virtual concatenated data again with wsclean, length = 1
@@ -1619,7 +1619,7 @@ mask4.argument.adaptive_rmsbox                             =   True
 mask4.argument.trim_by                                     =   0.4
 mask4.argument.img_format                                  =   fits
 mask4.argument.adaptive_thresh                             =   200
-mask4.argument.threshold_format                            =   str_with_units
+mask4.argument.threshold_format                            =   float
 mask4.argument.use_adaptive_threshold                      =   {{ use_selfcal_adaptive_threshold }}
 
 # image the virtual concatenated data again with wsclean, length = 1
