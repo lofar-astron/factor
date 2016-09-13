@@ -26,7 +26,7 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=False):
         Name of column 2
     column_out : str
         Name of output column (written to ms1)
-    op : str
+    op : str, optional
         Operation to perform: 'add' or 'subtract'
     in_memory : bool, optional
         If True, do the subtraction in memory rather than with taql
