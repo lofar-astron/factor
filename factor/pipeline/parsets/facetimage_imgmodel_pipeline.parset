@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} shift_empty, create_compressed_mapfile_shift_empty, add_model_data_col, sort_shift_empty_into_Groups, sort_shift_empty_into_Groups_maps, expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, add_model_to_empty_data, {% if skip_facet_imaging %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, create_parmdb_map, add_all_facet_sources, {% else %} apply_dir_dep, {% endif %} create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged_compressed_map, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
+pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} shift_empty, {% if not peel_calibrator or (peel_calibrator and not skip_facet_imaging) %} create_compressed_mapfile_shift_empty, add_model_data_col, sort_shift_empty_into_Groups, sort_shift_empty_into_Groups_maps, expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, add_model_to_empty_data, {% endif %} {% if skip_facet_imaging %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, create_parmdb_map, add_all_facet_sources, {% else %} apply_dir_dep, {% endif %} create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_averaged_compressed_map, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
 
 pipeline.pluginpath                                         =   {{ pipeline_dir }}/plugins
 
@@ -107,6 +107,10 @@ shift_empty.argument.shift.phasecenter                      =   [{{ ra }}deg, {{
 {% else %}
 shift_empty.argument.shift.phasecenter                      =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
 {% endif %}
+
+{% if not peel_calibrator or (peel_calibrator and not skip_facet_imaging) %}
+# here we add the sources from the calibrator/facet model images back in, so
+# don't do this if the calibrator was peeled and its facet was not imaging
 
 # compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile_shift_empty.control.kind          =   plugin
@@ -232,7 +236,12 @@ add_model_to_empty_data.control.opts.mapfiles_in            =   [shift_empty.out
 add_model_to_empty_data.control.opts.inputkeys              =   [file1,file2]
 add_model_to_empty_data.argument.flags                      =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add,True]
 
+# end of "was calibrator peeled and facet imaging skipped?" block
+{% endif %}
+
 {% if skip_facet_imaging %}
+# here we add back all sources (except the calibrator), as the predict step
+# above did not add them when facet imaging was skipped
 
 # create a mapfile with the current skymodels from supplied list, length = nbands
 create_full_skymodels_map.control.kind                      =   plugin

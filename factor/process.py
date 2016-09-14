@@ -120,7 +120,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 log.info('Exiting...')
                 sys.exit(1)
 
-            if d.peel_calibrator:
+            if d.peel_calibrator and not d.skip_facet_imaging:
                 # Do the imaging of the facet if calibrator was peeled and
                 # subtract the improved model
                 op = FacetPeelImage(parset, bands, d)
