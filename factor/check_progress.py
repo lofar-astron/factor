@@ -860,7 +860,7 @@ def get_current_step(direction):
 
 def check_for_error(direction, start_time):
     """
-    Returns True if pipeline log indicates error
+    Returns True if pipeline log indicates an error
     """
     current_op = get_current_op(direction)
     logfile = os.path.join(direction.working_dir, 'results', current_op,
@@ -874,7 +874,8 @@ def check_for_error(direction, start_time):
                     f.seek(-2, 1)         # ...jump back the read byte plus one more.
                 last = f.readline()       # Read last line.
 
-                if 'Processing interrupted: shutting down' or 'completed with errors' in last:
+                if ('Processing interrupted: shutting down' in last or
+                    'completed with errors' in last):
                     return True
                 else:
                     return False
