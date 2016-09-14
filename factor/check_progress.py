@@ -266,9 +266,11 @@ def plot_state(directions_list, trim_names=True):
     selfcal_ok_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9',
         facecolor='#A9F5A9', linewidth=2)
     selfcal_not_ok_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9',
+        facecolor='#FE9A2E', linewidth=2)
+    processing_error = plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9',
         facecolor='#F5A9A9', linewidth=2)
-    patch_list=[not_processed_patch, processing_patch, selfcal_not_ok_patch, selfcal_ok_patch]
-    label_list=['Unprocessed', 'Processing', 'Selfcal Failed', 'Selfcal OK']
+    patch_list=[not_processed_patch, processing_patch, processing_error, selfcal_not_ok_patch, selfcal_ok_patch]
+    label_list=['Unprocessed', 'Processing', 'Error', 'Selfcal Failed', 'Selfcal OK']
     for i in range(options['reimages']):
         label_list.append('Reimage '+str(i+1))
         color=(0.66/(i+2)**0.5,0.96/(i+2)**0.5,0.66/(i+2)**0.5,1.0)
@@ -576,6 +578,13 @@ def set_patch_color(a, d):
     a.current_op = get_current_op(d)
     if a.current_op is not None:
         a.current_step, current_index, num_steps, start_time = get_current_step(d)
+    has_error = check_for_error(d, start_time)
+    if has_error:
+        # Pipeline failed due to error
+        a.set_edgecolor('#a9a9a9')
+        a.set_facecolor('#F5A9A9')
+        return
+
     total_completed = max(0, len(a.completed_ops)-1)
     if d.name == 'field':
         # Increase by one to skip facetselfcal + facetsub for field, as they do not apply
@@ -597,9 +606,9 @@ def set_patch_color(a, d):
             a.set_edgecolor('#a9a9a9')
             a.set_facecolor(completed_color)
         else:
-            # Failed facet
+            # Failed selfcal
             a.set_edgecolor('#a9a9a9')
-            a.set_facecolor('#F5A9A9')
+            a.set_facecolor('#FE9A2E')
     elif len(a.completed_ops) > 0:
         # normally never run since facetselfcal will be first op
         a.set_edgecolor('#a9a9a9')
@@ -847,6 +856,33 @@ def get_current_step(direction):
     start_time = d[0]['start_time']
 
     return (current_steps[current_index], current_index, len(current_steps), start_time)
+
+
+def check_for_error(direction, start_time):
+    """
+    Returns True if pipeline log indicates error
+    """
+    logfile = os.path.join(direction.working_dir, 'results', current_op,
+        direction.name, 'logs', start_time, 'pipeline.log')
+    if os.path.exists(logfile):
+        try:
+            with open(logfile, "rb") as f:
+                first = f.readline()      # Read the first line.
+                f.seek(-2, 2)             # Jump to the second last byte.
+                while f.read(1) != b"\n": # Until EOL is found...
+                    f.seek(-2, 1)         # ...jump back the read byte plus one more.
+                last = f.readline()       # Read last line.
+
+                if 'Processing interrupted: shutting down' or 'completed with errors' in last:
+                    return True
+                else:
+                    return False
+        except (EOFError, ValueError):
+            # Catch errors related to the statefile being written to by the
+            # pipeline when we're trying to read from it
+            return False
+    else:
+        return False
 
 
 def get_current_op_step_names(direction):
