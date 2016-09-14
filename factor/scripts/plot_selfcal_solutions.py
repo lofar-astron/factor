@@ -107,15 +107,7 @@ def solplot_tec(parmdb, imageroot, refstationi, plot_international=False, freq=N
     parmdbmtable = lp.parmdb(parmdb)
     soldict = parmdbmtable.getValuesGrid('*')
 
-    if freq is None:
-        tfrange = parmdbmtable.getRange()
-        print 'freqrange', tfrange[0:2]
-        freq = np.average(tfrange[0:2])
-        print 'freq', freq/1e6, 'MHz'
-
     names = parmdbmtable.getNames()
-
-    'Gain:1:1:Phase:RS508HBA'
     stationsnames = np.array([name.split(':')[-1] for name in names])
     stationsnames = np.unique(stationsnames)
     if not plot_international:
@@ -162,12 +154,6 @@ def solplot_tec_scalarphase(parmdb, imageroot, refstationi, plot_international=F
     parmdbmtable = lp.parmdb(parmdb)
     soldict = parmdbmtable.getValuesGrid('*')
 
-    if freq is None:
-        tfrange = parmdbmtable.getRange()
-        print 'freqrange', tfrange[0:2]
-        freq = np.average(tfrange[0:2])
-        print 'freq', freq/1e6, 'MHz'
-
     names = parmdbmtable.getNames()
     stationsnames = np.array([name.split(':')[-1] for name in names])
     stationsnames = np.unique(stationsnames)
@@ -190,11 +176,13 @@ def solplot_tec_scalarphase(parmdb, imageroot, refstationi, plot_international=F
         axs = ax.reshape((Nr*Nc,1))
         ymin = 2
         ymax = 0
+
         for istat, station in enumerate(stationsnames):
             phase = soldict['CommonScalarPhase:{s}'.format(s=station)]['values'][:, chan_indx]
             tec = soldict['TEC:{s}'.format(s=station)]['values'][:, chan_indx]
             phase_ref_chan = phase_ref[:, chan_indx]
             tec_ref_chan = tec_ref[:, chan_indx]
+            freq = soldict['CommonScalarPhase:{s}'.format(s=station)]['freqs'][chan_indx]
 
             phase = np.ma.masked_where(phase==0, phase)
             if len(times) > 1000:
