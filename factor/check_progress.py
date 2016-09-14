@@ -578,12 +578,12 @@ def set_patch_color(a, d):
     a.current_op = get_current_op(d)
     if a.current_op is not None:
         a.current_step, current_index, num_steps, start_time = get_current_step(d)
-    has_error = check_for_error(d, start_time)
-    if has_error:
-        # Pipeline failed due to error
-        a.set_edgecolor('#a9a9a9')
-        a.set_facecolor('#F5A9A9')
-        return
+        has_error = check_for_error(d, start_time)
+        if has_error:
+            # Pipeline failed due to error
+            a.set_edgecolor('#a9a9a9')
+            a.set_facecolor('#F5A9A9')
+            return
 
     total_completed = max(0, len(a.completed_ops)-1)
     if d.name == 'field':
