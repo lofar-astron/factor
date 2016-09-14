@@ -81,6 +81,12 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     if len(peel_directions) > 0:
         log.info('Peeling {0} direction(s)'.format(len(peel_directions)))
 
+        # Set flag for first non-outlier direction (if any) to create preapply parmdb
+        for d in peel_directions:
+            if not d.is_outlier:
+                d.create_preapply_parmdb = True
+                break
+
         # Do the peeling
         for d in peel_directions:
             # Reset if needed. Note that proper reset of the subtract steps in
