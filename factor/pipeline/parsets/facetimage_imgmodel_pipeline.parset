@@ -293,7 +293,11 @@ add_all_facet_sources.control.opts.mapfiles_in              =   [shift_empty.out
 add_all_facet_sources.control.opts.inputkeys                =   [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb]
 {% endif %}
 add_all_facet_sources.argument.numthreads                   =   {{ max_cpus_per_io_proc_nfiles }}
+{% if peel_calibrator %}
+add_all_facet_sources.argument.msin.datacolumn              =   DATA
+{% else %}
 add_all_facet_sources.argument.msin.datacolumn              =   FACET_DATA_ALL
+{% endif %}
 add_all_facet_sources.argument.msout.overwrite              =   True
 add_all_facet_sources.argument.msout.writefullresflag       =   False
 add_all_facet_sources.argument.local_scratch_dir            =   {{ local_dir }}
@@ -344,6 +348,7 @@ add_all_facet_sources.argument.avg.timestep                 =   {{ facetimage_ti
 
 {% else %}
 # beginning of normal facet-imaging block
+
 # apply the direction-dependent solutions and average, length = nfiles
 apply_dir_dep.control.type                                  =   dppp
 {% if preapply_phase_cal %}
