@@ -863,6 +863,9 @@ def check_for_error(direction, start_time):
     Returns True if pipeline log indicates an error
     """
     current_op = get_current_op(direction)
+    if current_op is None or start_time is None:
+        return False
+
     logfile = os.path.join(direction.working_dir, 'results', current_op,
         direction.name, 'logs', start_time, 'pipeline.log')
     if os.path.exists(logfile):
