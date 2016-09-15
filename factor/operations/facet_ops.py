@@ -151,7 +151,7 @@ class FacetSelfcal(Operation):
             'verify_subtract.break.mapfile')
         self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'full_image_input.mapfile')
-        if self.create_preapply_parmdb:
+        if self.direction.create_preapply_parmdb:
             self.direction.preapply_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
                 'create_preapply_parmdb.mapfile')
 
