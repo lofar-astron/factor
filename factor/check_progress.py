@@ -853,7 +853,25 @@ def get_current_step(direction):
         current_index = min(len(current_steps)-1, current_steps.index(previous_step_name)+1)
     except ValueError:
         return (None,None,None,None)
+
+    # Get start time from statefile and check for newer one in the logs directory
+    # (since the statefile is not updated until at least one step is completed)
     start_time = d[0]['start_time']
+    logdir = os.path.join(direction.working_dir, 'results', current_op,
+        direction.name, 'logs')
+    dirs = glob.glob(logdir + '/*')
+    mtimes = []
+    for d in dirs:
+        if os.path.exists(d):
+            mtimes.append(os.path.getmtime(d))
+        else:
+            mtimes.append(np.nan)
+    try:
+        latest_dir = dirs[np.nanargmax(mtimes)]
+        start_time = os.path.basename(latest_dir)
+    except (ValueError, TypeError):
+        # ValueError or TypeError indicates mtimes list is all NaNs
+        pass
 
     return (current_steps[current_index], current_index, len(current_steps), start_time)
 
