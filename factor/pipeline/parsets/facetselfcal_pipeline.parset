@@ -482,6 +482,7 @@ premask_selfcal.argument.reference_dec_deg                 =   {{ dec }}
 premask_selfcal.argument.cellsize_deg                      =   {{ cellsize_selfcal_deg }}
 premask_selfcal.argument.region_file                       =   {{ region_selfcal }}
 premask_selfcal.argument.make_blank_image                  =   True
+premask_selfcal.argument.trim_by                           =   0.4
 
 # image the virtual concatenated data with wsclean, length = 1
 wsclean_image01.control.type                               =   wsclean
