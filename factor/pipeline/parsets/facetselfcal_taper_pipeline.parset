@@ -278,6 +278,9 @@ create_compressed_mapfile_data.control.mapfile_dir         =   input.output.mapf
 create_compressed_mapfile_data.control.filename            =   concat_input.mapfile
 
 # sort compressed mapfile so that there is one group per timestamp, length = ntimes * num_cal_blocks
+# we make dummy data here so that there will always be MS files for wsclean
+# predict, even if a cal block is completely flagged (which otherwise would get
+# skipped and cause problems with predict)
 sort_into_Groups.control.type                              =   sort_times_into_freqGroups
 sort_into_Groups.argument.flags                            =   [create_compressed_mapfile_data.output.mapfile]
 sort_into_Groups.argument.filename                         =   sorted_groups.mapfile
@@ -289,6 +292,8 @@ sort_into_Groups.argument.enforce_numSB                    =   False
 sort_into_Groups.argument.numSB                            =   {{ num_bands_per_cal_block }}
 {% endif %}
 sort_into_Groups.argument.nband_pad                        =   {{ nband_pad_selfcal }}
+sort_into_Groups.argument.make_dummy_files                 =   True
+sort_into_Groups.argument.skip_flagged_groups              =   False
 
 # convert the output of sort_into_Groups into usable mapfiles, len = 1 / (ntimes * num_cal_blocks)
 sort_into_Groups_maps.control.kind                         =   plugin

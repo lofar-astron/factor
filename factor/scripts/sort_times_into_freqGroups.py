@@ -11,7 +11,7 @@ from lofarpipe.support.data_map import DataMap, DataProduct
 
 def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True,
     hosts=None, NDPPPfill=True, target_path=None, stepname=None, nband_pad=0,
-    make_dummy_files=False):
+    make_dummy_files=False, skip_flagged_groups=True):
     """
     Check a list of MS files for missing frequencies
 
@@ -48,6 +48,10 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
         of the list
     make_dummy_files : bool, optional
         If True, make MS files for all dummy data
+    skip_flagged_groups : bool, optional
+        If True, groups that are missing have their skip flag set to True. If
+        False, these groups are filled with dummy data and their skip flag set
+        to False
 
     Returns
     -------
@@ -72,6 +76,8 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
         hosts = ['localhost']
     numhosts = len(hosts)
     print "sort_times_into_freqGroups: Working on",len(ms_list),"files"
+
+    dirname = os.path.dirname(ms_list[0])
 
     time_groups = {}
     # sort by time
@@ -164,6 +170,13 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
                         files[i] = os.path.join(dirname, '{0}_{1}.ms'.format(
                             os.path.splitext(ms)[0], uuid.uuid4().urn.split('-')[-1]))
 
+            if not skip_flagged_groups:
+                # Don't set skip flag to True, even if group is missing all files
+                if not make_dummy_files:
+                    raise ValueError('skip_flagged_groups cannot be False if make_dummy_files is also False')
+                else:
+                    skip_this = False
+
             filemap.append(MultiDataProduct(hosts[hostID%numhosts], files, skip_this))
             groupname = time_groups[time]['basename']+'_%Xt_%dg.ms'%(time,fgroup)
             if type(stepname) is str:
@@ -182,7 +195,6 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
             for ms in all_group_files:
                 if os.path.exists(ms):
                     ms_exists = ms
-                    dirname = os.path.dirname(ms_exists)
                     sw = pt.table('{}::SPECTRAL_WINDOW'.format(ms))
                     ms_exists_ref_freq = sw.getcol('REF_FREQUENCY')[0]
                     sw.close()
