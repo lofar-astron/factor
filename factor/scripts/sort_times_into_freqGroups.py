@@ -130,6 +130,7 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
     for time in timestamps:
         (freq,fname) = time_groups[time]['freq_names'].pop(0)
         nbands = 0
+        all_group_files = []
         for fgroup in range(ngroups):
             files = []
             skip_this = True
@@ -156,52 +157,12 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
             if not skip_this:
                 nbands += len(files)
 
-                if make_dummy_files:
-                    # Find at least one existing ms for this group
-                    ms_exists = None
-                    for ms in files:
-                        if os.path.exists(ms):
-                            ms_exists = ms
-                            dirname = os.path.dirname(ms_exists)
-                            sw = pt.table('{}::SPECTRAL_WINDOW'.format(ms))
-                            ms_exists_ref_freq = sw.getcol('REF_FREQUENCY')[0]
-                            sw.close()
-                            break
-
-                    for i, ms in enumerate(files):
-                        if ms == 'dummy.ms':
-                            ms_new = os.path.join(dirname, '{0}_{1}.ms'.format(
-                                os.path.splitext(ms)[0], uuid.uuid4().urn.split('-')[-1]))
-                            pt.tableutil.tablecopy(ms_exists, ms_new)
-
-                            # Alter SPECTRAL_WINDOW subtable as appropriate to fill gap
-                            sw = pt.table('{}::SPECTRAL_WINDOW'.format(ms_new), readonly=False)
-                            tot_bandwidth = sw.getcol('TOTAL_BANDWIDTH')[0]
-                            if i > 0:
-                                sw_low = pt.table('{}::SPECTRAL_WINDOW'.format(files[i-1]))
-                                ref_freq = sw_low.getcol('REF_FREQUENCY') + tot_bandwidth
-                                sw_low.close()
-                            else:
-                                for j in range(1, len(files)-1):
-                                    if os.path.exists(files[j]):
-                                        sw_high = pt.table('{}::SPECTRAL_WINDOW'.format(files[j]))
-                                        ref_freq = sw_high.getcol('REF_FREQUENCY') - tot_bandwidth * j
-                                        sw_high.close()
-                                        break
-                            chan_freq = sw.getcol('CHAN_FREQ') - ms_exists_ref_freq + ref_freq
-                            sw.putcol('REF_FREQUENCY', ref_freq)
-                            sw.putcol('CHAN_FREQ', chan_freq)
-                            sw.close()
-
-                            # Flag all data
-                            t = pt.table(ms_new, readonly=False)
-                            t.putcol('FLAG_ROW', np.ones(len(t), dtype=bool))
-                            f = t.getcol('FLAG')
-                            t.putcol('FLAG', np.ones(f.shape, dtype=bool))
-                            t.close()
-
-                            # Replace dummy.ms in files list with new filename
-                            files[i] = ms_new
+            if make_dummy_files:
+                for i, ms in enumerate(files):
+                    if ms == 'dummy.ms':
+                        # Replace dummy.ms in files list with new filename
+                        files[i] = os.path.join(dirname, '{0}_{1}.ms'.format(
+                            os.path.splitext(ms)[0], uuid.uuid4().urn.split('-')[-1]))
 
             filemap.append(MultiDataProduct(hosts[hostID%numhosts], files, skip_this))
             groupname = time_groups[time]['basename']+'_%Xt_%dg.ms'%(time,fgroup)
@@ -211,7 +172,51 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
                 groupname = os.path.join(target_path,os.path.basename(groupname))
             groupmap.append(DataProduct(hosts[hostID%numhosts],groupname, skip_this))
             hostID += 1
+            all_group_files.extend(files)
+
         assert freq==1e12
+
+        if make_dummy_files:
+            # Find at least one existing ms for this timestamp
+            ms_exists = None
+            for ms in all_group_files:
+                if os.path.exists(ms):
+                    ms_exists = ms
+                    dirname = os.path.dirname(ms_exists)
+                    sw = pt.table('{}::SPECTRAL_WINDOW'.format(ms))
+                    ms_exists_ref_freq = sw.getcol('REF_FREQUENCY')[0]
+                    sw.close()
+                    break
+
+            for i, ms in enumerate(all_group_files):
+                if 'dummy' in ms:
+                    pt.tableutil.tablecopy(ms_exists, ms)
+
+                    # Alter SPECTRAL_WINDOW subtable as appropriate to fill gap
+                    sw = pt.table('{}::SPECTRAL_WINDOW'.format(ms), readonly=False)
+                    tot_bandwidth = sw.getcol('TOTAL_BANDWIDTH')[0]
+                    if i > 0:
+                        sw_low = pt.table('{}::SPECTRAL_WINDOW'.format(all_group_files[i-1]))
+                        ref_freq = sw_low.getcol('REF_FREQUENCY') + tot_bandwidth
+                        sw_low.close()
+                    else:
+                        for j in range(1, len(files)-1):
+                            if os.path.exists(files[j]):
+                                sw_high = pt.table('{}::SPECTRAL_WINDOW'.format(all_group_files[j]))
+                                ref_freq = sw_high.getcol('REF_FREQUENCY') - tot_bandwidth * j
+                                sw_high.close()
+                                break
+                    chan_freq = sw.getcol('CHAN_FREQ') - ms_exists_ref_freq + ref_freq
+                    sw.putcol('REF_FREQUENCY', ref_freq)
+                    sw.putcol('CHAN_FREQ', chan_freq)
+                    sw.close()
+
+                    # Flag all data
+                    t = pt.table(ms, readonly=False)
+                    t.putcol('FLAG_ROW', np.ones(len(t), dtype=bool))
+                    f = t.getcol('FLAG')
+                    t.putcol('FLAG', np.ones(f.shape, dtype=bool))
+                    t.close()
 
     filemapname = os.path.join(mapfile_dir, filename)
     filemap.save(filemapname)
