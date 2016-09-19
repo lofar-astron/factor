@@ -550,7 +550,8 @@ def make_initial_skymodel(band):
     return s
 
 
-def group_directions(directions, n_per_grouping=[{'1':0}], allow_reordering=True):
+def group_directions(directions, n_per_grouping=[{'1':0}], allow_reordering=True,
+    order_statfile=None):
     """
     Sorts directions into groups that can be selfcaled simultaneously
 
@@ -568,6 +569,8 @@ def group_directions(directions, n_per_grouping=[{'1':0}], allow_reordering=True
     allow_reordering : bool, optional
         If True, allow sources in neighboring groups to be reordered to increase
         the minimum separation between sources within a group
+    order_statefile : str, optional
+        Filename for order
 
     Returns
     -------
@@ -630,6 +633,7 @@ def group_directions(directions, n_per_grouping=[{'1':0}], allow_reordering=True
         # between directions. The separation is calculated as the weighted
         # total separation between members of the group
         if allow_reordering:
+            if os.path.exists(
             log.info('Reordering directions to obtain max separation...')
             direction_groups_orig = direction_groups[:]
             remaining_directions = directions[:]
