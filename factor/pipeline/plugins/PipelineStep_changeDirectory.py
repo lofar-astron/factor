@@ -13,6 +13,8 @@ def plugin_main(args, **kwargs):
         different groups.)
     new_dir : str
         Name of the local directory to sync to
+    make_tempdir : bool
+        Make temporary directory inside new_dir?
     mapfile_dir : str
         Directory for output mapfile
     filename: str
@@ -26,9 +28,13 @@ def plugin_main(args, **kwargs):
     """
     mapfile_in = kwargs['mapfile_in']
     new_dir = kwargs['new_dir']
+    make_tempdir = True
+    if 'make_tempdir' in kwargs:
+        make_tempdir =  string2bool(kwargs['make_tempdir'])
+    if make_tempdir:
+        new_dir = tempfile.mkdtemp(dir=new_dir)
     mapfile_dir = kwargs['mapfile_dir']
     filename = kwargs['filename']
-
 
     map_in = DataMap.load(mapfile_in)
     map_in.iterator = DataMap.SkipIterator
@@ -42,3 +48,14 @@ def plugin_main(args, **kwargs):
     result = {'mapfile': fileid}
 
     return result
+
+
+def string2bool(instring):
+    if not isinstance(instring, basestring):
+        raise ValueError('string2bool: Input is not a basic string!')
+    if instring.upper() == 'TRUE' or instring == '1':
+        return True
+    elif instring.upper() == 'FALSE' or instring == '0':
+        return False
+    else:
+        raise ValueError('string2bool: Cannot convert string "'+instring+'" to boolean!')

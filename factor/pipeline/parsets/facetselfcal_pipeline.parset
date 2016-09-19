@@ -412,6 +412,7 @@ make_concat_data_sync_mapfile.control.kind                 =   plugin
 make_concat_data_sync_mapfile.control.type                 =   changeDirectory
 make_concat_data_sync_mapfile.control.mapfile_in           =   concat_data.output.mapfile
 make_concat_data_sync_mapfile.control.new_dir              =   {{ local_dir }}
+make_concat_data_sync_mapfile.control.make_tempdir         =   True
 make_concat_data_sync_mapfile.control.mapfile_dir          =   input.output.mapfile_dir
 make_concat_data_sync_mapfile.control.filename             =   concat_data_local.mapfile
 
