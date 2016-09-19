@@ -41,7 +41,7 @@ def plugin_main(args, **kwargs):
     map_in.iterator = DataMap.SkipIterator
     map_out = DataMap([])
     for item in map_in:
-        file_out = os.path.join(new_dir, os.path.dirname(item.file))
+        file_out = os.path.join(new_dir, os.path.basename(item.file))
         map_out.data.append(DataProduct(item.host, file_out, False))
 
     fileid = os.path.join(mapfile_dir, filename)
