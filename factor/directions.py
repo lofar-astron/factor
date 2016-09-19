@@ -633,7 +633,12 @@ def group_directions(directions, n_per_grouping=[{'1':0}], allow_reordering=True
         # between directions. The separation is calculated as the weighted
         # total separation between members of the group
         if allow_reordering:
-            if os.path.exists(
+#             if order_statefile is not None:
+#                 if os.path.exists(order_statefile):
+#                     with open(order_statefile, 'r') as f:
+#                         d = pickle.load(f)
+#                     d['order_ind']
+
             log.info('Reordering directions to obtain max separation...')
             direction_groups_orig = direction_groups[:]
             remaining_directions = directions[:]

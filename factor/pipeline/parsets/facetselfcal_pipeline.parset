@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} shift_cal, {% if preapply_phase_cal %} shift_cal_dir_indep, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, switch_weights_col_shift_cal1, concat_blavg_data, switch_weights_col_shift_cal2, copy_column1, copy_column2, {% endif %} {% if local_dir is not None %} sync_concat_data_to_local, {% endif %} concat_data_compressed_mapfile, {% if not preapply_phase_cal %} average0, {% endif %} create_compressed_mapfile0, sort_average0_into_Groups, sort_average0_into_Groups_maps, concat_average0_data, create_compressed_mapfile01, premask_selfcal, wsclean_image01, create_imagebase_map01, adjust_wsclean_mapfile0, mask0, wsclean_image02, create_imagebase_map02, pad_selfcal_model0_images, regroup_concat_data_map, create_expanded_model0_mapfile, expand_selfcal_model_size_map, wsclean_ft0, switch_weights_col1, make_fast_phase_parmdb_map, {% if peel_skymodel is not none %} create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, {% endif %} remove_parmdbs1, solve_phaseonly1, switch_weights_col2, {% if local_dir is not None %} make_apply_mapfile, {% endif %} apply_phaseonly1, create_compressed_mapfile1, wsclean_image11, create_imagebase_map11, adjust_wsclean_mapfile11, mask1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, pad_selfcal_model1_images, wsclean_ft1, switch_weights_col3, remove_parmdbs2, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, create_compressed_mapfile2, wsclean_image21, create_imagebase_map21, adjust_wsclean_mapfile21, mask2, wsclean_image22, create_imagebase_map22, create_expanded_model2_mapfile, pad_selfcal_model2_images, wsclean_ft2, switch_weights_col5, remove_parmdbs11, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, wsclean_image31, create_imagebase_map31, adjust_wsclean_mapfile31, mask3, wsclean_image32, loop_ampcal, {% if local_dir is not None %} remove_concat_data, {% endif %} merge_selfcal_parmdbs, {% if create_preapply_parmdb %} create_preapply_parmdb, {% endif %} make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, {% if is_patch or skip_facet_imaging %} create_model4_map, blank_model, {% else %} apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, create_compressed_mapfile6, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, {% endif %} pad_model_images, create_compressed_mapfile_shift_empty, add_model_data_col, sort_shift_empty_into_Groups, sort_shift_empty_into_Groups_maps, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} shift_cal, {% if preapply_phase_cal %} shift_cal_dir_indep, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, switch_weights_col_shift_cal1, concat_blavg_data, switch_weights_col_shift_cal2, copy_column1, copy_column2, {% endif %} {% if local_dir is not none %} sync_concat_data_to_local, {% endif %} concat_data_compressed_mapfile, {% if not preapply_phase_cal %} average0, {% endif %} create_compressed_mapfile0, sort_average0_into_Groups, sort_average0_into_Groups_maps, concat_average0_data, create_compressed_mapfile01, premask_selfcal, wsclean_image01, create_imagebase_map01, adjust_wsclean_mapfile0, mask0, wsclean_image02, create_imagebase_map02, pad_selfcal_model0_images, regroup_concat_data_map, create_expanded_model0_mapfile, expand_selfcal_model_size_map, wsclean_ft0, switch_weights_col1, make_fast_phase_parmdb_map, {% if peel_skymodel is not none %} create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, {% endif %} remove_parmdbs1, solve_phaseonly1, switch_weights_col2, {% if local_dir is not none %} make_apply_mapfile, {% endif %} apply_phaseonly1, create_compressed_mapfile1, wsclean_image11, create_imagebase_map11, adjust_wsclean_mapfile11, mask1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, pad_selfcal_model1_images, wsclean_ft1, switch_weights_col3, remove_parmdbs2, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, create_compressed_mapfile2, wsclean_image21, create_imagebase_map21, adjust_wsclean_mapfile21, mask2, wsclean_image22, create_imagebase_map22, create_expanded_model2_mapfile, pad_selfcal_model2_images, wsclean_ft2, switch_weights_col5, remove_parmdbs11, solve_ampphase11, switch_weights_col6, apply_ampphase11, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, wsclean_image31, create_imagebase_map31, adjust_wsclean_mapfile31, mask3, wsclean_image32, loop_ampcal, {% if local_dir is not none %} remove_concat_data, {% endif %} merge_selfcal_parmdbs, {% if create_preapply_parmdb %} create_preapply_parmdb, {% endif %} make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, {% if is_patch or skip_facet_imaging %} create_model4_map, blank_model, {% else %} apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, create_compressed_mapfile6, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, {% endif %} pad_model_images, create_compressed_mapfile_shift_empty, add_model_data_col, sort_shift_empty_into_Groups, sort_shift_empty_into_Groups_maps, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -93,7 +93,7 @@ shift_empty.argument.numthreads                            =   {{ max_cpus_per_i
 shift_empty.argument.msin.datacolumn                       =   {{ subtracted_data_colname }}
 shift_empty.argument.msout.overwrite                       =   True
 shift_empty.argument.msout.writefullresflag                =   False
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 shift_empty.argument.local_scratch_dir                     =   {{ local_dir }}
 {% endif %}
 shift_empty.argument.steps                                 =   [shift]
@@ -115,7 +115,7 @@ predict_all_model_data.control.opts.inputkeys              =   [msin,sourcedb,pa
 predict_all_model_data.argument.numthreads                 =   {{ max_cpus_per_io_proc_nfiles }}
 predict_all_model_data.argument.msout.overwrite            =   True
 predict_all_model_data.argument.msout.writefullresflag     =   False
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 predict_all_model_data.argument.local_scratch_dir          =   {{ local_dir }}
 {% endif %}
 predict_all_model_data.argument.steps                      =   [pred]
@@ -157,7 +157,7 @@ shift_cal.argument.numthreads                              =   {{ max_cpus_per_i
 shift_cal.argument.msin.datacolumn                         =   {{ subtracted_data_colname }}
 shift_cal.argument.msout.overwrite                         =   True
 shift_cal.argument.msout.writefullresflag                  =   False
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 shift_cal.argument.local_scratch_dir                       =   {{ local_dir }}
 {% endif %}
 {% if preapply_phase_cal %}
@@ -196,7 +196,7 @@ shift_cal_dir_indep.argument.numthreads                    =   {{ max_cpus_per_i
 shift_cal_dir_indep.argument.msin.datacolumn               =   {{ subtracted_data_colname }}
 shift_cal_dir_indep.argument.msout.overwrite               =   True
 shift_cal_dir_indep.argument.msout.writefullresflag        =   False
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 shift_cal_dir_indep.argument.local_scratch_dir             =   {{ local_dir }}
 {% endif %}
 shift_cal_dir_indep.argument.steps                         =   [shift,add,correct,avg]
@@ -233,7 +233,7 @@ shift_cal.argument.numthreads                              =   {{ max_cpus_per_i
 shift_cal.argument.msin.datacolumn                         =   FACET_DATA_ALL
 shift_cal.argument.msout.overwrite                         =   True
 shift_cal.argument.msout.writefullresflag                  =   False
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 shift_cal.argument.local_scratch_dir                       =   {{ local_dir }}
 {% endif %}
 {% if preapply_phase_cal %}
@@ -266,7 +266,7 @@ shift_cal_dir_indep.argument.numthreads                    =   {{ max_cpus_per_i
 shift_cal_dir_indep.argument.msin.datacolumn               =   FACET_DATA_ALL
 shift_cal_dir_indep.argument.msout.overwrite               =   True
 shift_cal_dir_indep.argument.msout.writefullresflag        =   False
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 shift_cal_dir_indep.argument.local_scratch_dir             =   {{ local_dir }}
 {% endif %}
 shift_cal_dir_indep.argument.steps                         =   [correct,avg]
@@ -326,7 +326,7 @@ concat_data.argument.msin.missingdata                      =   True
 concat_data.argument.msin.orderms                          =   False
 concat_data.argument.msout.overwrite                       =   True
 concat_data.argument.msout.writefullresflag                =   False
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 concat_data.argument.local_scratch_dir                     =   {{ local_dir }}
 {% endif %}
 concat_data.argument.steps                                 =   []
@@ -382,7 +382,7 @@ concat_blavg_data.argument.msin.missingdata                =   True
 concat_blavg_data.argument.msin.orderms                    =   False
 concat_blavg_data.argument.msout.overwrite                 =   True
 concat_blavg_data.argument.msout.writefullresflag          =   False
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 concat_blavg_data.argument.local_scratch_dir               =   {{ local_dir }}
 {% endif %}
 concat_blavg_data.argument.steps                           =   []
@@ -406,7 +406,7 @@ copy_column2.control.inputkeys                             =   [blavgfile,datafi
 copy_column2.argument.flags                                =   [blavgfile,datafile,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 {% endif %}
 
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 # make a mapfile for syncing of concat_data to local_dir, len = ntimes * num_cal_blocks
 make_concat_data_sync_mapfile.control.kind                 =   plugin
 make_concat_data_sync_mapfile.control.type                 =   changeDirectory
@@ -446,7 +446,7 @@ average0.argument.numthreads                               =   {{ max_cpus_per_i
 average0.argument.msin.datacolumn                          =   DATA
 average0.argument.msout.overwrite                          =   True
 average0.argument.msout.writefullresflag                   =   False
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 average0.argument.local_scratch_dir                        =   {{ local_dir }}
 {% endif %}
 average0.argument.steps                                    =   [correct,avg]
@@ -499,7 +499,7 @@ concat_average0_data.argument.msin.missingdata             =   True
 concat_average0_data.argument.msin.orderms                 =   False
 concat_average0_data.argument.msout.overwrite              =   True
 concat_average0_data.argument.msout.writefullresflag       =   False
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 concat_average0_data.argument.local_scratch_dir            =   {{ local_dir }}
 {% endif %}
 concat_average0_data.argument.steps                        =   []
@@ -769,7 +769,7 @@ switch_weights_col2.argument.flags                         =   [msfiles,WEIGHT_S
 ########## end of first round of selfcal
 ########## start of second round of selfcal
 
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 # make mapfile for the output of apply steps, len = ntimes * num_cal_blocks
 # this step is needed to direct the output to the non-local (shared) disk
 make_apply_mapfile.control.kind                            =   plugin
@@ -784,7 +784,7 @@ make_apply_mapfile.control.filename                        =   apply_output.mapf
 apply_phaseonly1.control.type                              =   dppp
 apply_phaseonly1.control.opts.mapfiles_in                  =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 apply_phaseonly1.control.opts.inputkeys                    =   [msin,parmdb]
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 apply_phaseonly1.control.opts.mapfile_out                  =   make_apply_mapfile.output.mapfile
 apply_phaseonly1.control.opts.outputkey                    =   msout
 apply_phaseonly1.argument.local_scratch_dir                =   {{ local_dir }}
@@ -1003,7 +1003,7 @@ switch_weights_col4.argument.flags                         =   [msfiles,WEIGHT_S
 apply_phaseonly2.control.type                              =   dppp
 apply_phaseonly2.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
 apply_phaseonly2.control.opts.inputkeys                    =   [msin,parmdb]
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 apply_phaseonly2.control.opts.mapfile_out                  =   make_apply_mapfile.output.mapfile
 apply_phaseonly2.control.opts.outputkey                    =   msout
 apply_phaseonly2.argument.local_scratch_dir                =   {{ local_dir }}
@@ -1300,7 +1300,7 @@ expand_smoothed_amp1_parmdb_map.control.filename           =   expand_amp1_smoot
 apply_amp1.control.type                                    =   dppp
 apply_amp1.control.opts.mapfiles_in                        =   [{{ concat_data_mapfile }},expand_smoothed_amp1_parmdb_map.output.mapfile]
 apply_amp1.control.opts.inputkeys                          =   [msin,parmdb]
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 apply_amp1.control.opts.mapfile_out                        =   make_apply_mapfile.output.mapfile
 apply_amp1.control.opts.outputkey                          =   msout
 apply_amp1.argument.local_scratch_dir                      =   {{ local_dir }}
@@ -1599,7 +1599,7 @@ expand_smoothed_amp2_parmdb_map.control.filename           =   expand_amp2_smoot
 apply_amp2.control.type                                    =   dppp
 apply_amp2.control.opts.mapfiles_in                        =   [{{ concat_data_mapfile }},expand_smoothed_amp2_parmdb_map.output.mapfile]
 apply_amp2.control.opts.inputkeys                          =   [msin,parmdb]
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 apply_amp2.control.opts.mapfile_out                        =   make_apply_mapfile.output.mapfile
 apply_amp2.control.opts.outputkey                          =   msout
 apply_amp2.argument.local_scratch_dir                      =   {{ local_dir }}
@@ -1762,7 +1762,7 @@ check_image.argument.flags                                 =   [image_new,image_
 
 ########## end of selfcal loop
 
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 # remove concat_data files, length = ntimes * num_cal_blocks
 remove_concat_data.control.type                            =   remove_file
 remove_concat_data.control.mapfile_in                      =   make_concat_data_sync_mapfile.output.mapfile
@@ -1855,7 +1855,7 @@ apply_dir_dep.argument.numthreads                          =   {{ max_cpus_per_i
 apply_dir_dep.argument.msin.datacolumn                     =   FACET_DATA_ALL
 apply_dir_dep.argument.msout.overwrite                     =   True
 apply_dir_dep.argument.msout.writefullresflag              =   False
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 apply_dir_dep.argument.local_scratch_dir                   =   {{ local_dir }}
 {% endif %}
 {% if preapply_phase_cal %}
@@ -2137,7 +2137,7 @@ corrupt_final_model.argument.numthreads                    =   {{ max_cpus_per_i
 corrupt_final_model.argument.msin.datacolumn               =   MODEL_DATA
 corrupt_final_model.argument.msout.overwrite               =   True
 corrupt_final_model.argument.msout.writefullresflag        =   False
-{% if local_dir is not None %}
+{% if local_dir is not none %}
 corrupt_final_model.argument.local_scratch_dir             =   {{ local_dir }}
 {% endif %}
 {% if preapply_phase_cal %}
