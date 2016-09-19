@@ -1,4 +1,5 @@
 import os
+import tempfile
 from lofarpipe.support.data_map import DataMap, DataProduct
 
 
