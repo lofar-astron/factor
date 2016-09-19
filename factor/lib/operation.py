@@ -77,12 +77,11 @@ class Operation(object):
 
         # Local scratch directory and corresponding node recipes
         if self.parset['cluster_specific']['dir_local'] is None:
-            # Not specified, specify scratch directory in normal work directory
-            self.local_scratch_dir = os.path.join(self.pipeline_working_dir,
-                self.direction.name)
+            # Not specified
+            self.local_scratch_dir = None
             self.dppp_nodescript = 'executable_args'
         elif self.parset['cluster_specific']['clusterdesc_file'].lower() == 'pbs':
-            # PBS = "system in Hamburg" -> use special DPPP node script
+            # PBS: use special DPPP node script
             self.local_scratch_dir = self.parset['cluster_specific']['dir_local']
             self.dppp_nodescript = 'dppp_scratch'
         else:
