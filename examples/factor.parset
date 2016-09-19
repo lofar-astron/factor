@@ -146,7 +146,7 @@ dir_ms = /data/bands
 
 # Use baseline-dependent averaging in WSClean (default = False). If enabled,
 # this option can dramatically speed up imaging with WSClean.
-# NOTE: this option requires WSClean v2.0 or higher
+# NOTE: this option requires the latest development version of WSClean
 # wsclean_bl_averaging = False
 
 # Selfcal imaging parameters: pixel size in arcsec (default = 1.5), Briggs
