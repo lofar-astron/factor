@@ -417,7 +417,7 @@ make_concat_data_sync_mapfile.control.mapfile_dir          =   input.output.mapf
 make_concat_data_sync_mapfile.control.filename             =   concat_data_local.mapfile
 
 # copy the output of concat_data to local_dir, len = ntimes * num_cal_blocks
-sync_concat_data_to_local.control.kind                     =   sync_files
+sync_concat_data_to_local.control.type                     =   sync_files
 sync_concat_data_to_local.control.mapfile_in               =   concat_data.output.mapfile
 sync_concat_data_to_local.control.mapfile_out              =   make_concat_data_sync_mapfile.output.mapfile
 sync_concat_data_to_local.control.inputkey                 =   msin
