@@ -16,6 +16,8 @@ def plugin_main(args, **kwargs):
         Name of the local directory to sync to
     make_tempdir : bool
         Make temporary directory inside new_dir?
+    append : str
+        Append string to end of new files
     mapfile_dir : str
         Directory for output mapfile
     filename: str
@@ -34,6 +36,9 @@ def plugin_main(args, **kwargs):
         make_tempdir =  string2bool(kwargs['make_tempdir'])
     if make_tempdir:
         new_dir = tempfile.mkdtemp(dir=new_dir)
+    append = None
+    if 'append' in kwargs:
+        append =  kwargs['append']
     mapfile_dir = kwargs['mapfile_dir']
     filename = kwargs['filename']
 
@@ -42,6 +47,8 @@ def plugin_main(args, **kwargs):
     map_out = DataMap([])
     for item in map_in:
         file_out = os.path.join(new_dir, os.path.basename(item.file))
+        if append is not None:
+            file_out += append
         map_out.data.append(DataProduct(item.host, file_out, False))
 
     fileid = os.path.join(mapfile_dir, filename)
