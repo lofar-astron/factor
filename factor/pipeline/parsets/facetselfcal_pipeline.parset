@@ -774,7 +774,7 @@ switch_weights_col2.argument.flags                         =   [msfiles,WEIGHT_S
 # this step is needed to direct the output to the non-local (shared) disk
 make_apply_mapfile.control.kind                            =   plugin
 make_apply_mapfile.control.type                            =   localToShared
-make_apply_mapfile.control.mapfile_in                      =   make_sync_concat_data_mapfiles.output.mapfile
+make_apply_mapfile.control.mapfile_in                      =   make_concat_data_sync_mapfile.output.mapfile
 make_apply_mapfile.control.mapfile_to_match                =   concat_data.output.mapfile
 make_apply_mapfile.control.mapfile_dir                     =   input.output.mapfile_dir
 make_apply_mapfile.control.filename                        =   apply_output.mapfile
