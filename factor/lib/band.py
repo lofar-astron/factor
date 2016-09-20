@@ -689,7 +689,9 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
                'distribution': 'Gaussian',
                'distributionTruncation': 1.5,
                'normalization': 'RF',
-               'weightBitCount': np.uint32(10)}
+               'weightBitCount': np.uint32(10),
+               'MAXIMUMCACHESIZE': 0,
+               'SEQNR': seqnr}
             dmi[key]['COLUMNS'] = columns_to_compress
             dmi[key]['NAME'] = 'DyscoStMan'
             dmi[key]['SEQNR'] = seqnr
