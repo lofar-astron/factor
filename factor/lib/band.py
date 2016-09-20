@@ -627,6 +627,12 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
             # Replace current storage manager by DyscoStMan if needed
             log.debug('Compressing file...')
 
+            # Write table to disk so that we can open it in write mode
+            temp_file = chunk_file + '.tmp'
+            seltab.copy(temp_file, deep=True)
+            seltab.close()
+            seltab = pt.table(temp_file, readonly=False, ack=False)
+
             # Get flags, as we must replace flagged values with NaNs before
             # compression
             flags = seltab.getcol('FLAG')
