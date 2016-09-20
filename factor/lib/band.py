@@ -510,7 +510,8 @@ def find_unflagged_fraction(ms_file):
             t = pt.table(ms_file, ack=False)
             flags_per_element = t.calc('nfalse(FLAG)')
             nelements = t.calc('nelements(FLAG)')[0] # = number of channels * number of pols
-            unflagged_fraction = float(np.sum(flags_per_element)) / nelements / len(seltab)
+            unflagged_fraction = float(np.sum(flags_per_element)) / nelements / len(t)
+            t.close()
         except:
             print('taql exited abnormally checking flagged fraction for file {}.'.format(ms_file))
             sys.exit(1)
