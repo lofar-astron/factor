@@ -20,6 +20,7 @@ def main(file_from, file_to):
 
     """
     destination_dir = os.path.dirname(file_to)
+    os.system('/bin/mkdir -p {0}'.format(destination_dir))
     if not os.path.exists(file_to):
         # Copy file
         os.system('/bin/cp -r {0} {1}'.format(file_from, file_to))
