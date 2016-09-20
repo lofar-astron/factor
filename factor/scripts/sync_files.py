@@ -22,7 +22,7 @@ def main(file_from, file_to):
     destination_dir = os.path.dirname(file_to)
     if not os.path.exists(file_to):
         # Copy file
-        os.system('/bin/cp -rT {0} {1}'.format(file_from, file_to))
+        os.system('/bin/cp -r {0} {1}'.format(file_from, file_to))
     else:
         # Sync file
         os.system('/usr/bin/rsync -a {0} {1}'.format(file_from, destination_dir))
