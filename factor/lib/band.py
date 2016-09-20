@@ -715,7 +715,7 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
 
     seltab.close()
     tab.close()
-    if use_compression:
+    if copy and use_compression:
         shutil.rmtree(temp_file)
 
     # Check that the chunk has at least min_fraction unflagged data.
