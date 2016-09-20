@@ -985,7 +985,7 @@ remove_parmdbs2.argument.flags                             =   [-rf,parmdb]
 # note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
 # GainCal has a filter parameter, we can switch to that
 solve_phaseonly2.control.type                              =   dppp_inplace
-solve_phaseonly2.control.mapfiles_in                       =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+solve_phaseonly2.control.mapfiles_in                       =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 solve_phaseonly2.control.inputkeys                         =   [msin,parmdb]
 solve_phaseonly2.argument.numthreads                       =   {{ max_cpus_per_proc_ntimes }}
 solve_phaseonly2.argument.msin.datacolumn                  =   {{ data_column }}
@@ -1015,7 +1015,7 @@ switch_weights_col4.argument.flags                         =   [msfiles,WEIGHT_S
 
 # apply the previous calibration and average, length = ntimes * num_cal_blocks
 apply_phaseonly2.control.type                              =   dppp
-apply_phaseonly2.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+apply_phaseonly2.control.opts.mapfiles_in                  =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 apply_phaseonly2.control.opts.inputkeys                    =   [msin,parmdb]
 {% if selfcal_local_dir is not none %}
 apply_phaseonly2.control.opts.mapfile_out                  =   make_apply_mapfile.output.mapfile
