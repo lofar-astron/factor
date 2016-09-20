@@ -146,6 +146,17 @@ def get_global_options(parset):
     else:
         parset_dict['chunk_size_sec'] = 2400.0
 
+    # Use Dysco compression for chunked files (default = False). Enabling this
+    # option will result in less storage usage and signifcanctly faster
+    # processing. To use this option, you must have the Dysco library in your
+    # LD_LIBRARY_PATH. Note: if enabled, Factor will not make symbolic links to the
+    # input data, even if they are shorter than chunk_size_sec, but will copy them
+    # instead
+    if 'use_compression' in parset_dict:
+        parset_dict['use_compression'] = parset.getboolean('global', 'use_compression')
+    else:
+        parset_dict['use_compression'] = False
+
     # Use interactive mode (default = False). Factor will ask for confirmation of
     # internally derived DDE calibrators and facets
     if 'interactive' in parset_dict:
@@ -239,7 +250,7 @@ def get_global_options(parset):
         'peel_flux_jy', 'keep_unavg_facet_data', 'max_selfcal_loops',
         'preaverage_flux_jy', 'multiscale_selfcal', 'skymodel_extension',
         'max_peak_smearing', 'tec_block_mhz', 'selfcal_cellsize_arcsec',
-        'selfcal_robust']
+        'selfcal_robust', 'use_compression']
     allowed_options.extend(['direction_specific', 'calibration_specific',
         'imaging_specific', 'cluster_specific']) # add dicts needed for deprecated options
     deprecated_options_imaging = ['make_mosaic', 'facet_imager',

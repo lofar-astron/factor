@@ -35,11 +35,13 @@ class Band(object):
         If True, process input files, including chunking, etc.
     chunk_size_sec : float, optional
         Size of chunks in seconds
+    use_compression : bool, optional
+        If True, use Dysco comprossion on output chunk files
 
     """
     def __init__(self, MSfiles, factor_working_dir, dirindparmdb,
         skymodel_dirindep=None, local_dir=None, test_run=False, check_files=True,
-        process_files=False, chunk_size_sec=2400.0):
+        process_files=False, chunk_size_sec=2400.0, use_compression=False):
 
         self.files = MSfiles
         self.msnames = [ MS.split('/')[-1] for MS in self.files ]
@@ -122,7 +124,7 @@ class Band(object):
 
             # cut input files into chunks if needed
             self.chunk_input_files(chunk_size_sec, dirindparmdb, local_dir=local_dir,
-                                   test_run=test_run)
+                                   test_run=test_run, use_compression=use_compression)
             if len(self.files) == 0:
                 self.log.error('No data left after checking input files for band: {}. '
                                'Probably too little unflagged data.'.format(self.name))
@@ -288,7 +290,7 @@ class Band(object):
 
 
     def chunk_input_files(self, chunksize, dirindparmdb, local_dir=None,
-        test_run=False, min_fraction=0.5):
+        test_run=False, min_fraction=0.5, use_compression=False):
         """
         Make copies of input files that are smaller than 2*chunksize
 
@@ -310,6 +312,9 @@ class Band(object):
         min_fraction : float, optional
             Minimum fraction of unflaggged data in a time-chunk needed for the chunk
             to be kept. Only used whn chunking large files. (default = 0.1)
+        use_compression : bool, optional
+            If True, use Dysco comprossion on output chunk files
+
         """
         newfiles = []
         newdirindparmdbs = []
@@ -346,7 +351,7 @@ class Band(object):
             if not os.path.exists(newdirname):
                 os.mkdir(newdirname)
 
-            if nchunks > 1:
+            if nchunks > 1 or use_compression:
                 self.log.debug('Spliting {0} into {1} chunks...'.format(self.files[MS_id], nchunks))
 
                 pool = multiprocessing.Pool()
@@ -360,7 +365,8 @@ class Band(object):
                     itertools.repeat(colnames_to_keep),
                     itertools.repeat(newdirname),
                     itertools.repeat(local_dir),
-                    itertools.repeat(min_fraction)  ))
+                    itertools.repeat(min_fraction),
+                    itertools.repeat(use_compression) ))
                 pool.close()
                 pool.join()
 
@@ -515,7 +521,7 @@ def process_chunk_star(inputs):
 
 
 def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, chunksize, dirindparmdb,
-    colnames_to_keep, newdirname, local_dir=None, min_fraction=0.1):
+    colnames_to_keep, newdirname, local_dir=None, min_fraction=0.1, use_compression=True):
     """
     Processes one time chunk of input ms_file and returns new file names
 
@@ -546,7 +552,9 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
         copied to the original output directory
     min_fraction : float, optional
         Minimum fraction of unflaggged data in a time-chunk needed for the chunk
-        to be kept.
+        to be kept
+    use_compression : bool, optional
+        If True, use Dysco comprossion on output chunk files
 
     Returns
     -------
@@ -606,6 +614,8 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
     newdirindparmdb = os.path.join(chunk_file, dirindparmdb)
 
     if copy:
+        log.debug('Going to copy {0} samples to file {1}'.format(str(len(seltab)),chunk_file))
+
         if local_dir is not None:
             # Set output to temp directory
             chunk_file_original = chunk_file
@@ -613,13 +623,82 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
             if os.path.exists(chunk_file):
                 shutil.rmtree(chunk_file)
 
-        log.debug('Going to copy {0} samples to file {1}'.format(str(len(seltab)),chunk_file))
-        seltab.copy(chunk_file, True)
+        if use_compression:
+            # Replace current storage manager by DyscoStMan if needed
+            log.debug('Compressing file...')
+
+            # Get flags, as we must replace flagged values with NaNs before
+            # compression
+            flags = seltab.getcol('FLAG')
+            flagged = np.where(flags)
+
+            # Replace DATA with SUBTRACTED_DATA_ALL
+            seltab.renamecol('DATA', 'DATA_TEMP')
+            desc = seltab.getcoldesc('DATA_TEMP')
+            desc['name'] = 'DATA'
+            desc['option'] = 1 # make a Direct column
+            seltab.addcols(desc)
+            data = seltab.getcol('SUBTRACTED_DATA_ALL')
+            data[flagged] = np.NaN
+            seltab.putcol('DATA', data)
+            seltab.removecols(['DATA_TEMP'])
+            seltab.removecols(['SUBTRACTED_DATA_ALL'])
+
+            # Change WEIGHT_SPECTRUM to a Direct column if needed
+            desc = seltab.getcoldesc('WEIGHT_SPECTRUM')
+            if desc['option'] != 1:
+                seltab.renamecol('WEIGHT_SPECTRUM', 'WEIGHT_SPECTRUM_TEMP')
+                desc = seltab.getcoldesc('WEIGHT_SPECTRUM_TEMP')
+                desc['name'] = 'WEIGHT_SPECTRUM'
+                desc['option'] = 1 # make a Direct column
+                seltab.addcols(desc)
+                data = seltab.getcol('WEIGHT_SPECTRUM_TEMP')
+                data[flagged] = np.NaN
+                seltab.putcol('WEIGHT_SPECTRUM', data)
+                seltab.removecols(['WEIGHT_SPECTRUM_TEMP'])
+
+            # Set DyscoStMan to be storage manager for DATA and WEIGHT_SPECTRUM
+            # We use a compression of 10 and truncation of 1.5 sigma, as
+            # recommended in Offringa (2016)
+            dmi = seltab.getdminfo()
+            columns_to_compress = ['DATA', 'WEIGHT_SPECTRUM']
+            for colname in columns_to_compress:
+                # Remove current entry for column in the storage manager dict
+                for k, v in dmi.iteritems():
+                    if colname in dmi[k]['COLUMNS']:
+                        dmi[k]['COLUMNS'].remove(colname)
+                for k, v in dmi.copy().iteritems():
+                    # Check for empty entries and remove
+                    if len(dmi[k]['COLUMNS']) == 0:
+                        dmi.pop(k)
+            key = '*1'
+            i = 1
+            while key in dmi:
+                i += 1
+                key = '*{}'.format(i)
+            seqnr = int(key[1:]) - 1
+            dmi[key] = {}
+            dmi[key]['SPEC'] = {
+               'dataBitCount': np.uint32(10),
+               'distribution': 'Gaussian',
+               'distributionTruncation': 1.5,
+               'normalization': 'RF',
+               'weightBitCount': np.uint32(10)}
+            dmi[key]['COLUMNS'] = columns_to_compress
+            dmi[key]['NAME'] = 'DyscoStMan'
+            dmi[key]['SEQNR'] = seqnr
+            dmi[key]['TYPE'] = 'DyscoStMan'
+
+            # Save the new table
+            seltab.copy(chunk_file, deep=True, dminfo=dmi)
+        else:
+            # Just use existing storage manager
+            seltab.copy(chunk_file, deep=True)
 
         if local_dir is not None:
             # Copy temp file to original output location and clean up
             chunk_file_destination_dir = os.path.dirname(chunk_file_original)
-            os.system('/usr/bin/rsync -a {0} {1}'.format(chunk_file, chunk_file_destination_dir))
+            os.system('/bin/cp -r {0} {1}'.format(chunk_file, chunk_file_destination_dir))
             if not os.path.samefile(chunk_file, chunk_file_original):
                 shutil.rmtree(chunk_file)
             chunk_file = chunk_file_original

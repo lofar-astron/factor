@@ -439,7 +439,8 @@ def _set_up_bands(parset, test_run=False):
                     break
         band = Band(msdict[MSkey], parset['dir_working'], parset['parmdb_name'],
             skymodel_dirindep, local_dir=parset['cluster_specific']['dir_local'],
-            test_run=test_run, chunk_size_sec=parset['chunk_size_sec'])
+            test_run=test_run, chunk_size_sec=parset['chunk_size_sec'],
+            use_compression=parset['use_compression'])
         if len(band.files) == 0:
             # No useable files found for this band (likely due to too little
             # unflagged data)
@@ -658,6 +659,12 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
         # center)
         direction.field_ra = bands[0].ra
         direction.field_dec = bands[0].dec
+
+        # Set initial name of column that contains SUBTRACTED_DATA_ALL
+        if parset['use_compression']:
+            # Since we compressed the input data, the SUBTRACTED_DATA_ALL is now
+            # the DATA column
+            direction.subtracted_data_colname = 'DATA'
 
         # Reset state if specified
         if direction.name in reset_directions:

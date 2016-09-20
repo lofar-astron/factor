@@ -36,6 +36,14 @@ dir_ms = /data/bands
 # please make backup copies yourself)
 # chunk_size_sec = 2400
 
+# Use Dysco compression for chunked files (default = False). Enabling this
+# option will result in less storage usage and signifcanctly faster
+# processing. To use this option, you must have the Dysco library in your
+# LD_LIBRARY_PATH. Note: if enabled, Factor will not make symbolic links to the
+# input data, even if they are shorter than chunk_size_sec, but will copy them
+# instead
+# use_compression = False
+
 # Use interactive mode (default = False). Factor will ask for confirmation of
 # internally derived DDE calibrators and facets
 # interactive = False
