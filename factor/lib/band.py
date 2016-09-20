@@ -504,8 +504,8 @@ def find_unflagged_fraction(ms_file):
     # If the taql subprocess exits abnormally we need to handle it, or we get
     # a weird error.
     if p.returncode!=0:
-        self.log.error('taql exited abnormally checking flagged fraction for file {}.'.format(ms_file))
-        self.log.info('Exiting!')
+        print('taql exited abnormally checking flagged fraction for file {}.'.format(ms_file))
+        print('Exiting!')
         sys.exit(1)
 
     unflagged_fraction = float(r[0])
@@ -715,6 +715,8 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
 
     seltab.close()
     tab.close()
+    if use_compression:
+        shutil.rmtree(temp_file)
 
     # Check that the chunk has at least min_fraction unflagged data.
     # If not, then return (None, None)
