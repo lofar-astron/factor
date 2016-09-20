@@ -507,6 +507,7 @@ def find_unflagged_fraction(ms_file):
     if p.returncode!=0:
         # Try using casacore.tables insted
         try:
+            t = pt.table(ms_file, ack=False)
             flags_per_element = t.calc('nfalse(FLAG)')
             nelements = t.calc('nelements(FLAG)')[0] # = number of channels * number of pols
             unflagged_fraction = float(np.sum(flags_per_element)) / nelements / len(seltab)
