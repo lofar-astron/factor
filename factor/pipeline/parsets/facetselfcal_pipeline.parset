@@ -546,7 +546,9 @@ wsclean_image01.argument.scale                             =   {{ cellsize_selfc
 wsclean_image01.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image01.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image01.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image01.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image01.argument.multiscale-scales                 =   0
 {% endif %}
@@ -618,7 +620,9 @@ wsclean_image02.argument.scale                             =   {{ cellsize_selfc
 wsclean_image02.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image02.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image02.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image02.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image02.argument.multiscale-scales                 =   0
 {% endif %}
@@ -679,7 +683,9 @@ wsclean_ft0.argument.scale                                 =   {{ cellsize_selfc
 wsclean_ft0.argument.mem                                   =   {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft0.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
 wsclean_ft0.argument.j                                     =   {{ max_cpus_per_io_proc_ntimes }}
+{% if local_dir is not none %}
 wsclean_ft0.argument.tempdir                               =   {{ local_dir }}
+{% endif %}
 
 # switch "normal" weights with BL-averaged weights, length = ntimes
 switch_weights_col1.control.type                           =   switch_columns
@@ -839,7 +845,9 @@ wsclean_image11.argument.scale                             =   {{ cellsize_selfc
 wsclean_image11.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image11.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image11.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image11.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image11.argument.multiscale-scales                 =   0
 {% endif %}
@@ -911,7 +919,9 @@ wsclean_image12.argument.scale                             =   {{ cellsize_selfc
 wsclean_image12.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image12.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image12.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image12.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image12.argument.multiscale-scales                 =   0
 {% endif %}
@@ -955,7 +965,9 @@ wsclean_ft1.argument.scale                                 =   {{ cellsize_selfc
 wsclean_ft1.argument.mem                                   =   {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft1.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
 wsclean_ft1.argument.j                                     =   {{ max_cpus_per_io_proc_ntimes }}
+{% if local_dir is not none %}
 wsclean_ft1.argument.tempdir                               =   {{ local_dir }}
+{% endif %}
 
 # switch "normal" weights with BL-averaged weights, length = ntimes * num_cal_blocks
 switch_weights_col3.control.type                           =   switch_columns
@@ -1058,7 +1070,9 @@ wsclean_image21.argument.scale                             =   {{ cellsize_selfc
 wsclean_image21.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image21.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image21.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image21.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image21.argument.multiscale-scales                 =   0
 {% endif %}
@@ -1130,7 +1144,9 @@ wsclean_image22.argument.scale                             =   {{ cellsize_selfc
 wsclean_image22.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image22.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image22.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image22.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image22.argument.multiscale-scales                 =   0
 {% endif %}
@@ -1174,7 +1190,9 @@ wsclean_ft2.argument.scale                                 =   {{ cellsize_selfc
 wsclean_ft2.argument.mem                                   =   {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft2.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
 wsclean_ft2.argument.j                                     =   {{ max_cpus_per_io_proc_ntimes }}
+{% if local_dir is not none %}
 wsclean_ft2.argument.tempdir                               =   {{ local_dir }}
+{% endif %}
 
 # switch "normal" weights with BL-averaged weights, length = ntimes * num_cal_blocks
 switch_weights_col5.control.type                           =   switch_columns
@@ -1347,7 +1365,9 @@ wsclean_image31.argument.scale                             =   {{ cellsize_selfc
 wsclean_image31.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image31.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image31.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image31.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image31.argument.multiscale-scales                 =   0
 {% endif %}
@@ -1420,7 +1440,9 @@ wsclean_image32.argument.scale                             =   {{ cellsize_selfc
 wsclean_image32.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image32.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image32.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image32.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image32.argument.multiscale-scales                 =   0
 {% endif %}
@@ -1473,7 +1495,9 @@ wsclean_ft3.argument.scale                                 =   {{ cellsize_selfc
 wsclean_ft3.argument.mem                                   =   {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft3.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
 wsclean_ft3.argument.j                                     =   {{ max_cpus_per_io_proc_ntimes }}
+{% if local_dir is not none %}
 wsclean_ft3.argument.tempdir                               =   {{ local_dir }}
+{% endif %}
 
 # switch "normal" weights with BL-averaged weights, length = ntimes
 switch_weights_col7.control.type                           =   switch_columns
@@ -1648,7 +1672,9 @@ wsclean_image41.argument.scale                             =   {{ cellsize_selfc
 wsclean_image41.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image41.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image41.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image41.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image41.argument.multiscale-scales                 =   0
 {% endif %}
@@ -1721,7 +1747,9 @@ wsclean_image42.argument.scale                             =   {{ cellsize_selfc
 wsclean_image42.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image42.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image42.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image42.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image42.argument.multiscale-scales                 =   0
 {% endif %}
@@ -1961,7 +1989,9 @@ wsclean_image_full1.argument.scale                         =   {{ cellsize_selfc
 wsclean_image_full1.argument.channelsout                   =   {{ wsclean_nchannels }}
 wsclean_image_full1.argument.mem                           =   {{ max_percent_memory_per_proc_single }}
 wsclean_image_full1.argument.j                             =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image_full1.argument.tempdir                       =   {{ local_dir }}
+{% endif %}
 wsclean_image_full1.argument.weighting-rank-filter         =   3
 {% if facetimage_wsclean_nwavelengths > 0.0 %}
 wsclean_image_full1.argument.baseline-averaging            =   {{ facetimage_wsclean_nwavelengths }}
@@ -2018,7 +2048,9 @@ wsclean_image_full2.argument.scale                         =   {{ cellsize_selfc
 wsclean_image_full2.argument.channelsout                   =   {{ wsclean_nchannels }}
 wsclean_image_full2.argument.mem                           =   {{ max_percent_memory_per_proc_single }}
 wsclean_image_full2.argument.j                             =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image_full2.argument.tempdir                       =   {{ local_dir }}
+{% endif %}
 wsclean_image_full2.argument.weighting-rank-filter         =   3
 {% if facetimage_wsclean_nwavelengths > 0.0 %}
 wsclean_image_full2.argument.baseline-averaging            =   {{ facetimage_wsclean_nwavelengths }}
@@ -2123,7 +2155,9 @@ wsclean_ft.argument.channelsout                            =   {{ wsclean_nchann
 {% else %}
 wsclean_ft.argument.channelsout                            =   {{ wsclean_nchannels }}
 {% endif %}
+{% if local_dir is not none %}
 wsclean_ft.argument.tempdir                                =   {{ local_dir }}
+{% endif %}
 wsclean_ft.argument.nwlayers-for-size                      =   12288 12288
 
 # corrupt the model visibilities, length = nfiles
