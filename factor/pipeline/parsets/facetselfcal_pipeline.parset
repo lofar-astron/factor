@@ -1792,7 +1792,7 @@ check_image.argument.flags                                 =   [image_new,image_
 
 ########## end of selfcal loop
 
-{% if local_dir is not none %}
+{% if selfcal_local_dir is not none %}
 # remove concat_data files, length = ntimes * num_cal_blocks
 remove_concat_data.control.type                            =   remove_file
 remove_concat_data.control.mapfile_in                      =   make_concat_data_sync_mapfile.output.mapfile
