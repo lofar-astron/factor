@@ -501,14 +501,20 @@ def find_unflagged_fraction(ms_file):
         "sum([select nelements(FLAG) from {0}])'".format(ms_file),
         shell=True, stdout=subprocess.PIPE)
     r = p.communicate()
+
     # If the taql subprocess exits abnormally we need to handle it, or we get
     # a weird error.
     if p.returncode!=0:
-        print('taql exited abnormally checking flagged fraction for file {}.'.format(ms_file))
-        print('Exiting!')
-        sys.exit(1)
-
-    unflagged_fraction = float(r[0])
+        # Try using casacore.tables insted
+        try:
+            flags_per_element = t.calc('nfalse(FLAG)')
+            nelements = t.calc('nelements(FLAG)')[0] # = number of channels * number of pols
+            unflagged_fraction = float(np.sum(flags_per_element)) / nelements / len(seltab)
+        except:
+            print('taql exited abnormally checking flagged fraction for file {}.'.format(ms_file))
+            sys.exit(1)
+    else:
+        unflagged_fraction = float(r[0])
 
     return unflagged_fraction
 
