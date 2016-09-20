@@ -1,5 +1,4 @@
 import os
-import tempfile
 from lofarpipe.support.data_map import DataMap, DataProduct
 
 
@@ -35,7 +34,8 @@ def plugin_main(args, **kwargs):
     if 'make_tempdir' in kwargs:
         make_tempdir =  string2bool(kwargs['make_tempdir'])
     if make_tempdir:
-        new_dir = tempfile.mkdtemp(dir=new_dir)
+        direction_name = os.path.basename(mapfile_dir.split('/mapfiles')[0])
+        new_dir = os.path.join(new_dir, direction_name)
     append = None
     if 'append' in kwargs:
         append =  kwargs['append']
