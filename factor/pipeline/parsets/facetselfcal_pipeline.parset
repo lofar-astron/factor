@@ -406,17 +406,17 @@ copy_column2.control.inputkeys                             =   [blavgfile,datafi
 copy_column2.argument.flags                                =   [blavgfile,datafile,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 {% endif %}
 
-{% if local_dir is not none %}
-# make a mapfile for syncing of concat_data to local_dir, len = ntimes * num_cal_blocks
+{% if selfcal_local_dir is not none %}
+# make a mapfile for syncing of concat_data to selfcal_local_dir, len = ntimes * num_cal_blocks
 make_concat_data_sync_mapfile.control.kind                 =   plugin
 make_concat_data_sync_mapfile.control.type                 =   changeDirectory
 make_concat_data_sync_mapfile.control.mapfile_in           =   concat_data.output.mapfile
-make_concat_data_sync_mapfile.control.new_dir              =   {{ local_dir }}
+make_concat_data_sync_mapfile.control.new_dir              =   {{ selfcal_local_dir }}
 make_concat_data_sync_mapfile.control.make_tempdir         =   True
 make_concat_data_sync_mapfile.control.mapfile_dir          =   input.output.mapfile_dir
 make_concat_data_sync_mapfile.control.filename             =   concat_data_local.mapfile
 
-# copy the output of concat_data to local_dir, len = ntimes * num_cal_blocks
+# copy the output of concat_data to selfcal_local_dir, len = ntimes * num_cal_blocks
 sync_concat_data_to_local.control.type                     =   sync_files
 sync_concat_data_to_local.control.mapfile_in               =   concat_data.output.mapfile
 sync_concat_data_to_local.control.mapfile_out              =   make_concat_data_sync_mapfile.output.mapfile
@@ -769,7 +769,7 @@ switch_weights_col2.argument.flags                         =   [msfiles,WEIGHT_S
 ########## end of first round of selfcal
 ########## start of second round of selfcal
 
-{% if local_dir is not none %}
+{% if selfcal_local_dir is not none %}
 # make mapfile for the output of apply steps, len = ntimes * num_cal_blocks
 # this step is needed to direct the output to the non-local (shared) disk
 make_apply_mapfile.control.kind                            =   plugin
@@ -786,10 +786,10 @@ make_apply_mapfile.control.filename                        =   apply_output.mapf
 apply_phaseonly1.control.type                              =   dppp
 apply_phaseonly1.control.opts.mapfiles_in                  =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 apply_phaseonly1.control.opts.inputkeys                    =   [msin,parmdb]
-{% if local_dir is not none %}
+{% if selfcal_local_dir is not none %}
 apply_phaseonly1.control.opts.mapfile_out                  =   make_apply_mapfile.output.mapfile
 apply_phaseonly1.control.opts.outputkey                    =   msout
-apply_phaseonly1.argument.local_scratch_dir                =   {{ local_dir }}
+apply_phaseonly1.argument.local_scratch_dir                =   {{ selfcal_local_dir }}
 {% endif %}
 apply_phaseonly1.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
 apply_phaseonly1.argument.msin.datacolumn                  =   DATA
@@ -1005,10 +1005,10 @@ switch_weights_col4.argument.flags                         =   [msfiles,WEIGHT_S
 apply_phaseonly2.control.type                              =   dppp
 apply_phaseonly2.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
 apply_phaseonly2.control.opts.inputkeys                    =   [msin,parmdb]
-{% if local_dir is not none %}
+{% if selfcal_local_dir is not none %}
 apply_phaseonly2.control.opts.mapfile_out                  =   make_apply_mapfile.output.mapfile
 apply_phaseonly2.control.opts.outputkey                    =   msout
-apply_phaseonly2.argument.local_scratch_dir                =   {{ local_dir }}
+apply_phaseonly2.argument.local_scratch_dir                =   {{ selfcal_local_dir }}
 {% endif %}
 apply_phaseonly2.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
 apply_phaseonly2.argument.msin.datacolumn                  =   DATA
@@ -1302,10 +1302,10 @@ expand_smoothed_amp1_parmdb_map.control.filename           =   expand_amp1_smoot
 apply_amp1.control.type                                    =   dppp
 apply_amp1.control.opts.mapfiles_in                        =   [{{ concat_data_mapfile }},expand_smoothed_amp1_parmdb_map.output.mapfile]
 apply_amp1.control.opts.inputkeys                          =   [msin,parmdb]
-{% if local_dir is not none %}
+{% if selfcal_local_dir is not none %}
 apply_amp1.control.opts.mapfile_out                        =   make_apply_mapfile.output.mapfile
 apply_amp1.control.opts.outputkey                          =   msout
-apply_amp1.argument.local_scratch_dir                      =   {{ local_dir }}
+apply_amp1.argument.local_scratch_dir                      =   {{ selfcal_local_dir }}
 {% endif %}
 apply_amp1.argument.numthreads                             =   {{ max_cpus_per_io_proc_ntimes }}
 apply_amp1.argument.msin.datacolumn                        =   CORRECTED_DATA
@@ -1601,10 +1601,10 @@ expand_smoothed_amp2_parmdb_map.control.filename           =   expand_amp2_smoot
 apply_amp2.control.type                                    =   dppp
 apply_amp2.control.opts.mapfiles_in                        =   [{{ concat_data_mapfile }},expand_smoothed_amp2_parmdb_map.output.mapfile]
 apply_amp2.control.opts.inputkeys                          =   [msin,parmdb]
-{% if local_dir is not none %}
+{% if selfcal_local_dir is not none %}
 apply_amp2.control.opts.mapfile_out                        =   make_apply_mapfile.output.mapfile
 apply_amp2.control.opts.outputkey                          =   msout
-apply_amp2.argument.local_scratch_dir                      =   {{ local_dir }}
+apply_amp2.argument.local_scratch_dir                      =   {{ selfcal_local_dir }}
 {% endif %}
 apply_amp2.argument.numthreads                             =   {{ max_cpus_per_io_proc_ntimes }}
 apply_amp2.argument.msin.datacolumn                        =   CORRECTED_DATA

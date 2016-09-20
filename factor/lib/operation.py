@@ -75,7 +75,7 @@ class Operation(object):
             self.direction.name, 'mapfiles')
         create_directory(self.pipeline_mapfile_dir)
 
-        # Local scratch directory and corresponding node recipes
+        # Local scratch directories and corresponding node recipes
         if self.parset['cluster_specific']['dir_local'] is None:
             # Not specified
             self.local_scratch_dir = None
@@ -88,6 +88,7 @@ class Operation(object):
             # other: use given scratch directory and standard node script
             self.local_scratch_dir = self.parset['cluster_specific']['dir_local']
             self.dppp_nodescript = 'executable_args'
+        self.local_selfcal_scratch_dir = self.parset['cluster_specific']['dir_local_selfcal']
 
         # Directory that holds logs in a convenient place
         self.log_dir = os.path.join(self.factor_working_dir, 'logs', self.name)
@@ -132,6 +133,7 @@ class Operation(object):
                            'pipeline_dir': self.factor_pipeline_dir,
                            'script_dir': self.factor_script_dir,
                            'local_dir': self.local_scratch_dir,
+                           'selfcal_local_dir': self.local_selfcal_scratch_dir,
                            'pipeline_parset_dir': self.pipeline_parset_dir,
                            'hosts': self.node_list}
 
