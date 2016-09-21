@@ -128,7 +128,7 @@ predict_all_model_data.argument.pred.applycal.parmdb       =   parmdb
 add_all_facet_sources.control.type                         =   add_subtract_columns
 add_all_facet_sources.control.opts.mapfiles_in             =   [shift_empty.output.mapfile,predict_all_model_data.output.mapfile]
 add_all_facet_sources.control.opts.inputkeys               =   [file1,file2]
-add_all_facet_sources.argument.flags                       =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add,True]
+add_all_facet_sources.argument.flags                       =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add,True,{{ use_compression }}]
 
 {% if preapply_phase_cal %}
 # expand mapfile of the dir-dependent parmDB to all files, length = nfiles
@@ -2215,7 +2215,7 @@ corrupt_final_model.argument.corrupt_slow.invert           =   False
 subtract_initial_final.control.type                        =   add_subtract_columns
 subtract_initial_final.control.opts.mapfiles_in            =   [predict_all_model_data.output.mapfile,corrupt_final_model.output.mapfile]
 subtract_initial_final.control.opts.inputkeys              =   [file1,file2]
-subtract_initial_final.argument.flags                      =   [file1,file2,DATA,DATA,MODEL_DATA_DIFF,subtract,True]
+subtract_initial_final.argument.flags                      =   [file1,file2,DATA,DATA,MODEL_DATA_DIFF,subtract,True,{{ use_compression }}]
 
 # shift new residuals to field center, length = nfiles
 shift_diff_model_to_field.control.type                     =   dppp
@@ -2253,7 +2253,7 @@ create_middle_model_mapfile.control.filename               =   single_model.mapf
 subtract_single.control.type                               =   add_subtract_columns
 subtract_single.control.opts.mapfiles_in                   =   [create_middle_band_mapfile.output.mapfile,create_middle_model_mapfile.output.mapfile]
 subtract_single.control.opts.inputkeys                     =   [file1,file2]
-subtract_single.argument.flags                             =   [file1,file2,FACET_DATA_ALL,DATA,SUBTRACTED_DATA,subtract,True]
+subtract_single.argument.flags                             =   [file1,file2,FACET_DATA_ALL,DATA,SUBTRACTED_DATA,subtract,True,{{ use_compression }}]
 
 # average old empty data, length = ntimes
 average_pre.control.type                                   =   dppp

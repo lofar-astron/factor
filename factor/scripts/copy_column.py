@@ -10,7 +10,7 @@ import sys
 import os
 
 
-def copy_column_to_ms(ms, inputcol, outputcol, ms_from=None):
+def copy_column_to_ms(ms, inputcol, outputcol, ms_from=None, use_compression=False):
     """
     Copies one column to another, within an MS file or between two MS files
 
@@ -38,7 +38,32 @@ def copy_column_to_ms(ms, inputcol, outputcol, ms_from=None):
     # Add the output column if needed
     if outputcol not in t.colnames():
         desc['name'] = outputcol
-        t.addcols(desc)
+        if use_compression:
+            # Set DyscoStMan to be storage manager for DATA and WEIGHT_SPECTRUM
+            # We use a visibility bit rate of 14 and truncation of 1.5 sigma to keep the
+            # compression noise below ~ 0.01 mJy, as estimated from Fig 4 of
+            # Offringa (2016). For the weights, we use a bit rate of 12, as
+            # recommended in Sec 4.4 of Offringa (2016)
+            dmi = {
+                'SPEC': {
+                    'dataBitCount': numpy.uint32(16),
+                    'distribution': 'Gaussian',
+                    'distributionTruncation': 1.5,
+                    'normalization': 'RF',
+                    'weightBitCount': numpy.uint32(12)},
+                'NAME': '{}_dm'.format(outputcol),
+                'SEQNR': 1,
+                'TYPE': 'DyscoStMan'}
+            desc['option'] = 1 # make a Direct column
+            t.addcols(desc, dmi)
+        else:
+            t.addcols(desc)
+
+    if use_compression:
+        # Replace flagged values with NaNs before compression
+        flags = t.getcol('FLAG')
+        flagged = numpy.where(flags)
+        data[flagged] = numpy.NaN
 
     t.putcol(outputcol, data)
     t.flush()
@@ -109,7 +134,7 @@ def copy_column_from_bands(mslist, ms_to, inputcol, outputcol):
     dataout.close()
 
 
-def main(ms_from, ms_to, column_from, column_to, do_copy=True):
+def main(ms_from, ms_to, column_from, column_to, do_copy=True, use_compression=False):
     """
     Copy a column between MS files
 
@@ -126,6 +151,8 @@ def main(ms_from, ms_to, column_from, column_to, do_copy=True):
         Name of column to copy to
     do_copy : bool, optional
         If False, the copy is NOT done (used to skip a copy step in a pipeline)
+    use_compression : bool, optional
+        If True, use Dysco compression
 
     """
     if type(do_copy) is str:
@@ -161,7 +188,7 @@ def main(ms_from, ms_to, column_from, column_to, do_copy=True):
     else:
         if ms_to == ms_from:
             ms_from = None
-        copy_column_to_ms(ms_to, column_from, column_to, ms_from)
+        copy_column_to_ms(ms_to, column_from, column_to, ms_from, use_compression)
 
 
 if __name__ == '__main__':

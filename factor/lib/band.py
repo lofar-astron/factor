@@ -562,7 +562,7 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
         Minimum fraction of unflaggged data in a time-chunk needed for the chunk
         to be kept
     use_compression : bool, optional
-        If True, use Dysco comprossion on output chunk files
+        If True, use Dysco compression on output chunk files
 
     Returns
     -------
@@ -646,12 +646,28 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
             flags = seltab.getcol('FLAG')
             flagged = np.where(flags)
 
+            # Set DyscoStMan to be storage manager for DATA and WEIGHT_SPECTRUM
+            # We use a visibility bit rate of 14 and truncation of 1.5 sigma to keep the
+            # compression noise below ~ 0.01 mJy, as estimated from Fig 4 of
+            # Offringa (2016). For the weights, we use a bit rate of 12, as
+            # recommended in Sec 4.4 of Offringa (2016)
+            dmi = {
+                'SPEC': {
+                    'dataBitCount': np.uint32(16),
+                    'distribution': 'Gaussian',
+                    'distributionTruncation': 1.5,
+                    'normalization': 'RF',
+                    'weightBitCount': np.uint32(12)},
+                'NAME': 'DATA_dm',
+                'SEQNR': 1,
+                'TYPE': 'DyscoStMan'}
+
             # Replace DATA with SUBTRACTED_DATA_ALL
             seltab.renamecol('DATA', 'DATA_TEMP')
             desc = seltab.getcoldesc('DATA_TEMP')
             desc['name'] = 'DATA'
             desc['option'] = 1 # make a Direct column
-            seltab.addcols(desc)
+            seltab.addcols(desc, dmi)
             data = seltab.getcol('SUBTRACTED_DATA_ALL')
             data[flagged] = np.NaN
             seltab.putcol('DATA', data)
@@ -665,48 +681,15 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
                 desc = seltab.getcoldesc('WEIGHT_SPECTRUM_TEMP')
                 desc['name'] = 'WEIGHT_SPECTRUM'
                 desc['option'] = 1 # make a Direct column
-                seltab.addcols(desc)
+                dmi['NAME'] = 'WEIGHT_SPECTRUM_dm'
+                seltab.addcols(desc, dmi)
                 data = seltab.getcol('WEIGHT_SPECTRUM_TEMP')
                 data[flagged] = np.NaN
                 seltab.putcol('WEIGHT_SPECTRUM', data)
                 seltab.removecols(['WEIGHT_SPECTRUM_TEMP'])
 
-            # Set DyscoStMan to be storage manager for DATA and WEIGHT_SPECTRUM
-            # We use a compression of 10 and truncation of 1.5 sigma, as
-            # recommended in Offringa (2016)
-            dmi = seltab.getdminfo()
-            columns_to_compress = ['DATA', 'WEIGHT_SPECTRUM']
-            for colname in columns_to_compress:
-                # Remove current entry for column in the storage manager dict
-                for k, v in dmi.iteritems():
-                    if colname in dmi[k]['COLUMNS']:
-                        dmi[k]['COLUMNS'].remove(colname)
-                for k, v in dmi.copy().iteritems():
-                    # Check for empty entries and remove
-                    if len(dmi[k]['COLUMNS']) == 0:
-                        dmi.pop(k)
-            key = '*1'
-            i = 1
-            while key in dmi:
-                i += 1
-                key = '*{}'.format(i)
-            seqnr = int(key[1:]) - 1
-            dmi[key] = {}
-            dmi[key]['SPEC'] = {
-               'dataBitCount': np.uint32(10),
-               'distribution': 'Gaussian',
-               'distributionTruncation': 1.5,
-               'normalization': 'RF',
-               'weightBitCount': np.uint32(10),
-               'MAXIMUMCACHESIZE': 0,
-               'SEQNR': seqnr}
-            dmi[key]['COLUMNS'] = columns_to_compress
-            dmi[key]['NAME'] = 'DyscoStMan'
-            dmi[key]['SEQNR'] = seqnr
-            dmi[key]['TYPE'] = 'DyscoStMan'
-
             # Save the new table
-            seltab.copy(chunk_file, deep=True, dminfo=dmi)
+            seltab.copy(chunk_file, deep=True)
         else:
             # Just use existing storage manager
             seltab.copy(chunk_file, deep=True)

@@ -115,6 +115,7 @@ class Direction(object):
         self.cellsize_verify_deg = 0.00833 # verify subtract cell size
         self.target_rms_rad = 0.2 # preaverage target rms
         self.subtracted_data_colname = 'SUBTRACTED_DATA_ALL' # name of empty data column
+        self.use_compression = False # whether to use Dysco compression
         self.pre_average = False # whether to use baseline averaging
         self.blavg_weight_column = 'WEIGHT_SPECTRUM' # name of weights column
         self.peel_calibrator = False # whether to peel calibrator before imaging

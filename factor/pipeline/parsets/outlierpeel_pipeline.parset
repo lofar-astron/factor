@@ -458,7 +458,7 @@ corrupt_outlier_model.argument.corrupt_slow.invert       =   False
 subtract_outlier_model.control.type                      =   add_subtract_columns
 subtract_outlier_model.control.opts.mapfiles_in          =   [add_all_facet_sources.output.mapfile,corrupt_outlier_model.output.mapfile]
 subtract_outlier_model.control.opts.inputkeys            =   [file1,file2]
-subtract_outlier_model.argument.flags                    =   [file1,file2,DATA,DATA,SUBTRACTED_DATA_ALL,subtract,True]
+subtract_outlier_model.argument.flags                    =   [file1,file2,DATA,DATA,SUBTRACTED_DATA_ALL,subtract,True,{{ use_compression }}]
 
 # make a map with original data of only the central frequency band, length = ntimes
 create_middle_pre_band_mapfile.control.kind              =   plugin

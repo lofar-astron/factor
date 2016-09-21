@@ -234,7 +234,7 @@ predict_all_model_data.argument.pred.applycal.parmdb         =   parmdb
 subtract_final_initial.control.type                          =   add_subtract_columns
 subtract_final_initial.control.opts.mapfiles_in              =   [predict_all_model_data.output.mapfile,corrupt_final_model.output.mapfile]
 subtract_final_initial.control.opts.inputkeys                =   [file1,file2]
-subtract_final_initial.argument.flags                        =   [file1,file2,DATA,DATA,MODEL_DATA_DIFF,subtract,True]
+subtract_final_initial.argument.flags                        =   [file1,file2,DATA,DATA,MODEL_DATA_DIFF,subtract,True,{{ use_compression }}]
 
 # shift new residuals to field center, length = nfiles
 shift_diff_model_to_field.control.type                       =   dppp
@@ -253,4 +253,4 @@ shift_diff_model_to_field.argument.shift.phasecenter         =   [{{ field_ra }}
 subtract_diff_model_from_empty_data.control.type             =   add_subtract_columns
 subtract_diff_model_from_empty_data.control.opts.mapfiles_in =   [create_ms_map.output.mapfile,shift_diff_model_to_field.output.mapfile]
 subtract_diff_model_from_empty_data.control.opts.inputkeys   =   [file1,file2]
-subtract_diff_model_from_empty_data.argument.flags           =   [file1,file2,SUBTRACTED_DATA_ALL_NEW,DATA,SUBTRACTED_DATA_ALL_NEW,subtract,True]
+subtract_diff_model_from_empty_data.argument.flags           =   [file1,file2,SUBTRACTED_DATA_ALL_NEW,DATA,SUBTRACTED_DATA_ALL_NEW,subtract,True,{{ use_compression }}]

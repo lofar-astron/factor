@@ -665,6 +665,7 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
             # Since we compressed the input data, the SUBTRACTED_DATA_ALL is now
             # the DATA column
             direction.subtracted_data_colname = 'DATA'
+            direction.use_compression = True
 
         # Reset state if specified
         if direction.name in reset_directions:

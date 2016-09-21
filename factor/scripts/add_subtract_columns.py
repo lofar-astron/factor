@@ -5,11 +5,13 @@ Script to add or subtract two columns between one or two MS files
 import argparse
 from argparse import RawTextHelpFormatter
 import casacore.tables as pt
+import numpy as np
 import sys
 import os
 
 
-def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=False):
+def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=True,
+    use_compression=False):
     """
     Add/subtract columns (column_out = column1 +/- column2)
 
@@ -29,7 +31,9 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=False):
     op : str, optional
         Operation to perform: 'add' or 'subtract'
     in_memory : bool, optional
-        If True, do the subtraction in memory rather than with taql
+        If True, do the operation in memory rather than with taql
+    use_compression : bool, optional
+        If True, use Dysco compression
 
     """
     if type(in_memory) is str:
@@ -43,7 +47,26 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=False):
     if column_out not in t1.colnames():
         desc = t1.getcoldesc(column1)
         desc['name'] = column_out
-        t1.addcols(desc)
+        if use_compression:
+            # Set DyscoStMan to be storage manager for DATA and WEIGHT_SPECTRUM
+            # We use a visibility bit rate of 14 and truncation of 1.5 sigma to keep the
+            # compression noise below ~ 0.01 mJy, as estimated from Fig 4 of
+            # Offringa (2016). For the weights, we use a bit rate of 12, as
+            # recommended in Sec 4.4 of Offringa (2016)
+            dmi = {
+                'SPEC': {
+                    'dataBitCount': np.uint32(16),
+                    'distribution': 'Gaussian',
+                    'distributionTruncation': 1.5,
+                    'normalization': 'RF',
+                    'weightBitCount': np.uint32(12)},
+                'NAME': '{}_dm'.format(column_out),
+                'SEQNR': 1,
+                'TYPE': 'DyscoStMan'}
+            desc['option'] = 1 # make a Direct column
+            t1.addcols(desc, dmi)
+        else:
+            t1.addcols(desc)
     t1.close()
 
     if in_memory:
@@ -53,6 +76,14 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=False):
         t2 = pt.table(ms2, ack=False)
         data2 = t2.getcol(column2)
         t2.close()
+
+        if use_compression:
+            # Replace flagged values with NaNs before compression
+            flags = t1.getcol('FLAG')
+            flagged = np.where(flags)
+            data1[flagged] = np.NaN
+            data2[flagged] = np.NaN
+
         if op.lower() == 'add':
             t1.putcol(column_out, data1 + data2)
         elif op.lower() == 'subtract':
@@ -60,6 +91,7 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=False):
         else:
             print('Operation not understood. Must be either "add" or "subtract"')
             sys.exit(1)
+
         t1.flush()
         t1.close()
     else:
@@ -71,6 +103,11 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=False):
         else:
             print('Operation not understood. Must be either "add" or "subtract"')
             sys.exit(1)
+
+        if use_compression:
+            print('Compression not yet supported with in_memory = False')
+            sys.exit(1)
+
         os.system("taql 'update {0}, {1} t2 set {2}={3}{4}t2.{5}'".format(
             ms1, ms2, column_out, column1, op_sym, column2))
 
