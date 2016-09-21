@@ -105,7 +105,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 # Set the name of the subtracted data column
                 if set_sub_data_colname:
                     for direction in directions:
-                        direction.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
+                        direction.subtracted_data_colname = 'CORRECTED_DATA'
                     set_sub_data_colname = False
 
                 # Set the flag for preapplication of selfcal solutions, but only
@@ -179,7 +179,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             if len(direction_group_ok) > 0:
                 for d in directions:
                     if d.name != direction_group_ok[0].name:
-                        d.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
+                        d.subtracted_data_colname = 'CORRECTED_DATA'
                 set_sub_data_colname = False
         if set_preapply_flag and parset['calibration_specific']['preapply_first_cal_phases']:
             # Set the flag for preapplication of selfcal solutions (if needed)

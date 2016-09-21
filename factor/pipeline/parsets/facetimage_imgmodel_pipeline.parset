@@ -98,7 +98,7 @@ shift_empty.control.type                                    =   dppp
 shift_empty.control.opts.mapfile_in                         =   create_ms_map.output.mapfile
 shift_empty.control.opts.inputkey                           =   msin
 shift_empty.argument.numthreads                             =   {{ max_cpus_per_io_proc_nfiles }}
-shift_empty.argument.msin.datacolumn                        =   SUBTRACTED_DATA_ALL_NEW
+shift_empty.argument.msin.datacolumn                        =   CORRECTED_DATA
 shift_empty.argument.msout.overwrite                        =   True
 shift_empty.argument.msout.writefullresflag                 =   False
 {% if local_dir is not none %}
@@ -242,7 +242,7 @@ corrupt_final_model.argument.corrupt_slow.invert            =   False
 add_model_to_empty_data.control.type                        =   add_subtract_columns
 add_model_to_empty_data.control.opts.mapfiles_in            =   [shift_empty.output.mapfile,corrupt_final_model.output.mapfile]
 add_model_to_empty_data.control.opts.inputkeys              =   [file1,file2]
-add_model_to_empty_data.argument.flags                      =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add,True,{{ use_compression }}]
+add_model_to_empty_data.argument.flags                      =   [file1,file2,DATA,DATA,CORRECTED_DATA,add,True,{{ use_compression }}]
 
 # end of "was calibrator peeled and facet imaging skipped?" block
 {% endif %}
@@ -304,7 +304,7 @@ add_all_facet_sources.argument.numthreads                   =   {{ max_cpus_per_
 {% if peel_calibrator %}
 add_all_facet_sources.argument.msin.datacolumn              =   DATA
 {% else %}
-add_all_facet_sources.argument.msin.datacolumn              =   FACET_DATA_ALL
+add_all_facet_sources.argument.msin.datacolumn              =   CORRECTED_DATA
 {% endif %}
 add_all_facet_sources.argument.msout.overwrite              =   True
 add_all_facet_sources.argument.msout.writefullresflag       =   False
@@ -369,7 +369,7 @@ apply_dir_dep.control.opts.mapfiles_in                      =   [shift_empty.out
 apply_dir_dep.control.opts.inputkeys                        =   [msin,dir_dep_parmdb]
 {% endif %}
 apply_dir_dep.argument.numthreads                           =   {{ max_cpus_per_io_proc_nfiles }}
-apply_dir_dep.argument.msin.datacolumn                      =   FACET_DATA_ALL
+apply_dir_dep.argument.msin.datacolumn                      =   CORRECTED_DATA
 apply_dir_dep.argument.msout.overwrite                      =   True
 apply_dir_dep.argument.msout.writefullresflag               =   False
 {% if local_dir is not none %}

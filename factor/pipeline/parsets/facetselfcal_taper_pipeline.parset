@@ -128,7 +128,7 @@ predict_all_model_data.argument.pred.applycal.parmdb       =   parmdb
 add_all_facet_sources.control.type                         =   add_subtract_columns
 add_all_facet_sources.control.opts.mapfiles_in             =   [shift_empty.output.mapfile,predict_all_model_data.output.mapfile]
 add_all_facet_sources.control.opts.inputkeys               =   [file1,file2]
-add_all_facet_sources.argument.flags                       =   [file1,file2,DATA,DATA,FACET_DATA_ALL,add,True,{{ use_compression }}]
+add_all_facet_sources.argument.flags                       =   [file1,file2,DATA,DATA,CORRECTED_DATA,add,True,{{ use_compression }}]
 
 {% if preapply_phase_cal %}
 # expand mapfile of the dir-dependent parmDB to all files, length = nfiles
@@ -217,7 +217,7 @@ shift_cal_dir_indep.argument.avg.timestep                  =   {{ facetselfcal_t
 
 {% else %}
 
-# For patches, we simply need to average the FACET_DATA_ALL column of the        // length = nfiles
+# For patches, we simply need to average the CORRECTED_DATA column of the        // length = nfiles
 # shift_empty datasets (since a patch has the same region for all sources as for
 # the calibrator). Even though we don't phase shift here, we reuse the step name
 # for simplicity
@@ -230,7 +230,7 @@ shift_cal.control.opts.mapfile_in                          =   shift_empty.outpu
 shift_cal.control.opts.inputkey                            =   msin
 {% endif %}
 shift_cal.argument.numthreads                              =   {{ max_cpus_per_io_proc_nfiles }}
-shift_cal.argument.msin.datacolumn                         =   FACET_DATA_ALL
+shift_cal.argument.msin.datacolumn                         =   CORRECTED_DATA
 shift_cal.argument.msout.overwrite                         =   True
 shift_cal.argument.msout.writefullresflag                  =   False
 {% if local_dir is not none %}
@@ -263,7 +263,7 @@ shift_cal_dir_indep.control.type                           =   dppp
 shift_cal_dir_indep.control.opts.mapfiles_in               =   [shift_empty.output.mapfile,create_parmdb_map.output.mapfile]
 shift_cal_dir_indep.control.opts.inputkeys                 =   [msin,dir_indep_parmdb]
 shift_cal_dir_indep.argument.numthreads                    =   {{ max_cpus_per_io_proc_nfiles }}
-shift_cal_dir_indep.argument.msin.datacolumn               =   FACET_DATA_ALL
+shift_cal_dir_indep.argument.msin.datacolumn               =   CORRECTED_DATA
 shift_cal_dir_indep.argument.msout.overwrite               =   True
 shift_cal_dir_indep.argument.msout.writefullresflag        =   False
 {% if local_dir is not none %}
@@ -1929,7 +1929,7 @@ apply_dir_dep.control.opts.mapfiles_in                     =   [shift_empty.outp
 apply_dir_dep.control.opts.inputkeys                       =   [msin,dir_dep_parmdb]
 {% endif %}
 apply_dir_dep.argument.numthreads                          =   {{ max_cpus_per_io_proc_nfiles }}
-apply_dir_dep.argument.msin.datacolumn                     =   FACET_DATA_ALL
+apply_dir_dep.argument.msin.datacolumn                     =   CORRECTED_DATA
 apply_dir_dep.argument.msout.overwrite                     =   True
 apply_dir_dep.argument.msout.writefullresflag              =   False
 {% if local_dir is not none %}
@@ -2262,14 +2262,14 @@ corrupt_final_model.argument.corrupt_slow.invert           =   False
 subtract_initial_final.control.type                        =   add_subtract_columns
 subtract_initial_final.control.opts.mapfiles_in            =   [predict_all_model_data.output.mapfile,corrupt_final_model.output.mapfile]
 subtract_initial_final.control.opts.inputkeys              =   [file1,file2]
-subtract_initial_final.argument.flags                      =   [file1,file2,DATA,DATA,MODEL_DATA_DIFF,subtract,True,{{ use_compression }}]
+subtract_initial_final.argument.flags                      =   [file1,file2,DATA,DATA,MODEL_DATA,subtract,True,{{ use_compression }}]
 
 # shift new residuals to field center, length = nfiles
 shift_diff_model_to_field.control.type                     =   dppp
 shift_diff_model_to_field.control.opts.mapfile_in          =   predict_all_model_data.output.mapfile
 shift_diff_model_to_field.control.opts.inputkey            =   msin
 shift_diff_model_to_field.argument.numthreads              =   {{ max_cpus_per_io_proc_nfiles }}
-shift_diff_model_to_field.argument.msin.datacolumn         =   MODEL_DATA_DIFF
+shift_diff_model_to_field.argument.msin.datacolumn         =   MODEL_DATA
 shift_diff_model_to_field.argument.msout.overwrite         =   True
 shift_diff_model_to_field.argument.msout.writefullresflag  =   False
 shift_diff_model_to_field.argument.local_scratch_dir       =   {{ local_dir }}
@@ -2300,7 +2300,7 @@ create_middle_model_mapfile.control.filename               =   single_model.mapf
 subtract_single.control.type                               =   add_subtract_columns
 subtract_single.control.opts.mapfiles_in                   =   [create_middle_band_mapfile.output.mapfile,create_middle_model_mapfile.output.mapfile]
 subtract_single.control.opts.inputkeys                     =   [file1,file2]
-subtract_single.argument.flags                             =   [file1,file2,FACET_DATA_ALL,DATA,SUBTRACTED_DATA,subtract,True,{{ use_compression }}]
+subtract_single.argument.flags                             =   [file1,file2,CORRECTED_DATA,DATA,MODEL_DATA,subtract,True,{{ use_compression }}]
 
 # average old empty data, length = ntimes
 average_pre.control.type                                   =   dppp
@@ -2323,7 +2323,7 @@ average_post.control.type                                  =   dppp
 average_post.control.mapfile_in                            =   create_middle_band_mapfile.output.mapfile
 average_post.control.inputkey                              =   msin
 average_post.argument.numthreads                           =   {{ max_cpus_per_io_proc_ntimes }}
-average_post.argument.msin.datacolumn                      =   SUBTRACTED_DATA
+average_post.argument.msin.datacolumn                      =   MODEL_DATA
 average_post.argument.msout.overwrite                      =   True
 average_post.argument.msout.writefullresflag               =   False
 average_post.argument.local_scratch_dir                    =   {{ local_dir }}

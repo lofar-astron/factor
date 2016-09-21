@@ -53,7 +53,7 @@ facetsub
 This operation subtracts the improved model of the facet or calibrator made in the facetselfcal operation.
 
 Primary products:
-    * None. The ``SUBTRACTED_DATA_ALL_NEW`` column of the chunked MS files in ``chunks/`` are updated.
+    * None. The ``CORRECTED_DATA`` column of the chunked MS files in ``chunks/`` are updated.
 
 
 facetimage

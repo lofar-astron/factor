@@ -137,7 +137,7 @@ add_all_facet_sources.control.opts.mapfiles_in          =   [create_ms_map.outpu
 add_all_facet_sources.control.opts.inputkeys            =   [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb]
 {% endif %}
 add_all_facet_sources.argument.numthreads               =   {{ max_cpus_per_io_proc_nfiles }}
-add_all_facet_sources.argument.msin.datacolumn          =   SUBTRACTED_DATA_ALL_NEW
+add_all_facet_sources.argument.msin.datacolumn          =   CORRECTED_DATA
 add_all_facet_sources.argument.msout.overwrite          =   True
 add_all_facet_sources.argument.msout.writefullresflag   =   False
 add_all_facet_sources.argument.local_scratch_dir        =   {{ local_dir }}
