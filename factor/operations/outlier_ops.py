@@ -52,6 +52,12 @@ class OutlierPeel(Operation):
         else:
             smooth_amps_task = 'smooth_amps'
 
+        # Set mapfile for selfcal operations
+        if self.local_selfcal_scratch_dir is not None:
+            self.direction.concat_data_mapfile = 'make_concat_data_sync_mapfile.output.mapfile'
+        else:
+            self.direction.concat_data_mapfile = 'concat_data.output.mapfile'
+
         self.parms_dict.update({'ms_files_single': ms_files_single,
                                 'ms_files_grouped' : str(ms_files),
                                 'skymodels': skymodels,
