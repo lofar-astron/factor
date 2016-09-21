@@ -48,6 +48,7 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=True,
             use_compression = False
 
     # Add the output column to ms1 if needed
+    rename = False # whether we need to rename column_out to one recognized by Dysco
     t1 = pt.table(ms1, readonly=False, ack=False)
     desc = t1.getcoldesc(column1)
     if column_out not in t1.colnames():
@@ -61,8 +62,6 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=True,
                 rename = True
                 column_out_orig = column_out
                 column_out = 'CORRECTED_DATA'
-            else:
-                rename = False
             desc['name'] = column_out
             dmi = {
                 'SPEC': {
