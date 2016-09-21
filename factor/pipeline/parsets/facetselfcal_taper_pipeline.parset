@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} shift_cal, {% if preapply_phase_cal %} shift_cal_dir_indep, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, switch_weights_col_shift_cal1, concat_blavg_data, switch_weights_col_shift_cal2, copy_column1, copy_column2, {% endif %} concat_data_compressed_mapfile, {% if not preapply_phase_cal %} average0, {% endif %} create_compressed_mapfile0, sort_average0_into_Groups, sort_average0_into_Groups_maps, concat_average0_data, create_compressed_mapfile01, premask_selfcal, wsclean_image01, create_imagebase_map01, adjust_wsclean_mapfile0, mask0, wsclean_image02, create_imagebase_map02, pad_selfcal_model0_images, regroup_concat_data_map, create_expanded_model0_mapfile, expand_selfcal_model_size_map, wsclean_ft0, switch_weights_col1, make_fast_phase_parmdb_map, {% if peel_skymodel is not none %} create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, {% endif %} remove_parmdbs1, solve_phaseonly1, switch_weights_col2, apply_phaseonly1, create_compressed_mapfile1, wsclean_image11, create_imagebase_map11, adjust_wsclean_mapfile11, mask1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, pad_selfcal_model1_images, wsclean_ft1, switch_weights_col3, remove_parmdbs2, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, loop_phasecal, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, wsclean_image31, create_imagebase_map31, adjust_wsclean_mapfile31, mask3, wsclean_image32, loop_ampcal, merge_selfcal_parmdbs, {% if create_preapply_parmdb %} create_preapply_parmdb, {% endif %} make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, {% if is_patch or skip_facet_imaging %} create_model4_map, blank_model, {% else %} apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, create_compressed_mapfile6, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, {% endif %} pad_model_images, create_compressed_mapfile_shift_empty, add_model_data_col, sort_shift_empty_into_Groups, sort_shift_empty_into_Groups_maps,  create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_empty, predict_all_model_data, add_all_facet_sources, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} shift_cal, {% if preapply_phase_cal %} shift_cal_dir_indep, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, switch_weights_col_shift_cal1, concat_blavg_data, switch_weights_col_shift_cal2, copy_column1, copy_column2, {% endif %} {% if selfcal_local_dir is not none %} make_concat_data_sync_mapfile, sync_concat_data_to_local, {% endif %} concat_data_compressed_mapfile, {% if not preapply_phase_cal %} average0, {% endif %} create_compressed_mapfile0, sort_average0_into_Groups, sort_average0_into_Groups_maps, concat_average0_data, create_compressed_mapfile01, premask_selfcal, wsclean_image01, create_imagebase_map01, adjust_wsclean_mapfile0, mask0, wsclean_image02, create_imagebase_map02, pad_selfcal_model0_images, regroup_concat_data_map, create_expanded_model0_mapfile, expand_selfcal_model_size_map, wsclean_ft0, switch_weights_col1, make_fast_phase_parmdb_map, {% if peel_skymodel is not none %} create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, {% endif %} remove_parmdbs1, solve_phaseonly1, switch_weights_col2, {% if selfcal_local_dir is not none %} make_apply_mapfile, {% endif %} apply_phaseonly1, create_compressed_mapfile1, wsclean_image11, create_imagebase_map11, adjust_wsclean_mapfile11, mask1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, pad_selfcal_model1_images, wsclean_ft1, switch_weights_col3, remove_parmdbs2, solve_phaseonly2, switch_weights_col4, apply_phaseonly2, loop_phasecal, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, wsclean_image31, create_imagebase_map31, adjust_wsclean_mapfile31, mask3, wsclean_image32, loop_ampcal, {% if local_dir is not none %} remove_concat_data, {% endif %} merge_selfcal_parmdbs, {% if create_preapply_parmdb %} create_preapply_parmdb, {% endif %} make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, {% if is_patch or skip_facet_imaging %} create_model4_map, blank_model, {% else %} apply_dir_dep, create_compressed_mapfile5, sort_averaged, sort_averaged_maps, create_compressed_mapfile6, premask, wsclean_image_full1, create_imagebase_map, adjust_wsclean_mapfile1, mask5, wsclean_image_full2, create_model4_map, adjust_wsclean_mapfile2, {% endif %} pad_model_images, create_compressed_mapfile_shift_empty, add_model_data_col, sort_shift_empty_into_Groups, sort_shift_empty_into_Groups_maps, create_expanded_model_mapfile, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, subtract_initial_final, shift_diff_model_to_field, create_middle_band_mapfile, create_middle_model_mapfile, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath                                        =   {{ pipeline_dir }}/plugins
 
@@ -93,7 +93,9 @@ shift_empty.argument.numthreads                            =   {{ max_cpus_per_i
 shift_empty.argument.msin.datacolumn                       =   {{ subtracted_data_colname }}
 shift_empty.argument.msout.overwrite                       =   True
 shift_empty.argument.msout.writefullresflag                =   False
+{% if local_dir is not none %}
 shift_empty.argument.local_scratch_dir                     =   {{ local_dir }}
+{% endif %}
 shift_empty.argument.steps                                 =   [shift]
 shift_empty.argument.shift.type                            =   phaseshifter
 {% if is_patch or skip_facet_imaging %}
@@ -113,7 +115,9 @@ predict_all_model_data.control.opts.inputkeys              =   [msin,sourcedb,pa
 predict_all_model_data.argument.numthreads                 =   {{ max_cpus_per_io_proc_nfiles }}
 predict_all_model_data.argument.msout.overwrite            =   True
 predict_all_model_data.argument.msout.writefullresflag     =   False
+{% if local_dir is not none %}
 predict_all_model_data.argument.local_scratch_dir          =   {{ local_dir }}
+{% endif %}
 predict_all_model_data.argument.steps                      =   [pred]
 predict_all_model_data.argument.pred.type                  =   predict
 predict_all_model_data.argument.pred.sourcedb              =   sourcedb
@@ -153,7 +157,9 @@ shift_cal.argument.numthreads                              =   {{ max_cpus_per_i
 shift_cal.argument.msin.datacolumn                         =   {{ subtracted_data_colname }}
 shift_cal.argument.msout.overwrite                         =   True
 shift_cal.argument.msout.writefullresflag                  =   False
+{% if local_dir is not none %}
 shift_cal.argument.local_scratch_dir                       =   {{ local_dir }}
+{% endif %}
 {% if preapply_phase_cal %}
 shift_cal.argument.steps                                   =   [shift,add,correct_fast1,correct_fast2,correct_slow,avg]
 shift_cal.argument.correct_fast1.type                      =   applycal
@@ -190,7 +196,9 @@ shift_cal_dir_indep.argument.numthreads                    =   {{ max_cpus_per_i
 shift_cal_dir_indep.argument.msin.datacolumn               =   {{ subtracted_data_colname }}
 shift_cal_dir_indep.argument.msout.overwrite               =   True
 shift_cal_dir_indep.argument.msout.writefullresflag        =   False
+{% if local_dir is not none %}
 shift_cal_dir_indep.argument.local_scratch_dir             =   {{ local_dir }}
+{% endif %}
 shift_cal_dir_indep.argument.steps                         =   [shift,add,correct,avg]
 shift_cal_dir_indep.argument.shift.type                    =   phaseshifter
 shift_cal_dir_indep.argument.shift.phasecenter             =   [{{ ra }}deg, {{ dec }}deg]
@@ -225,7 +233,9 @@ shift_cal.argument.numthreads                              =   {{ max_cpus_per_i
 shift_cal.argument.msin.datacolumn                         =   FACET_DATA_ALL
 shift_cal.argument.msout.overwrite                         =   True
 shift_cal.argument.msout.writefullresflag                  =   False
+{% if local_dir is not none %}
 shift_cal.argument.local_scratch_dir                       =   {{ local_dir }}
+{% endif %}
 {% if preapply_phase_cal %}
 shift_cal.argument.steps                                   =   [correct_fast1,correct_fast2,correct_slow,avg]
 shift_cal.argument.correct_fast1.type                      =   applycal
@@ -256,7 +266,9 @@ shift_cal_dir_indep.argument.numthreads                    =   {{ max_cpus_per_i
 shift_cal_dir_indep.argument.msin.datacolumn               =   FACET_DATA_ALL
 shift_cal_dir_indep.argument.msout.overwrite               =   True
 shift_cal_dir_indep.argument.msout.writefullresflag        =   False
+{% if local_dir is not none %}
 shift_cal_dir_indep.argument.local_scratch_dir             =   {{ local_dir }}
+{% endif %}
 shift_cal_dir_indep.argument.steps                         =   [correct,avg]
 shift_cal_dir_indep.argument.correct.type                  =   applycal
 shift_cal_dir_indep.argument.correct.parmdb                =   dir_indep_parmdb
@@ -314,7 +326,9 @@ concat_data.argument.msin.missingdata                      =   True
 concat_data.argument.msin.orderms                          =   False
 concat_data.argument.msout.overwrite                       =   True
 concat_data.argument.msout.writefullresflag                =   False
+{% if local_dir is not none %}
 concat_data.argument.local_scratch_dir                     =   {{ local_dir }}
+{% endif %}
 concat_data.argument.steps                                 =   []
 
 {% if pre_average %}
@@ -368,7 +382,9 @@ concat_blavg_data.argument.msin.missingdata                =   True
 concat_blavg_data.argument.msin.orderms                    =   False
 concat_blavg_data.argument.msout.overwrite                 =   True
 concat_blavg_data.argument.msout.writefullresflag          =   False
+{% if local_dir is not none %}
 concat_blavg_data.argument.local_scratch_dir               =   {{ local_dir }}
+{% endif %}
 concat_blavg_data.argument.steps                           =   []
 
 # switch "normal" weights with block-average weights, length = nfiles
@@ -390,7 +406,26 @@ copy_column2.control.inputkeys                             =   [blavgfile,datafi
 copy_column2.argument.flags                                =   [blavgfile,datafile,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 {% endif %}
 
-# make compressed mapfile for concatenated data MSs, length = 1
+{% if selfcal_local_dir is not none %}
+# make a mapfile for syncing of concat_data to selfcal_local_dir, len = ntimes * num_cal_blocks
+make_concat_data_sync_mapfile.control.kind                 =   plugin
+make_concat_data_sync_mapfile.control.type                 =   changeDirectory
+make_concat_data_sync_mapfile.control.mapfile_in           =   concat_data.output.mapfile
+make_concat_data_sync_mapfile.control.new_dir              =   {{ selfcal_local_dir }}
+make_concat_data_sync_mapfile.control.make_tempdir         =   True
+make_concat_data_sync_mapfile.control.mapfile_dir          =   input.output.mapfile_dir
+make_concat_data_sync_mapfile.control.filename             =   concat_data_local.mapfile
+
+# copy the output of concat_data to selfcal_local_dir, len = ntimes * num_cal_blocks
+sync_concat_data_to_local.control.type                     =   sync_files
+sync_concat_data_to_local.control.mapfile_in               =   concat_data.output.mapfile
+sync_concat_data_to_local.control.mapfile_out              =   make_concat_data_sync_mapfile.output.mapfile
+sync_concat_data_to_local.control.inputkey                 =   msin
+sync_concat_data_to_local.control.outputkey                =   msout
+sync_concat_data_to_local.argument.flags                   =   [msin,msout]
+{% endif %}
+
+# make compressed mapfile for (non-local) concatenated data MSs, length = 1
 concat_data_compressed_mapfile.control.kind                =   plugin
 concat_data_compressed_mapfile.control.type                =   compressMapfile
 concat_data_compressed_mapfile.control.mapfile_in          =   concat_data.output.mapfile
@@ -412,7 +447,9 @@ average0.argument.numthreads                               =   {{ max_cpus_per_i
 average0.argument.msin.datacolumn                          =   DATA
 average0.argument.msout.overwrite                          =   True
 average0.argument.msout.writefullresflag                   =   False
+{% if local_dir is not none %}
 average0.argument.local_scratch_dir                        =   {{ local_dir }}
+{% endif %}
 average0.argument.steps                                    =   [correct,avg]
 average0.argument.correct.type                             =   applycal
 average0.argument.correct.parmdb                           =   parmdb
@@ -463,7 +500,9 @@ concat_average0_data.argument.msin.missingdata             =   True
 concat_average0_data.argument.msin.orderms                 =   False
 concat_average0_data.argument.msout.overwrite              =   True
 concat_average0_data.argument.msout.writefullresflag       =   False
+{% if local_dir is not none %}
 concat_average0_data.argument.local_scratch_dir            =   {{ local_dir }}
+{% endif %}
 concat_average0_data.argument.steps                        =   []
 
 # make compressed mapfile for concatenated averaged data MSs, length = 1
@@ -508,7 +547,9 @@ wsclean_image01.argument.scale                             =   {{ cellsize_selfc
 wsclean_image01.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image01.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image01.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image01.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image01.argument.multiscale-scales                 =   0
 {% endif %}
@@ -582,7 +623,9 @@ wsclean_image02.argument.scale                             =   {{ cellsize_selfc
 wsclean_image02.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image02.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image02.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image02.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image02.argument.multiscale-scales                 =   0
 {% endif %}
@@ -614,7 +657,7 @@ pad_selfcal_model0_images.argument.flags                   =   [imagefile,{{ wsc
 # needed for the wsclean_ft steps to get full frequency coverage per group
 regroup_concat_data_map.control.kind                       =   plugin
 regroup_concat_data_map.control.type                       =   compressMapfile
-regroup_concat_data_map.control.mapfile_in                 =   concat_data.output.mapfile
+regroup_concat_data_map.control.mapfile_in                 =   {{ concat_data_mapfile }}
 regroup_concat_data_map.control.nitems_to_compress         =   {{ num_cal_blocks }}
 regroup_concat_data_map.control.mapfile_dir                =   input.output.mapfile_dir
 regroup_concat_data_map.control.filename                   =   regroup_concat_data.mapfile
@@ -644,11 +687,13 @@ wsclean_ft0.argument.scale                                 =   {{ cellsize_selfc
 wsclean_ft0.argument.mem                                   =   {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft0.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
 wsclean_ft0.argument.j                                     =   {{ max_cpus_per_io_proc_ntimes }}
+{% if local_dir is not none %}
 wsclean_ft0.argument.tempdir                               =   {{ local_dir }}
+{% endif %}
 
 # switch "normal" weights with BL-averaged weights, length = ntimes
 switch_weights_col1.control.type                           =   switch_columns
-switch_weights_col1.control.mapfile_in                     =   concat_data.output.mapfile
+switch_weights_col1.control.mapfile_in                     =   {{ concat_data_mapfile }}
 switch_weights_col1.control.inputkey                       =   msfiles
 switch_weights_col1.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
@@ -697,10 +742,10 @@ remove_parmdbs1.argument.flags                             =   [-rf,parmdb]
 # GainCal has a filter parameter, we can switch to that
 solve_phaseonly1.control.type                              =   dppp_inplace
 {% if peel_skymodel is not none %}
-solve_ampphase11.control.mapfiles_in                       =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile,expand_peel_sourcedb_map.output.mapfile]
+solve_ampphase11.control.mapfiles_in                       =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile,expand_peel_sourcedb_map.output.mapfile]
 solve_ampphase11.control.inputkeys                         =   [msin,parmdb,sourcedb]
 {% else %}
-solve_phaseonly1.control.mapfiles_in                       =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+solve_phaseonly1.control.mapfiles_in                       =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 solve_phaseonly1.control.inputkeys                         =   [msin,parmdb]
 {% endif %}
 solve_phaseonly1.argument.numthreads                       =   {{ max_cpus_per_proc_ntimes }}
@@ -727,22 +772,39 @@ solve_phaseonly1.argument.solvetec.nchan                   =   {{ solint_freq_a 
 
 # switch the weights back, length = ntimes * num_cal_blocks
 switch_weights_col2.control.type                           =   switch_columns
-switch_weights_col2.control.mapfile_in                     =   concat_data.output.mapfile
+switch_weights_col2.control.mapfile_in                     =   {{ concat_data_mapfile }}
 switch_weights_col2.control.inputkey                       =   msfiles
 switch_weights_col2.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
 ########## end of first round of selfcal (20" resolution)
 ########## start of second round of selfcal (10" resolution)
 
+{% if selfcal_local_dir is not none %}
+# make mapfile for the output of apply steps, len = ntimes * num_cal_blocks
+# this step is needed to direct the output to the non-local (shared) disk
+make_apply_mapfile.control.kind                            =   plugin
+make_apply_mapfile.control.type                            =   changeDirectory
+make_apply_mapfile.control.mapfile_in                      =   make_concat_data_sync_mapfile.output.mapfile
+make_apply_mapfile.control.new_dir                         =   {{ pipeline_parset_dir }}
+make_apply_mapfile.control.make_tempdir                    =   False
+make_apply_mapfile.control.append                          =   _apply_output
+make_apply_mapfile.control.mapfile_dir                     =   input.output.mapfile_dir
+make_apply_mapfile.control.filename                        =   apply_output.mapfile
+{% endif %}
+
 # apply the previous calibration and average, length = ntimes * num_cal_blocks
 apply_phaseonly1.control.type                              =   dppp
-apply_phaseonly1.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+apply_phaseonly1.control.opts.mapfiles_in                  =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 apply_phaseonly1.control.opts.inputkeys                    =   [msin,parmdb]
+{% if selfcal_local_dir is not none %}
+apply_phaseonly1.control.opts.mapfile_out                  =   make_apply_mapfile.output.mapfile
+apply_phaseonly1.control.opts.outputkey                    =   msout
+apply_phaseonly1.argument.local_scratch_dir                =   {{ selfcal_local_dir }}
+{% endif %}
 apply_phaseonly1.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
 apply_phaseonly1.argument.msin.datacolumn                  =   DATA
 apply_phaseonly1.argument.msout.overwrite                  =   True
 apply_phaseonly1.argument.msout.writefullresflag           =   False
-apply_phaseonly1.argument.local_scratch_dir                =   {{ local_dir }}
 {% if preapply_solve_tec_only %}
 apply_phaseonly1.argument.steps                            =   [correct_fast1,avg]
 {% else %}
@@ -787,7 +849,9 @@ wsclean_image11.argument.scale                             =   {{ cellsize_selfc
 wsclean_image11.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image11.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image11.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image11.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image11.argument.multiscale-scales                 =   0
 {% endif %}
@@ -861,7 +925,9 @@ wsclean_image12.argument.scale                             =   {{ cellsize_selfc
 wsclean_image12.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image12.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image12.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image12.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image12.argument.multiscale-scales                 =   0
 {% endif %}
@@ -906,11 +972,13 @@ wsclean_ft1.argument.scale                                 =   {{ cellsize_selfc
 wsclean_ft1.argument.mem                                   =   {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft1.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
 wsclean_ft1.argument.j                                     =   {{ max_cpus_per_io_proc_ntimes }}
+{% if local_dir is not none %}
 wsclean_ft1.argument.tempdir                               =   {{ local_dir }}
+{% endif %}
 
 # switch "normal" weights with BL-averaged weights, length = ntimes * num_cal_blocks
 switch_weights_col3.control.type                           =   switch_columns
-switch_weights_col3.control.mapfile_in                     =   concat_data.output.mapfile
+switch_weights_col3.control.mapfile_in                     =   {{ concat_data_mapfile }}
 switch_weights_col3.control.inputkey                       =   msfiles
 switch_weights_col3.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
@@ -924,7 +992,7 @@ remove_parmdbs2.argument.flags                             =   [-rf,parmdb]
 # note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
 # GainCal has a filter parameter, we can switch to that
 solve_phaseonly2.control.type                              =   dppp_inplace
-solve_phaseonly2.control.mapfiles_in                       =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+solve_phaseonly2.control.mapfiles_in                       =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 solve_phaseonly2.control.inputkeys                         =   [msin,parmdb]
 solve_phaseonly2.argument.numthreads                       =   {{ max_cpus_per_proc_ntimes }}
 solve_phaseonly2.argument.msin.datacolumn                  =   {{ data_column }}
@@ -945,13 +1013,13 @@ solve_phaseonly2.argument.solvetec.nchan                   =   {{ solint_freq_a 
 
 # switch the weigthts back, length = ntimes * num_cal_blocks
 switch_weights_col4.control.type                           =   switch_columns
-switch_weights_col4.control.mapfile_in                     =   concat_data.output.mapfile
+switch_weights_col4.control.mapfile_in                     =   {{ concat_data_mapfile }}
 switch_weights_col4.control.inputkey                       =   msfiles
 switch_weights_col4.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
 # apply the previous calibration, length = ntimes * num_cal_blocks
 apply_phaseonly2.control.type                              =   dppp_inplace
-apply_phaseonly2.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+apply_phaseonly2.control.opts.mapfiles_in                  =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 apply_phaseonly2.control.opts.inputkeys                    =   [msin,parmdb]
 apply_phaseonly2.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
 apply_phaseonly2.argument.msin.datacolumn                  =   DATA
@@ -984,8 +1052,13 @@ loop_phasecal.control.loopsteps                            =   [average2,create_
 
 # average the output of the previous apply step, length = ntimes * num_cal_blocks
 average2.control.type                                      =   dppp
-average2.control.mapfile_in                                =   concat_data.output.mapfile
+average2.control.mapfile_in                                =   {{ concat_data_mapfile }}
 average2.control.inputkey                                  =   msin
+{% if selfcal_local_dir is not none %}
+average2.control.opts.mapfile_out                          =   make_apply_mapfile.output.mapfile
+average2.control.opts.outputkey                            =   msout
+average2.argument.local_scratch_dir                        =   {{ selfcal_local_dir }}
+{% endif %}
 average2.argument.numthreads                               =   {{ max_cpus_per_io_proc_ntimes }}
 average2.argument.msin.datacolumn                          =   CORRECTED_DATA
 average2.argument.msout.overwrite                          =   True
@@ -1021,7 +1094,9 @@ wsclean_image21.argument.scale                             =   {{ cellsize_selfc
 wsclean_image21.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image21.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image21.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image21.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image21.argument.multiscale-scales                 =   0
 {% endif %}
@@ -1093,7 +1168,9 @@ wsclean_image22.argument.scale                             =   {{ cellsize_selfc
 wsclean_image22.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image22.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image22.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image22.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image22.argument.multiscale-scales                 =   0
 {% endif %}
@@ -1137,11 +1214,13 @@ wsclean_ft2.argument.scale                                 =   {{ cellsize_selfc
 wsclean_ft2.argument.mem                                   =   {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft2.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
 wsclean_ft2.argument.j                                     =   {{ max_cpus_per_io_proc_ntimes }}
+{% if local_dir is not none %}
 wsclean_ft2.argument.tempdir                               =   {{ local_dir }}
+{% endif %}
 
 # switch "normal" weights with BL-averaged weights, length = ntimes * num_cal_blocks
 switch_weights_col5.control.type                           =   switch_columns
-switch_weights_col5.control.mapfile_in                     =   concat_data.output.mapfile
+switch_weights_col5.control.mapfile_in                     =   {{ concat_data_mapfile }}
 switch_weights_col5.control.inputkey                       =   msfiles
 switch_weights_col5.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
@@ -1155,7 +1234,7 @@ remove_parmdbs11.argument.flags                            =   [-rf,parmdb]
 # note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
 # GainCal has a filter parameter, we can switch to that
 solve_ampphase11.control.type                              =   dppp_inplace
-solve_ampphase11.control.mapfiles_in                       =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+solve_ampphase11.control.mapfiles_in                       =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 solve_ampphase11.control.inputkeys                         =   [msin,parmdb]
 solve_ampphase11.argument.numthreads                       =   {{ max_cpus_per_proc_ntimes }}
 solve_ampphase11.argument.msin.datacolumn                  =   {{ data_column }}
@@ -1176,13 +1255,13 @@ solve_ampphase11.argument.solvetec.nchan                   =   {{ solint_freq_a 
 
 # switch weights back, length = ntimes * num_cal_blocks
 switch_weights_col6.control.type                           =   switch_columns
-switch_weights_col6.control.mapfile_in                     =   concat_data.output.mapfile
+switch_weights_col6.control.mapfile_in                     =   {{ concat_data_mapfile }}
 switch_weights_col6.control.inputkey                       =   msfiles
 switch_weights_col6.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
 # apply the phase-only solutions from the previous calibration, length = ntimes * num_cal_blocks
 apply_ampphase11.control.type                              =   dppp_inplace
-apply_ampphase11.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+apply_ampphase11.control.opts.mapfiles_in                  =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 apply_ampphase11.control.opts.inputkeys                    =   [msin,parmdb]
 apply_ampphase11.argument.numthreads                       =   {{ max_cpus_per_proc_ntimes }}
 apply_ampphase11.argument.msin.datacolumn                  =   DATA
@@ -1246,7 +1325,7 @@ remove_parmdbs12.argument.flags                            =   [-rf,parmdb]
 # note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
 # GainCal has a filter parameter, we can switch to that
 solve_ampphase12.control.type                              =   dppp_inplace
-solve_ampphase12.control.mapfiles_in                       =   [concat_data.output.mapfile,make_slow_gain_parmdb_map.output.mapfile]
+solve_ampphase12.control.mapfiles_in                       =   [{{ concat_data_mapfile }},make_slow_gain_parmdb_map.output.mapfile]
 solve_ampphase12.control.inputkeys                         =   [msin,parmdb]
 solve_ampphase12.argument.numthreads                       =   {{ max_cpus_per_proc_ntimes }}
 solve_ampphase12.argument.msin.datacolumn                  =   CORRECTED_DATA
@@ -1286,13 +1365,17 @@ expand_smoothed_amp1_parmdb_map.control.filename           =   expand_amp1_smoot
 
 # apply the smoothed amplitudes and average, length = ntimes * num_cal_blocks
 apply_amp1.control.type                                    =   dppp
-apply_amp1.control.opts.mapfiles_in                        =   [concat_data.output.mapfile,expand_smoothed_amp1_parmdb_map.output.mapfile]
+apply_amp1.control.opts.mapfiles_in                        =   [{{ concat_data_mapfile }},expand_smoothed_amp1_parmdb_map.output.mapfile]
 apply_amp1.control.opts.inputkeys                          =   [msin,parmdb]
+{% if selfcal_local_dir is not none %}
+apply_amp1.control.opts.mapfile_out                        =   make_apply_mapfile.output.mapfile
+apply_amp1.control.opts.outputkey                          =   msout
+apply_amp1.argument.local_scratch_dir                      =   {{ selfcal_local_dir }}
+{% endif %}
 apply_amp1.argument.numthreads                             =   {{ max_cpus_per_io_proc_ntimes }}
 apply_amp1.argument.msin.datacolumn                        =   CORRECTED_DATA
 apply_amp1.argument.msout.overwrite                        =   True
 apply_amp1.argument.msout.writefullresflag                 =   False
-apply_amp1.argument.local_scratch_dir                      =   {{ local_dir }}
 apply_amp1.argument.steps                                  =   [correct_slow,avg]
 apply_amp1.argument.correct_slow.type                      =   applycal
 apply_amp1.argument.correct_slow.parmdb                    =   parmdb
@@ -1329,7 +1412,9 @@ wsclean_image31.argument.scale                             =   {{ cellsize_selfc
 wsclean_image31.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image31.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image31.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image31.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image31.argument.multiscale-scales                 =   0
 {% endif %}
@@ -1402,7 +1487,9 @@ wsclean_image32.argument.scale                             =   {{ cellsize_selfc
 wsclean_image32.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image32.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image32.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image32.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image32.argument.multiscale-scales                 =   0
 {% endif %}
@@ -1455,11 +1542,13 @@ wsclean_ft3.argument.scale                                 =   {{ cellsize_selfc
 wsclean_ft3.argument.mem                                   =   {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft3.argument.channelsout                           =   {{ wsclean_nchannels_selfcal }}
 wsclean_ft3.argument.j                                     =   {{ max_cpus_per_io_proc_ntimes }}
+{% if local_dir is not none %}
 wsclean_ft3.argument.tempdir                               =   {{ local_dir }}
+{% endif %}
 
 # switch "normal" weights with BL-averaged weights, length = ntimes
 switch_weights_col7.control.type                           =   switch_columns
-switch_weights_col7.control.mapfile_in                     =   concat_data.output.mapfile
+switch_weights_col7.control.mapfile_in                     =   {{ concat_data_mapfile }}
 switch_weights_col7.control.inputkey                       =   msfiles
 switch_weights_col7.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
@@ -1473,7 +1562,7 @@ remove_parmdbs21.argument.flags                            =   [-rf,parmdb]
 # note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
 # GainCal has a filter parameter, we can switch to that
 solve_ampphase21.control.type                              =   dppp_inplace
-solve_ampphase21.control.mapfiles_in                       =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+solve_ampphase21.control.mapfiles_in                       =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 solve_ampphase21.control.inputkeys                         =   [msin,parmdb]
 solve_ampphase21.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
 solve_ampphase21.argument.msin.datacolumn                  =   {{ data_column }}
@@ -1494,13 +1583,13 @@ solve_ampphase21.argument.solvetec.nchan                   =   {{ solint_freq_a 
 
 # switch weights back, length = ntimes * num_cal_blocks
 switch_weights_col8.control.type                           =   switch_columns
-switch_weights_col8.control.mapfile_in                     =   concat_data.output.mapfile
+switch_weights_col8.control.mapfile_in                     =   {{ concat_data_mapfile }}
 switch_weights_col8.control.inputkey                       =   msfiles
 switch_weights_col8.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
 # apply the phase-only solutions from the previous calibration, length = ntimes * num_cal_blocks
 apply_ampphase21.control.type                              =   dppp_inplace
-apply_ampphase21.control.opts.mapfiles_in                  =   [concat_data.output.mapfile,make_fast_phase_parmdb_map.output.mapfile]
+apply_ampphase21.control.opts.mapfiles_in                  =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 apply_ampphase21.control.opts.inputkeys                    =   [msin,parmdb]
 apply_ampphase21.argument.numthreads                       =   {{ max_cpus_per_proc_ntimes }}
 apply_ampphase21.argument.msin.datacolumn                  =   {{ data_column }}
@@ -1540,7 +1629,7 @@ remove_parmdbs22.argument.flags                            =   [-rf,parmdb]
 # note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
 # GainCal has a filter parameter, we can switch to that
 solve_ampphase22.control.type                              =   dppp_inplace
-solve_ampphase22.control.mapfiles_in                       =   [concat_data.output.mapfile,make_slow_gain_parmdb_map.output.mapfile]
+solve_ampphase22.control.mapfiles_in                       =   [{{ concat_data_mapfile }},make_slow_gain_parmdb_map.output.mapfile]
 solve_ampphase22.control.inputkeys                         =   [msin,parmdb]
 solve_ampphase22.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
 solve_ampphase22.argument.msin.datacolumn                  =   CORRECTED_DATA
@@ -1581,13 +1670,17 @@ expand_smoothed_amp2_parmdb_map.control.filename           =   expand_amp2_smoot
 
 # apply the smoothed amplitudes and average, length = ntimes * num_cal_blocks
 apply_amp2.control.type                                    =   dppp
-apply_amp2.control.opts.mapfiles_in                        =   [concat_data.output.mapfile,expand_smoothed_amp2_parmdb_map.output.mapfile]
+apply_amp2.control.opts.mapfiles_in                        =   [{{ concat_data_mapfile }},expand_smoothed_amp2_parmdb_map.output.mapfile]
 apply_amp2.control.opts.inputkeys                          =   [msin,parmdb]
+{% if selfcal_local_dir is not none %}
+apply_amp2.control.opts.mapfile_out                        =   make_apply_mapfile.output.mapfile
+apply_amp2.control.opts.outputkey                          =   msout
+apply_amp2.argument.local_scratch_dir                      =   {{ selfcal_local_dir }}
+{% endif %}
 apply_amp2.argument.numthreads                             =   {{ max_cpus_per_io_proc_ntimes }}
 apply_amp2.argument.msin.datacolumn                        =   CORRECTED_DATA
 apply_amp2.argument.msout.overwrite                        =   True
 apply_amp2.argument.msout.writefullresflag                 =   False
-apply_amp2.argument.local_scratch_dir                      =   {{ local_dir }}
 apply_amp2.argument.steps                                  =   [correct_slow,avg]
 apply_amp2.argument.correct_slow.type                      =   applycal
 apply_amp2.argument.correct_slow.parmdb                    =   parmdb
@@ -1626,7 +1719,9 @@ wsclean_image41.argument.scale                             =   {{ cellsize_selfc
 wsclean_image41.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image41.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image41.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image41.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image41.argument.multiscale-scales                 =   0
 {% endif %}
@@ -1699,7 +1794,9 @@ wsclean_image42.argument.scale                             =   {{ cellsize_selfc
 wsclean_image42.argument.channelsout                       =   {{ wsclean_nchannels_selfcal }}
 wsclean_image42.argument.mem                               =   {{ max_percent_memory_per_proc_single }}
 wsclean_image42.argument.j                                 =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image42.argument.tempdir                           =   {{ local_dir }}
+{% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image42.argument.multiscale-scales                 =   0
 {% endif %}
@@ -1741,6 +1838,14 @@ check_image2.control.inputkeys                             =   [image_new,image_
 check_image2.argument.flags                                =   [image_new,image_prev]
 
 ########## end of phase+amp selfcal loop
+
+{% if selfcal_local_dir is not none %}
+# remove concat_data files, length = ntimes * num_cal_blocks
+remove_concat_data.control.type                            =   remove_file
+remove_concat_data.control.mapfile_in                      =   make_concat_data_sync_mapfile.output.mapfile
+remove_concat_data.control.inputkey                        =   msfile
+remove_concat_data.argument.flags                          =   [-rf,msfile]
+{% endif %}
 
 # merge the phases and amplitudes parmDBs, length = 1
 merge_selfcal_parmdbs.control.type                         =   merge_parmdbs_selfcal
@@ -1827,7 +1932,9 @@ apply_dir_dep.argument.numthreads                          =   {{ max_cpus_per_i
 apply_dir_dep.argument.msin.datacolumn                     =   FACET_DATA_ALL
 apply_dir_dep.argument.msout.overwrite                     =   True
 apply_dir_dep.argument.msout.writefullresflag              =   False
+{% if local_dir is not none %}
 apply_dir_dep.argument.local_scratch_dir                   =   {{ local_dir }}
+{% endif %}
 {% if preapply_phase_cal %}
 {% if preapply_solve_tec_only %}
 apply_dir_dep.argument.steps                               =   [preapply_fast1,preapply_fast2,preapply_slow,correct_fast1,correct_slow,flagzero,avg]
@@ -1929,7 +2036,9 @@ wsclean_image_full1.argument.scale                         =   {{ cellsize_selfc
 wsclean_image_full1.argument.channelsout                   =   {{ wsclean_nchannels }}
 wsclean_image_full1.argument.mem                           =   {{ max_percent_memory_per_proc_single }}
 wsclean_image_full1.argument.j                             =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image_full1.argument.tempdir                       =   {{ local_dir }}
+{% endif %}
 wsclean_image_full1.argument.weighting-rank-filter         =   3
 {% if facetimage_wsclean_nwavelengths > 0.0 %}
 wsclean_image_full1.argument.baseline-averaging            =   {{ facetimage_wsclean_nwavelengths }}
@@ -1986,7 +2095,9 @@ wsclean_image_full2.argument.scale                         =   {{ cellsize_selfc
 wsclean_image_full2.argument.channelsout                   =   {{ wsclean_nchannels }}
 wsclean_image_full2.argument.mem                           =   {{ max_percent_memory_per_proc_single }}
 wsclean_image_full2.argument.j                             =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image_full2.argument.tempdir                       =   {{ local_dir }}
+{% endif %}
 wsclean_image_full2.argument.weighting-rank-filter         =   3
 {% if facetimage_wsclean_nwavelengths > 0.0 %}
 wsclean_image_full2.argument.baseline-averaging            =   {{ facetimage_wsclean_nwavelengths }}
@@ -2083,6 +2194,7 @@ wsclean_ft.control.type                                    =   wsclean_ft
 wsclean_ft.control.mapfiles_in                             =   [sort_shift_empty_into_Groups_maps.output.filesmap,create_expanded_model_mapfile.output.mapfile,expand_facet_model_size_map.output.mapfile]
 wsclean_ft.control.inputkeys                               =   [msfile,name,size]
 wsclean_ft.argument.flags                                  =   [-predict,msfile]
+wsclean_ft.argument.scale                                  =   {{ cellsize_selfcal_deg }}
 wsclean_ft.argument.mem                                    =   {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft.argument.j                                      =   {{ max_cpus_per_io_proc_ntimes }}
 {% if is_patch or skip_facet_imaging %}
@@ -2090,8 +2202,9 @@ wsclean_ft.argument.channelsout                            =   {{ wsclean_nchann
 {% else %}
 wsclean_ft.argument.channelsout                            =   {{ wsclean_nchannels }}
 {% endif %}
-wsclean_ft.argument.scale                                  =   {{ cellsize_selfcal_deg }}
+{% if local_dir is not none %}
 wsclean_ft.argument.tempdir                                =   {{ local_dir }}
+{% endif %}
 wsclean_ft.argument.nwlayers-for-size                      =   12288 12288
 
 # corrupt the model visibilities, length = nfiles
@@ -2107,7 +2220,9 @@ corrupt_final_model.argument.numthreads                    =   {{ max_cpus_per_i
 corrupt_final_model.argument.msin.datacolumn               =   MODEL_DATA
 corrupt_final_model.argument.msout.overwrite               =   True
 corrupt_final_model.argument.msout.writefullresflag        =   False
+{% if local_dir is not none %}
 corrupt_final_model.argument.local_scratch_dir             =   {{ local_dir }}
+{% endif %}
 {% if preapply_phase_cal %}
 {% if preapply_solve_tec_only %}
 corrupt_final_model.argument.steps                         =   [preapply_fast1,preapply_fast2,preapply_slow,corrupt_fast1,corrupt_slow]

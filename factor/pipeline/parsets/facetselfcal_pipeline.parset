@@ -689,7 +689,7 @@ wsclean_ft0.argument.tempdir                               =   {{ local_dir }}
 
 # switch "normal" weights with BL-averaged weights, length = ntimes
 switch_weights_col1.control.type                           =   switch_columns
-switch_weights_col1.control.mapfile_in                     =   concat_data.output.mapfile
+switch_weights_col1.control.mapfile_in                     =   {{ concat_data_mapfile }}
 switch_weights_col1.control.inputkey                       =   msfiles
 switch_weights_col1.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
@@ -768,7 +768,7 @@ solve_phaseonly1.argument.solvetec.nchan                   =   {{ solint_freq_a 
 
 # switch the weights back, length = ntimes * num_cal_blocks
 switch_weights_col2.control.type                           =   switch_columns
-switch_weights_col2.control.mapfile_in                     =   concat_data.output.mapfile
+switch_weights_col2.control.mapfile_in                     =   {{ concat_data_mapfile }}
 switch_weights_col2.control.inputkey                       =   msfiles
 switch_weights_col2.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
@@ -971,7 +971,7 @@ wsclean_ft1.argument.tempdir                               =   {{ local_dir }}
 
 # switch "normal" weights with BL-averaged weights, length = ntimes * num_cal_blocks
 switch_weights_col3.control.type                           =   switch_columns
-switch_weights_col3.control.mapfile_in                     =   concat_data.output.mapfile
+switch_weights_col3.control.mapfile_in                     =   {{ concat_data_mapfile }}
 switch_weights_col3.control.inputkey                       =   msfiles
 switch_weights_col3.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
@@ -1006,7 +1006,7 @@ solve_phaseonly2.argument.solvetec.nchan                   =   {{ solint_freq_a 
 
 # switch the weigthts back, length = ntimes * num_cal_blocks
 switch_weights_col4.control.type                           =   switch_columns
-switch_weights_col4.control.mapfile_in                     =   concat_data.output.mapfile
+switch_weights_col4.control.mapfile_in                     =   {{ concat_data_mapfile }}
 switch_weights_col4.control.inputkey                       =   msfiles
 switch_weights_col4.argument.flags                         =   [msfiles,WEIGHT_SPECTRUM,{{ blavg_weight_column }}]
 
@@ -2150,7 +2150,7 @@ wsclean_ft.argument.flags                                  =   [-predict,msfile]
 wsclean_ft.argument.scale                                  =   {{ cellsize_selfcal_deg }}
 wsclean_ft.argument.mem                                    =   {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft.argument.j                                      =   {{ max_cpus_per_io_proc_ntimes }}
-{% if skip_facet_imaging %}
+{% if is_patch or skip_facet_imaging %}
 wsclean_ft.argument.channelsout                            =   {{ wsclean_nchannels_selfcal }}
 {% else %}
 wsclean_ft.argument.channelsout                            =   {{ wsclean_nchannels }}
