@@ -41,6 +41,11 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=True,
             in_memory = True
         else:
             in_memory = False
+    if type(use_compression) is str:
+        if use_compression.lower() == 'true':
+            use_compression = True
+        else:
+            use_compression = False
 
     # Add the output column to ms1 if needed
     t1 = pt.table(ms1, readonly=False, ack=False)

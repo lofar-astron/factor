@@ -160,6 +160,11 @@ def main(ms_from, ms_to, column_from, column_to, do_copy=True, use_compression=F
             do_copy = True
         else:
             do_copy = False
+    if type(use_compression) is str:
+        if use_compression.lower() == 'true':
+            use_compression = True
+        else:
+            use_compression = False
 
     if not do_copy:
         print('Copy skipped (do_copy = False)')
