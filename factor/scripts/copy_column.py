@@ -37,13 +37,19 @@ def copy_column_to_ms(ms, inputcol, outputcol, ms_from=None, use_compression=Fal
 
     # Add the output column if needed
     if outputcol not in t.colnames():
-        desc['name'] = outputcol
         if use_compression:
             # Set DyscoStMan to be storage manager for DATA and WEIGHT_SPECTRUM
-            # We use a visibility bit rate of 14 and truncation of 1.5 sigma to keep the
+            # We use a visibility bit rate of 16 and truncation of 1.5 sigma to keep the
             # compression noise below ~ 0.01 mJy, as estimated from Fig 4 of
             # Offringa (2016). For the weights, we use a bit rate of 12, as
             # recommended in Sec 4.4 of Offringa (2016)
+            if column_out != 'CORRECTED_DATA':
+                rename = True
+                column_out_orig = column_out
+                column_out = 'CORRECTED_DATA'
+            else:
+                rename = False
+            desc['name'] = column_out
             dmi = {
                 'SPEC': {
                     'dataBitCount': numpy.uint32(16),
@@ -57,6 +63,7 @@ def copy_column_to_ms(ms, inputcol, outputcol, ms_from=None, use_compression=Fal
             desc['option'] = 1 # make a Direct column
             t.addcols(desc, dmi)
         else:
+            desc['name'] = outputcol
             t.addcols(desc)
 
     if use_compression:
@@ -66,6 +73,8 @@ def copy_column_to_ms(ms, inputcol, outputcol, ms_from=None, use_compression=Fal
         data[flagged] = numpy.NaN
 
     t.putcol(outputcol, data)
+    if rename:
+        t.renamecol(column_out, column_out_orig)
     t.flush()
     t.close()
 

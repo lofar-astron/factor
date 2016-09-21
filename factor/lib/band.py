@@ -647,7 +647,7 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
             flagged = np.where(flags)
 
             # Set DyscoStMan to be storage manager for DATA and WEIGHT_SPECTRUM
-            # We use a visibility bit rate of 14 and truncation of 1.5 sigma to keep the
+            # We use a visibility bit rate of 16 and truncation of 1.5 sigma to keep the
             # compression noise below ~ 0.01 mJy, as estimated from Fig 4 of
             # Offringa (2016). For the weights, we use a bit rate of 12, as
             # recommended in Sec 4.4 of Offringa (2016)

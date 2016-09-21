@@ -49,15 +49,21 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=True,
 
     # Add the output column to ms1 if needed
     t1 = pt.table(ms1, readonly=False, ack=False)
+    desc = t1.getcoldesc(column1)
     if column_out not in t1.colnames():
-        desc = t1.getcoldesc(column1)
-        desc['name'] = column_out
         if use_compression:
             # Set DyscoStMan to be storage manager for DATA and WEIGHT_SPECTRUM
-            # We use a visibility bit rate of 14 and truncation of 1.5 sigma to keep the
+            # We use a visibility bit rate of 16 and truncation of 1.5 sigma to keep the
             # compression noise below ~ 0.01 mJy, as estimated from Fig 4 of
             # Offringa (2016). For the weights, we use a bit rate of 12, as
             # recommended in Sec 4.4 of Offringa (2016)
+            if column_out != 'CORRECTED_DATA':
+                rename = True
+                column_out_orig = column_out
+                column_out = 'CORRECTED_DATA'
+            else:
+                rename = False
+            desc['name'] = column_out
             dmi = {
                 'SPEC': {
                     'dataBitCount': np.uint32(16),
@@ -71,12 +77,11 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=True,
             desc['option'] = 1 # make a Direct column
             t1.addcols(desc, dmi)
         else:
+            desc['name'] = column_out
             t1.addcols(desc)
-    t1.close()
 
     if in_memory:
         # Add or subtract columns in memory
-        t1 = pt.table(ms1, readonly=False, ack=False)
         data1 = t1.getcol(column1)
         t2 = pt.table(ms2, ack=False)
         data2 = t2.getcol(column2)
@@ -97,9 +102,15 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=True,
             print('Operation not understood. Must be either "add" or "subtract"')
             sys.exit(1)
 
+        if rename:
+            t1.renamecol(column_out, column_out_orig)
         t1.flush()
         t1.close()
     else:
+        # Close t1 before running TaQL
+        t1.flush
+        t1.close()
+
         # Add or subtract columns with TaQL
         if op.lower() == 'add':
             op_sym = '+'
