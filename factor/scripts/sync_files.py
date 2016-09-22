@@ -49,9 +49,15 @@ def main(file_from, file_to, use_compression=False):
             # Create compressed version
             t1 = pt.table(file_to_tmp, readonly=False, ack=False)
 
-            # Make compressed versions of DATA, BLAVG_DATA, WEIGHT_SPECTRUM,
+            # Make compressed versions of BLAVG_DATA, WEIGHT_SPECTRUM,
             # and BLAVG_WEIGHT_SPECTRUM columns
-            for colname_final in ['DATA', 'BLAVG_DATA', 'WEIGHT_SPECTRUM', 'BLAVG_WEIGHT_SPECTRUM']:
+            # NOTE: we do not compress the DATA column at the moment because
+            # DPPP adds a column to an MS using the same data manager as the
+            # DATA column and currently it does not support writing columns
+            # using Dysco (though see the feature issue at
+            # https://support.astron.nl/lofar_issuetracker/issues/9858)
+#             for colname_final in ['DATA', 'BLAVG_DATA', 'WEIGHT_SPECTRUM', 'BLAVG_WEIGHT_SPECTRUM']:
+            for colname_final in ['BLAVG_DATA', 'WEIGHT_SPECTRUM', 'BLAVG_WEIGHT_SPECTRUM']:
                 if colname_final in t1.colnames():
                     if colname_final == 'DATA':
                         colname_temp = 'DATA_TEMP'
