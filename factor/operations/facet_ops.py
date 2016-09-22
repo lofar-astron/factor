@@ -194,6 +194,7 @@ class FacetSelfcal(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'corrupt_final_model.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'predict_all_model_data.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'shift_cal.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'shift_cal_dir_indep.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'final_image1.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'make_concat_corr.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'make_blavg_data.mapfile'),
@@ -228,6 +229,7 @@ class FacetSelfcal(Operation):
             # imaging them all at once)
             self.direction.cleanup_mapfiles.extend([
                 os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'),
+                os.path.join(self.pipeline_mapfile_dir, 'sorted_groups_shift_empty.mapfile'),
                 os.path.join(self.pipeline_mapfile_dir, 'sorted_groups_shift_empty.mapfile_groups')])
         if self.direction.selfcal_ok or not self.parset['calibration_specific']['exit_on_selfcal_failure']:
             self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
@@ -444,6 +446,7 @@ class FacetImage(Operation):
         # Delete temp data
         self.direction.cleanup_mapfiles = [
             os.path.join(self.pipeline_mapfile_dir, 'image1.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'add_all_facet_sources.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'corrupt_final_model.mapfile')]
         if ((not self.parset['keep_avg_facet_data'] and self.direction.name != 'target') or
            self.direction.use_existing_data):
@@ -461,6 +464,7 @@ class FacetImage(Operation):
             # Add unaveraged calibrated data for the facet to files to be deleted
             self.direction.cleanup_mapfiles.extend([
                 os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'),
+                os.path.join(self.pipeline_mapfile_dir, 'sorted_groups_shift_empty.mapfile'),
                 os.path.join(self.pipeline_mapfile_dir, 'sorted_groups_shift_empty.mapfile_groups')])
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()
