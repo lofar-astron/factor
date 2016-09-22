@@ -117,7 +117,6 @@ class Direction(object):
         self.subtracted_data_colname = 'SUBTRACTED_DATA_ALL' # name of empty data column
         self.use_compression = False # whether to use Dysco compression
         self.pre_average = False # whether to use baseline averaging
-        self.blavg_weight_column = 'WEIGHT_SPECTRUM' # name of weights column
         self.peel_calibrator = False # whether to peel calibrator before imaging
         self.solve_all_correlations = False # whether to solve for all corrs for slow gain
         self.do_reset = False # whether to reset this direction
@@ -780,14 +779,6 @@ class Direction(object):
             self.num_bands_per_cal_block = int(np.ceil(nbands / float(num_cal_blocks)))
             self.solint_freq_p = int(np.ceil(num_chan_per_band_after_avg * nbands /
                 float(num_cal_blocks)))
-
-        # Set name of column to use for data and averaged weights
-        if self.pre_average:
-            self.data_column = 'BLAVG_DATA'
-            self.blavg_weight_column = 'BLAVG_WEIGHT_SPECTRUM'
-        else:
-            self.data_column = 'DATA'
-            self.blavg_weight_column = 'WEIGHT_SPECTRUM'
 
 
     def calc_partial_block(self, num_chan_per_band_after_avg, nbands,

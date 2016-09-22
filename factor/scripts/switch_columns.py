@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 """
-Script to switch the names of two columns
+Script to switch the names of normal and baseline-averaged columns
 """
 import argparse
 from argparse import RawTextHelpFormatter
@@ -9,37 +9,31 @@ import numpy
 import sys
 
 
-def main(ms_file, column1, column2):
+def main(ms_file):
     """
-    Switch the names of two columns
+    Switch the names of normal and baseline-averaged columns
 
     Parameters
     ----------
     ms_file : str
         Name of MS file
-    column1 : str
-        Name of column 1
-    column2 : str
-        Name of column 2
 
     """
     t = pt.table(ms_file, readonly=False, ack=False)
 
-    if column1 == column2:
-        return
+    for (column1, column2) in zip(['DATA', 'WEIGHT_SPECTRUM'], ['BLAVG_DATA', 'BLAVG_WEIGHT_SPECTRUM']):
+        if column1 not in t.colnames() and column2 not in t.colnames():
+            print('Both columns must be present in MS')
+            sys.exit(1)
 
-    if column1 not in t.colnames() and column2 not in t.colnames():
-        print('Both columns must be present in MS')
-        sys.exit(1)
+        # Rename column1 to temp col
+        t.renamecol(column1, column1+'_TEMP')
 
-    # Rename column1 to temp col
-    t.renamecol(column1, column1+'_TEMP')
+        # Rename column2 to column1
+        t.renamecol(column2, column1)
 
-    # Rename column2 to column1
-    t.renamecol(column2, column1)
-
-    # Rename temp col to column2
-    t.renamecol(column1+'_TEMP', column2)
+        # Rename temp col to column2
+        t.renamecol(column1+'_TEMP', column2)
     t.flush()
     t.close()
 

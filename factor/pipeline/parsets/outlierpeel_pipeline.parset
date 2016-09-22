@@ -166,6 +166,7 @@ sync_concat_data_to_local.control.mapfile_out            =   make_concat_data_sy
 sync_concat_data_to_local.control.inputkey               =   msin
 sync_concat_data_to_local.control.outputkey              =   msout
 sync_concat_data_to_local.argument.flags                 =   [msin,msout]
+sync_concat_data_to_local.argument.use_compression       =   {{ use_compression }}
 {% endif %}
 
 # generate mapfile for the fast-phase parmDBs generated in the solve_ampphase11 step, length = ntimes * num_cal_blocks

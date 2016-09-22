@@ -58,10 +58,6 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=True,
             # compression noise below ~ 0.01 mJy, as estimated from Fig 4 of
             # Offringa (2016). For the weights, we use a bit rate of 12, as
             # recommended in Sec 4.4 of Offringa (2016)
-            if column_out != 'CORRECTED_DATA':
-                rename = True
-                column_out_orig = column_out
-                column_out = 'CORRECTED_DATA'
             desc['name'] = column_out
             dmi = {
                 'SPEC': {
@@ -101,8 +97,6 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=True,
             print('Operation not understood. Must be either "add" or "subtract"')
             sys.exit(1)
 
-        if rename:
-            t1.renamecol(column_out, column_out_orig)
         t1.flush()
         t1.close()
     else:

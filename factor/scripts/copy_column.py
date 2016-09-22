@@ -43,13 +43,7 @@ def copy_column_to_ms(ms, inputcol, outputcol, ms_from=None, use_compression=Fal
             # compression noise below ~ 0.01 mJy, as estimated from Fig 4 of
             # Offringa (2016). For the weights, we use a bit rate of 12, as
             # recommended in Sec 4.4 of Offringa (2016)
-            if column_out != 'CORRECTED_DATA':
-                rename = True
-                column_out_orig = column_out
-                column_out = 'CORRECTED_DATA'
-            else:
-                rename = False
-            desc['name'] = column_out
+            desc['name'] = outputcol
             dmi = {
                 'SPEC': {
                     'dataBitCount': numpy.uint32(16),
@@ -73,8 +67,6 @@ def copy_column_to_ms(ms, inputcol, outputcol, ms_from=None, use_compression=Fal
         data[flagged] = numpy.NaN
 
     t.putcol(outputcol, data)
-    if rename:
-        t.renamecol(column_out, column_out_orig)
     t.flush()
     t.close()
 
