@@ -26,6 +26,12 @@ def main(file_from, file_to, use_compression=False):
         columns and assumes there is no CORRECTED_DATA already
 
     """
+    if type(use_compression) is str:
+        if use_compression.lower() == 'true':
+            use_compression = True
+        else:
+            use_compression = False
+
     if file_from.endswith('/'):
         file_from = file_from.strip('/')
     if file_to.endswith('/'):
@@ -35,12 +41,12 @@ def main(file_from, file_to, use_compression=False):
     if len(destination_dir) > 0:
         os.system('/bin/mkdir -p {0}'.format(destination_dir))
 
+    # Copy files
     try:
-        # Copy files
         if use_compression:
             file_to_tmp = '{}_tmp'.format(file_to)
             if os.path.exists(file_to_tmp):
-                os.system('/bin/rm -r {}'.format(file_to_tmp))
+                os.system('/bin/rm -rf {}'.format(file_to_tmp))
             os.system('/bin/cp -r {0} {1}'.format(file_from, file_to_tmp))
         else:
             os.system('/bin/cp -r {0} {1}'.format(file_from, file_to))
@@ -113,8 +119,7 @@ def main(file_from, file_to, use_compression=False):
             t1.close()
             os.system('rm -r {}'.format(file_to_tmp)) # delete tmp version
     except:
-        print('ERROR: could not sync file to {}, likely due to lack of space. '
-            'Please make more space available or select a different directory.'.format(destination_dir))
+        print('ERROR: could not sync file to {}, possibly due to lack of space.'.format(destination_dir))
         if os.path.exists(file_to_tmp):
             os.system('rm -r {}'.format(file_to_tmp))
         if os.path.exists(file_to):
