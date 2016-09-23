@@ -445,10 +445,10 @@ def _set_up_bands(parset, test_run=False):
             # No useable files found for this band (likely due to too little
             # unflagged data)
             if parset['exit_on_bad_band']:
-                self.log.info('Exiting!')
+                log.info('Exiting!')
                 sys.exit(1)
             else:
-                self.log.info('Skipping {} in further processing'.format(band.name))
+                log.info('Skipping {} in further processing'.format(band.name))
         else:
             bands.append(band)
 

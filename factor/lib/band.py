@@ -126,7 +126,7 @@ class Band(object):
             self.chunk_input_files(chunk_size_sec, dirindparmdb, local_dir=local_dir,
                                    test_run=test_run, use_compression=use_compression)
             if len(self.files) == 0:
-                self.log.error('No data left after checking input files for band: {}. '
+                self.log.warn('No data left after checking input files for band: {}. '
                                'Probably too little unflagged data.'.format(self.name))
             else:
                 # Calculate times and number of samples
