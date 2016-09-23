@@ -290,13 +290,14 @@ class Direction(object):
             if self.wsclean_nchannels > nbands:
                 self.wsclean_nchannels = nbands
 
-            wsclean_nchannels_factor_selfcal = max(2, max_gap + 1)
-            self.wsclean_nchannels_selfcal = max(1, int(np.ceil(nbands / float(wsclean_nchannels_factor_selfcal))))
-            self.nband_pad_selfcal = 0 # padding to allow self.wsclean_nchannels to be a divisor
-            nchan_after_avg = nchan * nbands / self.facetselfcal_freqstep
-            while nchan_after_avg % self.wsclean_nchannels_selfcal:
-                self.nband_pad_selfcal += 1
-                nchan_after_avg = nchan * (nbands + self.nband_pad_selfcal) / self.facetselfcal_freqstep
+            if hasattr(self, 'facetselfcal_freqstep'):
+                wsclean_nchannels_factor_selfcal = max(2, max_gap + 1)
+                self.wsclean_nchannels_selfcal = max(1, int(np.ceil(nbands / float(wsclean_nchannels_factor_selfcal))))
+                self.nband_pad_selfcal = 0 # padding to allow self.wsclean_nchannels to be a divisor
+                nchan_after_avg = nchan * nbands / self.facetselfcal_freqstep
+                while nchan_after_avg % self.wsclean_nchannels_selfcal:
+                    self.nband_pad_selfcal += 1
+                    nchan_after_avg = nchan * (nbands + self.nband_pad_selfcal) / self.facetselfcal_freqstep
 
             self.wsclean_suffix = '-MFS-image.fits'
         else:
