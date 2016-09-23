@@ -36,7 +36,9 @@ average_image_data.argument.numthreads                  =   {{ max_cpus_per_io_p
 average_image_data.argument.msin.datacolumn             =   DATA
 average_image_data.argument.msout.overwrite             =   True
 average_image_data.argument.msout.writefullresflag      =   False
+{% if local_dir is not none %}
 average_image_data.argument.local_scratch_dir           =   {{ local_dir }}
+{% endif %}
 average_image_data.argument.steps                       =   [avg]
 average_image_data.argument.avg.type                    =   squash
 average_image_data.argument.avg.freqstep                =   {{ facetimage_freqstep }}
@@ -140,7 +142,9 @@ add_all_facet_sources.argument.numthreads               =   {{ max_cpus_per_io_p
 add_all_facet_sources.argument.msin.datacolumn          =   CORRECTED_DATA
 add_all_facet_sources.argument.msout.overwrite          =   True
 add_all_facet_sources.argument.msout.writefullresflag   =   False
+{% if local_dir is not none %}
 add_all_facet_sources.argument.local_scratch_dir        =   {{ local_dir }}
+{% endif %}
 {% if preapply_phase_cal %}
 {% if preapply_solve_tec_only %}
 add_all_facet_sources.argument.steps                    =   [shift,add,preapply_fast1,preapply_fast2,preapply_slow,correct_fast1,correct_slow,flagzero,avg]
@@ -256,7 +260,9 @@ wsclean_image_full1.argument.scale                      =   {{ cellsize_facet_de
 wsclean_image_full1.argument.channelsout                =   {{ wsclean_nchannels }}
 wsclean_image_full1.argument.mem                        =   {{ max_percent_memory_per_proc_single }}
 wsclean_image_full1.argument.j                          =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image_full1.argument.tempdir                    =   {{ local_dir }}
+{% endif %}
 wsclean_image_full1.argument.weighting-rank-filter      =   3
 {% if taper_facet_arcsec > 0.0 %}
 wsclean_image_full1.argument.taper-gaussian             =  {{ taper_facet_arcsec }}
@@ -319,7 +325,9 @@ wsclean_image_full2.argument.scale                      =   {{ cellsize_facet_de
 wsclean_image_full2.argument.channelsout                =   {{ wsclean_nchannels }}
 wsclean_image_full2.argument.mem                        =   {{ max_percent_memory_per_proc_single }}
 wsclean_image_full2.argument.j                          =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image_full2.argument.tempdir                    =   {{ local_dir }}
+{% endif %}
 wsclean_image_full2.argument.weighting-rank-filter      =   3
 {% if taper_facet_arcsec > 0.0 %}
 wsclean_image_full2.argument.taper-gaussian             =  {{ taper_facet_arcsec }}
