@@ -669,7 +669,6 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
         else:
             direction.subtracted_data_colname = 'SUBTRACTED_DATA_ALL'
             direction.use_compression = False
-        else:
 
         # Reset state if specified
         if direction.name in reset_directions:
