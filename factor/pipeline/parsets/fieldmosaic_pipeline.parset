@@ -98,6 +98,14 @@ concat_data.argument.steps                             =   [avg]
 concat_data.argument.avg.type                          =   squash
 concat_data.argument.avg.freqstep                      =   {{ avgpb_freqstep }}
 concat_data.argument.avg.timestep                      =   {{ avgpb_timestep }}
+{% if use_compression %}
+concat_data.argument.msout.storagemanager              =   "Dysco"
+concat_data.argument.msout.storagemanager.databitrate           =   16
+concat_data.argument.msout.storagemanager.weightbitrate         =   12
+concat_data.argument.msout.storagemanager.distribution          =   "TruncatedGaussian"
+concat_data.argument.msout.storagemanager.disttruncation        =   1.5
+concat_data.argument.msout.storagemanager.normalization         =   "AF"
+{% endif %}
 
 # create compressed mapfile of averaged data, length = 1
 create_compressed_mapfile.control.kind                 =   plugin
@@ -119,7 +127,7 @@ make_pbimage.control.opts.mapfile_in                   =   concat.output.mapfile
 make_pbimage.control.opts.inputkey                     =   ms
 make_pbimage.control.opts.outputkey                    =   image
 make_pbimage.argument.numthreads                       =   {{ max_cpus_per_proc_single }}
-make_pbimage.argument.data                             =   CORRECTED_DATA
+make_pbimage.argument.data                             =   DATA
 make_pbimage.argument.weight                           =   briggs
 make_pbimage.argument.npix                             =   4096
 make_pbimage.argument.cellsize                         =   5.5arcsec

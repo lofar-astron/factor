@@ -926,7 +926,7 @@ def get_cluster_options(parset):
     # Full path to a local disk on the nodes for I/O-intensive processing. The path
     # must be the same for all nodes. A selfcal-only path can also be specified to
     # allow certain selfcal data to be cached in memory by setting it to a ram
-    # drive (e.g. /dev/shm) By default, dir_local_selfcal is set to dir_local
+    # drive (e.g., /dev/shm). By default, dir_local_selfcal is set to dir_local
     if 'dir_local' not in parset_dict:
         parset_dict['dir_local'] = None
     if 'dir_local_selfcal' not in parset_dict:

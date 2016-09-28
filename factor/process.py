@@ -179,7 +179,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             if len(direction_group_ok) > 0:
                 for d in directions:
                     if d.name != direction_group_ok[0].name:
-                        d.subtracted_data_colname = 'CORRECTED_DATA'
+                        d.subtracted_data_colname = 'CORRECTED_DATA '
                 set_sub_data_colname = False
         if set_preapply_flag and parset['calibration_specific']['preapply_first_cal_phases']:
             # Set the flag for preapplication of selfcal solutions (if needed)
@@ -662,10 +662,14 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
 
         # Set initial name of column that contains SUBTRACTED_DATA_ALL
         if parset['use_compression']:
-            # Since we compressed the input data, the SUBTRACTED_DATA_ALL is now
+            # Since we compressed the input data, SUBTRACTED_DATA_ALL is now
             # the DATA column
             direction.subtracted_data_colname = 'DATA'
             direction.use_compression = True
+        else:
+            direction.subtracted_data_colname = 'SUBTRACTED_DATA_ALL'
+            direction.use_compression = False
+        else:
 
         # Reset state if specified
         if direction.name in reset_directions:

@@ -81,7 +81,9 @@ add_all_facet_sources.argument.numthreads               =   {{ max_cpus_per_io_p
 add_all_facet_sources.argument.msin.datacolumn          =   CORRECTED_DATA
 add_all_facet_sources.argument.msout.overwrite          =   True
 add_all_facet_sources.argument.msout.writefullresflag   =   False
+{% if local_dir is not none %}
 add_all_facet_sources.argument.local_scratch_dir        =   {{ local_dir }}
+{% endif %}
 add_all_facet_sources.argument.steps                    =   [add]
 add_all_facet_sources.argument.add.type                 =   predict
 add_all_facet_sources.argument.add.sourcedb             =   sourcedb
@@ -96,7 +98,9 @@ shift_and_average.argument.numthreads                   =   {{ max_cpus_per_io_p
 shift_and_average.argument.msin.datacolumn              =   DATA
 shift_and_average.argument.msout.overwrite              =   True
 shift_and_average.argument.msout.writefullresflag       =   False
+{% if local_dir is not none %}
 shift_and_average.argument.local_scratch_dir            =   {{ local_dir }}
+{% endif %}
 shift_and_average.argument.steps                        =   [shift,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
 shift_and_average.argument.shift.type                   =   phaseshifter
 shift_and_average.argument.shift.phasecenter            =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
@@ -180,7 +184,9 @@ wsclean_image_full1.argument.scale                      =   {{ cellsize_facet_de
 wsclean_image_full1.argument.channelsout                =   {{ wsclean_nchannels }}
 wsclean_image_full1.argument.mem                        =   {{ max_percent_memory_per_proc_single }}
 wsclean_image_full1.argument.j                          =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image_full1.argument.tempdir                    =   {{ local_dir }}
+{% endif %}
 wsclean_image_full1.argument.weighting-rank-filter      =   3
 {% if taper_facet_arcsec > 0.0 %}
 wsclean_image_full1.argument.taper-gaussian             =   {{ taper_facet_arcsec }}
@@ -239,7 +245,9 @@ wsclean_image_full2.argument.scale                      =   {{ cellsize_facet_de
 wsclean_image_full2.argument.channelsout                =   {{ wsclean_nchannels }}
 wsclean_image_full2.argument.mem                        =   {{ max_percent_memory_per_proc_single }}
 wsclean_image_full2.argument.j                          =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
 wsclean_image_full2.argument.tempdir                    =   {{ local_dir }}
+{% endif %}
 wsclean_image_full2.argument.weighting-rank-filter      =   3
 {% if taper_facet_arcsec > 0.0 %}
 wsclean_image_full2.argument.taper-gaussian             =   {{ taper_facet_arcsec }}
@@ -336,7 +344,9 @@ wsclean_ft.argument.scale                               =   {{ cellsize_selfcal_
 wsclean_ft.argument.mem                                 =   {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft.argument.channelsout                         =   {{ wsclean_nchannels }}
 wsclean_ft.argument.j                                   =   {{ max_cpus_per_io_proc_ntimes }}
+{% if local_dir is not none %}
 wsclean_ft.argument.tempdir                             =   {{ local_dir }}
+{% endif %}
 wsclean_ft.argument.nwlayers-for-size                   =   12288 12288
 
 # corrupt the model visibilities, length = nfiles
@@ -347,7 +357,9 @@ corrupt_final_model.argument.numthreads                 =   {{ max_cpus_per_io_p
 corrupt_final_model.argument.msin.datacolumn            =   MODEL_DATA
 corrupt_final_model.argument.msout.overwrite            =   True
 corrupt_final_model.argument.msout.writefullresflag     =   False
+{% if local_dir is not none %}
 corrupt_final_model.argument.local_scratch_dir          =   {{ local_dir }}
+{% endif %}
 corrupt_final_model.argument.steps                      =   [corrupt_fast1,corrupt_fast2,corrupt_slow]
 corrupt_final_model.argument.corrupt_fast1.type         =   applycal
 corrupt_final_model.argument.corrupt_fast1.parmdb       =   parmdb

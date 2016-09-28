@@ -646,33 +646,31 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
             flags = seltab.getcol('FLAG')
             flagged = np.where(flags)
 
-            # Set DyscoStMan to be storage manager for DATA and WEIGHT_SPECTRUM
-            # We use a visibility bit rate of 16 and truncation of 1.5 sigma to keep the
-            # compression noise below ~ 0.01 mJy, as estimated from Fig 4 of
-            # Offringa (2016). For the weights, we use a bit rate of 12, as
-            # recommended in Sec 4.4 of Offringa (2016)
-            dmi = {
-                'SPEC': {
-                    'dataBitCount': np.uint32(16),
-                    'distribution': 'Gaussian',
-                    'distributionTruncation': 1.5,
-                    'normalization': 'RF',
-                    'weightBitCount': np.uint32(12)},
-                'NAME': 'DATA_dm',
-                'SEQNR': 1,
-                'TYPE': 'DyscoStMan'}
-
-            # Replace DATA with SUBTRACTED_DATA_ALL
+            # Replace DATA with SUBTRACTED_DATA_ALL and set flagged values to
+            # NaN (needed for Dysco compression)
             seltab.renamecol('DATA', 'DATA_TEMP')
             desc = seltab.getcoldesc('DATA_TEMP')
             desc['name'] = 'DATA'
-            desc['option'] = 1 # make a Direct column
-            seltab.addcols(desc, dmi)
+            seltab.addcols(desc)
             data = seltab.getcol('SUBTRACTED_DATA_ALL')
             data[flagged] = np.NaN
             seltab.putcol('DATA', data)
             seltab.removecols(['DATA_TEMP'])
             seltab.removecols(['SUBTRACTED_DATA_ALL'])
+
+            # Set DyscoStMan to be storage manager for WEIGHT_SPECTRUM
+            # For the weights, we use a bit rate of 12, as
+            # recommended in Sec 4.4 of Offringa (2016)
+            dmi = {
+                'SPEC': {
+                    'dataBitCount': np.uint32(16),
+                    'distribution': 'TruncatedGaussian',
+                    'distributionTruncation': 1.5,
+                    'normalization': 'RF',
+                    'weightBitCount': np.uint32(12)},
+                'NAME': 'WEIGHT_SPECTRUM_dm',
+                'SEQNR': 1,
+                'TYPE': 'DyscoStMan'}
 
             # Change WEIGHT_SPECTRUM to a Direct column if needed
             desc = seltab.getcoldesc('WEIGHT_SPECTRUM')
@@ -681,7 +679,6 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
                 desc = seltab.getcoldesc('WEIGHT_SPECTRUM_TEMP')
                 desc['name'] = 'WEIGHT_SPECTRUM'
                 desc['option'] = 1 # make a Direct column
-                dmi['NAME'] = 'WEIGHT_SPECTRUM_dm'
                 seltab.addcols(desc, dmi)
                 data = seltab.getcol('WEIGHT_SPECTRUM_TEMP')
                 data[flagged] = np.NaN

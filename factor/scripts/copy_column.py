@@ -47,7 +47,7 @@ def copy_column_to_ms(ms, inputcol, outputcol, ms_from=None, use_compression=Fal
             dmi = {
                 'SPEC': {
                     'dataBitCount': numpy.uint32(16),
-                    'distribution': 'Gaussian',
+                    'distribution': 'TruncatedGaussian',
                     'distributionTruncation': 1.5,
                     'normalization': 'RF',
                     'weightBitCount': numpy.uint32(12)},

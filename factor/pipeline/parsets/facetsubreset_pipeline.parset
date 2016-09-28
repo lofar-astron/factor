@@ -43,6 +43,7 @@ expand_preapply_parmdb_map.control.filename                  =   expand_preapply
 {% endif %}
 
 # shift current residual visibilities to facet-center, length = nfiles
+# Compress both data and weights
 shift_empty.control.type                                     =   dppp
 shift_empty.control.opts.mapfile_in                          =   create_ms_map.output.mapfile
 shift_empty.control.opts.inputkey                            =   msin
@@ -57,6 +58,14 @@ shift_empty.argument.shift.type                              =   phaseshifter
 shift_empty.argument.shift.phasecenter                       =   [{{ ra }}deg, {{ dec }}deg]
 {% else %}
 shift_empty.argument.shift.phasecenter                       =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+{% endif %}
+{% if use_compression %}
+shift_empty.argument.msout.storagemanager                    =   "Dysco"
+shift_empty.argument.msout.storagemanager.databitrate        =   16
+shift_empty.argument.msout.storagemanager.weightbitrate      =   12
+shift_empty.argument.msout.storagemanager.distribution       =   "TruncatedGaussian"
+shift_empty.argument.msout.storagemanager.disttruncation     =   1.5
+shift_empty.argument.msout.storagemanager.normalization      =   "AF"
 {% endif %}
 
 # compress mapfile so that all files are in one group, length = 1
@@ -129,7 +138,7 @@ wsclean_ft.argument.tempdir                                  =   {{ local_dir }}
 wsclean_ft.argument.nwlayers-for-size                        =   12288 12288
 
 # corrupt the facet-model visibilities, length = nfiles
-corrupt_final_model.control.type                             =   dppp
+corrupt_final_model.control.type                             =   dppp_inplace
 {% if preapply_phase_cal %}
 corrupt_final_model.control.opts.mapfiles_in                 =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile,expand_preapply_parmdb_map.output.mapfile]
 corrupt_final_model.control.opts.inputkeys                   =   [msin,dir_dep_parmdb,preapply_parmdb]
@@ -137,11 +146,10 @@ corrupt_final_model.control.opts.inputkeys                   =   [msin,dir_dep_p
 corrupt_final_model.control.opts.mapfiles_in                 =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 corrupt_final_model.control.opts.inputkeys                   =   [msin,parmdb]
 {% endif %}
-corrupt_final_model.argument.numthreads                      =   {{ max_cpus_per_io_proc_nfiles }}
+corrupt_final_model.argument.numthreads                      =   {{ max_cpus_per_proc_nfiles }}
 corrupt_final_model.argument.msin.datacolumn                 =   MODEL_DATA
-corrupt_final_model.argument.msout.overwrite                 =   True
-corrupt_final_model.argument.msout.writefullresflag          =   False
-corrupt_final_model.argument.local_scratch_dir               =   {{ local_dir }}
+corrupt_final_model.argument.msout                           =   .
+corrupt_final_model.argument.msout.datacolumn                =   MODEL_DATA_NEW
 {% if preapply_phase_cal %}
 {% if preapply_solve_tec_only %}
 corrupt_final_model.argument.steps                           =   [preapply_fast1,preapply_fast2,preapply_slow,corrupt_fast1,corrupt_slow]
@@ -217,13 +225,14 @@ expand_sourcedb_all_facet_sources.control.mapfile_dir        =   input.output.ma
 expand_sourcedb_all_facet_sources.control.filename           =   expand_sourcedb_all_facet_sources.mapfile
 
 # predict the skymodel data for the full facet into the phase-shifted measurement sets, length = nfiles
-predict_all_model_data.control.type                          =   dppp
+# No compression since we do not want to add noise to the model data (weights
+# are already compressed)
+predict_all_model_data.control.type                          =   dppp_inplace
 predict_all_model_data.control.opts.mapfiles_in              =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
 predict_all_model_data.control.opts.inputkeys                =   [msin,sourcedb,parmdb]
-predict_all_model_data.argument.numthreads                   =   {{ max_cpus_per_io_proc_nfiles }}
-predict_all_model_data.argument.msout.overwrite              =   True
-predict_all_model_data.argument.msout.writefullresflag       =   False
-predict_all_model_data.argument.local_scratch_dir            =   {{ local_dir }}
+predict_all_model_data.argument.numthreads                   =   {{ max_cpus_per_proc_nfiles }}
+predict_all_model_data.argument.msout                        =   .
+predict_all_model_data.argument.msout.datacolumn             =   MODEL_DATA_ORIG
 predict_all_model_data.argument.steps                        =   [pred]
 predict_all_model_data.argument.pred.type                    =   predict
 predict_all_model_data.argument.pred.sourcedb                =   sourcedb
@@ -234,23 +243,34 @@ predict_all_model_data.argument.pred.applycal.parmdb         =   parmdb
 subtract_final_initial.control.type                          =   add_subtract_columns
 subtract_final_initial.control.opts.mapfiles_in              =   [predict_all_model_data.output.mapfile,corrupt_final_model.output.mapfile]
 subtract_final_initial.control.opts.inputkeys                =   [file1,file2]
-subtract_final_initial.argument.flags                        =   [file1,file2,DATA,DATA,MODEL_DATA,subtract,True,{{ use_compression }}]
+subtract_final_initial.argument.flags                        =   [file1,file2,MODEL_DATA_ORIG,MODEL_DATA_NEW,MODEL_DATA,subtract,True,False]
 
 # shift new residuals to field center, length = nfiles
-shift_diff_model_to_field.control.type                       =   dppp
-shift_diff_model_to_field.control.opts.mapfile_in            =   predict_all_model_data.output.mapfile
-shift_diff_model_to_field.control.opts.inputkey              =   msin
-shift_diff_model_to_field.argument.numthreads                =   {{ max_cpus_per_io_proc_nfiles }}
-shift_diff_model_to_field.argument.msin.datacolumn           =   MODEL_DATA
-shift_diff_model_to_field.argument.msout.overwrite           =   True
-shift_diff_model_to_field.argument.msout.writefullresflag    =   False
-shift_diff_model_to_field.argument.local_scratch_dir         =   {{ local_dir }}
-shift_diff_model_to_field.argument.steps                     =   [shift]
-shift_diff_model_to_field.argument.shift.type                =   phaseshifter
-shift_diff_model_to_field.argument.shift.phasecenter         =   [{{ field_ra }}deg, {{ field_dec }}deg]
+# Compress weights only
+shift_diff_model_to_field.control.type                                 =   dppp
+shift_diff_model_to_field.control.opts.mapfile_in                      =   predict_all_model_data.output.mapfile
+shift_diff_model_to_field.control.opts.inputkey                        =   msin
+shift_diff_model_to_field.argument.numthreads                          =   {{ max_cpus_per_io_proc_nfiles }}
+shift_diff_model_to_field.argument.msin.datacolumn                     =   MODEL_DATA
+shift_diff_model_to_field.argument.msout.overwrite                     =   True
+shift_diff_model_to_field.argument.msout.writefullresflag              =   False
+{% if local_dir is not none %}
+shift_diff_model_to_field.argument.local_scratch_dir                   =   {{ local_dir }}
+{% endif %}
+shift_diff_model_to_field.argument.steps                               =   [shift]
+shift_diff_model_to_field.argument.shift.type                          =   phaseshifter
+shift_diff_model_to_field.argument.shift.phasecenter                   =   [{{ field_ra }}deg, {{ field_dec }}deg]
+{% if use_compression %}
+shift_diff_model_to_field.argument.msout.storagemanager                =   "Dysco"
+shift_diff_model_to_field.argument.msout.storagemanager.databitrate    =   0
+shift_diff_model_to_field.argument.msout.storagemanager.weightbitrate  =   12
+shift_diff_model_to_field.argument.msout.storagemanager.distribution   =   "TruncatedGaussian"
+shift_diff_model_to_field.argument.msout.storagemanager.disttruncation =   1.5
+shift_diff_model_to_field.argument.msout.storagemanager.normalization  =   "AF"
+{% endif %}
 
-# subtract model difference from facet-selfcal to original data, length = nfiles
+# subtract model difference from facet-selfcal from original data, length = nfiles
 subtract_diff_model_from_empty_data.control.type             =   add_subtract_columns
 subtract_diff_model_from_empty_data.control.opts.mapfiles_in =   [create_ms_map.output.mapfile,shift_diff_model_to_field.output.mapfile]
 subtract_diff_model_from_empty_data.control.opts.inputkeys   =   [file1,file2]
-subtract_diff_model_from_empty_data.argument.flags           =   [file1,file2,CORRECTED_DATA,DATA,CORRECTED_DATA,subtract,True,{{ use_compression }}]
+subtract_diff_model_from_empty_data.argument.flags           =   [file1,file2,CORRECTED_DATA,DATA,CORRECTED_DATA,subtract,True,False]

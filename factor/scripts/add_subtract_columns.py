@@ -48,12 +48,11 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=True,
             use_compression = False
 
     # Add the output column to ms1 if needed
-    rename = False # whether we need to rename column_out to one recognized by Dysco
     t1 = pt.table(ms1, readonly=False, ack=False)
     desc = t1.getcoldesc(column1)
     if column_out not in t1.colnames():
         if use_compression:
-            # Set DyscoStMan to be storage manager for DATA and WEIGHT_SPECTRUM
+            # Set DyscoStMan to be storage manager
             # We use a visibility bit rate of 16 and truncation of 1.5 sigma to keep the
             # compression noise below ~ 0.01 mJy, as estimated from Fig 4 of
             # Offringa (2016). For the weights, we use a bit rate of 12, as
@@ -62,7 +61,7 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=True,
             dmi = {
                 'SPEC': {
                     'dataBitCount': np.uint32(16),
-                    'distribution': 'Gaussian',
+                    'distribution': 'TruncatedGaussian',
                     'distributionTruncation': 1.5,
                     'normalization': 'RF',
                     'weightBitCount': np.uint32(12)},
@@ -78,9 +77,12 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=True,
     if in_memory:
         # Add or subtract columns in memory
         data1 = t1.getcol(column1)
-        t2 = pt.table(ms2, ack=False)
-        data2 = t2.getcol(column2)
-        t2.close()
+        if ms1 == ms2:
+            data2 = t1.getcol(column2)
+        else:
+            t2 = pt.table(ms2, ack=False)
+            data2 = t2.getcol(column2)
+            t2.close()
 
         if use_compression:
             # Replace flagged values with NaNs before compression

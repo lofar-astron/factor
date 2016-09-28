@@ -65,35 +65,57 @@ expand_sourcedb_all_facet_sources.control.filename       =   expand_sourcedb_all
 # Add sources, but don't phase shift. We will use these data later        / length = nfiles
 # to subtract the outlier model using the direction-dependent calibration
 # to create improved "empty" datasets
-add_all_facet_sources.control.type                       =   dppp
-add_all_facet_sources.control.opts.mapfiles_in           =   [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
-add_all_facet_sources.control.opts.inputkeys             =   [msin,sourcedb,parmdb]
-add_all_facet_sources.argument.numthreads                =   {{ max_cpus_per_io_proc_nfiles }}
-add_all_facet_sources.argument.msin.datacolumn           =   {{ subtracted_data_colname }}
-add_all_facet_sources.argument.msout.overwrite           =   True
-add_all_facet_sources.argument.msout.writefullresflag    =   False
-add_all_facet_sources.argument.local_scratch_dir         =   {{ local_dir }}
-add_all_facet_sources.argument.steps                     =   [add]
-add_all_facet_sources.argument.add.type                  =   predict
-add_all_facet_sources.argument.add.sourcedb              =   sourcedb
-add_all_facet_sources.argument.add.operation             =   add
-add_all_facet_sources.argument.add.applycal.parmdb       =   parmdb
+# Compress weights only
+add_all_facet_sources.control.type                                 =   dppp
+add_all_facet_sources.control.opts.mapfiles_in                     =   [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
+add_all_facet_sources.control.opts.inputkeys                       =   [msin,sourcedb,parmdb]
+add_all_facet_sources.argument.numthreads                          =   {{ max_cpus_per_io_proc_nfiles }}
+add_all_facet_sources.argument.msin.datacolumn                     =   {{ subtracted_data_colname }}
+add_all_facet_sources.argument.msout.overwrite                     =   True
+add_all_facet_sources.argument.msout.writefullresflag              =   False
+{% if local_dir is not none %}
+add_all_facet_sources.argument.local_scratch_dir                   =   {{ local_dir }}
+{% endif %}
+add_all_facet_sources.argument.steps                               =   [add]
+add_all_facet_sources.argument.add.type                            =   predict
+add_all_facet_sources.argument.add.sourcedb                        =   sourcedb
+add_all_facet_sources.argument.add.operation                       =   add
+add_all_facet_sources.argument.add.applycal.parmdb                 =   parmdb
+{% if use_compression %}
+add_all_facet_sources.argument.msout.storagemanager                =   "Dysco"
+add_all_facet_sources.argument.msout.storagemanager.databitrate    =   0
+add_all_facet_sources.argument.msout.storagemanager.weightbitrate  =   12
+add_all_facet_sources.argument.msout.storagemanager.distribution   =   "TruncatedGaussian"
+add_all_facet_sources.argument.msout.storagemanager.disttruncation =   1.5
+add_all_facet_sources.argument.msout.storagemanager.normalization  =   "AF"
+{% endif %}
 
 # Phase shift and average in preparation for calibration, length = nfiles
-shift_and_average.control.type                           =   dppp
-shift_and_average.control.mapfile_in                     =   add_all_facet_sources.output.mapfile
-shift_and_average.control.inputkey                       =   msin
-shift_and_average.argument.numthreads                    =   {{ max_cpus_per_io_proc_nfiles }}
-shift_and_average.argument.msin.datacolumn               =   DATA
-shift_and_average.argument.msout.overwrite               =   True
-shift_and_average.argument.msout.writefullresflag        =   False
-shift_and_average.argument.local_scratch_dir             =   {{ local_dir }}
-shift_and_average.argument.steps                         =   [shift,avg]
-shift_and_average.argument.shift.type                    =   phaseshifter
-shift_and_average.argument.shift.phasecenter             =   [{{ ra }}deg, {{ dec }}deg]
-shift_and_average.argument.avg.type                      =   squash
-shift_and_average.argument.avg.freqstep                  =   {{ facetselfcal_freqstep }}
-shift_and_average.argument.avg.timestep                  =   1
+# Compress both data and weights
+shift_and_average.control.type                                 =   dppp
+shift_and_average.control.mapfile_in                           =   add_all_facet_sources.output.mapfile
+shift_and_average.control.inputkey                             =   msin
+shift_and_average.argument.numthreads                          =   {{ max_cpus_per_io_proc_nfiles }}
+shift_and_average.argument.msin.datacolumn                     =   DATA
+shift_and_average.argument.msout.overwrite                     =   True
+shift_and_average.argument.msout.writefullresflag              =   False
+{% if local_dir is not none %}
+shift_and_average.argument.local_scratch_dir                   =   {{ local_dir }}
+{% endif %}
+shift_and_average.argument.steps                               =   [shift,avg]
+shift_and_average.argument.shift.type                          =   phaseshifter
+shift_and_average.argument.shift.phasecenter                   =   [{{ ra }}deg, {{ dec }}deg]
+shift_and_average.argument.avg.type                            =   squash
+shift_and_average.argument.avg.freqstep                        =   {{ facetselfcal_freqstep }}
+shift_and_average.argument.avg.timestep                        =   1
+{% if use_compression %}
+shift_and_average.argument.msout.storagemanager                =   "Dysco"
+shift_and_average.argument.msout.storagemanager.databitrate    =   16
+shift_and_average.argument.msout.storagemanager.weightbitrate  =   12
+shift_and_average.argument.msout.storagemanager.distribution   =   "TruncatedGaussian"
+shift_and_average.argument.msout.storagemanager.disttruncation =   1.5
+shift_and_average.argument.msout.storagemanager.normalization  =   "AF"
+{% endif %}
 
 # compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile.control.kind                   =   plugin
@@ -127,6 +149,9 @@ sort_into_Groups_maps.control.mapfile_groupmap           =   sort_into_Groups.ou
 sort_into_Groups_maps.control.mapfile_filesmap           =   sort_into_Groups.output.mapfile.mapfile
 
 # concat data in frequency, length = ntimes * num_cal_blocks
+# Note, this step is done because DPPP cannot handle datasets with multiple spectral
+# windows, as occurs when MSs at several frequencies are virtually concatenated
+# Compress both data and weights
 concat_data.control.type                                 =   dppp
 concat_data.control.mapfile_out                          =   sort_into_Groups_maps.output.groupmap
 concat_data.control.mapfile_in                           =   sort_into_Groups_maps.output.filesmap
@@ -141,6 +166,14 @@ concat_data.argument.msout.writefullresflag              =   False
 concat_data.argument.local_scratch_dir                   =   {{ local_dir }}
 {% endif %}
 concat_data.argument.steps                               =   []
+{% if use_compression %}
+concat_data.argument.msout.storagemanager                =   "Dysco"
+concat_data.argument.msout.storagemanager.databitrate    =   16
+concat_data.argument.msout.storagemanager.weightbitrate  =   12
+concat_data.argument.msout.storagemanager.distribution   =   "TruncatedGaussian"
+concat_data.argument.msout.storagemanager.disttruncation =   1.5
+concat_data.argument.msout.storagemanager.normalization  =   "AF"
+{% endif %}
 
 # make compressed mapfile for concatenated data MSs, length = 1
 concat_data_compressed_mapfile.control.kind              =   plugin
@@ -166,7 +199,6 @@ sync_concat_data_to_local.control.mapfile_out            =   make_concat_data_sy
 sync_concat_data_to_local.control.inputkey               =   msin
 sync_concat_data_to_local.control.outputkey              =   msout
 sync_concat_data_to_local.argument.flags                 =   [msin,msout]
-sync_concat_data_to_local.argument.use_compression       =   {{ use_compression }}
 {% endif %}
 
 # generate mapfile for the fast-phase parmDBs generated in the solve_ampphase11 step, length = ntimes * num_cal_blocks
@@ -213,7 +245,7 @@ remove_parmdbs11.argument.flags                          =   [-rf,parmdb]
 solve_ampphase11.control.type                            =   dppp_inplace
 solve_ampphase11.control.mapfiles_in                     =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile,expand_peel_sourcedb_map.output.mapfile]
 solve_ampphase11.control.inputkeys                       =   [msin,parmdb,sourcedb]
-solve_ampphase11.argument.numthreads                     =   {{ max_cpus_per_io_proc_ntimes }}
+solve_ampphase11.argument.numthreads                     =   {{ max_cpus_per_proc_ntimes }}
 solve_ampphase11.argument.msin.datacolumn                =   DATA
 solve_ampphase11.argument.msout                          =   .
 solve_ampphase11.argument.steps                          =   [uvcut,solvetec]
@@ -228,22 +260,30 @@ solve_ampphase11.argument.solvetec.solint                =   {{ solint_time_p }}
 solve_ampphase11.argument.solvetec.nchan                 =   {{ solint_freq_a }}
 
 # apply the phase-only solutions from the previous calibration, length = ntimes * num_cal_blocks
-apply_ampphase11.control.type                            =   dppp_inplace
-apply_ampphase11.control.opts.mapfiles_in                =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
-apply_ampphase11.control.opts.inputkeys                  =   [msin,parmdb]
-apply_ampphase11.argument.numthreads                     =   {{ max_cpus_per_proc_ntimes }}
-apply_ampphase11.argument.msin.datacolumn                =   DATA
-apply_ampphase11.argument.msout                          =   .
-apply_ampphase11.argument.msout.datacolumn               =   CORRECTED_DATA
-apply_ampphase11.argument.steps                          =   [correct_fast1,correct_fast2]
-apply_ampphase11.argument.correct_fast1.type             =   applycal
-apply_ampphase11.argument.correct_fast1.parmdb           =   parmdb
-apply_ampphase11.argument.correct_fast1.correction       =   tec
-apply_ampphase11.argument.correct_fast1.invert           =   True
-apply_ampphase11.argument.correct_fast2.type             =   applycal
-apply_ampphase11.argument.correct_fast2.parmdb           =   parmdb
-apply_ampphase11.argument.correct_fast2.correction       =   commonscalarphase
-apply_ampphase11.argument.correct_fast2.invert           =   True
+apply_ampphase11.control.type                                 =   dppp_inplace
+apply_ampphase11.control.opts.mapfiles_in                     =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
+apply_ampphase11.control.opts.inputkeys                       =   [msin,parmdb]
+apply_ampphase11.argument.numthreads                          =   {{ max_cpus_per_proc_ntimes }}
+apply_ampphase11.argument.msin.datacolumn                     =   DATA
+apply_ampphase11.argument.msout                               =   .
+apply_ampphase11.argument.msout.datacolumn                    =   CORRECTED_DATA
+apply_ampphase11.argument.steps                               =   [correct_fast1,correct_fast2]
+apply_ampphase11.argument.correct_fast1.type                  =   applycal
+apply_ampphase11.argument.correct_fast1.parmdb                =   parmdb
+apply_ampphase11.argument.correct_fast1.correction            =   tec
+apply_ampphase11.argument.correct_fast1.invert                =   True
+apply_ampphase11.argument.correct_fast2.type                  =   applycal
+apply_ampphase11.argument.correct_fast2.parmdb                =   parmdb
+apply_ampphase11.argument.correct_fast2.correction            =   commonscalarphase
+apply_ampphase11.argument.correct_fast2.invert                =   True
+{% if use_compression %}
+apply_ampphase11.argument.msout.storagemanager                =   "Dysco"
+apply_ampphase11.argument.msout.storagemanager.databitrate    =   16
+apply_ampphase11.argument.msout.storagemanager.weightbitrate  =   12
+apply_ampphase11.argument.msout.storagemanager.distribution   =   "TruncatedGaussian"
+apply_ampphase11.argument.msout.storagemanager.disttruncation =   1.5
+apply_ampphase11.argument.msout.storagemanager.normalization  =   "AF"
+{% endif %}
 
 # merge the parmDBs with the phase solutions into one, length = 1
 merge_phase_parmdbs.control.type                         =   merge_parmdbs_in_time
@@ -382,28 +422,26 @@ expand_sourcedb_outlier_map.control.mapfile_dir          =   input.output.mapfil
 expand_sourcedb_outlier_map.control.filename             =   expand_sourcedb_outlier.mapfile
 
 # Predict the outlier model data at the field phase center, length = nfiles
-predict_outlier_model.control.type                       =   dppp
+predict_outlier_model.control.type                       =   dppp_inplace
 predict_outlier_model.control.opts.mapfiles_in           =   [add_all_facet_sources.output.mapfile,expand_sourcedb_outlier_map.output.mapfile]
 predict_outlier_model.control.opts.inputkeys             =   [msin,sourcedb]
 predict_outlier_model.argument.numthreads                =   {{ max_cpus_per_io_proc_nfiles }}
 predict_outlier_model.argument.msin.datacolumn           =   DATA
-predict_outlier_model.argument.msout.overwrite           =   True
-predict_outlier_model.argument.msout.writefullresflag    =   False
-predict_outlier_model.argument.local_scratch_dir         =   {{ local_dir }}
+predict_outlier_model.argument.msout                     =   .
+predict_outlier_model.argument.msout.datacolumn          =   MODEL_DATA
 predict_outlier_model.argument.steps                     =   [predict]
 predict_outlier_model.argument.predict.type              =   predict
 predict_outlier_model.argument.predict.sourcedb          =   sourcedb
 predict_outlier_model.argument.predict.operation         =   replace
 
 # Corrupt the outlier model data with new calibration tables, length = nfiles
-corrupt_outlier_model.control.type                       =   dppp
-corrupt_outlier_model.control.opts.mapfiles_in           =   [predict_outlier_model.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+corrupt_outlier_model.control.type                       =   dppp_inplace
+corrupt_outlier_model.control.opts.mapfiles_in           =   [add_all_facet_sources.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 corrupt_outlier_model.control.opts.inputkeys             =   [msin,parmdb]
 corrupt_outlier_model.argument.numthreads                =   {{ max_cpus_per_io_proc_nfiles }}
-corrupt_outlier_model.argument.msin.datacolumn           =   DATA
-corrupt_outlier_model.argument.msout.overwrite           =   True
-corrupt_outlier_model.argument.msout.writefullresflag    =   False
-corrupt_outlier_model.argument.local_scratch_dir         =   {{ local_dir }}
+corrupt_outlier_model.argument.msin.datacolumn           =   MODEL_DATA
+corrupt_outlier_model.argument.msout                     =   .
+corrupt_outlier_model.argument.msout.datacolumn          =   MODEL_DATA_NEW
 corrupt_outlier_model.argument.steps                     =   [corrupt_fast1,corrupt_fast2,corrupt_slow]
 corrupt_outlier_model.argument.corrupt_fast1.type        =   applycal
 corrupt_outlier_model.argument.corrupt_fast1.parmdb      =   parmdb
@@ -419,9 +457,9 @@ corrupt_outlier_model.argument.corrupt_slow.invert       =   False
 
 # Subtract the corrupted model from the data to make improved subtracted datasets, length = nfiles
 subtract_outlier_model.control.type                      =   add_subtract_columns
-subtract_outlier_model.control.opts.mapfiles_in          =   [add_all_facet_sources.output.mapfile,corrupt_outlier_model.output.mapfile]
+subtract_outlier_model.control.opts.mapfiles_in          =   [add_all_facet_sources.output.mapfile,add_all_facet_sources.output.mapfile]
 subtract_outlier_model.control.opts.inputkeys            =   [file1,file2]
-subtract_outlier_model.argument.flags                    =   [file1,file2,DATA,DATA,CORRECTED_DATA,subtract,True,{{ use_compression }}]
+subtract_outlier_model.argument.flags                    =   [file1,file2,DATA,MODEL_DATA_NEW,CORRECTED_DATA,subtract,True,False]
 
 # make a map with original data of only the central frequency band, length = ntimes
 create_middle_pre_band_mapfile.control.kind              =   plugin
@@ -446,29 +484,49 @@ average_pre.argument.numthreads                          =   {{ max_cpus_per_io_
 average_pre.argument.msin.datacolumn                     =   {{ subtracted_data_colname }}
 average_pre.argument.msout.overwrite                     =   True
 average_pre.argument.msout.writefullresflag              =   False
+{% if local_dir is not none %}
 average_pre.argument.local_scratch_dir                   =   {{ local_dir }}
+{% endif %}
 average_pre.argument.steps                               =   [uv,avg]
 average_pre.argument.uv.type                             =   uvwflagger
 average_pre.argument.uv.uvmmax                           =   2500.0
 average_pre.argument.avg.type                            =   squash
 average_pre.argument.avg.freqstep                        =   {{ verify_freqstep }}
 average_pre.argument.avg.timestep                        =   {{ verify_timestep }}
+{% if use_compression %}
+average_pre.argument.msout.storagemanager                =   "Dysco"
+average_pre.argument.msout.storagemanager.databitrate    =   16
+average_pre.argument.msout.storagemanager.weightbitrate  =   12
+average_pre.argument.msout.storagemanager.distribution   =   "TruncatedGaussian"
+average_pre.argument.msout.storagemanager.disttruncation =   1.5
+average_pre.argument.msout.storagemanager.normalization  =   "AF"
+{% endif %}
 
 # average "old minus new" facet data (= new empty data), length = ntimes
-average_post.control.type                                =   dppp
-average_post.control.mapfile_in                          =   create_middle_post_mapfile.output.mapfile
-average_post.control.inputkey                            =   msin
-average_post.argument.numthreads                         =   {{ max_cpus_per_io_proc_ntimes }}
-average_post.argument.msin.datacolumn                    =   CORRECTED_DATA
-average_post.argument.msout.overwrite                    =   True
-average_post.argument.msout.writefullresflag             =   False
-average_post.argument.local_scratch_dir                  =   {{ local_dir }}
-average_post.argument.steps                              =   [uv,avg]
-average_post.argument.uv.type                            =   uvwflagger
-average_post.argument.uv.uvmmax                          =   2500.0
-average_post.argument.avg.type                           =   squash
-average_post.argument.avg.freqstep                       =   {{ verify_freqstep }}
-average_post.argument.avg.timestep                       =   {{ verify_timestep }}
+average_post.control.type                                 =   dppp
+average_post.control.mapfile_in                           =   create_middle_post_mapfile.output.mapfile
+average_post.control.inputkey                             =   msin
+average_post.argument.numthreads                          =   {{ max_cpus_per_io_proc_ntimes }}
+average_post.argument.msin.datacolumn                     =   CORRECTED_DATA
+average_post.argument.msout.overwrite                     =   True
+average_post.argument.msout.writefullresflag              =   False
+{% if local_dir is not none %}
+average_post.argument.local_scratch_dir                   =   {{ local_dir }}
+{% endif %}
+average_post.argument.steps                               =   [uv,avg]
+average_post.argument.uv.type                             =   uvwflagger
+average_post.argument.uv.uvmmax                           =   2500.0
+average_post.argument.avg.type                            =   squash
+average_post.argument.avg.freqstep                        =   {{ verify_freqstep }}
+average_post.argument.avg.timestep                        =   {{ verify_timestep }}
+{% if use_compression %}
+average_post.argument.msout.storagemanager                =   "Dysco"
+average_post.argument.msout.storagemanager.databitrate    =   16
+average_post.argument.msout.storagemanager.weightbitrate  =   12
+average_post.argument.msout.storagemanager.distribution   =   "TruncatedGaussian"
+average_post.argument.msout.storagemanager.disttruncation =   1.5
+average_post.argument.msout.storagemanager.normalization  =   "AF"
+{% endif %}
 
 # make compressed mapfile of old empty data, length = 1
 average_pre_compressed_map.control.kind                  =   plugin
@@ -495,6 +553,9 @@ wsclean_pre.argument.maxuv-l                             =   2500
 wsclean_pre.argument.scale                               =   0.00833
 wsclean_pre.argument.mem                                 =   {{ max_percent_memory_per_proc_single }}
 wsclean_pre.argument.j                                   =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
+wsclean_pre.argument.tempdir                             =   {{ local_dir }}
+{% endif %}
 
 # make compressed mapfile of new empty data, length = 1
 average_post_compressed_map.control.kind                 =   plugin
@@ -521,6 +582,9 @@ wsclean_post.argument.maxuv-l                            =   2500
 wsclean_post.argument.scale                              =   0.00833
 wsclean_post.argument.mem                                =   {{ max_percent_memory_per_proc_single }}
 wsclean_post.argument.j                                  =   {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
+wsclean_post.argument.tempdir                            =   {{ local_dir }}
+{% endif %}
 
 # do a "verify_subtract" on the two "empty" images, length = 1
 verify_subtract.control.type                             =   verify_subtract
@@ -540,5 +604,5 @@ expand_verify_subtract_map.control.filename              =   expand_verify_subtr
 copy_to_empty_data.control.type                          =   copy_column
 copy_to_empty_data.control.mapfiles_in                   =   [add_all_facet_sources.output.mapfile,create_ms_map.output.mapfile,expand_verify_subtract_map.output.mapfile]
 copy_to_empty_data.control.inputkeys                     =   [file1,file2,do_copy]
-copy_to_empty_data.argument.flags                        =   [file1,file2,{{ subtracted_data_colname }},CORRECTED_DATA]
+copy_to_empty_data.argument.flags                        =   [file1,file2,CORRECTED_DATA,CORRECTED_DATA]
 copy_to_empty_data.argument.do_copy                      =   do_copy
