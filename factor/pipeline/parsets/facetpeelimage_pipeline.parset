@@ -74,52 +74,70 @@ expand_sourcedb_all_facet_sources.control.filename      =   expand_sourcedb_all_
 # Add sources, but don't phase shift. We will use these data later        / length = nfiles
 # to subtract the outlier model using the direction-dependent calibration
 # to create improved "empty" datasets
-add_all_facet_sources.control.type                      =   dppp
-add_all_facet_sources.control.opts.mapfiles_in          =   [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
-add_all_facet_sources.control.opts.inputkeys            =   [msin,sourcedb,parmdb]
-add_all_facet_sources.argument.numthreads               =   {{ max_cpus_per_io_proc_nfiles }}
-add_all_facet_sources.argument.msin.datacolumn          =   CORRECTED_DATA
-add_all_facet_sources.argument.msout.overwrite          =   True
-add_all_facet_sources.argument.msout.writefullresflag   =   False
+# Note: throughout this parset, we compress only the weights to avoid adding compression
+# noise to the data
+add_all_facet_sources.control.type                                 =   dppp
+add_all_facet_sources.control.opts.mapfiles_in                     =   [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
+add_all_facet_sources.control.opts.inputkeys                       =   [msin,sourcedb,parmdb]
+add_all_facet_sources.argument.numthreads                          =   {{ max_cpus_per_io_proc_nfiles }}
+add_all_facet_sources.argument.msin.datacolumn                     =   CORRECTED_DATA
+add_all_facet_sources.argument.msout.overwrite                     =   True
+add_all_facet_sources.argument.msout.writefullresflag              =   False
 {% if local_dir is not none %}
-add_all_facet_sources.argument.local_scratch_dir        =   {{ local_dir }}
+add_all_facet_sources.argument.local_scratch_dir                   =   {{ local_dir }}
 {% endif %}
-add_all_facet_sources.argument.steps                    =   [add]
-add_all_facet_sources.argument.add.type                 =   predict
-add_all_facet_sources.argument.add.sourcedb             =   sourcedb
-add_all_facet_sources.argument.add.operation            =   add
-add_all_facet_sources.argument.add.applycal.parmdb      =   parmdb
+add_all_facet_sources.argument.steps                               =   [add]
+add_all_facet_sources.argument.add.type                            =   predict
+add_all_facet_sources.argument.add.sourcedb                        =   sourcedb
+add_all_facet_sources.argument.add.operation                       =   add
+add_all_facet_sources.argument.add.applycal.parmdb                 =   parmdb
+{% if use_compression %}
+add_all_facet_sources.argument.msout.storagemanager                =   "Dysco"
+add_all_facet_sources.argument.msout.storagemanager.databitrate    =   0
+add_all_facet_sources.argument.msout.storagemanager.weightbitrate  =   12
+add_all_facet_sources.argument.msout.storagemanager.distribution   =   "TruncatedGaussian"
+add_all_facet_sources.argument.msout.storagemanager.disttruncation =   1.5
+add_all_facet_sources.argument.msout.storagemanager.normalization  =   "AF"
+{% endif %}
 
 # Phase shift, correct, and average in preparation for imaging, length = nfiles
-shift_and_average.control.type                          =   dppp
-shift_and_average.control.opts.mapfiles_in              =   [add_all_facet_sources.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-shift_and_average.control.opts.inputkeys                =   [msin,dir_dep_parmdb]
-shift_and_average.argument.numthreads                   =   {{ max_cpus_per_io_proc_nfiles }}
-shift_and_average.argument.msin.datacolumn              =   DATA
-shift_and_average.argument.msout.overwrite              =   True
-shift_and_average.argument.msout.writefullresflag       =   False
+shift_and_average.control.type                                 =   dppp
+shift_and_average.control.opts.mapfiles_in                     =   [add_all_facet_sources.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+shift_and_average.control.opts.inputkeys                       =   [msin,dir_dep_parmdb]
+shift_and_average.argument.numthreads                          =   {{ max_cpus_per_io_proc_nfiles }}
+shift_and_average.argument.msin.datacolumn                     =   DATA
+shift_and_average.argument.msout.overwrite                     =   True
+shift_and_average.argument.msout.writefullresflag              =   False
 {% if local_dir is not none %}
-shift_and_average.argument.local_scratch_dir            =   {{ local_dir }}
+shift_and_average.argument.local_scratch_dir                   =   {{ local_dir }}
 {% endif %}
-shift_and_average.argument.steps                        =   [shift,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
-shift_and_average.argument.shift.type                   =   phaseshifter
-shift_and_average.argument.shift.phasecenter            =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
-shift_and_average.argument.correct_fast1.type           =   applycal
-shift_and_average.argument.correct_fast1.parmdb         =   dir_dep_parmdb
-shift_and_average.argument.correct_fast1.correction     =   tec
-shift_and_average.argument.correct_fast1.invert         =   True
-shift_and_average.argument.correct_fast2.type           =   applycal
-shift_and_average.argument.correct_fast2.parmdb         =   dir_dep_parmdb
-shift_and_average.argument.correct_fast2.correction     =   commonscalarphase
-shift_and_average.argument.correct_fast2.invert         =   True
-shift_and_average.argument.correct_slow.type            =   applycal
-shift_and_average.argument.correct_slow.parmdb          =   dir_dep_parmdb
-shift_and_average.argument.correct_slow.invert          =   True
-shift_and_average.argument.flagzero.type                =   preflagger
-shift_and_average.argument.flagzero.amplmin             =   1e-20
-shift_and_average.argument.avg.type                     =   squash
-shift_and_average.argument.avg.freqstep                 =   {{ facetimage_freqstep }}
-shift_and_average.argument.avg.timestep                 =   {{ facetimage_timestep }}
+shift_and_average.argument.steps                               =   [shift,correct_fast1,correct_fast2,correct_slow,flagzero,avg]
+shift_and_average.argument.shift.type                          =   phaseshifter
+shift_and_average.argument.shift.phasecenter                   =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
+shift_and_average.argument.correct_fast1.type                  =   applycal
+shift_and_average.argument.correct_fast1.parmdb                =   dir_dep_parmdb
+shift_and_average.argument.correct_fast1.correction            =   tec
+shift_and_average.argument.correct_fast1.invert                =   True
+shift_and_average.argument.correct_fast2.type                  =   applycal
+shift_and_average.argument.correct_fast2.parmdb                =   dir_dep_parmdb
+shift_and_average.argument.correct_fast2.correction            =   commonscalarphase
+shift_and_average.argument.correct_fast2.invert                =   True
+shift_and_average.argument.correct_slow.type                   =   applycal
+shift_and_average.argument.correct_slow.parmdb                 =   dir_dep_parmdb
+shift_and_average.argument.correct_slow.invert                 =   True
+shift_and_average.argument.flagzero.type                       =   preflagger
+shift_and_average.argument.flagzero.amplmin                    =   1e-20
+shift_and_average.argument.avg.type                            =   squash
+shift_and_average.argument.avg.freqstep                        =   {{ facetimage_freqstep }}
+shift_and_average.argument.avg.timestep                        =   {{ facetimage_timestep }}
+{% if use_compression %}
+shift_and_average.argument.msout.storagemanager                =   "Dysco"
+shift_and_average.argument.msout.storagemanager.databitrate    =   0
+shift_and_average.argument.msout.storagemanager.weightbitrate  =   12
+shift_and_average.argument.msout.storagemanager.distribution   =   "TruncatedGaussian"
+shift_and_average.argument.msout.storagemanager.disttruncation =   1.5
+shift_and_average.argument.msout.storagemanager.normalization  =   "AF"
+{% endif %}
 
 # make the compressed mapfile, length = 1
 create_compressed_mapfile.control.kind                  =   plugin
@@ -350,16 +368,13 @@ wsclean_ft.argument.tempdir                             =   {{ local_dir }}
 wsclean_ft.argument.nwlayers-for-size                   =   12288 12288
 
 # corrupt the model visibilities, length = nfiles
-corrupt_final_model.control.type                        =   dppp
+corrupt_final_model.control.type                        =   dppp_inplace
 corrupt_final_model.control.opts.mapfiles_in            =   [add_all_facet_sources.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 corrupt_final_model.control.opts.inputkeys              =   [msin,parmdb]
 corrupt_final_model.argument.numthreads                 =   {{ max_cpus_per_io_proc_nfiles }}
 corrupt_final_model.argument.msin.datacolumn            =   MODEL_DATA
-corrupt_final_model.argument.msout.overwrite            =   True
-corrupt_final_model.argument.msout.writefullresflag     =   False
-{% if local_dir is not none %}
-corrupt_final_model.argument.local_scratch_dir          =   {{ local_dir }}
-{% endif %}
+corrupt_final_model.argument.msout                      =   .
+corrupt_final_model.argument.msout.datacolumn           =   MODEL_DATA_NEW
 corrupt_final_model.argument.steps                      =   [corrupt_fast1,corrupt_fast2,corrupt_slow]
 corrupt_final_model.argument.corrupt_fast1.type         =   applycal
 corrupt_final_model.argument.corrupt_fast1.parmdb       =   parmdb
@@ -378,4 +393,4 @@ corrupt_final_model.argument.corrupt_slow.invert        =   False
 subtract_facet_model.control.type                       =   add_subtract_columns
 subtract_facet_model.control.opts.mapfiles_in           =   [add_all_facet_sources.output.mapfile,corrupt_final_model.output.mapfile]
 subtract_facet_model.control.opts.inputkeys             =   [file1,file2]
-subtract_facet_model.argument.flags                     =   [file1,file2,DATA,DATA,CORRECTED_DATA,subtract,True,{{ use_compression }}]
+subtract_facet_model.argument.flags                     =   [file1,file2,DATA,MODEL_DATA_NEW,CORRECTED_DATA,subtract,True,False]

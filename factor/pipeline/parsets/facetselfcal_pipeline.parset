@@ -427,27 +427,27 @@ switch_data_weights_col_shift_cal.argument.flags           =   [msfile]
 
 # Concat the preaveraged data (and weights), length = ntimes * num_cal_blocks
 # Compress both data and weights
-concat_blavg_data.control.type                             =   dppp
-concat_blavg_data.control.mapfile_out                      =   make_blavg_data_mapfile.output.mapfile
-concat_blavg_data.control.mapfile_in                       =   sort_into_Groups_maps.output.filesmap
-concat_blavg_data.control.inputkey                         =   msin
-concat_blavg_data.argument.numthreads                      =   {{ max_cpus_per_io_proc_ntimes }}
-concat_blavg_data.argument.msin.datacolumn                 =   DATA
-concat_blavg_data.argument.msin.missingdata                =   True
-concat_blavg_data.argument.msin.orderms                    =   False
-concat_blavg_data.argument.msout.overwrite                 =   True
-concat_blavg_data.argument.msout.writefullresflag          =   False
+concat_blavg_data.control.type                                 =   dppp
+concat_blavg_data.control.mapfile_out                          =   make_blavg_data_mapfile.output.mapfile
+concat_blavg_data.control.mapfile_in                           =   sort_into_Groups_maps.output.filesmap
+concat_blavg_data.control.inputkey                             =   msin
+concat_blavg_data.argument.numthreads                          =   {{ max_cpus_per_io_proc_ntimes }}
+concat_blavg_data.argument.msin.datacolumn                     =   DATA
+concat_blavg_data.argument.msin.missingdata                    =   True
+concat_blavg_data.argument.msin.orderms                        =   False
+concat_blavg_data.argument.msout.overwrite                     =   True
+concat_blavg_data.argument.msout.writefullresflag              =   False
 {% if local_dir is not none %}
-concat_blavg_data.argument.local_scratch_dir               =   {{ local_dir }}
+concat_blavg_data.argument.local_scratch_dir                   =   {{ local_dir }}
 {% endif %}
-concat_blavg_data.argument.steps                           =   []
+concat_blavg_data.argument.steps                               =   []
 {% if use_compression %}
-concat_blavg_data.argument.msout.storagemanager            =   "Dysco"
-concat_blavg_data.argument.msout.storagemanager.databitrate         =   16
-concat_blavg_data.argument.msout.storagemanager.weightbitrate       =   12
-concat_blavg_data.argument.msout.storagemanager.distribution        =   "TruncatedGaussian"
-concat_blavg_data.argument.msout.storagemanager.disttruncation      =   1.5
-concat_blavg_data.argument.msout.storagemanager.normalization       =   "AF"
+concat_blavg_data.argument.msout.storagemanager                =   "Dysco"
+concat_blavg_data.argument.msout.storagemanager.databitrate    =   16
+concat_blavg_data.argument.msout.storagemanager.weightbitrate  =   12
+concat_blavg_data.argument.msout.storagemanager.distribution   =   "TruncatedGaussian"
+concat_blavg_data.argument.msout.storagemanager.disttruncation =   1.5
+concat_blavg_data.argument.msout.storagemanager.normalization  =   "AF"
 {% endif %}
 
 # Copy BLAVG_DATA, length = ntimes * num_cal_blocks
@@ -866,43 +866,43 @@ make_apply_mapfile.control.filename                        =   apply_output.mapf
 {% endif %}
 
 # apply the previous calibration and average, length = ntimes * num_cal_blocks
-apply_phaseonly1.control.type                              =   dppp
-apply_phaseonly1.control.opts.mapfiles_in                  =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
-apply_phaseonly1.control.opts.inputkeys                    =   [msin,parmdb]
+apply_phaseonly1.control.type                                 =   dppp
+apply_phaseonly1.control.opts.mapfiles_in                     =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
+apply_phaseonly1.control.opts.inputkeys                       =   [msin,parmdb]
 {% if selfcal_local_dir is not none %}
-apply_phaseonly1.control.opts.mapfile_out                  =   make_apply_mapfile.output.mapfile
-apply_phaseonly1.control.opts.outputkey                    =   msout
-apply_phaseonly1.argument.local_scratch_dir                =   {{ selfcal_local_dir }}
+apply_phaseonly1.control.opts.mapfile_out                     =   make_apply_mapfile.output.mapfile
+apply_phaseonly1.control.opts.outputkey                       =   msout
+apply_phaseonly1.argument.local_scratch_dir                   =   {{ selfcal_local_dir }}
 {% endif %}
-apply_phaseonly1.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
-apply_phaseonly1.argument.msin.datacolumn                  =   DATA
-apply_phaseonly1.argument.msout.overwrite                  =   True
-apply_phaseonly1.argument.msout.writefullresflag           =   False
+apply_phaseonly1.argument.numthreads                          =   {{ max_cpus_per_io_proc_ntimes }}
+apply_phaseonly1.argument.msin.datacolumn                     =   DATA
+apply_phaseonly1.argument.msout.overwrite                     =   True
+apply_phaseonly1.argument.msout.writefullresflag              =   False
 {% if preapply_solve_tec_only %}
-apply_phaseonly1.argument.steps                            =   [correct_fast1,avg]
+apply_phaseonly1.argument.steps                               =   [correct_fast1,avg]
 {% else %}
-apply_phaseonly1.argument.steps                            =   [correct_fast1,correct_fast2,avg]
+apply_phaseonly1.argument.steps                               =   [correct_fast1,correct_fast2,avg]
 {% endif %}
-apply_phaseonly1.argument.correct_fast1.type               =   applycal
-apply_phaseonly1.argument.correct_fast1.parmdb             =   parmdb
-apply_phaseonly1.argument.correct_fast1.correction         =   tec
-apply_phaseonly1.argument.correct_fast1.invert             =   True
+apply_phaseonly1.argument.correct_fast1.type                  =   applycal
+apply_phaseonly1.argument.correct_fast1.parmdb                =   parmdb
+apply_phaseonly1.argument.correct_fast1.correction            =   tec
+apply_phaseonly1.argument.correct_fast1.invert                =   True
 {% if not preapply_solve_tec_only %}
-apply_phaseonly1.argument.correct_fast2.type               =   applycal
-apply_phaseonly1.argument.correct_fast2.parmdb             =   parmdb
-apply_phaseonly1.argument.correct_fast2.correction         =   commonscalarphase
-apply_phaseonly1.argument.correct_fast2.invert             =   True
+apply_phaseonly1.argument.correct_fast2.type                  =   applycal
+apply_phaseonly1.argument.correct_fast2.parmdb                =   parmdb
+apply_phaseonly1.argument.correct_fast2.correction            =   commonscalarphase
+apply_phaseonly1.argument.correct_fast2.invert                =   True
 {% endif %}
-apply_phaseonly1.argument.avg.type                         =   squash
-apply_phaseonly1.argument.avg.freqstep                     =   1
-apply_phaseonly1.argument.avg.timestep                     =   {{ facetselfcal_timestep }}
+apply_phaseonly1.argument.avg.type                            =   squash
+apply_phaseonly1.argument.avg.freqstep                        =   1
+apply_phaseonly1.argument.avg.timestep                        =   {{ facetselfcal_timestep }}
 {% if use_compression %}
-apply_phaseonly1.argument.msout.storagemanager             =   "Dysco"
-apply_phaseonly1.argument.msout.storagemanager.databitrate          =   16
-apply_phaseonly1.argument.msout.storagemanager.weightbitrate        =   12
-apply_phaseonly1.argument.msout.storagemanager.distribution         =   "TruncatedGaussian"
-apply_phaseonly1.argument.msout.storagemanager.disttruncation       =   1.5
-apply_phaseonly1.argument.msout.storagemanager.normalization        =   "AF"
+apply_phaseonly1.argument.msout.storagemanager                =   "Dysco"
+apply_phaseonly1.argument.msout.storagemanager.databitrate    =   16
+apply_phaseonly1.argument.msout.storagemanager.weightbitrate  =   12
+apply_phaseonly1.argument.msout.storagemanager.distribution   =   "TruncatedGaussian"
+apply_phaseonly1.argument.msout.storagemanager.disttruncation =   1.5
+apply_phaseonly1.argument.msout.storagemanager.normalization  =   "AF"
 {% endif %}
 
 # make compressed mapfile of averaged data, length = 1
@@ -1099,43 +1099,43 @@ switch_data_weights_col4.argument.flags                    =   [msfile]
 ########## start of third round of selfcal
 
 # apply the previous calibration and average, length = ntimes * num_cal_blocks
-apply_phaseonly2.control.type                              =   dppp
-apply_phaseonly2.control.opts.mapfiles_in                  =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
-apply_phaseonly2.control.opts.inputkeys                    =   [msin,parmdb]
+apply_phaseonly2.control.type                                 =   dppp
+apply_phaseonly2.control.opts.mapfiles_in                     =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
+apply_phaseonly2.control.opts.inputkeys                       =   [msin,parmdb]
 {% if selfcal_local_dir is not none %}
-apply_phaseonly2.control.opts.mapfile_out                  =   make_apply_mapfile.output.mapfile
-apply_phaseonly2.control.opts.outputkey                    =   msout
-apply_phaseonly2.argument.local_scratch_dir                =   {{ selfcal_local_dir }}
+apply_phaseonly2.control.opts.mapfile_out                     =   make_apply_mapfile.output.mapfile
+apply_phaseonly2.control.opts.outputkey                       =   msout
+apply_phaseonly2.argument.local_scratch_dir                   =   {{ selfcal_local_dir }}
 {% endif %}
-apply_phaseonly2.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
-apply_phaseonly2.argument.msin.datacolumn                  =   DATA
-apply_phaseonly2.argument.msout.overwrite                  =   True
-apply_phaseonly2.argument.msout.writefullresflag           =   False
+apply_phaseonly2.argument.numthreads                          =   {{ max_cpus_per_io_proc_ntimes }}
+apply_phaseonly2.argument.msin.datacolumn                     =   DATA
+apply_phaseonly2.argument.msout.overwrite                     =   True
+apply_phaseonly2.argument.msout.writefullresflag              =   False
 {% if preapply_solve_tec_only %}
-apply_phaseonly2.argument.steps                            =   [correct_fast1,avg]
+apply_phaseonly2.argument.steps                               =   [correct_fast1,avg]
 {% else %}
-apply_phaseonly2.argument.steps                            =   [correct_fast1,correct_fast2,avg]
+apply_phaseonly2.argument.steps                               =   [correct_fast1,correct_fast2,avg]
 {% endif %}
-apply_phaseonly2.argument.correct_fast1.type               =   applycal
-apply_phaseonly2.argument.correct_fast1.parmdb             =   parmdb
-apply_phaseonly2.argument.correct_fast1.correction         =   tec
-apply_phaseonly2.argument.correct_fast1.invert             =   True
+apply_phaseonly2.argument.correct_fast1.type                  =   applycal
+apply_phaseonly2.argument.correct_fast1.parmdb                =   parmdb
+apply_phaseonly2.argument.correct_fast1.correction            =   tec
+apply_phaseonly2.argument.correct_fast1.invert                =   True
 {% if not preapply_solve_tec_only %}
-apply_phaseonly2.argument.correct_fast2.type               =   applycal
-apply_phaseonly2.argument.correct_fast2.parmdb             =   parmdb
-apply_phaseonly2.argument.correct_fast2.correction         =   commonscalarphase
-apply_phaseonly2.argument.correct_fast2.invert             =   True
+apply_phaseonly2.argument.correct_fast2.type                  =   applycal
+apply_phaseonly2.argument.correct_fast2.parmdb                =   parmdb
+apply_phaseonly2.argument.correct_fast2.correction            =   commonscalarphase
+apply_phaseonly2.argument.correct_fast2.invert                =   True
 {% endif %}
-apply_phaseonly2.argument.avg.type                         =   squash
-apply_phaseonly2.argument.avg.freqstep                     =   1
-apply_phaseonly2.argument.avg.timestep                     =   {{ facetselfcal_timestep }}
+apply_phaseonly2.argument.avg.type                            =   squash
+apply_phaseonly2.argument.avg.freqstep                        =   1
+apply_phaseonly2.argument.avg.timestep                        =   {{ facetselfcal_timestep }}
 {% if use_compression %}
-apply_phaseonly2.argument.msout.storagemanager             =   "Dysco"
-apply_phaseonly2.argument.msout.storagemanager.databitrate          =   16
-apply_phaseonly2.argument.msout.storagemanager.weightbitrate        =   12
-apply_phaseonly2.argument.msout.storagemanager.distribution         =   "TruncatedGaussian"
-apply_phaseonly2.argument.msout.storagemanager.disttruncation       =   1.5
-apply_phaseonly2.argument.msout.storagemanager.normalization        =   "AF"
+apply_phaseonly2.argument.msout.storagemanager                =   "Dysco"
+apply_phaseonly2.argument.msout.storagemanager.databitrate    =   16
+apply_phaseonly2.argument.msout.storagemanager.weightbitrate  =   12
+apply_phaseonly2.argument.msout.storagemanager.distribution   =   "TruncatedGaussian"
+apply_phaseonly2.argument.msout.storagemanager.disttruncation =   1.5
+apply_phaseonly2.argument.msout.storagemanager.normalization  =   "AF"
 {% endif %}
 
 # make compressed mapfile of averaged data, length = 1
@@ -1439,11 +1439,11 @@ apply_amp1.argument.avg.freqstep                           =   1
 apply_amp1.argument.avg.timestep                           =   {{ facetselfcal_timestep }}
 {% if use_compression %}
 apply_amp1.argument.msout.storagemanager                   =   "Dysco"
-apply_amp1.argument.msout.storagemanager.databitrate                =   16
-apply_amp1.argument.msout.storagemanager.weightbitrate              =   12
-apply_amp1.argument.msout.storagemanager.distribution               =   "TruncatedGaussian"
-apply_amp1.argument.msout.storagemanager.disttruncation             =   1.5
-apply_amp1.argument.msout.storagemanager.normalization              =   "AF"
+apply_amp1.argument.msout.storagemanager.databitrate       =   16
+apply_amp1.argument.msout.storagemanager.weightbitrate     =   12
+apply_amp1.argument.msout.storagemanager.distribution      =   "TruncatedGaussian"
+apply_amp1.argument.msout.storagemanager.disttruncation    =   1.5
+apply_amp1.argument.msout.storagemanager.normalization     =   "AF"
 {% endif %}
 
 ########## end of third round of selfcal
@@ -1650,35 +1650,35 @@ switch_data_weights_col8.control.inputkey                  =   msfile
 switch_data_weights_col8.argument.flags                    =   [msfile]
 
 # apply the phase-only solutions from the previous calibration, length = ntimes * num_cal_blocks
-apply_ampphase21.control.type                              =   dppp_inplace
-apply_ampphase21.control.opts.mapfiles_in                  =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
-apply_ampphase21.control.opts.inputkeys                    =   [msin,parmdb]
-apply_ampphase21.argument.numthreads                       =   {{ max_cpus_per_proc_ntimes }}
-apply_ampphase21.argument.msin.datacolumn                  =   DATA
-apply_ampphase21.argument.msout                            =   .
-apply_ampphase21.argument.msout.datacolumn                 =   CORRECTED_DATA
+apply_ampphase21.control.type                                 =   dppp_inplace
+apply_ampphase21.control.opts.mapfiles_in                     =   [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
+apply_ampphase21.control.opts.inputkeys                       =   [msin,parmdb]
+apply_ampphase21.argument.numthreads                          =   {{ max_cpus_per_proc_ntimes }}
+apply_ampphase21.argument.msin.datacolumn                     =   DATA
+apply_ampphase21.argument.msout                               =   .
+apply_ampphase21.argument.msout.datacolumn                    =   CORRECTED_DATA
 {% if preapply_solve_tec_only %}
-apply_ampphase21.argument.steps                            =   [correct_fast1]
+apply_ampphase21.argument.steps                               =   [correct_fast1]
 {% else %}
-apply_ampphase21.argument.steps                            =   [correct_fast1,correct_fast2]
+apply_ampphase21.argument.steps                               =   [correct_fast1,correct_fast2]
 {% endif %}
-apply_ampphase21.argument.correct_fast1.type               =   applycal
-apply_ampphase21.argument.correct_fast1.parmdb             =   parmdb
-apply_ampphase21.argument.correct_fast1.correction         =   tec
-apply_ampphase21.argument.correct_fast1.invert             =   True
+apply_ampphase21.argument.correct_fast1.type                  =   applycal
+apply_ampphase21.argument.correct_fast1.parmdb                =   parmdb
+apply_ampphase21.argument.correct_fast1.correction            =   tec
+apply_ampphase21.argument.correct_fast1.invert                =   True
 {% if not preapply_solve_tec_only %}
-apply_ampphase21.argument.correct_fast2.type               =   applycal
-apply_ampphase21.argument.correct_fast2.parmdb             =   parmdb
-apply_ampphase21.argument.correct_fast2.correction         =   commonscalarphase
-apply_ampphase21.argument.correct_fast2.invert             =   True
+apply_ampphase21.argument.correct_fast2.type                  =   applycal
+apply_ampphase21.argument.correct_fast2.parmdb                =   parmdb
+apply_ampphase21.argument.correct_fast2.correction            =   commonscalarphase
+apply_ampphase21.argument.correct_fast2.invert                =   True
 {% endif %}
 {% if use_compression %}
-apply_ampphase21.argument.msout.storagemanager             =   "Dysco"
-apply_ampphase21.argument.msout.storagemanager.databitrate          =   16
-apply_ampphase21.argument.msout.storagemanager.weightbitrate        =   12
-apply_ampphase21.argument.msout.storagemanager.distribution         =   "TruncatedGaussian"
-apply_ampphase21.argument.msout.storagemanager.disttruncation       =   1.5
-apply_ampphase21.argument.msout.storagemanager.normalization        =   "AF"
+apply_ampphase21.argument.msout.storagemanager                =   "Dysco"
+apply_ampphase21.argument.msout.storagemanager.databitrate    =   16
+apply_ampphase21.argument.msout.storagemanager.weightbitrate  =   12
+apply_ampphase21.argument.msout.storagemanager.distribution   =   "TruncatedGaussian"
+apply_ampphase21.argument.msout.storagemanager.disttruncation =   1.5
+apply_ampphase21.argument.msout.storagemanager.normalization  =   "AF"
 {% endif %}
 
 # merge the parmDBs with the phase solutions into one, length = 1
@@ -1701,7 +1701,7 @@ remove_parmdbs22.argument.flags                            =   [-rf,parmdb]
 solve_ampphase22.control.type                              =   dppp_inplace
 solve_ampphase22.control.mapfiles_in                       =   [{{ concat_data_mapfile }},make_slow_gain_parmdb_map.output.mapfile]
 solve_ampphase22.control.inputkeys                         =   [msin,parmdb]
-solve_ampphase22.argument.numthreads                       =   {{ max_cpus_per_io_proc_ntimes }}
+solve_ampphase22.argument.numthreads                       =   {{ max_cpus_per_proc_ntimes }}
 solve_ampphase22.argument.msin.datacolumn                  =   CORRECTED_DATA
 solve_ampphase22.argument.msout                            =   .
 solve_ampphase22.argument.steps                            =   [uvcut,solvegain]
@@ -1760,11 +1760,11 @@ apply_amp2.argument.avg.freqstep                           =   1
 apply_amp2.argument.avg.timestep                           =   {{ facetselfcal_timestep }}
 {% if use_compression %}
 apply_amp2.argument.msout.storagemanager                   =   "Dysco"
-apply_amp2.argument.msout.storagemanager.databitrate                =   16
-apply_amp2.argument.msout.storagemanager.weightbitrate              =   12
-apply_amp2.argument.msout.storagemanager.distribution               =   "TruncatedGaussian"
-apply_amp2.argument.msout.storagemanager.disttruncation             =   1.5
-apply_amp2.argument.msout.storagemanager.normalization              =   "AF"
+apply_amp2.argument.msout.storagemanager.databitrate       =   16
+apply_amp2.argument.msout.storagemanager.weightbitrate     =   12
+apply_amp2.argument.msout.storagemanager.distribution      =   "TruncatedGaussian"
+apply_amp2.argument.msout.storagemanager.disttruncation    =   1.5
+apply_amp2.argument.msout.storagemanager.normalization     =   "AF"
 {% endif %}
 
 ########## end of fourth or of the looped round of selfcal
