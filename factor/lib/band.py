@@ -88,14 +88,13 @@ class Band(object):
             # Find mean elevation and FOV
             for MS_id in xrange(self.numMS):
                 # Add (virtual) elevation column to MS
-                try:
+                tab = pt.table(self.files[MS_id], ack=False)
+                exiting_colnames = tab.colnames()
+                tab.close()
+                if 'AZEL1' not in exiting_colnames:
                     pt.addDerivedMSCal(self.files[MS_id])
-                except RuntimeError:
-                    # RuntimeError indicates column already exists
-                    pass
 
                 # Calculate mean elevation
-                tab = pt.table(self.files[MS_id], ack=False)
                 if MS_id == 0:
                     global_el_values = tab.getcol('AZEL1', rowincr=10000)[:, 1]
                 else:
