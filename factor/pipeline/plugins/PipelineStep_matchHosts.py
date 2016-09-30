@@ -35,7 +35,7 @@ def plugin_main(args, **kwargs):
         hosts_to_match.append(item.host)
 
     for item, host in zip(map_in, hosts_to_match):
-        map_out.data.append(DataProduct(host, file_out, False))
+        map_out.data.append(DataProduct(host, item.file, False))
 
     fileid = os.path.join(mapfile_dir, filename)
     map_out.save(fileid)
