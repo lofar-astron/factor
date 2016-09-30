@@ -427,7 +427,7 @@ switch_data_weights_col_shift_cal.argument.flags           =   [msfile]
 
 # Concat the preaveraged data (and weights), length = ntimes * num_cal_blocks
 # Compress both data and weights
-concat_blavg_data.control.type                             =   dppp
+concat_blavg_data.control.type                             =   dppp_concat
 concat_blavg_data.control.mapfile_out                      =   make_blavg_data_mapfile.output.mapfile
 concat_blavg_data.control.mapfile_in                       =   sort_into_Groups_maps.output.filesmap
 concat_blavg_data.control.inputkey                         =   msin
@@ -569,7 +569,7 @@ sort_average0_into_Groups_maps.control.mapfile_filesmap    =   sort_average0_int
 # Note, this step is done to ensure that we get WSClean channel images that match
 # the datasets used for selfcal so that predict will work properly
 # Compress both data and weights
-concat_average0_data.control.type                                 =   dppp
+concat_average0_data.control.type                                 =   dppp_concat
 concat_average0_data.control.mapfile_out                          =   sort_average0_into_Groups_maps.output.groupmap
 concat_average0_data.control.mapfile_in                           =   sort_average0_into_Groups_maps.output.filesmap
 concat_average0_data.control.inputkey                             =   msin
