@@ -21,6 +21,10 @@ def plugin_main(args, **kwargs):
         Directory for output mapfile
     filename: str
         Name of output mapfile
+    nitems_per_host: int
+        Number of input items to give to a single host. This option can be used
+        to ensure that a host has all the necessary files (they are assumed to
+        be consecutive)
 
     Returns
     -------
@@ -41,15 +45,33 @@ def plugin_main(args, **kwargs):
     if make_tempdir:
         direction_name = os.path.basename(mapfile_dir.split('/mapfiles')[0])
         new_dir = os.path.join(new_dir, direction_name)
+    if 'nitems_per_host' in kwargs:
+        nitems_per_host = int(float(kwargs['nitems_per_host']))
+    else:
+        nitems_per_host = 1
 
     map_in = DataMap.load(mapfile_in)
-    map_in.iterator = DataMap.SkipIterator
     map_out = DataMap([])
-    for item in map_in:
-        file_out = os.path.join(new_dir, os.path.basename(item.file))
-        if append is not None:
-            file_out += append
-        map_out.data.append(DataProduct(item.host, file_out, False))
+    map_in.iterator = DataMap.SkipIterator
+    if nitems_to_compress > 1:
+        all_files = []
+        for item in map_in:
+            file_out = os.path.join(new_dir, os.path.basename(item.file))
+            if append is not None:
+                file_out += append
+            all_files.append(file_out)
+        file_groups = [all_files[i:i+nitems_to_compress] for i  in range(0, len(all_files), nitems_to_compress)]
+        all_hosts = [item.host for item in map_in]
+        host_groups = [all_hosts[i:i+nitems_to_compress] for i  in range(0, len(all_hosts), nitems_to_compress)]
+        for file_list, host_list in zip(file_groups, host_groups):
+            for file_out in file_list:
+                map_out.data.append(DataProduct(host_list[0], file_out, False))
+    else:
+        for item in map_in:
+            file_out = os.path.join(new_dir, os.path.basename(item.file))
+            if append is not None:
+                file_out += append
+            map_out.data.append(DataProduct(item.host, file_out, False))
 
     fileid = os.path.join(mapfile_dir, filename)
     map_out.save(fileid)
@@ -67,3 +89,5 @@ def string2bool(instring):
         return False
     else:
         raise ValueError('string2bool: Cannot convert string "'+instring+'" to boolean!')
+
+
