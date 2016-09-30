@@ -53,16 +53,16 @@ def plugin_main(args, **kwargs):
     map_in = DataMap.load(mapfile_in)
     map_out = DataMap([])
     map_in.iterator = DataMap.SkipIterator
-    if nitems_to_compress > 1:
+    if nitems_per_host > 1:
         all_files = []
         for item in map_in:
             file_out = os.path.join(new_dir, os.path.basename(item.file))
             if append is not None:
                 file_out += append
             all_files.append(file_out)
-        file_groups = [all_files[i:i+nitems_to_compress] for i  in range(0, len(all_files), nitems_to_compress)]
+        file_groups = [all_files[i:i+nitems_per_host] for i  in range(0, len(all_files), nitems_per_host)]
         all_hosts = [item.host for item in map_in]
-        host_groups = [all_hosts[i:i+nitems_to_compress] for i  in range(0, len(all_hosts), nitems_to_compress)]
+        host_groups = [all_hosts[i:i+nitems_per_host] for i  in range(0, len(all_hosts), nitems_per_host)]
         for file_list, host_list in zip(file_groups, host_groups):
             for file_out in file_list:
                 map_out.data.append(DataProduct(host_list[0], file_out, False))
