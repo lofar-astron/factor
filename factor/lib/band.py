@@ -90,9 +90,10 @@ class Band(object):
                 # Add (virtual) elevation column to MS
                 tab = pt.table(self.files[MS_id], ack=False)
                 exiting_colnames = tab.colnames()
-                tab.close()
                 if 'AZEL1' not in exiting_colnames:
+                    tab.close()
                     pt.addDerivedMSCal(self.files[MS_id])
+                    tab = pt.table(self.files[MS_id], ack=False)
 
                 # Calculate mean elevation
                 if MS_id == 0:
