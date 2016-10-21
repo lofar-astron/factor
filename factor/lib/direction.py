@@ -132,7 +132,6 @@ class Direction(object):
         self.reset_operations = []
         self.cleanup_mapfiles = []
         self.preapply_phase_cal = False
-        self.preapply_solve_tec_only = False
         self.create_preapply_parmdb = False
         self.contains_target = False # whether this direction contains the target (if any)
 

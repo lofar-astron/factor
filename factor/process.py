@@ -118,8 +118,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                         if direction.name != d.name:
                             direction.preapply_phase_cal = True
                             direction.preapply_parmdb_mapfile = d.preapply_parmdb_mapfile
-                            if parset['calibration_specific']['preapply_solve_tec_only']:
-                                direction.preapply_solve_tec_only = True
                     set_preapply_flag = False
             else:
                 log.error('Peeling failed for direction {0}.'.format(d.name))
@@ -183,8 +181,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     if d.name != direction_group_ok[0].name:
                         d.preapply_phase_cal = True
                         d.preapply_parmdb_mapfile = direction_group_ok[0].preapply_parmdb_mapfile
-                        if parset['calibration_specific']['preapply_solve_tec_only']:
-                            d.preapply_solve_tec_only = True
                 set_preapply_flag = False
 
         # Subtract final model(s) for directions for which selfcal went OK
