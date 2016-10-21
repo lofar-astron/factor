@@ -269,7 +269,7 @@ def plot_state(directions_list, trim_names=True):
     patch_list=[not_processed_patch, processing_patch, processing_error, selfcal_not_ok_patch, selfcal_ok_patch]
     label_list=['Unprocessed', 'Processing', 'Pipeline Error', 'Selfcal Failed', 'Selfcal OK']
     for i in range(options['reimages']):
-        label_list.append('Reimage '+str(i+1))
+        label_list.append('Image '+str(i+1))
         color=(0.66/(i+2)**0.5,0.96/(i+2)**0.5,0.66/(i+2)**0.5,1.0)
         reimage_patch=plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9',
             facecolor=color, linewidth=2)
