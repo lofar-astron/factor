@@ -85,8 +85,8 @@ def main(root, scalefactor=1.5):
         print 'size is', xsize
 
         padsize = get_optimum_size(int(xsize * scalefactor))
-        if padsize < 2048:
-            # Set min size to 2048 to avoid sampling issues.
+        if padsize < 1024:
+            # Set min size to 1024 to avoid sampling issues.
             # From Andre Offringa:
             # "If you make the images really small, you'll get inaccuracies from sampling
             # (i.e., predicting from / degridding) the uv plane. The uv plane will have the
@@ -95,7 +95,7 @@ def main(root, scalefactor=1.5):
             # so this doesn't happen too quickly, but if you're making images much smaller
             # than, say, 1024 x 1024, I think you might run into this, so you might perform
             # a bit of zero padding if you get much below that."
-            padsize = 2048
+            padsize = 1024
 
         offset = (padsize - xsize) / 2
         print 'padding to', padsize

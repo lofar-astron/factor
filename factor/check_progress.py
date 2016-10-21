@@ -107,10 +107,7 @@ def load_directions(parset_file):
     # Figure out whether reimaging is going to be done and if so how
     # many images are to be made.
     imaging_parset = parset['imaging_specific']
-    if not(imaging_parset['reimage_selfcaled']):
-        reimages=0
-    else:
-        reimages=len(imaging_parset['facet_cellsize_arcsec'])
+    reimages=len(imaging_parset['facet_cellsize_arcsec'])
     options['reimages']=reimages
 
     # Load directions. First check for user-supplied directions file then for

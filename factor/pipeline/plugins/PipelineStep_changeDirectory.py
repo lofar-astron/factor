@@ -40,11 +40,6 @@ def plugin_main(args, **kwargs):
         append =  kwargs['append']
     mapfile_dir = kwargs['mapfile_dir']
     filename = kwargs['filename']
-    if 'make_tempdir' in kwargs:
-        make_tempdir =  string2bool(kwargs['make_tempdir'])
-    if make_tempdir:
-        direction_name = os.path.basename(mapfile_dir.split('/mapfiles')[0])
-        new_dir = os.path.join(new_dir, direction_name)
     if 'nitems_per_host' in kwargs:
         nitems_per_host = int(float(kwargs['nitems_per_host']))
     else:

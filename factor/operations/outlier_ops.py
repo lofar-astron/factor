@@ -78,6 +78,8 @@ class OutlierPeel(Operation):
             'verify_subtract.break.mapfile')
         self.direction.dir_dep_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'merge_normalized_selfcal_parmdbs.mapfile')
+        self.direction.converted_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'convert_normalized_merged_selfcal_parmdbs.mapfile')
         self.direction.dir_indep_skymodels_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'full_skymodels.mapfile')
         self.direction.selfcal_plots_mapfile = os.path.join(self.pipeline_mapfile_dir,
@@ -85,6 +87,10 @@ class OutlierPeel(Operation):
         if self.direction.create_preapply_parmdb:
             self.direction.preapply_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
                 'create_preapply_parmdb.mapfile')
+        self.direction.sourcedb_new_facet_sources = os.path.join(self.pipeline_mapfile_dir,
+            'make_sourcedb_new_facet_sources_for_facet_imaging.mapfile')
+        self.direction.diff_models_field_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'predict_and_difference_models.mapfile')
 
         # Store results of verify_subtract check. This will work if the verification
         # was done using multiple bands although we use only one at the moment
@@ -103,14 +109,12 @@ class OutlierPeel(Operation):
 
         # Delete temp data
         self.direction.cleanup_mapfiles = [
-            os.path.join(self.pipeline_mapfile_dir, 'add_all_facet_sources.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'shift_and_average.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'shift_cal.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat_data.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'concat_blavg_data.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'predict_outlier_model.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'corrupt_outlier_model.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'apply_dir_dep.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'average_pre.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'average_post.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'sorted_groups.mapfile_groups')]
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()
+        self.cleanup()

@@ -1,276 +1,108 @@
 pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, expand_merged_parmdb_map, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} shift_empty, create_compressed_mapfile_shift_empty, add_model_data_col, sort_shift_empty_into_Groups, sort_shift_empty_into_Groups_maps, expand_facet_model_map, expand_facet_model_size_map, wsclean_ft, corrupt_final_model, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, predict_all_model_data, subtract_final_initial, shift_diff_model_to_field, subtract_diff_model_from_empty_data]
 
-pipeline.pluginpath                                          =   {{ pipeline_dir }}/plugins
+pipeline.pluginpath = {{ pipeline_dir }}/plugins
 
 # update host entries in all mapfiles
-update_mapfile_hosts.control.kind                            =   plugin
-update_mapfile_hosts.control.type                            =   updateHosts
-update_mapfile_hosts.control.mapfile_dir                     =   input.output.mapfile_dir
-update_mapfile_hosts.control.hosts                           =   {{ hosts }}
+update_mapfile_hosts.control.kind        = plugin
+update_mapfile_hosts.control.type        = updateHosts
+update_mapfile_hosts.control.mapfile_dir = input.output.mapfile_dir
+update_mapfile_hosts.control.hosts       = {{ hosts }}
 
 # create a mapfile with all single MSs from supplied list, length = nfiles
-create_ms_map.control.kind                                   =   plugin
-create_ms_map.control.type                                   =   addListMapfile
-create_ms_map.control.hosts                                  =   {{ hosts }}
-create_ms_map.control.files                                  =   {{ ms_files_single }}
-create_ms_map.control.mapfile_dir                            =   input.output.mapfile_dir
-create_ms_map.control.filename                               =   input_bands.mapfile
+create_ms_map.control.kind        = plugin
+create_ms_map.control.type        = addListMapfile
+create_ms_map.control.hosts       = {{ hosts }}
+create_ms_map.control.files       = {{ ms_files_single }}
+create_ms_map.control.mapfile_dir = input.output.mapfile_dir
+create_ms_map.control.filename    = input_bands.mapfile
 
 # create a multi-mapfile with the groups of MSs from supplied list, length = nbands
-create_msmulti_map.control.kind                              =   plugin
-create_msmulti_map.control.type                              =   addListMultiMapfile
-create_msmulti_map.control.hosts                             =   {{ hosts }}
-create_msmulti_map.control.files                             =   {{ ms_files_grouped }}
-create_msmulti_map.control.mapfile_dir                       =   input.output.mapfile_dir
-create_msmulti_map.control.filename                          =   input_files_grouped.mapfile
-
-# expand mapfile of the dir-dependent parmDB to all files, length = nfiles
-expand_merged_parmdb_map.control.kind                        =   plugin
-expand_merged_parmdb_map.control.type                        =   expandMapfile
-expand_merged_parmdb_map.control.mapfile_in                  =   {{ dir_dep_parmdb_mapfile }}
-expand_merged_parmdb_map.control.mapfile_to_match            =   create_ms_map.output.mapfile
-expand_merged_parmdb_map.control.mapfile_dir                 =   input.output.mapfile_dir
-expand_merged_parmdb_map.control.filename                    =   expand_merged_parmdbs.mapfile
-
-{% if preapply_phase_cal %}
-# expand mapfile of the dir-dependent parmDB to all files, length = nfiles
-expand_preapply_parmdb_map.control.kind                      =   plugin
-expand_preapply_parmdb_map.control.type                      =   expandMapfile
-expand_preapply_parmdb_map.control.mapfile_in                =   {{ preapply_parmdb_mapfile }}
-expand_preapply_parmdb_map.control.mapfile_to_match          =   create_ms_map.output.mapfile
-expand_preapply_parmdb_map.control.mapfile_dir               =   input.output.mapfile_dir
-expand_preapply_parmdb_map.control.filename                  =   expand_preapply_parmdbs.mapfile
-{% endif %}
-
-# shift current residual visibilities to facet-center, length = nfiles
-# Compress both data and weights
-shift_empty.control.type                                     =   dppp
-shift_empty.control.opts.mapfile_in                          =   create_ms_map.output.mapfile
-shift_empty.control.opts.inputkey                            =   msin
-shift_empty.argument.numthreads                              =   {{ max_cpus_per_io_proc_nfiles }}
-shift_empty.argument.msin.datacolumn                         =   CORRECTED_DATA
-shift_empty.argument.msout.overwrite                         =   True
-shift_empty.argument.msout.writefullresflag                  =   False
-shift_empty.argument.local_scratch_dir                       =   {{ local_dir }}
-shift_empty.argument.steps                                   =   [shift]
-shift_empty.argument.shift.type                              =   phaseshifter
-{% if skip_facet_imaging %}
-shift_empty.argument.shift.phasecenter                       =   [{{ ra }}deg, {{ dec }}deg]
-{% else %}
-shift_empty.argument.shift.phasecenter                       =   [{{ facet_ra }}deg, {{ facet_dec }}deg]
-{% endif %}
-{% if use_compression %}
-shift_empty.argument.msout.storagemanager                    =   "Dysco"
-shift_empty.argument.msout.storagemanager.databitrate        =   16
-shift_empty.argument.msout.storagemanager.weightbitrate      =   12
-shift_empty.argument.msout.storagemanager.distribution       =   "TruncatedGaussian"
-shift_empty.argument.msout.storagemanager.disttruncation     =   1.5
-shift_empty.argument.msout.storagemanager.normalization      =   "AF"
-{% endif %}
-
-# compress mapfile so that all files are in one group, length = 1
-create_compressed_mapfile_shift_empty.control.kind           =   plugin
-create_compressed_mapfile_shift_empty.control.type           =   compressMapfile
-create_compressed_mapfile_shift_empty.control.mapfile_in     =   shift_empty.output.mapfile
-create_compressed_mapfile_shift_empty.control.mapfile_dir    =   input.output.mapfile_dir
-create_compressed_mapfile_shift_empty.control.filename       =   concat_shift_empty_input.mapfile
-
-# add MODEL_DATA column to shift_empty MSs, length = nfiles
-# because the sort_shift_empty_into_Groups step below makes dummy files,
-# we need to add this column first so that the dummy files have them too
-add_model_data_col.control.type                             =   add_model_data_column
-add_model_data_col.control.mapfile_in                       =   shift_empty.output.mapfile
-add_model_data_col.control.inputkey                         =   msfile
-add_model_data_col.argument.flags                           =   [msfile]
-
-# sort compressed mapfile so that there is one group per timestamp, length = ntimes
-sort_shift_empty_into_Groups.control.type                    =   sort_times_into_freqGroups
-sort_shift_empty_into_Groups.argument.flags                  =   [create_compressed_mapfile_shift_empty.output.mapfile]
-sort_shift_empty_into_Groups.argument.filename               =   sorted_groups_shift_empty.mapfile
-sort_shift_empty_into_Groups.argument.mapfile_dir            =   input.output.mapfile_dir
-sort_shift_empty_into_Groups.argument.hosts                  =   {{ hosts }}
-sort_shift_empty_into_Groups.argument.stepname               =   sort_into_Groups
-{% if is_patch or skip_facet_imaging %}
-sort_shift_empty_into_Groups.argument.nband_pad              =   {{ nband_pad_selfcal }}
-{% else %}
-sort_shift_empty_into_Groups.argument.nband_pad              =   {{ nband_pad }}
-{% endif %}
-sort_shift_empty_into_Groups.argument.make_dummy_files       =   True
-
-# convert the output of sort_into_Groups into usable mapfiles, len = 1 / ntimes
-sort_shift_empty_into_Groups_maps.control.kind               =   plugin
-sort_shift_empty_into_Groups_maps.control.type               =   mapfilenamesFromMapfiles
-sort_shift_empty_into_Groups_maps.control.mapfile_groupmap   =   sort_shift_empty_into_Groups.output.groupmapfile.mapfile
-sort_shift_empty_into_Groups_maps.control.mapfile_filesmap   =   sort_shift_empty_into_Groups.output.mapfile.mapfile
-
-# expand mapfile of the facet-model to all groups, length = some
-expand_facet_model_map.control.kind                          =   plugin
-expand_facet_model_map.control.type                          =   expandMapfile
-expand_facet_model_map.control.mapfile_in                    =   {{ facet_model_mapfile }}
-expand_facet_model_map.control.mapfile_to_match              =   sort_shift_empty_into_Groups_maps.output.groupmap
-expand_facet_model_map.control.mapfile_dir                   =   input.output.mapfile_dir
-expand_facet_model_map.control.filename                      =   expand_facet_model.mapfile
-
-# expand mapfile of the model image sizes to all groups, length = some
-expand_facet_model_size_map.control.kind                     =   plugin
-expand_facet_model_size_map.control.type                     =   expandMapfile
-expand_facet_model_size_map.control.mapfile_in               =   {{ wsclean_modelimg_size_mapfile }}
-expand_facet_model_size_map.control.mapfile_to_match         =   sort_shift_empty_into_Groups_maps.output.groupmap
-expand_facet_model_size_map.control.mapfile_dir              =   input.output.mapfile_dir
-expand_facet_model_size_map.control.filename                 =   expand_facet_model_size.mapfile
-
-# make model visibilities, length = ntimes
-# For WSClean predict, we need to increase the number of wplanes so that the
-# effective model image size is larger than the FOV (to prevent aliasing issues)
-wsclean_ft.control.type                                      =   wsclean_ft
-wsclean_ft.control.mapfiles_in                               =   [sort_shift_empty_into_Groups_maps.output.filesmap,expand_facet_model_map.output.mapfile,expand_facet_model_size_map.output.mapfile]
-wsclean_ft.control.inputkeys                                 =   [msfile,name,size]
-wsclean_ft.argument.flags                                    =   [-predict,msfile]
-wsclean_ft.argument.mem                                      =   {{ max_percent_memory_per_io_proc_ntimes }}
-wsclean_ft.argument.j                                        =   {{ max_cpus_per_io_proc_ntimes }}
-wsclean_ft.argument.scale                                    =   {{ cellsize_selfcal_deg }}
-{% if is_patch or skip_facet_imaging %}
-wsclean_ft.argument.channelsout                              =   {{ wsclean_nchannels_selfcal }}
-{% else %}
-wsclean_ft.argument.channelsout                              =   {{ wsclean_nchannels }}
-{% endif %}
-wsclean_ft.argument.tempdir                                  =   {{ local_dir }}
-wsclean_ft.argument.nwlayers-for-size                        =   12288 12288
-
-# corrupt the facet-model visibilities, length = nfiles
-corrupt_final_model.control.type                             =   dppp_inplace
-{% if preapply_phase_cal %}
-corrupt_final_model.control.opts.mapfiles_in                 =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile,expand_preapply_parmdb_map.output.mapfile]
-corrupt_final_model.control.opts.inputkeys                   =   [msin,dir_dep_parmdb,preapply_parmdb]
-{% else %}
-corrupt_final_model.control.opts.mapfiles_in                 =   [shift_empty.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-corrupt_final_model.control.opts.inputkeys                   =   [msin,parmdb]
-{% endif %}
-corrupt_final_model.argument.numthreads                      =   {{ max_cpus_per_proc_nfiles }}
-corrupt_final_model.argument.msin.datacolumn                 =   MODEL_DATA
-corrupt_final_model.argument.msout                           =   .
-corrupt_final_model.argument.msout.datacolumn                =   MODEL_DATA_NEW
-{% if preapply_phase_cal %}
-{% if preapply_solve_tec_only %}
-corrupt_final_model.argument.steps                           =   [preapply_fast1,preapply_fast2,preapply_slow,corrupt_fast1,corrupt_slow]
-{% else %}
-corrupt_final_model.argument.steps                           =   [preapply_fast1,preapply_fast2,preapply_slow,corrupt_fast1,corrupt_fast2,corrupt_slow]
-{% endif %}
-corrupt_final_model.argument.preapply_fast1.type             =   applycal
-corrupt_final_model.argument.preapply_fast1.parmdb           =   preapply_parmdb
-corrupt_final_model.argument.preapply_fast1.correction       =   tec
-corrupt_final_model.argument.preapply_fast1.invert           =   False
-corrupt_final_model.argument.preapply_fast2.type             =   applycal
-corrupt_final_model.argument.preapply_fast2.parmdb           =   preapply_parmdb
-corrupt_final_model.argument.preapply_fast2.correction       =   commonscalarphase
-corrupt_final_model.argument.preapply_fast2.invert           =   False
-corrupt_final_model.argument.preapply_slow.type              =   applycal
-corrupt_final_model.argument.preapply_slow.parmdb            =   preapply_parmdb
-corrupt_final_model.argument.preapply_slow.invert            =   False
-{% else %}
-corrupt_final_model.argument.steps                           =   [corrupt_fast1,corrupt_fast2,corrupt_slow]
-{% endif %}
-corrupt_final_model.argument.corrupt_fast1.type              =   applycal
-corrupt_final_model.argument.corrupt_fast1.parmdb            =   dir_dep_parmdb
-corrupt_final_model.argument.corrupt_fast1.correction        =   tec
-corrupt_final_model.argument.corrupt_fast1.invert            =   False
-{% if not preapply_solve_tec_only %}
-corrupt_final_model.argument.corrupt_fast2.type              =   applycal
-corrupt_final_model.argument.corrupt_fast2.parmdb            =   dir_dep_parmdb
-corrupt_final_model.argument.corrupt_fast2.correction        =   commonscalarphase
-corrupt_final_model.argument.corrupt_fast2.invert            =   False
-{% endif %}
-corrupt_final_model.argument.corrupt_slow.type               =   applycal
-corrupt_final_model.argument.corrupt_slow.parmdb             =   dir_dep_parmdb
-corrupt_final_model.argument.corrupt_slow.correction         =   gain
-corrupt_final_model.argument.corrupt_slow.invert             =   False
+create_msmulti_map.control.kind        = plugin
+create_msmulti_map.control.type        = addListMultiMapfile
+create_msmulti_map.control.hosts       = {{ hosts }}
+create_msmulti_map.control.files       = {{ ms_files_grouped }}
+create_msmulti_map.control.mapfile_dir = input.output.mapfile_dir
+create_msmulti_map.control.filename    = input_files_grouped.mapfile
 
 # create a mapfile with the direction-independent parmDBs from supplied list, length = nfiles
-create_parmdb_map.control.kind                               =   plugin
-create_parmdb_map.control.type                               =   addListMapfile
-create_parmdb_map.control.hosts                              =   {{ hosts }}
-create_parmdb_map.control.files                              =   {{ dir_indep_parmDBs }}
-create_parmdb_map.control.mapfile_dir                        =   input.output.mapfile_dir
-create_parmdb_map.control.filename                           =   dir_indep_instrument_parmdbs.mapfile
+create_parmdb_map.control.kind        = plugin
+create_parmdb_map.control.type        = addListMapfile
+create_parmdb_map.control.hosts       = {{ hosts }}
+create_parmdb_map.control.files       = {{ dir_indep_parmDBs }}
+create_parmdb_map.control.mapfile_dir = input.output.mapfile_dir
+create_parmdb_map.control.filename    = dir_indep_instrument_parmdbs.mapfile
+
+# expand mapfile of the dir-dependent parmDB to all files, length = nfiles
+expand_merged_parmdb_map.control.kind             = plugin
+expand_merged_parmdb_map.control.type             = expandMapfile
+expand_merged_parmdb_map.control.mapfile_in       = {{ converted_parmdb_mapfile }}
+expand_merged_parmdb_map.control.mapfile_to_match = create_ms_map.output.mapfile
+expand_merged_parmdb_map.control.mapfile_dir      = input.output.mapfile_dir
+expand_merged_parmdb_map.control.filename         = expand_merged_parmdbs.mapfile
 
 # create a mapfile with the current skymodels from supplied list, length = nbands
-create_full_skymodels_map.control.kind                       =   plugin
-create_full_skymodels_map.control.type                       =   addListMapfile
-create_full_skymodels_map.control.hosts                      =   {{ hosts }}
-create_full_skymodels_map.control.files                      =   {{ skymodels }}
-create_full_skymodels_map.control.mapfile_dir                =   input.output.mapfile_dir
-create_full_skymodels_map.control.filename                   =   full_skymodels.mapfile
+create_full_skymodels_map.control.kind        = plugin
+create_full_skymodels_map.control.type        = addListMapfile
+create_full_skymodels_map.control.hosts       = {{ hosts }}
+create_full_skymodels_map.control.files       = {{ skymodels }}
+create_full_skymodels_map.control.mapfile_dir = input.output.mapfile_dir
+create_full_skymodels_map.control.filename    = full_skymodels.mapfile
 
 # extract the skymodel for this facet from global skymodel, length = nbands
-make_facet_skymodels_all.control.type                        =   make_facet_skymodel
-make_facet_skymodels_all.control.mapfile_in                  =   create_full_skymodels_map.output.mapfile
-make_facet_skymodels_all.control.inputkey                    =   fullmodelfile
-make_facet_skymodels_all.control.outputkey                   =   outfile
-make_facet_skymodels_all.argument.flags                      =   [fullmodelfile,outfile,{{ vertices_file }}]
-make_facet_skymodels_all.argument.cal_only                   =   False
+make_facet_skymodels_all.control.type       = make_facet_skymodel
+make_facet_skymodels_all.control.mapfile_in = create_full_skymodels_map.output.mapfile
+make_facet_skymodels_all.control.inputkey   = fullmodelfile
+make_facet_skymodels_all.control.outputkey  = outfile
+make_facet_skymodels_all.argument.flags     = [fullmodelfile,outfile,{{ vertices_file }}]
+make_facet_skymodels_all.argument.cal_only  = False
 
 # convert the facet skymodel into a sourcedb, length = nbands
-make_sourcedb_all_facet_sources.control.type                 =   make_sourcedb
-make_sourcedb_all_facet_sources.control.opts.mapfile_in      =   make_facet_skymodels_all.output.mapfile
-make_sourcedb_all_facet_sources.control.opts.inputkey        =   in
-make_sourcedb_all_facet_sources.argument.format              =   <
-make_sourcedb_all_facet_sources.argument.outtype             =   blob
+make_sourcedb_all_facet_sources.control.type       = make_sourcedb
+make_sourcedb_all_facet_sources.control.mapfile_in = make_facet_skymodels_all.output.mapfile
+make_sourcedb_all_facet_sources.control.inputkey   = in
+make_sourcedb_all_facet_sources.argument.format    = <
+make_sourcedb_all_facet_sources.argument.outtype   = blob
 
-# expand the sourcedb mapfile so that there is one entry for every file, length = nfiles
-expand_sourcedb_all_facet_sources.control.kind               =   plugin
-expand_sourcedb_all_facet_sources.control.type               =   mapfileSingleToGroup
-expand_sourcedb_all_facet_sources.control.mapfile_in         =   make_sourcedb_all_facet_sources.output.mapfile
-expand_sourcedb_all_facet_sources.control.mapfile_groups     =   create_msmulti_map.output.mapfile
-expand_sourcedb_all_facet_sources.control.mapfile_dir        =   input.output.mapfile_dir
-expand_sourcedb_all_facet_sources.control.filename           =   expand_sourcedb_all_facet_sources.mapfile
+# expand mapfile of the new sourcedb to all files, length = nfiles
+expand_new_sourcedb_map.control.kind           = plugin
+expand_new_sourcedb_map.control.type           = mapfileSingleToGroup
+expand_new_sourcedb_map.control.mapfile_in     = {{ sourcedb_new_facet_sources }}
+expand_new_sourcedb_map.control.mapfile_groups = create_msmulti_map.output.mapfile
+expand_new_sourcedb_map.control.mapfile_dir    = input.output.mapfile_dir
+expand_new_sourcedb_map.control.filename       = expand_sourcedbs.mapfile
 
-# predict the skymodel data for the full facet into the phase-shifted measurement sets, length = nfiles
-# No compression since we do not want to add noise to the model data (weights
-# are already compressed)
-predict_all_model_data.control.type                          =   dppp_inplace
-predict_all_model_data.control.opts.mapfiles_in              =   [shift_empty.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
-predict_all_model_data.control.opts.inputkeys                =   [msin,sourcedb,parmdb]
-predict_all_model_data.argument.numthreads                   =   {{ max_cpus_per_proc_nfiles }}
-predict_all_model_data.argument.msout                        =   .
-predict_all_model_data.argument.msout.datacolumn             =   MODEL_DATA_ORIG
-predict_all_model_data.argument.steps                        =   [pred]
-predict_all_model_data.argument.pred.type                    =   predict
-predict_all_model_data.argument.pred.sourcedb                =   sourcedb
-predict_all_model_data.argument.pred.operation               =   replace
-predict_all_model_data.argument.pred.applycal.parmdb         =   parmdb
-
-# subtract original model vis from new model vis, length = nfiles
-subtract_final_initial.control.type                          =   add_subtract_columns
-subtract_final_initial.control.opts.mapfiles_in              =   [predict_all_model_data.output.mapfile,corrupt_final_model.output.mapfile]
-subtract_final_initial.control.opts.inputkeys                =   [file1,file2]
-subtract_final_initial.argument.flags                        =   [file1,file2,MODEL_DATA_ORIG,MODEL_DATA_NEW,MODEL_DATA,subtract,True,False]
-
-# shift new residuals to field center, length = nfiles
-# Compress weights only
-shift_diff_model_to_field.control.type                                 =   dppp
-shift_diff_model_to_field.control.opts.mapfile_in                      =   predict_all_model_data.output.mapfile
-shift_diff_model_to_field.control.opts.inputkey                        =   msin
-shift_diff_model_to_field.argument.numthreads                          =   {{ max_cpus_per_io_proc_nfiles }}
-shift_diff_model_to_field.argument.msin.datacolumn                     =   MODEL_DATA
-shift_diff_model_to_field.argument.msout.overwrite                     =   True
-shift_diff_model_to_field.argument.msout.writefullresflag              =   False
+# predict the old and new models and subtract the old one from the new one, length = nfiles
+# compress weights only
+predict_and_difference_models.control.type                                 = dppp
+predict_and_difference_models.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_new_sourcedb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile,make_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
+predict_and_difference_models.control.inputkeys                            = [msin,dir_dep_sourcedb,dir_dep_parmdb,dir_indep_sourcedb,dir_indep_parmdb]
+predict_and_difference_models.argument.numthreads                          = {{ max_cpus_per_io_proc_nfiles }}
+predict_and_difference_models.argument.msin.datacolumn                     = DATA
+predict_and_difference_models.argument.msout.overwrite                     = True
+predict_and_difference_models.argument.msout.writefullresflag              = False
 {% if local_dir is not none %}
-shift_diff_model_to_field.argument.local_scratch_dir                   =   {{ local_dir }}
+predict_and_difference_models.argument.local_scratch_dir                   = {{ local_dir }}
 {% endif %}
-shift_diff_model_to_field.argument.steps                               =   [shift]
-shift_diff_model_to_field.argument.shift.type                          =   phaseshifter
-shift_diff_model_to_field.argument.shift.phasecenter                   =   [{{ field_ra }}deg, {{ field_dec }}deg]
+predict_and_difference_models.argument.steps                               = [pred_new,subtract_old]
+predict_and_difference_models.argument.pred_new.type                       = predict
+predict_and_difference_models.argument.pred_new.sourcedb                   = dir_dep_sourcedb
+predict_and_difference_models.argument.pred_new.applycal.parmdb            = dir_dep_parmdb
+predict_and_difference_models.argument.pred_new.operation                  = replace
+predict_and_difference_models.argument.subtract_old.type                   = predict
+predict_and_difference_models.argument.subtract_old.sourcedb               = dir_indep_sourcedb
+predict_and_difference_models.argument.subtract_old.applycal.parmdb        = dir_indep_parmdb
+predict_and_difference_models.argument.subtract_old.operation              = subtract
 {% if use_compression %}
-shift_diff_model_to_field.argument.msout.storagemanager                =   "Dysco"
-shift_diff_model_to_field.argument.msout.storagemanager.databitrate    =   0
-shift_diff_model_to_field.argument.msout.storagemanager.weightbitrate  =   12
-shift_diff_model_to_field.argument.msout.storagemanager.distribution   =   "TruncatedGaussian"
-shift_diff_model_to_field.argument.msout.storagemanager.disttruncation =   1.5
-shift_diff_model_to_field.argument.msout.storagemanager.normalization  =   "AF"
+predict_and_difference_models.argument.msout.storagemanager                = "Dysco"
+predict_and_difference_models.argument.msout.storagemanager.databitrate    = 0
+predict_and_difference_models.argument.msout.storagemanager.weightbitrate  = 12
+predict_and_difference_models.argument.msout.storagemanager.distribution   = "TruncatedGaussian"
+predict_and_difference_models.argument.msout.storagemanager.disttruncation = 1.5
+predict_and_difference_models.argument.msout.storagemanager.normalization  = "AF"
 {% endif %}
 
-# subtract model difference from facet-selfcal from original data, length = nfiles
-subtract_diff_model_from_empty_data.control.type             =   add_subtract_columns
-subtract_diff_model_from_empty_data.control.opts.mapfiles_in =   [create_ms_map.output.mapfile,shift_diff_model_to_field.output.mapfile]
-subtract_diff_model_from_empty_data.control.opts.inputkeys   =   [file1,file2]
-subtract_diff_model_from_empty_data.argument.flags           =   [file1,file2,CORRECTED_DATA,DATA,CORRECTED_DATA,subtract,True,False]
+# add model difference from facet-selfcal to original data, length = nfiles
+add_diff_model_from_empty_data.control.type        = add_subtract_columns
+add_diff_model_from_empty_data.control.mapfiles_in = [create_ms_map.output.mapfile,predict_and_difference_models.output.mapfile]
+add_diff_model_from_empty_data.control.inputkeys   = [file1,file2]
+add_diff_model_from_empty_data.argument.flags      = [file1,file2,CORRECTED_DATA,DATA,CORRECTED_DATA,add,True,False]

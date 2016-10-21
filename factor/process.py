@@ -126,14 +126,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 log.info('Exiting...')
                 sys.exit(1)
 
-            if d.peel_calibrator and not d.skip_facet_imaging:
-                # Do the imaging of the facet if calibrator was peeled and
-                # subtract the improved model
-                op = FacetPeelImage(parset, bands, d)
-                scheduler.run(op)
-
-                op = FacetSub(parset, bands, d)
-                scheduler.run(op)
+            # Subtract final model(s) if selfcal went OK
+            op = FacetSub(parset, bands, d)
+            scheduler.run(op)
 
     # Run selfcal and subtract operations on direction groups
     for gindx, direction_group in enumerate(direction_groups):
@@ -212,7 +207,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         log.error('Self calibration failed for all directions. Exiting...')
         sys.exit(1)
 
-    # (Re)image facets for each set of cellsize, robust, taper, and uv cut settings
+    # Image facets for each set of cellsize, robust, taper, and uv cut settings
     cellsizes = parset['imaging_specific']['facet_cellsize_arcsec']
     tapers = parset['imaging_specific']['facet_taper_arcsec']
     robusts = parset['imaging_specific']['facet_robust']
@@ -220,10 +215,16 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     selfcal_robust = parset['imaging_specific']['selfcal_robust']
     nimages = len(cellsizes)
     dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
-    dirs_with_selfcal_to_reimage = [d for d in dirs_with_selfcal if not d.is_patch
-        and not d.is_outlier]
-    dirs_without_selfcal = [d for d in directions if not d.selfcal_ok and not
-        d.is_patch and not d.is_outlier]
+    if parset['imaging_specific']['image_target_only']:
+        dirs_with_selfcal_to_reimage = [d for d in dirs_with_selfcal if not d.is_patch
+            and not d.is_outlier and d.contains_target]
+        dirs_without_selfcal = [d for d in directions if not d.selfcal_ok and not
+            d.is_patch and not d.is_outlier and d.contains_target]
+    else:
+        dirs_with_selfcal_to_reimage = [d for d in dirs_with_selfcal if not d.is_patch
+            and not d.is_outlier]
+        dirs_without_selfcal = [d for d in directions if not d.selfcal_ok and not
+            d.is_patch and not d.is_outlier]
     if len(dirs_without_selfcal) > 0:
         log.info('Imaging the following direction(s) with nearest self calibration solutions:')
         log.info('{0}'.format([d.name for d in dirs_without_selfcal]))
@@ -232,7 +233,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         nearest, sep = factor.directions.find_nearest(d, dirs_with_selfcal)
         log.debug('Using solutions from direction {0} for direction {1} '
             '(separation = {2} deg).'.format(nearest.name, d.name, sep))
-        d.dir_dep_parmdb_mapfile = nearest.dir_dep_parmdb_mapfile
+        d.converted_parmdb_mapfile = nearest.converted_parmdb_mapfile
         d.save_state()
     if len(dirs_with_selfcal_to_reimage + dirs_without_selfcal) > 0:
         for image_indx, (cellsize_arcsec, taper_arcsec, robust, min_uv_lambda) in enumerate(
@@ -245,8 +246,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             full_res_im, opname = _get_image_type_and_name(cellsize_arcsec, taper_arcsec,
                 robust, selfcal_robust, min_uv_lambda, parset)
             if full_res_im:
-                if parset['imaging_specific']['reimage_selfcaled']:
-                    dirs_to_image += dirs_with_selfcal_to_reimage
+                dirs_to_image += dirs_with_selfcal_to_reimage
             else:
                 dirs_to_image += dirs_with_selfcal_to_reimage
 
@@ -609,13 +609,6 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
             if target_has_own_facet and 'target' not in direction_names:
                 directions.append(target)
 
-            # Warn user if reimaging is to be done but they are not processing
-            # the full field
-            if parset['imaging_specific']['reimage_selfcaled']:
-                log.warn("The reimage_selfcaled parameter is True but all directions "
-                    "will not be processed. If you're interested in only a single "
-                    "target in the last facet, then re-imaging will not improve results.")
-
     # Set various direction attributes
     for i, direction in enumerate(directions):
         # Set direction sky model
@@ -651,9 +644,6 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
                     'XY and YX correlations during the slow gain solve')
                 sys.exit(1)
             direction.solve_all_correlations = True
-
-        # Set skip_facet_imaging flag
-        direction.skip_facet_imaging = parset['imaging_specific']['skip_facet_imaging']
 
         # Set field center to that of first band (all bands have the same phase
         # center)
@@ -784,11 +774,12 @@ def _initialize_directions(parset, initial_skymodel, ref_band, max_radius_deg=No
     target_dec = dir_parset['target_dec']
     target_radius_arcmin = dir_parset['target_radius_arcmin']
     target_has_own_facet = dir_parset['target_has_own_facet']
-    if target_has_own_facet:
-        if target_ra is not None and target_dec is not None and target_radius_arcmin is not None:
-            # Make target object
-            target = Direction('target', target_ra, target_dec,
-                factor_working_dir=parset['dir_working'])
+    if target_ra is not None and target_dec is not None and target_radius_arcmin is not None:
+        # Make target object
+        target = Direction('target', target_ra, target_dec,
+            factor_working_dir=parset['dir_working'])
+        if target_has_own_facet:
+            target.contains_target = True
 
             # Check if target is already in directions list because it was
             # selected as a DDE calibrator. If so, remove the duplicate
@@ -799,6 +790,11 @@ def _initialize_directions(parset, initial_skymodel, ref_band, max_radius_deg=No
             # Add target to directions list
             directions.append(target)
         else:
+            # Find direction that contains target
+            nearest, dist = factor.directions.find_nearest(target, directions)
+            nearest.contains_target = True
+    else:
+        if target_has_own_facet:
             log.critical('target_has_own_facet = True, but target RA, Dec, or radius not found in parset')
             sys.exit(1)
 

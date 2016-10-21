@@ -10,7 +10,7 @@ import sys
 import os
 
 
-def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=True,
+def main(ms1, ms2, column1, column2, column_out, op='add',in_memory=True,
     use_compression=False):
     """
     Add/subtract columns (column_out = column1 +/- column2)
@@ -29,7 +29,7 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=True,
     column_out : str
         Name of output column (written to ms1)
     op : str, optional
-        Operation to perform: 'add' or 'subtract'
+        Operation to perform: 'add', 'subtract12', or 'subtract21'
     in_memory : bool, optional
         If True, do the operation in memory rather than with taql
     use_compression : bool, optional
@@ -93,10 +93,12 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=True,
 
         if op.lower() == 'add':
             t1.putcol(column_out, data1 + data2)
-        elif op.lower() == 'subtract':
+        elif op.lower() == 'subtract12' or op.lower() == 'subtract':
             t1.putcol(column_out, data1 - data2)
+        elif op.lower() == 'subtract21':
+            t1.putcol(column_out, data2 - data1)
         else:
-            print('Operation not understood. Must be either "add" or "subtract"')
+            print('Operation not understood. Must be either "add" or "subtract[12,21]"')
             sys.exit(1)
 
         t1.flush()
@@ -109,18 +111,22 @@ def main(ms1, ms2, column1, column2, column_out, op='add', in_memory=True,
         # Add or subtract columns with TaQL
         if op.lower() == 'add':
             op_sym = '+'
-        elif op.lower() == 'subtract':
+        elif op.lower() == 'subtract' or op.lower() == 'subtract12' or op.lower() == 'subtract21':
             op_sym = '-'
         else:
-            print('Operation not understood. Must be either "add" or "subtract"')
+            print('Operation not understood. Must be either "add" or "subtract[12,21]"')
             sys.exit(1)
 
         if use_compression:
             print('Compression not yet supported with in_memory = False')
             sys.exit(1)
 
-        os.system("taql 'update {0}, {1} t2 set {2}={3}{4}t2.{5}'".format(
-            ms1, ms2, column_out, column1, op_sym, column2))
+        if op.lower() == 'subtract21':
+            os.system("taql 'update {0}, {1} t2 set {2}={3}{4}t2.{5}'".format(
+                ms1, ms2, column_out, column1, op_sym, column2))
+        else:
+            os.system("taql 'update {0}, {1} t2 set {2}=t2.{5}{4}{3}'".format(
+                ms1, ms2, column_out, column1, op_sym, column2))
 
 
 if __name__ == '__main__':

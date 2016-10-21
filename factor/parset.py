@@ -320,19 +320,13 @@ def get_calibration_options(parset):
 
     # Preapply the direction-dependent phase solutions for the first calibrator to
     # all subsequent ones (default = False). If True, residual clock errors are
-    # removed before calibration and a single TEC value is fit across the whole
-    # bandwidth. Furthermore, if preapply_solve_TEC_only is True, only TEC is solved
-    # for (instead of TEC+CommonScalarPhase)
+    # removed before calibration and a single TEC+CommonScalarPhase value is fit
+    # across the whole bandwidth
     if 'preapply_first_cal_phases' in parset_dict:
         parset_dict['preapply_first_cal_phases'] = parset.getboolean('calibration',
             'preapply_first_cal_phases')
     else:
         parset_dict['preapply_first_cal_phases'] = False
-    if 'preapply_solve_tec_only' in parset_dict:
-        parset_dict['preapply_solve_tec_only'] = parset.getboolean('calibration',
-            'preapply_solve_tec_only')
-    else:
-        parset_dict['preapply_solve_tec_only'] = False
 
     # Use baseline-dependent preaveraging to increase the signal-to-noise of the
     # phase-only solve for sources below this flux (default = 0.0; i.e., disabled).
@@ -395,7 +389,7 @@ def get_calibration_options(parset):
 
     # Check for unused options
     allowed_options = ['exit_on_selfcal_failure', 'skip_selfcal_check',
-        'preapply_first_cal_phases', 'preapply_solve_tec_only',
+        'preapply_first_cal_phases',
         'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal',
         'multires_selfcal', 'tec_block_mhz', 'peel_flux_jy',
         'solve_min_uv_lambda', 'spline_smooth2d',
@@ -436,26 +430,6 @@ def get_imaging_options(parset):
         parset_dict['make_mosaic'] = parset.getboolean('imaging', 'make_mosaic')
     else:
         parset_dict['make_mosaic'] = True
-
-    # Re-image directions for which selfcal was successful (default = True)
-    if 'reimage_selfcaled' in parset_dict:
-        parset_dict['reimage_selfcaled'] = parset.getboolean('imaging',
-            'reimage_selfcaled')
-    elif 'reimage' in parset._sections['directions']:
-        log.warning('Option "reimage" was given in the [directions] section of the '
-            'parset but should be in the [imaging] section and should be changed to '
-            '"reimage_selfcaled"')
-        parset_dict['reimage_selfcaled'] = parset.getboolean('directions',
-            'reimage')
-    else:
-        parset_dict['reimage_selfcaled'] = True
-
-    # Skip imaging of facets (default = False). Note that enabling this
-    # option will not produce facet images unless reimage_selfcaled is True.
-    if 'skip_facet_imaging' in parset_dict:
-        parset_dict['skip_facet_imaging'] = parset.getboolean('imaging', 'skip_facet_imaging')
-    else:
-        parset_dict['skip_facet_imaging'] = False
 
     # Max factor used to set the number of WSClean channel images when wide-band
     # clean is used (default = 4). The number of channel images is determined by
@@ -528,21 +502,29 @@ def get_imaging_options(parset):
     len_list = []
     if 'facet_cellsize_arcsec' in parset_dict:
         val_list = parset_dict['facet_cellsize_arcsec'].strip('[]').split(',')
+        if val_list[0] == '':
+            val_list = []
         val_list = [float(v) for v in val_list]
         parset_dict['facet_cellsize_arcsec'] = val_list
         len_list.append(len(val_list))
     if 'facet_taper_arcsec' in parset_dict:
         val_list = parset_dict['facet_taper_arcsec'].strip('[]').split(',')
+        if val_list[0] == '':
+            val_list = []
         val_list = [float(v) for v in val_list]
         parset_dict['facet_taper_arcsec'] = val_list
         len_list.append(len(val_list))
     if 'facet_robust' in parset_dict:
         val_list = parset_dict['facet_robust'].strip('[]').split(',')
+        if val_list[0] == '':
+            val_list = []
         val_list = [float(v) for v in val_list]
         parset_dict['facet_robust'] = val_list
         len_list.append(len(val_list))
     if 'facet_min_uv_lambda' in parset_dict:
         val_list = parset_dict['facet_min_uv_lambda'].strip('[]').split(',')
+        if val_list[0] == '':
+            val_list = []
         val_list = [float(v) for v in val_list]
         parset_dict['facet_min_uv_lambda'] = val_list
         len_list.append(len(val_list))
@@ -567,23 +549,19 @@ def get_imaging_options(parset):
     if 'facet_min_uv_lambda' not in parset_dict:
         parset_dict['facet_min_uv_lambda'] = [parset_dict['selfcal_min_uv_lambda']] * nvals
 
+    # Image only the target facet (default = False). If True and a target is
+    # specified in the [directions] section, then only the facet containing the
+    # target source is imaged
+    if 'image_target_only' in parset_dict:
+        parset_dict['image_target_only'] = parset.getboolean('imaging', 'image_target_only')
+    else:
+        parset_dict['image_target_only'] = False
+
    # Padding factor for WSClean images (default = 1.4)
     if 'wsclean_image_padding' in parset_dict:
         parset_dict['wsclean_image_padding'] = parset.getfloat('imaging', 'wsclean_image_padding')
     else:
         parset_dict['wsclean_image_padding'] = 1.4
-
-    # Padding factor for WSClean models for patches (default = 2.0)
-    if 'wsclean_patch_model_padding' in parset_dict:
-        parset._sections['imaging']['wsclean_patch_model_padding'] = parset_dict['wsclean_patch_model_padding']
-    else:
-        parset_dict['wsclean_patch_model_padding'] = 2.0
-
-    # Padding factor for WSClean models for full facets (default = 1.4)
-    if 'wsclean_facet_model_padding' in parset_dict:
-        parset._sections['imaging']['wsclean_facet_model_padding'] = parset_dict['wsclean_facet_model_padding']
-    else:
-        parset_dict['wsclean_facet_model_padding'] = 1.4
 
     # Fit a polynomial over frequency during clean (default = False). If True,
     # WSClean will use the "-fit-spectral-pol" option to fit an nterms = 3
@@ -598,10 +576,9 @@ def get_imaging_options(parset):
         'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
         'selfcal_clean_threshold', 'selfcal_adaptive_threshold',
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
-        'reimage_selfcaled', 'wsclean_image_padding', 'fit_spectral_pol',
-        'wsclean_patch_model_padding', 'wsclean_facet_model_padding',
+        'wsclean_image_padding', 'fit_spectral_pol', 'image_target_only',
         'selfcal_min_uv_lambda', 'facet_min_uv_lambda',
-        'selfcal_robust_wsclean', 'skip_facet_imaging', 'wsclean_bl_averaging',
+        'selfcal_robust_wsclean', 'wsclean_bl_averaging',
         'selfcal_scales']
     for option in given_options:
         if option not in allowed_options:
@@ -929,6 +906,8 @@ def get_cluster_options(parset):
     # drive (e.g., /dev/shm). By default, dir_local_selfcal is set to dir_local
     if 'dir_local' not in parset_dict:
         parset_dict['dir_local'] = None
+    else:
+        parset_dict['dir_local'] = parset_dict['dir_local'].rstrip('/')
     if 'dir_local_selfcal' not in parset_dict:
         parset_dict['dir_local_selfcal'] = parset_dict['dir_local']
 

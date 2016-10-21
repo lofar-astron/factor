@@ -1,23 +1,23 @@
-pipeline.steps = [update_diff_models_hosts, update_input_bands_hosts, {% block add_sub_steps %} add_diff_model_to_empty_data {% endblock add_sub_steps %}]
+pipeline.steps = [update_diff_models_hosts, update_input_bands_hosts, {% block add_sub_steps %} sub_diff_model {% endblock add_sub_steps %}]
 
-pipeline.pluginpath                                   =   {{ pipeline_dir }}/plugins
-
-# update hosts information in old mapfile, length = nfiles
-update_diff_models_hosts.control.kind                 =   plugin
-update_diff_models_hosts.control.type                 =   updateHosts
-update_diff_models_hosts.control.mapfile_in           =   {{ diff_models_field_mapfile }}
-update_diff_models_hosts.control.hosts                =   {{ hosts }}
+pipeline.pluginpath = {{ pipeline_dir }}/plugins
 
 # update hosts information in old mapfile, length = nfiles
-update_input_bands_hosts.control.kind                 =   plugin
-update_input_bands_hosts.control.type                 =   updateHosts
-update_input_bands_hosts.control.mapfile_in           =   {{ input_files_single_mapfile }}
-update_input_bands_hosts.control.hosts                =   {{ hosts }}
+update_diff_models_hosts.control.kind       = plugin
+update_diff_models_hosts.control.type       = updateHosts
+update_diff_models_hosts.control.mapfile_in = {{ diff_models_field_mapfile }}
+update_diff_models_hosts.control.hosts      = {{ hosts }}
+
+# update hosts information in old mapfile, length = nfiles
+update_input_bands_hosts.control.kind       = plugin
+update_input_bands_hosts.control.type       = updateHosts
+update_input_bands_hosts.control.mapfile_in = {{ input_files_single_mapfile }}
+update_input_bands_hosts.control.hosts      = {{ hosts }}
 
 {% block add_sub_parms %}
-# add model difference from facet-selfcal to original data, length = nfiles
-add_diff_model_to_empty_data.control.type             =   add_subtract_columns
-add_diff_model_to_empty_data.control.opts.mapfiles_in =   [{{ input_files_single_mapfile }},{{ diff_models_field_mapfile }}]
-add_diff_model_to_empty_data.control.opts.inputkeys   =   [file1,file2]
-add_diff_model_to_empty_data.argument.flags           =   [file1,file2,{{ subtracted_data_colname }},DATA,CORRECTED_DATA,add,True,False]
+# subtract model difference (new - old) from original data, length = nfiles
+sub_diff_model.control.type        = add_subtract_columns
+sub_diff_model.control.mapfiles_in = [{{ input_files_single_mapfile }},{{ diff_models_field_mapfile }}]
+sub_diff_model.control.inputkeys   = [file1,file2]
+sub_diff_model.argument.flags      = [file1,file2,{{ subtracted_data_colname }},DATA,CORRECTED_DATA,subtract]
 {% endblock add_sub_parms %}

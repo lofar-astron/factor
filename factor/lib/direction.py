@@ -134,6 +134,7 @@ class Direction(object):
         self.preapply_phase_cal = False
         self.preapply_solve_tec_only = False
         self.create_preapply_parmdb = False
+        self.contains_target = False # whether this direction contains the target (if any)
 
         # Define some directories and files
         self.working_dir = factor_working_dir
@@ -208,11 +209,6 @@ class Direction(object):
         mean_freq_mhz = np.mean([b.freq for b in bands]) / 1e6
         min_peak_smearing_factor = 1.0 - parset['imaging_specific']['max_peak_smearing']
         padding = parset['imaging_specific']['wsclean_image_padding']
-        self.wsclean_patch_model_padding = parset['imaging_specific']['wsclean_patch_model_padding']
-        if parset['imaging_specific']['skip_facet_imaging']:
-            self.wsclean_facet_model_padding = self.wsclean_patch_model_padding
-        else:
-            self.wsclean_facet_model_padding = parset['imaging_specific']['wsclean_facet_model_padding']
         wsclean_nchannels_factor = parset['imaging_specific']['wsclean_nchannels_factor']
         chan_width_hz = bands[0].chan_width_hz
         nchan = bands[0].nchan
@@ -1050,14 +1046,14 @@ class Direction(object):
                         files = [item.file]
                     for f in files:
                         if os.path.exists(f):
-                            os.system('rm -rf {0}'.format(f))
+                            os.system('rm -rf {0} &'.format(f))
 
                             # Also delete associated "_CONCAT" files that result
                             # from virtual concatenation
                             extra_files = glob.glob(f+'_CONCAT')
                             for e in extra_files:
                                 if os.path.exists(e):
-                                    os.system('rm -rf {0}'.format(e))
+                                    os.system('rm -rf {0} &'.format(e))
 
                         # Deal with special case of f being a WSClean image
                         if f.endswith('MFS-image.fits'):
@@ -1066,13 +1062,13 @@ class Direction(object):
                             extra_files = glob.glob(image_root+'*.fits')
                             for e in extra_files:
                                 if os.path.exists(e):
-                                    os.system('rm -rf {0}'.format(e))
+                                    os.system('rm -rf {0} &'.format(e))
                         elif f.endswith('-image.fits'):
                             # Search for related images and delete if found
                             image_root = f.split('-image.fits')[0]
                             extra_files = glob.glob(image_root+'*.fits')
                             for e in extra_files:
                                 if os.path.exists(e):
-                                    os.system('rm -rf {0}'.format(e))
+                                    os.system('rm -rf {0} &'.format(e))
             except IOError:
                 pass

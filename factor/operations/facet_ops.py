@@ -49,8 +49,6 @@ class FacetSelfcal(Operation):
         if self.parset['calibration_specific']['multires_selfcal']:
             # Set parset template to multi-resolution selfcal parset
             self.pipeline_parset_template = '{0}_taper_pipeline.parset'.format(self.name)
-        else:
-            self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
 
         # Define extra parameters needed for this operation
         self.direction.set_imcal_parameters(parset, bands)
@@ -74,8 +72,16 @@ class FacetSelfcal(Operation):
 
         # Set mapfile for selfcal operations
         if self.local_selfcal_scratch_dir is not None:
+            if self.direction.pre_average:
+                self.direction.phase_concat_data_mapfile = 'make_concat_blavg_data_sync_mapfile.output.mapfile'
+            else:
+                self.direction.phase_concat_data_mapfile = 'make_concat_data_sync_mapfile.output.mapfile'
             self.direction.concat_data_mapfile = 'make_concat_data_sync_mapfile.output.mapfile'
         else:
+            if self.direction.pre_average:
+                self.direction.phase_concat_data_mapfile = 'concat_blavg_data.output.mapfile'
+            else:
+                self.direction.phase_concat_data_mapfile = 'concat_data.output.mapfile'
             self.direction.concat_data_mapfile = 'concat_data.output.mapfile'
 
         # Parset and sky model for initial solve (not used for later selfcal
@@ -118,8 +124,6 @@ class FacetSelfcal(Operation):
         # Add output datamaps to direction object for later use
         self.direction.input_files_single_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'input_files_single.mapfile')
-        self.direction.shifted_model_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'corrupt_final_model.mapfile')
         self.direction.dir_indep_parmdbs_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'dir_indep_instrument_parmdbs.mapfile')
         self.direction.dir_indep_skymodels_mapfile = os.path.join(self.pipeline_mapfile_dir,
@@ -128,14 +132,10 @@ class FacetSelfcal(Operation):
             'make_facet_skymodels_all.mapfile')
         self.direction.dir_dep_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'merge_selfcal_parmdbs.mapfile')
+        self.direction.converted_parmdb_mapfile= os.path.join(self.pipeline_mapfile_dir,
+            'convert_merged_selfcal_parmdbs.mapfile')
         self.direction.selfcal_plots_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'make_selfcal_plots.mapfile')
-        if self.direction.skip_facet_imaging:
-            self.direction.facet_model_mapfile = os.path.join(self.pipeline_mapfile_dir,
-                'blank_model.mapfile')
-        else:
-            self.direction.facet_model_mapfile = os.path.join(self.pipeline_mapfile_dir,
-                'final_model_rootnames.mapfile')
         # Store mapfile of facet image and mask, needed by the fieldmosaic op. Here
         # we store it under the facetimage entry which will get overwritten later
         # if the facet is reimaged
@@ -152,7 +152,9 @@ class FacetSelfcal(Operation):
         self.direction.wsclean_modelimg_size_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'pad_model_images.padsize.mapfile')
         self.direction.diff_models_field_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'shift_diff_model_to_field.mapfile')
+            'predict_and_difference_models.mapfile')
+        self.direction.sourcedb_new_facet_sources = os.path.join(self.pipeline_mapfile_dir,
+            'make_sourcedb_new_facet_sources.mapfile')
         self.direction.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'verify_subtract.break.mapfile')
         self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
@@ -192,13 +194,12 @@ class FacetSelfcal(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'average_pre_compressed.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'average_post_compressed.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'corrupt_final_model.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'predict_all_model_data.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'shift_cal.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'shift_cal_dir_indep.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'final_image1.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'make_concat_corr.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'make_blavg_data.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'sorted_groups.mapfile_groups'),
+            os.path.join(self.pipeline_mapfile_dir, 'sorted_average0_groups.mapfile_groups'),
             os.path.join(self.pipeline_mapfile_dir, 'average0.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'average2.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'concat0_input.mapfile'),
@@ -213,6 +214,7 @@ class FacetSelfcal(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'wsclean_image41_imagename.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'apply_amp1.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'apply_amp2.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'apply_output.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'apply_phaseonly1.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'apply_phaseonly2.mapfile')]
         if not self.parset['keep_avg_facet_data'] and self.direction.name != 'target':
@@ -234,6 +236,7 @@ class FacetSelfcal(Operation):
         if self.direction.selfcal_ok or not self.parset['calibration_specific']['exit_on_selfcal_failure']:
             self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
             self.direction.cleanup()
+        self.cleanup()
 
 
 class FacetPeel(OutlierPeel):
@@ -256,13 +259,6 @@ class FacetSub(Operation):
         super(FacetSub, self).__init__(parset, bands, direction,
             name='FacetSub')
 
-        # Set the pipeline parset to use
-        if self.direction.peel_calibrator:
-            # Set parset template to replace parset
-            self.pipeline_parset_template = '{0}_replace_pipeline.parset'.format(self.name)
-        else:
-            self.pipeline_parset_template = '{0}_pipeline.parset'.format(self.name)
-
 
     def finalize(self):
         """
@@ -271,11 +267,9 @@ class FacetSub(Operation):
         # Delete the full-resolution model-difference files
         if hasattr(self.direction, 'diff_models_field_mapfile'):
             self.direction.cleanup_mapfiles.append(self.direction.diff_models_field_mapfile)
-        if hasattr(self.direction, 'subtracted_data_new_mapfile'):
-            # Delete the improved subtracted data from peelimage op
-            self.direction.cleanup_mapfiles.append(self.direction.subtracted_data_new_mapfile)
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()
+        self.cleanup()
 
 
 class FacetSubReset(Operation):
@@ -316,6 +310,7 @@ class FacetSubReset(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'shift_diff_model_to_field.mapfile_groups')]
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()
+        self.cleanup()
 
 
 class FacetImage(Operation):
@@ -348,6 +343,9 @@ class FacetImage(Operation):
         super(FacetImage, self).__init__(parset, bands, direction,
             name=name)
 
+        # Set the pipeline parset to use
+        self.pipeline_parset_template = 'facetimage_pipeline.parset'
+
         # Set flag for full-resolution run (used in finalize() to ensure that averaging
         # of the calibrated data is not too much for use by later imaging runs)
         if cellsize_arcsec == parset['imaging_specific']['selfcal_cellsize_arcsec']:
@@ -360,8 +358,7 @@ class FacetImage(Operation):
         if hasattr(self.direction, 'image_data_mapfile'):
             self.direction.use_existing_data = self.check_existing_files(self.direction.image_data_mapfile)
             if (self.direction.use_existing_data and
-                'facetselfcal' in self.direction.image_data_mapfile and
-                self.parset['imaging_specific']['reimage_selfcaled']):
+                'facetselfcal' in self.direction.image_data_mapfile):
                 # Old data exist but are from facetselfcal. Since reimage_selfcal is True,
                 # we will not use these data but instead generate new updated ones
                 self.log.debug('All files exist but are not up-to-date. They will be regenerated')
@@ -371,14 +368,6 @@ class FacetImage(Operation):
                 self.direction.image_data_mapfile_selfcal = self.direction.image_data_mapfile
         else:
             self.direction.use_existing_data = False
-
-        # Set the pipeline parset
-        if not self.direction.selfcal_ok:
-            # Set parset template to sky-model parset
-            self.pipeline_parset_template = 'facetimage_skymodel_pipeline.parset'
-        else:
-            # Set parset template to facet model-image parset
-            self.pipeline_parset_template = 'facetimage_imgmodel_pipeline.parset'
 
         # Define extra parameters needed for this operation
         self.direction.set_imcal_parameters(parset, bands, cellsize_arcsec, robust,
@@ -392,7 +381,7 @@ class FacetImage(Operation):
             if (self.direction.facetimage_freqstep != 1 or self.direction.facetimage_timestep != 1):
                 self.direction.average_image_data = True
         else:
-            self.direction.image_data_mapfile = 'concat_averaged_compressed_map.output.mapfile'
+            self.direction.image_data_mapfile = 'create_compressed_mapfile.output.mapfile'
             self.log.debug('No suitable calibrated data exist for reimaging. They will be generated')
 
         ms_files = [band.files for band in self.bands]
@@ -435,7 +424,7 @@ class FacetImage(Operation):
         # averaging is not too much for use by later imaging runs
         if not self.direction.use_existing_data and self.full_res:
             self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
-                'concat_averaged_compressed.mapfile')
+                'imaging_input.mapfile')
 
             # We also need to save the averaging steps for these data, so that
             # for the next imaging run, we can determine new averaging steps
@@ -448,7 +437,7 @@ class FacetImage(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'image1.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'add_all_facet_sources.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'corrupt_final_model.mapfile')]
-        if ((not self.parset['keep_avg_facet_data'] and self.direction.name != 'target') or
+        if ((not self.parset['keep_avg_facet_data'] and self.direction.contains_target) or
            self.direction.use_existing_data):
             # Add averaged calibrated data for the facet to files to be deleted.
             # These are only needed if the user wants to reimage by hand (e.g.,
@@ -457,9 +446,6 @@ class FacetImage(Operation):
             self.direction.cleanup_mapfiles.extend([
                 os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_input.mapfile'),
                 os.path.join(self.pipeline_mapfile_dir, 'sorted_groups.mapfile_groups')])
-        if not self.direction.use_existing_data and hasattr(self.direction, 'image_data_mapfile_selfcal'):
-            # Add old data from selfcal to files to be deleted, as we have made new improved versions
-            self.direction.cleanup_mapfiles.append(self.direction.image_data_mapfile_selfcal)
         if not self.parset['keep_unavg_facet_data']:
             # Add unaveraged calibrated data for the facet to files to be deleted
             self.direction.cleanup_mapfiles.extend([
@@ -468,75 +454,4 @@ class FacetImage(Operation):
                 os.path.join(self.pipeline_mapfile_dir, 'sorted_groups_shift_empty.mapfile_groups')])
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()
-
-
-class FacetPeelImage(Operation):
-    """
-    Operation to make the full image of a facet after peeling
-
-    Note, we do not allow cellsize, robust, or taper parameters, as they must
-    match the selfcal ones
-    """
-    def __init__(self, parset, bands, direction):
-        super(FacetPeelImage, self).__init__(parset, bands, direction,
-            name='FacetPeelImage')
-
-        # Define extra parameters needed for this operation
-        self.direction.set_imcal_parameters(parset, bands, imaging_only=True)
-        ms_files = [band.files for band in self.bands]
-        ms_files_single = []
-        for bandfiles in ms_files:
-            for filename in bandfiles:
-                ms_files_single.append(filename)
-        dir_indep_parmDBs = []
-        for band in self.bands:
-            for parmdb in band.dirindparmdbs:
-                dir_indep_parmDBs.append(parmdb)
-        skymodels = [band.skymodel_dirindep for band in self.bands]
-        self.parms_dict.update({'ms_files_single': ms_files_single,
-                                'ms_files_grouped' : str(ms_files),
-                                'skymodels': skymodels,
-                                'dir_indep_parmDBs': dir_indep_parmDBs})
-
-
-    def finalize(self):
-        """
-        Finalize this operation
-        """
-        # Add output datamaps to direction object for later use
-        # Store mapfile of facet image and mask, needed by the fieldmosaic op. Here
-        # we store it under the facetimage entry which will get overwritten later
-        # if the facet is reimaged
-        if hasattr(self.direction, 'facet_image_mapfile'):
-            self.direction.facet_image_mapfile['facetimage'] = os.path.join(self.pipeline_mapfile_dir,
-                'final_image.mapfile')
-            self.direction.facet_premask_mapfile['facetimage'] = os.path.join(self.pipeline_mapfile_dir,
-                'premask.mapfile')
-        else:
-            self.direction.facet_image_mapfile = {'facetimage': os.path.join(self.pipeline_mapfile_dir,
-                'final_image.mapfile')} # this attribute is a dictionary to allow multiple image mapfiles
-            self.direction.facet_premask_mapfile = {'facetimage': os.path.join(self.pipeline_mapfile_dir,
-                'premask.mapfile')} # this attribute is a dictionary to allow multiple mask mapfiles
-        self.direction.subtracted_data_new_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'subtract_facet_model.mapfile')
-        self.direction.facet_model_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'final_model_rootnames.mapfile')
-        self.direction.wsclean_modelimg_size_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'pad_model_images.padsize.mapfile')
-
-        # Delete temp data
-        self.direction.cleanup_mapfiles = [
-            os.path.join(self.pipeline_mapfile_dir, 'corrupt_final_model.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_input.mapfile')]
-        if not self.parset['keep_avg_facet_data'] and self.direction.name != 'target':
-            # Add averaged calibrated data for the facet to files to be deleted.
-            # These are only needed if the user wants to reimage by hand (e.g.,
-            # with a different weighting). They are always kept for the target
-            self.direction.cleanup_mapfiles.append(
-                os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_compressed.mapfile'))
-        if not self.parset['keep_unavg_facet_data']:
-            # Add unaveraged calibrated data for the facet to files to be deleted
-            self.direction.cleanup_mapfiles.append(
-                os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'))
-        self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
-        self.direction.cleanup()
+        self.cleanup()

@@ -73,11 +73,9 @@ dir_ms = /data/bands
 
 # Preapply the direction-dependent phase solutions for the first calibrator to
 # all subsequent ones (default = False). If True, residual clock errors are
-# removed before calibration and a single TEC value is fit across the whole
-# bandwidth. Furthermore, if preapply_solve_TEC_only is True, only TEC is solved
-# for (instead of TEC+CommonScalarPhase)
+# removed before calibration and a single TEC+CommonScalarPhase fit is used
+# across the whole bandwidth
 # preapply_first_cal_phases = False
-# preapply_solve_TEC_only = False
 
 # Use baseline-dependent preaveraging to increase the signal-to-noise of the
 # phase-only solve for sources below this flux density (default = 0.0; i.e.,
@@ -121,22 +119,8 @@ dir_ms = /data/bands
 # Make final mosaic (default = True)
 # make_mosaic = True
 
-# Re-image directions for which selfcal was successful (default = True)
-# reimage_selfcaled = True
-
-# Skip imaging of facets during selfcal (default = False). Note that enabling
-# this option will not produce full-resolution facet images unless
-# reimage_selfcaled is True.
-# skip_facet_imaging = False
-
 # Padding factor for WSClean images (default = 1.6)
 # wsclean_image_padding = 1.6
-
-# Padding factor for WSClean models for patches (default = 2.0)
-# wsclean_patch_model_padding = 2.0
-
-# Padding factor for WSClean models for full facets (default = 1.4)
-# wsclean_facet_model_padding = 1.4
 
 # Max desired peak flux density reduction at center of the facet edges due to
 # bandwidth smearing (at the mean frequency) and time smearing (default = 0.15 =
@@ -174,6 +158,11 @@ dir_ms = /data/bands
 # facet_robust = [-0.25, 0.0]
 # facet_taper_arcsec = [0.0, 45.0]
 # facet_min_uv_lambda = [80.0, 160.0]
+
+# Image only the target facet (default = False). If True and a target is
+# specified in the [directions] section, then only the facet containing the
+# target source is imaged
+# image_target_only = False
 
 # Use a clean threshold during selfcal imaging (default = False). If False,
 # clean will always stop at 1000 iterations. If True, clean will go to 1 sigma

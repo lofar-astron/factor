@@ -7,6 +7,7 @@ import os
 import sys
 import imp
 import numpy as np
+import shutil
 from collections import Counter
 from factor.lib.context import Timer
 
@@ -207,7 +208,6 @@ class Scheduler(object):
                 op.direction.save_state()
 
 
-
     def result_callback(self, result):
         """
         Callback function for apply_async result
@@ -288,5 +288,8 @@ class Scheduler(object):
             pool.join()
 
         if not self.success:
+            for op in self.operation_list:
+                # Remove any temp data left by failure
+                op.cleanup()
             log.error('One or more operations failed due to an error. Exiting...')
             sys.exit(1)

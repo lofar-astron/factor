@@ -59,6 +59,14 @@ The available options are described below under their respective sections.
         but will make symbolic links to them instead, so please make backup
         copies yourself)
 
+    use_compression
+        Use Dysco compression for chunked files (default = False). Enabling this
+        option will result in less storage usage and signifcanctly faster
+        processing. To use this option, you must have the Dysco library in your
+        LD_LIBRARY_PATH. Note: if enabled, Factor will not make symbolic links to the
+        input data, even if they are shorter than chunk_size_sec, but will copy them
+        instead.
+
     interactive
         Use interactive mode (default = ``False``). Factor will ask for confirmation of
         internally derived DDE calibrators and facets.
@@ -96,6 +104,12 @@ The available options are described below under their respective sections.
         until the improvement in dynamic range over the previous image is less than
         1.25%.
 
+    preapply_first_cal_phases
+        Preapply the direction-dependent phase solutions for the first calibrator to
+        all subsequent ones (default = `False``). If ``True``, residual clock errors are
+        removed before calibration and a single TEC+CommonScalarPhase fit is used
+        across the whole bandwidth.
+
     preaverage_flux_Jy
         Use baseline-dependent preaveraging to increase the signal-to-noise of the
         phase-only solve for sources below this flux density (default = 0.0; i.e.,
@@ -108,7 +122,7 @@ The available options are described below under their respective sections.
         improve convergence, especially when the starting model is poor.
 
     TEC_block_MHz
-        Size of frequency block in MHz over which a single TEC solution is fit
+        Size of frequency block in MHz over which a single TEC+CommonScalarPhase solution is fit
         (default = 10.0).
 
     peel_flux_Jy
@@ -144,19 +158,13 @@ The available options are described below under their respective sections.
     make_mosaic
         Make final mosaic (default = ``True``).
 
-    reimage_selfcaled
-        Re-image all directions for which selfcal was successful (default = ``True``).
-
-    skip_facet_imaging
-        Skip imaging of facets during selfcal (default = ``False``). Note that enabling
-        this option will not produce full-resolution facet images unless
-        :term:`reimage_selfcaled` is ``True``.
+    image_target_only
+        Image only the target facet (default = ``False``). If True and a target is
+        specified in the :ref:`_parset_directions_options` section, then only the facet containing the
+        target source is imaged.
 
     wsclean_image_padding
         Padding factor for WSClean images (default = 1.6).
-
-    wsclean_model_padding
-        Padding factor for WSClean models (default = 1.4).
 
     max_peak_smearing
         Max desired peak flux density reduction at center of the facet edges due to
@@ -185,10 +193,6 @@ The available options are described below under their respective sections.
 
     selfcal_min_uv_lambda
         Self calibration minimum uv distance in lambda (default = 80).
-
-    selfcal_scales
-        Self calibration multiscale clean scales (default = ``[0, 3, 7, 25, 60,
-        150]``; set to ``[0]`` to disable multiscale clean).
 
     selfcal_clean_threshold
         Use a clean threshold during selfcal imaging (default = ``False``). If ``False``,
@@ -360,6 +364,10 @@ The available options are described below under their respective sections.
         must be the same for all nodes. Note: do not specify this parameter if you are
         running more than one direction simultaneously on a single machine, as it will cause conflicts between directions
         that are processed in parallel (no default).
+
+    dir_local_selfcal
+        Full path to ram drive (e.g., /dev/shm) to allow certain selfcal data to
+        be cached in memory, speeding up selfcal on most systems considerably.
 
     ncpu
         Maximum number of CPUs per node to use (default = all). Note that this

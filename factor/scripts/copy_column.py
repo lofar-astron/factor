@@ -210,8 +210,3 @@ if __name__ == '__main__':
 
     main(args.ms_from, args.ms_to, args.column_from, args.column_to,
         do_copy=args.do_copy)
-
-
-
-
-
