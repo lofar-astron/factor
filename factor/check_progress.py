@@ -589,6 +589,10 @@ def set_patch_color(a, d):
     if 'facetpeelimage' in a.completed_ops:
         # Decrease by since we do not have facetsub
         total_completed -= 1
+    if hasattr(self.direction, 'facet_image_mapfile'):
+        if len(d.facet_image_mapfile) == total_completed:
+            # facetselfcal was skipped (or failed), so increment by one to compensate
+            total_completed += 1
 
     # treat facetselfcal and facetsub as one op for consistency with old code
     if total_completed==0:
