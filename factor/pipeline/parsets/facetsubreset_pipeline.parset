@@ -48,7 +48,7 @@ create_full_skymodels_map.control.files       = {{ skymodels }}
 create_full_skymodels_map.control.mapfile_dir = input.output.mapfile_dir
 create_full_skymodels_map.control.filename    = full_skymodels.mapfile
 
-# extract the skymodel for this facet from global skymodel, length = nbands
+# extract the old skymodel for this facet from global skymodel, length = nbands
 make_facet_skymodels_all.control.type       = make_facet_skymodel
 make_facet_skymodels_all.control.mapfile_in = create_full_skymodels_map.output.mapfile
 make_facet_skymodels_all.control.inputkey   = fullmodelfile
@@ -56,12 +56,20 @@ make_facet_skymodels_all.control.outputkey  = outfile
 make_facet_skymodels_all.argument.flags     = [fullmodelfile,outfile,{{ vertices_file }}]
 make_facet_skymodels_all.argument.cal_only  = False
 
-# convert the facet skymodel into a sourcedb, length = nbands
+# convert the old facet skymodel into a sourcedb, length = nbands
 make_sourcedb_all_facet_sources.control.type       = make_sourcedb
 make_sourcedb_all_facet_sources.control.mapfile_in = make_facet_skymodels_all.output.mapfile
 make_sourcedb_all_facet_sources.control.inputkey   = in
 make_sourcedb_all_facet_sources.argument.format    = <
 make_sourcedb_all_facet_sources.argument.outtype   = blob
+
+# expand mapfile of the old sourcedb to all files, length = nfiles
+expand_old_sourcedb_map.control.kind           = plugin
+expand_old_sourcedb_map.control.type           = mapfileSingleToGroup
+expand_old_sourcedb_map.control.mapfile_in     = make_sourcedb_all_facet_sources.output.mapfile
+expand_old_sourcedb_map.control.mapfile_groups = create_msmulti_map.output.mapfile
+expand_old_sourcedb_map.control.mapfile_dir    = input.output.mapfile_dir
+expand_old_sourcedb_map.control.filename       = expand_old_sourcedbs.mapfile
 
 # expand mapfile of the new sourcedb to all files, length = nfiles
 expand_new_sourcedb_map.control.kind           = plugin
@@ -69,12 +77,12 @@ expand_new_sourcedb_map.control.type           = mapfileSingleToGroup
 expand_new_sourcedb_map.control.mapfile_in     = {{ sourcedb_new_facet_sources }}
 expand_new_sourcedb_map.control.mapfile_groups = create_msmulti_map.output.mapfile
 expand_new_sourcedb_map.control.mapfile_dir    = input.output.mapfile_dir
-expand_new_sourcedb_map.control.filename       = expand_sourcedbs.mapfile
+expand_new_sourcedb_map.control.filename       = expand_new_sourcedbs.mapfile
 
 # predict the old and new models and subtract the old one from the new one, length = nfiles
 # compress weights only
 predict_and_difference_models.control.type                                 = dppp
-predict_and_difference_models.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_new_sourcedb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile,make_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
+predict_and_difference_models.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_new_sourcedb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile,expand_old_sourcedb_map.output.mapfile,create_parmdb_map.output.mapfile]
 predict_and_difference_models.control.inputkeys                            = [msin,dir_dep_sourcedb,dir_dep_parmdb,dir_indep_sourcedb,dir_indep_parmdb]
 predict_and_difference_models.argument.numthreads                          = {{ max_cpus_per_io_proc_nfiles }}
 predict_and_difference_models.argument.msin.datacolumn                     = DATA
