@@ -969,12 +969,10 @@ class Direction(object):
                     self.completed_operations = d['completed_operations']
 
                 # Load mapfiles needed for facetsubreset
-                if 'dir_dep_parmdb_mapfile' in d:
-                    self.dir_dep_parmdb_mapfile = d['dir_dep_parmdb_mapfile']
-                if 'facet_model_mapfile' in d:
-                    self.facet_model_mapfile = d['facet_model_mapfile']
-                if 'wsclean_modelimg_size_mapfile' in d:
-                    self.wsclean_modelimg_size_mapfile = d['wsclean_modelimg_size_mapfile']
+                if 'converted_parmdb_mapfile' in d:
+                    self.converted_parmdb_mapfile = d['converted_parmdb_mapfile']
+                if 'sourcedb_new_facet_sources' in d:
+                    self.sourcedb_new_facet_sources = d['sourcedb_new_facet_sources']
             return True
         except:
             return False
