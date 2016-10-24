@@ -87,12 +87,26 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 d.create_preapply_parmdb = True
                 break
 
+        # Reset if needed
+        direction_group_reset = [d for d in peel_directions if d.do_reset]
+        direction_group_reset_facetsub = [d for d in direction_group_reset if
+            'facetsub' in d.reset_operations]
+        if len(direction_group_reset_facetsub) > 0:
+            for d in direction_group_reset_facetsub:
+                if ('facetsubreset' in d.completed_operations or
+                    'facetsubreset' in reset_operations):
+                    # Reset a previous reset, but only if it completed successfully
+                    # or is explicitly specified for reset (to allow one to resume
+                    # facetsubreset instead of always resetting and restarting it)
+                    d.reset_state('facetsubreset')
+            ops = [FacetSubReset(parset, bands, d) for d in direction_group_reset_facetsub]
+            for op in ops:
+                scheduler.run(op)
+        for d in direction_group_reset:
+            d.reset_state(['outlierpeel', 'facetpeel', 'facetsub'])
+
         # Do the peeling
         for d in peel_directions:
-            # Reset if needed. Note that proper reset of the subtract steps in
-            # outlierpeel and facetsub is not currently supported
-            d.reset_state(['outlierpeel', 'facetpeel', 'facetpeelimage', 'facetsub'])
-
             if d.is_outlier:
                 op = OutlierPeel(parset, bands, d)
             else:
