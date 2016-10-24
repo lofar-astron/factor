@@ -584,15 +584,15 @@ def set_patch_color(a, d):
 
     total_completed = max(0, len(a.completed_ops)-1)
     if d.name == 'field':
-        # Increase by one to skip facetselfcal + facetsub for field, as they do not apply
+        # Increase by two to skip facetselfcal + facetsub for field, as they do not apply
         total_completed += 2
-    if 'facetpeelimage' in a.completed_ops:
-        # Decrease by since we do not have facetsub
-        total_completed -= 1
-    if hasattr(d, 'facet_image_mapfile'):
-        if len(d.facet_image_mapfile) == total_completed:
-            # facetselfcal was skipped (or failed), so increment by one to compensate
-            total_completed += 1
+    nimages = 0
+    for op in a.completed_ops:
+        if 'facetimage' in op:
+            nimages += 1
+    if nimages-1 == total_completed:
+        # facetselfcal was skipped (or failed), so increment by two to compensate
+        total_completed += 2
 
     # treat facetselfcal and facetsub as one op for consistency with old code
     if total_completed==0:
