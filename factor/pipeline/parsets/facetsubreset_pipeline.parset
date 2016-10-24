@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_new_sourcedb_map, predict_and_difference_models, add_diff_model_from_empty_data]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_old_sourcedb_map, expand_new_sourcedb_map, predict_and_difference_models, add_diff_model_from_empty_data]
 
 pipeline.pluginpath = {{ pipeline_dir }}/plugins
 
