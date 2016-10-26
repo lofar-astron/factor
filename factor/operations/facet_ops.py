@@ -62,7 +62,10 @@ class FacetSelfcal(Operation):
             for parmdb in band.dirindparmdbs:
                 dir_indep_parmDBs.append(parmdb)
         skymodels = [band.skymodel_dirindep for band in self.bands]
-        loopcount = max(1, self.parset['calibration_specific']['max_selfcal_loops'])
+        if self.direction.contains_target:
+            loopcount = max(1, self.parset['calibration_specific']['target_max_selfcal_loops'])
+        else:
+            loopcount = max(1, self.parset['calibration_specific']['max_selfcal_loops'])
 
         # Task for smoothing
         if self.parset['calibration_specific']['spline_smooth2d']:

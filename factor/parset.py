@@ -312,11 +312,16 @@ def get_calibration_options(parset):
     # Maximum number of cycles of the last step of selfcal to perform (default =
     # 10). The last step is looped until the number of cycles reaches this value or
     # until the improvement in dynamic range over the previous image is less than
-    # 1.25%
+    # 1.25%. A separate setting can also be used for the target facet only (allowing
+    # one to reduce the number for non-target facets)
     if 'max_selfcal_loops' in parset_dict:
         parset_dict['max_selfcal_loops'] = parset.getint('calibration', 'max_selfcal_loops')
     else:
         parset_dict['max_selfcal_loops'] = 10
+    if 'target_max_selfcal_loops' in parset_dict:
+        parset_dict['target_max_selfcal_loops'] = parset.getint('calibration', 'target_max_selfcal_loops')
+    else:
+        parset_dict['target_max_selfcal_loops'] = 10
 
     # Preapply the direction-dependent phase solutions for the first calibrator to
     # all subsequent ones (default = False). If True, residual clock errors are
@@ -389,7 +394,7 @@ def get_calibration_options(parset):
 
     # Check for unused options
     allowed_options = ['exit_on_selfcal_failure', 'skip_selfcal_check',
-        'preapply_first_cal_phases',
+        'preapply_first_cal_phases', 'target_max_selfcal_loops',
         'max_selfcal_loops', 'preaverage_flux_jy', 'multiscale_selfcal',
         'multires_selfcal', 'tec_block_mhz', 'peel_flux_jy',
         'solve_min_uv_lambda', 'spline_smooth2d',

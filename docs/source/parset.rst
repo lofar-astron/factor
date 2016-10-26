@@ -104,6 +104,10 @@ The available options are described below under their respective sections.
         until the improvement in dynamic range over the previous image is less than
         1.25%.
 
+    target_max_selfcal_loops
+        Maximum number of cycles of the last step of selfcal to perform for the target
+        facet, if any (default = 10).
+
     preapply_first_cal_phases
         Preapply the direction-dependent phase solutions for the first calibrator to
         all subsequent ones (default = `False``). If ``True``, residual clock errors are
