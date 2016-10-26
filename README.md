@@ -1,10 +1,10 @@
 Factor: Facet Calibration for LOFAR
 ===================================
 
-Factor is a tool for producing low-noise, high-resolution wide-field images from LOFAR HBA data. Factor has been designed to use as few free parameters as possible in order to mitigate the effects of over-fitting and thus to maximize image fidelity. Factor runs well on single machines or on compute clusters with multiple nodes. It requires only modest resources (at least 32 GB of memory and 1 TB of disk space).
+Factor is a tool for producing low-noise, high-resolution wide-field images from LOFAR HBA data. Factor has been designed to use as few free parameters as possible in order to mitigate the effects of over-fitting and thus maximize image fidelity. Factor runs well on single machines or on compute clusters with multiple nodes (with a shared file system). It requires only modest resources (at least 32 GB of memory and 1 TB of disk space).
 
-What's New
-----------
+What's New in v1.0
+------------------
 
 Note: Factor v1.0 is not compatible with previous versions. If you started a reduction
 with a previous version, you must restart from scratch to use v1.0; the version pervious to v1.0 is still
