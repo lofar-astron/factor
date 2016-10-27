@@ -226,39 +226,39 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     nimages = len(cellsizes)
     dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
     if parset['imaging_specific']['image_target_only']:
-        dirs_with_selfcal_to_reimage = [d for d in dirs_with_selfcal if not d.is_patch
+        dirs_with_selfcal_to_image = [d for d in dirs_with_selfcal if not d.is_patch
             and not d.is_outlier and d.contains_target]
-        dirs_without_selfcal = [d for d in directions if not d.selfcal_ok and not
+        dirs_without_selfcal_to_image = [d for d in directions if not d.selfcal_ok and not
             d.is_patch and not d.is_outlier and d.contains_target]
     else:
-        dirs_with_selfcal_to_reimage = [d for d in dirs_with_selfcal if not d.is_patch
+        dirs_with_selfcal_to_image = [d for d in dirs_with_selfcal if not d.is_patch
             and not d.is_outlier]
-        dirs_without_selfcal = [d for d in directions if not d.selfcal_ok and not
+        dirs_without_selfcal_to_image = [d for d in directions if not d.selfcal_ok and not
             d.is_patch and not d.is_outlier]
-    if len(dirs_without_selfcal) > 0:
+    if len(dirs_without_selfcal_to_image) > 0:
         log.info('Imaging the following direction(s) with nearest self calibration solutions:')
-        log.info('{0}'.format([d.name for d in dirs_without_selfcal]))
-    for d in dirs_without_selfcal:
+        log.info('{0}'.format([d.name for d in dirs_without_selfcal_to_image]))
+    for d in dirs_without_selfcal_to_image:
         # Search for nearest direction with successful selfcal
         nearest, sep = factor.directions.find_nearest(d, dirs_with_selfcal)
         log.debug('Using solutions from direction {0} for direction {1} '
             '(separation = {2} deg).'.format(nearest.name, d.name, sep))
         d.converted_parmdb_mapfile = nearest.converted_parmdb_mapfile
         d.save_state()
-    if len(dirs_with_selfcal_to_reimage + dirs_without_selfcal) > 0:
+    if len(dirs_with_selfcal_to_image + dirs_without_selfcal_to_image) > 0:
         for image_indx, (cellsize_arcsec, taper_arcsec, robust, min_uv_lambda) in enumerate(
             zip(cellsizes, tapers, robusts, min_uvs)):
 
             # Always image directions that did not go through selfcal
-            dirs_to_image = dirs_without_selfcal[:]
+            dirs_to_image = dirs_without_selfcal_to_image[:]
 
             # Only reimage facets with selfcal imaging parameters if reimage_selfcal flag is set
             full_res_im, opname = _get_image_type_and_name(cellsize_arcsec, taper_arcsec,
                 robust, selfcal_robust, min_uv_lambda, parset)
             if full_res_im:
-                dirs_to_image += dirs_with_selfcal_to_reimage
+                dirs_to_image += dirs_with_selfcal_to_image
             else:
-                dirs_to_image += dirs_with_selfcal_to_reimage
+                dirs_to_image += dirs_with_selfcal_to_image
 
             if len(dirs_to_image) > 0:
                 log.info('Imaging with cellsize = {0} arcsec, robust = {1}, '
@@ -277,46 +277,46 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 taper_arcsec, min_uv_lambda) for d in dirs_to_image]
             scheduler.run(ops)
 
-    # Mosaic the final facet images together
-    if parset['imaging_specific']['make_mosaic']:
-        # Make direction object for the field and load previous state (if any)
-        field = Direction('field', bands[0].ra, bands[0].dec,
-            factor_working_dir=parset['dir_working'])
-        field.load_state()
-        if len(reset_operations) > 0:
-            field.reset_operations = reset_operations
-        else:
-            field.reset_operations = (field.completed_operations[:] +
-                field.started_operations[:])
+        # Mosaic the final facet images together
+        if parset['imaging_specific']['make_mosaic']:
+            # Make direction object for the field and load previous state (if any)
+            field = Direction('field', bands[0].ra, bands[0].dec,
+                factor_working_dir=parset['dir_working'])
+            field.load_state()
+            if len(reset_operations) > 0:
+                field.reset_operations = reset_operations
+            else:
+                field.reset_operations = (field.completed_operations[:] +
+                    field.started_operations[:])
 
-        # Set averaging for primary beam generation
-        field.avgpb_freqstep = bands[0].nchan
-        field.avgpb_timestep = int(120.0 / bands[0].timepersample)
+            # Set averaging for primary beam generation
+            field.avgpb_freqstep = bands[0].nchan
+            field.avgpb_timestep = int(120.0 / bands[0].timepersample)
 
-        for i, (cellsize_arcsec, taper_arcsec, robust, min_uv_lambda) in enumerate(
-            zip(cellsizes, tapers, robusts, min_uvs)):
+            for i, (cellsize_arcsec, taper_arcsec, robust, min_uv_lambda) in enumerate(
+                zip(cellsizes, tapers, robusts, min_uvs)):
 
-            # Reset the field direction if specified
-            full_res_im, opname = _get_image_type_and_name(cellsize_arcsec, taper_arcsec,
-                robust, selfcal_robust, min_uv_lambda, parset, opbase='fieldmosaic')
-            if 'field' in reset_directions:
-                field.reset_state(opname)
+                # Reset the field direction if specified
+                full_res_im, opname = _get_image_type_and_name(cellsize_arcsec, taper_arcsec,
+                    robust, selfcal_robust, min_uv_lambda, parset, opbase='fieldmosaic')
+                if 'field' in reset_directions:
+                    field.reset_state(opname)
 
-            # Specify appropriate image, mask, and vertices file
-            field.facet_image_filenames = []
-            field.facet_vertices_filenames = []
-            full_res_im, opname = _get_image_type_and_name(cellsize_arcsec, taper_arcsec,
-                robust, selfcal_robust, min_uv_lambda, parset)
-            for d in directions:
-                if not d.is_patch:
-                    facet_image = DataMap.load(d.facet_image_mapfile[opname])[0].file
-                    field.facet_image_filenames.append(facet_image)
-                    field.facet_vertices_filenames.append(d.save_file)
+                # Specify appropriate image, mask, and vertices file
+                field.facet_image_filenames = []
+                field.facet_vertices_filenames = []
+                full_res_im, opname = _get_image_type_and_name(cellsize_arcsec, taper_arcsec,
+                    robust, selfcal_robust, min_uv_lambda, parset)
+                for d in directions:
+                    if not d.is_patch:
+                        facet_image = DataMap.load(d.facet_image_mapfile[opname])[0].file
+                        field.facet_image_filenames.append(facet_image)
+                        field.facet_vertices_filenames.append(d.save_file)
 
-            # Do mosaicking
-            op = FieldMosaic(parset, bands, field, cellsize_arcsec, robust,
-                    taper_arcsec, min_uv_lambda)
-            scheduler.run(op)
+                # Do mosaicking
+                op = FieldMosaic(parset, bands, field, cellsize_arcsec, robust,
+                        taper_arcsec, min_uv_lambda)
+                scheduler.run(op)
 
     log.info("Factor has finished :)")
 
