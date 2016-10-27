@@ -701,7 +701,7 @@ class Direction(object):
                 # Slow gain solve is per band, so don't scale the interval with
                 # the number of bands but only with the effective flux. Also,
                 # avoid cases in which the last solution interval is much smaller
-                # than the target interval (for the smallest time chunk, this
+                # than the target interval (for the smallest time chunk; this
                 # assumes that the chunks are all about the same length)
                 ref_flux_jy = 1.4
                 target_timewidth_s = 1200.0 * (ref_flux_jy / effective_flux_jy)**2

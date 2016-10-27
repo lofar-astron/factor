@@ -36,6 +36,7 @@ Setting Up and Running Factor
    parset
    directions
    running
+   tips
 
 
 Factor Operations
