@@ -56,6 +56,12 @@ dir_ms = /data/bands
 # keep_avg_facet_data = True
 # keep_unavg_facet_data = False
 
+# Flagging ranges (default = no flagging). A range of times and baselines to
+# flag can be specified (see the DPPP documentation for details of syntax). Note
+# that the times and baselines are AND-ed to produce the final flags
+# flag_reltime = [1:30:05 .. 1:35:20, 5:10:49 .. 5:14:30]
+# flag_baseline = [ CS013HBA* ]
+
 
 [calibration]
 # Exit if selfcal fails for any direction (default = True). If False, processing

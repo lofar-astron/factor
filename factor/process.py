@@ -670,6 +670,10 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
             direction.subtracted_data_colname = 'SUBTRACTED_DATA_ALL'
             direction.use_compression = False
 
+        # Set any flagging parameters
+        direction.flag_reltime = parset['flag_reltime']
+        direction.flag_baseline = parset['flag_baseline']:
+
         # Reset state if specified
         if direction.name in reset_directions:
             direction.do_reset = True

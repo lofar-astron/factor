@@ -152,7 +152,11 @@ prepare_imaging_data.argument.msout.writefullresflag              = False
 {% if local_dir is not none %}
 prepare_imaging_data.argument.local_scratch_dir                   = {{ local_dir }}
 {% endif %}
+{% if flag_reltime is not none or flag_baseline is not none %}
+prepare_imaging_data.argument.steps                               = [add,flag,shift,correct,flagzero,avg]
+{% else %}
 prepare_imaging_data.argument.steps                               = [add,shift,correct,flagzero,avg]
+{% endif %}
 prepare_imaging_data.argument.add.type                            = predict
 prepare_imaging_data.argument.add.sourcedb                        = sourcedb
 prepare_imaging_data.argument.add.operation                       = add
@@ -160,6 +164,15 @@ prepare_imaging_data.argument.add.operation                       = add
 prepare_imaging_data.argument.add.applycal.parmdb                 = dir_indep_parmdb
 {% else %}
 prepare_imaging_data.argument.add.applycal.parmdb                 = dir_dep_parmdb
+{% endif %}
+{% if flag_reltime is not none or flag_baseline is not none %}
+prepare_imaging_data.argument.flag.type                           = preflagger
+{% endif %}
+{% if flag_reltime is not none %}
+prepare_imaging_data.argument.flag.reltime                        = {{ flag_reltime }}
+{% endif %}
+{% if flag_baseline is not none %}
+prepare_imaging_data.argument.flag.baseline                       = {{ flag_baseline }}
 {% endif %}
 prepare_imaging_data.argument.shift.type                          = phaseshifter
 prepare_imaging_data.argument.shift.phasecenter                   = [{{ facet_ra }}deg, {{ facet_dec }}deg]
