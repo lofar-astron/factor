@@ -74,9 +74,13 @@ def plugin_main(args, **kwargs):
     freqs.sort()
     num_freqs = len(freqs)
     if num > num_freqs:
+        print 'PipelineStep_selectDistFreqs: less than %d frequency groups found, contiunig with %d groups.'%(num, num_freqs)
         num = num_freqs
     dist_ind = get_distributed_indices(0, num_freqs-1, num)
     selfreqs = [freqs[ind] for ind in dist_ind]
+    if len(selfreqs) < 1:
+        print "PipelineStep_selectDistFreqs: Selected less than one frequency bands."
+        raise ValueError("Selected less than one frequency bands.")
 
     all_files = []
     for selfreq in selfreqs:
