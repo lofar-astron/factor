@@ -226,7 +226,12 @@ wsclean_image_full1.control.mapfiles_in            = [concat_reaveraged_compress
 wsclean_image_full1.control.mapfiles_in            = [{{ image_data_mapfile }},premask.output.mapfile]
 {% endif %}
 wsclean_image_full1.control.inputkeys              = [msfile,fitsmask]
+{% if wsclean_nchannels_selfcal > 1 %}
 wsclean_image_full1.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image_full1.argument.channelsout           = {{ wsclean_nchannels_selfcal }}
+{% else %}
+wsclean_image_full1.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,msfile]
+{% endif %}
 wsclean_image_full1.argument.fitsmask              = fitsmask
 wsclean_image_full1.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
 wsclean_image_full1.argument.niter                 = {{ wsclean_full1_image_niter * 2 }}
@@ -237,7 +242,6 @@ wsclean_image_full1.argument.mgain                 = 0.6
 wsclean_image_full1.argument.cleanborder           = 0
 wsclean_image_full1.argument.minuv-l               = {{ facet_min_uv_lambda }}
 wsclean_image_full1.argument.scale                 = {{ cellsize_facet_deg }}
-wsclean_image_full1.argument.channelsout           = {{ wsclean_nchannels }}
 wsclean_image_full1.argument.mem                   = {{ max_percent_memory_per_proc_single }}
 wsclean_image_full1.argument.j                     = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
@@ -292,7 +296,12 @@ wsclean_image_full2.control.mapfiles_in            = [concat_reaveraged_compress
 wsclean_image_full2.control.mapfiles_in            = [{{ image_data_mapfile }},mask.output.mapfile,mask.output.threshold_5sig.mapfile]
 {% endif %}
 wsclean_image_full2.control.inputkeys              = [msfile,fitsmask,threshold]
+{% if wsclean_nchannels_selfcal > 1 %}
 wsclean_image_full2.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image_full2.argument.channelsout           = {{ wsclean_nchannels_selfcal }}
+{% else %}
+wsclean_image_full2.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,msfile]
+{% endif %}
 wsclean_image_full2.argument.fitsmask              = fitsmask
 wsclean_image_full2.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
 wsclean_image_full2.argument.niter                 = {{ wsclean_full2_image_niter }}

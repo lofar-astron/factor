@@ -121,7 +121,12 @@ premask_selfcal.argument.trim_by               = 0.4
 wsclean_image01.control.type                    = wsclean
 wsclean_image01.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image01.control.inputkeys               = [msfile,fitsmask]
+{% if wsclean_nchannels_selfcal > 1 %}
 wsclean_image01.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image01.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
+{% else %}
+wsclean_image01.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
+{% endif %}
 wsclean_image01.argument.fitsmask               = fitsmask
 wsclean_image01.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image01.argument.niter                  = 1000
@@ -132,7 +137,6 @@ wsclean_image01.argument.mgain                  = 0.6
 wsclean_image01.argument.cleanborder            = 0
 wsclean_image01.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image01.argument.scale                  = {{ cellsize_selfcal_deg }}
-wsclean_image01.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 wsclean_image01.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image01.argument.j                      = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
@@ -199,7 +203,12 @@ wsclean_image02.control.inputkeys               = [msfile,fitsmask]
 wsclean_image02.argument.threshold              = 0.0
 wsclean_image02.argument.niter                  = 1000
 {% endif %}
+{% if wsclean_nchannels_selfcal > 1 %}
 wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image02.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
+{% else %}
+wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
+{% endif %}
 wsclean_image02.argument.fitsmask               = fitsmask
 wsclean_image02.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image02.argument.pol                    = I
@@ -208,7 +217,6 @@ wsclean_image02.argument.mgain                  = 0.6
 wsclean_image02.argument.cleanborder            = 0
 wsclean_image02.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image02.argument.scale                  = {{ cellsize_selfcal_deg }}
-wsclean_image02.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 wsclean_image02.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image02.argument.j                      = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
@@ -418,7 +426,12 @@ create_compressed_mapfile1.control.filename    = image1_input.mapfile
 wsclean_image11.control.type                    = wsclean
 wsclean_image11.control.mapfiles_in             = [create_compressed_mapfile1.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image11.control.inputkeys               = [msfile,fitsmask]
+{% if wsclean_nchannels_selfcal > 1 %}
 wsclean_image11.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image11.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
+{% else %}
+wsclean_image11.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
+{% endif %}
 wsclean_image11.argument.fitsmask               = fitsmask
 wsclean_image11.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image11.argument.niter                  = 1000
@@ -429,7 +442,6 @@ wsclean_image11.argument.mgain                  = 0.6
 wsclean_image11.argument.cleanborder            = 0
 wsclean_image11.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image11.argument.scale                  = {{ cellsize_selfcal_deg }}
-wsclean_image11.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 wsclean_image11.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image11.argument.j                      = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
@@ -496,6 +508,12 @@ wsclean_image12.control.inputkeys               = [msfile,fitsmask]
 wsclean_image12.argument.threshold              = 0.0
 wsclean_image12.argument.niter                  = 1000
 {% endif %}
+{% if wsclean_nchannels_selfcal > 1 %}
+wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image12.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
+{% else %}
+wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
+{% endif %}
 wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
 wsclean_image12.argument.fitsmask               = fitsmask
 wsclean_image12.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
@@ -505,7 +523,6 @@ wsclean_image12.argument.mgain                  = 0.6
 wsclean_image12.argument.cleanborder            = 0
 wsclean_image12.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image12.argument.scale                  = {{ cellsize_selfcal_deg }}
-wsclean_image12.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 wsclean_image12.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image12.argument.j                      = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
@@ -654,7 +671,12 @@ create_compressed_mapfile2.control.filename    = image2_input.mapfile
 wsclean_image21.control.type                    = wsclean
 wsclean_image21.control.mapfiles_in             = [create_compressed_mapfile2.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image21.control.inputkeys               = [msfile,fitsmask]
+{% if wsclean_nchannels_selfcal > 1 %}
 wsclean_image21.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image21.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
+{% else %}
+wsclean_image21.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
+{% endif %}
 wsclean_image21.argument.fitsmask               = fitsmask
 wsclean_image21.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image21.argument.niter                  = 1000
@@ -665,7 +687,6 @@ wsclean_image21.argument.mgain                  = 0.6
 wsclean_image21.argument.cleanborder            = 0
 wsclean_image21.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image21.argument.scale                  = {{ cellsize_selfcal_deg }}
-wsclean_image21.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 wsclean_image21.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image21.argument.j                      = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
@@ -730,6 +751,12 @@ wsclean_image22.control.inputkeys               = [msfile,fitsmask]
 wsclean_image22.argument.threshold              = 0.0
 wsclean_image22.argument.niter                  = 1000
 {% endif %}
+{% if wsclean_nchannels_selfcal > 1 %}
+wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image22.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
+{% else %}
+wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
+{% endif %}
 wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
 wsclean_image22.argument.fitsmask               = fitsmask
 wsclean_image22.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
@@ -739,7 +766,6 @@ wsclean_image22.argument.mgain                  = 0.6
 wsclean_image22.argument.cleanborder            = 0
 wsclean_image22.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image22.argument.scale                  = {{ cellsize_selfcal_deg }}
-wsclean_image22.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 wsclean_image22.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image22.argument.j                      = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
@@ -981,7 +1007,12 @@ create_compressed_mapfile3.control.filename    = image3_input.mapfile
 wsclean_image31.control.type                    = wsclean
 wsclean_image31.control.mapfiles_in             = [create_compressed_mapfile3.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image31.control.inputkeys               = [msfile,fitsmask]
+{% if wsclean_nchannels_selfcal > 1 %}
 wsclean_image31.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image31.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
+{% else %}
+wsclean_image31.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
+{% endif %}
 wsclean_image31.argument.fitsmask               = fitsmask
 wsclean_image31.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image31.argument.niter                  = 1000
@@ -992,7 +1023,6 @@ wsclean_image31.argument.mgain                  = 0.6
 wsclean_image31.argument.cleanborder            = 0
 wsclean_image31.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image31.argument.scale                  = {{ cellsize_selfcal_deg }}
-wsclean_image31.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 wsclean_image31.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image31.argument.j                      = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
@@ -1058,7 +1088,12 @@ wsclean_image32.control.inputkeys               = [msfile,fitsmask]
 wsclean_image32.argument.threshold              = 0.0
 wsclean_image32.argument.niter                  = 1000
 {% endif %}
+{% if wsclean_nchannels_selfcal > 1 %}
 wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image32.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
+{% else %}
+wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
+{% endif %}
 wsclean_image32.argument.fitsmask               = fitsmask
 wsclean_image32.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image32.argument.pol                    = I
@@ -1067,7 +1102,6 @@ wsclean_image32.argument.mgain                  = 0.6
 wsclean_image32.argument.cleanborder            = 0
 wsclean_image32.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image32.argument.scale                  = {{ cellsize_selfcal_deg }}
-wsclean_image32.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 wsclean_image32.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image32.argument.j                      = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
@@ -1291,7 +1325,12 @@ create_compressed_mapfile4.control.filename    = image4_input.mapfile
 wsclean_image41.control.type                    = wsclean
 wsclean_image41.control.mapfiles_in             = [create_compressed_mapfile4.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image41.control.inputkeys               = [msfile,fitsmask]
+{% if wsclean_nchannels_selfcal > 1 %}
 wsclean_image41.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image41.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
+{% else %}
+wsclean_image41.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
+{% endif %}
 wsclean_image41.argument.fitsmask               = fitsmask
 wsclean_image41.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image41.argument.niter                  = 1000
@@ -1302,7 +1341,6 @@ wsclean_image41.argument.mgain                  = 0.6
 wsclean_image41.argument.cleanborder            = 0
 wsclean_image41.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image41.argument.scale                  = {{ cellsize_selfcal_deg }}
-wsclean_image41.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 wsclean_image41.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image41.argument.j                      = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
@@ -1368,7 +1406,12 @@ wsclean_image42.control.inputkeys               = [msfile,fitsmask]
 wsclean_image42.argument.threshold              = 0.0
 wsclean_image42.argument.niter                  = 1000
 {% endif %}
+{% if wsclean_nchannels_selfcal > 1 %}
 wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image42.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
+{% else %}
+wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
+{% endif %}
 wsclean_image42.argument.fitsmask               = fitsmask
 wsclean_image42.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image42.argument.pol                    = I
@@ -1377,7 +1420,6 @@ wsclean_image42.argument.mgain                  = 0.6
 wsclean_image42.argument.cleanborder            = 0
 wsclean_image42.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image42.argument.scale                  = {{ cellsize_selfcal_deg }}
-wsclean_image42.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 wsclean_image42.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image42.argument.j                      = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
