@@ -565,7 +565,12 @@ premask.argument.make_blank_image      = True
 wsclean_image_full.control.type                   = wsclean
 wsclean_image_full.control.mapfiles_in            = [create_compressed_mapfile5.output.mapfile,premask.output.mapfile]
 wsclean_image_full.control.inputkeys              = [msfile,fitsmask]
+{% if use_wideband %}
 wsclean_image_full.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image_full.argument.channelsout           = 6
+{% else %}
+wsclean_image_full.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,msfile]
+{% endif %}
 wsclean_image_full.argument.fitsmask              = fitsmask
 wsclean_image_full.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
 wsclean_image_full.argument.niter                 = 2000
@@ -576,11 +581,6 @@ wsclean_image_full.argument.mgain                 = 0.6
 wsclean_image_full.argument.cleanborder           = 0
 wsclean_image_full.argument.minuv-l               = {{ facet_min_uv_lambda }}
 wsclean_image_full.argument.scale                 = {{ cellsize_selfcal_deg }}
-{% if use_wideband %}
-wsclean_image_full.argument.channelsout           = 6
-{% else %}
-wsclean_image_full.argument.channelsout           = 1
-{% endif %}
 wsclean_image_full.argument.mem                   = {{ max_percent_memory_per_proc_single }}
 wsclean_image_full.argument.j                     = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}

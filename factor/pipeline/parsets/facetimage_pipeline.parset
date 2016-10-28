@@ -226,9 +226,9 @@ wsclean_image_full1.control.mapfiles_in            = [concat_reaveraged_compress
 wsclean_image_full1.control.mapfiles_in            = [{{ image_data_mapfile }},premask.output.mapfile]
 {% endif %}
 wsclean_image_full1.control.inputkeys              = [msfile,fitsmask]
-{% if wsclean_nchannels_selfcal > 1 %}
+{% if wsclean_nchannels > 1 %}
 wsclean_image_full1.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
-wsclean_image_full1.argument.channelsout           = {{ wsclean_nchannels_selfcal }}
+wsclean_image_full1.argument.channelsout           = {{ wsclean_nchannels }}
 {% else %}
 wsclean_image_full1.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,msfile]
 {% endif %}
@@ -296,9 +296,9 @@ wsclean_image_full2.control.mapfiles_in            = [concat_reaveraged_compress
 wsclean_image_full2.control.mapfiles_in            = [{{ image_data_mapfile }},mask.output.mapfile,mask.output.threshold_5sig.mapfile]
 {% endif %}
 wsclean_image_full2.control.inputkeys              = [msfile,fitsmask,threshold]
-{% if wsclean_nchannels_selfcal > 1 %}
+{% if wsclean_nchannels > 1 %}
 wsclean_image_full2.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
-wsclean_image_full2.argument.channelsout           = {{ wsclean_nchannels_selfcal }}
+wsclean_image_full2.argument.channelsout           = {{ wsclean_nchannels }}
 {% else %}
 wsclean_image_full2.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,msfile]
 {% endif %}
