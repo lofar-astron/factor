@@ -212,7 +212,7 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
                         ref_freq = sw_low.getcol('REF_FREQUENCY') + tot_bandwidth
                         sw_low.close()
                     else:
-                        for j in range(1, len(all_group_files)-1):
+                        for j in range(1, len(all_group_files)):
                             if os.path.exists(all_group_files[j]):
                                 sw_high = pt.table('{}::SPECTRAL_WINDOW'.format(all_group_files[j]))
                                 ref_freq = sw_high.getcol('REF_FREQUENCY') - tot_bandwidth * j
