@@ -55,16 +55,10 @@ def plugin_main(args, **kwargs):
     freq_groups = {}
     hosts = []
     for item in map_in:
-        # First try to find the frequencies by the standard prefactor naming convention
-        if '_SBgr' in item.file:
-            freq = int(item.file.split('_SBgr')[1][:3])
-        elif '_SB' in item.file:
-            freq = int(item.file.split('_SB')[1][:3])
-        else:
-            # Get the frequency info from the MS file
-            sw = pt.table(item.file+'::SPECTRAL_WINDOW', ack=False)
-            freq = int(sw.col('REF_FREQUENCY')[0])
-            sw.close()
+        # Get the frequency info from the MS file
+        sw = pt.table(item.file+'::SPECTRAL_WINDOW', ack=False)
+        freq = int(sw.col('REF_FREQUENCY')[0])
+        sw.close()
         if freq in freq_groups:
             freq_groups[freq].append(item.file)
         else:
