@@ -164,6 +164,8 @@ class Direction(object):
                 sys.exit(1)
             else:
                 self.cal_size_deg = self.cal_imsize * self.cellsize_selfcal_deg / 1.5
+                self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
+                    / self.cellsize_selfcal_deg * 1.0 / 0.6))
         else:
             if self.cal_imsize == 0:
                 # Set image size to size of calibrator, padded to 40% extra
