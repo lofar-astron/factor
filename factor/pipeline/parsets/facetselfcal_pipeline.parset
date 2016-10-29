@@ -1831,7 +1831,7 @@ convert_merged_selfcal_parmdbs.control.outputkey   = parmdb_out
 convert_merged_selfcal_parmdbs.argument.flags      = [parmdb_in,parmdb_out]
 {% endif %}
 
-# make plots of the selfcal solutions from the marged parmDB, length = 1
+# make plots of the selfcal solutions from the merged parmDB, length = 1
 make_selfcal_plots.control.type       = make_selfcal_plots
 make_selfcal_plots.control.mapfile_in = merge_selfcal_parmdbs.output.mapfile
 make_selfcal_plots.control.inputkeys  = parmdb
