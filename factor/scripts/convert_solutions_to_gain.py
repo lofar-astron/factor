@@ -75,8 +75,7 @@ def main(merged_selfcal_parmdb, output_file, preapply_parmdb=None):
     for station in station_names:
         fast_phase = np.copy(soldict['CommonScalarPhase:{s}'.format(s=station)]['values'])
         tec = np.copy(soldict['TEC:{s}'.format(s=station)]['values'])
-        freqs = np.copy(soldict['TEC:{s}'.format(s=station)]['freqs'])
-        tec_phase =  -8.44797245e9 * tec / freqs
+        tec_phase =  -8.44797245e9 * tec / slow_freqs
 
         slow_real_00 = np.copy(soldict['Gain:0:0:Real:{s}'.format(s=station)]['values'])
         slow_imag_00 = np.copy(soldict['Gain:0:0:Imag:{s}'.format(s=station)]['values'])
