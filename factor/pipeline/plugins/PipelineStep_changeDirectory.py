@@ -56,11 +56,12 @@ def plugin_main(args, **kwargs):
                 file_out += append
             all_files.append(file_out)
         file_groups = [all_files[i:i+nitems_per_host] for i  in range(0, len(all_files), nitems_per_host)]
-        all_hosts = [item.host for item in map_in]
-        host_groups = [all_hosts[i:i+nitems_per_host] for i  in range(0, len(all_hosts), nitems_per_host)]
-        for file_list, host_list in zip(file_groups, host_groups):
+        all_hosts = list(set([item.host for item in map_in]))
+        numhosts = len(all_hosts)
+        for i, file_list in enumerate(file_groups):
+            host_out = all_hosts[i%numhosts]
             for file_out in file_list:
-                map_out.data.append(DataProduct(host_list[0], file_out, False))
+                map_out.data.append(DataProduct(host_out, file_out, False))
     else:
         for item in map_in:
             file_out = os.path.join(new_dir, os.path.basename(item.file))
