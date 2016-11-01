@@ -7,6 +7,7 @@ import sys
 import numpy as np
 from collections import Counter
 import factor._logging
+import re
 
 log = logging.getLogger('factor:cluster')
 
@@ -46,6 +47,40 @@ def make_pbs_clusterdesc():
     log.info('Using {0} node(s)'.format(len(nodes)))
 
     return clusterdesc_file
+
+
+def expand_part(s):
+    """Expand a part (e.g. "x[1-2]y[1-3][1-3]") (no outer level commas).
+
+    Note: Adapted from git://www.nsc.liu.se/~kent/python-hostlist.git
+    """
+
+    # Base case: the empty part expand to the singleton list of ""
+    if s == "":
+        return [""]
+
+    # Split into:
+    # 1) prefix string (may be empty)
+    # 2) rangelist in brackets (may be missing)
+    # 3) the rest
+
+    m = re.match(r'([^,\[]*)(\[[^\]]*\])?(.*)', s)
+    (prefix, rangelist, rest) = m.group(1,2,3)
+
+    # Expand the rest first (here is where we recurse!)
+    rest_expanded = expand_part(rest)
+
+    # Expand our own part
+    if not rangelist:
+        # If there is no rangelist, our own contribution is the prefix only
+        us_expanded = [prefix]
+    else:
+        # Otherwise expand the rangelist (adding the prefix before)
+        us_expanded = expand_rangelist(prefix, rangelist[1:-1])
+
+    return [us_part + rest_part
+            for us_part in us_expanded
+            for rest_part in rest_expanded]
 
 
 def expand_hostlist(hostlist, allow_duplicates=False, sort=False):
