@@ -8,6 +8,7 @@ import logging
 import socket
 import subprocess
 import numpy as np
+import sys
 import uuid
 from factor import _logging
 from jinja2 import Environment, FileSystemLoader
@@ -160,7 +161,8 @@ class Operation(object):
             self.cfg_dict['remote'] = '[remote]\n'\
                 + 'method = slurm_srun\n'\
                 + 'max_per_node = {0}\n'.format(self.parset['cluster_specific']['ncpu'])
-        elif self.parset['cluster_specific']['clustertype'] == 'pbs':
+        elif (self.parset['cluster_specific']['clustertype'] == 'pbs' or
+            self.parset['cluster_specific']['clustertype'] == 'slurm'):
             self.cfg_dict['remote'] = ''
         else:
             self.log.error('Could not determine the nature of your cluster!')
