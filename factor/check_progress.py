@@ -799,6 +799,8 @@ def find_facet_images(direction):
     # Search for various image patterns
     facet_images = []
     for d in dirs:
+        facet_images += glob.glob(os.path.join(d, '*.wsclean_image_full-MFS-image.fits'))
+        facet_images += glob.glob(os.path.join(d, '*.wsclean_image_full-image.fits'))
         facet_images += glob.glob(os.path.join(d, '*.wsclean_image_full2-MFS-image.fits'))
         facet_images += glob.glob(os.path.join(d, '*.wsclean_image_full2-image.fits'))
 
