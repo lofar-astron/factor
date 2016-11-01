@@ -8,7 +8,6 @@ import numpy as np
 from collections import Counter
 import factor._logging
 
-
 log = logging.getLogger('factor:cluster')
 
 
@@ -49,6 +48,43 @@ def make_pbs_clusterdesc():
     return clusterdesc_file
 
 
+def expand_hostlist(hostlist, allow_duplicates=False, sort=False):
+    """Expand a hostlist expression string to a Python list.
+
+    Example: expand_hostlist("n[9-11],d[01-02]") ==>
+             ['n9', 'n10', 'n11', 'd01', 'd02']
+
+    Unless allow_duplicates is true, duplicates will be purged
+    from the results. If sort is true, the output will be sorted.
+
+    Note: Adapted from git://www.nsc.liu.se/~kent/python-hostlist.git
+    """
+
+    results = []
+    bracket_level = 0
+    part = ""
+
+    for c in hostlist + ",":
+        if c == "," and bracket_level == 0:
+            # Comma at top level, split!
+            if part: results.extend(expand_part(part))
+            part = ""
+            bad_part = False
+        else:
+            part += c
+
+        if c == "[": bracket_level += 1
+        elif c == "]": bracket_level -= 1
+
+    seen = set()
+    results_nodup = []
+    for e in results:
+        if e not in seen:
+            results_nodup.append(e)
+            seen.add(e)
+    return results_nodup
+
+
 def make_slurm_clusterdesc():
     """
     Make a cluster description file from the SLURM_JOB_NODELIST
@@ -61,17 +97,13 @@ def make_slurm_clusterdesc():
     """
     nodes = []
     try:
-        filename = os.environ['SLURM_JOB_NODELIST']
+        hostlist = os.environ['SLURM_JOB_NODELIST']
     except KeyError:
         log.error('SLURM_JOB_NODELIST not found. You must have a reservation to '
             'use clusterdesc = SLURM.')
         sys.exit(1)
 
-    with open(filename, 'r') as file:
-        for line in file:
-            node_name = line.split()[0]
-            if node_name not in nodes:
-                nodes.append(node_name)
+    nodes = expand_hostlist(hostlist)
 
     lines = ['# Clusterdesc file to do parallel processing with SLURM\n\n']
     lines.append('ClusterName = SLURM\n\n')
