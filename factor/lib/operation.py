@@ -168,12 +168,15 @@ class Operation(object):
             self.log.error('Could not determine the nature of your cluster!')
             sys.exit(1)
 
-        # an absolute path in ...['clusterdesc'] will overrule the the "working_dir"
+        # an absolute path in ...['clusterdesc'] will overrule the "working_dir"
         self.cfg_dict['clusterdesc'] = os.path.join(self.factor_working_dir,
             self.parset['cluster_specific']['clusterdesc'])
 
 
     def update_dicts(self):
+        """
+        Update the dicts used for the pipeline parset templates
+        """
         self.cfg_dict.update(self.direction.__dict__)
         self.parms_dict.update(self.direction.__dict__)
 
