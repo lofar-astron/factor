@@ -905,9 +905,10 @@ def get_cluster_options(parset):
     log.info("Running up to %i IO-intensive job(s) in parallel per node" %
         (parset_dict['nthread_io']))
 
-    # Full path to cluster description file. Use clusterdesc_file = PBS to use the
-    # PBS / torque reserved nodes. If not given, the clusterdesc file for a single
-    # (i.e., local) node is used
+    # Full path to cluster description file. Use clusterdesc_file = PBS to use
+    # the PBS / torque reserved nodes and clusterdesc_file = SLURM to use SLURM
+    # reserved ones. If not given, the clusterdesc file for a single (i.e.,
+    # local) node is used
     if 'clusterdesc_file' not in parset_dict:
         parset_dict['clusterdesc_file'] = parset_dict['lofarroot'] + '/share/local.clusterdesc'
         parset_dict['node_list'] = ['localhost']

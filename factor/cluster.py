@@ -49,6 +49,43 @@ def make_pbs_clusterdesc():
     return clusterdesc_file
 
 
+def make_slurm_clusterdesc():
+    """
+    Make a cluster description file from the SLURM_JOB_NODELIST
+
+    Returns
+    -------
+    clusterdesc_file
+        Filename of resulting cluster description file
+
+    """
+    nodes = []
+    try:
+        filename = os.environ['SLURM_JOB_NODELIST']
+    except KeyError:
+        log.error('SLURM_JOB_NODELIST not found. You must have a reservation to '
+            'use clusterdesc = SLURM.')
+        sys.exit(1)
+
+    with open(filename, 'r') as file:
+        for line in file:
+            node_name = line.split()[0]
+            if node_name not in nodes:
+                nodes.append(node_name)
+
+    lines = ['# Clusterdesc file to do parallel processing with SLURM\n\n']
+    lines.append('ClusterName = SLURM\n\n')
+    lines.append('# Compute nodes\n')
+    lines.append('Compute.Nodes = [{0}]\n'.format(', '.join(sorted(nodes))))
+
+    clusterdesc_file = 'factor_slurm.clusterdesc'
+    with open(clusterdesc_file, 'wb') as file:
+        file.writelines(lines)
+    log.info('Using {0} node(s)'.format(len(nodes)))
+
+    return clusterdesc_file
+
+
 def get_compute_nodes(clusterdesc_file):
     """
     Read a cluster description file and return list of nodes

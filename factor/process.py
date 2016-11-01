@@ -350,6 +350,11 @@ def _set_up_compute_parameters(parset, dry_run=False):
             log.info('Using cluster setting: "PBS".')
             parset['cluster_specific']['clusterdesc'] = factor.cluster.make_pbs_clusterdesc()
             parset['cluster_specific']['clustertype'] = 'pbs'
+        elif (cluster_parset['clusterdesc_file'].lower() == 'slurm' or
+            ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'slurm')):
+            log.info('Using cluster setting: "SLURM".')
+            parset['cluster_specific']['clusterdesc'] = factor.cluster.make_slurm_clusterdesc()
+            parset['cluster_specific']['clustertype'] = 'slurm'
         elif (cluster_parset['clusterdesc_file'].lower() == 'juropa_slurm' or
             ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'juropa_slurm')):
             log.info('Using cluster setting: "JUROPA_slurm" (Single genericpipeline using multiple nodes).')
