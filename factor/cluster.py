@@ -83,6 +83,44 @@ def expand_part(s):
             for rest_part in rest_expanded]
 
 
+def expand_range(prefix, range_):
+    """ Expand a range (e.g. 1-10 or 14), putting a prefix before.
+
+    Note: Adapted from git://www.nsc.liu.se/~kent/python-hostlist.git
+    """
+
+    # Check for a single number first
+    m = re.match(r'^[0-9]+$', range_)
+    if m:
+        return ["%s%s" % (prefix, range_)]
+
+    # Otherwise split low-high
+    m = re.match(r'^([0-9]+)-([0-9]+)$', range_)
+
+    (s_low, s_high) = m.group(1,2)
+    low = int(s_low)
+    high = int(s_high)
+    width = len(s_low)
+
+    results = []
+    for i in xrange(low, high+1):
+        results.append("%s%0*d" % (prefix, width, i))
+    return results
+
+
+def expand_rangelist(prefix, rangelist):
+    """ Expand a rangelist (e.g. "1-10,14"), putting a prefix before.
+
+    Note: Adapted from git://www.nsc.liu.se/~kent/python-hostlist.git
+    """
+
+    # Split at commas and expand each range separately
+    results = []
+    for range_ in rangelist.split(","):
+        results.extend(expand_range(prefix, range_))
+    return results
+
+
 def expand_hostlist(hostlist, allow_duplicates=False, sort=False):
     """Expand a hostlist expression string to a Python list.
 
