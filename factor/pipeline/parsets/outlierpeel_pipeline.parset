@@ -250,8 +250,8 @@ solve_ampphase11.argument.solvetec.nchan          = {{ solint_freq_a }}
 
 # apply the phase-only solutions from the previous calibration, length = ntimes * num_cal_blocks
 apply_ampphase11.control.type                                 = dppp_inplace
-apply_ampphase11.control.mapfiles_in                     = [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
-apply_ampphase11.control.inputkeys                       = [msin,parmdb]
+apply_ampphase11.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
+apply_ampphase11.control.inputkeys                            = [msin,parmdb]
 apply_ampphase11.argument.numthreads                          = {{ max_cpus_per_proc_ntimes }}
 apply_ampphase11.argument.msin.datacolumn                     = DATA
 apply_ampphase11.argument.msout                               = .
@@ -660,7 +660,6 @@ expand_mask5_map.control.filename         = expand_mask5_map.mapfile
 make_new_facet_skymodel.control.type        = fits2sky
 make_new_facet_skymodel.control.mapfiles_in = [create_msmulti_map.output.mapfile,expand_model5_map.output.mapfile,expand_mask5_map.output.mapfile]
 make_new_facet_skymodel.control.inputkeys   = [msfile,rootname,mask]
-make_new_facet_skymodel.control.mapfile_out = make_new_cal_skymodel_output_mapfile.output.mapfile
 make_new_facet_skymodel.control.outputkey   = skymodel
 make_new_facet_skymodel.argument.flags      = [rootname,msfile,skymodel,mask]
 
