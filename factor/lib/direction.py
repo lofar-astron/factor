@@ -240,6 +240,7 @@ class Direction(object):
         self.use_selfcal_clean_threshold = parset['imaging_specific']['selfcal_clean_threshold']
         self.use_selfcal_adaptive_threshold = parset['imaging_specific']['selfcal_adaptive_threshold']
         self.fit_spectral_pol = parset['imaging_specific']['fit_spectral_pol']
+        self.nbands_selfcal_facet_image = parset['imaging_specific']['nbands_selfcal_facet_image']
 
         if facet_cellsize_arcsec is None:
             facet_cellsize_arcsec = parset['imaging_specific']['selfcal_cellsize_arcsec']
