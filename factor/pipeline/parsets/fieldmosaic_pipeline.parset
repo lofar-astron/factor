@@ -20,6 +20,7 @@ create_blanked_images_map.control.kind         = plugin
 create_blanked_images_map.control.type         = appendMapfile
 create_blanked_images_map.control.mapfile_in   = create_images_map.output.mapfile
 create_blanked_images_map.control.append_index = True
+create_blanked_images_map.control.append       = image
 create_blanked_images_map.control.mapfile_dir  = input.output.mapfile_dir
 create_blanked_images_map.control.filename     = blanked_facet_images.mapfile
 
