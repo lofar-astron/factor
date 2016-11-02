@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_images_map, create_vertices_map, blank_images, create_compressed_mapfile_images, make_mosaic, create_ms_map, create_compressed_mapfile_ms, sort_into_Groups, sort_into_Groups_maps, concat_data, create_compressed_mapfile, concat, make_pbimage, zero_avgpb, image2fits, correct_mosaic]
+pipeline.steps = [update_mapfile_hosts, create_images_map, create_blanked_images_map, create_vertices_map, blank_images, create_compressed_mapfile_images, make_mosaic, create_ms_map, create_compressed_mapfile_ms, sort_into_Groups, sort_into_Groups_maps, concat_data, create_compressed_mapfile, concat, make_pbimage, zero_avgpb, image2fits, correct_mosaic]
 
 pipeline.pluginpath = {{ pipeline_dir }}/plugins
 
@@ -15,6 +15,14 @@ create_images_map.control.files       = {{ facet_image_filenames }}
 create_images_map.control.mapfile_dir = input.output.mapfile_dir
 create_images_map.control.filename    = facet_images.mapfile
 
+# make a mapfile with the name of the WSClean image, length = 1
+create_blanked_images_map.control.kind         = plugin
+create_blanked_images_map.control.type         = appendMapfile
+create_blanked_images_map.control.mapfile_in   = create_imagebase_map.output.mapfile
+create_blanked_images_map.control.append_index = True
+create_blanked_images_map.control.mapfile_dir  = input.output.mapfile_dir
+create_blanked_images_map.control.filename     = blanked_facet_images.mapfile
+
 # create a mapfile with the existing vertices, length = nfacets
 create_vertices_map.control.kind        = plugin
 create_vertices_map.control.type        = addListMapfile
@@ -27,6 +35,7 @@ create_vertices_map.control.filename    = facet_vertices.mapfile
 blank_images.control.type         = blank_image
 blank_images.control.mapfiles_in  = [create_images_map.output.mapfile,create_vertices_map.output.mapfile]
 blank_images.control.inputkeys    = [infile,vertices_file]
+blank_images.control.mapfile_out  = create_blanked_images_map.output.mapfile
 blank_images.control.outputkey    = outfile
 blank_images.argument.flags       = [infile,vertices_file,outfile]
 blank_images.argument.blank_value = zero
