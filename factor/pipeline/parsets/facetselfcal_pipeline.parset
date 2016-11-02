@@ -1919,14 +1919,15 @@ expand_sourcedb_all_facet_sources.control.mapfile_dir    = input.output.mapfile_
 expand_sourcedb_all_facet_sources.control.filename       = expand_sourcedb_all_facet_sources.mapfile
 
 {% if use_wideband %}
-# select 6 bands spread over the full bandwidth for imaging, length = 6 * nchunks
+# select bands spread over the full bandwidth for imaging, length = nbands_selfcal_facet_image * nchunks
 select_imaging_bands.control.kind        = plugin
 select_imaging_bands.control.type        = selectDistFreqs
 select_imaging_bands.control.mapfile_in  = create_ms_map.output.mapfile
+select_imaging_bands.control.num         = {{ nbands_selfcal_facet_image }}
 select_imaging_bands.control.mapfile_dir = input.output.mapfile_dir
 select_imaging_bands.control.filename    = imaging_bands.mapfile
 
-# adjust the dir-indep sourcedb mapfile to match the selected bands, length = 6 * nchunks
+# adjust the dir-indep sourcedb mapfile to match the selected bands, length = nbands_selfcal_facet_image * nchunks
 select_sourcedb_all_facet_sources.control.kind         = plugin
 select_sourcedb_all_facet_sources.control.type         = matchDistFreqs
 select_sourcedb_all_facet_sources.control.mapfile_in   = expand_sourcedb_all_facet_sources.output.mapfile
@@ -1935,7 +1936,7 @@ select_sourcedb_all_facet_sources.control.mapfile_full = create_ms_map.output.ma
 select_sourcedb_all_facet_sources.control.mapfile_dir  = input.output.mapfile_dir
 select_sourcedb_all_facet_sources.control.filename     = imaging_sourcedbs.mapfile
 
-# adjust the dir-indep parmdb mapfile to match the selected bands, length = 6 * nchunks
+# adjust the dir-indep parmdb mapfile to match the selected bands, length = nbands_selfcal_facet_image * nchunks
 select_parmdb_map.control.kind         = plugin
 select_parmdb_map.control.type         = matchDistFreqs
 select_parmdb_map.control.mapfile_in   = create_parmdb_map.output.mapfile
@@ -1944,7 +1945,7 @@ select_parmdb_map.control.mapfile_full = create_ms_map.output.mapfile
 select_parmdb_map.control.mapfile_dir  = input.output.mapfile_dir
 select_parmdb_map.control.filename     = imaging_parmdbs.mapfile
 
-# adjust the dir-dep parmdb mapfile to match the selected bands, length = 6 * nchunks
+# adjust the dir-dep parmdb mapfile to match the selected bands, length = nbands_selfcal_facet_image * nchunks
 select_merged_parmdb_map.control.kind             = plugin
 select_merged_parmdb_map.control.type             = expandMapfile
 select_merged_parmdb_map.control.mapfile_in       = convert_merged_selfcal_parmdbs.output.mapfile
@@ -1953,7 +1954,7 @@ select_merged_parmdb_map.control.mapfile_dir      = input.output.mapfile_dir
 select_merged_parmdb_map.control.filename         = select_merged_parmdbs.mapfile
 {% endif %}
 
-# shift the empty data, add all facet sources, apply the direction-dependent solutions and average, length = nfiles or 6 * nchunks
+# shift the empty data, add all facet sources, apply the direction-dependent solutions and average, length = nfiles or nbands_selfcal_facet_image * nchunks
 # compress data and weights
 apply_dir_dep.control.type                                   = dppp
 {% if use_wideband %}
@@ -2026,8 +2027,8 @@ wsclean_image_full.argument.flags                 = [-no-update-model-required,{
 {% endif %}
 wsclean_image_full.argument.fitsmask              = fitsmask
 wsclean_image_full.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
-wsclean_image_full.argument.niter                 = 2000
-wsclean_image_full.argument.threshold             = {{ wsclean_full1_image_threshold_jy }}
+wsclean_image_full.argument.niter                 = {{ wsclean_selfcal_full_image_niter }}
+wsclean_image_full.argument.threshold             = {{ wsclean_selfcal_full_image_threshold_jy }}
 wsclean_image_full.argument.pol                   = I
 wsclean_image_full.argument.weight                = briggs {{ robust_selfcal }}
 wsclean_image_full.argument.mgain                 = 0.6

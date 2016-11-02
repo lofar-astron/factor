@@ -455,6 +455,18 @@ def get_imaging_options(parset):
     else:
         parset_dict['wsclean_nchannels_factor'] = 4
 
+    # Number of bands to use for facet imaging during selfcal (default = 6). Facet
+    # imaing during selfcal is used to improve the subtraction of non-calibrator
+    # sources in the facet. More bands will result in a better subtraction but also
+    # longer runtimes. When fewer than the total number are used, the bands are
+    # selected so that they are evenly spread over the full available bandwidth
+    if 'nbands_selfcal_facet_image' in parset_dict:
+        parset_dict['nbands_selfcal_facet_image'] = parset.getint('imaging', 'nbands_selfcal_facet_image')
+        if parset_dict['nbands_selfcal_facet_image'] < 1:
+            parset_dict['nbands_selfcal_facet_image'] = 1
+    else:
+        parset_dict['nbands_selfcal_facet_image'] = 6
+
     # Use baseline-dependent averaging in WSClean (default = False). If enabled,
     # this option can dramatically speed up imaging with WSClean.
     if 'wsclean_bl_averaging' in parset_dict:
@@ -589,7 +601,7 @@ def get_imaging_options(parset):
         'selfcal_clean_threshold', 'selfcal_adaptive_threshold',
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
         'wsclean_image_padding', 'fit_spectral_pol', 'image_target_only',
-        'selfcal_min_uv_lambda', 'facet_min_uv_lambda',
+        'selfcal_min_uv_lambda', 'facet_min_uv_lambda', 'nbands_selfcal_facet_image',
         'selfcal_robust_wsclean', 'wsclean_bl_averaging',
         'selfcal_scales']
     for option in given_options:

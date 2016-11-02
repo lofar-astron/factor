@@ -144,6 +144,13 @@ dir_ms = /data/bands
 # activated when there are more than 5 bands
 # wsclean_nchannels_factor = 4
 
+# Number of bands to use for facet imaging during selfcal (default = 6). Facet
+# imaing during selfcal is used to improve the subtraction of non-calibrator
+# sources in the facet. More bands will result in a better subtraction but also
+# longer runtimes. When fewer than the total number are used, the bands are
+# selected so that they are evenly spread over the full available bandwidth
+# nbands_selfcal_facet_image = 6
+
 # Use baseline-dependent averaging in WSClean (default = False). If enabled,
 # this option can dramatically speed up imaging with WSClean.
 # NOTE: this option requires the latest development version of WSClean
@@ -275,7 +282,7 @@ flux_min_Jy = 0.3
 
 
 [cluster]
-# Full path to cluster description file. Use clusterdesc_file = PBS to use the
+# Full path to cluster description file. Use clusterdesc_file = PBS to use
 # PBS / torque reserved nodes, clusterdesc_file = SLURM to use SLURM reserved
 # ones, or use clusterdesc_file = JUROPA_slurm to use multiple nodes in a slurm
 # reservation on JUROPA. If not given, the clusterdesc file for a single (i.e.,

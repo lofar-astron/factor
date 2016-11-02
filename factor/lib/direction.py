@@ -257,7 +257,7 @@ class Direction(object):
             facet_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
         self.facet_min_uv_lambda = facet_min_uv_lambda
 
-        self.set_imaging_parameters(nbands, padding)
+        self.set_imaging_parameters(nbands, parset['imaging_specific']['nbands_selfcal_facet_image'], padding)
         self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,
             timestep_sec, ntimes, nbands, mean_freq_mhz, self.skymodel,
             preaverage_flux_jy, min_peak_smearing_factor, tec_block_mhz,
@@ -326,7 +326,7 @@ class Direction(object):
             self.facetimage_wsclean_nwavelengths = 0
 
 
-    def set_imaging_parameters(self, nbands, padding=1.05):
+    def set_imaging_parameters(self, nbands, nbands_selfcal, padding=1.05):
         """
         Sets various parameters for images in facetselfcal and facetimage pipelines
 
@@ -357,6 +357,9 @@ class Direction(object):
         # image to ensure the imager has a reasonable chance to reach the
         # threshold first (which is set by the masking step)
         scaling_factor = np.sqrt(np.float(nbands))
+        scaling_factor_selfcal = np.sqrt(np.float(nbands_selfcal))
+        self.wsclean_selfcal_full_image_niter = int(2000 * scaling_factor_selfcal)
+        self.wsclean_selfcal_full_image_threshold_jy =  1.5e-3 * 0.7 / scaling_factor_selfcal
         self.wsclean_full1_image_niter = int(2000 * scaling_factor)
         self.wsclean_full1_image_threshold_jy =  1.5e-3 * 0.7 / scaling_factor
         self.wsclean_full2_image_niter = int(12000 * scaling_factor)

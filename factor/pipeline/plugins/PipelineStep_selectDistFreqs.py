@@ -35,7 +35,7 @@ def plugin_main(args, **kwargs):
     mapfile_dir = kwargs['mapfile_dir']
     filename = kwargs['filename']
     if 'num' in kwargs:
-        num = int(kwargs['include'])
+        num = int(kwargs['num'])
     else:
         num = 6
     fileid = os.path.join(mapfile_dir, filename)
