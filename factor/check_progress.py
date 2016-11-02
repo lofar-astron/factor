@@ -792,7 +792,7 @@ def find_facet_images(direction):
         direction.name)
     image_dir = os.path.join(direction.working_dir, 'results', 'facetimage*',
         direction.name)
-    peelimage_dir = os.path.join(direction.working_dir, 'results', 'facetpeelimage',
+    peelimage_dir = os.path.join(direction.working_dir, 'results', 'facetpeel',
         direction.name)
     dirs = [selfcal_dir, image_dir, peelimage_dir]
 
