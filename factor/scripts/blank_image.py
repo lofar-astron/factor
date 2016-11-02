@@ -131,14 +131,11 @@ def main(input_image_file, vertices_file, output_image_file, blank_value='zero',
         if img_format == 'fits':
             new_im.tofits(output_image, overwrite=True)
             info_dict = im.info()['imageinfo']['restoringbeam']
-            bpar_ma = quanta.quantity(info_dict['major']).get_value('deg')
-            bpar_mi = quanta.quantity(info_dict['minor']).get_value('deg')
-            bpar_pa = quanta.quantity(info_dict['positionangle']).get_value('deg')
             hdu = pyfits.open(output_image, mode='update')
             header = hdu[0].header
-            header['BMAJ'] = mean_psf_fwhm[0]
-            header['BMIN'] = mean_psf_fwhm[1]
-            header['BPA'] = mean_psf_fwhm[2]
+            header['BMAJ'] = quanta.quantity(info_dict['major']).get_value('deg')
+            header['BMIN'] = quanta.quantity(info_dict['minor']).get_value('deg')
+            header['BPA'] = quanta.quantity(info_dict['positionangle']).get_value('deg')
             header['BUNIT'] = im.info()['unit']
             header['RESTFRQ'] = im.info()['coordinates']['spectral2']['restfreq']
             header['RESTFREQ'] = im.info()['coordinates']['spectral2']['restfreq']
