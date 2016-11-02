@@ -5,6 +5,7 @@ Script to blank regions (with zeros or NaNs) in a fits or casa image
 import argparse
 from argparse import RawTextHelpFormatter
 import casacore.images as pim
+from casacore import quanta
 import numpy as np
 import sys
 import os
@@ -129,7 +130,7 @@ def main(input_image_file, vertices_file, output_image_file, blank_value='zero',
         new_im.putdata(data)
         if img_format == 'fits':
             new_im.tofits(output_image, overwrite=True)
-            info_dict = new_im.info()['imageinfo']['restoringbeam']
+            info_dict = im.info()['imageinfo']['restoringbeam']
             bpar_ma = quanta.quantity(info_dict['major']).get_value('deg')
             bpar_mi = quanta.quantity(info_dict['minor']).get_value('deg')
             bpar_pa = quanta.quantity(info_dict['positionangle']).get_value('deg')
@@ -138,9 +139,9 @@ def main(input_image_file, vertices_file, output_image_file, blank_value='zero',
             header['BMAJ'] = mean_psf_fwhm[0]
             header['BMIN'] = mean_psf_fwhm[1]
             header['BPA'] = mean_psf_fwhm[2]
-            header['BUNIT'] = new_im.info()['unit']
-            header['RESTFRQ'] = new_im.info()['coordinates']['spectral2']['restfreq']
-            header['RESTFREQ'] = new_im.info()['coordinates']['spectral2']['restfreq']
+            header['BUNIT'] = im.info()['unit']
+            header['RESTFRQ'] = im.info()['coordinates']['spectral2']['restfreq']
+            header['RESTFREQ'] = im.info()['coordinates']['spectral2']['restfreq']
             newhdu = pyfits.PrimaryHDU(data=hdu[0].data, header=header)
             newhdu.writeto(output_image,clobber=True)
 
