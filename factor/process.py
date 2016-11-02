@@ -114,9 +114,13 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             scheduler.run(op)
 
             # Check whether direction went through peeling successfully. If so,
-            # set various flags if needed. If not successful, exit
+            # subtract and set various flags if needed. If not successful, exit
             if d.selfcal_ok:
-                # Set the name of the subtracted data column
+                # Subtract improved model(s) with DDE calibration
+                op = FacetSub(parset, bands, d)
+                scheduler.run(op)
+
+                # Set the name of the subtracted data column for subsequent directions
                 if set_sub_data_colname:
                     for direction in directions:
                         direction.subtracted_data_colname = 'CORRECTED_DATA'
@@ -137,10 +141,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 log.error('Peeling failed for direction {0}.'.format(d.name))
                 log.info('Exiting...')
                 sys.exit(1)
-
-            # Subtract final model(s) if selfcal went OK
-            op = FacetSub(parset, bands, d)
-            scheduler.run(op)
 
     # Run selfcal and subtract operations on direction groups
     for gindx, direction_group in enumerate(direction_groups):
