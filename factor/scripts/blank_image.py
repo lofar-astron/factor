@@ -11,6 +11,7 @@ import os
 import pickle
 import glob
 from factor.lib.polygon import Polygon
+from astropy.io import fits as pyfits
 
 
 def read_vertices(filename):
@@ -128,6 +129,21 @@ def main(input_image_file, vertices_file, output_image_file, blank_value='zero',
         new_im.putdata(data)
         if img_format == 'fits':
             new_im.tofits(output_image, overwrite=True)
+            info_dict = new_im.info()['imageinfo']['restoringbeam']
+            bpar_ma = quanta.quantity(info_dict['major']).get_value('deg')
+            bpar_mi = quanta.quantity(info_dict['minor']).get_value('deg')
+            bpar_pa = quanta.quantity(info_dict['positionangle']).get_value('deg')
+            hdu = pyfits.open(output_image, mode='update')
+            header = hdu[0].header
+            header['BMAJ'] = mean_psf_fwhm[0]
+            header['BMIN'] = mean_psf_fwhm[1]
+            header['BPA'] = mean_psf_fwhm[2]
+            header['BUNIT'] = new_im.info()['unit']
+            header['RESTFRQ'] = new_im.info()['coordinates']['spectral2']['restfreq']
+            header['RESTFREQ'] = new_im.info()['coordinates']['spectral2']['restfreq']
+            newhdu = pyfits.PrimaryHDU(data=hdu[0].data, header=header)
+            newhdu.writeto(output_image,clobber=True)
+
         elif img_format == 'casa':
             new_im.saveas(output_image, overwrite=True)
         else:
