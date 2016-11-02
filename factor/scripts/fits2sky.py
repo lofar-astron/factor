@@ -51,7 +51,7 @@ def convert_radec_str(ra, dec):
 
 
 def main(fits_model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.001,
-    max_residual_jy=0.1):
+    max_residual_jy=0.1, interp='linear'):
     """
     Make a makesourcedb sky model for input MS from WSClean fits model images
 
@@ -72,6 +72,9 @@ def main(fits_model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.
         to include in output model
     max_residual_jy : float, optional
         Maximum acceptible residual flux in Jy
+    interp : str, optional
+        Interpolation method. Can be any supported by scipy.interpolate.interp1d:
+            'linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic'
 
     """
     min_peak_flux_jy = float(min_peak_flux_jy)
@@ -120,13 +123,14 @@ def main(fits_model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.
     fits_models = np.array(fits_models)[sorted_ind]
     model_images = np.array(model_images)[sorted_ind]
 
-    # For each pixel that meets the flux cut (and is in the mask, if given), fit a
-    # polynomial in log(flux)-log(frequency) space
+    # Find pixels that meet the flux cut (and are in the mask, if given)
     if fits_mask is not None:
         mask = fits.getdata(fits_mask, 0)
         nonzero_ind = np.where((mfs_image > min_peak_flux_jy) & (mask > 0))
     else:
         nonzero_ind = np.where(mfs_image > min_peak_flux_jy)
+
+    # Remove sources until we reach the desired residual
     if len(nonzero_ind[0]) > 0:
         total_flux = np.sum(mfs_image[nonzero_ind])
         while (total_flux - np.sum(mfs_image[nonzero_ind])) < max_residual_jy:
@@ -139,6 +143,7 @@ def main(fits_model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.
                 # keep up to 50 sources regardless of the residual
                 break
 
+    # Interpolate the fluxes to the frequency of the MS
     nsources = len(nonzero_ind[0])
     fluxes = []
     names = []
@@ -160,7 +165,7 @@ def main(fits_model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.
             flux = flux_array[-1]
         else:
             # Otherwise interpolate
-            flux = scipy.interpolate.interp1d(freqs, flux_array)(ms_freq)
+            flux = scipy.interpolate.interp1d(freqs, flux_array, kind=interp)(ms_freq)
         fluxes.append(flux)
 
     # Write sky model

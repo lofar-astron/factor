@@ -1892,6 +1892,7 @@ make_new_cal_skymodel.control.type        = fits2sky
 make_new_cal_skymodel.control.mapfiles_in = [create_msmulti_map.output.mapfile,expand_blank_model_map.output.mapfile]
 make_new_cal_skymodel.control.inputkeys   = [msfile,rootname]
 make_new_cal_skymodel.control.outputkey   = skymodel
+make_new_cal_skymodel.argument.interp     = nearest
 make_new_cal_skymodel.argument.flags      = [rootname,msfile,skymodel]
 
 {% if not is_patch %}
