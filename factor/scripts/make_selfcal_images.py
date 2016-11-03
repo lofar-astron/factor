@@ -390,7 +390,7 @@ if __name__ == '__main__':
     parser.add_argument('imagefiles', help='list of the selfcal images')
     parser.add_argument('maskfiles', help='list of the mask images', type=str, default=None)
     parser.add_argument('imagenoise', help='noise for scaling (Jy/beam)', type=float, default=None)
-    parser.add_argument('interactive', help='return calibrator model only', type=bool, default=False)
+    parser.add_argument('interactive', help='use interactive mode', type=bool, default=False)
     parser.add_argument('facet_name', help='name of facet', type=str, default=None)
     args = parser.parse_args()
 
