@@ -119,17 +119,11 @@ def main(images, outfits, maxwidth=0):
 
     # Initialize the arrays for the output image, sensitivity, and weights
     master_im = np.zeros((len(master_dec),len(master_ra)))
-#     master_mask = np.zeros((len(master_dec),len(master_ra)))
 
     # Reproject the images onto the master grid, weight and normalize
     for im in pims:
-#         mask = pim.image('',shape=im.shape(), coordsys=im.coordinates())
-#         mask_data = np.where(im.getdata()==0.0,False,True)
-#         mask.putdata(mask_data)
-#         mask = mask.regrid([2,3],ma,outshape=(int(nc),int(ns),len(master_dec),len(master_ra)))
         im = im.regrid([2,3],ma,outshape=(int(nc),int(ns),len(master_dec),len(master_ra)))
         master_im += np.squeeze(im.getdata())
-#         master_mask += np.squeeze(mask.getdata())
 
     blank=np.ones_like(master_im)*np.nan
     master_im=np.where(master_im,master_im,blank)
