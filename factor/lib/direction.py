@@ -173,6 +173,7 @@ class Direction(object):
                 self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
                     / self.cellsize_selfcal_deg * 1.0 / 0.6))
 
+        self.cal_imsize = max(512, self.cal_imsize) # ensure size is at least 512
         self.cal_radius_deg = self.cal_size_deg / 2.0
         self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
 
