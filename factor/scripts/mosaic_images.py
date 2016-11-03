@@ -123,7 +123,6 @@ def main(images, outfits, maxwidth=0):
 
     # Reproject the images onto the master grid, weight and normalize
     for im in pims:
-        print 'doing image',im
         im = im.regrid([2,3],ma,outshape=(int(nc),int(ns),len(master_dec),len(master_ra)))
         mask = pim.image('',shape=im.shape(), coordsys=im.coordinates())
         mask_data = np.where(im.getdata()==0.0,False,True)
