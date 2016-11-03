@@ -117,7 +117,7 @@ premask_selfcal.argument.region_file           = {{ region_selfcal }}
 premask_selfcal.argument.make_blank_image      = True
 premask_selfcal.argument.trim_by               = 0.4
 
-# image the virtual concatenated data with wsclean, length = 1
+# image the concatenated data with wsclean, length = 1
 wsclean_image01.control.type                    = wsclean
 wsclean_image01.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image01.control.inputkeys               = [msfile,fitsmask]
@@ -139,7 +139,9 @@ wsclean_image01.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image01.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image01.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image01.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if local_dir is not none %}
+{% if selfcal_local_dir is not none %}
+wsclean_image01.argument.tempdir                = {{ selfcal_local_dir }}
+{% elif local_dir is not none %}
 wsclean_image01.argument.tempdir                = {{ local_dir_parent }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
@@ -190,7 +192,7 @@ mask0.argument.img_format             = fits
 mask0.argument.threshold_format       = float
 mask0.argument.use_adaptive_threshold = {{ use_selfcal_adaptive_threshold }}
 
-# image the virtual concatenated data again with wsclean, length = 1
+# image the concatenated data again with wsclean, length = 1
 wsclean_image02.control.type                    = wsclean
 {% if use_selfcal_clean_threshold %}
 wsclean_image02.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile,mask0.output.mapfile,mask0.output.threshold_5sig.mapfile]
@@ -219,7 +221,9 @@ wsclean_image02.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image02.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image02.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image02.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if local_dir is not none %}
+{% if selfcal_local_dir is not none %}
+wsclean_image02.argument.tempdir                = {{ selfcal_local_dir }}
+{% elif local_dir is not none %}
 wsclean_image02.argument.tempdir                = {{ local_dir_parent }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
@@ -283,7 +287,8 @@ wsclean_ft0.argument.scale       = {{ cellsize_selfcal_deg }}
 wsclean_ft0.argument.mem         = {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft0.argument.channelsout = {{ wsclean_nchannels_selfcal }}
 wsclean_ft0.argument.j           = {{ max_cpus_per_io_proc_ntimes }}
-{% if local_dir is not none %}
+{% if selfcal_local_dir is none and local_dir is not none %}
+# WSClean uses selfcal_local_dir automatically if the output files are there
 wsclean_ft0.argument.tempdir     = {{ local_dir_parent }}
 {% endif %}
 
@@ -296,13 +301,13 @@ copy_model_data0.argument.flags      = [ms_from,ms_to,MODEL_DATA,MODEL_DATA]
 {% endif %}
 
 # generate mapfile for the fast-phase parmDBs generated in the solve_phaseonly steps, length = ntimes * num_cal_blocks
-make_fast_phase_parmdb_map.control.kind               =  plugin
-make_fast_phase_parmdb_map.control.type               =  createMapfile
-make_fast_phase_parmdb_map.control.method             =  add_suffix_to_file
-make_fast_phase_parmdb_map.control.mapfile_in         =  concat_data.output.mapfile
-make_fast_phase_parmdb_map.control.add_suffix_to_file =  /instrument
-make_fast_phase_parmdb_map.control.mapfile_dir        =  input.output.mapfile_dir
-make_fast_phase_parmdb_map.control.filename           =  fast_parmdb.mapfile
+make_fast_phase_parmdb_map.control.kind               = plugin
+make_fast_phase_parmdb_map.control.type               = createMapfile
+make_fast_phase_parmdb_map.control.method             = add_suffix_to_file
+make_fast_phase_parmdb_map.control.mapfile_in         = concat_data.output.mapfile
+make_fast_phase_parmdb_map.control.add_suffix_to_file = /instrument
+make_fast_phase_parmdb_map.control.mapfile_dir        = input.output.mapfile_dir
+make_fast_phase_parmdb_map.control.filename           = fast_parmdb.mapfile
 
 {% if peel_skymodel is not none %}
 # create a mapfile with the outlier skymodel from supplied list, length = 1
@@ -369,23 +374,35 @@ solve_phaseonly1.argument.solvetec.nchan          = {{ solint_freq_a }}
 
 {% if selfcal_local_dir is not none %}
 # make mapfile for the output of apply steps, len = ntimes * num_cal_blocks
-# this step is needed to direct the output to the non-local (shared) disk
+# this step is needed to direct the output to the shared disk if one is being
+# used with mulitple nodes
+{% if clustertype == local %}
+# on single machines, there is no need to change directories, so instead just
+# append the required suffix
+make_apply_mapfile.control.kind         = plugin
+make_apply_mapfile.control.type         = appendMapfile
+make_apply_mapfile.control.mapfile_in   = make_concat_data_sync_mapfile.output.mapfile
+make_apply_mapfile.control.append       = _apply_output
+make_apply_mapfile.control.mapfile_dir  = input.output.mapfile_dir
+make_apply_mapfile.control.filename     = apply_output.mapfile
+{% else %}
 make_apply_mapfile.control.kind         = plugin
 make_apply_mapfile.control.type         = changeDirectory
 make_apply_mapfile.control.mapfile_in   = make_concat_data_sync_mapfile.output.mapfile
 make_apply_mapfile.control.new_dir      = {{ pipeline_parset_dir }}
-make_apply_mapfile.control.make_tempdir = False
 make_apply_mapfile.control.append       = _apply_output
+make_apply_mapfile.control.clustertype  = {{ clustertype }}
 make_apply_mapfile.control.mapfile_dir  = input.output.mapfile_dir
 make_apply_mapfile.control.filename     = apply_output.mapfile
 {% endif %}
+{% endif %}
 
 # apply the previous calibration and average, length = ntimes * num_cal_blocks
-apply_phaseonly1.control.type        = dppp
-apply_phaseonly1.control.mapfiles_in = [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
-apply_phaseonly1.control.inputkeys   = [msin,parmdb]
+apply_phaseonly1.control.type                                 = dppp
+apply_phaseonly1.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
+apply_phaseonly1.control.inputkeys                            = [msin,parmdb]
 {% if selfcal_local_dir is not none %}
-apply_phaseonly1.control.mapfile_out = make_apply_mapfile.output.mapfile
+apply_phaseonly1.control.mapfile_out                          = make_apply_mapfile.output.mapfile
 {% endif %}
 apply_phaseonly1.argument.numthreads                          = {{ max_cpus_per_io_proc_ntimes }}
 apply_phaseonly1.argument.msin.datacolumn                     = DATA
@@ -444,7 +461,9 @@ wsclean_image11.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image11.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image11.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image11.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if local_dir is not none %}
+{% if selfcal_local_dir is not none %}
+wsclean_image11.argument.tempdir                = {{ selfcal_local_dir }}
+{% elif local_dir is not none %}
 wsclean_image11.argument.tempdir                = {{ local_dir_parent }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
@@ -514,7 +533,6 @@ wsclean_image12.argument.channelsout            = {{ wsclean_nchannels_selfcal }
 {% else %}
 wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
 {% endif %}
-wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
 wsclean_image12.argument.fitsmask               = fitsmask
 wsclean_image12.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image12.argument.pol                    = I
@@ -525,7 +543,9 @@ wsclean_image12.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image12.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image12.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image12.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if local_dir is not none %}
+{% if selfcal_local_dir is not none %}
+wsclean_image12.argument.tempdir                = {{ selfcal_local_dir }}
+{% elif local_dir is not none %}
 wsclean_image12.argument.tempdir                = {{ local_dir_parent }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
@@ -572,8 +592,9 @@ wsclean_ft1.argument.scale       = {{ cellsize_selfcal_deg }}
 wsclean_ft1.argument.mem         = {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft1.argument.channelsout = {{ wsclean_nchannels_selfcal }}
 wsclean_ft1.argument.j           = {{ max_cpus_per_io_proc_ntimes }}
-{% if local_dir is not none %}
-wsclean_ft1.argument.tempdir     = {{ local_dir }}
+{% if selfcal_local_dir is none and local_dir is not none %}
+# WSClean uses selfcal_local_dir automatically if the output files are there
+wsclean_ft1.argument.tempdir     = {{ local_dir_parent }}
 {% endif %}
 
 {% if pre_average %}
@@ -642,23 +663,31 @@ loop_phasecal.control.loopcount = {{ loopcount }}
 loop_phasecal.control.loopsteps = [average2,create_compressed_mapfile2,wsclean_image21,create_imagebase_map21,adjust_wsclean_mapfile21,mask2,wsclean_image22,create_imagebase_map22,create_expanded_model2_mapfile,pad_selfcal_model2_images,wsclean_ft2,{% if pre_average %}copy_model_data2,{% endif %}remove_parmdbs11,solve_ampphase11,apply_ampphase11,adjust_wsclean_mapfile22_phaseloop,copy_image1,check_image1]
 
 # average the output of the previous apply step, length = ntimes * num_cal_blocks
-average2.control.type                    = dppp
-average2.control.mapfile_in              = {{ concat_data_mapfile }}
-average2.control.inputkey                = msin
+average2.control.type                                 = dppp
+average2.control.mapfile_in                           = {{ concat_data_mapfile }}
+average2.control.inputkey                             = msin
 {% if selfcal_local_dir is not none %}
-average2.control.mapfile_out             = make_apply_mapfile.output.mapfile
+average2.control.mapfile_out                          = make_apply_mapfile.output.mapfile
 {% endif %}
-average2.argument.numthreads             = {{ max_cpus_per_io_proc_ntimes }}
-average2.argument.msin.datacolumn        = CORRECTED_DATA
-average2.argument.msout.overwrite        = True
-average2.argument.msout.writefullresflag = False
+average2.argument.numthreads                          = {{ max_cpus_per_io_proc_ntimes }}
+average2.argument.msin.datacolumn                     = CORRECTED_DATA
+average2.argument.msout.overwrite                     = True
+average2.argument.msout.writefullresflag              = False
 {% if local_dir is not none %}
-average2.argument.local_scratch_dir      = {{ local_dir }}
+average2.argument.local_scratch_dir                   = {{ local_dir }}
 {% endif %}
-average2.argument.steps                  = [avg]
-average2.argument.avg.type               = squash
-average2.argument.avg.freqstep           = 1
-average2.argument.avg.timestep           = {{ facetselfcal_timestep }}
+average2.argument.steps                               = [avg]
+average2.argument.avg.type                            = squash
+average2.argument.avg.freqstep                        = 1
+average2.argument.avg.timestep                        = {{ facetselfcal_timestep }}
+{% if use_compression %}
+average2.argument.msout.storagemanager                = "Dysco"
+average2.argument.msout.storagemanager.databitrate    = 16
+average2.argument.msout.storagemanager.weightbitrate  = 12
+average2.argument.msout.storagemanager.distribution   = "TruncatedGaussian"
+average2.argument.msout.storagemanager.disttruncation = 1.5
+average2.argument.msout.storagemanager.normalization  = "AF"
+{% endif %}
 
 # make compressed mapfile of averaged data, length = 1
 create_compressed_mapfile2.control.kind        = plugin
@@ -689,7 +718,9 @@ wsclean_image21.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image21.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image21.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image21.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if local_dir is not none %}
+{% if selfcal_local_dir is not none %}
+wsclean_image21.argument.tempdir                = {{ selfcal_local_dir }}
+{% elif local_dir is not none %}
 wsclean_image21.argument.tempdir                = {{ local_dir_parent }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
@@ -757,7 +788,6 @@ wsclean_image22.argument.channelsout            = {{ wsclean_nchannels_selfcal }
 {% else %}
 wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
 {% endif %}
-wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
 wsclean_image22.argument.fitsmask               = fitsmask
 wsclean_image22.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image22.argument.pol                    = I
@@ -768,7 +798,9 @@ wsclean_image22.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image22.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image22.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image22.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if local_dir is not none %}
+{% if selfcal_local_dir is not none %}
+wsclean_image22.argument.tempdir                = {{ selfcal_local_dir }}
+{% elif local_dir is not none %}
 wsclean_image22.argument.tempdir                = {{ local_dir_parent }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
@@ -814,7 +846,8 @@ wsclean_ft2.argument.scale       = {{ cellsize_selfcal_deg }}
 wsclean_ft2.argument.mem         = {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft2.argument.channelsout = {{ wsclean_nchannels_selfcal }}
 wsclean_ft2.argument.j           = {{ max_cpus_per_io_proc_ntimes }}
-{% if local_dir is not none %}
+{% if selfcal_local_dir is none and local_dir is not none %}
+# WSClean uses selfcal_local_dir automatically if the output files are there
 wsclean_ft2.argument.tempdir     = {{ local_dir_parent }}
 {% endif %}
 
@@ -859,21 +892,15 @@ apply_ampphase11.argument.numthreads                          = {{ max_cpus_per_
 apply_ampphase11.argument.msin.datacolumn                     = DATA
 apply_ampphase11.argument.msout                               = .
 apply_ampphase11.argument.msout.datacolumn                    = CORRECTED_DATA
-{% if preapply_solve_tec_only %}
-apply_ampphase11.argument.steps                               = [correct_fast1]
-{% else %}
 apply_ampphase11.argument.steps                               = [correct_fast1,correct_fast2]
-{% endif %}
 apply_ampphase11.argument.correct_fast1.type                  = applycal
 apply_ampphase11.argument.correct_fast1.parmdb                = parmdb
 apply_ampphase11.argument.correct_fast1.correction            = tec
 apply_ampphase11.argument.correct_fast1.invert                = True
-{% if not preapply_solve_tec_only %}
 apply_ampphase11.argument.correct_fast2.type                  = applycal
 apply_ampphase11.argument.correct_fast2.parmdb                = parmdb
 apply_ampphase11.argument.correct_fast2.correction            = commonscalarphase
 apply_ampphase11.argument.correct_fast2.invert                = True
-{% endif %}
 {% if use_compression %}
 apply_ampphase11.argument.msout.storagemanager                = "Dysco"
 apply_ampphase11.argument.msout.storagemanager.databitrate    = 16
@@ -1025,7 +1052,9 @@ wsclean_image31.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image31.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image31.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image31.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if local_dir is not none %}
+{% if selfcal_local_dir is not none %}
+wsclean_image31.argument.tempdir                = {{ selfcal_local_dir }}
+{% elif local_dir is not none %}
 wsclean_image31.argument.tempdir                = {{ local_dir_parent }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
@@ -1104,7 +1133,9 @@ wsclean_image32.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image32.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image32.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image32.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if local_dir is not none %}
+{% if selfcal_local_dir is not none %}
+wsclean_image32.argument.tempdir                = {{ selfcal_local_dir }}
+{% elif local_dir is not none %}
 wsclean_image32.argument.tempdir                = {{ local_dir_parent }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
@@ -1159,7 +1190,8 @@ wsclean_ft3.argument.scale       = {{ cellsize_selfcal_deg }}
 wsclean_ft3.argument.mem         = {{ max_percent_memory_per_io_proc_ntimes }}
 wsclean_ft3.argument.channelsout = {{ wsclean_nchannels_selfcal }}
 wsclean_ft3.argument.j           = {{ max_cpus_per_io_proc_ntimes }}
-{% if local_dir is not none %}
+{% if selfcal_local_dir is none and local_dir is not none %}
+# WSClean uses selfcal_local_dir automatically if the output files are there
 wsclean_ft3.argument.tempdir     = {{ local_dir_parent }}
 {% endif %}
 
@@ -1343,7 +1375,9 @@ wsclean_image41.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image41.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image41.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image41.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if local_dir is not none %}
+{% if selfcal_local_dir is not none %}
+wsclean_image41.argument.tempdir                = {{ selfcal_local_dir }}
+{% elif local_dir is not none %}
 wsclean_image41.argument.tempdir                = {{ local_dir_parent }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
@@ -1422,7 +1456,9 @@ wsclean_image42.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image42.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image42.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image42.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if local_dir is not none %}
+{% if selfcal_local_dir is not none %}
+wsclean_image42.argument.tempdir                = {{ selfcal_local_dir }}
+{% elif local_dir is not none %}
 wsclean_image42.argument.tempdir                = {{ local_dir_parent }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
