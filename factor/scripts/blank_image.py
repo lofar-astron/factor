@@ -83,15 +83,15 @@ def main(input_image_file, vertices_file, output_image_file, blank_value='zero',
         yvert.append(w.wcs_world2pix(ra_dec, 0)[0][RAind])
     poly = Polygon(xvert, yvert)
 
-    # Find limits of facet poly
-    xmin = int(np.min(xvert)) - 2
-    xmax = int(np.max(xvert)) + 2
-    ymin = int(np.min(yvert)) - 2
-    ymax = int(np.max(yvert)) + 2
-
     for input_image, output_image in zip(input_image_files, output_image_files):
         hdu = pyfits.open(input_image)
         data = hdu[0].data
+
+        # Find limits of facet poly and blank pixels outside them
+        xmin = max(int(np.min(xvert)) - 2, 0)
+        xmax = min(int(np.max(xvert)) + 2, data.shape[2])
+        ymin = max(int(np.min(yvert)) - 2, 0)
+        ymax = min(int(np.max(yvert)) + 2, data.shape[3])
         data[0, 0, :, :ymin] = blank_val
         data[0, 0, :, ymax:] = blank_val
         data[0, 0, :xmin, :] = blank_val
