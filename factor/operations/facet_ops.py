@@ -360,15 +360,6 @@ class FacetImage(Operation):
         # be regenerated
         if hasattr(self.direction, 'image_data_mapfile'):
             self.direction.use_existing_data = self.check_existing_files(self.direction.image_data_mapfile)
-            if (self.direction.use_existing_data and
-                'facetselfcal' in self.direction.image_data_mapfile):
-                # Old data exist but are from facetselfcal. Since reimage_selfcal is True,
-                # we will not use these data but instead generate new updated ones
-                self.log.debug('All files exist but are not up-to-date. They will be regenerated')
-                self.direction.use_existing_data = False
-
-                # Store mapfile for old data from selfcal for later clean up
-                self.direction.image_data_mapfile_selfcal = self.direction.image_data_mapfile
         else:
             self.direction.use_existing_data = False
 
@@ -379,13 +370,13 @@ class FacetImage(Operation):
             existing_data_freqstep=self.direction.full_res_facetimage_freqstep,
             existing_data_timestep=self.direction.full_res_facetimage_timestep)
         if self.direction.use_existing_data:
-            self.log.debug('Suitable calibrated data exist and will be used for reimaging')
+            self.log.debug('Suitable calibrated data exist and will be used for (re)imaging')
             # Set flag that determines whether additional averaging is to be done
             if (self.direction.facetimage_freqstep != 1 or self.direction.facetimage_timestep != 1):
                 self.direction.average_image_data = True
         else:
             self.direction.image_data_mapfile = 'create_compressed_mapfile.output.mapfile'
-            self.log.debug('No suitable calibrated data exist for reimaging. They will be generated')
+            self.log.debug('No suitable calibrated data exist for (re)imaging. They will be generated')
 
         ms_files = [band.files for band in self.bands]
         ms_files_single = []
