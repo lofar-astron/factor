@@ -91,6 +91,14 @@ def main(input_image_file, vertices_file, output_image_file, blank_value='zero',
         input_image_files = [input_image_file]
         output_image_files = [output_image_file]
 
+    if blank_value == 'zero':
+        blank_val = 0.0
+    elif blank_value == 'nan':
+        blank_val = np.nan
+    else:
+        print('Blank value type "{}" not understood.'.format(blank_with))
+        sys.exit(1)
+
     for input_image, output_image in zip(input_image_files, output_image_files):
         im = pim.image(input_image)
         data = im.getdata()
@@ -111,19 +119,24 @@ def main(input_image_file, vertices_file, output_image_file, blank_value='zero',
             yvert.append(pixels[3]) # y -> RA
         poly = Polygon(xvert, yvert)
 
+        # Find size of facet and blank regions outside
+        xmin = int(np.min(xvert)) - 2
+        xmax = int(np.max(xvert)) + 2
+        ymin = int(np.min(yvert)) - 2
+        ymax = int(np.max(yvert)) + 2
+        data[0, 0, :, :ymin] = blank_val
+        data[0, 0, :, ymax:] = blank_val
+        data[0, 0, :xmin, :] = blank_val
+        data[0, 0, xmax:, :] = blank_val
+
         # Find distance to nearest poly edge and blank those that
         # are outside the facet (dist < 0)
-        pix_ind = np.indices(data[0, 0].shape)
+        pix_ind = np.indices((xmax-xmin, ymax-ymin))
+        pix_ind[0] += xmin
+        pix_ind[1] += ymin
         dist = poly.is_inside(pix_ind[0], pix_ind[1])
         outside_ind = np.where(dist < 0.0)
         if len(outside_ind[0]) > 0:
-            if blank_value == 'zero':
-                blank_val = 0.0
-            elif blank_value == 'nan':
-                blank_val = np.nan
-            else:
-                print('Blank value type "{}" not understood.'.format(blank_with))
-                sys.exit(1)
             data[0, 0, pix_ind[0][outside_ind], pix_ind[1][outside_ind]] = blank_val
 
         # Save changes
