@@ -262,13 +262,10 @@ def spline1D_phase(phase_orig):
         idx = max(0, ndata-2-i)
         phase[ndata+ndata+i] = phase_orig[idx]
 
-    # work in log-sapce
-    phase_orig_ext = numpy.copy(phase)
-    phase = numpy.log10(phase)
     weights = (0.*numpy.copy(phase)) + 1 # initialize weights to 1
 
     # filter bad data and determine average scatter of amplitudes
-    idx = numpy.where(phase != 0.0) # log10(1.0) = 0.0
+    idx = numpy.where(phase != 0.0)
     #print idx, 'idx'
     if numpy.any(idx): # so we do not have an empty array
         scatter = findscatter(phase[idx])
@@ -366,7 +363,7 @@ def spline1D_phase(phase_orig):
     n_knots = numpy.int(numpy.ceil(numpy.float(len(knotvec))/3.)) # approxmiate, just for plot
 
     # return cleaned phases, model, scatter, number of knots, indices of replaced outliers
-    return phase_clean, 10**(model[ndata:ndata + ndata]), noisevec[ndata:ndata + ndata], scatter, n_knots, idxbad, weights[ndata:ndata + ndata]
+    return phase_clean, model[ndata:ndata + ndata], noisevec[ndata:ndata + ndata], scatter, n_knots, idxbad, weights[ndata:ndata + ndata]
 
 
 def pad_2Darray(a, width, mode):
@@ -487,7 +484,7 @@ def median2Dphasefilter(phase_orig):
     return phase_cleaned, phase_median, baddata
 
 
-def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=False):
+def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=False, plot_phases=False):
     if type(normalize) is str:
         if normalize.lower() == 'true':
             normalize = True
@@ -505,11 +502,6 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
     parms = pdb.getValuesGrid('*')
 
     key_names = parms.keys()
-    for key_name in key_names:
-        # Check for NaNs. If found, set to 1
-        flagged_indx = numpy.where(numpy.isnan(parms[key_name]['values']))
-        parms[key_name]['values'][flagged_indx] = 1.0
-
     nchans = len(parms[key_names[0]]['freqs'])
 
     # determine the number of polarizations in parmdb (2 or 4)
@@ -560,13 +552,22 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
             channel_phase_orig = [numpy.arctan2(channel_parms_imag[chan],
                 channel_parms_real[chan]) for chan in range(nchans)]
 
+            # Check for NaNs. If found, set amps to 1 and phases to 0.0
+            for chan in range(nchans):
+                flagged_indx = numpy.where(numpy.isnan(channel_amp_orig[chan]))
+                if len(flagged_indx[0]) > 0:
+                    channel_amp_orig[chan][flagged_indx] = 1.0
+                flagged_indx = numpy.where(numpy.isnan(channel_phase_orig[chan]))
+                if len(flagged_indx[0]) > 0:
+                    channel_phase_orig[chan][flagged_indx] = 0.0
+
             # now find the bad data
             pool = multiprocessing.Pool()
-            amp_results = pool.map(spline1D, channel_amp_orig)
+            amp_results = pool.map(spline1D_amp, channel_amp_orig)
             pool.close()
             pool.join()
             pool = multiprocessing.Pool()
-            phase_results = pool.map(spline1D, channel_phase_orig)
+            phase_results = pool.map(spline1D_phase, channel_phase_orig)
             pool.close()
             pool.join()
 
@@ -587,35 +588,66 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
                 timevec = numpy.arange(0,len(channel_amp_orig[chan]))
 
                 # only plot one channel, just to verify code works
-                if plotting and chan == nchans-1: # plot last channel
-                    axsa[istat][0].plot(timevec, amp_cleaned, marker=fmt, ls=ls,
-                        markersize=0.1*len(amp_cleaned), c=cc,mec=cc)
-                    axsa[istat][0].plot(timevec,noisevec, c=cc, lw=0.75, ls='--')
+                if plot_phases:
+                    if plotting and chan == nchans-1: # plot last channel
+                        axsa[istat][0].plot(timevec,numpy.mod(phase_cleaned+numpy.pi, 2*numpy.pi) - numpy.pi , marker=fmt, ls=ls,
+                            markersize=500/len(phase_cleaned), c=cc,mec=cc)
+                        axsa[istat][0].plot(timevec,phase_noisevec, c=cc, lw=0.75, ls='--')
 
-                    if pol in pol_list[0]:
-                        axsa[istat][0].annotate('scatter=' +'{:.2g}'.format(scatter),
-                            xy=(0.5,0.15), color=cc,textcoords='axes fraction')
-                        axsa[istat][0].annotate('#knots=' +'{:d}'.format(n_knots),
-                            xy=(0.01,0.15), color=cc,textcoords='axes fraction') # we divded by three beucase we mirrored the array
-                    else:
-                        axsa[istat][0].annotate('scatter=' +'{:.2g}'.format(scatter),
-                            xy=(0.5,0.02), color=cc, textcoords='axes fraction')
-                        axsa[istat][0].annotate('#knots=' +'{:d}'.format(n_knots),
-                            xy=(0.01,0.02), color=cc,textcoords='axes fraction')
+                        if pol in pol_list[0]:
+                            axsa[istat][0].annotate('scatter=' +'{:.2g}'.format(phase_scatter),
+                                xy=(0.5,0.15), color=cc,textcoords='axes fraction')
+                            axsa[istat][0].annotate('#knots=' +'{:d}'.format(phase_n_knots),
+                                xy=(0.01,0.15), color=cc,textcoords='axes fraction') # we divded by three beucase we mirrored the array
+                        else:
+                            axsa[istat][0].annotate('scatter=' +'{:.2g}'.format(phase_scatter),
+                                xy=(0.5,0.02), color=cc, textcoords='axes fraction')
+                            axsa[istat][0].annotate('#knots=' +'{:d}'.format(phase_n_knots),
+                                xy=(0.01,0.02), color=cc,textcoords='axes fraction')
 
-                    if numpy.any(idxbad):
-                        axsa[istat][0].plot(timevec[idxbad],channel_amp_orig[chan][idxbad],
-                            marker='o', c=ccf, ls=ls, markersize=4)
+                        if numpy.any(phase_idxbad):
+                            axsa[istat][0].plot(timevec[phase_idxbad],channel_phase_orig[chan][phase_idxbad],
+                                marker='o', c=ccf, ls=ls, markersize=4)
 
-                    idxbadi = numpy.where(weights < 1.0)
-                    if numpy.any(idxbadi):
-                        axsa[istat][0].plot(timevec[idxbadi],channel_amp_orig[chan][idxbadi],
-                            marker='o', c='black', ls=ls, markersize=4, mec='black')
+                        idxbadi = numpy.where(phase_weights < 1.0)
+                        if numpy.any(idxbadi):
+                            axsa[istat][0].plot(timevec[idxbadi],numpy.mod(channel_phase_orig[chan][idxbadi]+numpy.pi, 2*numpy.pi) - numpy.pi,
+                                marker='o', c='black', ls=ls, markersize=4, mec='black')
 
-                    axsa[istat][0].plot(timevec, model, c=ccf, lw=1.0)
-                    axsa[istat][0].set_title(antenna)
-                    axsa[istat][0].set_ylim(-0.3, 2)
-                    axsa[istat][0].set_xlim(0, max(timevec))
+                        axsa[istat][0].plot(timevec, numpy.mod(phase_model+numpy.pi, 2*numpy.pi) - numpy.pi, c=ccf, lw=1.0)
+                        axsa[istat][0].set_title(antenna)
+                        axsa[istat][0].set_ylim(-3.14, 3.14)
+                        axsa[istat][0].set_xlim(0, max(timevec))
+                else:
+                    if plotting and chan == nchans-1: # plot last channel
+                        axsa[istat][0].plot(timevec, amp_cleaned, marker=fmt, ls=ls,
+                            markersize=0.1*len(amp_cleaned), c=cc,mec=cc)
+                        axsa[istat][0].plot(timevec,noisevec, c=cc, lw=0.75, ls='--')
+
+                        if pol in pol_list[0]:
+                            axsa[istat][0].annotate('scatter=' +'{:.2g}'.format(scatter),
+                                xy=(0.5,0.15), color=cc,textcoords='axes fraction')
+                            axsa[istat][0].annotate('#knots=' +'{:d}'.format(n_knots),
+                                xy=(0.01,0.15), color=cc,textcoords='axes fraction') # we divded by three beucase we mirrored the array
+                        else:
+                            axsa[istat][0].annotate('scatter=' +'{:.2g}'.format(scatter),
+                                xy=(0.5,0.02), color=cc, textcoords='axes fraction')
+                            axsa[istat][0].annotate('#knots=' +'{:d}'.format(n_knots),
+                                xy=(0.01,0.02), color=cc,textcoords='axes fraction')
+
+                        if numpy.any(idxbad):
+                            axsa[istat][0].plot(timevec[idxbad],channel_amp_orig[chan][idxbad],
+                                marker='o', c=ccf, ls=ls, markersize=4)
+
+                        idxbadi = numpy.where(weights < 1.0)
+                        if numpy.any(idxbadi):
+                            axsa[istat][0].plot(timevec[idxbadi],channel_amp_orig[chan][idxbadi],
+                                marker='o', c='black', ls=ls, markersize=4, mec='black')
+
+                        axsa[istat][0].plot(timevec, model, c=ccf, lw=1.0)
+                        axsa[istat][0].set_title(antenna)
+                        axsa[istat][0].set_ylim(-0.3, 2)
+                        axsa[istat][0].set_xlim(0, max(timevec))
 
             if nchans > 5: # Do 2D smooth
                 channel_parms_real = [parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan]
@@ -630,7 +662,7 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
                 phase_orig = numpy.arctan2(channel_parms_imag[:], channel_parms_real[:]**2)
 
                 amp_cleaned, amp_median, baddata = median2Dampfilter(numpy.copy(amp_orig))
-                phase_cleaned, phase_median, phase_baddata = median2Dampfilter(numpy.copy(phase_orig))
+                phase_cleaned, phase_median, phase_baddata = median2Dphasefilter(numpy.copy(phase_orig))
 
                 for chan in range(nchans):
                     # put back the results
