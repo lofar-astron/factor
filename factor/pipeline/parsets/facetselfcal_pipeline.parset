@@ -1876,7 +1876,6 @@ blank_model.control.inputkey                = infile
 blank_model.control.outputkey               = outfile
 blank_model.argument.flags                  = [infile,{{ vertices_file }},outfile]
 blank_model.argument.blank_value            = zero
-blank_model.argument.img_format             = fits
 blank_model.argument.image_is_wsclean_model = True
 
 # expand the model mapfile so that there is one entry for every band, length = nbands
