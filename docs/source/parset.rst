@@ -6,7 +6,8 @@ The Factor parset
 Before Factor can be run, a parset describing the reduction must be made. The
 parset is a simple text file defining the parameters of a run in a number of
 sections. For example, a typical parset for a basic reduction on a single
-machine is shown below::
+machine could look like the following (see :ref:`tips` for tips on setting up an
+optimal parset)::
 
         [global]
         dir_working = /path/to/factor/working/dir
@@ -63,12 +64,12 @@ The available options are described below under their respective sections.
         Use Dysco compression for chunked files (default = False). Enabling this
         option will result in less storage usage and signifcanctly faster
         processing on systems with slow IO. To use this option, you must have the
-        Dysco library in your LD_LIBRARY_PATH. Note: if enabled, Factor will not
+        Dysco library in your ``LD_LIBRARY_PATH``. Note: if enabled, Factor will not
         make symbolic links to the input data, even if they are shorter than
         :term:`chunk_size_sec`, but will copy them instead.
 
     interactive
-        Use interactive mode (default = ``False``). If True, Factor will ask for confirmation of
+        Use interactive mode (default = ``False``). If ``True``, Factor will ask for confirmation of
         internally derived DDE calibrators and facets.
 
     keep_avg_facet_data
@@ -83,7 +84,7 @@ The available options are described below under their respective sections.
 
     flag_reltime
         Range of times to flag (default = no flagging). The syntax is that of
-        the preflagger ``reltime`` parameter (see the DPPP documentation for
+        the preflagger ``reltime`` parameter (see the DPPP documentation on the LOFAR wiki for
         details of the syntax). E.g., ``flag_reltime = [1:30:05..1:35:20,
         5:10:49..5:14:30]``. Note that time and baseline flagging (set with
         :term:`flag_baseline`) ranges are AND-ed to produce the final flags.
@@ -124,7 +125,7 @@ The available options are described below under their respective sections.
 
     preapply_first_cal_phases
         Preapply the direction-dependent phase solutions for the first calibrator to
-        all subsequent ones (default = `False``). If ``True``, residual clock errors are
+        all subsequent ones (default = ``False``). If ``True``, residual clock errors are
         removed before calibration and a single TEC+CommonScalarPhase fit is used
         across the whole bandwidth.
 
@@ -144,7 +145,7 @@ The available options are described below under their respective sections.
         (default = 10.0).
 
     peel_flux_Jy
-        Peel the calibrator for sources above this flux density (default = 25.0).
+        Peel the calibrator for sources above this flux density in Jy (default = 25.0).
         When activated, the calibrator is peeled using a supplied sky model and
         the facet is then imaged as normal. Note: for each source that should be
         peeled, a sky model must be specified in the directions file in the
@@ -177,7 +178,7 @@ The available options are described below under their respective sections.
         Make final mosaic (default = ``True``).
 
     image_target_only
-        Image only the target facet (default = ``False``). If True and a target is
+        Image only the target facet (default = ``False``). If ``True`` and a target is
         specified in the :ref:`_parset_directions_options` section, then only the facet containing the
         target source is imaged.
 
@@ -364,15 +365,16 @@ The available options are described below under their respective sections.
 
     clusterdesc_file
         Full path to cluster description file. Use ``clusterdesc_file = PBS`` to use the
-        PBS / torque reserved nodes, or use ``clusterdesc_file = JUROPA_slurm`` to use
+        PBS / torque reserved nodes, clusterdesc_file = SLURM to use SLURM reserved
+        ones, or use ``clusterdesc_file = JUROPA_slurm`` to use
         multiple nodes in a slurm reservation on JUROPA.
         If not given, the clusterdesc file for a single (i.e., local) node is used.
 
         .. note::
 
-            On a cluster that uses torque and PBS, Factor will automatically determine the nodes for which you have a
-            PBS reservation and use them. Note that you must ask for all the nodes you need
-            in a single PBS script, so that all nodes are available for the full Factor run. An
+            On a cluster that uses PBS or SLRUM, Factor will automatically determine the nodes for which you have a
+            reservation and use them. Note that you must ask for all the nodes you need
+            in a single PBS or SLURM script, so that all nodes are available for the full Factor run. An
             example PBS script that uses 6 nodes (with 6 CPUs each) is shown below::
 
                 #!/bin/bash
@@ -416,8 +418,8 @@ The available options are described below under their respective sections.
         Maximum umber of directions to process in parallel on each node (default
         = 1). Note that the number of CPUs (set with the
         :term:`ncpu` parameter) and the amount of memory available to WSClean
-        :(set with the term:`wsclean_fmem` parameter) will be divided among the
-        :directions on each node.
+        (set with the term:`wsclean_fmem` parameter) will be divided among the
+        directions on each node.
 
 .. _parset_checkfactor_options:
 
