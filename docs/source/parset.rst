@@ -57,18 +57,18 @@ The available options are described below under their respective sections.
         chunking the data, set this value to be larger than the length of the
         longest dataset (in this case, Factor will not make copies of the files
         but will make symbolic links to them instead, so please make backup
-        copies yourself)
+        copies yourself).
 
     use_compression
         Use Dysco compression for chunked files (default = False). Enabling this
         option will result in less storage usage and signifcanctly faster
-        processing. To use this option, you must have the Dysco library in your
-        LD_LIBRARY_PATH. Note: if enabled, Factor will not make symbolic links to the
-        input data, even if they are shorter than chunk_size_sec, but will copy them
-        instead.
+        processing on systems with slow IO. To use this option, you must have the
+        Dysco library in your LD_LIBRARY_PATH. Note: if enabled, Factor will not
+        make symbolic links to the input data, even if they are shorter than
+        :term:`chunk_size_sec`, but will copy them instead.
 
     interactive
-        Use interactive mode (default = ``False``). Factor will ask for confirmation of
+        Use interactive mode (default = ``False``). If True, Factor will ask for confirmation of
         internally derived DDE calibrators and facets.
 
     keep_avg_facet_data
@@ -197,6 +197,13 @@ The available options are described below under their respective sections.
         dividing the number of bands by the nearest divisor to this factor. Smaller
         values produce better results but require longer run times. Wide-band clean is
         activated when there are more than 5 bands.
+
+    nbands_selfcal_facet_image
+        Number of bands to use for facet imaging during selfcal (default = 6). Facet
+        imaing during selfcal is used to improve the subtraction of non-calibrator
+        sources in the facet. More bands will result in a better subtraction but also
+        longer runtimes. When fewer than the total number are used, the bands are
+        selected so that they are evenly spread over the full available bandwidth
 
     wsclean_bl_averaging
         Use baseline-dependent averaging in WSClean (default = ``False``). If enabled,

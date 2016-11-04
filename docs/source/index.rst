@@ -39,8 +39,8 @@ Setting Up and Running Factor
    tips
 
 
-Factor Operations
------------------
+Factor Operations and Primary Data Products
+-------------------------------------------
 
 .. toctree::
    :maxdepth: 2
