@@ -8,7 +8,7 @@ Below are a number of tips for setting up and running Factor in the optimal way.
 Match the number of chunks to the number of cores
 -------------------------------------------------
 To maximize CPU usage, the number of chunks should be evenly divisible by
-the number of available cores. Adjust the :term:`chunk_size` parameter to obtain the
+the number of available cores. Adjust the :term:`chunk_size_sec` parameter to obtain the
 desired number of chunks.
 
 Use the ram drive
