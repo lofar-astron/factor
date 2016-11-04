@@ -36,10 +36,11 @@ Setting Up and Running Factor
    parset
    directions
    running
+   tips
 
 
-Factor Operations
------------------
+Factor Operations and Primary Data Products
+-------------------------------------------
 
 .. toctree::
    :maxdepth: 2

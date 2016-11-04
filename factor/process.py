@@ -81,12 +81,32 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     if len(peel_directions) > 0:
         log.info('Peeling {0} direction(s)'.format(len(peel_directions)))
 
+        # Set flag for first non-outlier direction (if any) to create preapply parmdb
+        for d in peel_directions:
+            if not d.is_outlier:
+                d.create_preapply_parmdb = True
+                break
+
+        # Reset if needed
+        direction_group_reset = [d for d in peel_directions if d.do_reset]
+        direction_group_reset_facetsub = [d for d in direction_group_reset if
+            'facetsub' in d.reset_operations]
+        if len(direction_group_reset_facetsub) > 0:
+            for d in direction_group_reset_facetsub:
+                if ('facetsubreset' in d.completed_operations or
+                    'facetsubreset' in reset_operations):
+                    # Reset a previous reset, but only if it completed successfully
+                    # or is explicitly specified for reset (to allow one to resume
+                    # facetsubreset instead of always resetting and restarting it)
+                    d.reset_state('facetsubreset')
+            ops = [FacetSubReset(parset, bands, d) for d in direction_group_reset_facetsub]
+            for op in ops:
+                scheduler.run(op)
+        for d in direction_group_reset:
+            d.reset_state(['outlierpeel', 'facetpeel', 'facetsub'])
+
         # Do the peeling
         for d in peel_directions:
-            # Reset if needed. Note that proper reset of the subtract steps in
-            # outlierpeel and facetsub is not currently supported
-            d.reset_state(['outlierpeel', 'facetpeel', 'facetpeelimage', 'facetsub'])
-
             if d.is_outlier:
                 op = OutlierPeel(parset, bands, d)
             else:
@@ -94,12 +114,16 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             scheduler.run(op)
 
             # Check whether direction went through peeling successfully. If so,
-            # set various flags if needed. If not successful, exit
+            # subtract and set various flags if needed. If not successful, exit
             if d.selfcal_ok:
-                # Set the name of the subtracted data column
+                # Subtract improved model(s) with DDE calibration
+                op = FacetSub(parset, bands, d)
+                scheduler.run(op)
+
+                # Set the name of the subtracted data column for subsequent directions
                 if set_sub_data_colname:
                     for direction in directions:
-                        direction.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
+                        direction.subtracted_data_colname = 'CORRECTED_DATA'
                     set_sub_data_colname = False
 
                 # Set the flag for preapplication of selfcal solutions, but only
@@ -112,22 +136,11 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                         if direction.name != d.name:
                             direction.preapply_phase_cal = True
                             direction.preapply_parmdb_mapfile = d.preapply_parmdb_mapfile
-                            if parset['calibration_specific']['preapply_solve_tec_only']:
-                                direction.preapply_solve_tec_only = True
                     set_preapply_flag = False
             else:
                 log.error('Peeling failed for direction {0}.'.format(d.name))
                 log.info('Exiting...')
                 sys.exit(1)
-
-            if d.peel_calibrator:
-                # Do the imaging of the facet if calibrator was peeled and
-                # subtract the improved model
-                op = FacetPeelImage(parset, bands, d)
-                scheduler.run(op)
-
-                op = FacetSub(parset, bands, d)
-                scheduler.run(op)
 
     # Run selfcal and subtract operations on direction groups
     for gindx, direction_group in enumerate(direction_groups):
@@ -155,7 +168,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             d.reset_state(['facetselfcal', 'facetsub'])
 
         # Set flag for first direction to create preapply parmdb
-        direction_group[0].create_preapply_parmdb = True
+        if set_preapply_flag:
+            direction_group[0].create_preapply_parmdb = True
 
         # Do selfcal on calibrator only
         ops = [FacetSelfcal(parset, bands, d) for d in direction_group]
@@ -172,7 +186,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             if len(direction_group_ok) > 0:
                 for d in directions:
                     if d.name != direction_group_ok[0].name:
-                        d.subtracted_data_colname = 'SUBTRACTED_DATA_ALL_NEW'
+                        d.subtracted_data_colname = 'CORRECTED_DATA '
                 set_sub_data_colname = False
         if set_preapply_flag and parset['calibration_specific']['preapply_first_cal_phases']:
             # Set the flag for preapplication of selfcal solutions (if needed)
@@ -181,8 +195,6 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     if d.name != direction_group_ok[0].name:
                         d.preapply_phase_cal = True
                         d.preapply_parmdb_mapfile = direction_group_ok[0].preapply_parmdb_mapfile
-                        if parset['calibration_specific']['preapply_solve_tec_only']:
-                            d.preapply_solve_tec_only = True
                 set_preapply_flag = False
 
         # Subtract final model(s) for directions for which selfcal went OK
@@ -205,47 +217,48 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         log.error('Self calibration failed for all directions. Exiting...')
         sys.exit(1)
 
-    # (Re)image facets for each set of cellsize, robust, taper, and uv cut settings
+    # Image facets for each set of cellsize, robust, taper, and uv cut settings
+    cellsizes = parset['imaging_specific']['facet_cellsize_arcsec']
+    tapers = parset['imaging_specific']['facet_taper_arcsec']
+    robusts = parset['imaging_specific']['facet_robust']
+    min_uvs = parset['imaging_specific']['facet_min_uv_lambda']
+    selfcal_robust = parset['imaging_specific']['selfcal_robust']
+    nimages = len(cellsizes)
     dirs_with_selfcal = [d for d in directions if d.selfcal_ok]
-    dirs_with_selfcal_to_reimage = [d for d in dirs_with_selfcal if not d.is_patch
-        and not d.is_outlier]
-    dirs_without_selfcal = [d for d in directions if not d.selfcal_ok and not
-        d.is_patch and not d.is_outlier]
-    if len(dirs_without_selfcal) > 0:
+    if parset['imaging_specific']['image_target_only']:
+        dirs_with_selfcal_to_image = [d for d in dirs_with_selfcal if not d.is_patch
+            and not d.is_outlier and d.contains_target]
+        dirs_without_selfcal_to_image = [d for d in directions if not d.selfcal_ok and not
+            d.is_patch and not d.is_outlier and d.contains_target]
+    else:
+        dirs_with_selfcal_to_image = [d for d in dirs_with_selfcal if not d.is_patch
+            and not d.is_outlier]
+        dirs_without_selfcal_to_image = [d for d in directions if not d.selfcal_ok and not
+            d.is_patch and not d.is_outlier]
+    if len(dirs_without_selfcal_to_image) > 0:
         log.info('Imaging the following direction(s) with nearest self calibration solutions:')
-        log.info('{0}'.format([d.name for d in dirs_without_selfcal]))
-    for d in dirs_without_selfcal:
+        log.info('{0}'.format([d.name for d in dirs_without_selfcal_to_image]))
+    for d in dirs_without_selfcal_to_image:
         # Search for nearest direction with successful selfcal
         nearest, sep = factor.directions.find_nearest(d, dirs_with_selfcal)
         log.debug('Using solutions from direction {0} for direction {1} '
             '(separation = {2} deg).'.format(nearest.name, d.name, sep))
-        d.dir_dep_parmdb_mapfile = nearest.dir_dep_parmdb_mapfile
+        d.converted_parmdb_mapfile = nearest.converted_parmdb_mapfile
         d.save_state()
-
-    if len(dirs_with_selfcal_to_reimage + dirs_without_selfcal) > 0:
-        cellsizes = parset['imaging_specific']['facet_cellsize_arcsec']
-        tapers = parset['imaging_specific']['facet_taper_arcsec']
-        robusts = parset['imaging_specific']['facet_robust']
-        min_uvs = parset['imaging_specific']['facet_min_uv_lambda']
-        nimages = len(cellsizes)
-
+    if len(dirs_with_selfcal_to_image + dirs_without_selfcal_to_image) > 0:
         for image_indx, (cellsize_arcsec, taper_arcsec, robust, min_uv_lambda) in enumerate(
             zip(cellsizes, tapers, robusts, min_uvs)):
+
             # Always image directions that did not go through selfcal
-            dirs_to_image = dirs_without_selfcal[:]
+            dirs_to_image = dirs_without_selfcal_to_image[:]
 
             # Only reimage facets with selfcal imaging parameters if reimage_selfcal flag is set
-            if parset['imaging_specific']['facet_imager'] == 'wsclean':
-                selfcal_robust = parset['imaging_specific']['selfcal_robust_wsclean']
+            full_res_im, opname = _get_image_type_and_name(cellsize_arcsec, taper_arcsec,
+                robust, selfcal_robust, min_uv_lambda, parset)
+            if full_res_im:
+                dirs_to_image += dirs_with_selfcal_to_image
             else:
-                selfcal_robust = parset['imaging_specific']['selfcal_robust']
-            if (cellsize_arcsec == parset['imaging_specific']['selfcal_cellsize_arcsec'] and
-                robust == selfcal_robust and taper_arcsec == 0.0 and
-                min_uv_lambda == parset['imaging_specific']['selfcal_min_uv_lambda']):
-                if parset['imaging_specific']['reimage_selfcaled']:
-                    dirs_to_image += dirs_with_selfcal_to_reimage
-            else:
-                dirs_to_image += dirs_with_selfcal_to_reimage
+                dirs_to_image += dirs_with_selfcal_to_image
 
             if len(dirs_to_image) > 0:
                 log.info('Imaging with cellsize = {0} arcsec, robust = {1}, '
@@ -257,9 +270,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             # Reset facetimage op for any directions that need it
             directions_reset = [d for d in dirs_to_image if d.do_reset]
             for d in directions_reset:
-                op = FacetImage(parset, bands, d, cellsize_arcsec, robust,
-                    taper_arcsec, min_uv_lambda)
-                d.reset_state(op.name)
+                d.reset_state(opname)
 
             # Do facet imaging
             ops = [FacetImage(parset, bands, d, cellsize_arcsec, robust,
@@ -267,29 +278,38 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             scheduler.run(ops)
 
         # Mosaic the final facet images together
-        for i, (cellsize_arcsec, taper_arcsec, robust, min_uv_lambda) in enumerate(
-            zip(cellsizes, tapers, robusts, min_uvs)):
-            if parset['imaging_specific']['make_mosaic']:
-                # Make direction object for the field and load previous state (if any)
-                field = Direction('field', bands[0].ra, bands[0].dec,
-                    factor_working_dir=parset['dir_working'])
-                field.load_state()
+        if parset['imaging_specific']['make_mosaic']:
+            # Make direction object for the field and load previous state (if any)
+            field = Direction('field', bands[0].ra, bands[0].dec,
+                factor_working_dir=parset['dir_working'])
+            field.load_state()
+            if len(reset_operations) > 0:
+                field.reset_operations = reset_operations
+            else:
+                field.reset_operations = (field.completed_operations[:] +
+                    field.started_operations[:])
 
-                # Set averaging for primary beam generation
-                field.avgpb_freqstep = bands[0].nchan
-                field.avgpb_timestep = int(120.0 / bands[0].timepersample)
+            # Set averaging for primary beam generation
+            field.avgpb_freqstep = bands[0].nchan
+            field.avgpb_timestep = int(120.0 / bands[0].timepersample)
+
+            for i, (cellsize_arcsec, taper_arcsec, robust, min_uv_lambda) in enumerate(
+                zip(cellsizes, tapers, robusts, min_uvs)):
 
                 # Reset the field direction if specified
+                full_res_im, opname = _get_image_type_and_name(cellsize_arcsec, taper_arcsec,
+                    robust, selfcal_robust, min_uv_lambda, parset, opbase='fieldmosaic')
                 if 'field' in reset_directions:
-                    op = FieldMosaic(parset, bands, field, cellsize_arcsec, robust,
-                        taper_arcsec, min_uv_lambda)
-                    field.reset_state(op.name)
+                    field.reset_state(opname)
 
+                # Specify appropriate image, mask, and vertices file
                 field.facet_image_filenames = []
                 field.facet_vertices_filenames = []
-                for d in directions:
+                full_res_im, opname = _get_image_type_and_name(cellsize_arcsec, taper_arcsec,
+                    robust, selfcal_robust, min_uv_lambda, parset)
+                for d in dirs_to_image:
                     if not d.is_patch:
-                        facet_image = DataMap.load(d.facet_image_mapfile)[0].file
+                        facet_image = DataMap.load(d.facet_image_mapfile[opname])[0].file
                         field.facet_image_filenames.append(facet_image)
                         field.facet_vertices_filenames.append(d.save_file)
 
@@ -330,6 +350,11 @@ def _set_up_compute_parameters(parset, dry_run=False):
             log.info('Using cluster setting: "PBS".')
             parset['cluster_specific']['clusterdesc'] = factor.cluster.make_pbs_clusterdesc()
             parset['cluster_specific']['clustertype'] = 'pbs'
+        elif (cluster_parset['clusterdesc_file'].lower() == 'slurm' or
+            ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'slurm')):
+            log.info('Using cluster setting: "SLURM".')
+            parset['cluster_specific']['clusterdesc'] = factor.cluster.make_slurm_clusterdesc()
+            parset['cluster_specific']['clustertype'] = 'slurm'
         elif (cluster_parset['clusterdesc_file'].lower() == 'juropa_slurm' or
             ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'juropa_slurm')):
             log.info('Using cluster setting: "JUROPA_slurm" (Single genericpipeline using multiple nodes).')
@@ -429,8 +454,18 @@ def _set_up_bands(parset, test_run=False):
                     break
         band = Band(msdict[MSkey], parset['dir_working'], parset['parmdb_name'],
             skymodel_dirindep, local_dir=parset['cluster_specific']['dir_local'],
-            test_run=test_run, chunk_size_sec=parset['chunk_size_sec'])
-        bands.append(band)
+            test_run=test_run, chunk_size_sec=parset['chunk_size_sec'],
+            use_compression=parset['use_compression'])
+        if len(band.files) == 0:
+            # No useable files found for this band (likely due to too little
+            # unflagged data)
+            if parset['exit_on_bad_band']:
+                log.info('Exiting!')
+                sys.exit(1)
+            else:
+                log.info('Skipping {} in further processing'.format(band.name))
+        else:
+            bands.append(band)
 
     # Sort bands by frequency
     band_freqs = [band.freq for band in bands]
@@ -589,13 +624,6 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
             if target_has_own_facet and 'target' not in direction_names:
                 directions.append(target)
 
-            # Warn user if reimaging is to be done but they are not processing
-            # the full field
-            if parset['imaging_specific']['reimage_selfcaled']:
-                log.warn("The reimage_selfcaled parameter is True but all directions "
-                    "will not be processed. If you're interested in only a single "
-                    "target in the last facet, then re-imaging will not improve results.")
-
     # Set various direction attributes
     for i, direction in enumerate(directions):
         # Set direction sky model
@@ -632,13 +660,24 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
                 sys.exit(1)
             direction.solve_all_correlations = True
 
-        # Set skip_facet_imaging flag
-        direction.skip_facet_imaging = parset['imaging_specific']['skip_facet_imaging']
-
         # Set field center to that of first band (all bands have the same phase
         # center)
         direction.field_ra = bands[0].ra
         direction.field_dec = bands[0].dec
+
+        # Set initial name of column that contains SUBTRACTED_DATA_ALL
+        if parset['use_compression']:
+            # Since we compressed the input data, SUBTRACTED_DATA_ALL is now
+            # the DATA column
+            direction.subtracted_data_colname = 'DATA'
+            direction.use_compression = True
+        else:
+            direction.subtracted_data_colname = 'SUBTRACTED_DATA_ALL'
+            direction.use_compression = False
+
+        # Set any flagging parameters
+        direction.flag_reltime = parset['flag_reltime']
+        direction.flag_baseline = parset['flag_baseline']
 
         # Reset state if specified
         if direction.name in reset_directions:
@@ -754,11 +793,12 @@ def _initialize_directions(parset, initial_skymodel, ref_band, max_radius_deg=No
     target_dec = dir_parset['target_dec']
     target_radius_arcmin = dir_parset['target_radius_arcmin']
     target_has_own_facet = dir_parset['target_has_own_facet']
-    if target_has_own_facet:
-        if target_ra is not None and target_dec is not None and target_radius_arcmin is not None:
-            # Make target object
-            target = Direction('target', target_ra, target_dec,
-                factor_working_dir=parset['dir_working'])
+    if target_ra is not None and target_dec is not None and target_radius_arcmin is not None:
+        # Make target object
+        target = Direction('target', target_ra, target_dec,
+            factor_working_dir=parset['dir_working'])
+        if target_has_own_facet:
+            target.contains_target = True
 
             # Check if target is already in directions list because it was
             # selected as a DDE calibrator. If so, remove the duplicate
@@ -769,6 +809,11 @@ def _initialize_directions(parset, initial_skymodel, ref_band, max_radius_deg=No
             # Add target to directions list
             directions.append(target)
         else:
+            # Find direction that contains target
+            nearest, dist = factor.directions.find_nearest(target, directions)
+            nearest.contains_target = True
+    else:
+        if target_has_own_facet:
             log.critical('target_has_own_facet = True, but target RA, Dec, or radius not found in parset')
             sys.exit(1)
 
@@ -793,3 +838,42 @@ def _initialize_directions(parset, initial_skymodel, ref_band, max_radius_deg=No
     factor.directions.make_ds9_calimage_file(directions, ds9_calimage_reg_file)
 
     return directions
+
+
+def _get_image_type_and_name(cellsize_arcsec, taper_arcsec, robust, selfcal_robust,
+    min_uv_lambda, parset, opbase='facetimage'):
+    """
+    Checks input parameters and returns type and associated operation
+
+    Parameters
+    ----------
+    cellsize_arcsec : float
+        Cell size
+    taper_arcsec : float
+        Taper
+    robust : float
+        Briggs robust
+    min_uv_lambda : float
+        Min uv cut
+    parset : dict
+        Factor parset
+    opbase : str, optional
+        Basename of operation
+
+    Returns
+    -------
+    full_res_im, opname : bool, str
+        Image type (full resolution or not) and FacetImage operation name
+
+    """
+    if (cellsize_arcsec != parset['imaging_specific']['selfcal_cellsize_arcsec'] or
+        robust != selfcal_robust or taper_arcsec != 0.0 or
+        min_uv_lambda != parset['imaging_specific']['selfcal_min_uv_lambda']):
+        opname = '{0}_c{1}r{2}t{3}u{4}'.format(opbase, round(cellsize_arcsec, 1),
+                round(robust, 2), round(taper_arcsec, 1), round(min_uv_lambda, 1))
+        full_res_im = False
+    else:
+        opname = opbase
+        full_res_im = True
+
+    return full_res_im, opname

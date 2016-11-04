@@ -7,9 +7,10 @@ from argparse import RawTextHelpFormatter
 import casacore.tables as pt
 import numpy
 import sys
+import os
 
 
-def copy_column_to_ms(ms, inputcol, outputcol, ms_from=None):
+def copy_column_to_ms(ms, inputcol, outputcol, ms_from=None, use_compression=False):
     """
     Copies one column to another, within an MS file or between two MS files
 
@@ -36,8 +37,34 @@ def copy_column_to_ms(ms, inputcol, outputcol, ms_from=None):
 
     # Add the output column if needed
     if outputcol not in t.colnames():
-        desc['name'] = outputcol
-        t.addcols(desc)
+        if use_compression:
+            # Set DyscoStMan to be storage manager for DATA and WEIGHT_SPECTRUM
+            # We use a visibility bit rate of 16 and truncation of 1.5 sigma to keep the
+            # compression noise below ~ 0.01 mJy, as estimated from Fig 4 of
+            # Offringa (2016). For the weights, we use a bit rate of 12, as
+            # recommended in Sec 4.4 of Offringa (2016)
+            desc['name'] = outputcol
+            dmi = {
+                'SPEC': {
+                    'dataBitCount': numpy.uint32(16),
+                    'distribution': 'TruncatedGaussian',
+                    'distributionTruncation': 1.5,
+                    'normalization': 'RF',
+                    'weightBitCount': numpy.uint32(12)},
+                'NAME': '{}_dm'.format(outputcol),
+                'SEQNR': 1,
+                'TYPE': 'DyscoStMan'}
+            desc['option'] = 1 # make a Direct column
+            t.addcols(desc, dmi)
+        else:
+            desc['name'] = outputcol
+            t.addcols(desc)
+
+    if use_compression:
+        # Replace flagged values with NaNs before compression
+        flags = t.getcol('FLAG')
+        flagged = numpy.where(flags)
+        data[flagged] = numpy.NaN
 
     t.putcol(outputcol, data)
     t.flush()
@@ -53,7 +80,7 @@ def copy_column_to_bands(mslist, ms_from, inputcol, outputcol):
     mslist : list
         MS files receiving copy
     ms_from : str
-        MS file to copy from.
+        MS file to copy from
     inputcol : str
         Column name to copy from
     outputcol : str
@@ -74,7 +101,41 @@ def copy_column_to_bands(mslist, ms_from, inputcol, outputcol):
             dataout.close()
 
 
-def main(ms_from, ms_to, column_from, column_to, do_copy=True):
+def copy_column_from_bands(mslist, ms_to, inputcol, outputcol):
+    """
+    Copies one column from multiple MS files (bands) to a single MS file
+
+    Note: the bands are assumed to be ordered by frequency, with a nonexisting
+    file (e.g., 'dummy.ms') denoting missing bands
+
+    Parameters
+    ----------
+    mslist : list
+        MS files to copy from
+    ms_to : str
+        MS file receiving copy
+    inputcol : str
+        Column name to copy from
+    outputcol : str
+        Column name to copy to
+
+    """
+    dataout = pt.table(ms_to, readonly=False)
+    data = dataout.getcol(outputcol, nrow=1)
+    numberofchans = numpy.int(numpy.shape(data)[1])
+    chanperms = numberofchans/numpy.int(len(mslist))
+
+    for ms_id, ms in enumerate(mslist):
+        if os.path.isdir(ms):
+            datain = pt.table(ms, readonly=True)
+            data = datain.getcol(inputcol)
+            dataout.putcolslice(outputcol, data, [chanperms*ms_id,0], [(chanperms*(ms_id+1))-1,3])
+            datain.close()
+    dataout.flush()
+    dataout.close()
+
+
+def main(ms_from, ms_to, column_from, column_to, do_copy=True, use_compression=False):
     """
     Copy a column between MS files
 
@@ -91,6 +152,8 @@ def main(ms_from, ms_to, column_from, column_to, do_copy=True):
         Name of column to copy to
     do_copy : bool, optional
         If False, the copy is NOT done (used to skip a copy step in a pipeline)
+    use_compression : bool, optional
+        If True, use Dysco compression
 
     """
     if type(do_copy) is str:
@@ -98,6 +161,11 @@ def main(ms_from, ms_to, column_from, column_to, do_copy=True):
             do_copy = True
         else:
             do_copy = False
+    if type(use_compression) is str:
+        if use_compression.lower() == 'true':
+            use_compression = True
+        else:
+            use_compression = False
 
     if not do_copy:
         print('Copy skipped (do_copy = False)')
@@ -108,13 +176,25 @@ def main(ms_from, ms_to, column_from, column_to, do_copy=True):
             ms_to = ms_to.strip('[]').split(',')
             ms_to = [m.strip() for m in ms_to]
 
+    if type(ms_from) is str:
+        if '[' in ms_from:
+            ms_from = ms_from.strip('[]').split(',')
+            ms_from = [m.strip() for m in ms_from]
+
+    if type(ms_to) is list and type(ms_from) is list:
+        print('ERROR: ms_from and ms_to cannot both be lists')
+        sys.exit(1)
+
     if type(ms_to) is list:
         # List means call copy_column_to_bands()
         copy_column_to_bands(ms_to, ms_from, column_from, column_to)
+    elif type(ms_from) is list:
+        # List means call copy_column_from_bands()
+        copy_column_from_bands(ms_from, ms_to, column_from, column_to)
     else:
         if ms_to == ms_from:
             ms_from = None
-        copy_column_to_ms(ms_to, column_from, column_to, ms_from)
+        copy_column_to_ms(ms_to, column_from, column_to, ms_from, use_compression)
 
 
 if __name__ == '__main__':
@@ -130,8 +210,3 @@ if __name__ == '__main__':
 
     main(args.ms_from, args.ms_to, args.column_from, args.column_to,
         do_copy=args.do_copy)
-
-
-
-
-

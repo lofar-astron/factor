@@ -35,11 +35,13 @@ class Band(object):
         If True, process input files, including chunking, etc.
     chunk_size_sec : float, optional
         Size of chunks in seconds
+    use_compression : bool, optional
+        If True, use Dysco comprossion on output chunk files
 
     """
     def __init__(self, MSfiles, factor_working_dir, dirindparmdb,
         skymodel_dirindep=None, local_dir=None, test_run=False, check_files=True,
-        process_files=False, chunk_size_sec=2400.0):
+        process_files=False, chunk_size_sec=2400.0, use_compression=False):
 
         self.files = MSfiles
         self.msnames = [ MS.split('/')[-1] for MS in self.files ]
@@ -86,14 +88,14 @@ class Band(object):
             # Find mean elevation and FOV
             for MS_id in xrange(self.numMS):
                 # Add (virtual) elevation column to MS
-                try:
+                tab = pt.table(self.files[MS_id], ack=False)
+                exiting_colnames = tab.colnames()
+                if 'AZEL1' not in exiting_colnames:
+                    tab.close()
                     pt.addDerivedMSCal(self.files[MS_id])
-                except RuntimeError:
-                    # RuntimeError indicates column already exists
-                    pass
+                    tab = pt.table(self.files[MS_id], ack=False)
 
                 # Calculate mean elevation
-                tab = pt.table(self.files[MS_id], ack=False)
                 if MS_id == 0:
                     global_el_values = tab.getcol('AZEL1', rowincr=10000)[:, 1]
                 else:
@@ -122,30 +124,28 @@ class Band(object):
 
             # cut input files into chunks if needed
             self.chunk_input_files(chunk_size_sec, dirindparmdb, local_dir=local_dir,
-                                   test_run=test_run)
+                                   test_run=test_run, use_compression=use_compression)
             if len(self.files) == 0:
-                self.log.error('No data left after checking input files for band: {}. '
+                self.log.warn('No data left after checking input files for band: {}. '
                                'Probably too little unflagged data.'.format(self.name))
-                self.log.info('Exiting!')
-                sys.exit(1)
-
-            # Calculate times and number of samples
-            self.sumsamples = 0
-            self.minSamplesPerFile = 4294967295  # If LOFAR lasts that many seconds then I buy you a beer.
-            self.starttime = np.finfo('d').max
-            self.endtime = 0.
-            for MSid in xrange(self.numMS):
-                tab = pt.table(self.files[MSid], ack=False)
-                self.starttime = min(self.starttime,np.min(tab.getcol('TIME')))
-                self.endtime = max(self.endtime,np.min(tab.getcol('TIME')))
-                for t2 in tab.iter(["ANTENNA1","ANTENNA2"]):
-                    if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
-                        self.timepersample = t2.col('TIME')[1] - t2.col('TIME')[0]
-                        numsamples = t2.nrows()
-                        self.sumsamples += numsamples
-                        self.minSamplesPerFile = min(self.minSamplesPerFile,numsamples)
-                        break
-                tab.close()
+            else:
+                # Calculate times and number of samples
+                self.sumsamples = 0
+                self.minSamplesPerFile = 4294967295  # If LOFAR lasts that many seconds then I buy you a beer.
+                self.starttime = np.finfo('d').max
+                self.endtime = 0.
+                for MSid in xrange(self.numMS):
+                    tab = pt.table(self.files[MSid], ack=False)
+                    self.starttime = min(self.starttime,np.min(tab.getcol('TIME')))
+                    self.endtime = max(self.endtime,np.min(tab.getcol('TIME')))
+                    for t2 in tab.iter(["ANTENNA1","ANTENNA2"]):
+                        if (t2.getcell('ANTENNA1',0)) < (t2.getcell('ANTENNA2',0)):
+                            self.timepersample = t2.col('TIME')[1] - t2.col('TIME')[0]
+                            numsamples = t2.nrows()
+                            self.sumsamples += numsamples
+                            self.minSamplesPerFile = min(self.minSamplesPerFile,numsamples)
+                            break
+                    tab.close()
             self.save_state()
 
         self.log.debug("Using {0} files.".format(len(self.files)))
@@ -290,7 +290,7 @@ class Band(object):
 
 
     def chunk_input_files(self, chunksize, dirindparmdb, local_dir=None,
-        test_run=False, min_fraction=0.5):
+        test_run=False, min_fraction=0.5, use_compression=False):
         """
         Make copies of input files that are smaller than 2*chunksize
 
@@ -312,6 +312,9 @@ class Band(object):
         min_fraction : float, optional
             Minimum fraction of unflaggged data in a time-chunk needed for the chunk
             to be kept. Only used whn chunking large files. (default = 0.1)
+        use_compression : bool, optional
+            If True, use Dysco comprossion on output chunk files
+
         """
         newfiles = []
         newdirindparmdbs = []
@@ -348,7 +351,7 @@ class Band(object):
             if not os.path.exists(newdirname):
                 os.mkdir(newdirname)
 
-            if nchunks > 1:
+            if nchunks > 1 or use_compression:
                 self.log.debug('Spliting {0} into {1} chunks...'.format(self.files[MS_id], nchunks))
 
                 pool = multiprocessing.Pool()
@@ -362,7 +365,8 @@ class Band(object):
                     itertools.repeat(colnames_to_keep),
                     itertools.repeat(newdirname),
                     itertools.repeat(local_dir),
-                    itertools.repeat(min_fraction)  ))
+                    itertools.repeat(min_fraction),
+                    itertools.repeat(use_compression) ))
                 pool.close()
                 pool.join()
 
@@ -497,14 +501,22 @@ def find_unflagged_fraction(ms_file):
         "sum([select nelements(FLAG) from {0}])'".format(ms_file),
         shell=True, stdout=subprocess.PIPE)
     r = p.communicate()
+
     # If the taql subprocess exits abnormally we need to handle it, or we get
     # a weird error.
     if p.returncode!=0:
-        self.log.error('taql exited abnormally checking flagged fraction for file {}.'.format(ms_file))
-        self.log.info('Exiting!')
-        sys.exit(1)
-
-    unflagged_fraction = float(r[0])
+        # Try using casacore.tables insted
+        try:
+            t = pt.table(ms_file, ack=False)
+            flags_per_element = t.calc('nfalse(FLAG)')
+            nelements = t.calc('nelements(FLAG)')[0] # = number of channels * number of pols
+            unflagged_fraction = float(np.sum(flags_per_element)) / nelements / len(t)
+            t.close()
+        except:
+            print('taql exited abnormally checking flagged fraction for file {}.'.format(ms_file))
+            sys.exit(1)
+    else:
+        unflagged_fraction = float(r[0])
 
     return unflagged_fraction
 
@@ -517,7 +529,7 @@ def process_chunk_star(inputs):
 
 
 def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, chunksize, dirindparmdb,
-    colnames_to_keep, newdirname, local_dir=None, min_fraction=0.1):
+    colnames_to_keep, newdirname, local_dir=None, min_fraction=0.1, use_compression=True):
     """
     Processes one time chunk of input ms_file and returns new file names
 
@@ -548,7 +560,9 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
         copied to the original output directory
     min_fraction : float, optional
         Minimum fraction of unflaggged data in a time-chunk needed for the chunk
-        to be kept.
+        to be kept
+    use_compression : bool, optional
+        If True, use Dysco compression on output chunk files
 
     Returns
     -------
@@ -608,6 +622,8 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
     newdirindparmdb = os.path.join(chunk_file, dirindparmdb)
 
     if copy:
+        log.debug('Going to copy {0} samples to file {1}'.format(str(len(seltab)),chunk_file))
+
         if local_dir is not None:
             # Set output to temp directory
             chunk_file_original = chunk_file
@@ -615,13 +631,70 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
             if os.path.exists(chunk_file):
                 shutil.rmtree(chunk_file)
 
-        log.debug('Going to copy {0} samples to file {1}'.format(str(len(seltab)),chunk_file))
-        seltab.copy(chunk_file, True)
+        if use_compression:
+            # Replace current storage manager by DyscoStMan if needed
+            log.debug('Compressing file...')
+
+            # Write table to disk so that we can open it in write mode
+            temp_file = chunk_file + '.tmp'
+            seltab.copy(temp_file, deep=True)
+            seltab.close()
+            seltab = pt.table(temp_file, readonly=False, ack=False)
+
+            # Get flags, as we must replace flagged values with NaNs before
+            # compression
+            flags = seltab.getcol('FLAG')
+            flagged = np.where(flags)
+
+            # Replace DATA with SUBTRACTED_DATA_ALL and set flagged values to
+            # NaN (needed for Dysco compression)
+            seltab.renamecol('DATA', 'DATA_TEMP')
+            desc = seltab.getcoldesc('DATA_TEMP')
+            desc['name'] = 'DATA'
+            seltab.addcols(desc)
+            data = seltab.getcol('SUBTRACTED_DATA_ALL')
+            data[flagged] = np.NaN
+            seltab.putcol('DATA', data)
+            seltab.removecols(['DATA_TEMP'])
+            seltab.removecols(['SUBTRACTED_DATA_ALL'])
+
+            # Set DyscoStMan to be storage manager for WEIGHT_SPECTRUM
+            # For the weights, we use a bit rate of 12, as
+            # recommended in Sec 4.4 of Offringa (2016)
+            dmi = {
+                'SPEC': {
+                    'dataBitCount': np.uint32(16),
+                    'distribution': 'TruncatedGaussian',
+                    'distributionTruncation': 1.5,
+                    'normalization': 'RF',
+                    'weightBitCount': np.uint32(12)},
+                'NAME': 'WEIGHT_SPECTRUM_dm',
+                'SEQNR': 1,
+                'TYPE': 'DyscoStMan'}
+
+            # Change WEIGHT_SPECTRUM to a Direct column if needed
+            desc = seltab.getcoldesc('WEIGHT_SPECTRUM')
+            if desc['option'] != 1:
+                seltab.renamecol('WEIGHT_SPECTRUM', 'WEIGHT_SPECTRUM_TEMP')
+                desc = seltab.getcoldesc('WEIGHT_SPECTRUM_TEMP')
+                desc['name'] = 'WEIGHT_SPECTRUM'
+                desc['option'] = 1 # make a Direct column
+                seltab.addcols(desc, dmi)
+                data = seltab.getcol('WEIGHT_SPECTRUM_TEMP')
+                data[flagged] = np.NaN
+                seltab.putcol('WEIGHT_SPECTRUM', data)
+                seltab.removecols(['WEIGHT_SPECTRUM_TEMP'])
+
+            # Save the new table
+            seltab.copy(chunk_file, deep=True)
+        else:
+            # Just use existing storage manager
+            seltab.copy(chunk_file, deep=True)
 
         if local_dir is not None:
             # Copy temp file to original output location and clean up
             chunk_file_destination_dir = os.path.dirname(chunk_file_original)
-            os.system('/usr/bin/rsync -a {0} {1}'.format(chunk_file, chunk_file_destination_dir))
+            os.system('/bin/cp -r {0} {1}'.format(chunk_file, chunk_file_destination_dir))
             if not os.path.samefile(chunk_file, chunk_file_original):
                 shutil.rmtree(chunk_file)
             chunk_file = chunk_file_original
@@ -632,6 +705,8 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
 
     seltab.close()
     tab.close()
+    if copy and use_compression:
+        shutil.rmtree(temp_file)
 
     # Check that the chunk has at least min_fraction unflagged data.
     # If not, then return (None, None)

@@ -6,7 +6,6 @@ from lofarpipe.support.data_map import DataMap, DataProduct
 def plugin_main(args, **kwargs):
     """
     Makes a mapfile with only the MSs at the middle Frequency
-    Quite a bit of a hack for a plugin, but right now I don't care.
 
     Parameters
     ----------
@@ -28,11 +27,17 @@ def plugin_main(args, **kwargs):
     mapfile_in = kwargs['mapfile_in']
     mapfile_dir = kwargs['mapfile_dir']
     filename = kwargs['filename']
+    if 'include' in kwargs:
+        include = kwargs['include']
+    else:
+        include = None
     fileid = os.path.join(mapfile_dir, filename)
 
     map_in = DataMap.load(mapfile_in)
     map_in.iterator = DataMap.SkipIterator
     map_out = DataMap()
+    map_out.data = []
+    map_out._data = []
 
     # do not re-run if we already ran, and input files are deleted.
     if os.path.exists(fileid) and  not os.path.exists(map_in[0].file):
@@ -43,16 +48,30 @@ def plugin_main(args, **kwargs):
     freq_groups = {}
     hosts = []
     for item in map_in:
-        # Get the frequency info
-        sw = pt.table(item.file+'::SPECTRAL_WINDOW', ack=False)
-        freq = int(sw.col('REF_FREQUENCY')[0])
-        sw.close()
-        if freq in freq_groups:
-            freq_groups[freq].append(item.file)
+        if include is not None:
+            if include in item.file:
+                # Get the frequency info
+                sw = pt.table(item.file+'::SPECTRAL_WINDOW', ack=False)
+                freq = int(sw.col('REF_FREQUENCY')[0])
+                sw.close()
+                if freq in freq_groups:
+                    freq_groups[freq].append(item.file)
+                else:
+                    freq_groups[freq] = [item.file]
+                if not item.host in hosts:
+                    hosts.append(item.host)
         else:
-            freq_groups[freq] = [item.file]
-        if not item.host in hosts:
-            hosts.append(item.host)
+            # Get the frequency info
+            sw = pt.table(item.file+'::SPECTRAL_WINDOW', ack=False)
+            freq = int(sw.col('REF_FREQUENCY')[0])
+            sw.close()
+            if freq in freq_groups:
+                freq_groups[freq].append(item.file)
+            else:
+                freq_groups[freq] = [item.file]
+            if not item.host in hosts:
+                hosts.append(item.host)
+
     # find maximum number of files per frequency-group
     maxfiles = max([len(group) for group in freq_groups.values()])
     # find the center-frequency
@@ -74,6 +93,8 @@ def plugin_main(args, **kwargs):
         map_out.append(DataProduct(host, fname, False))
 
     map_out.save(fileid)
+    del(map_in)
+    del(map_out)
     result = {'mapfile': fileid}
 
     return result

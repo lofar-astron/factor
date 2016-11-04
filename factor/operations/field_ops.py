@@ -71,3 +71,4 @@ class FieldMosaic(Operation):
             ]
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()
+        self.cleanup()

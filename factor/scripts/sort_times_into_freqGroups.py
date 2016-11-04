@@ -5,10 +5,13 @@ Script to sort a list of MSs by into frequency groups by time-stamp
 import casacore.tables as pt
 import sys, os
 import numpy as np
+import uuid
 from lofarpipe.support.data_map import DataMap, DataProduct
 
 
-def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPfill=True, target_path=None, stepname=None, nband_pad=0):
+def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True,
+    hosts=None, NDPPPfill=True, target_path=None, stepname=None, nband_pad=0,
+    make_dummy_files=False, skip_flagged_groups=True):
     """
     Check a list of MS files for missing frequencies
 
@@ -24,6 +27,10 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
         How many files should go into one frequency group. Values <= 0 mean put
         all files of the same time-step into one group.
         default = -1
+    enforce_numSB : bool, optional
+        If True and numSB > 0, then add flagged dummy data to ensure that the
+        last block has exactly numSB files. If False, then the last block can
+        have fewer files (as long as there are no gaps in frequency)
     hosts : list or str
         List of hostnames or string with list of hostnames
     NDPPPfill : bool, optional
@@ -39,6 +46,12 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
     nband_pad : int, optional
         Add this number of bands of dummy data to the high-frequency end
         of the list
+    make_dummy_files : bool, optional
+        If True, make MS files for all dummy data
+    skip_flagged_groups : bool, optional
+        If True, groups that are missing have their skip flag set to True. If
+        False, these groups are filled with dummy data and their skip flag set
+        to False
 
     Returns
     -------
@@ -54,6 +67,8 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
     NDPPPfill = input2bool(NDPPPfill)
     numSB = int(numSB)
     nband_pad = int(nband_pad)
+    enforce_numSB = input2bool(enforce_numSB)
+    make_dummy_files = input2bool(make_dummy_files)
 
     if type(hosts) is str:
         hosts = [h.strip(' \'\"') for h in hosts.strip('[]').split(',')]
@@ -61,6 +76,8 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
         hosts = ['localhost']
     numhosts = len(hosts)
     print "sort_times_into_freqGroups: Working on",len(ms_list),"files"
+
+    dirname = os.path.dirname(ms_list[0])
 
     time_groups = {}
     # sort by time
@@ -118,6 +135,8 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
     hostID = 0
     for time in timestamps:
         (freq,fname) = time_groups[time]['freq_names'].pop(0)
+        nbands = 0
+        all_group_files = []
         for fgroup in range(ngroups):
             files = []
             skip_this = True
@@ -126,14 +145,37 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
                     files.append('dummy.ms')
                 else:
                     files.append(fname)
+                    skip_this = False
                     if len(time_groups[time]['freq_names'])>0:
                         (freq,fname) = time_groups[time]['freq_names'].pop(0)
                     else:
+                        # Set freq to high value to pad the rest of the group
+                        # with dummy data
                         (freq,fname) = (1e12,'This_shouldn\'t_show_up')
-                    skip_this = False
+                        if not enforce_numSB:
+                            # Don't pad the rest of this group with dummy data
+                            break
 
-            for i in range(nband_pad):
-                files.append('dummy.ms')
+            if fgroup == ngroups-1:
+                # Append dummy data to last frequency group only
+                for i in range(nband_pad):
+                    files.append('dummy.ms')
+            if not skip_this:
+                nbands += len(files)
+
+            if make_dummy_files:
+                for i, ms in enumerate(files):
+                    if ms == 'dummy.ms':
+                        # Replace dummy.ms in files list with new filename
+                        files[i] = os.path.join(dirname, '{0}_{1}.ms'.format(
+                            os.path.splitext(ms)[0], uuid.uuid4().urn.split('-')[-1]))
+
+            if not skip_flagged_groups:
+                # Don't set skip flag to True, even if group is missing all files
+                if not make_dummy_files:
+                    raise ValueError('skip_flagged_groups cannot be False if make_dummy_files is also False')
+                else:
+                    skip_this = False
 
             filemap.append(MultiDataProduct(hosts[hostID%numhosts], files, skip_this))
             groupname = time_groups[time]['basename']+'_%Xt_%dg.ms'%(time,fgroup)
@@ -143,13 +185,56 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, hosts=None, NDPPPf
                 groupname = os.path.join(target_path,os.path.basename(groupname))
             groupmap.append(DataProduct(hosts[hostID%numhosts],groupname, skip_this))
             hostID += 1
+            all_group_files.extend(files)
+
         assert freq==1e12
+
+        if make_dummy_files:
+            # Find at least one existing ms for this timestamp
+            ms_exists = None
+            for ms in all_group_files:
+                if os.path.exists(ms):
+                    ms_exists = ms
+                    sw = pt.table('{}::SPECTRAL_WINDOW'.format(ms))
+                    ms_exists_ref_freq = sw.getcol('REF_FREQUENCY')[0]
+                    sw.close()
+                    break
+
+            for i, ms in enumerate(all_group_files):
+                if 'dummy' in ms:
+                    pt.tableutil.tablecopy(ms_exists, ms)
+
+                    # Alter SPECTRAL_WINDOW subtable as appropriate to fill gap
+                    sw = pt.table('{}::SPECTRAL_WINDOW'.format(ms), readonly=False)
+                    tot_bandwidth = sw.getcol('TOTAL_BANDWIDTH')[0]
+                    if i > 0:
+                        sw_low = pt.table('{}::SPECTRAL_WINDOW'.format(all_group_files[i-1]))
+                        ref_freq = sw_low.getcol('REF_FREQUENCY') + tot_bandwidth
+                        sw_low.close()
+                    else:
+                        for j in range(1, len(all_group_files)):
+                            if os.path.exists(all_group_files[j]):
+                                sw_high = pt.table('{}::SPECTRAL_WINDOW'.format(all_group_files[j]))
+                                ref_freq = sw_high.getcol('REF_FREQUENCY') - tot_bandwidth * j
+                                sw_high.close()
+                                break
+                    chan_freq = sw.getcol('CHAN_FREQ') - ms_exists_ref_freq + ref_freq
+                    sw.putcol('REF_FREQUENCY', ref_freq)
+                    sw.putcol('CHAN_FREQ', chan_freq)
+                    sw.close()
+
+                    # Flag all data
+                    t = pt.table(ms, readonly=False)
+                    t.putcol('FLAG_ROW', np.ones(len(t), dtype=bool))
+                    f = t.getcol('FLAG')
+                    t.putcol('FLAG', np.ones(f.shape, dtype=bool))
+                    t.close()
 
     filemapname = os.path.join(mapfile_dir, filename)
     filemap.save(filemapname)
     groupmapname = os.path.join(mapfile_dir, filename+'_groups')
     groupmap.save(groupmapname)
-    result = {'mapfile': filemapname, 'groupmapfile': groupmapname}
+    result = {'mapfile': filemapname, 'groupmapfile': groupmapname, 'nbands': nbands}
     return result
 
 def input2bool(invar):

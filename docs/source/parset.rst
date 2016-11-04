@@ -6,7 +6,8 @@ The Factor parset
 Before Factor can be run, a parset describing the reduction must be made. The
 parset is a simple text file defining the parameters of a run in a number of
 sections. For example, a typical parset for a basic reduction on a single
-machine is shown below::
+machine could look like the following (see :ref:`tips` for tips on setting up an
+optimal parset)::
 
         [global]
         dir_working = /path/to/factor/working/dir
@@ -57,10 +58,18 @@ The available options are described below under their respective sections.
         chunking the data, set this value to be larger than the length of the
         longest dataset (in this case, Factor will not make copies of the files
         but will make symbolic links to them instead, so please make backup
-        copies yourself)
+        copies yourself).
+
+    use_compression
+        Use Dysco compression for chunked files (default = False). Enabling this
+        option will result in less storage usage and signifcanctly faster
+        processing on systems with slow IO. To use this option, you must have the
+        Dysco library in your ``LD_LIBRARY_PATH``. Note: if enabled, Factor will not
+        make symbolic links to the input data, even if they are shorter than
+        :term:`chunk_size_sec`, but will copy them instead.
 
     interactive
-        Use interactive mode (default = ``False``). Factor will ask for confirmation of
+        Use interactive mode (default = ``False``). If ``True``, Factor will ask for confirmation of
         internally derived DDE calibrators and facets.
 
     keep_avg_facet_data
@@ -72,6 +81,20 @@ The available options are described below under their respective sections.
 
     keep_unavg_facet_data
         Keep unaveraged calibrated data for each facet (default = ``False``).
+
+    flag_reltime
+        Range of times to flag (default = no flagging). The syntax is that of
+        the preflagger ``reltime`` parameter (see the DPPP documentation on the LOFAR wiki for
+        details of the syntax). E.g., ``flag_reltime = [1:30:05..1:35:20,
+        5:10:49..5:14:30]``. Note that time and baseline flagging (set with
+        :term:`flag_baseline`) ranges are AND-ed to produce the final flags.
+
+    flag_baseline
+        Range of baselines to flag (default = no flagging). The syntax is that
+        of the preflagger ``baseline`` parameter (see the DPPP documentation for
+        details of the syntax). E.g., ``flag_baseline = [CS013HBA*]``. Note that
+        baseline and time flagging (set with
+        :term:`flag_reltime`) ranges are AND-ed to produce the final flags.
 
 
 .. _parset_calibration_options:
@@ -96,6 +119,16 @@ The available options are described below under their respective sections.
         until the improvement in dynamic range over the previous image is less than
         1.25%.
 
+    target_max_selfcal_loops
+        Maximum number of cycles of the last step of selfcal to perform for the target
+        facet, if any (default = 10).
+
+    preapply_first_cal_phases
+        Preapply the direction-dependent phase solutions for the first calibrator to
+        all subsequent ones (default = ``False``). If ``True``, residual clock errors are
+        removed before calibration and a single TEC+CommonScalarPhase fit is used
+        across the whole bandwidth.
+
     preaverage_flux_Jy
         Use baseline-dependent preaveraging to increase the signal-to-noise of the
         phase-only solve for sources below this flux density (default = 0.0; i.e.,
@@ -108,11 +141,11 @@ The available options are described below under their respective sections.
         improve convergence, especially when the starting model is poor.
 
     TEC_block_MHz
-        Size of frequency block in MHz over which a single TEC solution is fit
+        Size of frequency block in MHz over which a single TEC+CommonScalarPhase solution is fit
         (default = 10.0).
 
     peel_flux_Jy
-        Peel the calibrator for sources above this flux density (default = 25.0).
+        Peel the calibrator for sources above this flux density in Jy (default = 25.0).
         When activated, the calibrator is peeled using a supplied sky model and
         the facet is then imaged as normal. Note: for each source that should be
         peeled, a sky model must be specified in the directions file in the
@@ -144,19 +177,13 @@ The available options are described below under their respective sections.
     make_mosaic
         Make final mosaic (default = ``True``).
 
-    reimage_selfcaled
-        Re-image all directions for which selfcal was successful (default = ``True``).
-
-    skip_facet_imaging
-        Skip imaging of facets during selfcal (default = ``False``). Note that enabling
-        this option will not produce full-resolution facet images unless
-        :term:`reimage_selfcaled` is ``True``.
+    image_target_only
+        Image only the target facet (default = ``False``). If ``True`` and a target is
+        specified in the :ref:`_parset_directions_options` section, then only the facet containing the
+        target source is imaged.
 
     wsclean_image_padding
         Padding factor for WSClean images (default = 1.6).
-
-    wsclean_model_padding
-        Padding factor for WSClean models (default = 1.4).
 
     max_peak_smearing
         Max desired peak flux density reduction at center of the facet edges due to
@@ -165,10 +192,6 @@ The available options are described below under their respective sections.
         more smearing away from the facet centers. This value only applies to the
         facet imaging (self calibration always uses a value of 0.15).
 
-    facet_imager
-        Use WSClean or CASA for imaging of entire facet (default = ``wsclean``). For large
-        bandwidths, the CASA imager is typically faster.
-
     wsclean_nchannels_factor
         Max factor used to set the number of WSClean channel images when wide-band
         clean is used (default = 4). The number of channel images is determined by
@@ -176,35 +199,26 @@ The available options are described below under their respective sections.
         values produce better results but require longer run times. Wide-band clean is
         activated when there are more than 5 bands.
 
+    nbands_selfcal_facet_image
+        Number of bands to use for facet imaging during selfcal (default = 6). Facet
+        imaing during selfcal is used to improve the subtraction of non-calibrator
+        sources in the facet. More bands will result in a better subtraction but also
+        longer runtimes. When fewer than the total number are used, the bands are
+        selected so that they are evenly spread over the full available bandwidth
+
     wsclean_bl_averaging
         Use baseline-dependent averaging in WSClean (default = ``False``). If enabled,
         this option can dramatically speed up imaging with WSClean.
         NOTE: this option requires WSClean v2.0 or higher.
 
-    wsclean_add_bands
-        Allow flagged data to be added during WSClean imaging to allow
-        :term:`wsclean_nchannels_factor` to be a divisor of the number bands (default = ``True``).
-        Enabling this option can dramatically speed up imaging with WSClean when the
-        number of bands before padding does not allow :term:`wsclean_nchannels_factor` to be
-        greater than 1 (e.g., :term:`wsclean_nchannels_factor` must be 1 to be an even divisor
-        of 29 bands, so activating this option would add 1 band of flagged data to
-        produce 30 bands, which will work with :term:`wsclean_nchannels_factor` = 3, 5, or 6)
-
     selfcal_cellsize_arcsec
         Self calibration pixel size in arcsec (default = 1.5).
 
     selfcal_robust
-        Self calibration Briggs robust parameter for CASA (default = -0.25).
-
-    selfcal_robust_wsclean
-        Self calibration Briggs robust parameter for WSClean (default = -0.5).
+        Self calibration Briggs robust parameter (default = -0.5).
 
     selfcal_min_uv_lambda
         Self calibration minimum uv distance in lambda (default = 80).
-
-    selfcal_scales
-        Self calibration multiscale clean scales (default = ``[0, 3, 7, 25, 60,
-        150]``; set to ``[0]`` to disable multiscale clean).
 
     selfcal_clean_threshold
         Use a clean threshold during selfcal imaging (default = ``False``). If ``False``,
@@ -351,15 +365,16 @@ The available options are described below under their respective sections.
 
     clusterdesc_file
         Full path to cluster description file. Use ``clusterdesc_file = PBS`` to use the
-        PBS / torque reserved nodes, or use ``clusterdesc_file = JUROPA_slurm`` to use
+        PBS / torque reserved nodes, clusterdesc_file = SLURM to use SLURM reserved
+        ones, or use ``clusterdesc_file = JUROPA_slurm`` to use
         multiple nodes in a slurm reservation on JUROPA.
         If not given, the clusterdesc file for a single (i.e., local) node is used.
 
         .. note::
 
-            On a cluster that uses torque and PBS, Factor will automatically determine the nodes for which you have a
-            PBS reservation and use them. Note that you must ask for all the nodes you need
-            in a single PBS script, so that all nodes are available for the full Factor run. An
+            On a cluster that uses PBS or SLRUM, Factor will automatically determine the nodes for which you have a
+            reservation and use them. Note that you must ask for all the nodes you need
+            in a single PBS or SLURM script, so that all nodes are available for the full Factor run. An
             example PBS script that uses 6 nodes (with 6 CPUs each) is shown below::
 
                 #!/bin/bash
@@ -376,6 +391,10 @@ The available options are described below under their respective sections.
         must be the same for all nodes. Note: do not specify this parameter if you are
         running more than one direction simultaneously on a single machine, as it will cause conflicts between directions
         that are processed in parallel (no default).
+
+    dir_local_selfcal
+        Full path to ram drive (e.g., /dev/shm) to allow certain selfcal data to
+        be cached in memory, speeding up selfcal on most systems considerably.
 
     ncpu
         Maximum number of CPUs per node to use (default = all). Note that this
@@ -399,8 +418,8 @@ The available options are described below under their respective sections.
         Maximum umber of directions to process in parallel on each node (default
         = 1). Note that the number of CPUs (set with the
         :term:`ncpu` parameter) and the amount of memory available to WSClean
-        :(set with the term:`wsclean_fmem` parameter) will be divided among the
-        :directions on each node.
+        (set with the term:`wsclean_fmem` parameter) will be divided among the
+        directions on each node.
 
 .. _parset_checkfactor_options:
 

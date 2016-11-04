@@ -6,7 +6,10 @@ Contains the master class for all operations
 import os
 import logging
 import socket
+import subprocess
 import numpy as np
+import sys
+import uuid
 from factor import _logging
 from jinja2 import Environment, FileSystemLoader
 from lofarpipe.support.utilities import create_directory
@@ -75,20 +78,31 @@ class Operation(object):
             self.direction.name, 'mapfiles')
         create_directory(self.pipeline_mapfile_dir)
 
-        # Local scratch directory and corresponding node recipes
+        # Local scratch directories and corresponding node recipes
+        scratch_subdir = '{0}_{1}'.format(self.direction.name,
+            str(uuid.uuid4().get_hex()[0:6]))
         if self.parset['cluster_specific']['dir_local'] is None:
-            # Not specified, specify scratch directory in normal work directory
-            self.local_scratch_dir = os.path.join(self.pipeline_working_dir,
-                self.direction.name)
+            # Not specified
+            self.local_scratch_dir = None
+            self.local_dir_parent = None
             self.dppp_nodescript = 'executable_args'
         elif self.parset['cluster_specific']['clusterdesc_file'].lower() == 'pbs':
-            # PBS = "system in Hamburg" -> use special DPPP node script
-            self.local_scratch_dir = self.parset['cluster_specific']['dir_local']
+            # PBS: use special DPPP node script
+            self.local_scratch_dir = os.path.join(
+                self.parset['cluster_specific']['dir_local'], scratch_subdir)
+            self.local_dir_parent = self.parset['cluster_specific']['dir_local']
             self.dppp_nodescript = 'dppp_scratch'
         else:
             # other: use given scratch directory and standard node script
-            self.local_scratch_dir = self.parset['cluster_specific']['dir_local']
+            self.local_scratch_dir = os.path.join(
+                self.parset['cluster_specific']['dir_local'], scratch_subdir)
+            self.local_dir_parent = self.parset['cluster_specific']['dir_local']
             self.dppp_nodescript = 'executable_args'
+        if self.parset['cluster_specific']['dir_local_selfcal'] is None:
+            self.local_selfcal_scratch_dir = None
+        else:
+            self.local_selfcal_scratch_dir = os.path.join(
+                self.parset['cluster_specific']['dir_local_selfcal'], scratch_subdir)
 
         # Directory that holds logs in a convenient place
         self.log_dir = os.path.join(self.factor_working_dir, 'logs', self.name)
@@ -120,7 +134,6 @@ class Operation(object):
                          'factorroot': self.factor_root_dir,
                          'pipeline_working_dir': self.pipeline_working_dir,
                          'pipeline_runtime_dir': self.pipeline_runtime_dir,
-                         'casa_executable': parset['casa_executable'],
                          'wsclean_executable': parset['wsclean_executable'],
                          'image2fits_executable': parset['image2fits_executable'],
                          'dppp_nodescript': self.dppp_nodescript}
@@ -134,6 +147,8 @@ class Operation(object):
                            'pipeline_dir': self.factor_pipeline_dir,
                            'script_dir': self.factor_script_dir,
                            'local_dir': self.local_scratch_dir,
+                           'local_dir_parent': self.local_dir_parent,
+                           'selfcal_local_dir': self.local_selfcal_scratch_dir,
                            'pipeline_parset_dir': self.pipeline_parset_dir,
                            'hosts': self.node_list}
 
@@ -146,18 +161,22 @@ class Operation(object):
             self.cfg_dict['remote'] = '[remote]\n'\
                 + 'method = slurm_srun\n'\
                 + 'max_per_node = {0}\n'.format(self.parset['cluster_specific']['ncpu'])
-        elif self.parset['cluster_specific']['clustertype'] == 'pbs':
+        elif (self.parset['cluster_specific']['clustertype'] == 'pbs' or
+            self.parset['cluster_specific']['clustertype'] == 'slurm'):
             self.cfg_dict['remote'] = ''
         else:
             self.log.error('Could not determine the nature of your cluster!')
             sys.exit(1)
 
-        # an absolute path in ...['clusterdesc'] will overrule the the "working_dir"
+        # an absolute path in ...['clusterdesc'] will overrule the "working_dir"
         self.cfg_dict['clusterdesc'] = os.path.join(self.factor_working_dir,
             self.parset['cluster_specific']['clusterdesc'])
 
 
     def update_dicts(self):
+        """
+        Update the dicts used for the pipeline parset templates
+        """
         self.cfg_dict.update(self.direction.__dict__)
         self.parms_dict.update(self.direction.__dict__)
 
@@ -295,3 +314,23 @@ class Operation(object):
         except IOError:
             self.log.debug('Could not read mapfile {}. Skipping it'.format(mapfile))
             return False
+
+
+    def cleanup(self):
+        """
+        Cleans up temp files in the scratch directories of each node
+        """
+        if self.local_scratch_dir is not None:
+            for node in self.node_list:
+                if node == 'localhost':
+                    cmd = ['rm', '-rf', self.local_scratch_dir]
+                else:
+                    cmd = ['ssh', node, 'rm', '-rf', self.local_scratch_dir]
+                tmp = subprocess.call(cmd)
+        if self.local_selfcal_scratch_dir is not None:
+            for node in self.node_list:
+                if node == 'localhost':
+                    cmd = ['rm', '-rf', self.local_selfcal_scratch_dir]
+                else:
+                    cmd = ['ssh', node, 'rm', '-rf', self.local_selfcal_scratch_dir]
+                tmp = subprocess.call(cmd)

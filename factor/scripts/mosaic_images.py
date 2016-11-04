@@ -13,7 +13,7 @@ import os
 from factor.directions import mask_vertices
 
 
-def main(images, vertices, outfits, maxwidth=0):
+def main(images, outfits, maxwidth=0):
     """
     Creates mosaic
 
@@ -21,10 +21,8 @@ def main(images, vertices, outfits, maxwidth=0):
     ----------
     images : str or list of str
         List of filenames of facet images. May be given as a list or as a string
-        (e.g., '[image1, image2]'
-    vertices : str or list of str
-        List of filenames of facet vertices files. May be given as
-        a list or as a string (e.g., '[vert1, vert2]'
+        (e.g., '[image1, image2]'. Each image must be blanked with zeros outside
+        of the facet region
     outfits : str
         Filename of output FITS mosaic
     maxwidth : int, optional
@@ -35,14 +33,11 @@ def main(images, vertices, outfits, maxwidth=0):
     if type(images) is str:
         images = images.strip('[]').split(',')
         images = [im.strip() for im in images]
-    if type(vertices) is str:
-        vertices = vertices.strip('[]').split(',')
-        vertices = [v.strip() for v in vertices]
 
-    formstr = '{0:45s}  {1:45s} {2:s}  {3:s} {4:s} {5:s}'
-    print formstr.format("-----","--------","------------","-------","-------","------")
-    print formstr.format("Image", "FC reg","Norm. weight", "Maj(ac)", "Min(ac)","PA(deg)")
-    print formstr.format("-----","--------","------------","-------","-------","------")
+    formstr = '{0:45s}  {1:s}  {2:s} {3:s} {4:s}'
+    print formstr.format("-----","------------","-------","-------","-------")
+    print formstr.format("Image","Norm. weight","Maj(ac)","Min(ac)","PA(deg)")
+    print formstr.format("-----","------------","-------","-------","-------")
 
     psf_fwhm = [] # resolution
     frequency = [] # frequency of images (should be equal?)
@@ -54,7 +49,7 @@ def main(images, vertices, outfits, maxwidth=0):
         bpar_pa = quanta.quantity(info_dict['positionangle']).get_value('deg')
         psf_fwhm.append([bpar_ma, bpar_mi, bpar_pa])
         frequency.append(this_pim.info()['coordinates']['spectral2']['restfreq'])
-        print '{0:45.45s}  {1:45.45s} {2:0.2f}          {3:0.2f}    {4:0.2f}    {5:0.2f}'.format(images[i], vertices[i], 0, bpar_ma*60, bpar_mi*60,bpar_pa)
+        print '{0:45.45s}  {1:0.2f}          {2:0.2f}    {3:0.2f}    {4:0.2f}'.format(images[i], 0, bpar_ma*60, bpar_mi*60,bpar_pa)
 
     psf_fwhm = np.array(psf_fwhm)
     frequency = np.array(frequency)
@@ -124,19 +119,14 @@ def main(images, vertices, outfits, maxwidth=0):
 
     # Initialize the arrays for the output image, sensitivity, and weights
     master_im = np.zeros((len(master_dec),len(master_ra)))
-    master_mask = np.zeros((len(master_dec),len(master_ra)))
 
     # Reproject the images onto the master grid, weight and normalize
-    for i, im in enumerate(pims):
-        print 'doing image',i
-        im, mask = mask_vertices(im, vertices[i])
+    for im in pims:
         im = im.regrid([2,3],ma,outshape=(int(nc),int(ns),len(master_dec),len(master_ra)))
-        mask = mask.regrid([2,3],ma,outshape=(int(nc),int(ns),len(master_dec),len(master_ra)))
         master_im += np.squeeze(im.getdata())
-        master_mask += np.squeeze(mask.getdata())
 
-    blank=np.ones_like(im)*np.nan
-    master_im=np.where(master_mask,master_im,blank)
+    blank=np.ones_like(master_im)*np.nan
+    master_im=np.where(master_im,master_im,blank)
 
     # Write fits files
     arrax = np.zeros( (1,1, len(master_im[:,0]), len(master_im[0,:])) )
@@ -165,11 +155,10 @@ if __name__ == '__main__':
     descriptiontext = "Create a mosaic from facet images.\n"
     parser = argparse.ArgumentParser(description=descriptiontext, formatter_class=RawTextHelpFormatter)
     parser.add_argument('images', help='List of filenames of facet images')
-    parser.add_argument('vertices', help='List of filenames of facet vertices')
     parser.add_argument('outfits', help='Output name of mosaic fits file')
     parser.add_argument('-m','--maxwidth', help='Maximum number of pixels to '
         'consider for the width of the mosaic [default 0 = unlimited] This can '
         'be helpful at high declination.', default=0, type=int)
 
     args = parser.parse_args()
-    main(args.images, args.vertices, args.outfits, maxwidth=args.maxwidth)
+    main(args.images, args.outfits, maxwidth=args.maxwidth)

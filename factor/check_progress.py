@@ -107,10 +107,7 @@ def load_directions(parset_file):
     # Figure out whether reimaging is going to be done and if so how
     # many images are to be made.
     imaging_parset = parset['imaging_specific']
-    if not(imaging_parset['reimage_selfcaled']):
-        reimages=0
-    else:
-        reimages=len(imaging_parset['facet_cellsize_arcsec'])
+    reimages=len(imaging_parset['facet_cellsize_arcsec'])
     options['reimages']=reimages
 
     # Load directions. First check for user-supplied directions file then for
@@ -266,11 +263,13 @@ def plot_state(directions_list, trim_names=True):
     selfcal_ok_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9',
         facecolor='#A9F5A9', linewidth=2)
     selfcal_not_ok_patch = plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9',
+        facecolor='#A4A4A4', linewidth=2)
+    processing_error = plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9',
         facecolor='#F5A9A9', linewidth=2)
-    patch_list=[not_processed_patch, processing_patch, selfcal_not_ok_patch, selfcal_ok_patch]
-    label_list=['Unprocessed', 'Processing', 'Failed', 'Completed']
+    patch_list=[not_processed_patch, processing_patch, processing_error, selfcal_not_ok_patch, selfcal_ok_patch]
+    label_list=['Unprocessed', 'Processing', 'Pipeline Error', 'Selfcal Failed', 'Selfcal OK']
     for i in range(options['reimages']):
-        label_list.append('Reimage '+str(i+1))
+        label_list.append('Image '+str(i+1))
         color=(0.66/(i+2)**0.5,0.96/(i+2)**0.5,0.66/(i+2)**0.5,1.0)
         reimage_patch=plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9',
             facecolor=color, linewidth=2)
@@ -576,7 +575,25 @@ def set_patch_color(a, d):
     a.current_op = get_current_op(d)
     if a.current_op is not None:
         a.current_step, current_index, num_steps, start_time = get_current_step(d)
+        has_error = check_for_error(d, start_time)
+        if has_error:
+            # Pipeline failed due to error
+            a.set_edgecolor('#a9a9a9')
+            a.set_facecolor('#F5A9A9')
+            return
+
     total_completed = max(0, len(a.completed_ops)-1)
+    if d.name == 'field':
+        # Increase by two to skip facetselfcal + facetsub for field, as they do not apply
+        total_completed += 2
+    nimages = 0
+    for op in a.completed_ops:
+        if 'facetimage' in op:
+            nimages += 1
+    if nimages-1 == total_completed:
+        # facetselfcal was skipped (or failed), so increment by two to compensate
+        total_completed += 2
+
     # treat facetselfcal and facetsub as one op for consistency with old code
     if total_completed==0:
         total_completed=1
@@ -590,9 +607,9 @@ def set_patch_color(a, d):
             a.set_edgecolor('#a9a9a9')
             a.set_facecolor(completed_color)
         else:
-            # Failed facet
+            # Failed selfcal
             a.set_edgecolor('#a9a9a9')
-            a.set_facecolor('#F5A9A9')
+            a.set_facecolor('#A4A4A4')
     elif len(a.completed_ops) > 0:
         # normally never run since facetselfcal will be first op
         a.set_edgecolor('#a9a9a9')
@@ -672,21 +689,21 @@ def find_selfcal_images(direction):
     selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
         direction.name)
     if os.path.exists(selfcal_dir):
-        selfcal_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image[01]2.image.tt0'))
-        tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22_iter*.image.tt0'))
+        selfcal_images = glob.glob(os.path.join(selfcal_dir, '*.wsclean_image[01]2-MFS-image.fits'))
+        tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.wsclean_image22_iter*-MFS-image.fits'))
         if len(tec_iter_images) == 0:
-            tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22.image.tt0'))
+            tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.wsclean_image22-MFS-image.fits'))
         selfcal_images += tec_iter_images
-        selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image[3]2.image.tt0'))
-        selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image42_iter*.image.tt0'))
+        selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.wsclean_image[3]2-MFS-image.fits'))
+        selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.wsclean_image42_iter*-MFS-image.fits'))
         if len(selfcal_images) == 0:
-            selfcal_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image[01]2.image'))
-            tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22_iter*.image'))
+            selfcal_images = glob.glob(os.path.join(selfcal_dir, '*.wsclean_image[01]2-image.fits'))
+            tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.wsclean_image22_iter*-image.fits'))
             if len(tec_iter_images) == 0:
-                tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.casa_image22.image'))
+                tec_iter_images = glob.glob(os.path.join(selfcal_dir, '*.wsclean_image22-image.fits'))
             selfcal_images += tec_iter_images
-            selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image[3]2.image'))
-            selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.casa_image42_iter*.image'))
+            selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.wsclean_image[3]2-image.fits'))
+            selfcal_images += glob.glob(os.path.join(selfcal_dir, '*.wsclean_image42_iter*-image.fits'))
         selfcal_images.sort()
     else:
         selfcal_images = []
@@ -775,17 +792,17 @@ def find_facet_images(direction):
         direction.name)
     image_dir = os.path.join(direction.working_dir, 'results', 'facetimage*',
         direction.name)
-    peelimage_dir = os.path.join(direction.working_dir, 'results', 'facetpeelimage',
+    peelimage_dir = os.path.join(direction.working_dir, 'results', 'facetpeel',
         direction.name)
     dirs = [selfcal_dir, image_dir, peelimage_dir]
 
     # Search for various image patterns
     facet_images = []
     for d in dirs:
+        facet_images += glob.glob(os.path.join(d, '*.wsclean_image_full-MFS-image.fits'))
+        facet_images += glob.glob(os.path.join(d, '*.wsclean_image_full-image.fits'))
         facet_images += glob.glob(os.path.join(d, '*.wsclean_image_full2-MFS-image.fits'))
         facet_images += glob.glob(os.path.join(d, '*.wsclean_image_full2-image.fits'))
-        facet_images += glob.glob(os.path.join(d, '*.casa_image_full2.image.tt0'))
-        facet_images += glob.glob(os.path.join(d, '*.casa_image_full2.image'))
 
     facetimage_ops = []
     for facet_image in facet_images:
@@ -839,9 +856,59 @@ def get_current_step(direction):
         current_index = min(len(current_steps)-1, current_steps.index(previous_step_name)+1)
     except ValueError:
         return (None,None,None,None)
+
+    # Get start time from statefile and check for newer one in the logs directory
+    # (since the statefile is not updated until at least one step is completed)
     start_time = d[0]['start_time']
+    logdir = os.path.join(direction.working_dir, 'results', current_op,
+        direction.name, 'logs')
+    dirs = glob.glob(logdir + '/*')
+    mtimes = []
+    for d in dirs:
+        if os.path.exists(d):
+            mtimes.append(os.path.getmtime(d))
+        else:
+            mtimes.append(np.nan)
+    try:
+        latest_dir = dirs[np.nanargmax(mtimes)]
+        start_time = os.path.basename(latest_dir)
+    except (ValueError, TypeError):
+        # ValueError or TypeError indicates mtimes list is all NaNs
+        pass
 
     return (current_steps[current_index], current_index, len(current_steps), start_time)
+
+
+def check_for_error(direction, start_time):
+    """
+    Returns True if pipeline log indicates an error
+    """
+    current_op = get_current_op(direction)
+    if current_op is None or start_time is None:
+        return False
+
+    logfile = os.path.join(direction.working_dir, 'results', current_op,
+        direction.name, 'logs', start_time, 'pipeline.log')
+    if os.path.exists(logfile):
+        try:
+            with open(logfile, "rb") as f:
+                first = f.readline()      # Read the first line.
+                f.seek(-2, 2)             # Jump to the second last byte.
+                while f.read(1) != b"\n": # Until EOL is found...
+                    f.seek(-2, 1)         # ...jump back the read byte plus one more.
+                last = f.readline()       # Read last line.
+
+                if ('Processing interrupted: shutting down' in last or
+                    'completed with errors' in last):
+                    return True
+                else:
+                    return False
+        except (EOFError, ValueError):
+            # Catch errors related to the statefile being written to by the
+            # pipeline when we're trying to read from it
+            return False
+    else:
+        return False
 
 
 def get_current_op_step_names(direction):

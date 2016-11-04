@@ -81,7 +81,7 @@ class Direction(object):
             self.log.error('Dynamic range is "{}" but must be either "LD" or "HD".'.format(self.dynamic_range))
             sys.exit(1)
         if region_selfcal.lower() == 'empty':
-            # Set to empty list (casapy format)
+            # Set to empty list (casa format)
             self.region_selfcal = '[]'
         else:
             if not os.path.exists(region_selfcal):
@@ -115,8 +115,8 @@ class Direction(object):
         self.cellsize_verify_deg = 0.00833 # verify subtract cell size
         self.target_rms_rad = 0.2 # preaverage target rms
         self.subtracted_data_colname = 'SUBTRACTED_DATA_ALL' # name of empty data column
+        self.use_compression = False # whether to use Dysco compression
         self.pre_average = False # whether to use baseline averaging
-        self.blavg_weight_column = 'WEIGHT_SPECTRUM' # name of weights column
         self.peel_calibrator = False # whether to peel calibrator before imaging
         self.solve_all_correlations = False # whether to solve for all corrs for slow gain
         self.do_reset = False # whether to reset this direction
@@ -132,8 +132,8 @@ class Direction(object):
         self.reset_operations = []
         self.cleanup_mapfiles = []
         self.preapply_phase_cal = False
-        self.preapply_solve_tec_only = False
         self.create_preapply_parmdb = False
+        self.contains_target = False # whether this direction contains the target (if any)
 
         # Define some directories and files
         self.working_dir = factor_working_dir
@@ -150,6 +150,8 @@ class Direction(object):
         ----------
         selfcal_cellsize_arcsec : float
             Cellsize for selfcal imaging
+        padding : float, optional
+            Padding factor for image. Padded regions to
 
         """
         self.cellsize_selfcal_deg = selfcal_cellsize_arcsec / 3600.0
@@ -162,11 +164,16 @@ class Direction(object):
                 sys.exit(1)
             else:
                 self.cal_size_deg = self.cal_imsize * self.cellsize_selfcal_deg / 1.5
+                self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
+                    / self.cellsize_selfcal_deg * 1.0 / 0.6))
         else:
             if self.cal_imsize == 0:
+                # Set image size to size of calibrator, padded to 40% extra
+                # (the padded region is not cleaned)
                 self.cal_imsize = max(512, self.get_optimum_size(self.cal_size_deg
-                    / self.cellsize_selfcal_deg * 1.2)) # cal imsize has 20% padding
+                    / self.cellsize_selfcal_deg * 1.0 / 0.6))
 
+        self.cal_imsize = max(512, self.cal_imsize) # ensure size is at least 512
         self.cal_radius_deg = self.cal_size_deg / 2.0
         self.cal_rms_box = self.cal_size_deg / self.cellsize_selfcal_deg
 
@@ -203,12 +210,7 @@ class Direction(object):
         """
         mean_freq_mhz = np.mean([b.freq for b in bands]) / 1e6
         min_peak_smearing_factor = 1.0 - parset['imaging_specific']['max_peak_smearing']
-        if parset['imaging_specific']['facet_imager'].lower() == 'wsclean':
-            # Use larger padding for WSClean images
-            padding = parset['imaging_specific']['wsclean_image_padding']
-            self.wsclean_model_padding = parset['imaging_specific']['wsclean_model_padding']
-        else:
-            padding = 1.05
+        padding = parset['imaging_specific']['wsclean_image_padding']
         wsclean_nchannels_factor = parset['imaging_specific']['wsclean_nchannels_factor']
         chan_width_hz = bands[0].chan_width_hz
         nchan = bands[0].nchan
@@ -222,7 +224,7 @@ class Direction(object):
             timestep_sec *= existing_data_timestep
             ntimes /= existing_data_timestep
 
-        nbands = len(bands)
+        nbands, max_gap = self.get_nbands(bands)
         preaverage_flux_jy = parset['calibration_specific']['preaverage_flux_jy']
         if self.preapply_phase_cal:
             # If dir-dependent phase solutions are preapplied, we can solve for
@@ -234,23 +236,19 @@ class Direction(object):
         peel_flux_jy = parset['calibration_specific']['peel_flux_jy']
 
         self.robust_selfcal = parset['imaging_specific']['selfcal_robust']
-        self.robust_selfcal_wsclean = parset['imaging_specific']['selfcal_robust_wsclean']
         self.solve_min_uv_lambda = parset['calibration_specific']['solve_min_uv_lambda']
         self.selfcal_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
         self.use_selfcal_clean_threshold = parset['imaging_specific']['selfcal_clean_threshold']
         self.use_selfcal_adaptive_threshold = parset['imaging_specific']['selfcal_adaptive_threshold']
-        self.casa_multiscale = parset['imaging_specific']['selfcal_scales']
+        self.fit_spectral_pol = parset['imaging_specific']['fit_spectral_pol']
+        self.nbands_selfcal_facet_image = parset['imaging_specific']['nbands_selfcal_facet_image']
 
         if facet_cellsize_arcsec is None:
             facet_cellsize_arcsec = parset['imaging_specific']['selfcal_cellsize_arcsec']
         self.cellsize_facet_deg = facet_cellsize_arcsec / 3600.0
 
         if facet_robust is None:
-            # Use the selfcal values
-            if parset['imaging_specific']['facet_imager'].lower() == 'wsclean':
-                facet_robust = parset['imaging_specific']['selfcal_robust_wsclean']
-            else:
-                facet_robust = parset['imaging_specific']['selfcal_robust']
+            facet_robust = parset['imaging_specific']['selfcal_robust']
         self.robust_facet = facet_robust
 
         if facet_taper_arcsec is None:
@@ -261,41 +259,51 @@ class Direction(object):
             facet_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
         self.facet_min_uv_lambda = facet_min_uv_lambda
 
-        self.set_imaging_parameters(nbands, padding)
+        self.set_imaging_parameters(nbands, parset['imaging_specific']['nbands_selfcal_facet_image'], padding)
         self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,
             timestep_sec, ntimes, nbands, mean_freq_mhz, self.skymodel,
             preaverage_flux_jy, min_peak_smearing_factor, tec_block_mhz,
             peel_flux_jy, imaging_only=imaging_only)
 
-        # Set channelsout for wide-band imaging with WSClean and nterms
-        # for the CASA imager. Note that the number of WSClean channels must be
-        # an even divisor of the total number of channels in the full bandwidth
-        # after averaging to prevent mismatches during the predict step on the
-        # unaveraged data
+        # Set channelsout for wide-band imaging with WSClean. Note that the
+        # number of WSClean channels must be an even divisor of the total number
+        # of channels in the full bandwidth after averaging to prevent
+        # mismatches during the predict step on the unaveraged data. For selfcal,
+        # we want 2 bands per WSClean channel and fit a third-order polynomial
+        # using 3 averaged channels
         #
         # Also define the image suffixes (which depend on whether or not
         # wide-band clean is done)
+        if wsclean_nchannels_factor < max_gap + 1:
+            # Ensure we can cover any frequency gaps with a single WSClean channel
+            wsclean_nchannels_factor = max_gap + 1
+            self.log.info('Detected a frequency gap of {0} bands; setting wsclean_nchannels_factor '
+                'to {1} to avoid having a fully flagged WSClean channel'.format(max_gap, wsclean_nchannels_factor))
         if self.use_wideband:
             self.wsclean_nchannels = max(1, int(np.ceil(nbands / float(wsclean_nchannels_factor))))
             nchan_after_avg = nchan * nbands / self.facetimage_freqstep
             self.nband_pad = 0 # padding to allow self.wsclean_nchannels to be a divisor
-            if parset['imaging_specific']['wsclean_add_bands']:
-                while nchan_after_avg % self.wsclean_nchannels:
-                    self.nband_pad += 1
-                    nchan_after_avg = nchan * (nbands + self.nband_pad) / self.facetimage_freqstep
-            else:
-                while nchan_after_avg % self.wsclean_nchannels:
-                    self.wsclean_nchannels += 1
+            while nchan_after_avg % self.wsclean_nchannels:
+                self.nband_pad += 1
+                nchan_after_avg = nchan * (nbands + self.nband_pad) / self.facetimage_freqstep
             if self.wsclean_nchannels > nbands:
                 self.wsclean_nchannels = nbands
-            self.nterms = 2
-            self.casa_suffix = '.tt0'
+
+            if hasattr(self, 'facetselfcal_freqstep'):
+                wsclean_nchannels_factor_selfcal = max(2, max_gap + 1)
+                self.wsclean_nchannels_selfcal = max(1, int(np.ceil(nbands / float(wsclean_nchannels_factor_selfcal))))
+                self.nband_pad_selfcal = 0 # padding to allow self.wsclean_nchannels to be a divisor
+                nchan_after_avg = nchan * nbands / self.facetselfcal_freqstep
+                while nchan_after_avg % self.wsclean_nchannels_selfcal:
+                    self.nband_pad_selfcal += 1
+                    nchan_after_avg = nchan * (nbands + self.nband_pad_selfcal) / self.facetselfcal_freqstep
+
             self.wsclean_suffix = '-MFS-image.fits'
         else:
             self.wsclean_nchannels = 1
+            self.wsclean_nchannels_selfcal = 1
             self.nband_pad = 0
-            self.nterms = 1
-            self.casa_suffix = None
+            self.nband_pad_selfcal = 0
             self.wsclean_suffix = '-image.fits'
 
         # Set the baseline-averaging limit for WSClean, which depends on the
@@ -320,7 +328,7 @@ class Direction(object):
             self.facetimage_wsclean_nwavelengths = 0
 
 
-    def set_imaging_parameters(self, nbands, padding=1.05):
+    def set_imaging_parameters(self, nbands, nbands_selfcal, padding=1.05):
         """
         Sets various parameters for images in facetselfcal and facetimage pipelines
 
@@ -339,10 +347,6 @@ class Direction(object):
             self.facet_imsize = max(512, self.get_optimum_size(self.width
                 / self.cellsize_facet_deg * padding))
 
-        # Set number of w planes for imaging / ft
-        self.cal_wplanes = self.set_wplanes(self.cal_imsize)
-        self.facet_wplanes = self.set_wplanes(self.facet_imsize)
-
         # Determine whether the total bandwidth is large enough that wide-band
         # imaging is needed
         if nbands > 5:
@@ -355,12 +359,12 @@ class Direction(object):
         # image to ensure the imager has a reasonable chance to reach the
         # threshold first (which is set by the masking step)
         scaling_factor = np.sqrt(np.float(nbands))
+        scaling_factor_selfcal = np.sqrt(np.float(nbands_selfcal))
+        self.wsclean_selfcal_full_image_niter = int(2000 * scaling_factor_selfcal)
+        self.wsclean_selfcal_full_image_threshold_jy =  1.5e-3 * 0.7 / scaling_factor_selfcal
         self.wsclean_full1_image_niter = int(2000 * scaling_factor)
         self.wsclean_full1_image_threshold_jy =  1.5e-3 * 0.7 / scaling_factor
-        self.casa_full1_image_niter = int(2000 * scaling_factor)
-        self.casa_full1_image_threshold_mjy = "{}mJy".format(1.5 * 0.7 / scaling_factor)
         self.wsclean_full2_image_niter = int(12000 * scaling_factor)
-        self.casa_full2_image_niter = int(12000 * scaling_factor)
 
         # Set multiscale imaging mode for facet imaging: Get source sizes and
         # check for large sources (anything above 4 arcmin -- the CC sky model
@@ -374,12 +378,10 @@ class Direction(object):
             else:
                 self.mscale_field_do = False
         if self.mscale_field_do:
-            self.casa_full_multiscale = '[0, 3, 7, 25, 60, 150]'
             self.wsclean_multiscale = '-multiscale,'
             self.wsclean_full1_image_niter /= 2 # fewer iterations are needed
             self.wsclean_full2_image_niter /= 2 # fewer iterations are needed
         else:
-            self.casa_full_multiscale = '[0]'
             self.wsclean_multiscale = ''
 
         # Set whether to use wavelet module in calibrator masking
@@ -389,41 +391,12 @@ class Direction(object):
                 self.atrous_do = True
             else:
                 self.atrous_do = False
-        if not self.atrous_do:
-            # For selfcal, only use the first two scales unless atrous_do was
-            # activated
-            multiscale_list = self.casa_multiscale.strip('[]').split(',')
-            multiscale_list = [s.strip() for s in multiscale_list]
-            if len(multiscale_list) > 2:
-                # Only use first two scales if source is small
-                self.casa_multiscale = '[{}]'.format(', '.join(multiscale_list[:2]))
 
-
-    def set_wplanes(self, imsize):
-        """
-        Sets number of wplanes for casa clean
-
-        Parameters
-        ----------
-        imsize : int
-            Image size in pixels
-
-        """
-        wplanes = 64
-        if imsize > 799:
-            wplanes = 96
-        if imsize > 1023:
-            wplanes = 128
-        if imsize > 1599:
-            wplanes = 256
-        if imsize > 2047:
-            wplanes = 384
-        if imsize > 3000:
-            wplanes = 448
-        if imsize > 4095:
-            wplanes = 512
-
-        return wplanes
+        # If wavelet module is activated, also activate multiscale clean
+        if self.atrous_do:
+            self.wsclean_selfcal_multiscale = True
+        else:
+            self.wsclean_selfcal_multiscale = False
 
 
     def get_optimum_size(self, size):
@@ -735,7 +708,7 @@ class Direction(object):
                 # Slow gain solve is per band, so don't scale the interval with
                 # the number of bands but only with the effective flux. Also,
                 # avoid cases in which the last solution interval is much smaller
-                # than the target interval (for the smallest time chunk, this
+                # than the target interval (for the smallest time chunk; this
                 # assumes that the chunks are all about the same length)
                 ref_flux_jy = 1.4
                 target_timewidth_s = 1200.0 * (ref_flux_jy / effective_flux_jy)**2
@@ -805,18 +778,10 @@ class Direction(object):
                 num_cal_blocks = num_cal_blocks_upper
             if num_cal_blocks < 1:
                 num_cal_blocks = 1
-            self.num_cal_blocks = num_cal_blocks
+            self.num_cal_blocks = int(num_cal_blocks)
             self.num_bands_per_cal_block = int(np.ceil(nbands / float(num_cal_blocks)))
             self.solint_freq_p = int(np.ceil(num_chan_per_band_after_avg * nbands /
                 float(num_cal_blocks)))
-
-        # Set name of column to use for data and averaged weights
-        if self.pre_average:
-            self.data_column = 'BLAVG_DATA'
-            self.blavg_weight_column = 'BLAVG_WEIGHT_SPECTRUM'
-        else:
-            self.data_column = 'DATA'
-            self.blavg_weight_column = 'WEIGHT_SPECTRUM'
 
 
     def calc_partial_block(self, num_chan_per_band_after_avg, nbands,
@@ -935,6 +900,40 @@ class Direction(object):
                 pass
 
 
+    def get_nbands(self, bands):
+        """
+        Returns total number of bands including missing ones
+
+        Parameters
+        ----------
+        bands : list of Band objects
+            Bands for this operation
+
+        Returns
+        -------
+        nbands, max_gap : int, int
+            The total number of bands (including gaps) and the size in number
+            of bands of the maximum gap
+
+        """
+        freqs_hz = [b.freq for b in bands]
+        chan_width_hz = bands[0].chan_width_hz
+        nchan = bands[0].nchan
+        freq_width_hz = chan_width_hz * nchan
+
+        # Find gaps, if any
+        missing_bands = []
+        max_gap = 0
+        for i, (freq1, freq2) in enumerate(zip(freqs_hz[:-1], freqs_hz[1:])):
+            ngap = int(round((freq2 - freq1)/freq_width_hz))
+            if ngap - 1 > max_gap:
+                max_gap = ngap - 1
+            missing_bands.extend([i + j + 1 for j in range(ngap-1)])
+        nbands = len(bands) + len(missing_bands)
+
+        return (nbands, max_gap)
+
+
     def save_state(self):
         """
         Saves the direction state to a file
@@ -977,16 +976,10 @@ class Direction(object):
                     self.completed_operations = d['completed_operations']
 
                 # Load mapfiles needed for facetsubreset
-                if 'dir_dep_parmdb_mapfile' in d:
-                    self.dir_dep_parmdb_mapfile = d['dir_dep_parmdb_mapfile']
-                if 'facet_model_mapfile' in d:
-                    self.facet_model_mapfile = d['facet_model_mapfile']
-                if 'wsclean_modelimg_size_mapfile' in d:
-                    self.wsclean_modelimg_size_mapfile = d['wsclean_modelimg_size_mapfile']
-
-                # Load mapfile needed for reimaging with existing data
-#                 if 'image_data_mapfile' in d:
-#                     self.image_data_mapfile = d['image_data_mapfile']
+                if 'converted_parmdb_mapfile' in d:
+                    self.converted_parmdb_mapfile = d['converted_parmdb_mapfile']
+                if 'sourcedb_new_facet_sources' in d:
+                    self.sourcedb_new_facet_sources = d['sourcedb_new_facet_sources']
             return True
         except:
             return False
@@ -1057,7 +1050,14 @@ class Direction(object):
                         files = [item.file]
                     for f in files:
                         if os.path.exists(f):
-                            os.system('rm -rf {0}'.format(f))
+                            os.system('rm -rf {0} &'.format(f))
+
+                            # Also delete associated "_CONCAT" files that result
+                            # from virtual concatenation
+                            extra_files = glob.glob(f+'_CONCAT')
+                            for e in extra_files:
+                                if os.path.exists(e):
+                                    os.system('rm -rf {0} &'.format(e))
 
                         # Deal with special case of f being a WSClean image
                         if f.endswith('MFS-image.fits'):
@@ -1066,13 +1066,13 @@ class Direction(object):
                             extra_files = glob.glob(image_root+'*.fits')
                             for e in extra_files:
                                 if os.path.exists(e):
-                                    os.system('rm -rf {0}'.format(e))
+                                    os.system('rm -rf {0} &'.format(e))
                         elif f.endswith('-image.fits'):
                             # Search for related images and delete if found
                             image_root = f.split('-image.fits')[0]
                             extra_files = glob.glob(image_root+'*.fits')
                             for e in extra_files:
                                 if os.path.exists(e):
-                                    os.system('rm -rf {0}'.format(e))
+                                    os.system('rm -rf {0} &'.format(e))
             except IOError:
                 pass

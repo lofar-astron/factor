@@ -15,20 +15,27 @@ import os
 from factor.lib.polygon import Polygon
 
 
-def read_vertices(filename):
+def read_vertices(filename, cal_only=False):
     """
-    Returns facet vertices stored in input file
+    Returns facet vertices
+
+    Parameters
+    ----------
+    filename : str
+        Filename of pickled file with direction vertices
+
     """
     with open(filename, 'r') as f:
         direction_dict = pickle.load(f)
-    return direction_dict['vertices']
+    if cal_only:
+        return direction_dict['vertices_cal']
+    else:
+        return direction_dict['vertices']
 
 
 def read_casa_polys(filename, image):
     """
     Reads casa region file and returns polys
-
-    Note: only regions of type "poly" are supported
     """
     with open(filename, 'r') as f:
         lines = f.readlines()
@@ -64,7 +71,7 @@ def read_casa_polys(filename, image):
         elif line.startswith('ellipse'):
             ell_str_temp = line.split('[[')[1]
             if '], 0.0' not in ell_str_temp and '], 90.0' not in ell_str_temp:
-                print('Only position angles of 0.0 and 90.0 are support for CASA '
+                print('Only position angles of 0.0 and 90.0 are supported for CASA '
                     'regions of type "ellipse"')
                 sys.exit(1)
             if '], 0.0' in ell_str_temp:
@@ -214,13 +221,32 @@ def make_template_image(image_name, reference_ra_deg, reference_dec_deg,
     hdulist.close()
 
 
+def vertices_to_poly(vertices, ref_im):
+    """Converts a list of RA, Dec vertices to a Polygon object"""
+    RAverts = vertices[0]
+    Decverts = vertices[1]
+    xvert = []
+    yvert = []
+    for RAvert, Decvert in zip(RAverts, Decverts):
+        try:
+            pixels = ref_im.topixel([0, 1, Decvert*np.pi/180.0,
+                                       RAvert*np.pi/180.0])
+        except:
+            pixels = ref_im.topixel([1, 1, Decvert*np.pi/180.0,
+                                       RAvert*np.pi/180.0])
+        xvert.append(pixels[2]) # x -> Dec
+        yvert.append(pixels[3]) # y -> RA
+
+    return Polygon(xvert, yvert)
+
 
 def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, rmsbox=None,
          rmsbox_bright=(35, 7), iterate_threshold=False, adaptive_rmsbox=False, img_format='fits',
          threshold_format='float', trim_by=0.0, vertices_file=None, atrous_jmax=6,
          pad_to_size=None, skip_source_detection=False, region_file=None, nsig=1.0,
          reference_ra_deg=None, reference_dec_deg=None, cellsize_deg=0.000417,
-         use_adaptive_threshold=False, adaptive_thresh=150.0):
+         use_adaptive_threshold=False, make_blank_image=False, adaptive_thresh=150.0,
+         exclude_cal_region=False):
     """
     Make a clean mask and return clean threshold
 
@@ -228,8 +254,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     ----------
     image_name : str
         Filename of input image from which mask will be made. If the image does
-        not exist, a template image with center at (reference_ra_deg,
-        reference_dec_deg) will be made internally
+        not exist or make_blank_image is True, a template image with center at
+        (reference_ra_deg, reference_dec_deg) will be made internally
     mask_name : str
         Filename of output mask image
     atrous_do : bool, optional
@@ -277,9 +303,15 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     use_adaptive_threshold : bool, optional
         If True, use an adaptive threshold estimated from the negative values in
         the image
+    make_blank_image : bool, optional
+        If True, a blank template image is made. In this case, reference_ra_deg
+        and reference_dec_deg must be specified
     adaptive_thresh : float, optional
         If adaptive_rmsbox is True, this value sets the threshold above
         which a source will use the small rms box
+    exclude_cal_region : bool, optional
+        If True, and a vertices_file is given, the calibrator region is also
+        exclude from the output mask
 
     Returns
     -------
@@ -331,8 +363,22 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         reference_ra_deg = float(reference_ra_deg)
         reference_dec_deg = float(reference_dec_deg)
 
+    if type(make_blank_image) is str:
+        if make_blank_image.lower() == 'true':
+            make_blank_image = True
+        else:
+            make_blank_image = False
     if not os.path.exists(image_name):
-        print('Input image not found. Making empty image...')
+        make_blank_image = True
+
+    if type(exclude_cal_region) is str:
+        if exclude_cal_region.lower() == 'true':
+            exclude_cal_region = True
+        else:
+            exclude_cal_region = False
+
+    if make_blank_image:
+        print('Making empty template image...')
         if not skip_source_detection:
             print('ERROR: Source detection cannot be done on an empty image')
             sys.exit(1)
@@ -341,7 +387,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             make_template_image(image_name, reference_ra_deg, reference_dec_deg,
                 cellsize_deg=float(cellsize_deg))
         else:
-            print('ERROR: if image not found, a refernce position must be given')
+            print('ERROR: a refernce position must be given to make an empty template image')
             sys.exit(1)
 
     trim_by = float(trim_by)
@@ -412,6 +458,10 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             if threshisl_neg > threshisl:
                 threshisl = threshisl_neg
 
+        if not atrous_do:
+            stop_at = 'isl'
+        else:
+            stop_at = None
         if iterate_threshold:
             # Start with given threshold and lower it until we get at least one island
             nisl = 0
@@ -421,7 +471,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                                          atrous_do=atrous_do, ini_method='curvature', thresh='hard',
                                          adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=adaptive_thresh,
                                          rms_box_bright=rmsbox_bright, rms_map=True, quiet=True,
-                                         atrous_jmax=atrous_jmax)
+                                         atrous_jmax=atrous_jmax, stop_at=stop_at)
                 nisl = img.nisl
                 threshpix /= 1.2
                 threshisl /= 1.2
@@ -433,7 +483,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                                      atrous_do=atrous_do, ini_method='curvature', thresh='hard',
                                      adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=adaptive_thresh,
                                      rms_box_bright=rmsbox_bright, rms_map=True, quiet=True,
-                                     atrous_jmax=atrous_jmax)
+                                     atrous_jmax=atrous_jmax, stop_at=stop_at)
 
         if img.nisl == 0:
             if region_file is None or region_file == '[]':
@@ -453,7 +503,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                 # a source of ~ 10 beams
                 has_large_isl = True
 
-    if (region_file is not None and region_file != '[]' and skip_source_detection):
+    if (region_file is not None and region_file != '[]' and skip_source_detection
+        and not make_blank_image):
         # Copy region file and return if source detection was not done
         os.system('cp {0} {1}'.format(region_file.strip('[]"'), mask_name))
         if threshold_format == 'float':
@@ -511,30 +562,27 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         if vertices_file is not None:
             # Modify the clean mask to exclude regions outside of the polygon
             vertices = read_vertices(vertices_file)
-            RAverts = vertices[0]
-            Decverts = vertices[1]
-            xvert = []
-            yvert = []
-            for RAvert, Decvert in zip(RAverts, Decverts):
-                try:
-                    pixels = new_mask.topixel([0, 1, Decvert*np.pi/180.0,
-                                               RAvert*np.pi/180.0])
-                except:
-                    pixels = new_mask.topixel([1, 1, Decvert*np.pi/180.0,
-                                               RAvert*np.pi/180.0])
-                xvert.append(pixels[2]) # x -> Dec
-                yvert.append(pixels[3]) # y -> RA
-            poly = Polygon(xvert, yvert)
+            poly = vertices_to_poly(vertices, new_mask)
+            if exclude_cal_region:
+                cal_vertices = read_vertices(vertices_file, cal_only=True)
+                cal_poly = vertices_to_poly(cal_vertices, new_mask)
 
             # Find masked regions
             masked_ind = np.where(data[0, 0])
 
             # Find distance to nearest poly edge and unmask those that
-            # are outside the facet (dist < 0)
+            # are outside the facet (dist < 0) and inside the calibrator region
+            # (cal_dist > 0)
             dist = poly.is_inside(masked_ind[0], masked_ind[1])
             outside_ind = np.where(dist < 0.0)
             if len(outside_ind[0]) > 0:
                 data[0, 0, masked_ind[0][outside_ind], masked_ind[1][outside_ind]] = 0
+            if exclude_cal_region:
+                masked_ind = np.where(data[0, 0])
+                cal_dist = cal_poly.is_inside(masked_ind[0], masked_ind[1])
+                inside_ind = np.where(cal_dist > 0.0)
+                if len(inside_ind[0]) > 0:
+                    data[0, 0, masked_ind[0][inside_ind], masked_ind[1][inside_ind]] = 0
 
         if trim_by > 0.0:
             sh = np.shape(data)

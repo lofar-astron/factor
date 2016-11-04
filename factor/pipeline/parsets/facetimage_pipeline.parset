@@ -1,0 +1,343 @@
+pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, {% if not selfcal_ok %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, create_parmdb_map, {% endif %} expand_sourcedb_all_facet_sources, prepare_imaging_data, create_compressed_mapfile, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
+
+pipeline.pluginpath = {{ pipeline_dir }}/plugins
+
+# update host entries in all mapfiles
+update_mapfile_hosts.control.kind        = plugin
+update_mapfile_hosts.control.type        = updateHosts
+update_mapfile_hosts.control.mapfile_dir = input.output.mapfile_dir
+update_mapfile_hosts.control.hosts       = {{ hosts }}
+
+{% if use_existing_data %}
+# beginning of use-existing-data block
+# update host entry in existing image_data_mapfile, length = 1
+update_image_data_mapfile_hosts.control.kind       = plugin
+update_image_data_mapfile_hosts.control.type       = updateHosts
+update_image_data_mapfile_hosts.control.mapfile_in = {{ image_data_mapfile }}
+update_image_data_mapfile_hosts.control.hosts      = {{ hosts }}
+
+{% if average_image_data %}
+# existing data can be averaged further
+
+# make an uncompressed mapfile of the concatenated data, length = nfiles
+# note: these MSs include any dummy MS files inserted to fill gaps or pad
+concat_averaged_uncompressed_map.control.kind        = plugin
+concat_averaged_uncompressed_map.control.type        = uncompressMapfile
+concat_averaged_uncompressed_map.control.mapfile_in  = {{ image_data_mapfile }}
+concat_averaged_uncompressed_map.control.mapfile_dir = input.output.mapfile_dir
+concat_averaged_uncompressed_map.control.hosts       = {{ hosts }}
+concat_averaged_uncompressed_map.control.filename    = concat_averaged_uncompressed.mapfile
+
+# average, length = nfiles
+# Note: throughout this parset, we compress only the weights to avoid adding compression
+# noise to the data
+average_image_data.control.type                                 = dppp
+average_image_data.control.mapfile_in                           = concat_averaged_uncompressed_map.output.mapfile
+average_image_data.control.inputkey                             = msin
+average_image_data.argument.numthreads                          = {{ max_cpus_per_io_proc_nfiles }}
+average_image_data.argument.msin.datacolumn                     = DATA
+average_image_data.argument.msout.overwrite                     = True
+average_image_data.argument.msout.writefullresflag              = False
+{% if local_dir is not none %}
+average_image_data.argument.local_scratch_dir                   = {{ local_dir }}
+{% endif %}
+average_image_data.argument.steps                               = [avg]
+average_image_data.argument.avg.type                            = squash
+average_image_data.argument.avg.freqstep                        = {{ facetimage_freqstep }}
+average_image_data.argument.avg.timestep                        = {{ facetimage_timestep }}
+{% if use_compression %}
+average_image_data.argument.msout.storagemanager                = "Dysco"
+average_image_data.argument.msout.storagemanager.databitrate    = 0
+average_image_data.argument.msout.storagemanager.weightbitrate  = 12
+average_image_data.argument.msout.storagemanager.distribution   = "TruncatedGaussian"
+average_image_data.argument.msout.storagemanager.disttruncation = 1.5
+average_image_data.argument.msout.storagemanager.normalization  = "AF"
+{% endif %}
+
+# make a compressed mapfile of the reaveraged data, length = 1
+concat_reaveraged_compressed_map.control.kind        = plugin
+concat_reaveraged_compressed_map.control.type        = compressMapfile
+concat_reaveraged_compressed_map.control.mapfile_in  = average_image_data.output.mapfile
+concat_reaveraged_compressed_map.control.mapfile_dir = input.output.mapfile_dir
+concat_reaveraged_compressed_map.control.filename    = concat_reaveraged_compressed.mapfile
+{% endif %}
+
+# end of average-existing-data block
+{% else %}
+# beginning of no-existing-data block
+
+# create a mapfile with all single MSs from supplied list, length = nfiles
+create_ms_map.control.kind        = plugin
+create_ms_map.control.type        = addListMapfile
+create_ms_map.control.hosts       = {{ hosts }}
+create_ms_map.control.files       = {{ ms_files_single }}
+create_ms_map.control.mapfile_dir = input.output.mapfile_dir
+create_ms_map.control.filename    = input_bands.mapfile
+
+# create a multi-mapfile with the groups of MSs from supplied list, length = nbands
+create_msmulti_map.control.kind        = plugin
+create_msmulti_map.control.type        = addListMultiMapfile
+create_msmulti_map.control.hosts       = {{ hosts }}
+create_msmulti_map.control.files       = {{ ms_files_grouped }}
+create_msmulti_map.control.mapfile_dir = input.output.mapfile_dir
+create_msmulti_map.control.filename    = input_files_grouped.mapfile
+
+# expand mapfile of the dir-dependent parmDB to all files, length = nfiles
+expand_merged_parmdb_map.control.kind             = plugin
+expand_merged_parmdb_map.control.type             = expandMapfile
+expand_merged_parmdb_map.control.mapfile_in       = {{ converted_parmdb_mapfile }}
+expand_merged_parmdb_map.control.mapfile_to_match = create_ms_map.output.mapfile
+expand_merged_parmdb_map.control.mapfile_dir      = input.output.mapfile_dir
+expand_merged_parmdb_map.control.filename         = expand_merged_parmdbs.mapfile
+
+{% if not selfcal_ok %}
+
+# create a mapfile with the current skymodels from supplied list, length = nbands
+create_full_skymodels_map.control.kind        = plugin
+create_full_skymodels_map.control.type        = addListMapfile
+create_full_skymodels_map.control.hosts       = {{ hosts }}
+create_full_skymodels_map.control.files       = {{ skymodels }}
+create_full_skymodels_map.control.mapfile_dir = input.output.mapfile_dir
+create_full_skymodels_map.control.filename    = full_skymodels.mapfile
+
+# extract the skymodel for this facet from global skymodel, length = nbands
+make_facet_skymodels_all.control.type       = make_facet_skymodel
+make_facet_skymodels_all.control.mapfile_in = create_full_skymodels_map.output.mapfile
+make_facet_skymodels_all.control.inputkey   = fullmodelfile
+make_facet_skymodels_all.control.outputkey  = outfile
+make_facet_skymodels_all.argument.flags     = [fullmodelfile,outfile,{{ vertices_file }}]
+
+# convert the facet skymodel into a sourcedb, length = nbands
+make_sourcedb_all_facet_sources.control.type       = make_sourcedb
+make_sourcedb_all_facet_sources.control.mapfile_in = make_facet_skymodels_all.output.mapfile
+make_sourcedb_all_facet_sources.control.inputkey   = in
+make_sourcedb_all_facet_sources.argument.format    = <
+make_sourcedb_all_facet_sources.argument.outtype   = blob
+
+# create a mapfile with the direction-independent parmDBs from supplied list, length = nfiles
+create_parmdb_map.control.kind        = plugin
+create_parmdb_map.control.type        = addListMapfile
+create_parmdb_map.control.hosts       = {{ hosts }}
+create_parmdb_map.control.files       = {{ dir_indep_parmDBs }}
+create_parmdb_map.control.mapfile_dir = input.output.mapfile_dir
+create_parmdb_map.control.filename    = dir_indep_instrument_parmdbs.mapfile
+
+{% endif %}
+
+# expand the sourcedb mapfile so that there is one entry for every file, length = nfiles
+expand_sourcedb_all_facet_sources.control.kind           = plugin
+expand_sourcedb_all_facet_sources.control.type           = mapfileSingleToGroup
+{% if not selfcal_ok %}
+expand_sourcedb_all_facet_sources.control.mapfile_in     = make_sourcedb_all_facet_sources.output.mapfile
+{% else %}
+expand_sourcedb_all_facet_sources.control.mapfile_in     = {{ sourcedb_new_facet_sources }}
+{% endif %}
+expand_sourcedb_all_facet_sources.control.mapfile_groups = create_msmulti_map.output.mapfile
+expand_sourcedb_all_facet_sources.control.mapfile_dir    = input.output.mapfile_dir
+expand_sourcedb_all_facet_sources.control.filename       = expand_sourcedb_all_facet_sources.mapfile
+
+# add the model visibilities, shift, apply the direction-dependent solutions, and average, length = nfiles
+prepare_imaging_data.control.type                                 = dppp
+{% if not selfcal_ok %}
+prepare_imaging_data.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+prepare_imaging_data.control.inputkeys                            = [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb]
+{% else %}
+prepare_imaging_data.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+prepare_imaging_data.control.inputkeys                            = [msin,sourcedb,dir_dep_parmdb]
+{% endif %}
+prepare_imaging_data.argument.numthreads                          = {{ max_cpus_per_io_proc_nfiles }}
+prepare_imaging_data.argument.msin.datacolumn                     = CORRECTED_DATA
+prepare_imaging_data.argument.msout.overwrite                     = True
+prepare_imaging_data.argument.msout.writefullresflag              = False
+{% if local_dir is not none %}
+prepare_imaging_data.argument.local_scratch_dir                   = {{ local_dir }}
+{% endif %}
+{% if flag_reltime is not none or flag_baseline is not none %}
+prepare_imaging_data.argument.steps                               = [add,flag,shift,correct,flagzero,avg]
+{% else %}
+prepare_imaging_data.argument.steps                               = [add,shift,correct,flagzero,avg]
+{% endif %}
+prepare_imaging_data.argument.add.type                            = predict
+prepare_imaging_data.argument.add.sourcedb                        = sourcedb
+prepare_imaging_data.argument.add.operation                       = add
+{% if not selfcal_ok %}
+prepare_imaging_data.argument.add.applycal.parmdb                 = dir_indep_parmdb
+{% else %}
+prepare_imaging_data.argument.add.applycal.parmdb                 = dir_dep_parmdb
+{% endif %}
+{% if flag_reltime is not none or flag_baseline is not none %}
+prepare_imaging_data.argument.flag.type                           = preflagger
+{% endif %}
+{% if flag_reltime is not none %}
+prepare_imaging_data.argument.flag.reltime                        = {{ flag_reltime }}
+{% endif %}
+{% if flag_baseline is not none %}
+prepare_imaging_data.argument.flag.baseline                       = {{ flag_baseline }}
+{% endif %}
+prepare_imaging_data.argument.shift.type                          = phaseshifter
+prepare_imaging_data.argument.shift.phasecenter                   = [{{ facet_ra }}deg, {{ facet_dec }}deg]
+prepare_imaging_data.argument.correct.type                        = applycal
+prepare_imaging_data.argument.correct.parmdb                      = dir_dep_parmdb
+prepare_imaging_data.argument.correct.invert                      = True
+prepare_imaging_data.argument.flagzero.type                       = preflagger
+prepare_imaging_data.argument.flagzero.amplmin                    = 1e-20
+prepare_imaging_data.argument.avg.type                            = squash
+prepare_imaging_data.argument.avg.freqstep                        = {{ facetimage_freqstep }}
+prepare_imaging_data.argument.avg.timestep                        = {{ facetimage_timestep }}
+{% if use_compression %}
+prepare_imaging_data.argument.msout.storagemanager                = "Dysco"
+prepare_imaging_data.argument.msout.storagemanager.databitrate    = 0
+prepare_imaging_data.argument.msout.storagemanager.weightbitrate  = 12
+prepare_imaging_data.argument.msout.storagemanager.distribution   = "TruncatedGaussian"
+prepare_imaging_data.argument.msout.storagemanager.disttruncation = 1.5
+prepare_imaging_data.argument.msout.storagemanager.normalization  = "AF"
+{% endif %}
+
+# make the compressed mapfile, length = 1
+create_compressed_mapfile.control.kind        = plugin
+create_compressed_mapfile.control.type        = compressMapfile
+create_compressed_mapfile.control.mapfile_in  = prepare_imaging_data.output.mapfile
+create_compressed_mapfile.control.mapfile_dir = input.output.mapfile_dir
+create_compressed_mapfile.control.filename    = imaging_input.mapfile
+
+# end of no-existing-data block
+{% endif %}
+
+# Make a preliminary clean mask from the facet region, length = 1
+premask.control.type                   = make_clean_mask
+premask.control.mapfile_in             = {{ image_data_mapfile }}
+premask.control.inputkey               = imagefile
+premask.control.outputkey              = maskfile
+premask.argument.flags                 = [imagefile,maskfile]
+premask.argument.img_format            = fits
+premask.argument.pad_to_size           = {{ facet_imsize }}
+premask.argument.skip_source_detection = True
+premask.argument.vertices_file         = {{ vertices_file }}
+premask.argument.reference_ra_deg      = {{ facet_ra }}
+premask.argument.reference_dec_deg     = {{ facet_dec }}
+premask.argument.cellsize_deg          = {{ cellsize_facet_deg }}
+premask.argument.make_blank_image      = True
+
+# do the first round of imaging, length = 1
+wsclean_image_full1.control.type                   = wsclean
+{% if average_image_data %}
+wsclean_image_full1.control.mapfiles_in            = [concat_reaveraged_compressed_map.output.mapfile,premask.output.mapfile]
+{% else %}
+wsclean_image_full1.control.mapfiles_in            = [{{ image_data_mapfile }},premask.output.mapfile]
+{% endif %}
+wsclean_image_full1.control.inputkeys              = [msfile,fitsmask]
+{% if wsclean_nchannels > 1 %}
+wsclean_image_full1.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image_full1.argument.channelsout           = {{ wsclean_nchannels }}
+{% else %}
+wsclean_image_full1.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,msfile]
+{% endif %}
+wsclean_image_full1.argument.fitsmask              = fitsmask
+wsclean_image_full1.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
+wsclean_image_full1.argument.niter                 = {{ wsclean_full1_image_niter * 2 }}
+wsclean_image_full1.argument.threshold             = {{ wsclean_full1_image_threshold_jy }}
+wsclean_image_full1.argument.pol                   = I
+wsclean_image_full1.argument.weight                = briggs {{ robust_facet }}
+wsclean_image_full1.argument.mgain                 = 0.6
+wsclean_image_full1.argument.cleanborder           = 0
+wsclean_image_full1.argument.minuv-l               = {{ facet_min_uv_lambda }}
+wsclean_image_full1.argument.scale                 = {{ cellsize_facet_deg }}
+wsclean_image_full1.argument.mem                   = {{ max_percent_memory_per_proc_single }}
+wsclean_image_full1.argument.j                     = {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
+wsclean_image_full1.argument.tempdir               = {{ local_dir_parent }}
+{% endif %}
+wsclean_image_full1.argument.weighting-rank-filter = 3
+{% if taper_facet_arcsec > 0.0 %}
+wsclean_image_full1.argument.taper-gaussian        =  {{ taper_facet_arcsec }}
+{% endif %}
+{% if facetimage_wsclean_nwavelengths > 0.0 %}
+wsclean_image_full1.argument.baseline-averaging    = {{ facetimage_wsclean_nwavelengths }}
+{% endif %}
+
+# make a mapfile with the root-name of the WSClean images, length = 1
+create_imagebase_map1.control.kind        = plugin
+create_imagebase_map1.control.type        = trimMapfile
+create_imagebase_map1.control.mapfile_in  = wsclean_image_full1.output.wsclean_image_full1-image.fits.mapfile
+create_imagebase_map1.control.trim        = -
+create_imagebase_map1.control.mapfile_dir = input.output.mapfile_dir
+create_imagebase_map1.control.filename    = wsclean_image_full1_image_rootnames.mapfile
+
+# make a mapfile with the name of the WSClean image, length = 1
+adjust_wsclean_mapfile1.control.kind        = plugin
+adjust_wsclean_mapfile1.control.type        = appendMapfile
+adjust_wsclean_mapfile1.control.mapfile_in  = create_imagebase_map1.output.mapfile
+adjust_wsclean_mapfile1.control.append      = {{ wsclean_suffix }}
+adjust_wsclean_mapfile1.control.mapfile_dir = input.output.mapfile_dir
+adjust_wsclean_mapfile1.control.filename    = image1.mapfile
+
+# make a mask from the image, length = 1
+mask.control.type             = make_clean_mask
+mask.control.mapfile_in       = adjust_wsclean_mapfile1.output.mapfile
+mask.control.inputkey         = imagefile
+mask.control.outputkey        = maskfile
+mask.argument.flags           = [imagefile,maskfile]
+mask.argument.region_file     = {{ region_field }}
+mask.argument.threshisl       = 3
+mask.argument.threshpix       = 5
+mask.argument.rmsbox          = (300,100)
+mask.argument.rmsbox_bright   = (70,10)
+mask.argument.atrous_jmax     = 3
+mask.argument.adaptive_rmsbox = True
+mask.argument.atrous_do       = True
+mask.argument.img_format      = fits
+mask.argument.vertices_file   = {{ vertices_file }}
+
+# second round of imaging with the mask, length = 1
+wsclean_image_full2.control.type                   = wsclean
+{% if average_image_data %}
+wsclean_image_full2.control.mapfiles_in            = [concat_reaveraged_compressed_map.output.mapfile,mask.output.mapfile,mask.output.threshold_5sig.mapfile]
+{% else %}
+wsclean_image_full2.control.mapfiles_in            = [{{ image_data_mapfile }},mask.output.mapfile,mask.output.threshold_5sig.mapfile]
+{% endif %}
+wsclean_image_full2.control.inputkeys              = [msfile,fitsmask,threshold]
+{% if wsclean_nchannels > 1 %}
+wsclean_image_full2.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image_full2.argument.channelsout           = {{ wsclean_nchannels }}
+{% else %}
+wsclean_image_full2.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,msfile]
+{% endif %}
+wsclean_image_full2.argument.fitsmask              = fitsmask
+wsclean_image_full2.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
+wsclean_image_full2.argument.niter                 = {{ wsclean_full2_image_niter }}
+wsclean_image_full2.argument.threshold             = threshold
+wsclean_image_full2.argument.pol                   = I
+wsclean_image_full2.argument.weight                = briggs {{ robust_facet }}
+wsclean_image_full2.argument.mgain                 = 0.6
+wsclean_image_full2.argument.cleanborder           = 0
+wsclean_image_full2.argument.minuv-l               = {{ facet_min_uv_lambda }}
+wsclean_image_full2.argument.scale                 = {{ cellsize_facet_deg }}
+wsclean_image_full2.argument.channelsout           = {{ wsclean_nchannels }}
+wsclean_image_full2.argument.mem                   = {{ max_percent_memory_per_proc_single }}
+wsclean_image_full2.argument.j                     = {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
+wsclean_image_full2.argument.tempdir               = {{ local_dir_parent }}
+{% endif %}
+wsclean_image_full2.argument.weighting-rank-filter = 3
+{% if taper_facet_arcsec > 0.0 %}
+wsclean_image_full2.argument.taper-gaussian        =  {{ taper_facet_arcsec }}
+{% endif %}
+{% if facetimage_wsclean_nwavelengths > 0.0 %}
+wsclean_image_full2.argument.baseline-averaging    = {{ facetimage_wsclean_nwavelengths }}
+{% endif %}
+
+# make a mapfile with the root-name of the WSClean images, length = 1
+create_imagebase_map2.control.kind        = plugin
+create_imagebase_map2.control.type        = trimMapfile
+create_imagebase_map2.control.mapfile_in  = wsclean_image_full2.output.wsclean_image_full2-image.fits.mapfile
+create_imagebase_map2.control.trim        = -
+create_imagebase_map2.control.mapfile_dir = input.output.mapfile_dir
+create_imagebase_map2.control.filename    = wsclean_image_full2_image_rootnames.mapfile
+
+# make a mapfile with the name of the WSClean image at a known name, length = 1
+adjust_wsclean_mapfile2.control.kind        = plugin
+adjust_wsclean_mapfile2.control.type        = appendMapfile
+adjust_wsclean_mapfile2.control.mapfile_in  = create_imagebase_map2.output.mapfile
+adjust_wsclean_mapfile2.control.append      = {{ wsclean_suffix }}
+adjust_wsclean_mapfile2.control.mapfile_dir = input.output.mapfile_dir
+adjust_wsclean_mapfile2.control.filename    = final_image.mapfile

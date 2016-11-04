@@ -9,7 +9,7 @@ import casacore.images as pim
 import os
 
 
-def main(image_pre, image_post, res_val, max_factor=0.5):
+def main(image_pre, image_post, res_val, max_factor=0.25):
     """
     Verify subtraction by checking quantities in residual images
 

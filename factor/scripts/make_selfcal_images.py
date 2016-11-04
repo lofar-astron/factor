@@ -11,6 +11,7 @@ import astropy.io.fits
 import subprocess
 import logging
 import warnings
+import glob
 warnings.filterwarnings("ignore") # Needed to suppress excessive output from matplotlib 1.5 that hangs the pipeline
 
 
@@ -205,44 +206,25 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
     if maskfiles is None:
         maskfiles = []
         for imagefile in imagefiles:
-            maskfile = imagefile.split('.image')[0] + '.mask'
-            if os.path.exists(maskfile):
-                maskfiles.append(maskfile)
-            else:
+            for i in range(5):
+                indx = imagefile.find('image{}2'.format(i))
+                if indx >= 0:
+                    break
+            imageroot = imagefile.split('.fits')[0].replace('image{}2'.format(i), 'image{}1'.format(i))
+            try:
+                maskfiles.append(glob.glob(imageroot + '.mask?')[0])
+            except IndexError:
                 maskfiles.append(None)
     else:
         if type(maskfiles) is str:
             maskfiles = maskfiles.strip('[]').split(',')
         maskfiles = [f.strip() for f in maskfiles]
-
-    # Convert casa images to FITS if needed
-    fitsfiles = []
-    fitsmaskfiles = []
-    for f, m in zip(imagefiles, maskfiles):
-        if os.path.isdir(f):
-            if not os.path.exists('{0}.fits'.format(f)):
-                subprocess.call('image2fits in={0} out={0}.fits'.format(f),
-                    shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            fitsfiles.append('{}.fits'.format(f))
-        else:
-            fitsfiles.append(f)
-        if m is not None:
-            if os.path.isdir(m):
-                if not os.path.exists('{0}.fits'.format(m)):
-                    subprocess.call('image2fits in={0} out={0}.fits'.format(m),
-                        shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                fitsmaskfiles.append('{}.fits'.format(m))
-            else:
-                fitsmaskfiles.append(m)
-        else:
-            fitsmaskfiles.append(None)
-
-    outplotname = fitsfiles[0].replace('.fits','.png')
+    outplotname = imagefiles[0].replace('.fits','.png')
 
     # find image noise
     if imagenoise is None:
         imagenoises = []
-        for fitsimagename in fitsfiles:
+        for fitsimagename in imagefiles:
             hdulist = astropy.io.fits.open(fitsimagename)
             data = hdulist[0].data
             imagenoises.append(find_imagenoise(data))
@@ -256,10 +238,10 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
         row3_images = ['image32', 'image42']
         num_tec_plots = 0
         num_tecamp_plots = 0
-        for fitsimagename in fitsfiles:
+        for fitsimagename in imagefiles:
             if any([fitsimagename.find(r) > 0 for r in row2_images]):
                 num_tec_plots += 1
-        for fitsimagename in fitsfiles:
+        for fitsimagename in imagefiles:
             if any([fitsimagename.find(r) > 0 for r in row3_images]):
                 num_tecamp_plots += 1
         Nc = 6
@@ -278,7 +260,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
         first_tec = True
         first_gain = True
 
-        for i, (fitsimagename, mask) in enumerate(zip(fitsfiles, fitsmaskfiles)):
+        for i, (fitsimagename, mask) in enumerate(zip(imagefiles, maskfiles)):
             if any([fitsimagename.find(r) > 0 for r in row1_images]):
                 ax = plt.subplot(gs[0, row1_colindx])
                 if row1_colindx == 0:
@@ -372,7 +354,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
         fig.show()
     else:
         image_infixes = ['image02', 'image12', 'image22', 'image32', 'image42']
-        for fitsimagename, mask in zip(fitsfiles, fitsmaskfiles):
+        for fitsimagename, mask in zip(imagefiles, maskfiles):
             outplotname = fitsimagename.replace('.fits', '.png')
             for im in image_infixes:
                 if im in fitsimagename:
@@ -408,7 +390,7 @@ if __name__ == '__main__':
     parser.add_argument('imagefiles', help='list of the selfcal images')
     parser.add_argument('maskfiles', help='list of the mask images', type=str, default=None)
     parser.add_argument('imagenoise', help='noise for scaling (Jy/beam)', type=float, default=None)
-    parser.add_argument('interactive', help='return calibrator model only', type=bool, default=False)
+    parser.add_argument('interactive', help='use interactive mode', type=bool, default=False)
     parser.add_argument('facet_name', help='name of facet', type=str, default=None)
     args = parser.parse_args()
 
