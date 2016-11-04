@@ -376,25 +376,13 @@ solve_phaseonly1.argument.solvetec.nchan          = {{ solint_freq_a }}
 # make mapfile for the output of apply steps, len = ntimes * num_cal_blocks
 # this step is needed to direct the output to the shared disk if one is being
 # used with mulitple nodes
-{% if clustertype == local %}
-# on single machines, there is no need to change directories, so instead just
-# append the required suffix
-make_apply_mapfile.control.kind         = plugin
-make_apply_mapfile.control.type         = appendMapfile
-make_apply_mapfile.control.mapfile_in   = make_concat_data_sync_mapfile.output.mapfile
-make_apply_mapfile.control.append       = _apply_output
-make_apply_mapfile.control.mapfile_dir  = input.output.mapfile_dir
-make_apply_mapfile.control.filename     = apply_output.mapfile
-{% else %}
 make_apply_mapfile.control.kind         = plugin
 make_apply_mapfile.control.type         = changeDirectory
 make_apply_mapfile.control.mapfile_in   = make_concat_data_sync_mapfile.output.mapfile
 make_apply_mapfile.control.new_dir      = {{ pipeline_parset_dir }}
 make_apply_mapfile.control.append       = _apply_output
-make_apply_mapfile.control.clustertype  = {{ clustertype }}
 make_apply_mapfile.control.mapfile_dir  = input.output.mapfile_dir
 make_apply_mapfile.control.filename     = apply_output.mapfile
-{% endif %}
 {% endif %}
 
 # apply the previous calibration and average, length = ntimes * num_cal_blocks
