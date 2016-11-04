@@ -16,8 +16,8 @@ Since version pre1.0:
 * The CASA imager has been replaced by WSClean, which is generally much faster and integrates better with the LOFAR pipeline framework that Factor uses
 * A new option has been added to keep the primary data files used in self calibration in memory, speeding up self calibration dramatically on some systems (set "dir\_local\_selfcal = /dev/shm" under the [cluster] section of the parset)
 * The Dysco storage manager can now be used to compress visibilities and weights, reducing file sizes (and IO) by a factor of ~ 2.5
-* The reimage\_selfcaled option has been removed, as facets are always reimaged now. A image\_target\_only option has been added if you wish to reimage only the target
-* The skip\_facet\_imaging option has been removed, as facets are always imaged now to improve the subtraction (using up to 6 bands)
+* The reimage\_selfcaled option has been removed, as facets are always (re)imaged now. A image\_target\_only option has been added if you wish to (re)image only the target
+* The skip\_facet\_imaging option has been removed, as facets are always imaged now to improve the subtraction
 
 
 Installation
@@ -35,8 +35,8 @@ should run the following command before using Factor:
 
 Factor requires the following:
 
-* The LOFAR offline trunk from the LOFAR software repository (release 2.18 or later; to use compression, a version of the trunk after 14/10/2016 is required)
-* [WSClean](http://sourceforge.net/p/wsclean/wiki/Home) (version 1.12 or later)
+* The LOFAR offline trunk from the LOFAR software repository (a version of the trunk after 02/11/2016 is required)
+* [WSClean](http://sourceforge.net/p/wsclean/wiki/Home) (version 1.12 or later: to use baseline-dependent averaging, a version of the trunk after 03/11/2016 is required)
 * [LSMTool](https://github.com/darafferty/LSMTool) (version 1.1 or later)
 * [jinja2](http://jinja.pocoo.org/docs/dev)
 * [Shapely](https://github.com/Toblerity/Shapely)
