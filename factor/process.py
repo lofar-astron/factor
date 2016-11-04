@@ -307,7 +307,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 field.facet_vertices_filenames = []
                 full_res_im, opname = _get_image_type_and_name(cellsize_arcsec, taper_arcsec,
                     robust, selfcal_robust, min_uv_lambda, parset)
-                for d in directions:
+                for d in dirs_to_image:
                     if not d.is_patch:
                         facet_image = DataMap.load(d.facet_image_mapfile[opname])[0].file
                         field.facet_image_filenames.append(facet_image)
