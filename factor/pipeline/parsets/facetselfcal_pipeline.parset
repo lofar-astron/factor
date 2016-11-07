@@ -90,7 +90,7 @@ shift_cal.argument.msout.writefullresflag              = False
 shift_cal.argument.local_scratch_dir                   = {{ local_dir }}
 {% endif %}
 {% if preapply_phase_cal %}
-{% if flag_reltime is not none or flag_baseline is not none %}
+{% if flag_abstime is not none or flag_baseline is not none %}
 shift_cal.argument.steps                               = [shift,add,flag,correct_fast1,correct_fast2,correct_slow,avg]
 {% else %}
 shift_cal.argument.steps                               = [shift,add,correct_fast1,correct_fast2,correct_slow,avg]
@@ -107,7 +107,7 @@ shift_cal.argument.correct_slow.type                   = applycal
 shift_cal.argument.correct_slow.parmdb                 = preapply_parmdb
 shift_cal.argument.correct_slow.invert                 = True
 {% else %}
-{% if flag_reltime is not none or flag_baseline is not none %}
+{% if flag_abstime is not none or flag_baseline is not none %}
 shift_cal.argument.steps                               = [shift,add,flag,avg]
 {% else %}
 shift_cal.argument.steps                               = [shift,add,avg]
@@ -119,11 +119,11 @@ shift_cal.argument.add.type                            = predict
 shift_cal.argument.add.sourcedb                        = sourcedb
 shift_cal.argument.add.operation                       = add
 shift_cal.argument.add.applycal.parmdb                 = dir_indep_parmdb
-{% if flag_reltime is not none or flag_baseline is not none %}
+{% if flag_abstime is not none or flag_baseline is not none %}
 shift_cal.argument.flag.type                           = preflagger
 {% endif %}
-{% if flag_reltime is not none %}
-shift_cal.argument.flag.reltime                        = {{ flag_reltime }}
+{% if flag_abstime is not none %}
+shift_cal.argument.flag.abstime                        = {{ flag_abstime }}
 {% endif %}
 {% if flag_baseline is not none %}
 shift_cal.argument.flag.baseline                       = {{ flag_baseline }}
@@ -154,7 +154,7 @@ shift_cal_dir_indep.argument.msout.writefullresflag              = False
 {% if local_dir is not none %}
 shift_cal_dir_indep.argument.local_scratch_dir                   = {{ local_dir }}
 {% endif %}
-{% if flag_reltime is not none or flag_baseline is not none %}
+{% if flag_abstime is not none or flag_baseline is not none %}
 shift_cal_dir_indep.argument.steps                               = [shift,add,flag,correct,avg]
 {% else %}
 shift_cal_dir_indep.argument.steps                               = [shift,add,correct,avg]
@@ -165,11 +165,11 @@ shift_cal_dir_indep.argument.add.type                            = predict
 shift_cal_dir_indep.argument.add.sourcedb                        = sourcedb
 shift_cal_dir_indep.argument.add.operation                       = add
 shift_cal_dir_indep.argument.add.applycal.parmdb                 = dir_indep_parmdb
-{% if flag_reltime is not none or flag_baseline is not none %}
+{% if flag_abstime is not none or flag_baseline is not none %}
 shift_cal_dir_indep.argument.flag.type                           = preflagger
 {% endif %}
-{% if flag_reltime is not none %}
-shift_cal_dir_indep.argument.flag.reltime                        = {{ flag_reltime }}
+{% if flag_abstime is not none %}
+shift_cal_dir_indep.argument.flag.abstime                        = {{ flag_abstime }}
 {% endif %}
 {% if flag_baseline is not none %}
 shift_cal_dir_indep.argument.flag.baseline                       = {{ flag_baseline }}

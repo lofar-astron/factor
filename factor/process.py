@@ -676,7 +676,7 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
             direction.use_compression = False
 
         # Set any flagging parameters
-        direction.flag_reltime = parset['flag_reltime']
+        direction.flag_abstime = parset['flag_abstime']
         direction.flag_baseline = parset['flag_baseline']
 
         # Reset state if specified

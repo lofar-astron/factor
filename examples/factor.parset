@@ -59,7 +59,7 @@ dir_ms = /data/bands
 # Flagging ranges (default = no flagging). A range of times and baselines to
 # flag can be specified (see the DPPP documentation for details of syntax). Note
 # that the times and baselines are AND-ed to produce the final flags
-# flag_reltime = [1:30:05..1:35:20, 5:10:49..5:14:30]
+# flag_abstime = [12-Mar-2010/11:31:00.0..12-Mar-2010/11:50:00.0]
 # flag_baseline = [CS013HBA*]
 
 
