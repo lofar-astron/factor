@@ -13,6 +13,7 @@ import numpy as np
 import sys
 import os
 from factor.lib.polygon import Polygon
+from factor.scripts import blank_image
 
 
 def read_vertices(filename, cal_only=False):
@@ -401,42 +402,15 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     if not skip_source_detection:
         if vertices_file is not None:
             # Modify the input image to blank the regions outside of the polygon
-            temp_img = pim.image(image_name)
+            blank_image.main(image_name, vertices_file, image_name+'.blanked',
+                blank_value='nan')
             image_name += '.blanked'
-            temp_img.saveas(image_name, overwrite=True)
-            input_img = pim.image(image_name)
-            data = input_img.getdata()
-
-            vertices = read_vertices(vertices_file)
-            RAverts = vertices[0]
-            Decverts = vertices[1]
-            xvert = []
-            yvert = []
-            for RAvert, Decvert in zip(RAverts, Decverts):
-                pixels = input_img.topixel([1, 1, Decvert*np.pi/180.0,
-                    RAvert*np.pi/180.0])
-                xvert.append(pixels[2]) # x -> Dec
-                yvert.append(pixels[3]) # y -> RA
-            poly = Polygon(xvert, yvert)
-
-            # Find masked regions
-            masked_ind = np.where(data[0, 0])
-
-            # Find distance to nearest poly edge and set to NaN those that
-            # are outside the facet (dist < 0)
-            dist = poly.is_inside(masked_ind[0], masked_ind[1])
-            outside_ind = np.where(dist < 0.0)
-            if len(outside_ind[0]) > 0:
-                data[0, 0, masked_ind[0][outside_ind], masked_ind[1][outside_ind]] = np.nan
-
-            # Save changes
-            input_img.putdata(data)
 
         if use_adaptive_threshold:
             # Get an estimate of the rms
             img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
                                      thresh_pix=threshpix, thresh_isl=threshisl,
-                                     atrous_do=atrous_do, ini_method='curvature', thresh='hard',
+                                     atrous_do=atrous_do, thresh='hard',
                                      adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=adaptive_thresh,
                                      rms_box_bright=rmsbox_bright, rms_map=True, quiet=True,
                                      atrous_jmax=atrous_jmax, stop_at='isl')
@@ -468,7 +442,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             while nisl == 0:
                 img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
                                          thresh_pix=threshpix, thresh_isl=threshisl,
-                                         atrous_do=atrous_do, ini_method='curvature', thresh='hard',
+                                         atrous_do=atrous_do, thresh='hard',
                                          adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=adaptive_thresh,
                                          rms_box_bright=rmsbox_bright, rms_map=True, quiet=True,
                                          atrous_jmax=atrous_jmax, stop_at=stop_at)
@@ -480,7 +454,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         else:
             img = bdsm.process_image(image_name, mean_map='zero', rms_box=rmsbox,
                                      thresh_pix=threshpix, thresh_isl=threshisl,
-                                     atrous_do=atrous_do, ini_method='curvature', thresh='hard',
+                                     atrous_do=atrous_do, thresh='hard',
                                      adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=adaptive_thresh,
                                      rms_box_bright=rmsbox_bright, rms_map=True, quiet=True,
                                      atrous_jmax=atrous_jmax, stop_at=stop_at)
