@@ -4,7 +4,6 @@ Script to convert selfcal solutions to single gain table
 """
 import argparse
 from argparse import RawTextHelpFormatter
-import casacore.tables as pt
 import lofar.parmdb as lp
 import numpy as np
 import sys
@@ -71,6 +70,15 @@ def main(merged_selfcal_parmdb, output_file, preapply_parmdb=None):
     soldict = parmdb.getValues('*', slow_freqs, slow_freqwidths, fast_times,
         fast_timewidths, asStartEnd=False)
 
+    # Identify any gaps in time (frequency gaps are not allowed), as we need to handle
+    # each section separately if gaps are present
+    delta_times = fast_times[1:] - fast_times[:-1]
+    gaps = np.where(delta_times != fast_timewidths[:-1])
+    if len(gaps[0]) > 0:
+        gaps_ind = gaps[0] + 1
+    else:
+        gaps_ind = []
+
     # Add various phase and amp corrections together
     for station in station_names:
         fast_phase = np.copy(soldict['CommonScalarPhase:{s}'.format(s=station)]['values'])
@@ -110,14 +118,28 @@ def main(merged_selfcal_parmdb, output_file, preapply_parmdb=None):
             total_phase_11 = np.mod(fast_phase + tec_phase + slow_phase_11 + np.pi, 2*np.pi) - np.pi
             total_amp_11 = slow_amp_11
 
-        pdb_out.addValues({'Gain:0:0:Phase:{}'.format(station): {'freqs': slow_freqs, 'freqwidths':
-            slow_freqwidths, 'times': fast_times, 'timewidths': fast_timewidths, 'values': total_phase_00}})
-        pdb_out.addValues({'Gain:0:0:Ampl:{}'.format(station): {'freqs': slow_freqs, 'freqwidths':
-            slow_freqwidths, 'times': fast_times, 'timewidths': fast_timewidths, 'values': total_amp_00}})
-        pdb_out.addValues({'Gain:1:1:Phase:{}'.format(station): {'freqs': slow_freqs, 'freqwidths':
-            slow_freqwidths, 'times': fast_times, 'timewidths': fast_timewidths, 'values': total_phase_11}})
-        pdb_out.addValues({'Gain:1:1:Ampl:{}'.format(station): {'freqs': slow_freqs, 'freqwidths':
-            slow_freqwidths, 'times': fast_times, 'timewidths': fast_timewidths, 'values': total_amp_11}})
+        g_start = 0
+        for g in gaps_ind:
+            # If time gaps exist, add them one-by-one (except for last one)
+            pdb_out.addValues('Gain:0:0:Phase:{}'.format(station), total_phase_00[g_start:g], slow_freqs, slow_freqwidths,
+                fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
+            pdb_out.addValues('Gain:0:0:Ampl:{}'.format(station), total_amp_00[g_start:g], slow_freqs, slow_freqwidths,
+                fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
+            pdb_out.addValues('Gain:1:1:Phase:{}'.format(station), total_phase_11[g_start:g], slow_freqs, slow_freqwidths,
+                fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
+            pdb_out.addValues('Gain:1:1:Ampl:{}'.format(station), total_amp_11[g_start:g], slow_freqs, slow_freqwidths,
+                fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
+            g_start = g
+
+        # Add remaining time slots
+        pdb_out.addValues('Gain:0:0:Phase:{}'.format(station), total_phase_00[g_start:], slow_freqs, slow_freqwidths,
+            fast_times[g_start:], fast_timewidths[g_start:], asStartEnd=False)
+        pdb_out.addValues('Gain:0:0:Ampl:{}'.format(station), total_amp_00[g_start:], slow_freqs, slow_freqwidths,
+            fast_times[g_start:], fast_timewidths[g_start:], asStartEnd=False)
+        pdb_out.addValues('Gain:1:1:Phase:{}'.format(station), total_phase_11[g_start:], slow_freqs, slow_freqwidths,
+            fast_times[g_start:], fast_timewidths[g_start:], asStartEnd=False)
+        pdb_out.addValues('Gain:1:1:Ampl:{}'.format(station), total_amp_11[g_start:], slow_freqs, slow_freqwidths,
+            fast_times[g_start:], fast_timewidths[g_start:], asStartEnd=False)
 
     # Write values
     pdb_out.flush()
