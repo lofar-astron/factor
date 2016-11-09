@@ -73,7 +73,7 @@ def main(merged_selfcal_parmdb, output_file, preapply_parmdb=None):
     # Identify any gaps in time (frequency gaps are not allowed), as we need to handle
     # each section separately if gaps are present
     delta_times = fast_times[1:] - fast_times[:-1]
-    gaps = np.where(delta_times != fast_timewidths[:-1])
+    gaps = np.where(delta_times > fast_timewidths[:-1]*2.)
     if len(gaps[0]) > 0:
         gaps_ind = gaps[0] + 1
     else:
