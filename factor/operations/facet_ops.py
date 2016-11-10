@@ -306,11 +306,7 @@ class FacetSubReset(Operation):
         Finalize this operation
         """
         # Delete temp data
-        self.direction.cleanup_mapfiles = [
-            os.path.join(self.pipeline_mapfile_dir, 'regroup_shift_empty.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'corrupt_final_model.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'predict_all_model_data.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'shift_diff_model_to_field.mapfile_groups')]
+        self.direction.cleanup_mapfiles = [os.path.join(self.pipeline_mapfile_dir, 'predict_and_difference_models.mapfile')]
         self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
         self.direction.cleanup()
         self.cleanup()
