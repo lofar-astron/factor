@@ -13,7 +13,6 @@ import shutil
 
 
 def main(instrument_name, instrument_name_reset):
-    gain = 'Gain'
     pdb = lofar.parmdb.parmdb(instrument_name)
     parms = pdb.getValuesGrid('*')
 
@@ -21,23 +20,20 @@ def main(instrument_name, instrument_name_reset):
     nchans = len(parms[key_names[0]]['freqs'])
 
     # determine the number of polarizations in parmdb (2 or 4)
-    if any(gain+':0:1:' in s for s in key_names):
+    if any('Gain:0:1:' in s for s in key_names):
         pol_list = ['0:0', '1:1', '0:1', '1:0']
     else:
         pol_list = ['0:0', '1:1']
 
-    # Get station names
-    antenna_list = set([s.split(':')[-1] for s in pdb.getNames()])
+    # Get station names and data shape
+    antenna_list = list(set([s.split(':')[-1] for s in pdb.getNames()]))
+    data_shape = parms['Gain:'+pol_list[0]+':Ampl:'+antenna_list[0]]['values'][:, 0].shape
 
     # Reset the amplitude solutions to unity
     for chan in range(nchans):
         for pol in pol_list:
             for antenna in antenna_list:
-                real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
-                imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
-                phase = numpy.arctan2(imag, real)
-                parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = numpy.copy(numpy.cos(phase))
-                parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = numpy.copy(numpy.sin(phase))
+                parms['Gain:'+pol+':Ampl:'+antenna]['values'][:, chan] = numpy.ones(data_shape)
 
     if os.path.exists(instrument_name_reset):
         shutil.rmtree(instrument_name_reset)

@@ -10,47 +10,51 @@ import sys
 import os
 
 
-def main(merged_selfcal_parmdb, output_file, preapply_parmdb=None):
+def main(fast_parmdb, slow_parmdb, output_file, preapply_parmdb=None):
     """
     Converts multiple selfcal tables to single gain table
 
     Parameters
     ----------
-    merged_selfcal_parmdb : str
-        File with fast phase (TEC and CommonScalarPhase) and slow gain solutions
+    fast_parmdb : str
+        File with fast phase (TEC and CommonScalarPhase) solutions
+    fast_parmdb : str
+        File with slow gain solutions
     output_file : str
         Output filename
     preapply_parmdb : str
-        File with fast phase (TEC and CommonScalarPhase) and slow phase solutions
-        for pre-application
+        File with combined fast phase (TEC and CommonScalarPhase) and slow phase
+        solutions for pre-application
     """
-    parmdb = lp.parmdb(merged_selfcal_parmdb)
-    soldict = parmdb.getValuesGrid('*')
-    pdb_out = lp.parmdb(output_file, create=True)
+    fast_pdb = lp.parmdb(fast_parmdb)
+    fast_soldict = fast_pdb.getValuesGrid('*')
+    slow_pdb = lp.parmdb(slow_parmdb)
+    slow_soldict = slow_pdb.getValuesGrid('*')
+    output_pdb = lp.parmdb(output_file, create=True)
     if preapply_parmdb is not None:
-        pdb_preapply = lp.parmdb(preapply_parmdb)
-        soldict_preapply = parmdb.getValuesGrid('*')
+        preapply_pdb = lp.parmdb(preapply_parmdb)
+        preapply_soldict = preapply_pdb.getValuesGrid('*')
 
     # Get various quantities over which we must iterate
-    station_names = list(set([s.split(':')[-1] for s in parmdb.getNames()]))
-    fast_times = soldict['CommonScalarPhase:{s}'.format(s=station_names[0])]['times']
-    fast_timewidths = soldict['CommonScalarPhase:{s}'.format(s=station_names[0])]['timewidths']
+    station_names = list(set([s.split(':')[-1] for s in fast_pdb.getNames()]))
+    fast_times = fast_soldict['CommonScalarPhase:{s}'.format(s=station_names[0])]['times']
+    fast_timewidths = fast_soldict['CommonScalarPhase:{s}'.format(s=station_names[0])]['timewidths']
     fast_timestep = np.mean(fast_timewidths)
 
     if preapply_parmdb is not None:
-        fast_times_preapply = soldict_preapply['CommonScalarPhase:{s}'.format(s=station_names[0])]['times']
-        fast_timewidths_preapply = soldict_preapply['CommonScalarPhase:{s}'.format(s=station_names[0])]['timewidths']
+        fast_times_preapply = preapply_soldict['Gain:0:0:Phase:{s}'.format(s=station_names[0])]['times']
+        fast_timewidths_preapply = preapply_soldict['Gain:0:0:Phase:{s}'.format(s=station_names[0])]['timewidths']
         fast_timestep_preapply = np.mean(fast_timewidths_preapply)
 
-    slow_freqs = soldict['Gain:0:0:Real:{s}'.format(s=station_names[0])]['freqs']
-    slow_freqwidths = soldict['Gain:0:0:Real:{s}'.format(s=station_names[0])]['freqwidths']
+    slow_freqs = slow_soldict['Gain:0:0:Real:{s}'.format(s=station_names[0])]['freqs']
+    slow_freqwidths = slow_soldict['Gain:0:0:Real:{s}'.format(s=station_names[0])]['freqwidths']
     slow_freqstep = np.mean(slow_freqwidths)
     if preapply_parmdb is not None:
-        slow_freqs_preapply = soldict_preapply['Gain:0:0:Real:{s}'.format(s=station_names[0])]['freqs']
-        slow_freqwidths_preapply = soldict_preapply['Gain:0:0:Real:{s}'.format(s=station_names[0])]['freqwidths']
+        slow_freqs_preapply = preapply_soldict['Gain:0:0:Real:{s}'.format(s=station_names[0])]['freqs']
+        slow_freqwidths_preapply = preapply_soldict['Gain:0:0:Real:{s}'.format(s=station_names[0])]['freqwidths']
         slow_freqstep_preapply = np.mean(slow_freqwidths_preapply)
 
-    key_names = soldict.keys()
+    key_names = fast_soldict.keys()
     if any('Gain:0:1:' in s for s in key_names):
         pol_list = ['0:0', '1:1', '0:1', '1:0']
     else:
@@ -65,9 +69,11 @@ def main(merged_selfcal_parmdb, output_file, preapply_parmdb=None):
         if fast_timestep_preapply < fast_timestep:
             fast_times = fast_times_preapply
             fast_timewidths = fast_timewidths_preapply
-        soldict_preapply = pdb_preapply.getValues('*', slow_freqs, slow_freqwidths,
+        preapply_soldict = preapply_pdb.getValues('*', slow_freqs, slow_freqwidths,
             fast_times, fast_timewidths, asStartEnd=False)
-    soldict = parmdb.getValues('*', slow_freqs, slow_freqwidths, fast_times,
+    fast_soldict = fast_pdb.getValues('*', slow_freqs, slow_freqwidths, fast_times,
+        fast_timewidths, asStartEnd=False)
+    slow_soldict = slow_pdb.getValues('*', slow_freqs, slow_freqwidths, fast_times,
         fast_timewidths, asStartEnd=False)
 
     # Identify any gaps in time (frequency gaps are not allowed), as we need to handle
@@ -81,68 +87,41 @@ def main(merged_selfcal_parmdb, output_file, preapply_parmdb=None):
 
     # Add various phase and amp corrections together
     for station in station_names:
-        fast_phase = np.copy(soldict['CommonScalarPhase:{s}'.format(s=station)]['values'])
-        tec = np.copy(soldict['TEC:{s}'.format(s=station)]['values'])
+        fast_phase = np.copy(fast_soldict['CommonScalarPhase:{s}'.format(s=station)]['values'])
+        tec = np.copy(fast_soldict['TEC:{s}'.format(s=station)]['values'])
         tec_phase =  -8.44797245e9 * tec / slow_freqs
 
-        slow_real_00 = np.copy(soldict['Gain:0:0:Real:{s}'.format(s=station)]['values'])
-        slow_imag_00 = np.copy(soldict['Gain:0:0:Imag:{s}'.format(s=station)]['values'])
-        slow_amp_00 = np.sqrt((slow_real_00**2) + (slow_imag_00**2))
-        slow_phase_00 = np.arctan2(slow_imag_00, slow_real_00)
-        slow_real_11 = np.copy(soldict['Gain:1:1:Real:{s}'.format(s=station)]['values'])
-        slow_imag_11 = np.copy(soldict['Gain:1:1:Imag:{s}'.format(s=station)]['values'])
-        slow_amp_11 = np.sqrt((slow_real_11**2) + (slow_imag_11**2))
-        slow_phase_11 = np.arctan2(slow_imag_11, slow_real_11)
+        for pol in pol_list:
+            slow_real = np.copy(slow_soldict['Gain:'+pol+':Real:{s}'.format(s=station)]['values'])
+            slow_imag = np.copy(slow_soldict['Gain:'+pol+':Imag:{s}'.format(s=station)]['values'])
+            slow_amp = np.sqrt((slow_real**2) + (slow_imag**2))
+            slow_phase = np.arctan2(slow_imag, slow_real)
 
-        if preapply_parmdb is not None:
-            fast_phase_preapply = np.copy(soldict_preapply['CommonScalarPhase:{s}'.format(s=station)]['values'])
-            tec_preapply = np.copy(soldict_preapply['TEC:{s}'.format(s=station)]['values'])
-            tec_phase_preapply =  -8.44797245e9 * tec_preapply / slow_freqs
+            if preapply_parmdb is not None:
+                fast_phase_preapply = np.copy(preapply_soldict['Gain:'+pol+':Phase:{s}'.format(s=station)]['values'])
+                total_phase = np.mod(fast_phase + tec_phase + slow_phase + fast_phase_preapply + np.pi, 2*np.pi) - np.pi
+                total_amp = slow_amp
+            else:
+                total_phase = np.mod(fast_phase + tec_phase + slow_phase + np.pi, 2*np.pi) - np.pi
+                total_amp = slow_amp
 
-            slow_real_00_preapply = np.copy(soldict_preapply['Gain:0:0:Real:{s}'.format(s=station)]['values'])
-            slow_imag_00_preapply = np.copy(soldict_preapply['Gain:0:0:Imag:{s}'.format(s=station)]['values'])
-            slow_phase_00_preapply = np.arctan2(slow_imag_00_preapply, slow_real_00_preapply)
-            slow_real_11_preapply = np.copy(soldict_preapply['Gain:1:1:Real:{s}'.format(s=station)]['values'])
-            slow_imag_11_preapply = np.copy(soldict_preapply['Gain:1:1:Imag:{s}'.format(s=station)]['values'])
-            slow_phase_11_preapply = np.arctan2(slow_imag_11_preapply, slow_real_11_preapply)
+            g_start = 0
+            for g in gaps_ind:
+                # If time gaps exist, add them one-by-one (except for last one)
+                output_pdb.addValues('Gain:'+pol+':Phase:{}'.format(station), total_phase[g_start:g], slow_freqs, slow_freqwidths,
+                    fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
+                output_pdb.addValues('Gain:'+pol+':Ampl:{}'.format(station), total_amp[g_start:g], slow_freqs, slow_freqwidths,
+                    fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
+                g_start = g
 
-            total_phase_00 = np.mod(fast_phase + tec_phase + slow_phase_00 +
-                fast_phase_preapply + tec_phase_preapply + slow_phase_00_preapply + np.pi, 2*np.pi) - np.pi
-            total_amp_00 = slow_amp_00
-            total_phase_11 = np.mod(fast_phase + tec_phase + slow_phase_11 +
-                fast_phase_preapply + tec_phase_preapply + slow_phase_11_preapply + np.pi, 2*np.pi) - np.pi
-            total_amp_11 = slow_amp_11
-        else:
-            total_phase_00 = np.mod(fast_phase + tec_phase + slow_phase_00 + np.pi, 2*np.pi) - np.pi
-            total_amp_00 = slow_amp_00
-            total_phase_11 = np.mod(fast_phase + tec_phase + slow_phase_11 + np.pi, 2*np.pi) - np.pi
-            total_amp_11 = slow_amp_11
-
-        g_start = 0
-        for g in gaps_ind:
-            # If time gaps exist, add them one-by-one (except for last one)
-            pdb_out.addValues('Gain:0:0:Phase:{}'.format(station), total_phase_00[g_start:g], slow_freqs, slow_freqwidths,
-                fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
-            pdb_out.addValues('Gain:0:0:Ampl:{}'.format(station), total_amp_00[g_start:g], slow_freqs, slow_freqwidths,
-                fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
-            pdb_out.addValues('Gain:1:1:Phase:{}'.format(station), total_phase_11[g_start:g], slow_freqs, slow_freqwidths,
-                fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
-            pdb_out.addValues('Gain:1:1:Ampl:{}'.format(station), total_amp_11[g_start:g], slow_freqs, slow_freqwidths,
-                fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
-            g_start = g
-
-        # Add remaining time slots
-        pdb_out.addValues('Gain:0:0:Phase:{}'.format(station), total_phase_00[g_start:], slow_freqs, slow_freqwidths,
-            fast_times[g_start:], fast_timewidths[g_start:], asStartEnd=False)
-        pdb_out.addValues('Gain:0:0:Ampl:{}'.format(station), total_amp_00[g_start:], slow_freqs, slow_freqwidths,
-            fast_times[g_start:], fast_timewidths[g_start:], asStartEnd=False)
-        pdb_out.addValues('Gain:1:1:Phase:{}'.format(station), total_phase_11[g_start:], slow_freqs, slow_freqwidths,
-            fast_times[g_start:], fast_timewidths[g_start:], asStartEnd=False)
-        pdb_out.addValues('Gain:1:1:Ampl:{}'.format(station), total_amp_11[g_start:], slow_freqs, slow_freqwidths,
-            fast_times[g_start:], fast_timewidths[g_start:], asStartEnd=False)
+            # Add remaining time slots
+            output_pdb.addValues('Gain:'+pol+':Phase:{}'.format(station), total_phase[g_start:], slow_freqs, slow_freqwidths,
+                fast_times[g_start:], fast_timewidths[g_start:], asStartEnd=False)
+            output_pdb.addValues('Gain:'+pol+':Ampl:{}'.format(station), total_amp[g_start:], slow_freqs, slow_freqwidths,
+                fast_times[g_start:], fast_timewidths[g_start:], asStartEnd=False)
 
     # Write values
-    pdb_out.flush()
+    output_pdb.flush()
 
 
 if __name__ == '__main__':
