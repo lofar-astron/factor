@@ -203,22 +203,10 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
 
             for i, ms in enumerate(all_group_files):
                 if 'dummy' in ms:
-                    pt.tableutil.tablecopy(ms_exists, ms)
-
                     # Alter SPECTRAL_WINDOW subtable as appropriate to fill gap
+                    ref_freq = minfreq + freq_width*(i + 0.5)
+                    pt.tableutil.tablecopy(ms_exists, ms)
                     sw = pt.table('{}::SPECTRAL_WINDOW'.format(ms), readonly=False)
-                    tot_bandwidth = sw.getcol('TOTAL_BANDWIDTH')[0]
-                    if i > 0:
-                        sw_low = pt.table('{}::SPECTRAL_WINDOW'.format(all_group_files[i-1]))
-                        ref_freq = sw_low.getcol('REF_FREQUENCY') + tot_bandwidth
-                        sw_low.close()
-                    else:
-                        for j in range(1, len(all_group_files)):
-                            if os.path.exists(all_group_files[j]):
-                                sw_high = pt.table('{}::SPECTRAL_WINDOW'.format(all_group_files[j]))
-                                ref_freq = sw_high.getcol('REF_FREQUENCY') - tot_bandwidth * j
-                                sw_high.close()
-                                break
                     chan_freq = sw.getcol('CHAN_FREQ') - ms_exists_ref_freq + ref_freq
                     sw.putcol('REF_FREQUENCY', ref_freq)
                     sw.putcol('CHAN_FREQ', chan_freq)
@@ -262,7 +250,8 @@ def input2strlist(invar):
             map_in = DataMap.load(invar)
             map_in.iterator = DataMap.SkipIterator
             str_list = []
-            for fname in map_in:
+            for item in map_in:
+                fname = item.file
                 if fname.startswith('[') and fname.endswith(']'):
                     for f in fname.strip('[]').split(','):
                         str_list.append(f.strip(' \'\"'))
