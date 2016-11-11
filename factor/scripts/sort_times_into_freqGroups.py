@@ -149,11 +149,13 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
                     skip_this = False
                     if len(time_groups[time]['freq_names'])>0:
                         (freq,fname) = time_groups[time]['freq_names'].pop(0)
+                        freq_rest = freq
                     else:
                         # Set freq to high value to pad the rest of the group
                         # with dummy data
                         (freq,fname) = (1e12,'This_shouldn\'t_show_up')
-                        if not enforce_numSB:
+                        freq_rest += freq_width
+                        if not enforce_numSB and freq_rest > maxfreq:
                             # Don't pad the rest of this group with dummy data
                             break
 
