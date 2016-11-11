@@ -497,10 +497,10 @@ wsclean_image01.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image01.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image01.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image01.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if selfcal_local_dir is not none %}
-wsclean_image01.argument.tempdir                = {{ selfcal_local_dir }}
-{% elif local_dir is not none %}
+{% if local_dir is not none %}
 wsclean_image01.argument.tempdir                = {{ local_dir_parent }}
+{% elif selfcal_local_dir is not none %}
+wsclean_image01.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image01.argument.multiscale-scales      = 0
@@ -577,10 +577,10 @@ wsclean_image02.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image02.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image02.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image02.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if selfcal_local_dir is not none %}
-wsclean_image02.argument.tempdir                = {{ selfcal_local_dir }}
-{% elif local_dir is not none %}
+{% if local_dir is not none %}
 wsclean_image02.argument.tempdir                = {{ local_dir_parent }}
+{% elif selfcal_local_dir is not none %}
+wsclean_image02.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image02.argument.multiscale-scales      = 0
@@ -812,10 +812,10 @@ wsclean_image11.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image11.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image11.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image11.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if selfcal_local_dir is not none %}
-wsclean_image11.argument.tempdir                = {{ selfcal_local_dir }}
-{% elif local_dir is not none %}
+{% if local_dir is not none %}
 wsclean_image11.argument.tempdir                = {{ local_dir_parent }}
+{% elif selfcal_local_dir is not none %}
+wsclean_image11.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image11.argument.multiscale-scales      = 0
@@ -892,10 +892,10 @@ wsclean_image12.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image12.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image12.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image12.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if selfcal_local_dir is not none %}
-wsclean_image12.argument.tempdir                = {{ selfcal_local_dir }}
-{% elif local_dir is not none %}
+{% if local_dir is not none %}
 wsclean_image12.argument.tempdir                = {{ local_dir_parent }}
+{% elif selfcal_local_dir is not none %}
+wsclean_image12.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image12.argument.multiscale-scales      = 0
@@ -1045,10 +1045,10 @@ wsclean_image21.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image21.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image21.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image21.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if selfcal_local_dir is not none %}
-wsclean_image21.argument.tempdir                = {{ selfcal_local_dir }}
-{% elif local_dir is not none %}
+{% if local_dir is not none %}
 wsclean_image21.argument.tempdir                = {{ local_dir_parent }}
+{% elif selfcal_local_dir is not none %}
+wsclean_image21.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image21.argument.multiscale-scales      = 0
@@ -1125,10 +1125,10 @@ wsclean_image22.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image22.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image22.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image22.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if selfcal_local_dir is not none %}
-wsclean_image22.argument.tempdir                = {{ selfcal_local_dir }}
-{% elif local_dir is not none %}
+{% if local_dir is not none %}
 wsclean_image22.argument.tempdir                = {{ local_dir_parent }}
+{% elif selfcal_local_dir is not none %}
+wsclean_image22.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image22.argument.multiscale-scales      = 0
@@ -1356,10 +1356,10 @@ wsclean_image31.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image31.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image31.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image31.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if selfcal_local_dir is not none %}
-wsclean_image31.argument.tempdir                = {{ selfcal_local_dir }}
-{% elif local_dir is not none %}
+{% if local_dir is not none %}
 wsclean_image31.argument.tempdir                = {{ local_dir_parent }}
+{% elif selfcal_local_dir is not none %}
+wsclean_image31.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image31.argument.multiscale-scales      = 0
@@ -1437,10 +1437,10 @@ wsclean_image32.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image32.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image32.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image32.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if selfcal_local_dir is not none %}
-wsclean_image32.argument.tempdir                = {{ selfcal_local_dir }}
-{% elif local_dir is not none %}
+{% if local_dir is not none %}
 wsclean_image32.argument.tempdir                = {{ local_dir_parent }}
+{% elif selfcal_local_dir is not none %}
+wsclean_image32.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image32.argument.multiscale-scales      = 0
@@ -1679,10 +1679,10 @@ wsclean_image41.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image41.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image41.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image41.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if selfcal_local_dir is not none %}
-wsclean_image41.argument.tempdir                = {{ selfcal_local_dir }}
-{% elif local_dir is not none %}
+{% if local_dir is not none %}
 wsclean_image41.argument.tempdir                = {{ local_dir_parent }}
+{% elif selfcal_local_dir is not none %}
+wsclean_image41.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image41.argument.multiscale-scales      = 0
@@ -1760,10 +1760,10 @@ wsclean_image42.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image42.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image42.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image42.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if selfcal_local_dir is not none %}
-wsclean_image42.argument.tempdir                = {{ selfcal_local_dir }}
-{% elif local_dir is not none %}
+{% if local_dir is not none %}
 wsclean_image42.argument.tempdir                = {{ local_dir_parent }}
+{% elif selfcal_local_dir is not none %}
+wsclean_image42.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image42.argument.multiscale-scales      = 0
