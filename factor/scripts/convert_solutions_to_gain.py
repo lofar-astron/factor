@@ -50,8 +50,8 @@ def main(fast_parmdb, slow_parmdb, output_file, preapply_parmdb=None):
     slow_freqwidths = slow_soldict['Gain:0:0:Real:{s}'.format(s=station_names[0])]['freqwidths']
     slow_freqstep = np.mean(slow_freqwidths)
     if preapply_parmdb is not None:
-        slow_freqs_preapply = preapply_soldict['Gain:0:0:Real:{s}'.format(s=station_names[0])]['freqs']
-        slow_freqwidths_preapply = preapply_soldict['Gain:0:0:Real:{s}'.format(s=station_names[0])]['freqwidths']
+        slow_freqs_preapply = preapply_soldict['Gain:0:0:Phase:{s}'.format(s=station_names[0])]['freqs']
+        slow_freqwidths_preapply = preapply_soldict['Gain:0:0:Phase:{s}'.format(s=station_names[0])]['freqwidths']
         slow_freqstep_preapply = np.mean(slow_freqwidths_preapply)
 
     key_names = fast_soldict.keys()
