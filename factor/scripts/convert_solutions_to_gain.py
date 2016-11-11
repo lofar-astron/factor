@@ -128,8 +128,9 @@ if __name__ == '__main__':
     descriptiontext = "Converts multiple selfcal tables to single gain table.\n"
 
     parser = argparse.ArgumentParser(description=descriptiontext, formatter_class=RawTextHelpFormatter)
-    parser.add_argument('merged_selfcal_parmdb', help='name of the merged parmdb')
+    parser.add_argument('fast_selfcal_parmdb', help='name of the parmdb with fast solutions')
+    parser.add_argument('slow_selfcal_parmdb', help='name of the parmdb with slow solutions')
     parser.add_argument('output_file', help='name of the output file')
     args = parser.parse_args()
 
-    main(args.merged_selfcal_parmdb, args.output_file)
+    main(args.fast_selfcal_parmdb, args.slow_selfcal_parmdb, args.output_file)
