@@ -131,6 +131,7 @@ if __name__ == '__main__':
     parser.add_argument('fast_selfcal_parmdb', help='name of the parmdb with fast solutions')
     parser.add_argument('slow_selfcal_parmdb', help='name of the parmdb with slow solutions')
     parser.add_argument('output_file', help='name of the output file')
+    parser.add_argument('--preapply_parmdb',type=str,default=None,help='preapply parmDB from another facet')
     args = parser.parse_args()
 
-    main(args.fast_selfcal_parmdb, args.slow_selfcal_parmdb, args.output_file)
+    main(args.fast_selfcal_parmdb, args.slow_selfcal_parmdb, args.output_file, preapply_parmdb=args.preapply_parmdb)
