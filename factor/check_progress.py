@@ -590,6 +590,8 @@ def set_patch_color(a, d):
     for op in a.completed_ops:
         if 'facetimage' in op:
             nimages += 1
+        if 'facetsubreset' in op:
+            total_completed -= 1
     if nimages-1 == total_completed:
         # facetselfcal was skipped (or failed), so increment by two to compensate
         total_completed += 2
