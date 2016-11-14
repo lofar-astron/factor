@@ -144,7 +144,8 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
             skip_this = True
             for fIdx in range(numSB):
                 if not enforce_numSB and freq_rest > maxfreq:
-                    # Don't pad the rest of this group with dummy data
+                    # Don't pad the rest of the last group with dummy data
+                    freq = 1e12
                     break
                 elif freq > (fIdx+fgroup*numSB+1)*freq_width+minfreq:
                     files.append('dummy.ms')
