@@ -137,30 +137,24 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
     for time in timestamps:
         (freq,fname) = time_groups[time]['freq_names'].pop(0)
         nbands = 0
-        freq_rest = 0.0
         all_group_files = []
         for fgroup in range(ngroups):
             files = []
             skip_this = True
             for fIdx in range(numSB):
-                if not enforce_numSB and freq_rest > maxfreq:
-                    # Don't pad the rest of the last group with dummy data
-                    freq = 1e12
-                    break
-                elif freq > (fIdx+fgroup*numSB+1)*freq_width+minfreq:
-                    files.append('dummy.ms')
-                    freq_rest += freq_width
+                thisfreq = (fIdx+fgroup*numSB+1)*freq_width+minfreq
+                if freq > thisfreq:
+                    if enforce_numSB or (not enforce_numSB and thisfreq < maxfreq):
+                        files.append('dummy.ms')
                 else:
                     files.append(fname)
                     skip_this = False
                     if len(time_groups[time]['freq_names'])>0:
                         (freq,fname) = time_groups[time]['freq_names'].pop(0)
-                        freq_rest = freq
                     else:
                         # Set freq to high value to pad the rest of the group
                         # with dummy data
                         (freq,fname) = (1e12,'This_shouldn\'t_show_up')
-                        freq_rest += freq_width
 
             if fgroup == ngroups-1:
                 # Append dummy data to last frequency group only
