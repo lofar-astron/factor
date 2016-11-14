@@ -137,13 +137,18 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
     for time in timestamps:
         (freq,fname) = time_groups[time]['freq_names'].pop(0)
         nbands = 0
+        freq_rest = 0.0
         all_group_files = []
         for fgroup in range(ngroups):
             files = []
             skip_this = True
             for fIdx in range(numSB):
-                if freq > (fIdx+fgroup*numSB+1)*freq_width+minfreq:
+                if not enforce_numSB and freq_rest > maxfreq:
+                    # Don't pad the rest of this group with dummy data
+                    break
+                elif freq > (fIdx+fgroup*numSB+1)*freq_width+minfreq:
                     files.append('dummy.ms')
+                    freq_rest += freq_width
                 else:
                     files.append(fname)
                     skip_this = False
@@ -155,9 +160,6 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
                         # with dummy data
                         (freq,fname) = (1e12,'This_shouldn\'t_show_up')
                         freq_rest += freq_width
-                        if not enforce_numSB and freq_rest > maxfreq:
-                            # Don't pad the rest of this group with dummy data
-                            break
 
             if fgroup == ngroups-1:
                 # Append dummy data to last frequency group only
@@ -366,7 +368,6 @@ class MultiDataMap(DataMap):
                 chunk = item.file[i:i+number]
                 mdplist.append(MultiDataProduct(item.host, chunk, item.skip))
         self._set_data(mdplist)
-
 
 
 if __name__ == '__main__':
