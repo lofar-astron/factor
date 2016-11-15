@@ -387,7 +387,7 @@ class Direction(object):
         # Set whether to use wavelet module in calibrator masking
         if self.atrous_do is None:
             sizes_arcmin = self.get_source_sizes(cal_only=True)
-            if any([s > large_size_arcmin for s in sizes_arcmin]):
+            if sizes_arcmin and any([s > large_size_arcmin for s in sizes_arcmin]):
                 self.atrous_do = True
             else:
                 self.atrous_do = False
