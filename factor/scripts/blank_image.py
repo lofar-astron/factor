@@ -117,8 +117,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=descriptiontext, formatter_class=RawTextHelpFormatter)
     parser.add_argument('input_image_file', help='Filename of input image')
     parser.add_argument('vertices_file', help='Filename of vertices file')
-    parser.add_argument('output_image_file', help='Filename of output image')
+    parser.add_argument('image_is_wsclean_model', help='True if input is WSClean model root')
     parser.add_argument('-b', '--blank_value', help='value for blank pixesl', type=str, default='zeros')
     args = parser.parse_args()
     main(args.input_image_file, args.vertices_file, args.output_image_file,
-         blank_value=args.blank_value)
+         blank_value=args.blank_value, image_is_wsclean_model=args.image_is_wsclean_model)
