@@ -144,7 +144,7 @@ def main(ms_input, filename=None, mapfile_dir=None, numSB=-1, enforce_numSB=True
             for fIdx in range(numSB):
                 thisfreq = (fIdx+fgroup*numSB+1)*freq_width+minfreq
                 if freq > thisfreq:
-                    if enforce_numSB or (not enforce_numSB and thisfreq < maxfreq):
+                    if enforce_numSB or thisfreq-freq_width/2. < maxfreq:
                         files.append('dummy.ms')
                 else:
                     files.append(fname)
