@@ -387,7 +387,7 @@ class Direction(object):
         # Set whether to use wavelet module in calibrator masking
         if self.atrous_do is None:
             sizes_arcmin = self.get_source_sizes(cal_only=True)
-            if sizes_arcmin and any([s > large_size_arcmin for s in sizes_arcmin]):
+            if sizes_arcmin is not None and any([s > large_size_arcmin for s in sizes_arcmin]):
                 self.atrous_do = True
             else:
                 self.atrous_do = False
@@ -398,6 +398,13 @@ class Direction(object):
         else:
             self.wsclean_selfcal_multiscale = False
 
+        # Let the user know what we are doing
+        if self.wsclean_selfcal_multiscale and self.mscale_field_do:
+            self.log.debug("Will do multiscale-cleaning for calibrator and facet.")
+        elif self.wsclean_selfcal_multiscale:
+            self.log.debug("Will do multiscale-cleaning for calibrator only.")
+        elif self.mscale_field_do:
+            self.log.debug("Will do multiscale-cleaning for facet only.")
 
     def get_optimum_size(self, size):
         """
