@@ -84,7 +84,7 @@ def main(input_image_file, vertices_file, output_image_file, blank_value='zero',
     poly = Polygon(xvert, yvert)
 
     for input_image, output_image in zip(input_image_files, output_image_files):
-        hdu = pyfits.open(input_image)
+        hdu = pyfits.open(input_image, memmap=False)
         data = hdu[0].data
 
         # Find limits of facet poly and blank pixels outside them

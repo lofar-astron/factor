@@ -139,7 +139,7 @@ def main(images, outfits, maxwidth=0):
     new_pim.tofits(outfits, overwrite=True)
 
     # need to add new beam info (not sure if this is possible with casacore)
-    hdu = pyfits.open(outfits,mode='update')
+    hdu = pyfits.open(outfits, mode='update', memmap=False)
     header = hdu[0].header
     header['BMAJ'] = mean_psf_fwhm[0]
     header['BMIN'] = mean_psf_fwhm[1]
