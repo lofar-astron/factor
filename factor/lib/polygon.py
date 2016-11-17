@@ -153,6 +153,7 @@ class Polygon:
         jo = j.copy()
         jo[j == 0] -= 1
         area = _det([x[j + 1], x[j], x[jo - 1]], [y[j + 1], y[j], y[jo - 1]])
+        area[area==0.] =-1.  # remove point if vertex is linear
         mindst[~snear] = np.copysign(mindst, area)[~snear]
 
         # Point is closer to its nearest side than to its nearest vertex, check
@@ -160,6 +161,7 @@ class Polygon:
         # If point is to left of side it is inside polygon, else point is
         # outside polygon.
         area = _det([x[j], x[j + 1], xpoint], [y[j], y[j + 1], ypoint])
+        area[area==0.] =-1.  # remove point if it  is _on_ the line
         mindst[snear] = np.copysign(mindst, area)[snear]
 
         # Point is on side of polygon

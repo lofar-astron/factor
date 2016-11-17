@@ -65,8 +65,18 @@ def read_casa_polys(filename, image):
                 except:
                     pixels = image.topixel([1, 1, Decvert*np.pi/180.0,
                                                RAvert*np.pi/180.0])
+                # remove points that are too close to each other
+                if len(xvert)>0:
+                    dist = (xvert[-1]-pixels[2])**2 + (yvert[-1]-pixels[3])**2
+                    if dist < .5:
+                        continue
                 xvert.append(pixels[2]) # x -> Dec
                 yvert.append(pixels[3]) # y -> RA
+            # check if first and last points are too close
+            dist = (xvert[-1]-xvert[0])**2 + (yvert[-1]-yvert[0])**2
+            if dist < .5:
+                xvert.pop()
+                yvert.pop()
             polys.append(Polygon(xvert, yvert))
 
         elif line.startswith('ellipse'):
