@@ -449,3 +449,22 @@ The available options are described below under their respective sections.
 
     image_display
         Use ``display`` or ``eog`` to display PNG images (default = ``display``).
+
+
+.. _parset_ms_specific_options:
+
+``[<Your_MS_Name>]``
+-----------------
+
+.. glossary::
+   
+MS-specific parameters (optional). Currently, only the initial sky model can
+be specified here
+
+    init_skymodel
+        Full path to the skymodel that was used to subtract the sources in the
+	MS that was given as the section-name. For multi-epoch (interleaved or
+	multi-night) observations the skymodel has to be specified only for one
+	MS of each frequency group, it will then be used for all MSs in this
+	frequency group. (Mixing MSs of the same frequency but in which different
+	skymodels were used to subtract the sources is currently not possible.)
