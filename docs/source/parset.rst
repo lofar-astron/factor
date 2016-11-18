@@ -86,14 +86,24 @@ The available options are described below under their respective sections.
         Range of times to flag (default = no flagging). The syntax is that of
         the preflagger ``abstime`` parameter (see the DPPP documentation on the LOFAR wiki for
         details of the syntax). E.g., ``[12-Mar-2010/11:31:00.0..12-Mar-2010/11:50:00.0]``.
-        Note that time and baseline flagging (set with
+        Note that time, frequency (set with
+        :term:`flag_freqrange`), and baseline (set with
         :term:`flag_baseline`) ranges are AND-ed to produce the final flags.
 
     flag_baseline
         Range of baselines to flag (default = no flagging). The syntax is that
         of the preflagger ``baseline`` parameter (see the DPPP documentation for
         details of the syntax). E.g., ``flag_baseline = [CS013HBA*]``. Note that
-        baseline and time flagging (set with
+        baseline, frequency (set with
+        :term:`flag_freqrange`), and time (set with
+        :term:`flag_abstime`) ranges are AND-ed to produce the final flags.
+
+    flag_freqrange
+        Range of frequencies to flag (default = no flagging). The syntax is that
+        of the preflagger ``freqrange`` parameter (see the DPPP documentation for
+        details of the syntax). E.g., ``flag_freqrange = [125.2..126.4MHz]``. Note that
+        frequency, baseline (set with
+        :term:`flag_baseline`), and time (set with
         :term:`flag_abstime`) ranges are AND-ed to produce the final flags.
 
 

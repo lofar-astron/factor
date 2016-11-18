@@ -56,11 +56,12 @@ dir_ms = /data/bands
 # keep_avg_facet_data = True
 # keep_unavg_facet_data = False
 
-# Flagging ranges (default = no flagging). A range of times and baselines to
-# flag can be specified (see the DPPP documentation for details of syntax). Note
-# that the times and baselines are AND-ed to produce the final flags
+# Flagging ranges (default = no flagging). A range of times, baselines, and
+# frequencies to flag can be specified (see the DPPP documentation for details
+# of the syntax). Note that the ranges are AND-ed to produce the final flags
 # flag_abstime = [12-Mar-2010/11:31:00.0..12-Mar-2010/11:50:00.0]
 # flag_baseline = [CS013HBA*]
+# flag_freqrange = [125.2..126.4MHz]
 
 
 [calibration]

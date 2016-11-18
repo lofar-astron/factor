@@ -678,6 +678,7 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
         # Set any flagging parameters
         direction.flag_abstime = parset['flag_abstime']
         direction.flag_baseline = parset['flag_baseline']
+        direction.flag_freqrange = parset['flag_freqrange']
 
         # Reset state if specified
         if direction.name in reset_directions:

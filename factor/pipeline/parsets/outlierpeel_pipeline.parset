@@ -74,7 +74,7 @@ shift_cal.argument.msout.writefullresflag              = False
 {% if local_dir is not none %}
 shift_cal.argument.local_scratch_dir                   = {{ local_dir }}
 {% endif %}
-{% if flag_abstime is not none or flag_baseline is not none %}
+{% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
 shift_cal.argument.steps                               = [shift,add,flag,avg]
 {% else %}
 shift_cal.argument.steps                               = [shift,add,avg]
@@ -85,7 +85,7 @@ shift_cal.argument.add.type                            = predict
 shift_cal.argument.add.sourcedb                        = sourcedb
 shift_cal.argument.add.operation                       = add
 shift_cal.argument.add.applycal.parmdb                 = dir_indep_parmdb
-{% if flag_abstime is not none or flag_baseline is not none %}
+{% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
 shift_cal.argument.flag.type                           = preflagger
 {% endif %}
 {% if flag_abstime is not none %}
@@ -93,6 +93,9 @@ shift_cal.argument.flag.abstime                        = {{ flag_abstime }}
 {% endif %}
 {% if flag_baseline is not none %}
 shift_cal.argument.flag.baseline                       = {{ flag_baseline }}
+{% endif %}
+{% if flag_freqrange is not none %}
+shift_cal.argument.flag.freqrange                      = {{ flag_freqrange }}
 {% endif %}
 shift_cal.argument.avg.type                            = squash
 shift_cal.argument.avg.freqstep                        = {{ facetselfcal_freqstep }}

@@ -164,12 +164,15 @@ def get_global_options(parset):
     else:
         parset_dict['interactive'] = False
 
-    # Flagging ranges (default = no flagging). A range of times and baselines to
-    # flag can be specified (see the DPPP documentation for details of syntax)
+    # Flagging ranges (default = no flagging). A range of times baselines, and
+    # frequencies to flag can be specified (see the DPPP documentation for
+    # details of syntax)
     if 'flag_abstime' not in parset_dict:
         parset_dict['flag_abstime'] = None
     if 'flag_baseline' not in parset_dict:
         parset_dict['flag_baseline'] = None
+    if 'flag_freqrange' not in parset_dict:
+        parset_dict['flag_freqrange'] = None
 
     # Make final mosaic (default = True)
     if 'make_mosaic' in parset_dict:
@@ -257,7 +260,8 @@ def get_global_options(parset):
         'peel_flux_jy', 'keep_unavg_facet_data', 'max_selfcal_loops',
         'preaverage_flux_jy', 'multiscale_selfcal', 'skymodel_extension',
         'max_peak_smearing', 'tec_block_mhz', 'selfcal_cellsize_arcsec',
-        'selfcal_robust', 'use_compression', 'flag_abstime', 'flag_baseline']
+        'selfcal_robust', 'use_compression', 'flag_abstime', 'flag_baseline',
+        'flag_freqrange']
     allowed_options.extend(['direction_specific', 'calibration_specific',
         'imaging_specific', 'cluster_specific']) # add dicts needed for deprecated options
     deprecated_options_imaging = ['make_mosaic', 'facet_imager',
