@@ -315,7 +315,9 @@ flux_min_Jy = 0.3
 
 [ms1.ms]
 # MS-specific parameters (optional). Currently, only the initial sky model can
-# be specified here
+# be specified here. For multi-epoch (interleaved or multi-night) observations
+# the skymodel has to be specified only for one MS of each frequency group, it
+# will then be used for all MSs in this frequency group. 
 # init_skymodel = /data/ms1.sky
 
 [ms2.ms]
