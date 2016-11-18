@@ -456,11 +456,12 @@ The available options are described below under their respective sections.
 ``[<Your_MS_Name>]``
 -----------------
 
+MS-specific parameters (optional). You have to give the name of the MS (without
+the path) as the section name. Currently, only the initial sky model can
+be specified here.
+
 .. glossary::
    
-MS-specific parameters (optional). Currently, only the initial sky model can
-be specified here
-
     init_skymodel
         Full path to the skymodel that was used to subtract the sources in the
 	MS that was given as the section-name. For multi-epoch (interleaved or
