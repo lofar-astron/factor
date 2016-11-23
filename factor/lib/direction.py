@@ -796,10 +796,9 @@ class Direction(object):
         """
         Returns size of partial block in MHz
         """
-        nchan_per_block = np.ceil(num_chan_per_band_after_avg * nbands /
-            num_cal_blocks)
+        nband_per_block = np.ceil(nbands / num_cal_blocks)
         partial_block_mhz = (num_chan_per_band_after_avg * nbands %
-            nchan_per_block) * mhz_per_chan_after_avg
+            nband_per_block) * mhz_per_chan_after_avg
         return partial_block_mhz
 
 
