@@ -358,12 +358,12 @@ merge_selfcal_parmdbs.control.inputkeys   = [parmdb_p,parmdb_a]
 merge_selfcal_parmdbs.control.outputkey   = parmdb_out
 merge_selfcal_parmdbs.argument.flags      = [parmdb_p,parmdb_a,parmdb_out]
 
-# convert the merged the phase and amplitude parmDBs to gain parmDBs, length = 1
-convert_merged_selfcal_parmdbs.control.type       = convert_solutions_to_gain
-convert_merged_selfcal_parmdbs.control.mapfile_in = merge_selfcal_parmdbs.output.mapfile
-convert_merged_selfcal_parmdbs.control.inputkey   = parmdb_in
-convert_merged_selfcal_parmdbs.control.outputkey  = parmdb_out
-convert_merged_selfcal_parmdbs.argument.flags     = [parmdb_in,parmdb_out]
+# convert the merged phase and amplitude parmDBs to gain parmDBs, length = 1
+convert_merged_selfcal_parmdbs.control.type        = convert_solutions_to_gain
+convert_merged_selfcal_parmdbs.control.mapfiles_in = [merge_phase_parmdbs.output.mapfile,smooth_amps.output.mapfile]
+convert_merged_selfcal_parmdbs.control.inputkeys   = [fast_parmdb_in,slow_parmdb_in]
+convert_merged_selfcal_parmdbs.control.outputkey   = parmdb_out
+convert_merged_selfcal_parmdbs.argument.flags      = [fast_parmdb_in,slow_parmdb_in,parmdb_out]
 
 # merge the phases and normalized amplitudes parmDBs, length = 1
 merge_normalized_selfcal_parmdbs.control.type        = merge_parmdbs_selfcal
@@ -372,12 +372,12 @@ merge_normalized_selfcal_parmdbs.control.inputkeys   = [parmdb_p,parmdb_a]
 merge_normalized_selfcal_parmdbs.control.outputkey   = parmdb_out
 merge_normalized_selfcal_parmdbs.argument.flags      = [parmdb_p,parmdb_a,parmdb_out]
 
-# convert the merged the phase and normalized amplitude parmDBs to gain parmDBs, length = 1
+# convert the merged phase and normalized amplitude parmDBs to gain parmDBs, length = 1
 convert_normalized_merged_selfcal_parmdbs.control.type       = convert_solutions_to_gain
-convert_normalized_merged_selfcal_parmdbs.control.mapfile_in = merge_normalized_selfcal_parmdbs.output.mapfile
-convert_normalized_merged_selfcal_parmdbs.control.inputkey   = parmdb_in
-convert_normalized_merged_selfcal_parmdbs.control.outputkey  = parmdb_out
-convert_normalized_merged_selfcal_parmdbs.argument.flags     = [parmdb_in,parmdb_out]
+convert_normalized_merged_selfcal_parmdbs.control.mapfiles_in = [merge_phase_parmdbs.output.mapfile,smooth_amps_normalized.output.mapfile]
+convert_normalized_merged_selfcal_parmdbs.control.inputkeys   = [fast_parmdb_in,slow_parmdb_in]
+convert_normalized_merged_selfcal_parmdbs.control.outputkey   = parmdb_out
+convert_normalized_merged_selfcal_parmdbs.argument.flags      = [fast_parmdb_in,slow_parmdb_in,parmdb_out]
 
 {% if create_preapply_parmdb %}
 # make a phase-only parmDB suitable for preapplication, length = 1
