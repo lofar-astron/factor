@@ -18,7 +18,6 @@ import itertools
 import time
 
 
-
 log = logging.getLogger('factor:directions')
 
 
@@ -1022,7 +1021,7 @@ def make_ds9_calimage_file(directions, outputfile):
 
     for direction in directions:
         imsize = direction.cal_imsize * direction.cellsize_selfcal_deg * 3600 # arcsec
-        imsize_unmasked = 0.8 * imsize
+        imsize_unmasked = 0.6 * imsize
         lines.append('box({0}, {1}, {2}", {2}") # text={{{3}}}\n'.
             format(direction.ra, direction.dec, imsize, direction.name))
         lines.append('box({0}, {1}, {2}", {2}")\n'.
