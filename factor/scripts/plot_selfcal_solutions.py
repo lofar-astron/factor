@@ -83,7 +83,7 @@ def solplot_scalarphase(parmdb, imageroot, refstationi, plot_international=False
             phase_ref_chan = phase_ref[:, chan_indx]
 
             # don't plot flagged phases
-            phase = np.ma.masked_where(phase==0, phase)
+            phase = np.ma.masked_where(np.logical_or(phase==0, np.isnan(phase)), phase)
 
             #try:
             if len(phase) > 1000:
@@ -132,7 +132,7 @@ def solplot_tec(parmdb, imageroot, refstationi, plot_international=False, freq=N
             tec = soldict['TEC:{s}'.format(s=station)]['values'][:, chan_indx]
             tec_ref_chan = tec_ref[:, chan_indx]
 
-            tec = np.ma.masked_where(tec==0, tec)
+            tec = np.ma.masked_where(np.logical_or(tec==0, np.isnan(tec)), tec)
             if len(times) > 1000:
                 fmt = ','
             else:
@@ -184,7 +184,7 @@ def solplot_tec_scalarphase(parmdb, imageroot, refstationi, plot_international=F
             tec_ref_chan = tec_ref[:, chan_indx]
             freq = soldict['CommonScalarPhase:{s}'.format(s=station)]['freqs'][chan_indx]
 
-            phase = np.ma.masked_where(phase==0, phase)
+            phase = np.ma.masked_where(np.logical_or(phase==0, np.isnan(phase)), phase)
             if len(times) > 1000:
                 fmt = ','
             else:
@@ -289,8 +289,8 @@ def solplot_phase_phasors(parmdb, imageroot, refstationi, plot_international=Fal
             phase11_ref_chan = phase11_ref[:, chan_indx]
 
             # don't plot flagged phases
-            phase00 = np.ma.masked_where(phase00==0, phase00)
-            phase11 = np.ma.masked_where(phase11==0, phase11)
+            phase00 = np.ma.masked_where(np.logical_or(phase00==0, np.isnan(phase00)), phase00)
+            phase11 = np.ma.masked_where(np.logical_or(phase11==0, np.isnan(phase11)), phase11)
 
             if fourpol:
 	        phase10 = soldict['Gain:1:0:Phase:{s}'.format(s=station)]['values'][:, chan_indx]
@@ -299,8 +299,8 @@ def solplot_phase_phasors(parmdb, imageroot, refstationi, plot_international=Fal
                 phase10_ref_chan = phase10_ref[:, chan_indx]
 
                 # don't plot flagged phases
-                phase01 = np.ma.masked_where(phase01==0, phase01)
-                phase10 = np.ma.masked_where(phase10==0, phase10)
+                phase01 = np.ma.masked_where(np.logical_or(phase01==0, np.isnan(phase01)), phase01)
+                phase10 = np.ma.masked_where(np.logical_or(phase10==0, np.isnan(phase10)), phase10)
 
             if len(times) > 1000:
                 fmt = ','
@@ -402,8 +402,8 @@ def solplot_phase(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp
                 phase01 = np.angle(valscorr01)
                 phase10 = np.angle(valscorr10)
 
-                phase01 = np.ma.masked_where(phase01==0, phase01)
-                phase10 = np.ma.masked_where(phase10==0, phase10)
+                phase01 = np.ma.masked_where(np.logical_or(phase01==0, np.isnan(phase01)), phase01)
+                phase10 = np.ma.masked_where(np.logical_or(phase10==0, np.isnan(phase10)), phase10)
 
             if len(np.unique(real11)) > 500:
                 fmt = ','
@@ -414,8 +414,8 @@ def solplot_phase(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp
             phase11 = np.angle(valscorr11)
 
             # don't plot flagged phases
-            phase00 = np.ma.masked_where(phase00==0, phase00)
-            phase11 = np.ma.masked_where(phase11==0, phase11)
+            phase00 = np.ma.masked_where(np.logical_or(phase00==0, np.isnan(phase00)), phase00)
+            phase11 = np.ma.masked_where(np.logical_or(phase11==0, np.isnan(phase11)), phase11)
 
             if fourpol:
                 axsp[istat][0].plot(times, normalize(phase01-phase01_ref_chan), color='orange',  marker=fmt, ls=ls, label='Gain:0:1:Phase',mec='orange')
@@ -523,8 +523,8 @@ def solplot_amp(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp=F
             ls='none'
 
             ## for y scale: check max and min values
-            amp00m = np.ma.masked_where(amp00==1, amp00).compressed()
-            amp11m = np.ma.masked_where(amp11==1, amp11).compressed()
+            amp00m = np.ma.masked_where(np.logical_or(amp00==1, np.isnan(amp00)), amp00).compressed()
+            amp11m = np.ma.masked_where(np.logical_or(amp11==1, np.isnan(amp11)), amp11).compressed()
 
             if fourpol:
                 amp01m = np.ma.masked_where(amp01==1, amp01).compressed()
@@ -540,8 +540,8 @@ def solplot_amp(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp=F
                 ymin = min(np.min(amp11m),ymin)
 
             # don't plot flagged amplitudes
-            amp00 = np.ma.masked_where(amp00==1, amp00)
-            amp11 = np.ma.masked_where(amp11==1, amp11)
+            amp00 = np.ma.masked_where(np.logical_or(amp00==1, np.isnan(amp00)), amp00)
+            amp11 = np.ma.masked_where(np.logical_or(amp11==1, np.isnan(amp11)), amp11)
 
             if fourpol:
 	        amp01 = np.ma.masked_where(amp01==1, amp01)

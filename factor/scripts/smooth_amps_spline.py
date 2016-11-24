@@ -13,7 +13,7 @@ import math
 import shutil
 import multiprocessing
 import matplotlib.pyplot as plt
-from scipy.interpolate import LSQUnivariateSpline
+from scipy.interpolate import LSQUnivariateSpline, interp1d, interp2d
 import sys
 import scipy.ndimage
 import astropy.convolution
@@ -117,6 +117,9 @@ def spline1D(amp_orig):
     # to compute knot points
     f = lambda m, n: [i*n//m + n//(2*m) for i in range(m)]
 
+    if amp_orig is None:
+        return None, None, None, None, None, None, None
+
     # expand array and mirror full array around edges
     ndata = len(amp_orig)
     amp = numpy.zeros(ndata+2*ndata)
@@ -136,32 +139,19 @@ def spline1D(amp_orig):
     weights = (0.*numpy.copy(amp)) + 1 # initialize weights to 1
 
     # filter bad data and determine average scatter of amplitudes
-    idx = numpy.where(amp != 0.0) # log10(1.0) = 0.0
-    #print idx, 'idx'
-    if numpy.any(idx): # so we do not have an empty array
-        scatter = findscatter(amp[idx])
-        # remove some really bad stuff, by putting weights to zero.
-        idxbadi1 = numpy.where(amp > (numpy.median(amp) + (35.*std(amp))))
-        weights[idxbadi1] = 1e-10 # small value, zero generates NaN in spline
-        idxbadi2 = numpy.where(amp < (numpy.median(amp) - (35.*std(amp))))
-        weights[idxbadi2] = 1e-10  # small value, zero generates NaN in spline
-    else:
-        scatter = 0.02 # just that we have a value to prevent crashes in case all amplitudes are 1.0
-        #print 'No valid data for found for this anntenna: ', antenna
-
+    scatter = findscatter(amp)
+    # remove some really bad stuff, by putting weights to zero.
+    idxbadi1 = numpy.where(amp > (numpy.median(amp) + (35.*std(amp))))
+    weights[idxbadi1] = 1e-10 # small value, zero generates NaN in spline
+    idxbadi2 = numpy.where(amp < (numpy.median(amp) - (35.*std(amp))))
+    weights[idxbadi2] = 1e-10  # small value, zero generates NaN in spline
 
     # make the noisevec
-    if numpy.any(idx): # at least 1 good data point
-        if len(amp[idx]) > 30:  # so at least 30/3 = 10 good data points
-            # create noise vector
-            noisevec = findnoisevec(amp)
-        else:
-            noisevec = (numpy.copy(amp) * 0.) + 1.0 # just make constant noise, if we have too little datapoints
+    if len(amp) > 30:  # so at least 30/3 = 10 good data points
+        # create noise vector
+        noisevec = findnoisevec(amp)
     else:
         noisevec = (numpy.copy(amp) * 0.) + 1.0 # just make constant noise, if we have too little datapoints
-
-
-    #print scatter, antenna
 
     if scatter < 0.005:
         #Interior knots t must satisfy Schoenberg-Whitney conditions
@@ -286,14 +276,9 @@ def median2Dampfilter(amp_orig):
     amp_median = scipy.ndimage.median_filter(amp, (3,5)) # so a bit more smoothing along the time-axis
 
     # find scatter
-    idxgood = numpy.where(amp != 0.0)
-    if numpy.any(idxgood):
-        scatter_freq = findscatter_freq(amp)
-        scatter_time = findscatter_time(amp)
-    else:
-        scatter_freq  = 0.02 # just asign some value
-        scatter_time =  0.02 # just asign some value
-        #print 'scatter (freq,time)', scatter_freq, scatter_time, antenna, pol
+    scatter_freq = findscatter_freq(amp)
+    scatter_time = findscatter_time(amp)
+    # print 'scatter (freq,time)', scatter_freq, scatter_time
 
     scatter = 0.5*(scatter_freq+scatter_time) # average x-y scatter
 
@@ -337,10 +322,17 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
     parms = pdb.getValuesGrid('*')
 
     key_names = parms.keys()
+    initial_flagged_dict = {}
+    initial_unflagged_dict = {}
     for key_name in key_names:
-        # Check for NaNs. If found, set to 1
-        flagged_indx = numpy.where(numpy.isnan(parms[key_name]['values']))
-        parms[key_name]['values'][flagged_indx] = 1.0
+        # Check for NaNs and zeros. If found, set to 1
+        initial_flagged_indx = numpy.where(numpy.logical_or(numpy.isnan(parms[key_name]['values']),
+            parms[key_name]['values'] == 0.0))
+        initial_flagged_dict[key_name] = initial_flagged_indx
+        initial_unflagged_indx = numpy.where(numpy.logical_and(~numpy.isnan(parms[key_name]['values']),
+            parms[key_name]['values'] != 0.0))
+        initial_unflagged_dict[key_name] = initial_unflagged_indx
+        parms[key_name]['values'][initial_flagged_indx] = 1.0
 
     nchans = len(parms[key_names[0]]['freqs'])
 
@@ -390,15 +382,31 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
             channel_amp_orig = [numpy.sqrt(channel_parms_real[chan]**2 +
                 channel_parms_imag[chan]**2) for chan in range(nchans)]
 
+            # Interpolate across flagged solutions
+            channel_amp_interp = []
+            for chan in range(nchans):
+                unflagged_times = numpy.where(channel_parms_real[chan] != 1.0)
+                flagged_times = numpy.where(channel_parms_real[chan] == 1.0)
+                if numpy.any(unflagged_times):
+                    if numpy.any(flagged_times):
+                        finterp = interp1d(times[unflagged_times], channel_amp_orig[chan][unflagged_times],
+                            kind='linear', bounds_error=False, fill_value=numpy.mean(channel_amp_orig[chan][unflagged_times]))
+                        channel_amp_orig[chan][flagged_times] = finterp(times[flagged_times])
+                    channel_amp_interp.append(channel_amp_orig[chan])
+                else:
+                    channel_amp_interp.append(None)
+
             # now find the bad data
             pool = multiprocessing.Pool()
-            results = pool.map(spline1D, channel_amp_orig)
+            results = pool.map(spline1D, channel_amp_interp)
             pool.close()
             pool.join()
 
             for chan, (amp_cleaned, model, noisevec, scatter, n_knots, idxbad, weights) in enumerate(results):
                 # put back the results
                 phase = numpy.arctan2(channel_parms_imag[chan], channel_parms_real[chan])
+                if amp_cleaned is None:
+                    amp_cleaned = channel_amp_orig[chan]
                 parms[gain + ':' + pol + ':Real:' + antenna]['values'][:, chan] = numpy.copy(amp_cleaned*numpy.cos(phase))
                 parms[gain + ':' + pol + ':Imag:' + antenna]['values'][:, chan] = numpy.copy(amp_cleaned*numpy.sin(phase))
 
@@ -449,44 +457,52 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
                     for chan in range(nchans)]
                 channel_parms_real =  numpy.asarray(channel_parms_real)
                 channel_parms_imag =  numpy.asarray(channel_parms_imag)
-                channel_amp_orig = [numpy.sqrt(channel_parms_real[chan]**2 +
-                    channel_parms_imag[chan]**2) for chan in range(nchans)]
-                amp_orig = numpy.sqrt(channel_parms_real[:]**2 + channel_parms_imag[:]**2)
-                phase    = numpy.arctan2(channel_parms_imag[:], channel_parms_real[:])
+                channel_amp_orig = numpy.asarray([numpy.sqrt(channel_parms_real[chan]**2 +
+                    channel_parms_imag[chan]**2) for chan in range(nchans)])
+                phase = numpy.arctan2(channel_parms_imag[:], channel_parms_real[:])
 
-                amp_cleaned, amp_median, baddata = median2Dampfilter(numpy.copy(amp_orig))
+                # Interpolate across flagged solutions
+                channel_amp_interp = []
+                unflagged_sols = numpy.where(channel_parms_real != 1.0)
+                x, y = numpy.meshgrid(times, range(nchans))
+                if numpy.any(unflagged_sols):
+                    flagged_sols = numpy.where(channel_parms_real == 1.0)
+                    if numpy.any(flagged_sols):
+                        finterp = interp2d(x[unflagged_sols], y[unflagged_sols], channel_amp_orig[unflagged_sols],
+                            kind='linear', bounds_error=False, fill_value=numpy.mean(channel_amp_orig[unflagged_sols]))
+                        channel_amp_orig[flagged_sols] = finterp(x[flagged_sols], y[flagged_sols])
+                    amp_cleaned, amp_median, baddata = median2Dampfilter(channel_amp_orig)
 
-                for chan in range(nchans):
-                    # put back the results
-                    parms[gain + ':' + pol + ':Real:' + antenna]['values'][:, chan] = numpy.copy((amp_cleaned[chan,:])*numpy.cos(phase[chan,:]))
-                    parms[gain + ':' + pol + ':Imag:' + antenna]['values'][:, chan] = numpy.copy((amp_cleaned[chan,:])*numpy.sin(phase[chan,:]))
+                    for chan in range(nchans):
+                        # put back the results
+                        parms[gain + ':' + pol + ':Real:' + antenna]['values'][:, chan] = numpy.copy((amp_cleaned[chan,:])*numpy.cos(phase[chan,:]))
+                        parms[gain + ':' + pol + ':Imag:' + antenna]['values'][:, chan] = numpy.copy((amp_cleaned[chan,:])*numpy.sin(phase[chan,:]))
 
-                if plotting:
-                    axsa2[4*istat][0].imshow(numpy.transpose(amp_orig),
-                        interpolation='none',origin='lower',clim=(0.5, 1.5),aspect='auto')
-                    axsa2[4*istat][0].set_xlabel('freq')
-                    axsa2[4*istat][0].set_ylabel('time')
-                    axsa2[4*istat][0].set_title('Original' + '    ' + antenna)
+                    if plotting:
+                        axsa2[4*istat][0].imshow(numpy.transpose(channel_amp_orig),
+                            interpolation='none',origin='lower',clim=(0.5, 1.5),aspect='auto')
+                        axsa2[4*istat][0].set_xlabel('freq')
+                        axsa2[4*istat][0].set_ylabel('time')
+                        axsa2[4*istat][0].set_title('Original' + '    ' + antenna)
 
-                    axsa2[4*istat+1][0].imshow(numpy.transpose(amp_median),
-                        interpolation='none',origin='lower',aspect='auto', clim=(0.5,1.5))
-                    axsa2[4*istat+1][0].set_xlabel('freq')
-                    axsa2[4*istat+1][0].set_ylabel('time')
-                    axsa2[4*istat+1][0].set_title('2D median model')
+                        axsa2[4*istat+1][0].imshow(numpy.transpose(amp_median),
+                            interpolation='none',origin='lower',aspect='auto', clim=(0.5,1.5))
+                        axsa2[4*istat+1][0].set_xlabel('freq')
+                        axsa2[4*istat+1][0].set_ylabel('time')
+                        axsa2[4*istat+1][0].set_title('2D median model')
 
-                    axsa2[4*istat+2][0].imshow(numpy.transpose(numpy.abs(amp_orig-amp_median)),
-                        interpolation='none',origin='lower',clim=(0.0, 0.3),aspect='auto')
-                    axsa2[4*istat+2][0].set_xlabel('freq')
-                    axsa2[4*istat+2][0].set_ylabel('time')
-                    axsa2[4*istat+2][0].set_title('abs(Residual)')
+                        axsa2[4*istat+2][0].imshow(numpy.transpose(numpy.abs(channel_amp_orig-amp_median)),
+                            interpolation='none',origin='lower',clim=(0.0, 0.3),aspect='auto')
+                        axsa2[4*istat+2][0].set_xlabel('freq')
+                        axsa2[4*istat+2][0].set_ylabel('time')
+                        axsa2[4*istat+2][0].set_title('abs(Residual)')
 
-                    axsa2[4*istat+3][0].imshow(numpy.transpose(baddata),
-                        interpolation='none',origin='lower',clim=(0.0, 2.0),
-                        aspect='auto', cmap='gnuplot')
-                    axsa2[4*istat+3][0].set_xlabel('freq')
-                    axsa2[4*istat+3][0].set_ylabel('time')
-                    axsa2[4*istat+3][0].set_title('Replaced solutions')
-
+                        axsa2[4*istat+3][0].imshow(numpy.transpose(baddata),
+                            interpolation='none',origin='lower',clim=(0.0, 2.0),
+                            aspect='auto', cmap='gnuplot')
+                        axsa2[4*istat+3][0].set_xlabel('freq')
+                        axsa2[4*istat+3][0].set_ylabel('time')
+                        axsa2[4*istat+3][0].set_title('Replaced solutions')
 
     if plotting:
         fa.savefig('1Dsmooth.png', dpi=100)
@@ -499,13 +515,16 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
     if normalize:
         # First find the normalization factor
         amplist = []
-        for chan in range(nchans):
-            for pol in ['0:0','1:1']:  # hard code here in case the data contains 0:1 and 1:0
-                for antenna in antenna_list:
-                    real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
-                    imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
+        for pol in ['0:0','1:1']:  # hard code here in case the data contains 0:1 and 1:0
+            for antenna in antenna_list:
+                key_name = gain + ':' + pol + ':Real:'+ antenna
+                if numpy.any(initial_unflagged_dict[key_name]):
+                    # Only use unflagged data for normalization
+                    real = numpy.copy(parms[key_name]['values'])
+                    key_name = gain + ':' + pol + ':Imag:'+ antenna
+                    imag = numpy.copy(parms[key_name]['values'])
                     amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
-                    amplist.append(amp)
+                    amplist.append(amp[initial_unflagged_dict[key_name]])
         norm_factor = 1.0/(numpy.mean(numpy.concatenate(amplist)))
         print "smooth_amps_spline.py: Normalization-Factor is:", norm_factor
 
@@ -527,6 +546,10 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
                         numpy.cos(phase) * norm_factor)
                     parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = numpy.copy(amp *
                         numpy.sin(phase) * norm_factor)
+
+    # Make sure flagged solutions are still flagged
+    for key_name in key_names:
+        parms[key_name]['values'][initial_flagged_dict[key_name]] = numpy.nan
 
     if os.path.exists(instrument_name_smoothed):
         shutil.rmtree(instrument_name_smoothed)
