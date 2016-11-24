@@ -373,7 +373,7 @@ merge_normalized_selfcal_parmdbs.control.outputkey   = parmdb_out
 merge_normalized_selfcal_parmdbs.argument.flags      = [parmdb_p,parmdb_a,parmdb_out]
 
 # convert the merged phase and normalized amplitude parmDBs to gain parmDBs, length = 1
-convert_normalized_merged_selfcal_parmdbs.control.type       = convert_solutions_to_gain
+convert_normalized_merged_selfcal_parmdbs.control.type        = convert_solutions_to_gain
 convert_normalized_merged_selfcal_parmdbs.control.mapfiles_in = [merge_phase_parmdbs.output.mapfile,smooth_amps_normalized.output.mapfile]
 convert_normalized_merged_selfcal_parmdbs.control.inputkeys   = [fast_parmdb_in,slow_parmdb_in]
 convert_normalized_merged_selfcal_parmdbs.control.outputkey   = parmdb_out
@@ -388,7 +388,7 @@ create_preapply_parmdb.control.outputkey  = outparmdb
 create_preapply_parmdb.control.arguments  = [inparmdb,outparmdb]
 {% endif %}
 
-# make plots of the selfcal results (normalized) from the marged parmDB, length = 1
+# make plots of the selfcal results (normalized) from the merged parmDB, length = 1
 make_selfcal_plots.control.type       = make_selfcal_plots
 make_selfcal_plots.control.mapfile_in = merge_normalized_selfcal_parmdbs.output.mapfile
 make_selfcal_plots.control.inputkeys  = parmdb
