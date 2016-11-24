@@ -8,6 +8,7 @@ import os
 import lofar.parmdb as pdb
 import casacore.tables as pt
 import shutil
+import numpy as np
 
 
 def main(parmdb_p, parmdb_a, parmdb_out, clobber=True):
@@ -46,12 +47,17 @@ def main(parmdb_p, parmdb_a, parmdb_out, clobber=True):
     pdb_a = pdb.parmdb(parmdb_a)
     parms = pdb_a.getValuesGrid('*')
     for parmname in pdb_a.getNames():
+        # Set flagged solutions to NaN
+        flagged = np.where(np.logical_or(parms[parmname]['values'] == 0.0,
+            np.isnan(parms[parmname]['values'])))
+        parms[parmname]['values'][flagged] = np.nan
         ValueHolder = pdb_out.makeValue(values=parms[parmname]['values'],
                                         sfreq=parms[parmname]['freqs'],
                                         efreq=parms[parmname]['freqwidths'],
                                         stime=parms[parmname]['times'],
                                         etime=parms[parmname]['timewidths'],
                                         asStartEnd=False)
+
         pdb_out.addValues(parmname,ValueHolder)
     pdb_out.flush()
 

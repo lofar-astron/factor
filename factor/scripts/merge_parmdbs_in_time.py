@@ -52,6 +52,9 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
         pdb_add = pdb.parmdb(inparmdb)
         parms = pdb_add.getValuesGrid('*')
         for parmname in pdb_add.getNames():
+            flagged = np.where(np.logical_or(parms[parmname]['values'] == 0.0,
+                np.isnan(parms[parmname]['values'])))
+            parms[parmname]['values'][flagged] = np.nan
             ValueHolder = pdb_concat.makeValue(values=parms[parmname]['values'],
                                                sfreq=parms[parmname]['freqs'],
                                                efreq=parms[parmname]['freqwidths'],
