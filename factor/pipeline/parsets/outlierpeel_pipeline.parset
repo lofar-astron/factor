@@ -514,13 +514,29 @@ apply_dir_dep.argument.msout.writefullresflag                = False
 {% if local_dir is not none %}
 apply_dir_dep.argument.local_scratch_dir                     = {{ local_dir }}
 {% endif %}
+{% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
+apply_dir_dep.argument.steps                                 = [shift,add,flag,subtract_cal,correct,flagzero,avg]
+{% else %}
 apply_dir_dep.argument.steps                                 = [shift,add,subtract_cal,correct,flagzero,avg]
+{% endif %}
 apply_dir_dep.argument.shift.type                            = phaseshifter
 apply_dir_dep.argument.shift.phasecenter                     = [{{ facet_ra }}deg, {{ facet_dec }}deg]
 apply_dir_dep.argument.add.type                              = predict
 apply_dir_dep.argument.add.sourcedb                          = sourcedb
 apply_dir_dep.argument.add.operation                         = add
 apply_dir_dep.argument.add.applycal.parmdb                   = dir_indep_parmdb
+{% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
+apply_dir_dep.argument.flag.type                             = preflagger
+{% endif %}
+{% if flag_abstime is not none %}
+apply_dir_dep.argument.flag.abstime                          = {{ flag_abstime }}
+{% endif %}
+{% if flag_baseline is not none %}
+apply_dir_dep.argument.flag.baseline                         = {{ flag_baseline }}
+{% endif %}
+{% if flag_freqrange is not none %}
+apply_dir_dep.argument.flag.freqrange                        = {{ flag_freqrange }}
+{% endif %}
 apply_dir_dep.argument.subtract_cal.type                     = predict
 apply_dir_dep.argument.subtract_cal.sourcedb                 = sourcedb_cal
 apply_dir_dep.argument.subtract_cal.operation                = subtract
