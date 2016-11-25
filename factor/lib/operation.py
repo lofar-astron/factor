@@ -92,6 +92,12 @@ class Operation(object):
                 self.parset['cluster_specific']['dir_local'], scratch_subdir)
             self.local_dir_parent = self.parset['cluster_specific']['dir_local']
             self.dppp_nodescript = 'dppp_scratch'
+        elif self.parset['cluster_specific']['clusterdesc_file'].lower() == 'slurm':
+            # SLURM: use special DPPP node script
+            self.local_scratch_dir = os.path.join(
+                self.parset['cluster_specific']['dir_local'], scratch_subdir)
+            self.local_dir_parent = self.parset['cluster_specific']['dir_local']
+            self.dppp_nodescript = 'dppp_scratch'
         else:
             # other: use given scratch directory and standard node script
             self.local_scratch_dir = os.path.join(
