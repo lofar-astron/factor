@@ -62,6 +62,7 @@ make_sourcedb_all_facet_sources.control.mapfile_in = make_facet_skymodels_all.ou
 make_sourcedb_all_facet_sources.control.inputkey   = in
 make_sourcedb_all_facet_sources.argument.format    = <
 make_sourcedb_all_facet_sources.argument.outtype   = blob
+make_sourcedb_all_facet_sources.argument.append    = False
 
 # expand mapfile of the old sourcedb to all files, length = nfiles
 expand_old_sourcedb_map.control.kind           = plugin

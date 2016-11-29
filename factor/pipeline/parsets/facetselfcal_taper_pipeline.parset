@@ -324,6 +324,7 @@ make_peel_sourcedb.control.mapfile_in = create_peel_skymodel_map.output.mapfile
 make_peel_sourcedb.control.inputkey   = in
 make_peel_sourcedb.argument.format    = <
 make_peel_sourcedb.argument.outtype   = blob
+make_peel_sourcedb.argument.append    = False
 
 # expand the sourcedb mapfile so that there is one entry for every file, length = ntimes * num_cal_blocks
 expand_peel_sourcedb_map.control.kind             = plugin

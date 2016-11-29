@@ -113,6 +113,7 @@ make_sourcedb_all_facet_sources.control.mapfile_in = make_facet_skymodels_all.ou
 make_sourcedb_all_facet_sources.control.inputkey   = in
 make_sourcedb_all_facet_sources.argument.format    = <
 make_sourcedb_all_facet_sources.argument.outtype   = blob
+make_sourcedb_all_facet_sources.argument.append    = False
 
 # create a mapfile with the direction-independent parmDBs from supplied list, length = nfiles
 create_parmdb_map.control.kind        = plugin

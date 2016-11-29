@@ -53,6 +53,7 @@ make_sourcedb_cal_facet_sources.control.mapfile_in = make_facet_skymodels_cal.ou
 make_sourcedb_cal_facet_sources.control.inputkey   = in
 make_sourcedb_cal_facet_sources.argument.format    = <
 make_sourcedb_cal_facet_sources.argument.outtype   = blob
+make_sourcedb_cal_facet_sources.argument.append    = False
 
 # expand the sourcedb mapfile so that there is one entry for every file, length = nfiles
 expand_sourcedb_cal_facet_sources.control.kind           = plugin
@@ -216,6 +217,7 @@ make_peel_sourcedb.control.mapfile_in = create_peel_skymodel_map.output.mapfile
 make_peel_sourcedb.control.inputkey   = in
 make_peel_sourcedb.argument.format    = <
 make_peel_sourcedb.argument.outtype   = blob
+make_peel_sourcedb.argument.append    = False
 
 # expand the sourcedb mapfile so that there is one entry for every file, length = ntimes * num_cal_blocks
 expand_peel_sourcedb_map.control.kind             = plugin
@@ -436,6 +438,7 @@ make_sourcedb_all_facet_sources.control.mapfile_in = make_facet_skymodels_all.ou
 make_sourcedb_all_facet_sources.control.inputkey   = in
 make_sourcedb_all_facet_sources.argument.format    = <
 make_sourcedb_all_facet_sources.argument.outtype   = blob
+make_sourcedb_all_facet_sources.argument.append    = False
 
 # expand the dir-indep sourcedb mapfile so that there is one entry for every file, length = nfiles
 expand_sourcedb_all_facet_sources.control.kind           = plugin
@@ -566,7 +569,7 @@ create_compressed_mapfile5.control.mapfile_in  = apply_dir_dep.output.mapfile
 create_compressed_mapfile5.control.mapfile_dir = input.output.mapfile_dir
 create_compressed_mapfile5.control.filename    = concat_averaged_input.mapfile
 
-# make a mask from the last selfcal image, length = 1
+# make a mask that excludes areas outside the facet and inside the cal region, length = 1
 premask.control.type                   = make_clean_mask
 premask.control.mapfile_in             = create_compressed_mapfile5.output.mapfile
 premask.control.inputkey               = imagefile
@@ -576,6 +579,7 @@ premask.argument.img_format            = fits
 premask.argument.pad_to_size           = {{ facet_imsize }}
 premask.argument.skip_source_detection = True
 premask.argument.vertices_file         = {{ vertices_file }}
+premask.argument.exclude_cal_region    = True
 premask.argument.reference_ra_deg      = {{ facet_ra }}
 premask.argument.reference_dec_deg     = {{ facet_dec }}
 premask.argument.cellsize_deg          = {{ cellsize_facet_deg }}
@@ -707,6 +711,7 @@ make_sourcedb_new_facet_sources_for_facet_imaging.control.mapfile_in = combine_s
 make_sourcedb_new_facet_sources_for_facet_imaging.control.inputkey   = in
 make_sourcedb_new_facet_sources_for_facet_imaging.argument.format    = <
 make_sourcedb_new_facet_sources_for_facet_imaging.argument.outtype   = blob
+make_sourcedb_new_facet_sources_for_facet_imaging.argument.append    = False
 
 # expand the sourcedb mapfile so that there is one entry for every file, length = nfiles
 expand_sourcedb_new_facet_sources.control.kind           = plugin

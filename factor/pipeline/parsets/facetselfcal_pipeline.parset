@@ -53,6 +53,7 @@ make_sourcedb_cal_facet_sources.control.mapfile_in = make_facet_skymodels_cal.ou
 make_sourcedb_cal_facet_sources.control.inputkey   = in
 make_sourcedb_cal_facet_sources.argument.format    = <
 make_sourcedb_cal_facet_sources.argument.outtype   = blob
+make_sourcedb_cal_facet_sources.argument.append    = False
 
 # expand the sourcedb mapfile so that there is one entry for every file, length = nfiles
 expand_sourcedb_cal_facet_sources.control.kind           = plugin
@@ -685,6 +686,7 @@ make_peel_sourcedb.control.mapfile_in = create_peel_skymodel_map.output.mapfile
 make_peel_sourcedb.control.inputkey   = in
 make_peel_sourcedb.argument.format    = <
 make_peel_sourcedb.argument.outtype   = blob
+make_peel_sourcedb.argument.append    = False
 
 # expand the sourcedb mapfile so that there is one entry for every file, length = ntimes * num_cal_blocks
 expand_peel_sourcedb_map.control.kind             = plugin
@@ -1931,6 +1933,7 @@ make_sourcedb_all_facet_sources.control.mapfile_in = make_facet_skymodels_all.ou
 make_sourcedb_all_facet_sources.control.inputkey   = in
 make_sourcedb_all_facet_sources.argument.format    = <
 make_sourcedb_all_facet_sources.argument.outtype   = blob
+make_sourcedb_all_facet_sources.argument.append    = False
 
 # expand the dir-indep sourcedb mapfile so that there is one entry for every file, length = nfiles
 expand_sourcedb_all_facet_sources.control.kind           = plugin
@@ -2180,6 +2183,7 @@ make_sourcedb_new_facet_sources.control.mapfile_in = combine_skymodels.output.ma
 make_sourcedb_new_facet_sources.control.inputkey   = in
 make_sourcedb_new_facet_sources.argument.format    = <
 make_sourcedb_new_facet_sources.argument.outtype   = blob
+make_sourcedb_new_facet_sources.argument.append    = False
 
 # expand the sourcedb mapfile so that there is one entry for every file, length = nfiles
 expand_sourcedb_new_facet_sources.control.kind           = plugin
@@ -2198,6 +2202,7 @@ make_sourcedb_new_facet_sources.control.mapfile_in = make_new_cal_skymodel.outpu
 make_sourcedb_new_facet_sources.control.inputkey   = in
 make_sourcedb_new_facet_sources.argument.format    = <
 make_sourcedb_new_facet_sources.argument.outtype   = blob
+make_sourcedb_new_facet_sources.argument.append    = False
 
 # expand the sourcedb mapfile so that there is one entry for every file, length = nfiles
 expand_sourcedb_new_facet_sources.control.kind           = plugin
