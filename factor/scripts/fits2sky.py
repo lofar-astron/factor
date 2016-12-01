@@ -80,6 +80,10 @@ def main(fits_model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.
     min_peak_flux_jy = float(min_peak_flux_jy)
     max_residual_jy = float(max_residual_jy)
 
+    if type(fits_mask) is str:
+        if fits_mask.lower() == 'none':
+            fits_mask = None
+
     # Find model images: look first for channel images and MFS image
     fits_models = glob.glob(fits_model_root+'-00*-model.fits')
     if len(fits_models) > 0:
@@ -125,8 +129,12 @@ def main(fits_model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.
 
     # Find pixels that meet the flux cut (and are in the mask, if given)
     if fits_mask is not None:
-        mask = fits.getdata(fits_mask, 0)
-        nonzero_ind = np.where((mfs_image > min_peak_flux_jy) & (mask > 0))
+        if fits_mask.lower() == 'empty':
+            # Handle case in which no sources were found during masking
+            nonzero_ind = [[], []]
+        else:
+            mask = fits.getdata(fits_mask, 0)
+            nonzero_ind = np.where((mfs_image > min_peak_flux_jy) & (mask > 0))
     else:
         nonzero_ind = np.where(mfs_image > min_peak_flux_jy)
 

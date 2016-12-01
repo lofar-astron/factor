@@ -246,6 +246,7 @@ class Direction(object):
         if facet_cellsize_arcsec is None:
             facet_cellsize_arcsec = parset['imaging_specific']['selfcal_cellsize_arcsec']
         self.cellsize_facet_deg = facet_cellsize_arcsec / 3600.0
+        self.cellsize_facet_low_deg = self.cellsize_facet_deg * 4.0
 
         if facet_robust is None:
             facet_robust = parset['imaging_specific']['selfcal_robust']
@@ -326,6 +327,12 @@ class Direction(object):
             self.facetimage_wsclean_nwavelengths = int(max_baseline * 2*np.pi * self.facetimage_timestep_sec / (24*60*60))
         else:
             self.facetimage_wsclean_nwavelengths = 0
+        if (hasattr(self, 'facetimage_low_timestep_sec') and
+            parset['imaging_specific']['wsclean_bl_averaging']):
+            max_baseline = 1 / (3 * self.cellsize_facet_deg * 4.0 * np.pi / 180)
+            self.facetimage_low_wsclean_nwavelengths = int(max_baseline * 2*np.pi * self.facetimage_low_timestep_sec / (24*60*60))
+        else:
+            self.facetimage_low_wsclean_nwavelengths = 0
 
 
     def set_imaging_parameters(self, nbands, nbands_selfcal, padding=1.05):
@@ -346,6 +353,9 @@ class Direction(object):
             self.facet_imsize_nopadding = int(self.width / self.cellsize_facet_deg)
             self.facet_imsize = max(512, self.get_optimum_size(self.width
                 / self.cellsize_facet_deg * padding))
+            self.facet_low_imsize_nopadding = int(self.width / self.cellsize_facet_deg / 4.0)
+            self.facet_low_imsize = max(512, self.get_optimum_size(self.width
+                / self.cellsize_facet_deg / 4.0 * padding))
 
         # Determine whether the total bandwidth is large enough that wide-band
         # imaging is needed
@@ -669,6 +679,18 @@ class Direction(object):
             self.facetimage_timestep_sec = self.facetimage_timestep * timestep_sec
             self.log.debug('Using averaging steps of {0} channels and {1} time slots '
                 'for facet imaging'.format(self.facetimage_freqstep, self.facetimage_timestep))
+
+            # Do the same for the low-resolution facet image
+            low_res_factor = 4.0 # how much lower resolution is than high-res image
+            resolution_low_deg = 3.0 * low_res_factor * self.cellsize_facet_deg # assume normal sampling of restoring beam
+            target_timewidth_s = min(120.0, self.get_target_timewidth(delta_theta_deg,
+                resolution_low_deg, peak_smearing_factor))
+            target_bandwidth_mhz = min(2.0, self.get_target_bandwidth(mean_freq_mhz,
+                delta_theta_deg, resolution_low_deg, peak_smearing_factor))
+            self.facetimage_low_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
+            self.facetimage_low_freqstep = freq_divisors[np.argmin(np.abs(freq_divisors - self.facetimage_low_freqstep))]
+            self.facetimage_low_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
+            self.facetimage_low_timestep_sec = self.facetimage_low_timestep * timestep_sec
 
         # Set time intervals for selfcal solve steps
         if not imaging_only:
