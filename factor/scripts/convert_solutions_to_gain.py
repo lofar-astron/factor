@@ -105,8 +105,9 @@ def main(fast_parmdb, slow_parmdb, output_file, preapply_parmdb=None):
                 total_phase = np.mod(fast_phase + tec_phase + slow_phase + np.pi, 2*np.pi) - np.pi
                 total_amp = slow_amp
 
-            # Identify zero phase solutions and set the corresponding entries in total_phase to NaN
+            # Identify zero phase solutions and set the corresponding entries in total_phase and total_amp to NaN
             total_phase = np.where(np.logical_or(fast_phase == 0.0, tec_phase == 0.0), np.nan, total_phase)
+            total_amp = np.where(np.logical_or(fast_phase == 0.0, tec_phase == 0.0), np.nan, total_amp)
 
             g_start = 0
             for g in gaps_ind:
