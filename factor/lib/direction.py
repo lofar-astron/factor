@@ -683,8 +683,8 @@ class Direction(object):
             # Do the same for the low-resolution facet image
             # generate another (numpy-)array with the divisors of nchan after averaging
             tmp_divisors = []
-            for step in range(nchan/facetimage_freqstep, 0, -1):
-                if (nchan/facetimage_freqstep % step) == 0:
+            for step in range(nchan/self.facetimage_freqstep, 0, -1):
+                if (nchan/self.facetimage_freqstep % step) == 0:
                     tmp_divisors.append(step)
             freq_divisors_low = np.array(tmp_divisors)
             low_res_factor = 4.0 # how much lower resolution is than high-res image
