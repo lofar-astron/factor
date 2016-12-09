@@ -307,32 +307,51 @@ class Direction(object):
             self.nband_pad_selfcal = 0
             self.wsclean_suffix = '-image.fits'
 
-        # Set the baseline-averaging limit for WSClean, which depends on the
-        # integration time given the specified maximum allowed smearing. We scale
-        # it from the imaging cell size assuming normal sampling as:
-        #
-        # max baseline in nwavelengths = 1 / theta_rad ~= 1 / (cellsize_deg * 3 * pi / 180)
-        #
-        # nwavelengths = max baseline in nwavelengths * 2 * pi * integration time in seconds / (24 * 60 * 60)
-        #
+        # Set the baseline-averaging limit for WSClean
         if (hasattr(self, 'facetselfcal_timestep_sec') and
             parset['imaging_specific']['wsclean_bl_averaging']):
-            max_baseline = 1 / (3 * self.cellsize_selfcal_deg * np.pi / 180)
-            self.facetselfcal_wsclean_nwavelengths = int(max_baseline * 2*np.pi * self.facetselfcal_timestep_sec / (24*60*60))
+            self.facetselfcal_wsclean_nwavelengths = self.get_nwavelengths(self.cellsize_selfcal_deg,
+                self.facetselfcal_timestep_sec)
         else:
             self.facetselfcal_wsclean_nwavelengths = 0
         if (hasattr(self, 'facetimage_timestep_sec') and
             parset['imaging_specific']['wsclean_bl_averaging']):
-            max_baseline = 1 / (3 * self.cellsize_facet_deg * np.pi / 180)
-            self.facetimage_wsclean_nwavelengths = int(max_baseline * 2*np.pi * self.facetimage_timestep_sec / (24*60*60))
+            self.facetimage_wsclean_nwavelengths = self.get_nwavelengths(self.cellsize_facet_deg,
+                self.facetimage_timestep_sec)
         else:
             self.facetimage_wsclean_nwavelengths = 0
         if (hasattr(self, 'facetimage_low_timestep_sec') and
             parset['imaging_specific']['wsclean_bl_averaging']):
-            max_baseline = 1 / (3 * self.cellsize_facet_deg * 4.0 * np.pi / 180)
-            self.facetimage_low_wsclean_nwavelengths = int(max_baseline * 2*np.pi * self.facetimage_low_timestep_sec / (24*60*60))
+            self.facetimage_low_wsclean_nwavelengths = self.get_nwavelengths(self.cellsize_facet_deg,
+                self.facetimage_low_timestep_sec)
         else:
             self.facetimage_low_wsclean_nwavelengths = 0
+
+
+    def get_nwavelengths(self, cellsize_deg, timestep_sec,):
+        """
+        Returns nwavelengths for WSClean BL-based averaging
+
+        The value depends on the integration time given the specified maximum
+        allowed smearing. We scale it from the imaging cell size assuming normal
+        sampling as:
+
+        max baseline in nwavelengths = 1 / theta_rad ~= 1 / (cellsize_deg * 3 * pi / 180)
+        nwavelengths = max baseline in nwavelengths * 2 * pi *
+            integration time in seconds / (24 * 60 * 60) / 4
+
+        Parameters
+        ----------
+        cellsize_deg : float
+            Pixel size of image in degrees
+        timestep_sec : float
+            Length of one timestep in seconds
+
+        """
+        max_baseline = 1 / (3 * cellsize_deg * np.pi / 180)
+        wsclean_nwavelengths_time = int(max_baseline * 2*np.pi * timestep_sec /
+            (24 * 60 * 60) / 4)
+        return wsclean_nwavelengths_time
 
 
     def set_imaging_parameters(self, nbands, nbands_selfcal, padding=1.05):
