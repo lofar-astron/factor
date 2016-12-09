@@ -238,8 +238,12 @@ class Scheduler(object):
             this_op.finalize()
             this_op.set_completed()
         else:
-            log.error('Operation {0} failed due to an error (direction: '
-                '{1})'.format(op_name, direction_name))
+            if this_op.can_restart():
+                log.warning('Operation {0} failed due to error (direction: '
+                    '{1}) but will be automatically resumed'.format(op_name, direction_name))
+            else:
+                log.error('Operation {0} failed due to an error (direction: '
+                    '{1})'.format(op_name, direction_name))
             self.success = False
 
 
@@ -266,30 +270,58 @@ class Scheduler(object):
             op.finalize()
             op.set_completed()
 
-        # Filter out completed ops
-        self.operation_list = [op for op in operation_list if not op.check_completed()]
-        if len(self.operation_list) == 0 or self.dry_run:
+        # If this is a dry run, return
+        if self.dry_run:
             return
 
-        # Run the operation(s)
-        self.allocate_resources()
-        with Timer(log, 'operation'):
-            pool = multiprocessing.Pool(processes=self.max_procs)
-            self.queued_ops = self.operation_list[self.max_procs:]
-            for op in self.operation_list:
-                op.setup()
-                op.set_started()
-                pool.apply_async(call_generic_pipeline, (op.name,
-                    op.direction.name, op.pipeline_parset_file,
-                    op.pipeline_config_file, op.logbasename,
-                    self.genericpipeline_executable),
-                    callback=self.result_callback)
-            pool.close()
-            pool.join()
+        # Filter out completed ops
+        self.operation_list = [op for op in operation_list if not op.check_completed()]
 
-        if not self.success:
-            for op in self.operation_list:
-                # Remove any temp data left by failure
-                op.cleanup()
-            log.error('One or more operations failed due to an error. Exiting...')
-            sys.exit(1)
+        # Run the operation(s)
+        n_tries = 0
+        while len(self.operation_list) > 0:
+            self.allocate_resources()
+            with Timer(log, 'operation'):
+                pool = multiprocessing.Pool(processes=self.max_procs)
+                self.queued_ops = self.operation_list[self.max_procs:]
+                for op in self.operation_list:
+                    op.setup()
+                    op.set_started()
+                    pool.apply_async(call_generic_pipeline, (op.name,
+                        op.direction.name, op.pipeline_parset_file,
+                        op.pipeline_config_file, op.logbasename,
+                        self.genericpipeline_executable),
+                        callback=self.result_callback)
+                pool.close()
+                pool.join()
+
+            # Check for and handle any failed ops
+            if not self.success:
+                for op in self.operation_list:
+                    # Remove any temp data left by failure
+                    op.cleanup()
+
+                # Check whether any failed ops can be restarted automatically
+                ops_can_restart = [op for op in self.operation_list if op.can_restart()
+                    and not op.check_completed()]
+                ops_cannot_restart = [op for op in self.operation_list if not op.can_restart()
+                    and not op.check_completed()]
+
+                if len(ops_cannot_restart) == 0:
+                    # All failed ops can be restarted, so reset success flag and
+                    # process the failed ops again (up to 3 times)
+                    n_tries += 1
+                    if n_tries > 3:
+                        log.error('One or more operations failed due to an error '
+                            'and automatic restart did not work. Exiting...')
+                        sys.exit(1)
+                    self.success = True
+                    self.operation_list = ops_can_restart
+                else:
+                    # If any failed ops cannot be restarted, exit
+                    log.error('One or more operations failed due to an error. Exiting...')
+                    sys.exit(1)
+
+
+
+

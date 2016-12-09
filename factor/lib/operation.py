@@ -322,6 +322,81 @@ class Operation(object):
             return False
 
 
+    def can_restart(self):
+        """
+        Checks the pipeline log for certain conditions that affect auto restarting
+
+        Returns
+        -------
+        can_restart : bool
+            True if pipeline log indicates an error for which auto restart is
+            possible
+
+        """
+        logfile = self.logbasename + '.out.log'
+        can_restart = False
+        if os.path.exists(logfile):
+            # Read the last 20 lines and look for 'returncode 123456'
+            with open(logfile, "rb") as f:
+                for i in range(20):
+                    first = f.readline()      # Read the first line.
+                    f.seek(-2, 2)             # Jump to the second last byte.
+                    while f.read(1) != b"\n": # Until EOL is found...
+                        f.seek(-2, 1)         # ...jump back the read byte plus one more.
+                    last = f.readline()       # Read last line.
+
+                    if 'returncode 123456' in last:
+                        can_restart = True
+                        break
+
+        return can_restart
+
+
+    def get_steptypes(self):
+        """
+        Returns the step types of completed pipeline steps
+
+        Returns
+        -------
+        steptypes : list
+            List of step types
+
+        """
+        import pickle
+
+        statefile = os.path.join(self.pipeline_parset_dir, 'statefile')
+        current_state = pickle.load(open(statefile, 'rb'))
+        steptypes = [item[0] for item in current_state[1]]
+
+        return steptypes
+
+
+    def reset_state_to_steptype(self, steptype):
+        """
+        Resets the pipeline state to before the given steptype
+
+        Steptype is the type of the step as defined in the parset under
+        *.control.type
+
+        Parameters
+        ----------
+        steptype : str
+            Step type from which to alter state
+
+        """
+        import pickle
+
+        statefile = os.path.join(self.pipeline_parset_dir, 'statefile')
+        current_state = pickle.load(open(statefile, 'rb'))
+        steptypes = [item[0] for item in current_state[1]]
+
+        # delete steps from the first instance of the given step type
+        del_number = steptypes.index(steptype)
+        current_state[1] = current_state[1][:del_number]
+
+        pickle.dump(current_state, open(statefile, 'wb'))
+
+
     def cleanup(self):
         """
         Cleans up temp files in the scratch directories of each node
@@ -340,3 +415,8 @@ class Operation(object):
                 else:
                     cmd = ['ssh', node, 'rm', '-rf', self.local_selfcal_scratch_dir]
                 tmp = subprocess.call(cmd)
+
+            # Check whether we need to reset the pipeline state to before the sync step
+            steptypes = self.get_steptypes()
+            if 'sync_files' in steptypes and 'remove_synced_data' not in steptypes:
+                self.reset_state_to_steptype('sync_files')
