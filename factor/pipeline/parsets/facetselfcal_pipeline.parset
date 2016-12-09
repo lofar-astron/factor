@@ -1838,12 +1838,12 @@ convert_merged_selfcal_parmdbs.control.type        = convert_solutions_to_gain
 convert_merged_selfcal_parmdbs.control.mapfiles_in = [merge_phase_parmdbs.output.mapfile,smooth_amp2.output.mapfile,{{ preapply_parmdb_mapfile }}]
 convert_merged_selfcal_parmdbs.control.inputkeys   = [fast_parmdb_in,slow_parmdb_in,parmdb_pre]
 convert_merged_selfcal_parmdbs.control.outputkey   = parmdb_out
-convert_merged_selfcal_parmdbs.argument.flags      = [fast_parmdb_in,slow_parmdb_in,parmdb_out,parmdb_pre]
+convert_merged_selfcal_parmdbs.argument.flags      = [fast_parmdb_in,slow_parmdb_in,parmdb_out,{{ facetselfcal_freqstep * solint_freq_a }},parmdb_pre]
 {% else %}
 convert_merged_selfcal_parmdbs.control.mapfiles_in = [merge_phase_parmdbs.output.mapfile,smooth_amp2.output.mapfile]
 convert_merged_selfcal_parmdbs.control.inputkeys   = [fast_parmdb_in,slow_parmdb_in]
 convert_merged_selfcal_parmdbs.control.outputkey   = parmdb_out
-convert_merged_selfcal_parmdbs.argument.flags      = [fast_parmdb_in,slow_parmdb_in,parmdb_out]
+convert_merged_selfcal_parmdbs.argument.flags      = [fast_parmdb_in,slow_parmdb_in,parmdb_out,{{ facetselfcal_freqstep * solint_freq_a }}]
 {% endif %}
 
 {% if create_preapply_parmdb %}
