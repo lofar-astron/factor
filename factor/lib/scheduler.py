@@ -321,6 +321,8 @@ class Scheduler(object):
                     # If any failed ops cannot be restarted, exit
                     log.error('One or more operations failed due to an error. Exiting...')
                     sys.exit(1)
+            else:
+                self.operation_list = []
 
 
 
