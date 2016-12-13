@@ -117,6 +117,7 @@ def main(fast_parmdb, slow_parmdb, output_file, freqstep=1, preapply_parmdb=None
             slow_amp = np.sqrt((slow_real**2) + (slow_imag**2))
             slow_phase = np.arctan2(slow_imag, slow_real)
 
+            total_amp = slow_amp
             if preapply_parmdb is not None:
                 fast_phase_preapply = np.copy(preapply_soldict['Gain:'+pol+':Phase:{s}'.format(s=station)]['values'])
                 total_phase = np.mod(fast_phase + tec_phase + slow_phase + fast_phase_preapply + np.pi, 2*np.pi) - np.pi
@@ -126,7 +127,6 @@ def main(fast_parmdb, slow_parmdb, output_file, freqstep=1, preapply_parmdb=None
                 total_amp = np.where(fast_phase_preapply == 0.0, np.nan, total_amp)
             else:
                 total_phase = np.mod(fast_phase + tec_phase + slow_phase + np.pi, 2*np.pi) - np.pi
-            total_amp = slow_amp
 
             # Identify zero phase solutions and set the corresponding entries in total_phase and total_amp to NaN
             total_phase = np.where(np.logical_or(fast_phase == 0.0, tec_phase == 0.0), np.nan, total_phase)
