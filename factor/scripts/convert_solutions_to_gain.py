@@ -73,8 +73,9 @@ def main(fast_parmdb, slow_parmdb, output_file, freqstep=1, preapply_parmdb=None
             fast_times = fast_times_preapply
             fast_timewidths = fast_timewidths_preapply
 
-    # Get values on the final time and frequency grid
-    if freqstep > 1:
+    # Get values on the final time and frequency grid. This is not needed if
+    # a preapply_parmdb is specified, as it will already be made on the final grids
+    if freqstep > 1 and preapply_parmdb is None:
         final_freqs = []
         final_freqwidths = []
         for freq, freqwidth in zip(slow_freqs, slow_freqwidths):
