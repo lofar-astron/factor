@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} shift_cal, {% if preapply_phase_cal %} shift_cal_dir_indep, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, concat_blavg_data, {% endif %} {% if selfcal_local_dir is not none %} make_concat_data_sync_mapfile, adjust_concat_data_hosts, sync_concat_data_to_local, {% if pre_average %} make_concat_blavg_data_sync_mapfile, adjust_concat_blavg_data_hosts, sync_concat_blavg_data_to_local, {% endif %} {% endif %} concat_data_compressed_mapfile, {% block selfcal_steps %} {% if not preapply_phase_cal %} average0, {% endif %} create_compressed_mapfile0, sort_average0_into_Groups, sort_average0_into_Groups_maps, concat_average0_data, create_compressed_mapfile01, premask_selfcal, wsclean_image01, create_imagebase_map01, adjust_wsclean_mapfile0, mask0, wsclean_image02, create_imagebase_map02, pad_selfcal_model0_images, regroup_concat_data_map, create_expanded_model0_mapfile, expand_selfcal_model_size_map, wsclean_ft0, {% if pre_average %} copy_model_data0, {% endif %} make_fast_phase_parmdb_map, {% if peel_skymodel is not none %} create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, {% endif %} remove_parmdbs1, solve_phaseonly1, merge_first_phase_parmdbs, {% if selfcal_local_dir is not none %} make_apply_mapfile, {% endif %} apply_phaseonly1, create_compressed_mapfile1, wsclean_image11, create_imagebase_map11, adjust_wsclean_mapfile11, mask1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, pad_selfcal_model1_images, wsclean_ft1, {% if pre_average %} copy_model_data1, {% endif %} remove_parmdbs2, solve_phaseonly2, apply_phaseonly2, create_compressed_mapfile2, wsclean_image21, create_imagebase_map21, adjust_wsclean_mapfile21, mask2, wsclean_image22, create_imagebase_map22, create_expanded_model2_mapfile, pad_selfcal_model2_images, wsclean_ft2, {% if pre_average %} copy_model_data2, {% endif %} remove_parmdbs11, solve_ampphase11, apply_ampphase11, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, wsclean_image31, create_imagebase_map31, adjust_wsclean_mapfile31, mask3, wsclean_image32, loop_ampcal, {% endblock selfcal_steps %} {% if selfcal_local_dir is not none %} remove_concat_data, {% endif %} merge_selfcal_parmdbs, convert_merged_selfcal_parmdbs, {% if create_preapply_parmdb %} create_preapply_parmdb, {% endif %} make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, create_model4_map, blank_model, expand_blank_model_map, make_new_cal_skymodel, {% if not is_patch %} make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, {% if use_wideband %} select_imaging_bands, select_sourcedb_all_facet_sources, select_parmdb_map, select_merged_parmdb_map, {% endif %} apply_dir_dep, create_compressed_mapfile5, premask, wsclean_image_full, create_imagebase_map, adjust_wsclean_mapfile1, mask5, create_model5_map, adjust_wsclean_mapfile2, expand_model5_map, expand_mask5_map, make_high_facet_skymodel, combine_skymodels_high, make_sourcedb_high, expand_sourcedb_high, {% if use_wideband %} select_sourcedb_high, {% endif %} subtract_high, create_compressed_mapfile6, premask_low, wsclean_image_full_low, create_imagebase_low_map, adjust_wsclean_mapfile3, mask6, check_mask, expand_model6_map, expand_mask6_map, make_low_facet_skymodel, combine_facet_skymodels, combine_skymodels, make_sourcedb_new_facet_sources, expand_sourcedb_new_facet_sources, {% else %} make_sourcedb_new_facet_sources, expand_sourcedb_new_facet_sources, {% endif %} predict_and_difference_models, create_middle_band_mapfile1, create_middle_band_mapfile2, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} shift_cal, {% if preapply_phase_cal %} shift_cal_dir_indep, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, concat_blavg_data, {% endif %} {% if selfcal_local_dir is not none %} make_concat_data_sync_mapfile, adjust_concat_data_hosts, sync_concat_data_to_local, {% if pre_average %} make_concat_blavg_data_sync_mapfile, adjust_concat_blavg_data_hosts, sync_concat_blavg_data_to_local, {% endif %} {% endif %} concat_data_compressed_mapfile, {% block selfcal_steps %} {% if not preapply_phase_cal %} average0, {% endif %} create_compressed_mapfile0, sort_average0_into_Groups, sort_average0_into_Groups_maps, concat_average0_data, create_compressed_mapfile01, premask_selfcal, wsclean_image01, create_imagebase_map01, adjust_wsclean_mapfile0, mask0, wsclean_image02, create_imagebase_map02, pad_selfcal_model0_images, regroup_concat_data_map, create_expanded_model0_mapfile, expand_selfcal_model_size_map, wsclean_ft0, {% if pre_average %} copy_model_data0, {% endif %} make_fast_phase_parmdb_map, {% if peel_skymodel is not none %} create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, {% endif %} remove_parmdbs1, solve_phaseonly1, merge_first_phase_parmdbs, {% if selfcal_local_dir is not none %} make_apply_mapfile, {% endif %} apply_phaseonly1, create_compressed_mapfile1, wsclean_image11, create_imagebase_map11, adjust_wsclean_mapfile11, mask1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, pad_selfcal_model1_images, wsclean_ft1, {% if pre_average %} copy_model_data1, {% endif %} remove_parmdbs2, solve_phaseonly2, apply_phaseonly2, create_compressed_mapfile2, wsclean_image21, create_imagebase_map21, adjust_wsclean_mapfile21, mask2, wsclean_image22, create_imagebase_map22, create_expanded_model2_mapfile, pad_selfcal_model2_images, wsclean_ft2, {% if pre_average %} copy_model_data2, {% endif %} remove_parmdbs11, solve_ampphase11, apply_ampphase11, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, wsclean_image31, create_imagebase_map31, adjust_wsclean_mapfile31, mask3, wsclean_image32, loop_ampcal, {% endblock selfcal_steps %} {% if selfcal_local_dir is not none %} remove_concat_data, {% endif %} merge_selfcal_parmdbs, convert_merged_selfcal_parmdbs, {% if create_preapply_parmdb %} create_preapply_parmdb, {% endif %} make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, create_model4_map, blank_model, expand_blank_model_map, make_new_cal_skymodel, {% if not is_patch %} make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, {% if use_wideband %} select_imaging_bands, select_sourcedb_all_facet_sources, select_parmdb_map, select_merged_parmdb_map, {% endif %} prepare_imaging_data, create_compressed_mapfile5, premask, wsclean_image_full, create_imagebase_map, adjust_wsclean_mapfile1, mask5, create_model5_map, adjust_wsclean_mapfile2, expand_model5_map, expand_mask5_map, make_high_facet_skymodel, combine_skymodels_high, {% endif %} {% if not is_patch or wsclean_selfcal_multiscale %} make_sourcedb_high, expand_sourcedb_high, {% if use_wideband %} {% if is_patch %} prepare_imaging_data, {% endif %} select_sourcedb_high, {% endif %} subtract_high, create_compressed_mapfile6, premask_low, wsclean_image_full_low, create_imagebase_low_map, adjust_wsclean_mapfile3, mask6, check_mask, expand_model6_map, expand_mask6_map, make_low_facet_skymodel, {% if not is_patch %} combine_facet_skymodels, {% endif %} combine_skymodels, make_sourcedb_new_facet_sources, expand_sourcedb_new_facet_sources, {% else %} make_sourcedb_new_facet_sources, expand_sourcedb_new_facet_sources, {% endif %} predict_and_difference_models, create_middle_band_mapfile1, create_middle_band_mapfile2, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath = {{ pipeline_dir }}/plugins
 
@@ -1919,6 +1919,7 @@ make_new_cal_skymodel.argument.interp     = nearest
 make_new_cal_skymodel.argument.flags      = [rootname,msfile,skymodel]
 
 {% if not is_patch %}
+# Image the full facet at high-res to improve the model
 
 # extract the skymodel for the full facet from global skymodel, length = nbands
 make_facet_skymodels_all.control.type       = make_facet_skymodel
@@ -1981,65 +1982,65 @@ select_merged_parmdb_map.control.filename         = select_merged_parmdbs.mapfil
 
 # shift the empty data, add all facet sources, apply the direction-dependent solutions and average, length = nfiles or nbands_selfcal_facet_image * nchunks
 # compress data and weights
-apply_dir_dep.control.type                                   = dppp
+prepare_imaging_data.control.type                                   = dppp
 {% if use_wideband %}
-apply_dir_dep.control.mapfiles_in                            = [select_imaging_bands.output.mapfile,select_sourcedb_all_facet_sources.output.mapfile,select_parmdb_map.output.mapfile,select_merged_parmdb_map.output.mapfile]
+prepare_imaging_data.control.mapfiles_in                            = [select_imaging_bands.output.mapfile,select_sourcedb_all_facet_sources.output.mapfile,select_parmdb_map.output.mapfile,select_merged_parmdb_map.output.mapfile]
 {% else %}
-apply_dir_dep.control.mapfiles_in                            = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+prepare_imaging_data.control.mapfiles_in                            = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile]
 {% endif %}
-apply_dir_dep.control.inputkeys                              = [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb]
-apply_dir_dep.argument.numthreads                            = {{ max_cpus_per_io_proc_nfiles }}
-apply_dir_dep.argument.msin.datacolumn                       = {{ subtracted_data_colname }}
-apply_dir_dep.argument.msout.overwrite                       = True
-apply_dir_dep.argument.msout.writefullresflag                = False
+prepare_imaging_data.control.inputkeys                              = [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb]
+prepare_imaging_data.argument.numthreads                            = {{ max_cpus_per_io_proc_nfiles }}
+prepare_imaging_data.argument.msin.datacolumn                       = {{ subtracted_data_colname }}
+prepare_imaging_data.argument.msout.overwrite                       = True
+prepare_imaging_data.argument.msout.writefullresflag                = False
 {% if local_dir is not none %}
-apply_dir_dep.argument.local_scratch_dir                     = {{ local_dir }}
+prepare_imaging_data.argument.local_scratch_dir                     = {{ local_dir }}
 {% endif %}
 {% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
-apply_dir_dep.argument.steps                                 = [shift,add,flag,correct,flagzero,avg]
+prepare_imaging_data.argument.steps                                 = [shift,add,flag,correct,flagzero,avg]
 {% else %}
-apply_dir_dep.argument.steps                                 = [shift,add,correct,flagzero,avg]
+prepare_imaging_data.argument.steps                                 = [shift,add,correct,flagzero,avg]
 {% endif %}
-apply_dir_dep.argument.shift.type                            = phaseshifter
-apply_dir_dep.argument.shift.phasecenter                     = [{{ facet_ra }}deg, {{ facet_dec }}deg]
-apply_dir_dep.argument.add.type                              = predict
-apply_dir_dep.argument.add.sourcedb                          = sourcedb
-apply_dir_dep.argument.add.operation                         = add
-apply_dir_dep.argument.add.applycal.parmdb                   = dir_indep_parmdb
+prepare_imaging_data.argument.shift.type                            = phaseshifter
+prepare_imaging_data.argument.shift.phasecenter                     = [{{ facet_ra }}deg, {{ facet_dec }}deg]
+prepare_imaging_data.argument.add.type                              = predict
+prepare_imaging_data.argument.add.sourcedb                          = sourcedb
+prepare_imaging_data.argument.add.operation                         = add
+prepare_imaging_data.argument.add.applycal.parmdb                   = dir_indep_parmdb
 {% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
-apply_dir_dep.argument.flag.type                             = preflagger
+prepare_imaging_data.argument.flag.type                             = preflagger
 {% endif %}
 {% if flag_abstime is not none %}
-apply_dir_dep.argument.flag.abstime                          = {{ flag_abstime }}
+prepare_imaging_data.argument.flag.abstime                          = {{ flag_abstime }}
 {% endif %}
 {% if flag_baseline is not none %}
-apply_dir_dep.argument.flag.baseline                         = {{ flag_baseline }}
+prepare_imaging_data.argument.flag.baseline                         = {{ flag_baseline }}
 {% endif %}
 {% if flag_freqrange is not none %}
-apply_dir_dep.argument.flag.freqrange                        = {{ flag_freqrange }}
+prepare_imaging_data.argument.flag.freqrange                        = {{ flag_freqrange }}
 {% endif %}
-apply_dir_dep.argument.correct.type                          = applycal
-apply_dir_dep.argument.correct.parmdb                        = dir_dep_parmdb
-apply_dir_dep.argument.correct.invert                        = True
-apply_dir_dep.argument.flagzero.type                         = preflagger
-apply_dir_dep.argument.flagzero.amplmin                      = 1e-20
-apply_dir_dep.argument.avg.type                              = squash
-apply_dir_dep.argument.avg.freqstep                          = {{ facetimage_freqstep }}
-apply_dir_dep.argument.avg.timestep                          = {{ facetimage_timestep }}
+prepare_imaging_data.argument.correct.type                          = applycal
+prepare_imaging_data.argument.correct.parmdb                        = dir_dep_parmdb
+prepare_imaging_data.argument.correct.invert                        = True
+prepare_imaging_data.argument.flagzero.type                         = preflagger
+prepare_imaging_data.argument.flagzero.amplmin                      = 1e-20
+prepare_imaging_data.argument.avg.type                              = squash
+prepare_imaging_data.argument.avg.freqstep                          = {{ facetimage_freqstep }}
+prepare_imaging_data.argument.avg.timestep                          = {{ facetimage_timestep }}
 # Don't compress for now, as WSClean tries to allocate too much memory
 # {% if use_compression %}
-# apply_dir_dep.argument.msout.storagemanager                = "Dysco"
-# apply_dir_dep.argument.msout.storagemanager.databitrate    = 16
-# apply_dir_dep.argument.msout.storagemanager.weightbitrate  = 12
-# apply_dir_dep.argument.msout.storagemanager.distribution   = "TruncatedGaussian"
-# apply_dir_dep.argument.msout.storagemanager.disttruncation = 1.5
-# apply_dir_dep.argument.msout.storagemanager.normalization  = "AF"
+# prepare_imaging_data.argument.msout.storagemanager                = "Dysco"
+# prepare_imaging_data.argument.msout.storagemanager.databitrate    = 16
+# prepare_imaging_data.argument.msout.storagemanager.weightbitrate  = 12
+# prepare_imaging_data.argument.msout.storagemanager.distribution   = "TruncatedGaussian"
+# prepare_imaging_data.argument.msout.storagemanager.disttruncation = 1.5
+# prepare_imaging_data.argument.msout.storagemanager.normalization  = "AF"
 # {% endif %}
 
 # compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile5.control.kind        = plugin
 create_compressed_mapfile5.control.type        = compressMapfile
-create_compressed_mapfile5.control.mapfile_in  = apply_dir_dep.output.mapfile
+create_compressed_mapfile5.control.mapfile_in  = prepare_imaging_data.output.mapfile
 create_compressed_mapfile5.control.mapfile_dir = input.output.mapfile_dir
 create_compressed_mapfile5.control.filename    = concat_averaged_input.mapfile
 
@@ -2165,9 +2166,21 @@ combine_skymodels_high.control.inputkeys   = [newfacetmodel,calmodel]
 combine_skymodels_high.control.outputkey   = skymodel
 combine_skymodels_high.argument.flags      = [calmodel,newfacetmodel,skymodel]
 
+# end of high-res full facet imaging
+{% endif %}
+
+{% if not is_patch or wsclean_selfcal_multiscale %}
+# Make a low-res image of the facet or (if wsclean_selfcal_multiscale is True)
+# of the calibrator region to pick up any extended emission missed in the high-
+# res image
+
 # convert the combined sky model into a sourcedb, length = nbands
 make_sourcedb_high.control.type       = make_sourcedb
+{% if is_patch %}
+make_sourcedb_high.control.mapfile_in = make_new_cal_skymodel.output.mapfile
+{% else %}
 make_sourcedb_high.control.mapfile_in = combine_skymodels_high.output.mapfile
+{% endif %}
 make_sourcedb_high.control.inputkey   = in
 make_sourcedb_high.argument.format    = <
 make_sourcedb_high.argument.outtype   = blob
@@ -2182,12 +2195,27 @@ expand_sourcedb_high.control.mapfile_dir    = input.output.mapfile_dir
 expand_sourcedb_high.control.filename       = expand_sourcedb_high.mapfile
 
 {% if use_wideband %}
+{% if is_patch %}
+# select bands spread over the full bandwidth for imaging, length = nbands_selfcal_facet_image * nchunks
+prepare_imaging_data.control.kind        = plugin
+prepare_imaging_data.control.type        = selectDistFreqs
+prepare_imaging_data.control.mapfile_in  = apply_amp2.output.mapfile
+prepare_imaging_data.control.num         = {{ nbands_selfcal_facet_image }}
+prepare_imaging_data.control.mapfile_dir = input.output.mapfile_dir
+prepare_imaging_data.control.filename    = imaging_bands.mapfile
+{% endif %}
+
 # adjust the high-res sourcedb mapfile to match the selected bands, length = nbands_selfcal_facet_image * nchunks
 select_sourcedb_high.control.kind         = plugin
 select_sourcedb_high.control.type         = matchDistFreqs
 select_sourcedb_high.control.mapfile_in   = expand_sourcedb_high.output.mapfile
+{% if is_patch %}
+select_sourcedb_high.control.mapfile_dist = prepare_imaging_data.output.mapfile
+select_sourcedb_high.control.mapfile_full = apply_amp2.output.mapfile
+{% else %}
 select_sourcedb_high.control.mapfile_dist = select_imaging_bands.output.mapfile
 select_sourcedb_high.control.mapfile_full = create_ms_map.output.mapfile
+{% endif %}
 select_sourcedb_high.control.mapfile_dir  = input.output.mapfile_dir
 select_sourcedb_high.control.filename     = high_sourcedbs.mapfile
 {% endif %}
@@ -2196,9 +2224,13 @@ select_sourcedb_high.control.filename     = high_sourcedbs.mapfile
 # compress data and weights
 subtract_high.control.type                                 = dppp
 {% if use_wideband %}
-subtract_high.control.mapfiles_in                          = [apply_dir_dep.output.mapfile,select_sourcedb_high.output.mapfile]
+subtract_high.control.mapfiles_in                          = [prepare_imaging_data.output.mapfile,select_sourcedb_high.output.mapfile]
 {% else %}
-subtract_high.control.mapfiles_in                          = [apply_dir_dep.output.mapfile,expand_sourcedb_high.output.mapfile]
+{% if is_patch %}
+subtract_high.control.mapfiles_in                          = [apply_amp2.output.mapfile,expand_sourcedb_high.output.mapfile]
+{% else %}
+subtract_high.control.mapfiles_in                          = [prepare_imaging_data.output.mapfile,expand_sourcedb_high.output.mapfile]
+{% endif %}
 {% endif %}
 subtract_high.control.inputkeys                            = [msin,sourcedb_high]
 subtract_high.argument.numthreads                          = {{ max_cpus_per_io_proc_nfiles }}
@@ -2342,16 +2374,22 @@ make_low_facet_skymodel.control.inputkeys   = [msfile,rootname,mask]
 make_low_facet_skymodel.control.outputkey   = skymodel
 make_low_facet_skymodel.argument.flags      = [rootname,msfile,skymodel,mask]
 
+{% if not is_patch %}
 # combine the low and high-res facet sky models, length = nbands
 combine_facet_skymodels.control.type        = combine_skymodels
 combine_facet_skymodels.control.mapfiles_in = [make_high_facet_skymodel.output.mapfile,make_low_facet_skymodel.output.mapfile]
 combine_facet_skymodels.control.inputkeys   = [highresmodel,lowresmodel]
 combine_facet_skymodels.control.outputkey   = skymodel
 combine_facet_skymodels.argument.flags      = [highresmodel,lowresmodel,skymodel]
+{% endif %}
 
 # combine the new calibrator and facet sky models, length = nbands
 combine_skymodels.control.type        = combine_skymodels
+{% if is_patch %}
+combine_skymodels.control.mapfiles_in = [make_low_facet_skymodel.output.mapfile,make_new_cal_skymodel.output.mapfile]
+{% else %}
 combine_skymodels.control.mapfiles_in = [combine_facet_skymodels.output.mapfile,make_new_cal_skymodel.output.mapfile]
+{% endif %}
 combine_skymodels.control.inputkeys   = [newfacetmodel,calmodel]
 combine_skymodels.control.outputkey   = skymodel
 combine_skymodels.argument.flags      = [calmodel,newfacetmodel,skymodel]
@@ -2373,7 +2411,8 @@ expand_sourcedb_new_facet_sources.control.mapfile_dir    = input.output.mapfile_
 expand_sourcedb_new_facet_sources.control.filename       = expand_sourcedb_new_facet_sources.mapfile
 
 {% else %}
-# for patches, just make a sourcedb from the new calibrator sky model
+# for patches for which wsclean_selfcal_multiscale = False, just make a sourcedb
+# from the new calibrator sky model
 
 # convert the calibrator sky model (= facet sky model) into a sourcedb, length = nbands
 make_sourcedb_new_facet_sources.control.type       = make_sourcedb

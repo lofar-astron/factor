@@ -160,8 +160,6 @@ class FacetSelfcal(Operation):
             'make_sourcedb_new_facet_sources.mapfile')
         self.direction.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'verify_subtract.break.mapfile')
-        self.direction.image_data_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'full_image_input.mapfile')
         if self.direction.create_preapply_parmdb:
             self.direction.preapply_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
                 'create_preapply_parmdb.mapfile')
@@ -219,23 +217,10 @@ class FacetSelfcal(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'apply_amp2.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'apply_output.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'apply_phaseonly1.mapfile'),
-            os.path.join(self.pipeline_mapfile_dir, 'apply_phaseonly2.mapfile')]
-        if not self.parset['keep_avg_facet_data'] and self.direction.name != 'target':
-            # Add averaged calibrated data for the facet to files to be deleted.
-            # These are only needed if the user wants to reimage by hand (e.g.,
-            # with a different weighting). They are always kept for the target
-            self.direction.cleanup_mapfiles.extend([
-                os.path.join(self.pipeline_mapfile_dir, 'concat_averaged_input.mapfile'),
-                os.path.join(self.pipeline_mapfile_dir, 'apply_dir_dep_sorted_groups.mapfile_groups')])
-        if not self.parset['keep_unavg_facet_data']:
-            # Add unaveraged calibrated data for the facet to files to be deleted.
-            # These are only needed if the user wants to phase shift them to
-            # another direction (e.g., to combine several facets together before
-            # imaging them all at once)
-            self.direction.cleanup_mapfiles.extend([
-                os.path.join(self.pipeline_mapfile_dir, 'shift_empty.mapfile'),
-                os.path.join(self.pipeline_mapfile_dir, 'sorted_groups_shift_empty.mapfile'),
-                os.path.join(self.pipeline_mapfile_dir, 'sorted_groups_shift_empty.mapfile_groups')])
+            os.path.join(self.pipeline_mapfile_dir, 'apply_phaseonly2.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'subtract_high.mapfile'),
+            os.path.join(self.pipeline_mapfile_dir, 'prepare_imaging_data.mapfile')
+            ]
         if self.direction.selfcal_ok or not self.parset['calibration_specific']['exit_on_selfcal_failure']:
             self.log.debug('Cleaning up files (direction: {})'.format(self.direction.name))
             self.direction.cleanup()
