@@ -111,15 +111,15 @@ def main(fits_model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.
     model_images = []
     for f in fits_models:
         # Get the frequency info
-        hdr = fits.getheader(f, 0)
+        hdr = fits.getheader(f, 0, ignore_missing_end=True)
         freqs.append(hdr['CRVAL3']) # Hz
-        model_images.append(fits.getdata(f, 0))
+        model_images.append(fits.getdata(f, 0, ignore_missing_end=True))
     w = wcs.WCS(hdr)
 
     # Read in MFS image
     if mfs_model is None:
         mfs_model = fits_models[0]
-    mfs_image = fits.getdata(mfs_model, 0)
+    mfs_image = fits.getdata(mfs_model, 0, ignore_missing_end=True)
 
     # Sort by freq
     sorted_ind = np.argsort(freqs)
@@ -133,7 +133,7 @@ def main(fits_model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.
             # Handle case in which no sources were found during masking
             nonzero_ind = [[], []]
         else:
-            mask = fits.getdata(fits_mask, 0)
+            mask = fits.getdata(fits_mask, 0, ignore_missing_end=True)
             nonzero_ind = np.where((mfs_image > min_peak_flux_jy) & (mask > 0))
     else:
         nonzero_ind = np.where(mfs_image > min_peak_flux_jy)
