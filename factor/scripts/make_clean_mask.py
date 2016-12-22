@@ -408,6 +408,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     nsig = float(nsig)
     adaptive_thresh = float(adaptive_thresh)
     threshold = 0.0
+    nisl = 0
 
     if not skip_source_detection:
         if vertices_file is not None:
@@ -468,14 +469,13 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                                      adaptive_rms_box=adaptive_rmsbox, adaptive_thresh=adaptive_thresh,
                                      rms_box_bright=rmsbox_bright, rms_map=True, quiet=True,
                                      atrous_jmax=atrous_jmax, stop_at=stop_at)
-
-        if img.nisl == 0:
+        nisl = img.nisl
+        if nisl == 0:
             if region_file is None or region_file == '[]':
                 print('No islands found. Clean mask cannot be made.')
                 return {'threshold_5sig': 'None'}
             else:
                 # Continue on and use user-supplied region file
-                skip_source_detection = True
                 threshold = nsig * img.clipped_rms
 
         # Check if there are large islands preset (indicating that multi-scale
@@ -497,7 +497,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             # This is done to get around the need for quotes around strings in casapy scripts
             # 'casastr/' is removed by the generic pipeline
             return {'threshold_5sig': 'casastr/{0}Jy'.format(threshold)}
-    elif not skip_source_detection:
+    elif not skip_source_detection and nisl > 0:
         img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
                          img_format=img_format, clobber=True)
 
@@ -505,7 +505,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         or (region_file is not None and region_file != '[]')
         or skip_source_detection):
         # Alter the mask in various ways
-        if skip_source_detection:
+        if skip_source_detection or nisl == 0:
             # Read the image
             mask_im = pim.image(image_name)
         else:
@@ -539,7 +539,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
 
         data = new_mask.getdata()
 
-        if skip_source_detection:
+        if skip_source_detection or nisl == 0:
             # Mask all pixels
             data[:] = 1
 
