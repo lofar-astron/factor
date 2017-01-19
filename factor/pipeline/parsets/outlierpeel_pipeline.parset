@@ -862,7 +862,7 @@ make_low_facet_skymodel.control.type        = fits2sky
 make_low_facet_skymodel.control.mapfiles_in = [create_msmulti_map.output.mapfile,expand_model6_map.output.mapfile,expand_mask6_map.output.mapfile]
 make_low_facet_skymodel.control.inputkeys   = [msfile,rootname,mask]
 make_low_facet_skymodel.control.outputkey   = skymodel
-make_low_facet_skymodel.argument.flags      = [rootname,msfile,skymodel,mask]
+make_low_facet_skymodel.argument.flags      = [rootname,msfile,skymodel,mask,0.0,0.0]
 
 # combine the low and high-res facet sky models, length = nbands
 combine_facet_skymodels.control.type        = combine_skymodels
