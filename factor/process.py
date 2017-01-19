@@ -155,6 +155,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             'facetsub' in d.reset_operations]
         if len(direction_group_reset_facetsub) > 0:
             for d in direction_group_reset_facetsub:
+                # Set subtracted data column to ensure we are using the new one
+                d.subtracted_data_colname = 'CORRECTED_DATA'
+
                 if ('facetsubreset' in d.completed_operations or
                     'facetsubreset' in reset_operations):
                     # Reset a previous reset, but only if it completed successfully
@@ -186,7 +189,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
             if len(direction_group_ok) > 0:
                 for d in directions:
                     if d.name != direction_group_ok[0].name:
-                        d.subtracted_data_colname = 'CORRECTED_DATA '
+                        d.subtracted_data_colname = 'CORRECTED_DATA'
                 set_sub_data_colname = False
         if set_preapply_flag and parset['calibration_specific']['preapply_first_cal_phases']:
             # Set the flag for preapplication of selfcal solutions (if needed)
@@ -214,7 +217,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
     # Check that at least one direction went through selfcal successfully. If
     # not, exit
     if len([d for d in directions if d.selfcal_ok]) == 0:
-        log.error('Self calibration failed for all directions. Exiting...')
+        log.warn('Self calibration failed for all directions. Exiting...')
         sys.exit(1)
 
     # Image facets for each set of cellsize, robust, taper, and uv cut settings
@@ -517,10 +520,9 @@ def _set_up_bands(parset, test_run=False):
     # Determine whether any bands lack an initial sky model
     bands_no_skymodel = [b for b in bands if b.skymodel_dirindep is None]
     if len(bands_no_skymodel) > 0:
-        if len(bands_no_skymodel) > 0:
-            band_names = ', '.join([b.name for b in bands_no_skymodel])
-            log.error('A direction-indpendent sky model was not found for the '
-                'following bands: {}'.format(band_names))
+        band_names = ', '.join([b.name for b in bands_no_skymodel])
+        log.error('A direction-indpendent sky model was not found for the '
+            'following bands: {}'.format(band_names))
         log.info('Exiting...')
         sys.exit(1)
 
