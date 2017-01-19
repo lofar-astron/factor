@@ -2245,7 +2245,11 @@ subtract_high.argument.subtract.type                       = predict
 subtract_high.argument.subtract.sourcedb                   = sourcedb_high
 subtract_high.argument.subtract.operation                  = subtract
 subtract_high.argument.avg.type                            = squash
+{% if is_patch %}
+subtract_high.argument.avg.freqstep                        = 1
+{% else %}
 subtract_high.argument.avg.freqstep                        = {{ facetimage_low_freqstep }}
+{% endif %}
 subtract_high.argument.avg.timestep                        = {{ facetimage_low_timestep }}
 # Don't compress for now, as WSClean tries to allocate too much memory
 # {% if use_compression %}

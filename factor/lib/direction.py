@@ -701,9 +701,11 @@ class Direction(object):
 
             # Do the same for the low-resolution facet image
             # generate another (numpy-)array with the divisors of nchan after averaging
+            nchan_after_facetimage = nchan / self.facetimage_freqstep
+            chan_width_hz_after_facetimage = chan_width_hz * self.facetimage_freqstep
             tmp_divisors = []
-            for step in range(nchan/self.facetimage_freqstep, 0, -1):
-                if (nchan/self.facetimage_freqstep % step) == 0:
+            for step in range(nchan_after_facetimage, 0, -1):
+                if (nchan_after_facetimage % step) == 0:
                     tmp_divisors.append(step)
             freq_divisors_low = np.array(tmp_divisors)
             low_res_factor = 4.0 # how much lower resolution is than high-res image
@@ -712,7 +714,8 @@ class Direction(object):
                 resolution_low_deg, peak_smearing_factor))
             target_bandwidth_mhz = min(2.0, self.get_target_bandwidth(mean_freq_mhz,
                 delta_theta_deg, resolution_low_deg, peak_smearing_factor))
-            self.facetimage_low_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 / chan_width_hz)), nchan))
+            self.facetimage_low_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 /
+                chan_width_hz_after_facetimage)), nchan_after_facetimage))
             self.facetimage_low_freqstep = freq_divisors_low[np.argmin(np.abs(freq_divisors_low - self.facetimage_low_freqstep))]
             self.facetimage_low_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
             self.facetimage_low_timestep_sec = self.facetimage_low_timestep * timestep_sec
