@@ -66,21 +66,18 @@ def plugin_main(args, **kwargs):
         if not item.host in hosts:
             hosts.append(item.host)
 
-    # find maximum number of files per frequency-group
-    maxfiles = max([len(group) for group in freq_groups.values()])
-
     # select frequencies
     freqs =  freq_groups.keys()
     freqs.sort()
     num_freqs = len(freqs)
     if num > num_freqs:
-        print 'PipelineStep_selectDistFreqs: less than %d frequency groups found, contiunig with %d groups.'%(num, num_freqs)
+        print 'PipelineStep_selectDistFreqs: fewer than %d frequency groups found, continuig with %d groups.'%(num, num_freqs)
         num = num_freqs
     dist_ind = get_distributed_indices(0, num_freqs-1, num)
     selfreqs = [freqs[ind] for ind in dist_ind]
     if len(selfreqs) < 1:
-        print "PipelineStep_selectDistFreqs: Selected less than one frequency bands."
-        raise ValueError("Selected less than one frequency bands.")
+        print "PipelineStep_selectDistFreqs: Selected fewer than one frequency band."
+        raise ValueError("Selected fewer than one frequency band.")
 
     all_files = []
     for selfreq in selfreqs:
