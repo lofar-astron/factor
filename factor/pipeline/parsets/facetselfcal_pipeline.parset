@@ -1918,8 +1918,10 @@ make_new_cal_skymodel.control.outputkey   = skymodel
 make_new_cal_skymodel.argument.interp     = nearest
 make_new_cal_skymodel.argument.flags      = [rootname,msfile,skymodel]
 
-{% if not is_patch %}
-# Image the full facet at high-res to improve the model
+{% if not is_patch or wsclean_selfcal_multiscale %}
+# Image the full facet at high-res to improve the model (if direction is a patch,
+# and wsclean_selfcal_multiscale is True, we do this but skip the high-res imaging
+# as we already have such an image from selfcal)
 
 # extract the skymodel for the full facet from global skymodel, length = nbands
 make_facet_skymodels_all.control.type       = make_facet_skymodel
@@ -2036,6 +2038,9 @@ prepare_imaging_data.argument.avg.timestep                          = {{ facetim
 # prepare_imaging_data.argument.msout.storagemanager.disttruncation = 1.5
 # prepare_imaging_data.argument.msout.storagemanager.normalization  = "AF"
 # {% endif %}
+
+{% if not is_patch %}
+# Now make the high-res facet image
 
 # compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile5.control.kind        = plugin
@@ -2169,7 +2174,6 @@ combine_skymodels_high.argument.flags      = [calmodel,newfacetmodel,skymodel]
 # end of high-res full facet imaging
 {% endif %}
 
-{% if not is_patch or wsclean_selfcal_multiscale %}
 # Make a low-res image of the facet or (if wsclean_selfcal_multiscale is True)
 # of the calibrator region to pick up any extended emission missed in the high-
 # res image
@@ -2195,27 +2199,12 @@ expand_sourcedb_high.control.mapfile_dir    = input.output.mapfile_dir
 expand_sourcedb_high.control.filename       = expand_sourcedb_high.mapfile
 
 {% if use_wideband %}
-{% if is_patch %}
-# select bands spread over the full bandwidth for imaging, length = nbands_selfcal_facet_image * nchunks
-prepare_imaging_data.control.kind        = plugin
-prepare_imaging_data.control.type        = selectDistFreqs
-prepare_imaging_data.control.mapfile_in  = apply_amp2.output.mapfile
-prepare_imaging_data.control.num         = {{ nbands_selfcal_facet_image }}
-prepare_imaging_data.control.mapfile_dir = input.output.mapfile_dir
-prepare_imaging_data.control.filename    = imaging_bands.mapfile
-{% endif %}
-
 # adjust the high-res sourcedb mapfile to match the selected bands, length = nbands_selfcal_facet_image * nchunks
 select_sourcedb_high.control.kind         = plugin
 select_sourcedb_high.control.type         = matchDistFreqs
 select_sourcedb_high.control.mapfile_in   = expand_sourcedb_high.output.mapfile
-{% if is_patch %}
-select_sourcedb_high.control.mapfile_dist = prepare_imaging_data.output.mapfile
-select_sourcedb_high.control.mapfile_full = apply_amp2.output.mapfile
-{% else %}
 select_sourcedb_high.control.mapfile_dist = select_imaging_bands.output.mapfile
 select_sourcedb_high.control.mapfile_full = create_ms_map.output.mapfile
-{% endif %}
 select_sourcedb_high.control.mapfile_dir  = input.output.mapfile_dir
 select_sourcedb_high.control.filename     = high_sourcedbs.mapfile
 {% endif %}
@@ -2226,11 +2215,7 @@ subtract_high.control.type                                 = dppp
 {% if use_wideband %}
 subtract_high.control.mapfiles_in                          = [prepare_imaging_data.output.mapfile,select_sourcedb_high.output.mapfile]
 {% else %}
-{% if is_patch %}
-subtract_high.control.mapfiles_in                          = [apply_amp2.output.mapfile,expand_sourcedb_high.output.mapfile]
-{% else %}
 subtract_high.control.mapfiles_in                          = [prepare_imaging_data.output.mapfile,expand_sourcedb_high.output.mapfile]
-{% endif %}
 {% endif %}
 subtract_high.control.inputkeys                            = [msin,sourcedb_high]
 subtract_high.argument.numthreads                          = {{ max_cpus_per_io_proc_nfiles }}
@@ -2245,11 +2230,7 @@ subtract_high.argument.subtract.type                       = predict
 subtract_high.argument.subtract.sourcedb                   = sourcedb_high
 subtract_high.argument.subtract.operation                  = subtract
 subtract_high.argument.avg.type                            = squash
-{% if is_patch %}
-subtract_high.argument.avg.freqstep                        = 1
-{% else %}
 subtract_high.argument.avg.freqstep                        = {{ facetimage_low_freqstep }}
-{% endif %}
 subtract_high.argument.avg.timestep                        = {{ facetimage_low_timestep }}
 # Don't compress for now, as WSClean tries to allocate too much memory
 # {% if use_compression %}
