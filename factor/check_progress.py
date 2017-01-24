@@ -58,6 +58,7 @@ def show_instructions():
     log.info('(In both cases, pan/zoom mode must be off)')
     log.info('Press "c" to display calibrator selfcal images for selected direction')
     log.info('Press "i" to display facet image for selected direction')
+    log.info('Press "v" to display facet verify image for selected direction')
     log.info('Press "t" to display TEC solutions for selected direction')
     log.info('Press "g" to display Gain solutions for selected direction')
     log.info('Press "u" to update display (display is updated automatically every minute)')
@@ -79,7 +80,7 @@ def run(parset_file, trim_names=True):
 
     # Check for other assignments of the shortcuts we want to use and, if found,
     # remove them from rcParams
-    factor_keys = ['u', 'c', 'i', 't', 'g', 'h']
+    factor_keys = ['u', 'c', 'i', 't', 'g', 'h','v']
     for k in plt.rcParams.iterkeys():
         if 'keymap' in k:
             for key in factor_keys:
@@ -431,6 +432,19 @@ def on_press(event):
                 info += '\n  ({0}) {1}'.format(opindx+1, fimg_op)
             choose_from_list = True
 
+
+    elif event.key == 'v':
+        # Open full facet images (if any)
+        choose_from_list = False
+        if selected_direction is None:
+            return
+        facet_verify_images = find_facet_verify_images(selected_direction)
+        if len(facet_verify_images) == 0:
+            info = 'No verify image of facet exists for {}'.format(selected_direction.name)
+        else:
+            info = 'Opening selfcal verification images for {}...'.format(selected_direction.name)
+        display_image(facet_verify_images)
+
     elif event.key in [str(num+1) for num in range(9)]:
         # Open image (from list given on "i" press)
         if choose_from_list:
@@ -480,24 +494,30 @@ def on_press(event):
     fig.canvas.draw()
 
 
-def display_image(image):
+def display_image(images):
     """
-    Displays image in an external viewer
+    Displays images in an external viewer
     """
     global fig, at, selected_direction
+    
+    if not isinstance(images, list):
+        images = [images]
 
     if options['facet_viewer'] == 'casa':
-        im2 = pim.image(image)
-        im2.view()
+        for image in images:
+            im2 = pim.image(image)
+            im2.view()
     elif options['facet_viewer'] == 'ds9':
-        if os.path.isdir(image):
-            # Convert casa image to fits
-            if not os.path.exists('{0}.fits'.format(image)):
-                subprocess.call('image2fits in={0} out={0}.fits'.format(image),
-                    shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            image = '{0}.fits'.format(image)
+        for i in range(len(images)):
+            image = images[i]
+            if os.path.isdir(image):
+                # Convert casa image to fits
+                if not os.path.exists('{0}.fits'.format(image)):
+                    subprocess.call('image2fits in={0} out={0}.fits'.format(image),
+                        shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                images[i] = '{0}.fits'.format(image)
         if not haspyds9:
-            os.system('ds9 {} &'.format(image))
+            os.system('ds9 -tile {} &'.format(' '.join(images)))
         else:
             # use pyds9 if available to re-use an existing ds9
             pyds9.ds9_xpans()
@@ -509,13 +529,19 @@ def display_image(image):
             ds9=pyds9.DS9('checkfactor', wait=120)
             c.set_text(info_last)
             fig.canvas.draw()
-            ds9.set('file '+image)
-            if options['ds9_limits'] is not None:
-                ds9.set('scale limits '+options['ds9_limits'])
-            if options['ds9_load_regions']:
-                regionfile=os.path.join(selected_direction.working_dir,'regions','facets_ds9.reg')
-                ds9.set('regions delete all')
-                ds9.set('regions load '+regionfile)
+            for i in range(len(images)):
+                ds9.set('frame {:d}'.format(i))
+                ds9.set('file '+images[i])
+                if options['ds9_limits'] is not None:
+                    ds9.set('scale limits '+options['ds9_limits'])
+                if options['ds9_load_regions']:
+                    regionfile=os.path.join(selected_direction.working_dir,'regions','facets_ds9.reg')
+                    ds9.set('regions delete all')
+                    ds9.set('regions load '+regionfile)
+            ds9.set('tile')
+            ds9.set('frame match scale and limits')
+            ds9.set('frame match colorbar')
+            ds9.set('frame match wcs')
     else:
         info = 'Unknown facet viewer specified in config file!'
         c = at.get_child()
@@ -813,6 +839,26 @@ def find_facet_images(direction):
 
     return facet_images, facetimage_ops
 
+
+def find_facet_verify_images(direction):
+    """
+    Returns the filenames and op names of full facet images
+    """
+
+    selfcal_dir = os.path.join(direction.working_dir, 'results', 'facetselfcal',
+        direction.name)
+    peelimage_dir = os.path.join(direction.working_dir, 'results', 'facetpeel',
+        direction.name)
+    dirs = [selfcal_dir, peelimage_dir]
+
+    # Search for various image patterns
+    facet_verify_images = []
+    for d in dirs:
+        facet_verify_images += glob.glob(os.path.join(d, '*.wsclean_pre-image.fits'))
+        facet_verify_images += glob.glob(os.path.join(d, '*.wsclean_post-image.fits'))
+
+
+    return facet_verify_images
 
 def get_current_step(direction):
     """
