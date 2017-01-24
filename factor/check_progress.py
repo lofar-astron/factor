@@ -530,7 +530,10 @@ def display_image(images):
             c.set_text(info_last)
             fig.canvas.draw()
             for i in range(len(images)):
-                ds9.set('frame {:d}'.format(i))
+                if options['ds9_frames'] is None:
+                    ds9.set('frame {:d}'.format(i))
+                else:
+                    ds9.set('frame new')
                 ds9.set('file '+images[i])
                 if options['ds9_limits'] is not None:
                     ds9.set('scale limits '+options['ds9_limits'])

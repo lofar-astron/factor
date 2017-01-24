@@ -1014,6 +1014,9 @@ def get_checkfactor_options(parset):
     if 'ds9_limits' not in parset_dict:
         parset_dict['ds9_limits'] = None
 
+    if 'ds9_frames' not in parset_dict:
+        parset_dict['ds9_frames'] = None
+        
     if 'image_display' not in parset_dict:
         parset_dict['image_display'] = 'display -geometry 800x600'
     elif parset_dict['image_display'] == 'display':
@@ -1025,7 +1028,7 @@ def get_checkfactor_options(parset):
         parset_dict['ds9_load_regions'] = False
 
     # Check for unused options
-    allowed_options = ['facet_viewer', 'ds9_limits', 'image_display',
+    allowed_options = ['facet_viewer', 'ds9_limits', 'ds9_frames', 'image_display',
         'ds9_load_regions']
     for option in given_options:
         if option not in allowed_options:

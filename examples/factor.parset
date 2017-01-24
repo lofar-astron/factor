@@ -343,6 +343,9 @@ flux_min_Jy = 0.3
 # Scale limits (min max) in Jy/beam (ds9 only; default = full range)
 # ds9_limits = 0 0.1
 
+# Frame behaviour 'new' to open each image in a new frame (ds9 only; default = image i in frame i)
+ds9_frames = new
+
 # Use display or eog to display PNG images (default = display)
 # image_display = eog
 
