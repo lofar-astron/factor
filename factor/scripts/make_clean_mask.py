@@ -97,8 +97,12 @@ def read_casa_polys(filename, image):
             RAstr, Decstr = ell_str_list[0].split(',')
             ra_center = Angle(RAstr, unit='hourangle').to('deg').value
             dec_center = Angle(Decstr.replace('.', ':', 2), unit='deg').to('deg').value
-            pixels = image.topixel([0, 1, dec_center*np.pi/180.0,
-                ra_center*np.pi/180.0])
+            try:
+                pixels = image.topixel([0, 1, dec_center*np.pi/180.0,
+                    ra_center*np.pi/180.0])
+            except:
+                pixels = image.topixel([1, 1, dec_center*np.pi/180.0,
+                    ra_center*np.pi/180.0])
             x_center = pixels[2] # x -> Dec
             y_center = pixels[3] # y -> RA
 
