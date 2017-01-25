@@ -110,11 +110,19 @@ def read_casa_polys(filename, image):
             a_str, b_str = ell_str_list[1].split(',')
             a_deg = float(a_str.split('arcsec')[0])/3600.0
             b_deg = float(b_str.split('arcsec')[0])/3600.0
-            pixels1 = image.topixel([0, 1, (dec_center-a_deg/2.0)*np.pi/180.0,
-                ra_center*np.pi/180.0])
+            try:
+                pixels1 = image.topixel([0, 1, (dec_center-a_deg/2.0)*np.pi/180.0,
+                    ra_center*np.pi/180.0])
+            except:
+                pixels1 = image.topixel([1, 1, (dec_center-a_deg/2.0)*np.pi/180.0,
+                    ra_center*np.pi/180.0])
             a_pix1 = pixels1[2]
-            pixels2 = image.topixel([0, 1, (dec_center+a_deg/2.0)*np.pi/180.0,
-                ra_center*np.pi/180.0])
+            try:
+                pixels2 = image.topixel([0, 1, (dec_center+a_deg/2.0)*np.pi/180.0,
+                    ra_center*np.pi/180.0])
+            except:
+                pixels2 = image.topixel([0, 1, (dec_center+a_deg/2.0)*np.pi/180.0,
+                    ra_center*np.pi/180.0])
             a_pix2 = pixels2[2]
             a_pix = abs(a_pix2 - a_pix1)
             ex = []
