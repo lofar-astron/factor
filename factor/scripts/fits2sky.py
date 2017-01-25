@@ -51,7 +51,7 @@ def convert_radec_str(ra, dec):
 
 
 def main(fits_model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
-    max_residual_jy=0.1, interp='linear'):
+    max_residual_jy=0.05, interp='linear'):
     """
     Make a makesourcedb sky model for input MS from WSClean fits model images
 
@@ -68,10 +68,10 @@ def main(fits_model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.
     fits_mask : str, optional
         Filename of fits mask
     min_peak_flux_jy : float, optional
-        Minimum value of flux in Jy of a source in lowest-frequency model image
+        Minimum absolute value of flux in Jy of a source in lowest-frequency model image
         to include in output model
     max_residual_jy : float, optional
-        Maximum acceptible residual flux in Jy
+        Maximum acceptible total residual absolute flux in Jy
     interp : str, optional
         Interpolation method. Can be any supported by scipy.interpolate.interp1d:
             'linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic'
@@ -134,22 +134,9 @@ def main(fits_model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.
             nonzero_ind = [[], []]
         else:
             mask = fits.getdata(fits_mask, 0, ignore_missing_end=True)
-            nonzero_ind = np.where((mfs_image > min_peak_flux_jy) & (mask > 0))
+            nonzero_ind = np.where((np.abs(mfs_image) > min_peak_flux_jy) & (mask > 0))
     else:
-        nonzero_ind = np.where(mfs_image > min_peak_flux_jy)
-
-    # Remove sources until we reach the desired residual
-    if len(nonzero_ind[0]) > 0:
-        total_flux = np.sum(mfs_image[nonzero_ind])
-        while (total_flux - np.sum(mfs_image[nonzero_ind])) < max_residual_jy:
-            min_peak_flux_jy *= 1.1
-            if fits_mask is not None:
-                nonzero_ind = np.where((mfs_image > min_peak_flux_jy) & (mask > 0))
-            else:
-                nonzero_ind = np.where(mfs_image > min_peak_flux_jy)
-            if len(nonzero_ind[0]) < 50:
-                # keep up to 50 sources regardless of the residual
-                break
+        nonzero_ind = np.where(np.abs(mfs_image) > min_peak_flux_jy)
 
     # Interpolate the fluxes to the frequency of the MS
     nsources = len(nonzero_ind[0])
@@ -175,6 +162,21 @@ def main(fits_model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.
             # Otherwise interpolate
             flux = scipy.interpolate.interp1d(freqs, flux_array, kind=interp)(ms_freq)
         fluxes.append(flux)
+
+    # Remove sources until we reach the desired residual
+    if len(fluxes) > 0:
+        total_flux = np.sum(np.abs(fluxes))
+        keep_ind = np.where(np.abs(fluxes) > min_peak_flux_jy)
+        while (total_flux - np.sum(np.abs(np.array(fluxes)[keep_ind]))) < max_residual_jy:
+            min_peak_flux_jy *= 1.1
+            keep_ind = np.where(np.abs(fluxes) > min_peak_flux_jy)
+            if len(keep_ind[0]) < 50:
+                # keep up to 50 sources regardless of the residual
+                break
+        fluxes = np.array(fluxes)[keep_ind]
+        ras = np.array(ras)[keep_ind]
+        decs = np.array(decs)[keep_ind]
+        names = np.array(names)[keep_ind]
 
     # Write sky model
     with open(skymodel, 'w') as outfile:
