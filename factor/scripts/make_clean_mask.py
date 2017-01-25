@@ -121,7 +121,7 @@ def read_casa_polys(filename, image):
                 pixels2 = image.topixel([0, 1, (dec_center+a_deg/2.0)*np.pi/180.0,
                     ra_center*np.pi/180.0])
             except:
-                pixels2 = image.topixel([0, 1, (dec_center+a_deg/2.0)*np.pi/180.0,
+                pixels2 = image.topixel([1, 1, (dec_center+a_deg/2.0)*np.pi/180.0,
                     ra_center*np.pi/180.0])
             a_pix2 = pixels2[2]
             a_pix = abs(a_pix2 - a_pix1)
