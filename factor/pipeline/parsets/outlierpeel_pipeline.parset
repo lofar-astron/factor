@@ -590,10 +590,10 @@ wsclean_image_full.control.type                   = wsclean
 wsclean_image_full.control.mapfiles_in            = [create_compressed_mapfile5.output.mapfile,premask.output.mapfile]
 wsclean_image_full.control.inputkeys              = [msfile,fitsmask]
 {% if use_wideband %}
-wsclean_image_full.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image_full.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,msfile]
 wsclean_image_full.argument.channelsout           = {{ nbands_selfcal_facet_image }}
 {% else %}
-wsclean_image_full.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,msfile]
+wsclean_image_full.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,msfile]
 {% endif %}
 wsclean_image_full.argument.fitsmask              = fitsmask
 wsclean_image_full.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
@@ -639,11 +639,11 @@ mask5.control.inputkey            = imagefile
 mask5.control.outputkey           = maskfile
 mask5.argument.flags              = [imagefile,maskfile]
 mask5.argument.region_file        = {{ region_field }}
-mask5.argument.threshisl          = 10
-mask5.argument.threshpix          = 20
+mask5.argument.threshisl          = 6
+mask5.argument.threshpix          = 8
 mask5.argument.rmsbox             = (80,20)
 mask5.argument.adaptive_rmsbox    = True
-mask5.argument.atrous_do          = False
+mask5.argument.atrous_do          = {{ atrous_do }}
 mask5.argument.img_format         = fits
 mask5.argument.vertices_file      = {{ vertices_file }}
 mask5.argument.exclude_cal_region = True
@@ -782,10 +782,10 @@ wsclean_image_full_low.control.type                   = wsclean
 wsclean_image_full_low.control.mapfiles_in            = [create_compressed_mapfile6.output.mapfile,premask_low.output.mapfile]
 wsclean_image_full_low.control.inputkeys              = [msfile,fitsmask]
 {% if use_wideband %}
-wsclean_image_full_low.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image_full_low.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,msfile]
 wsclean_image_full_low.argument.channelsout           = {{ nbands_selfcal_facet_image }}
 {% else %}
-wsclean_image_full_low.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,msfile]
+wsclean_image_full_low.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,msfile]
 {% endif %}
 wsclean_image_full_low.argument.fitsmask              = fitsmask
 wsclean_image_full_low.argument.size                  = {{ facet_low_imsize }} {{ facet_low_imsize }}
@@ -832,11 +832,11 @@ mask6.control.inputkey            = imagefile
 mask6.control.outputkey           = maskfile
 mask6.argument.flags              = [imagefile,maskfile]
 mask6.argument.region_file        = {{ region_field }}
-mask6.argument.threshisl          = 10
-mask6.argument.threshpix          = 20
+mask6.argument.threshisl          = 6
+mask6.argument.threshpix          = 8
 mask6.argument.rmsbox             = (80,20)
 mask6.argument.adaptive_rmsbox    = True
-mask6.argument.atrous_do          = False
+mask6.argument.atrous_do          = True
 mask6.argument.img_format         = fits
 mask6.argument.vertices_file      = {{ vertices_file }}
 mask6.argument.exclude_cal_region = True
