@@ -51,7 +51,7 @@ def convert_radec_str(ra, dec):
 
 
 def main(fits_model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
-    max_residual_jy=0.05, interp='linear'):
+    max_residual_jy=0.00, interp='linear'):
     """
     Make a makesourcedb sky model for input MS from WSClean fits model images
 
