@@ -513,6 +513,7 @@ wsclean_image01.argument.multiscale-shape       = gaussian
 {% if not wsclean_selfcal_multiscale %}
 wsclean_image01.argument.multiscale-scales      = 0
 {% endif %}
+{% if wsclean_nchannels_selfcal > 3 %}
 wsclean_image01.argument.fit-spectral-pol       = 3
 {% elif wsclean_nchannels_selfcal > 1 %}
 wsclean_image01.argument.fit-spectral-pol       = {{ wsclean_nchannels_selfcal - 1 }}
