@@ -307,6 +307,15 @@ class Direction(object):
             self.nband_pad_selfcal = 0
             self.wsclean_suffix = '-image.fits'
 
+        # Set the channel values for the shallow facet imaging steps
+        fb = parset['imaging_specific']['fractional_bandwidth_selfcal_facet_image']
+        self.startchan_selfcal_facet_image = int((1.0 - fb) * nchan / 2.0)
+        self.nchan_selfcal_facet_image = int(fb * nchan)
+        while self.nchan_selfcal_facet_image % self.facetimage_freqstep:
+            self.nchan_selfcal_facet_image += 1
+        while self.nchan_selfcal_facet_image/self.facetimage_freqstep % self.facetimage_low_freqstep:
+            self.facetimage_low_freqstep -= 1
+
         # Set the baseline-averaging limit for WSClean
         if (hasattr(self, 'facetselfcal_timestep_sec') and
             parset['imaging_specific']['wsclean_bl_averaging']):
@@ -328,7 +337,7 @@ class Direction(object):
             self.facetimage_low_wsclean_nwavelengths = 0
 
 
-    def get_nwavelengths(self, cellsize_deg, timestep_sec,):
+    def get_nwavelengths(self, cellsize_deg, timestep_sec):
         """
         Returns nwavelengths for WSClean BL-based averaging
 
@@ -362,6 +371,8 @@ class Direction(object):
         ----------
         nbands : int
             Number of bands
+        nbands_selfcal : int
+            Number of bands for full facet image during selfcal
         padding : float, optional
             Padding factor by which size of facet is multiplied to determine
             the facet image size
@@ -388,7 +399,7 @@ class Direction(object):
         # image to ensure the imager has a reasonable chance to reach the
         # threshold first (which is set by the masking step)
         scaling_factor = np.sqrt(np.float(nbands))
-        scaling_factor_selfcal = np.sqrt(np.float(nbands_selfcal))
+        scaling_factor_selfcal = np.sqrt(np.float(nbands_selfcal)*0.25)
         self.wsclean_selfcal_full_image_niter = int(2000 * scaling_factor_selfcal)
         self.wsclean_selfcal_full_image_threshold_jy =  1.5e-3 * 0.7 / scaling_factor_selfcal
         self.wsclean_full1_image_niter = int(2000 * scaling_factor)

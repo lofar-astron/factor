@@ -1,0 +1,267 @@
+#! /usr/bin/env python
+"""
+Script to make a normal sky model from a polynomial sky model
+"""
+import argparse
+from argparse import RawTextHelpFormatter
+from astropy.io import fits
+from astropy import wcs
+from astropy.coordinates import Angle
+import numpy as np
+from numpy.polynomial.polynomial import polyval
+import casacore.tables as pt
+import sys
+import os
+import glob
+
+
+def ra2hhmmss(deg):
+    """Convert RA coordinate (in degrees) to HH MM SS"""
+
+    from math import modf
+    if deg < 0:
+        deg += 360.0
+    x, hh = modf(deg/15.)
+    x, mm = modf(x*60)
+    ss = x*60
+
+    return (int(hh), int(mm), ss)
+
+
+def dec2ddmmss(deg):
+    """Convert DEC coordinate (in degrees) to DD MM SS"""
+
+    from math import modf
+    sign = (-1 if deg < 0 else 1)
+    x, dd = modf(abs(deg))
+    x, ma = modf(x*60)
+    sa = x*60
+
+    return (int(dd), int(ma), sa, sign)
+
+
+def RA2Angle(RA):
+    """
+    Returns Angle objects for input RA values.
+
+    Parameters
+    ----------
+    RA : str, float or list of str, float
+        Values of RA to convert. Can be strings in makesourcedb format or floats
+        in degrees.
+
+    Returns
+    -------
+    RAAngle : astropy.coordinates.Angle object
+
+    """
+    import astropy.units as u
+
+    if type(RA) is not list:
+        RA = [RA]
+
+    if type(RA[0]) is str:
+        try:
+            RAAngle = Angle(Angle(RA, unit=u.hourangle), unit=u.deg)
+        except KeyboardInterrupt:
+            raise
+        except Exception as e:
+            raise ValueError('RA not understood (must be string in '
+                'makesourcedb format or float in degrees): {0}'.format(e.message))
+    else:
+        RAAngle = Angle(RA, unit=u.deg)
+
+    return RAAngle
+
+
+def Dec2Angle(Dec):
+    """
+    Returns Angle objects for input Dec values.
+
+    Parameters
+    ----------
+    Dec : str, float or list of str, float
+        Values of Dec to convert. Can be strings in makesourcedb format or floats
+        in degrees
+
+    Returns
+    -------
+    DecAngle : astropy.coordinates.Angle object
+
+    """
+    import astropy.units as u
+
+    if type(Dec) is not list:
+        Dec = [Dec]
+
+    if type(Dec[0]) is str:
+        try:
+            DecAngle = Angle(Dec, unit=u.deg)
+        except KeyboardInterrupt:
+            raise
+        except ValueError:
+            try:
+                DecSex = [decstr.replace('.', ':', 2) for decstr in Dec]
+                DecAngle = Angle(DecSex, unit=u.deg)
+            except Exception as e:
+                raise ValueError('Dec not understood (must be string in '
+                    'makesourcedb format or float in degrees): {0}'.format(e.message))
+        except Exception as e:
+            raise ValueError('Dec not understood (must be string in '
+                'makesourcedb format or float in degrees): {0}'.format(e.message))
+    else:
+        DecAngle = Angle(Dec, unit=u.deg)
+
+    return DecAngle
+
+
+def processLine(line, ncols):
+    """
+    Processes a makesourcedb line.
+
+    Parameters
+    ----------
+    line : str
+        Data line
+    ncols : int
+        Number of columns
+
+    Returns
+    -------
+    line : str
+        Processed line
+
+    """
+    if line.startswith("FORMAT") or line.startswith("format") or line.startswith("#"):
+        return None
+
+    # Check for SpectralIndex or SpectralTerms entries, which are unreadable as they use
+    # the same separator for multiple orders as used for the columns
+    line = line.strip('\n')
+    a = re.search('\[.*\]', line)
+    if a is not None:
+        b = line[a.start(): a.end()]
+        c = b.strip('[]')
+        if ',' in c:
+            c = c.replace(',', ';')
+        line = line.replace(b, c)
+    colLines = line.split(',')
+
+    while len(colLines) < ncols:
+        colLines.append(' ')
+
+    return ','.join(colLines)
+
+
+def processSpectralTerms(terms):
+    terms = terms.strip('[]').split(';')
+    terms = [float(t) for t in terms]
+    return terms
+
+
+def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
+    max_residual_jy=0.0):
+    """
+    Make a makesourcedb sky model for input MS from WSClean fits model images
+
+    Parameters
+    ----------
+    model_root : str
+        Root name of WSClean polynomial model sky model
+    ms_file : str
+        Filename of MS for which sky model is to be made. Can be a list of files
+        (e.g., '[ms1,ms2,...]', in which case they should all have the same
+        frequency
+    skymodel : str
+        Filename of the output makesourcedb sky model
+    fits_mask : str, optional
+        Filename of fits mask
+    min_peak_flux_jy : float, optional
+        Minimum absolute value of flux in Jy of a source in lowest-frequency model image
+        to include in output model
+    max_residual_jy : float, optional
+        Maximum acceptible total residual absolute flux in Jy
+
+    """
+    min_peak_flux_jy = float(min_peak_flux_jy)
+    max_residual_jy = float(max_residual_jy)
+
+    if type(fits_mask) is str:
+        if fits_mask.lower() == 'none':
+            fits_mask = None
+
+    # Read MS file and get the frequency info
+    if '[' in ms_file and ']' in ms_file:
+        files = ms_file.strip('[]').split(',')
+        files = [f.strip() for f in files]
+        ms_file = files[0]
+    sw = pt.table(ms_file+'::SPECTRAL_WINDOW', ack=False)
+    ms_freq = sw.col('REF_FREQUENCY')[0]
+    sw.close()
+
+    # Read in model
+    ncols = 8
+    outlines = []
+    polymodel = model_root + '-components.txt'
+    with open(polymodel) as f:
+        for line in f:
+            if line.startswith("# ReferenceFrequency"):
+                ref_freq = float(line.split('=')[1].strip())
+            else:
+                outline = processLine(line, ncols)
+                if outline is not None:
+                    outlines.append(outline)
+    data = Table.read(outlines, format='ascii', comment='#', guess=False,
+        delimiter=',', data_start=0, names=['Name', 'Type', 'Ra', 'Dec',
+        'SpectralTerms', 'MajorAxis', 'MinorAxis', 'Orientation'])
+    nsources = len(data)
+
+    # Check if fits mask is empty
+    if fits_mask is not None:
+        if fits_mask.lower() == 'empty':
+            # Handle case in which no sources were found during masking
+            nsources = 0
+            mask = None
+        else:
+            mask = fits.getdata(fits_mask, 0, ignore_missing_end=True)
+            hdr = fits.getheader(fits_mask, 0, ignore_missing_end=True)
+            w = wcs.WCS(hdr)
+
+    # Discard components not in the mask, if given
+    if mask is not None:
+        xs, ys = w.wcs_world2pix(np.array([RA2Angle(data['Ra']), Dec2Angle(data['Dec']), 0, 0]), 0)
+        for i, (x, y) in enumerate(zip(xs, ys)):
+            if mask[0, 0, x, y] < 1:
+                data.remove_row(i)
+
+    # Write sky model
+    with open(skymodel, 'w') as outfile:
+        outfile.write('FORMAT = Name, Type, Ra, Dec, I, Q, U, V, ReferenceFrequency, '
+            'MajorAxis, MinorAxis, Orientation\n')
+        for s in data:
+            polyterms = processSpectralTerms(s['SpectralTerms'])
+            flux = polyval(ms_freq/ref_freq, polyterms)
+            if s['Type'] == 'POINT':
+                outfile.write('{0}, POINT, {1}, {2}, {3}, 0.0, 0.0, 0.0, {4}, , , \n'
+                    .format(s['Name'], s['Ra'], s['Dec'], flux, ms_freq))
+            elif s['Type'] == 'GAUSSIAN':
+                outfile.write('{0}, GAUSSIAN, {1}, {2}, {3}, 0.0, 0.0, 0.0, {4}, {5}, {6}, {7}\n'
+                    .format(s['Name'], s['Ra'], s['Dec'], flux, ms_freq,
+                    s['MajorAxis'], s['MinorAxis'], s['Orientation']))
+
+
+if __name__ == '__main__':
+    descriptiontext = "Make a makesourcedb sky model from WSClean fits model images.\n"
+
+    parser = argparse.ArgumentParser(description=descriptiontext, formatter_class=RawTextHelpFormatter)
+    parser.add_argument('fits_model_root', help='Root of model images')
+    parser.add_argument('ms_file', help='Filename of MS for which sky model is to be made')
+    parser.add_argument('skymodel', help='Filename of output sky model')
+    parser.add_argument('-f' '--fits_mask', help='Filename of fits mask', type=str, default=None)
+    parser.add_argument('-p', '--min_peak_flux_jy', help='Minimum absolute value of flux in Jy', type=float, default=0.0001)
+    parser.add_argument('-r', '--max_residual_jy', help='Maximum acceptible total residual absolute flux in Jy', type=float, default=0.0)
+    parser.add_argument('-i', '--interp', help='Interpolation method', type=str, default='linear')
+    args = parser.parse_args()
+    main(args.fits_model_root, args.ms_file, args.skymodel, fits_mask=args.fits_mask,
+        min_peak_flux_jy=args.min_peak_flux_jy, max_residual_jy=args.max_residual_jy,
+        interp=args.interp)

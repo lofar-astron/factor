@@ -471,6 +471,19 @@ def get_imaging_options(parset):
     else:
         parset_dict['nbands_selfcal_facet_image'] = 6
 
+    # Fractional of bandwidth to use for facet imaging during selfcal (default = 0.25). Facet
+    # imaing during selfcal is used to improve the subtraction of non-calibrator
+    # sources in the facet. More bandwidth will result in a better subtraction but also
+    # longer runtimes
+    if 'fractional_bandwidth_selfcal_facet_image' in parset_dict:
+        parset_dict['fractional_bandwidth_selfcal_facet_image'] = parset.getfloat('imaging', 'fractional_bandwidth_selfcal_facet_image')
+        if parset_dict['fractional_bandwidth_selfcal_facet_image'] < 0.0:
+            parset_dict['fractional_bandwidth_selfcal_facet_image'] = 0.2
+        if parset_dict['fractional_bandwidth_selfcal_facet_image'] > 1.0:
+            parset_dict['fractional_bandwidth_selfcal_facet_image'] = 1.0
+    else:
+        parset_dict['fractional_bandwidth_selfcal_facet_image'] = 0.25
+
     # Use baseline-dependent averaging in WSClean (default = False). If enabled,
     # this option can dramatically speed up imaging with WSClean.
     if 'wsclean_bl_averaging' in parset_dict:
@@ -606,7 +619,7 @@ def get_imaging_options(parset):
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
         'wsclean_image_padding', 'fit_spectral_pol', 'image_target_only',
         'selfcal_min_uv_lambda', 'facet_min_uv_lambda', 'nbands_selfcal_facet_image',
-        'selfcal_robust_wsclean', 'wsclean_bl_averaging',
+        'selfcal_robust_wsclean', 'wsclean_bl_averaging', 'fractional_bandwidth_selfcal_facet_image',
         'selfcal_scales']
     for option in given_options:
         if option not in allowed_options:
@@ -1016,7 +1029,7 @@ def get_checkfactor_options(parset):
 
     if 'ds9_frames' not in parset_dict:
         parset_dict['ds9_frames'] = None
-        
+
     if 'image_display' not in parset_dict:
         parset_dict['image_display'] = 'display -geometry 800x600'
     elif parset_dict['image_display'] == 'display':
