@@ -7,6 +7,7 @@ from argparse import RawTextHelpFormatter
 from astropy.io import fits
 from astropy import wcs
 from astropy.coordinates import Angle
+from astropy.table import Table
 import numpy as np
 from numpy.polynomial.polynomial import polyval
 import casacore.tables as pt
@@ -226,6 +227,8 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
             mask = fits.getdata(fits_mask, 0, ignore_missing_end=True)
             hdr = fits.getheader(fits_mask, 0, ignore_missing_end=True)
             w = wcs.WCS(hdr)
+    else:
+        mask = None
 
     # Discard components not in the mask, if given
     if mask is not None:
@@ -238,9 +241,10 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
     with open(skymodel, 'w') as outfile:
         outfile.write('FORMAT = Name, Type, Ra, Dec, I, Q, U, V, ReferenceFrequency, '
             'MajorAxis, MinorAxis, Orientation\n')
-        for s in data:
+        for i, s in enumerate(data):
             polyterms = processSpectralTerms(s['SpectralTerms'])
             flux = polyval(ms_freq/ref_freq, polyterms)
+            name = 'cc{}'.format(i)
             if s['Type'] == 'POINT':
                 outfile.write('{0}, POINT, {1}, {2}, {3}, 0.0, 0.0, 0.0, {4}, , , \n'
                     .format(s['Name'], s['Ra'], s['Dec'], flux, ms_freq))
