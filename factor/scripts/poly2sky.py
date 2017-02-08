@@ -200,7 +200,7 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
     ms_freq = sw.col('REF_FREQUENCY')[0]
     sw.close()
 
-    # Read in model
+    # Read in sky model
     ncols = 8
     outlines = []
     polymodel = model_root + '-components.txt'
@@ -217,6 +217,25 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
         'SpectralTerms', 'MajorAxis', 'MinorAxis', 'Orientation'])
     nsources = len(data)
 
+    # Find model images and read in frequencies
+    fits_models = glob.glob(fits_model_root+'-00*-model.fits')
+    if len(fits_models) == 0:
+        # No channels images found, so look for non-MFS images
+        fits_models = glob.glob(fits_model_root+'-model.fits')
+    if len(fits_models) == 0:
+        print('ERROR: no model images found')
+        sys.exit(1)
+    freqs = []
+    for f in fits_models:
+        # Get the frequency info
+        hdr = fits.getheader(f, 0, ignore_missing_end=True)
+        freqs.append(hdr['CRVAL3']) # Hz
+
+    # Determine nearest model frequency to MS frequency. We will use this to
+    # get the fluxes (to match the frequency blocks used during imaging and
+    # calibration)
+    sky_freq = min(freqs, key=lambda x:abs(x-ms_freq))
+
     # Check if fits mask is empty
     if fits_mask is not None:
         if fits_mask.lower() == 'empty':
@@ -232,10 +251,13 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
 
     # Discard components not in the mask, if given
     if mask is not None:
-        xs, ys = w.wcs_world2pix(np.array([RA2Angle(data['Ra']), Dec2Angle(data['Dec']), 0, 0]), 0)
-        for i, (x, y) in enumerate(zip(xs, ys)):
-            if mask[0, 0, x, y] < 1:
-                data.remove_row(i)
+        pix = w.wcs_world2pix(np.array([RA2Angle(data['Ra'].tolist()),
+            Dec2Angle(data['Dec'].tolist()), [0]*len(data), [0]*len(data)]).T, 0)
+        not_in_mask = []
+        for i, p in enumerate(pix):
+            if mask[0, 0, int(round(p[1])), int(round(p[0]))] < 1:
+                not_in_mask.append(i)
+        data.remove_rows(not_in_mask)
 
     # Write sky model
     with open(skymodel, 'w') as outfile:
@@ -243,14 +265,14 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
             'MajorAxis, MinorAxis, Orientation\n')
         for i, s in enumerate(data):
             polyterms = processSpectralTerms(s['SpectralTerms'])
-            flux = polyval(ms_freq/ref_freq, polyterms)
+            flux = polyval(sky_freq/ref_freq, polyterms)
             name = 'cc{}'.format(i)
             if s['Type'] == 'POINT':
                 outfile.write('{0}, POINT, {1}, {2}, {3}, 0.0, 0.0, 0.0, {4}, , , \n'
-                    .format(s['Name'], s['Ra'], s['Dec'], flux, ms_freq))
+                    .format(name, s['Ra'], s['Dec'], flux, ms_freq))
             elif s['Type'] == 'GAUSSIAN':
                 outfile.write('{0}, GAUSSIAN, {1}, {2}, {3}, 0.0, 0.0, 0.0, {4}, {5}, {6}, {7}\n'
-                    .format(s['Name'], s['Ra'], s['Dec'], flux, ms_freq,
+                    .format(name, s['Ra'], s['Dec'], flux, ms_freq,
                     s['MajorAxis'], s['MinorAxis'], s['Orientation']))
 
 
