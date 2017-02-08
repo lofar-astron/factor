@@ -10,9 +10,9 @@ from astropy.coordinates import Angle
 import numpy as np
 from numpy.polynomial.polynomial import polyval
 import casacore.tables as pt
+import re
 import sys
 import os
-import glob
 
 
 def ra2hhmmss(deg):
