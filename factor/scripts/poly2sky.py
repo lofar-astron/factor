@@ -14,6 +14,7 @@ import casacore.tables as pt
 import re
 import sys
 import os
+import glob
 
 
 def ra2hhmmss(deg):
