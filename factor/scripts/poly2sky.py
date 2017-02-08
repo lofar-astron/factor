@@ -219,10 +219,10 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
     nsources = len(data)
 
     # Find model images and read in frequencies
-    fits_models = glob.glob(fits_model_root+'-00*-model.fits')
+    fits_models = glob.glob(model_root+'-00*-model.fits')
     if len(fits_models) == 0:
         # No channels images found, so look for non-MFS images
-        fits_models = glob.glob(fits_model_root+'-model.fits')
+        fits_models = glob.glob(model_root+'-model.fits')
     if len(fits_models) == 0:
         print('ERROR: no model images found')
         sys.exit(1)
