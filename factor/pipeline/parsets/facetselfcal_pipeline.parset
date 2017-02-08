@@ -2039,10 +2039,10 @@ wsclean_image_full.control.type                   = wsclean
 wsclean_image_full.control.mapfiles_in            = [create_compressed_mapfile5.output.mapfile,premask.output.mapfile]
 wsclean_image_full.control.inputkeys              = [msfile,fitsmask]
 {% if use_wideband %}
-wsclean_image_full.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,-save-component-list,msfile]
+wsclean_image_full.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,-multiscale,-save-component-list,msfile]
 wsclean_image_full.argument.channelsout           = {{ nbands_selfcal_facet_image }}
 {% else %}
-wsclean_image_full.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-save-component-list,msfile]
+wsclean_image_full.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-multiscale,-save-component-list,msfile]
 {% endif %}
 wsclean_image_full.argument.fitsmask              = fitsmask
 wsclean_image_full.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
@@ -2064,6 +2064,7 @@ wsclean_image_full.argument.fit-spectral-pol      = 3
 {% elif nbands_selfcal_facet_image > 1 %}
 wsclean_image_full.argument.fit-spectral-pol      = {{ nbands_selfcal_facet_image - 1 }}
 {% endif %}
+wsclean_image_full.argument.multiscale-scales     = 0
 wsclean_image_full.argument.weighting-rank-filter = 3
 {% if facetimage_wsclean_nwavelengths > 0.0 %}
 wsclean_image_full.argument.baseline-averaging    = {{ facetimage_wsclean_nwavelengths }}
