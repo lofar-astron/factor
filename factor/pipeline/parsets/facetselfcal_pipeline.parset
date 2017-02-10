@@ -2123,7 +2123,7 @@ create_model5_map.control.filename    = final_model_rootnames.mapfile
 adjust_wsclean_mapfile2.control.kind        = plugin
 adjust_wsclean_mapfile2.control.type        = appendMapfile
 adjust_wsclean_mapfile2.control.mapfile_in  = create_model5_map.output.mapfile
-adjust_wsclean_mapfile2.control.append      = {{ wsclean_suffix }}
+adjust_wsclean_mapfile2.control.append      = {{ wsclean_selfcal_facet_image_suffix }}
 adjust_wsclean_mapfile2.control.mapfile_dir = input.output.mapfile_dir
 adjust_wsclean_mapfile2.control.filename    = final_image.mapfile
 
@@ -2284,7 +2284,7 @@ create_imagebase_low_map.control.filename    = wsclean_image_full_low_image_root
 adjust_wsclean_mapfile3.control.kind        = plugin
 adjust_wsclean_mapfile3.control.type        = appendMapfile
 adjust_wsclean_mapfile3.control.mapfile_in  = create_imagebase_low_map.output.mapfile
-adjust_wsclean_mapfile3.control.append      = {{ wsclean_suffix }}
+adjust_wsclean_mapfile3.control.append      = {{ wsclean_selfcal_facet_image_suffix }}
 adjust_wsclean_mapfile3.control.mapfile_dir = input.output.mapfile_dir
 adjust_wsclean_mapfile3.control.filename    = final_image_low.mapfile
 

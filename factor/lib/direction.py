@@ -242,6 +242,8 @@ class Direction(object):
         self.use_selfcal_adaptive_threshold = parset['imaging_specific']['selfcal_adaptive_threshold']
         self.fit_spectral_pol = parset['imaging_specific']['fit_spectral_pol']
         self.nbands_selfcal_facet_image = parset['imaging_specific']['nbands_selfcal_facet_image']
+        if self.nbands_selfcal_facet_image > len(bands):
+            self.nbands_selfcal_facet_image = len(bands)
 
         if facet_cellsize_arcsec is None:
             facet_cellsize_arcsec = parset['imaging_specific']['selfcal_cellsize_arcsec']
@@ -260,7 +262,7 @@ class Direction(object):
             facet_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
         self.facet_min_uv_lambda = facet_min_uv_lambda
 
-        self.set_imaging_parameters(nbands, parset['imaging_specific']['nbands_selfcal_facet_image'], padding)
+        self.set_imaging_parameters(nbands, self.nbands_selfcal_facet_image, padding)
         self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,
             timestep_sec, ntimes, nbands, mean_freq_mhz, self.skymodel,
             preaverage_flux_jy, min_peak_smearing_factor, tec_block_mhz,
@@ -315,6 +317,10 @@ class Direction(object):
             self.nchan_selfcal_facet_image += 1
         while self.nchan_selfcal_facet_image/self.facetimage_freqstep % self.facetimage_low_freqstep:
             self.facetimage_low_freqstep -= 1
+        if self.nbands_selfcal_facet_image > 1:
+            self.wsclean_selfcal_facet_image_suffix = '-MFS-image.fits'
+        else:
+            self.wsclean_selfcal_facet_image_suffix = '-image.fits'
 
         # Set the baseline-averaging limit for WSClean
         if (hasattr(self, 'facetselfcal_timestep_sec') and
