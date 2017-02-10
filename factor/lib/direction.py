@@ -416,7 +416,7 @@ class Direction(object):
         # check for large sources (anything above 4 arcmin -- the CC sky model
         # was convolved with a Gaussian of 1 arcmin, so unresolved sources have
         # sizes of ~ 1 arcmin)
-        large_size_arcmin = 6.0
+        large_size_arcmin = 2.0
         if self.mscale_field_do is None:
             sizes_arcmin = self.get_source_sizes()
             if any([s > large_size_arcmin for s in sizes_arcmin]):
