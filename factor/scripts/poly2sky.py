@@ -203,7 +203,7 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
 
     # Read in sky model
     ncols = 8
-    outlines = []
+    outlines = ['Name, Type, Ra, Dec, SpectralTerms, MajorAxis, MinorAxis, Orientation']
     polymodel = model_root + '-components.txt'
     with open(polymodel) as f:
         for line in f:
@@ -213,9 +213,8 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
                 outline = processLine(line, ncols)
                 if outline is not None:
                     outlines.append(outline)
-    data = Table.read(outlines, format='ascii', comment='#', guess=False,
-        delimiter=',', data_start=0, names=['Name', 'Type', 'Ra', 'Dec',
-        'SpectralTerms', 'MajorAxis', 'MinorAxis', 'Orientation'])
+    data = Table.read(outlines, format='ascii', guess=False, delimiter=',',
+        header_start=0, data_start=1)
     nsources = len(data)
 
     # Find model images and read in frequencies
