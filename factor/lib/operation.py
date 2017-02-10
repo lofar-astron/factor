@@ -365,8 +365,11 @@ class Operation(object):
         import pickle
 
         statefile = os.path.join(self.pipeline_parset_dir, 'statefile')
-        current_state = pickle.load(open(statefile, 'rb'))
-        steptypes = [item[0] for item in current_state[1]]
+        if os.path.exists(statefile):
+            current_state = pickle.load(open(statefile, 'rb'))
+            steptypes = [item[0] for item in current_state[1]]
+        else:
+            steptypes = []
 
         return steptypes
 
