@@ -158,7 +158,6 @@ def processLine(line, ncols):
 def processSpectralTerms(terms):
     if type(terms) is str:
         terms = terms.strip('[]').split(';')
-    terms = [float(t) for t in terms]
     return terms
 
 
