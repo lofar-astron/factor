@@ -171,7 +171,7 @@ dir_ms = /data/bands
 # set of images and one mosaic image will be made for each set of parameters. By
 # default, facets will be imaged using the selfcal imaging parameters above
 # facet_cellsize_arcsec = [1.5, 15.0]
-# facet_robust = [-0.25, 0.0]
+# facet_robust = [-0.5, 0.0]
 # facet_taper_arcsec = [0.0, 45.0]
 # facet_min_uv_lambda = [80.0, 160.0]
 
@@ -326,7 +326,7 @@ flux_min_Jy = 0.3
 # MS-specific parameters (optional). Currently, only the initial sky model can
 # be specified here. For multi-epoch (interleaved or multi-night) observations
 # the skymodel has to be specified only for one MS of each frequency group, it
-# will then be used for all MSs in this frequency group. 
+# will then be used for all MSs in this frequency group.
 # init_skymodel = /data/ms1.sky
 
 [ms2.ms]
