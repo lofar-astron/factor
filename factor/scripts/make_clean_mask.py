@@ -555,6 +555,20 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             # Mask all pixels
             data[:] = 1
 
+        if region_file is not None and region_file != '[]':
+            # Merge the CASA regions with the mask
+            casa_polys = read_casa_polys(region_file.strip('[]"'), new_mask)
+            for poly in casa_polys:
+                # Find unmasked regions
+                unmasked_ind = np.where(data[0, 0] == 0)
+
+                # Find distance to nearest poly edge and mask those that
+                # are inside the casa region (dist > 0)
+                dist = poly.is_inside(unmasked_ind[0], unmasked_ind[1])
+                inside_ind = np.where(dist > 0.0)
+                if len(inside_ind[0]) > 0:
+                    data[0, 0, unmasked_ind[0][inside_ind], unmasked_ind[1][inside_ind]] = 1
+
         if vertices_file is not None:
             # Modify the clean mask to exclude regions outside of the polygon
             vertices = read_vertices(vertices_file)
@@ -587,20 +601,6 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             data[0, 0, 0:margin, 0:sh[3]] = 0
             data[0, 0, 0:sh[2], sh[3]-margin:sh[3]] = 0
             data[0, 0, sh[2]-margin:sh[2], 0:sh[3]] = 0
-
-        if region_file is not None and region_file != '[]':
-            # Merge the CASA regions with the mask
-            casa_polys = read_casa_polys(region_file.strip('[]"'), new_mask)
-            for poly in casa_polys:
-                # Find unmasked regions
-                unmasked_ind = np.where(data[0, 0] == 0)
-
-                # Find distance to nearest poly edge and mask those that
-                # are inside the casa region (dist > 0)
-                dist = poly.is_inside(unmasked_ind[0], unmasked_ind[1])
-                inside_ind = np.where(dist > 0.0)
-                if len(inside_ind[0]) > 0:
-                    data[0, 0, unmasked_ind[0][inside_ind], unmasked_ind[1][inside_ind]] = 1
 
         # Save changes
         new_mask.putdata(data)
