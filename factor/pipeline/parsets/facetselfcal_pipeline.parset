@@ -2038,7 +2038,7 @@ premask.argument.reference_dec_deg     = {{ facet_dec }}
 wsclean_image_full.control.type                   = wsclean
 wsclean_image_full.control.mapfiles_in            = [create_compressed_mapfile5.output.mapfile,premask.output.mapfile]
 wsclean_image_full.control.inputkeys              = [msfile,fitsmask]
-{% if wsclean_nchannels_selfcal > 1 %}
+{% if nbands_selfcal_facet_image > 1 %}
 wsclean_image_full.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,-multiscale,-save-component-list,msfile]
 wsclean_image_full.argument.channelsout           = {{ nbands_selfcal_facet_image }}
 {% else %}
@@ -2239,7 +2239,7 @@ premask_low.argument.make_blank_image      = True
 wsclean_image_full_low.control.type                   = wsclean
 wsclean_image_full_low.control.mapfiles_in            = [create_compressed_mapfile6.output.mapfile,premask_low.output.mapfile]
 wsclean_image_full_low.control.inputkeys              = [msfile,fitsmask]
-{% if wsclean_nchannels_selfcal > 1 %}
+{% if nbands_selfcal_facet_image > 1 %}
 wsclean_image_full_low.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,-multiscale,-save-component-list,msfile]
 wsclean_image_full_low.argument.channelsout           = {{ nbands_selfcal_facet_image }}
 {% else %}
