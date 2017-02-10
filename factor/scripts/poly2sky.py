@@ -96,7 +96,7 @@ def Dec2Angle(Dec):
     if type(Dec) is not list:
         Dec = [Dec]
 
-    if type(Dec[0]) is str:
+    if type(Dec[0]) is str or type(Dec[0]) is np.string_:
         try:
             DecAngle = Angle(Dec, unit=u.deg)
         except KeyboardInterrupt:
@@ -156,7 +156,7 @@ def processLine(line, ncols):
 
 
 def processSpectralTerms(terms):
-    if type(terms) is str:
+    if type(terms) is str or type(terms) is np.string_:
         terms = terms.strip('[]').split(';')
         terms = [float(t) for t in terms]
     return terms
