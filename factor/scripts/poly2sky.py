@@ -216,7 +216,6 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
                     outlines.append(outline)
     data = Table.read(outlines, format='ascii', guess=False, delimiter=',',
         header_start=0, data_start=1)
-    nsources = len(data)
 
     # Find model images and read in frequencies
     fits_models = glob.glob(model_root+'-00*-model.fits')
@@ -241,7 +240,7 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
     if fits_mask is not None:
         if fits_mask.lower() == 'empty':
             # Handle case in which no sources were found during masking
-            nsources = 0
+            data = []
             mask = None
         else:
             mask = fits.getdata(fits_mask, 0, ignore_missing_end=True)
