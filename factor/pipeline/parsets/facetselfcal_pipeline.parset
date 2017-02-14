@@ -2361,7 +2361,7 @@ expand_sourcedb_med.control.filename       = expand_sourcedb_med.mapfile
 # subtract the medium-resolution model, length = nfiles or nbands_selfcal_facet_image * nchunks
 # compress data and weights
 subtract_med.control.type                                 = dppp
-subtract_med.control.mapfiles_in                          = [prepare_imaging_data.output.mapfile,expand_sourcedb_high_med.output.mapfile]
+subtract_med.control.mapfiles_in                          = [prepare_imaging_data.output.mapfile,expand_sourcedb_med.output.mapfile]
 subtract_med.control.inputkeys                            = [msin,sourcedb_high_med]
 subtract_med.argument.numthreads                          = {{ max_cpus_per_io_proc_nfiles }}
 subtract_med.argument.msin.datacolumn                     = DATA
