@@ -2231,7 +2231,7 @@ premask_med.argument.make_blank_image      = True
 wsclean_image_full_med.control.type                   = wsclean
 wsclean_image_full_med.control.mapfiles_in            = [create_compressed_mapfile6.output.mapfile,premask_med.output.mapfile]
 wsclean_image_full_med.control.inputkeys              = [msfile,fitsmask]
-{% if use_wideband %}
+{% if nbands_selfcal_facet_image > 1 %}
 wsclean_image_full_med.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,-multiscale,-save-component-list,msfile]
 wsclean_image_full_med.argument.channelsout           = {{ nbands_selfcal_facet_image }}
 {% else %}
