@@ -2390,7 +2390,7 @@ subtract_med.argument.avg.timestep                        = {{ facetimage_low_ti
 # compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile7.control.kind        = plugin
 create_compressed_mapfile7.control.type        = compressMapfile
-create_compressed_mapfile7.control.mapfile_in  = subtract_high_med.output.mapfile
+create_compressed_mapfile7.control.mapfile_in  = subtract_med.output.mapfile
 create_compressed_mapfile7.control.mapfile_dir = input.output.mapfile_dir
 create_compressed_mapfile7.control.filename    = concat_averaged_low_input.mapfile
 
