@@ -34,6 +34,8 @@ if __name__ == '__main__':
         '-o facetselfcal,facetsub). By default, all operations are reset. Available '
         'operations are: outlierpeel, facetpeel, facetpeelimage, facetselfcal, facetsub, '
         'facetimage, fieldmosaic', type=str, default=None)
+    parser.add_option('-s', '--stop_after', help='Stop after processing so many facetselfcal groups. '
+	'(Please note the difference between directions and groups!)', type=int, default=0)
     parser.add_option('-t', help='enable test mode', action='store_true', default=False)
     parser.add_option('-v', help='enable verbose mode', action='store_true', default=False)
     (options, args) = parser.parse_args()
@@ -67,4 +69,4 @@ if __name__ == '__main__':
     # Process the field
     process.run(parset_file, logging_level=logging_level, dry_run=options.d,
         test_run=options.t, reset_directions=reset_directions, reset_operations=
-        reset_operations)
+        reset_operations, stop_after=options.stop_after)

@@ -26,7 +26,7 @@ log = logging.getLogger('factor')
 
 
 def run(parset_file, logging_level='info', dry_run=False, test_run=False,
-    reset_directions=[], reset_operations=[]):
+    reset_directions=[], reset_operations=[], stop_after=0):
     """
     Processes a dataset using facet calibration
 
@@ -53,6 +53,8 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         List of names of directions to be reset
     reset_operations : list of str, optional
         Llist of operations to be reset
+    stop_after : int, optional
+        Stop after processing so many facetselfcal groups.
 
     """
     # Read parset
@@ -142,8 +144,14 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 log.info('Exiting...')
                 sys.exit(1)
 
+    if stop_after: log.debug('Will stop after processing {} selfcal-groups.'.format(stop_after))
     # Run selfcal and subtract operations on direction groups
     for gindx, direction_group in enumerate(direction_groups):
+        if stop_after and gindx >= stop_after:
+            log.warn('Stopping after having processed {} groups.'.format(stop_after))
+            log.info('Exiting...')
+            sys.exit(0)
+
         log.info('Self calibrating {0} direction(s) in Group {1}'.format(
             len(direction_group), gindx+1))
 
