@@ -167,6 +167,10 @@ class Operation(object):
             self.cfg_dict['remote'] = '[remote]\n'\
                 + 'method = slurm_srun\n'\
                 + 'max_per_node = {0}\n'.format(self.parset['cluster_specific']['ncpu'])
+        elif self.parset['cluster_specific']['clustertype'] == 'mpirun':
+            self.cfg_dict['remote'] = '[remote]\n'\
+                + 'method = mpirun\n'\
+                + 'max_per_node = {0}\n'.format(self.parset['cluster_specific']['ncpu'])
         elif (self.parset['cluster_specific']['clustertype'] == 'pbs' or
             self.parset['cluster_specific']['clustertype'] == 'slurm'):
             self.cfg_dict['remote'] = ''

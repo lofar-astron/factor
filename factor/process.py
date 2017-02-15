@@ -365,6 +365,13 @@ def _set_up_compute_parameters(parset, dry_run=False):
             parset['cluster_specific']['clusterdesc'] = os.path.join(parset['lofarroot'], 'share', 'local.clusterdesc')
             parset['cluster_specific']['clustertype'] = 'juropa_slurm'
             parset['cluster_specific']['node_list'] = ['localhost']
+        elif (cluster_parset['clusterdesc_file'].lower() == 'mpirun' or
+            ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'mpirun')):
+            log.info('Using cluster setting: "mpirun".')
+            # mpirun uses the local.clusterdesc?
+            parset['cluster_specific']['clusterdesc'] = os.path.join(parset['lofarroot'], 'share', 'local.clusterdesc')
+            parset['cluster_specific']['clustertype'] = 'mpirun'
+            parset['cluster_specific']['node_list'] = ['localhost']
         else:
             log.info('Using cluster setting: "local" (Single node).')
             parset['cluster_specific']['clusterdesc'] = cluster_parset['clusterdesc_file']
