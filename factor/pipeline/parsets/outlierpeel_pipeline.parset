@@ -448,130 +448,74 @@ expand_sourcedb_all_facet_sources.control.mapfile_groups = create_msmulti_map.ou
 expand_sourcedb_all_facet_sources.control.mapfile_dir    = input.output.mapfile_dir
 expand_sourcedb_all_facet_sources.control.filename       = expand_sourcedb_all_facet_sources.mapfile
 
-{% if use_wideband %}
-# select bands spread over the full bandwidth for imaging, length = nbands_selfcal_facet_image * nchunks
-select_imaging_bands.control.kind        = plugin
-select_imaging_bands.control.type        = selectDistFreqs
-select_imaging_bands.control.mapfile_in  = create_ms_map.output.mapfile
-select_imaging_bands.control.num         = {{ nbands_selfcal_facet_image }}
-select_imaging_bands.control.mapfile_dir = input.output.mapfile_dir
-select_imaging_bands.control.filename    = imaging_bands.mapfile
-
-# adjust the dir-indep sourcedb mapfile to match the selected bands, length = nbands_selfcal_facet_image * nchunks
-select_sourcedb_all_facet_sources.control.kind         = plugin
-select_sourcedb_all_facet_sources.control.type         = matchDistFreqs
-select_sourcedb_all_facet_sources.control.mapfile_in   = expand_sourcedb_all_facet_sources.output.mapfile
-select_sourcedb_all_facet_sources.control.mapfile_dist = select_imaging_bands.output.mapfile
-select_sourcedb_all_facet_sources.control.mapfile_full = create_ms_map.output.mapfile
-select_sourcedb_all_facet_sources.control.mapfile_dir  = input.output.mapfile_dir
-select_sourcedb_all_facet_sources.control.filename     = imaging_all_sourcedbs.mapfile
-
-# adjust the calibrator sourcedb mapfile to match the selected bands, length = nbands_selfcal_facet_image * nchunks
-select_sourcedb_cal_facet_sources.control.kind         = plugin
-select_sourcedb_cal_facet_sources.control.type         = matchDistFreqs
-select_sourcedb_cal_facet_sources.control.mapfile_in   = expand_cal_sourcedb_map.output.mapfile
-select_sourcedb_cal_facet_sources.control.mapfile_dist = select_imaging_bands.output.mapfile
-select_sourcedb_cal_facet_sources.control.mapfile_full = create_ms_map.output.mapfile
-select_sourcedb_cal_facet_sources.control.mapfile_dir  = input.output.mapfile_dir
-select_sourcedb_cal_facet_sources.control.filename     = imaging_cal_sourcedbs.mapfile
-
-# adjust the dir-indep parmdb mapfile to match the selected bands, length = nbands_selfcal_facet_image * nchunks
-select_parmdb_map.control.kind         = plugin
-select_parmdb_map.control.type         = matchDistFreqs
-select_parmdb_map.control.mapfile_in   = create_parmdb_map.output.mapfile
-select_parmdb_map.control.mapfile_dist = select_imaging_bands.output.mapfile
-select_parmdb_map.control.mapfile_full = create_ms_map.output.mapfile
-select_parmdb_map.control.mapfile_dir  = input.output.mapfile_dir
-select_parmdb_map.control.filename     = imaging_parmdbs.mapfile
-
-# adjust the dir-dep parmdb mapfile to match the selected bands, length = nbands_selfcal_facet_image * nchunks
-select_merged_parmdb_map.control.kind             = plugin
-select_merged_parmdb_map.control.type             = expandMapfile
-select_merged_parmdb_map.control.mapfile_in       = convert_merged_selfcal_parmdbs.output.mapfile
-select_merged_parmdb_map.control.mapfile_to_match = select_imaging_bands.output.mapfile
-select_merged_parmdb_map.control.mapfile_dir      = input.output.mapfile_dir
-select_merged_parmdb_map.control.filename         = select_merged_parmdbs.mapfile
-
-# adjust the normalized dir-dep parmdb mapfile to match the selected bands, length = nbands_selfcal_facet_image * nchunks
-select_normalized_merged_parmdb_map.control.kind             = plugin
-select_normalized_merged_parmdb_map.control.type             = expandMapfile
-select_normalized_merged_parmdb_map.control.mapfile_in       = convert_normalized_merged_selfcal_parmdbs.output.mapfile
-select_normalized_merged_parmdb_map.control.mapfile_to_match = select_imaging_bands.output.mapfile
-select_normalized_merged_parmdb_map.control.mapfile_dir      = input.output.mapfile_dir
-select_normalized_merged_parmdb_map.control.filename         = select_normalized_merged_parmdbs.mapfile
-{% endif %}
-
-# shift the empty data, add all facet sources, subtract the calibrator, apply the direction-dependent solutions and average, length = nfiles or nbands_selfcal_facet_image * nchunks
+# shift the empty data, add all facet sources, apply the direction-dependent solutions and average, length = nfiles or nbands_selfcal_facet_image * nchunks
 # compress data and weights
-apply_dir_dep.control.type                                   = dppp
-{% if use_wideband %}
-apply_dir_dep.control.mapfiles_in                            = [select_imaging_bands.output.mapfile,select_sourcedb_all_facet_sources.output.mapfile,select_sourcedb_cal_facet_sources.output.mapfile,select_parmdb_map.output.mapfile,select_merged_parmdb_map.output.mapfile,select_normalized_merged_parmdb_map.output.mapfile]
-{% else %}
-apply_dir_dep.control.mapfiles_in                            = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,expand_cal_sourcedb_map.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile,expand_normalized_merged_parmdb_map.output.mapfile]
-{% endif %}
-apply_dir_dep.control.inputkeys                              = [msin,sourcedb,sourcedb_cal,dir_indep_parmdb,dir_dep_parmdb,dir_dep_parmdb_normalized]
-apply_dir_dep.argument.numthreads                            = {{ max_cpus_per_io_proc_nfiles }}
-apply_dir_dep.argument.msin.datacolumn                       = {{ subtracted_data_colname }}
-apply_dir_dep.argument.msout.overwrite                       = True
-apply_dir_dep.argument.msout.writefullresflag                = False
+prepare_imaging_data.control.type                                   = dppp
+prepare_imaging_data.control.mapfiles_in                            = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile]
+prepare_imaging_data.control.inputkeys                              = [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb]
+prepare_imaging_data.argument.numthreads                            = {{ max_cpus_per_io_proc_nfiles }}
+prepare_imaging_data.argument.msin.datacolumn                       = {{ subtracted_data_colname }}
+prepare_imaging_data.argument.msin.startchan                        = {{ startchan_selfcal_facet_image }}
+prepare_imaging_data.argument.msin.nchan                            = {{ nchan_selfcal_facet_image }}
+prepare_imaging_data.argument.msout.overwrite                       = True
+prepare_imaging_data.argument.msout.writefullresflag                = False
 {% if local_dir is not none %}
-apply_dir_dep.argument.local_scratch_dir                     = {{ local_dir }}
+prepare_imaging_data.argument.local_scratch_dir                     = {{ local_dir }}
 {% endif %}
 {% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
-apply_dir_dep.argument.steps                                 = [shift,add,flag,subtract_cal,correct,flagzero,avg]
+prepare_imaging_data.argument.steps                                 = [shift,add,flag,correct,flagzero,avg]
 {% else %}
-apply_dir_dep.argument.steps                                 = [shift,add,subtract_cal,correct,flagzero,avg]
+prepare_imaging_data.argument.steps                                 = [shift,add,correct,flagzero,avg]
 {% endif %}
-apply_dir_dep.argument.shift.type                            = phaseshifter
-apply_dir_dep.argument.shift.phasecenter                     = [{{ facet_ra }}deg, {{ facet_dec }}deg]
-apply_dir_dep.argument.add.type                              = predict
-apply_dir_dep.argument.add.sourcedb                          = sourcedb
-apply_dir_dep.argument.add.operation                         = add
-apply_dir_dep.argument.add.applycal.parmdb                   = dir_indep_parmdb
+prepare_imaging_data.argument.shift.type                            = phaseshifter
+prepare_imaging_data.argument.shift.phasecenter                     = [{{ facet_ra }}deg, {{ facet_dec }}deg]
+prepare_imaging_data.argument.add.type                              = predict
+prepare_imaging_data.argument.add.sourcedb                          = sourcedb
+prepare_imaging_data.argument.add.operation                         = add
+prepare_imaging_data.argument.add.applycal.parmdb                   = dir_indep_parmdb
 {% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
-apply_dir_dep.argument.flag.type                             = preflagger
+prepare_imaging_data.argument.flag.type                             = preflagger
 {% endif %}
 {% if flag_abstime is not none %}
-apply_dir_dep.argument.flag.abstime                          = {{ flag_abstime }}
+prepare_imaging_data.argument.flag.abstime                          = {{ flag_abstime }}
 {% endif %}
 {% if flag_baseline is not none %}
-apply_dir_dep.argument.flag.baseline                         = {{ flag_baseline }}
+prepare_imaging_data.argument.flag.baseline                         = {{ flag_baseline }}
 {% endif %}
 {% if flag_freqrange is not none %}
-apply_dir_dep.argument.flag.freqrange                        = {{ flag_freqrange }}
+prepare_imaging_data.argument.flag.freqrange                        = {{ flag_freqrange }}
 {% endif %}
-apply_dir_dep.argument.subtract_cal.type                     = predict
-apply_dir_dep.argument.subtract_cal.sourcedb                 = sourcedb_cal
-apply_dir_dep.argument.subtract_cal.operation                = subtract
-apply_dir_dep.argument.subtract_cal.applycal.parmdb          = dir_dep_parmdb
-apply_dir_dep.argument.correct.type                          = applycal
-apply_dir_dep.argument.correct.parmdb                        = dir_dep_parmdb_normalized
-apply_dir_dep.argument.correct.invert                        = True
-apply_dir_dep.argument.flagzero.type                         = preflagger
-apply_dir_dep.argument.flagzero.amplmin                      = 1e-20
-apply_dir_dep.argument.avg.type                              = squash
-apply_dir_dep.argument.avg.freqstep                          = {{ facetimage_freqstep }}
-apply_dir_dep.argument.avg.timestep                          = {{ facetimage_timestep }}
+prepare_imaging_data.argument.correct.type                          = applycal
+prepare_imaging_data.argument.correct.parmdb                        = dir_dep_parmdb
+prepare_imaging_data.argument.correct.invert                        = True
+prepare_imaging_data.argument.flagzero.type                         = preflagger
+prepare_imaging_data.argument.flagzero.amplmin                      = 1e-20
+prepare_imaging_data.argument.avg.type                              = squash
+prepare_imaging_data.argument.avg.freqstep                          = {{ facetimage_freqstep }}
+prepare_imaging_data.argument.avg.timestep                          = {{ facetimage_timestep }}
 # Don't compress for now, as WSClean tries to allocate too much memory
 # {% if use_compression %}
-# apply_dir_dep.argument.msout.storagemanager                = "Dysco"
-# apply_dir_dep.argument.msout.storagemanager.databitrate    = 16
-# apply_dir_dep.argument.msout.storagemanager.weightbitrate  = 12
-# apply_dir_dep.argument.msout.storagemanager.distribution   = "TruncatedGaussian"
-# apply_dir_dep.argument.msout.storagemanager.disttruncation = 1.5
-# apply_dir_dep.argument.msout.storagemanager.normalization  = "AF"
+# prepare_imaging_data.argument.msout.storagemanager                = "Dysco"
+# prepare_imaging_data.argument.msout.storagemanager.databitrate    = 16
+# prepare_imaging_data.argument.msout.storagemanager.weightbitrate  = 12
+# prepare_imaging_data.argument.msout.storagemanager.distribution   = "TruncatedGaussian"
+# prepare_imaging_data.argument.msout.storagemanager.disttruncation = 1.5
+# prepare_imaging_data.argument.msout.storagemanager.normalization  = "AF"
 # {% endif %}
+
+{% if not is_patch %}
+# Now make the high-res facet image
 
 # compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile5.control.kind        = plugin
 create_compressed_mapfile5.control.type        = compressMapfile
-create_compressed_mapfile5.control.mapfile_in  = apply_dir_dep.output.mapfile
+create_compressed_mapfile5.control.mapfile_in  = prepare_imaging_data.output.mapfile
 create_compressed_mapfile5.control.mapfile_dir = input.output.mapfile_dir
 create_compressed_mapfile5.control.filename    = concat_averaged_input.mapfile
 
-# make a mask that excludes areas outside the facet and inside the cal region, length = 1
+# make a mask from the last selfcal image, length = 1
 premask.control.type                   = make_clean_mask
-premask.control.mapfile_in             = create_compressed_mapfile5.output.mapfile
+premask.control.mapfile_in             = create_imagebase_map42.output.mapfile
 premask.control.inputkey               = imagefile
 premask.control.outputkey              = maskfile
 premask.argument.flags                 = [imagefile,maskfile]
@@ -579,21 +523,18 @@ premask.argument.img_format            = fits
 premask.argument.pad_to_size           = {{ facet_imsize }}
 premask.argument.skip_source_detection = True
 premask.argument.vertices_file         = {{ vertices_file }}
-premask.argument.exclude_cal_region    = True
 premask.argument.reference_ra_deg      = {{ facet_ra }}
 premask.argument.reference_dec_deg     = {{ facet_dec }}
-premask.argument.cellsize_deg          = {{ cellsize_facet_deg }}
-premask.argument.make_blank_image      = True
 
 # image the concatenated data with the preliminary mask, length = 1
 wsclean_image_full.control.type                   = wsclean
 wsclean_image_full.control.mapfiles_in            = [create_compressed_mapfile5.output.mapfile,premask.output.mapfile]
 wsclean_image_full.control.inputkeys              = [msfile,fitsmask]
-{% if use_wideband %}
-wsclean_image_full.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,msfile]
+{% if nbands_selfcal_facet_image > 1 %}
+wsclean_image_full.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,-multiscale,-save-component-list,-nonegative,msfile]
 wsclean_image_full.argument.channelsout           = {{ nbands_selfcal_facet_image }}
 {% else %}
-wsclean_image_full.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,msfile]
+wsclean_image_full.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-multiscale,-save-component-list,-nonegative,msfile]
 {% endif %}
 wsclean_image_full.argument.fitsmask              = fitsmask
 wsclean_image_full.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
@@ -610,6 +551,12 @@ wsclean_image_full.argument.j                     = {{ max_cpus_per_proc_single 
 {% if local_dir is not none %}
 wsclean_image_full.argument.tempdir               = {{ local_dir_parent }}
 {% endif %}
+{% if nbands_selfcal_facet_image > 3 %}
+wsclean_image_full.argument.fit-spectral-pol      = 3
+{% elif nbands_selfcal_facet_image > 1 %}
+wsclean_image_full.argument.fit-spectral-pol      = {{ nbands_selfcal_facet_image - 1 }}
+{% endif %}
+wsclean_image_full.argument.multiscale-scales     = 0
 wsclean_image_full.argument.weighting-rank-filter = 3
 {% if facetimage_wsclean_nwavelengths > 0.0 %}
 wsclean_image_full.argument.baseline-averaging    = {{ facetimage_wsclean_nwavelengths }}
@@ -627,7 +574,7 @@ create_imagebase_map.control.filename    = wsclean_image_full_image_rootnames.ma
 adjust_wsclean_mapfile1.control.kind        = plugin
 adjust_wsclean_mapfile1.control.type        = appendMapfile
 adjust_wsclean_mapfile1.control.mapfile_in  = create_imagebase_map.output.mapfile
-adjust_wsclean_mapfile1.control.append      = {{ wsclean_suffix }}
+adjust_wsclean_mapfile1.control.append      = {{ wsclean_selfcal_facet_image_suffix }}
 adjust_wsclean_mapfile1.control.mapfile_dir = input.output.mapfile_dir
 adjust_wsclean_mapfile1.control.filename    = final_image1.mapfile
 
@@ -643,7 +590,7 @@ mask5.argument.threshisl          = 6
 mask5.argument.threshpix          = 8
 mask5.argument.rmsbox             = (80,20)
 mask5.argument.adaptive_rmsbox    = True
-mask5.argument.atrous_do          = {{ atrous_do }}
+mask5.argument.atrous_do          = False
 mask5.argument.img_format         = fits
 mask5.argument.vertices_file      = {{ vertices_file }}
 mask5.argument.exclude_cal_region = True
@@ -664,14 +611,6 @@ create_model5_map.control.trim        = -
 create_model5_map.control.mapfile_dir = input.output.mapfile_dir
 create_model5_map.control.filename    = final_model_rootnames.mapfile
 
-# make a mapfile with the name of the WSClean image, length = 1
-adjust_wsclean_mapfile2.control.kind        = plugin
-adjust_wsclean_mapfile2.control.type        = appendMapfile
-adjust_wsclean_mapfile2.control.mapfile_in  = create_model5_map.output.mapfile
-adjust_wsclean_mapfile2.control.append      = {{ wsclean_suffix }}
-adjust_wsclean_mapfile2.control.mapfile_dir = input.output.mapfile_dir
-adjust_wsclean_mapfile2.control.filename    = final_image.mapfile
-
 # expand the model mapfile so that there is one entry for every band, length = nbands
 expand_model5_map.control.kind             = plugin
 expand_model5_map.control.type             = expandMapfile
@@ -689,15 +628,33 @@ expand_mask5_map.control.mapfile_dir      = input.output.mapfile_dir
 expand_mask5_map.control.filename         = expand_mask5_map.mapfile
 
 # make high-res full-facet sky model, using mask above, len = nbands
-make_high_facet_skymodel.control.type        = fits2sky
+make_high_facet_skymodel.control.type        = poly2sky
 make_high_facet_skymodel.control.mapfiles_in = [create_msmulti_map.output.mapfile,expand_model5_map.output.mapfile,expand_mask5_map.output.mapfile]
 make_high_facet_skymodel.control.inputkeys   = [msfile,rootname,mask]
 make_high_facet_skymodel.control.outputkey   = skymodel
 make_high_facet_skymodel.argument.flags      = [rootname,msfile,skymodel,mask]
 
-# convert the high-res sky model into a sourcedb, length = nbands
+# combine the new calibrator and facet sky models, length = nbands
+combine_skymodels_high.control.type        = combine_skymodels
+combine_skymodels_high.control.mapfiles_in = [make_high_facet_skymodel.output.mapfile,make_new_cal_skymodel.output.mapfile]
+combine_skymodels_high.control.inputkeys   = [newfacetmodel,calmodel]
+combine_skymodels_high.control.outputkey   = skymodel
+combine_skymodels_high.argument.flags      = [calmodel,newfacetmodel,skymodel]
+
+# end of high-res full facet imaging
+{% endif %}
+
+# Make a medium-res image of the facet or (if wsclean_selfcal_multiscale is True)
+# of the calibrator region to pick up any extended emission missed in the high-
+# res image
+
+# convert the combined sky model into a sourcedb, length = nbands
 make_sourcedb_high.control.type       = make_sourcedb
-make_sourcedb_high.control.mapfile_in = make_high_facet_skymodel.output.mapfile
+{% if is_patch %}
+make_sourcedb_high.control.mapfile_in = make_new_cal_skymodel.output.mapfile
+{% else %}
+make_sourcedb_high.control.mapfile_in = combine_skymodels_high.output.mapfile
+{% endif %}
 make_sourcedb_high.control.inputkey   = in
 make_sourcedb_high.argument.format    = <
 make_sourcedb_high.argument.outtype   = blob
@@ -711,25 +668,10 @@ expand_sourcedb_high.control.mapfile_groups = create_msmulti_map.output.mapfile
 expand_sourcedb_high.control.mapfile_dir    = input.output.mapfile_dir
 expand_sourcedb_high.control.filename       = expand_sourcedb_high.mapfile
 
-{% if use_wideband %}
-# adjust the high-res sourcedb mapfile to match the selected bands, length = nbands_selfcal_facet_image * nchunks
-select_sourcedb_high.control.kind         = plugin
-select_sourcedb_high.control.type         = matchDistFreqs
-select_sourcedb_high.control.mapfile_in   = expand_sourcedb_high.output.mapfile
-select_sourcedb_high.control.mapfile_dist = select_imaging_bands.output.mapfile
-select_sourcedb_high.control.mapfile_full = create_ms_map.output.mapfile
-select_sourcedb_high.control.mapfile_dir  = input.output.mapfile_dir
-select_sourcedb_high.control.filename     = high_sourcedbs.mapfile
-{% endif %}
-
 # subtract the high-resolution model, length = nfiles or nbands_selfcal_facet_image * nchunks
 # compress data and weights
 subtract_high.control.type                                 = dppp
-{% if use_wideband %}
-subtract_high.control.mapfiles_in                          = [apply_dir_dep.output.mapfile,select_sourcedb_high.output.mapfile]
-{% else %}
-subtract_high.control.mapfiles_in                          = [apply_dir_dep.output.mapfile,expand_sourcedb_high.output.mapfile]
-{% endif %}
+subtract_high.control.mapfiles_in                          = [prepare_imaging_data.output.mapfile,expand_sourcedb_high.output.mapfile]
 subtract_high.control.inputkeys                            = [msin,sourcedb_high]
 subtract_high.argument.numthreads                          = {{ max_cpus_per_io_proc_nfiles }}
 subtract_high.argument.msin.datacolumn                     = DATA
@@ -760,11 +702,195 @@ create_compressed_mapfile6.control.kind        = plugin
 create_compressed_mapfile6.control.type        = compressMapfile
 create_compressed_mapfile6.control.mapfile_in  = subtract_high.output.mapfile
 create_compressed_mapfile6.control.mapfile_dir = input.output.mapfile_dir
-create_compressed_mapfile6.control.filename    = concat_averaged_low_input.mapfile
+create_compressed_mapfile6.control.filename    = concat_averaged_med_input.mapfile
+
+# Make a preliminary clean mask from the facet region, length = 1
+premask_med.control.type                   = make_clean_mask
+premask_med.control.mapfile_in             = create_compressed_mapfile6.output.mapfile
+premask_med.control.inputkey               = imagefile
+premask_med.control.outputkey              = maskfile
+premask_med.argument.flags                 = [imagefile,maskfile]
+premask_med.argument.img_format            = fits
+premask_med.argument.pad_to_size           = {{ facet_low_imsize }}
+premask_med.argument.skip_source_detection = True
+premask_med.argument.vertices_file         = {{ vertices_file }}
+premask_med.argument.reference_ra_deg      = {{ facet_ra }}
+premask_med.argument.reference_dec_deg     = {{ facet_dec }}
+premask_med.argument.cellsize_deg          = {{ cellsize_facet_low_deg }}
+premask_med.argument.make_blank_image      = True
+
+# image the concatenated data with the preliminary mask at med resolution, length = 1
+wsclean_image_full_med.control.type                   = wsclean
+wsclean_image_full_med.control.mapfiles_in            = [create_compressed_mapfile6.output.mapfile,premask_med.output.mapfile]
+wsclean_image_full_med.control.inputkeys              = [msfile,fitsmask]
+{% if nbands_selfcal_facet_image > 1 %}
+wsclean_image_full_med.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,-multiscale,-save-component-list,-nonegative,msfile]
+wsclean_image_full_med.argument.channelsout           = {{ nbands_selfcal_facet_image }}
+{% else %}
+wsclean_image_full_med.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-multiscale,-save-component-list,-nonegative,msfile]
+{% endif %}
+wsclean_image_full_med.argument.fitsmask              = fitsmask
+wsclean_image_full_med.argument.size                  = {{ facet_med_imsize }} {{ facet_med_imsize }}
+wsclean_image_full_med.argument.niter                 = {{ wsclean_selfcal_full_image_niter }}
+wsclean_image_full_med.argument.threshold             = {{ wsclean_selfcal_full_image_threshold_jy }}
+wsclean_image_full_med.argument.pol                   = I
+wsclean_image_full_med.argument.weight                = briggs {{ robust_selfcal }}
+wsclean_image_full_med.argument.mgain                 = 0.6
+wsclean_image_full_med.argument.cleanborder           = 0
+wsclean_image_full_med.argument.minuv-l               = {{ facet_min_uv_lambda }}
+wsclean_image_full_med.argument.taper-gaussian        = {{ cellsize_facet_med_deg*3600*3 }}arcsec
+wsclean_image_full_med.argument.scale                 = {{ cellsize_facet_med_deg }}
+wsclean_image_full_med.argument.mem                   = {{ max_percent_memory_per_proc_single }}
+wsclean_image_full_med.argument.j                     = {{ max_cpus_per_proc_single }}
+{% if local_dir is not none %}
+wsclean_image_full_med.argument.tempdir               = {{ local_dir_parent }}
+{% endif %}
+wsclean_image_full_med.argument.multiscale-shape      = gaussian
+{% if nbands_selfcal_facet_image > 3 %}
+wsclean_image_full_med.argument.fit-spectral-pol      = 3
+{% elif nbands_selfcal_facet_image > 1 %}
+wsclean_image_full_med.argument.fit-spectral-pol      = {{ nbands_selfcal_facet_image - 1 }}
+{% endif %}
+wsclean_image_full_med.argument.weighting-rank-filter = 3
+{% if facetimage_medlow_wsclean_nwavelengths > 0.0 %}
+wsclean_image_full_med.argument.baseline-averaging    = {{ facetimage_medlow_wsclean_nwavelengths }}
+{% endif %}
+
+# make a mapfile with the root-name of the WSClean images, length = 1
+create_imagebase_med_map.control.kind        = plugin
+create_imagebase_med_map.control.type        = trimMapfile
+create_imagebase_med_map.control.mapfile_in  = wsclean_image_full_med.output.wsclean_image_full_med-image.fits.mapfile
+create_imagebase_med_map.control.trim        = -
+create_imagebase_med_map.control.mapfile_dir = input.output.mapfile_dir
+create_imagebase_med_map.control.filename    = wsclean_image_full_med_image_rootnames.mapfile
+
+# make a mapfile with the name of the WSClean image, length = 1
+adjust_wsclean_mapfile3.control.kind        = plugin
+adjust_wsclean_mapfile3.control.type        = appendMapfile
+adjust_wsclean_mapfile3.control.mapfile_in  = create_imagebase_med_map.output.mapfile
+adjust_wsclean_mapfile3.control.append      = {{ wsclean_selfcal_facet_image_suffix }}
+adjust_wsclean_mapfile3.control.mapfile_dir = input.output.mapfile_dir
+adjust_wsclean_mapfile3.control.filename    = final_image_med.mapfile
+
+# make a mask from the updated image, length = 1
+# we use high thresholds to pick up only the brightest sources and exclude artifacts
+mask6.control.type                = make_clean_mask
+mask6.control.mapfile_in          = adjust_wsclean_mapfile3.output.mapfile
+mask6.control.inputkey            = imagefile
+mask6.control.outputkey           = maskfile
+mask6.argument.flags              = [imagefile,maskfile]
+mask6.argument.region_file        = {{ region_field }}
+mask6.argument.threshisl          = 5
+mask6.argument.threshpix          = 8
+mask6.argument.rmsbox             = (80,20)
+mask6.argument.adaptive_rmsbox    = True
+mask6.argument.atrous_do          = True
+mask6.argument.img_format         = fits
+mask6.argument.vertices_file      = {{ vertices_file }}
+mask6.argument.exclude_cal_region = False
+
+# check the mask6 output and modify its mapfile if no sources were found, length = 1
+check_mask_med.control.kind          = plugin
+check_mask_med.control.type          = checkMapfile
+check_mask_med.control.mapfile_in    = mask6.output.mapfile
+check_mask_med.control.mapfile_check = mask6.output.threshold_5sig.mapfile
+check_mask_med.control.mapfile_dir   = input.output.mapfile_dir
+check_mask_med.control.filename      = check_mask6_map.mapfile
+
+# expand the model mapfile so that there is one entry for every band, length = nbands
+expand_model6_map.control.kind             = plugin
+expand_model6_map.control.type             = expandMapfile
+expand_model6_map.control.mapfile_in       = create_imagebase_med_map.output.mapfile
+expand_model6_map.control.mapfile_to_match = create_msmulti_map.output.mapfile
+expand_model6_map.control.mapfile_dir      = input.output.mapfile_dir
+expand_model6_map.control.filename         = expand_model6_map.mapfile
+
+# expand the mask mapfile so that there is one entry for every band, length = nbands
+expand_mask6_map.control.kind             = plugin
+expand_mask6_map.control.type             = expandMapfile
+expand_mask6_map.control.mapfile_in       = check_mask_med.output.mapfile
+expand_mask6_map.control.mapfile_to_match = create_msmulti_map.output.mapfile
+expand_mask6_map.control.mapfile_dir      = input.output.mapfile_dir
+expand_mask6_map.control.filename         = expand_mask6_map.mapfile
+
+# make med-res full-facet sky model, using mask above, len = nbands
+make_med_facet_skymodel.control.type        = poly2sky
+make_med_facet_skymodel.control.mapfiles_in = [create_msmulti_map.output.mapfile,expand_model6_map.output.mapfile,expand_mask6_map.output.mapfile]
+make_med_facet_skymodel.control.inputkeys   = [msfile,rootname,mask]
+make_med_facet_skymodel.control.outputkey   = skymodel
+make_med_facet_skymodel.argument.flags      = [rootname,msfile,skymodel,mask,0.0,0.0]
+
+# combine the medium- and high-res facet sky models, length = nbands
+combine_facet_skymodels.control.type        = combine_skymodels
+{% if is_patch %}
+combine_facet_skymodels.control.mapfiles_in = [make_new_cal_skymodel.output.mapfile,make_med_facet_skymodel.output.mapfile]
+{% else %}
+combine_facet_skymodels.control.mapfiles_in = [combine_skymodels_high.output.mapfile,make_med_facet_skymodel.output.mapfile]
+{% endif %}
+combine_facet_skymodels.control.inputkeys   = [highresmodel,medresmodel]
+combine_facet_skymodels.control.outputkey   = skymodel
+combine_facet_skymodels.argument.flags      = [highresmodel,medresmodel,skymodel]
+
+# make a low-res image of the facet, as there may still be extended emission
+# missed in the med-res image, but only if multiscale is activated
+
+{% if wsclean_selfcal_multiscale or mscale_field_do %}
+
+# convert the combined medium-res sky model into a sourcedb, length = nbands
+make_sourcedb_med.control.type       = make_sourcedb
+make_sourcedb_med.control.mapfile_in = combine_facet_skymodels.output.mapfile
+make_sourcedb_med.control.inputkey   = in
+make_sourcedb_med.argument.format    = <
+make_sourcedb_med.argument.outtype   = blob
+make_sourcedb_med.argument.append    = False
+
+# expand the medium-res sourcedb mapfile so that there is one entry for every file, length = nfiles
+expand_sourcedb_med.control.kind           = plugin
+expand_sourcedb_med.control.type           = mapfileSingleToGroup
+expand_sourcedb_med.control.mapfile_in     = make_sourcedb_med.output.mapfile
+expand_sourcedb_med.control.mapfile_groups = create_msmulti_map.output.mapfile
+expand_sourcedb_med.control.mapfile_dir    = input.output.mapfile_dir
+expand_sourcedb_med.control.filename       = expand_sourcedb_med.mapfile
+
+# subtract the medium-resolution model, length = nfiles or nbands_selfcal_facet_image * nchunks
+# compress data and weights
+subtract_med.control.type                                 = dppp
+subtract_med.control.mapfiles_in                          = [prepare_imaging_data.output.mapfile,expand_sourcedb_med.output.mapfile]
+subtract_med.control.inputkeys                            = [msin,sourcedb_high_med]
+subtract_med.argument.numthreads                          = {{ max_cpus_per_io_proc_nfiles }}
+subtract_med.argument.msin.datacolumn                     = DATA
+subtract_med.argument.msout.overwrite                     = True
+subtract_med.argument.msout.writefullresflag              = False
+{% if local_dir is not none %}
+subtract_med.argument.local_scratch_dir                   = {{ local_dir }}
+{% endif %}
+subtract_med.argument.steps                               = [subtract,avg]
+subtract_med.argument.subtract.type                       = predict
+subtract_med.argument.subtract.sourcedb                   = sourcedb_high_med
+subtract_med.argument.subtract.operation                  = subtract
+subtract_med.argument.avg.type                            = squash
+subtract_med.argument.avg.freqstep                        = {{ facetimage_low_freqstep }}
+subtract_med.argument.avg.timestep                        = {{ facetimage_low_timestep }}
+# Don't compress for now, as WSClean tries to allocate too much memory
+# {% if use_compression %}
+# subtract_med.argument.msout.storagemanager                = "Dysco"
+# subtract_med.argument.msout.storagemanager.databitrate    = 0
+# subtract_med.argument.msout.storagemanager.weightbitrate  = 12
+# subtract_med.argument.msout.storagemanager.distribution   = "TruncatedGaussian"
+# subtract_med.argument.msout.storagemanager.disttruncation = 1.5
+# subtract_med.argument.msout.storagemanager.normalization  = "AF"
+# {% endif %}
+
+# compress mapfile so that all files are in one group, length = 1
+create_compressed_mapfile7.control.kind        = plugin
+create_compressed_mapfile7.control.type        = compressMapfile
+create_compressed_mapfile7.control.mapfile_in  = subtract_med.output.mapfile
+create_compressed_mapfile7.control.mapfile_dir = input.output.mapfile_dir
+create_compressed_mapfile7.control.filename    = concat_averaged_low_input.mapfile
 
 # Make a preliminary clean mask from the facet region, length = 1
 premask_low.control.type                   = make_clean_mask
-premask_low.control.mapfile_in             = create_compressed_mapfile6.output.mapfile
+premask_low.control.mapfile_in             = create_compressed_mapfile7.output.mapfile
 premask_low.control.inputkey               = imagefile
 premask_low.control.outputkey              = maskfile
 premask_low.argument.flags                 = [imagefile,maskfile]
@@ -774,18 +900,18 @@ premask_low.argument.skip_source_detection = True
 premask_low.argument.vertices_file         = {{ vertices_file }}
 premask_low.argument.reference_ra_deg      = {{ facet_ra }}
 premask_low.argument.reference_dec_deg     = {{ facet_dec }}
-premask_low.argument.cellsize_deg          = {{ cellsize_facet_low_deg }}
+premask_low.argument.cellsize_deg          = {{ cellsize_facet_low_deg*4 }}
 premask_low.argument.make_blank_image      = True
 
 # image the concatenated data with the preliminary mask at low resolution, length = 1
 wsclean_image_full_low.control.type                   = wsclean
-wsclean_image_full_low.control.mapfiles_in            = [create_compressed_mapfile6.output.mapfile,premask_low.output.mapfile]
+wsclean_image_full_low.control.mapfiles_in            = [create_compressed_mapfile7.output.mapfile,premask_low.output.mapfile]
 wsclean_image_full_low.control.inputkeys              = [msfile,fitsmask]
-{% if use_wideband %}
-wsclean_image_full_low.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,msfile]
+{% if nbands_selfcal_facet_image > 1 %}
+wsclean_image_full_low.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,-multiscale,-save-component-list,-nonegative,msfile]
 wsclean_image_full_low.argument.channelsout           = {{ nbands_selfcal_facet_image }}
 {% else %}
-wsclean_image_full_low.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,msfile]
+wsclean_image_full_low.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-multiscale,-save-component-list,-nonegative,msfile]
 {% endif %}
 wsclean_image_full_low.argument.fitsmask              = fitsmask
 wsclean_image_full_low.argument.size                  = {{ facet_low_imsize }} {{ facet_low_imsize }}
@@ -796,16 +922,22 @@ wsclean_image_full_low.argument.weight                = briggs {{ robust_selfcal
 wsclean_image_full_low.argument.mgain                 = 0.6
 wsclean_image_full_low.argument.cleanborder           = 0
 wsclean_image_full_low.argument.minuv-l               = {{ facet_min_uv_lambda }}
-wsclean_image_full_low.argument.taper-gaussian        = 20arcsec
+wsclean_image_full_low.argument.taper-gaussian        = {{ cellsize_facet_low_deg*3600*3 }}arcsec
 wsclean_image_full_low.argument.scale                 = {{ cellsize_facet_low_deg }}
 wsclean_image_full_low.argument.mem                   = {{ max_percent_memory_per_proc_single }}
 wsclean_image_full_low.argument.j                     = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
 wsclean_image_full_low.argument.tempdir               = {{ local_dir_parent }}
 {% endif %}
+wsclean_image_full_low.argument.multiscale-shape      = gaussian
+{% if nbands_selfcal_facet_image > 3 %}
+wsclean_image_full_low.argument.fit-spectral-pol      = 3
+{% elif nbands_selfcal_facet_image > 1 %}
+wsclean_image_full_low.argument.fit-spectral-pol      = {{ nbands_selfcal_facet_image - 1 }}
+{% endif %}
 wsclean_image_full_low.argument.weighting-rank-filter = 3
-{% if facetimage_low_wsclean_nwavelengths > 0.0 %}
-wsclean_image_full_low.argument.baseline-averaging    = {{ facetimage_low_wsclean_nwavelengths }}
+{% if facetimage_medlow_wsclean_nwavelengths > 0.0 %}
+wsclean_image_full_low.argument.baseline-averaging    = {{ facetimage_medlow_wsclean_nwavelengths }}
 {% endif %}
 
 # make a mapfile with the root-name of the WSClean images, length = 1
@@ -817,71 +949,77 @@ create_imagebase_low_map.control.mapfile_dir = input.output.mapfile_dir
 create_imagebase_low_map.control.filename    = wsclean_image_full_low_image_rootnames.mapfile
 
 # make a mapfile with the name of the WSClean image, length = 1
-adjust_wsclean_mapfile3.control.kind        = plugin
-adjust_wsclean_mapfile3.control.type        = appendMapfile
-adjust_wsclean_mapfile3.control.mapfile_in  = create_imagebase_low_map.output.mapfile
-adjust_wsclean_mapfile3.control.append      = {{ wsclean_suffix }}
-adjust_wsclean_mapfile3.control.mapfile_dir = input.output.mapfile_dir
-adjust_wsclean_mapfile3.control.filename    = final_image_low.mapfile
+adjust_wsclean_mapfile4.control.kind        = plugin
+adjust_wsclean_mapfile4.control.type        = appendMapfile
+adjust_wsclean_mapfile4.control.mapfile_in  = create_imagebase_low_map.output.mapfile
+adjust_wsclean_mapfile4.control.append      = {{ wsclean_selfcal_facet_image_suffix }}
+adjust_wsclean_mapfile4.control.mapfile_dir = input.output.mapfile_dir
+adjust_wsclean_mapfile4.control.filename    = final_image_low.mapfile
 
 # make a mask from the updated image, length = 1
-# we use high thresholds to pick up only the brightest sources and exclude artifacts
-mask6.control.type                = make_clean_mask
-mask6.control.mapfile_in          = adjust_wsclean_mapfile3.output.mapfile
-mask6.control.inputkey            = imagefile
-mask6.control.outputkey           = maskfile
-mask6.argument.flags              = [imagefile,maskfile]
-mask6.argument.region_file        = {{ region_field }}
-mask6.argument.threshisl          = 6
-mask6.argument.threshpix          = 8
-mask6.argument.rmsbox             = (80,20)
-mask6.argument.adaptive_rmsbox    = True
-mask6.argument.atrous_do          = True
-mask6.argument.img_format         = fits
-mask6.argument.vertices_file      = {{ vertices_file }}
-mask6.argument.exclude_cal_region = True
+# we use large rmsbox to pick up extended sources
+mask7.control.type                = make_clean_mask
+mask7.control.mapfile_in          = adjust_wsclean_mapfile4.output.mapfile
+mask7.control.inputkey            = imagefile
+mask7.control.outputkey           = maskfile
+mask7.argument.flags              = [imagefile,maskfile]
+mask7.argument.region_file        = {{ region_field }}
+mask7.argument.threshisl          = 5
+mask7.argument.threshpix          = 8
+mask7.argument.rmsbox             = (130,40)
+mask7.argument.adaptive_rmsbox    = True
+mask7.argument.atrous_do          = True
+mask7.argument.img_format         = fits
+mask7.argument.vertices_file      = {{ vertices_file }}
+mask7.argument.exclude_cal_region = False
 
 # check the mask6 output and modify its mapfile if no sources were found, length = 1
 check_mask_low.control.kind          = plugin
 check_mask_low.control.type          = checkMapfile
-check_mask_low.control.mapfile_in    = mask6.output.mapfile
-check_mask_low.control.mapfile_check = mask6.output.threshold_5sig.mapfile
+check_mask_low.control.mapfile_in    = mask7.output.mapfile
+check_mask_low.control.mapfile_check = mask7.output.threshold_5sig.mapfile
 check_mask_low.control.mapfile_dir   = input.output.mapfile_dir
 check_mask_low.control.filename      = check_mask6_map.mapfile
 
 # expand the model mapfile so that there is one entry for every band, length = nbands
-expand_model6_map.control.kind             = plugin
-expand_model6_map.control.type             = expandMapfile
-expand_model6_map.control.mapfile_in       = create_imagebase_low_map.output.mapfile
-expand_model6_map.control.mapfile_to_match = create_msmulti_map.output.mapfile
-expand_model6_map.control.mapfile_dir      = input.output.mapfile_dir
-expand_model6_map.control.filename         = expand_model6_map.mapfile
+expand_model7_map.control.kind             = plugin
+expand_model7_map.control.type             = expandMapfile
+expand_model7_map.control.mapfile_in       = create_imagebase_low_map.output.mapfile
+expand_model7_map.control.mapfile_to_match = create_msmulti_map.output.mapfile
+expand_model7_map.control.mapfile_dir      = input.output.mapfile_dir
+expand_model7_map.control.filename         = expand_model7_map.mapfile
 
 # expand the mask mapfile so that there is one entry for every band, length = nbands
-expand_mask6_map.control.kind             = plugin
-expand_mask6_map.control.type             = expandMapfile
-expand_mask6_map.control.mapfile_in       = check_mask_low.output.mapfile
-expand_mask6_map.control.mapfile_to_match = create_msmulti_map.output.mapfile
-expand_mask6_map.control.mapfile_dir      = input.output.mapfile_dir
-expand_mask6_map.control.filename         = expand_mask6_map.mapfile
+expand_mask7_map.control.kind             = plugin
+expand_mask7_map.control.type             = expandMapfile
+expand_mask7_map.control.mapfile_in       = check_mask_low.output.mapfile
+expand_mask7_map.control.mapfile_to_match = create_msmulti_map.output.mapfile
+expand_mask7_map.control.mapfile_dir      = input.output.mapfile_dir
+expand_mask7_map.control.filename         = expand_mask7_map.mapfile
 
 # make low-res full-facet sky model, using mask above, len = nbands
-make_low_facet_skymodel.control.type        = fits2sky
-make_low_facet_skymodel.control.mapfiles_in = [create_msmulti_map.output.mapfile,expand_model6_map.output.mapfile,expand_mask6_map.output.mapfile]
+make_low_facet_skymodel.control.type        = poly2sky
+make_low_facet_skymodel.control.mapfiles_in = [create_msmulti_map.output.mapfile,expand_model7_map.output.mapfile,expand_mask7_map.output.mapfile]
 make_low_facet_skymodel.control.inputkeys   = [msfile,rootname,mask]
 make_low_facet_skymodel.control.outputkey   = skymodel
 make_low_facet_skymodel.argument.flags      = [rootname,msfile,skymodel,mask,0.0,0.0]
 
-# combine the low and high-res facet sky models, length = nbands
-combine_facet_skymodels.control.type        = combine_skymodels
-combine_facet_skymodels.control.mapfiles_in = [make_low_facet_skymodel.output.mapfile,make_high_facet_skymodel.output.mapfile]
-combine_facet_skymodels.control.inputkeys   = [lowresmodel,highresmodel]
-combine_facet_skymodels.control.outputkey   = skymodel
-combine_facet_skymodels.argument.flags      = [lowresmodel,highresmodel,skymodel]
+# combine the low-res sky models with the high- and med-res ones, length = nbands
+combine_new_skymodels.control.type        = combine_skymodels
+combine_new_skymodels.control.mapfiles_in = [combine_facet_skymodels.output.mapfile,make_low_facet_skymodel.output.mapfile]
+combine_new_skymodels.control.inputkeys   = [newfacetmodel,calmodel]
+combine_new_skymodels.control.outputkey   = skymodel
+combine_new_skymodels.argument.flags      = [calmodel,newfacetmodel,skymodel]
+
+{% endif %}
 
 # convert the combined sky model for facet imaging into a sourcedb, length = nbands
 make_sourcedb_new_facet_sources_for_facet_imaging.control.type       = make_sourcedb
+{% if wsclean_selfcal_multiscale or mscale_field_do %}
+make_sourcedb_new_facet_sources_for_facet_imaging.control.mapfile_in = combine_new_skymodels.output.mapfile
+{% else %}
 make_sourcedb_new_facet_sources_for_facet_imaging.control.mapfile_in = combine_facet_skymodels.output.mapfile
+{% endif %}
 make_sourcedb_new_facet_sources_for_facet_imaging.control.inputkey   = in
 make_sourcedb_new_facet_sources_for_facet_imaging.argument.format    = <
 make_sourcedb_new_facet_sources_for_facet_imaging.argument.outtype   = blob

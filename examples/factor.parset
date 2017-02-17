@@ -145,12 +145,11 @@ dir_ms = /data/bands
 # activated when there are more than 5 bands
 # wsclean_nchannels_factor = 4
 
-# Number of bands to use for facet imaging during selfcal (default = 6). Facet
-# imaing during selfcal is used to improve the subtraction of non-calibrator
-# sources in the facet. More bands will result in a better subtraction but also
-# longer runtimes. When fewer than the total number are used, the bands are
-# selected so that they are evenly spread over the full available bandwidth
-# nbands_selfcal_facet_image = 6
+# Fractional of bandwidth to use for facet imaging during selfcal (default =
+# 0.25). Facet imaging during selfcal is used to improve the subtraction of
+# non-calibrator sources in the facet. More bandwidth will result in a better
+# subtraction but also longer runtimes
+# fractional_bandwidth_selfcal_facet_image = 0.25
 
 # Use baseline-dependent averaging in WSClean (default = False). If enabled,
 # this option can dramatically speed up imaging with WSClean.

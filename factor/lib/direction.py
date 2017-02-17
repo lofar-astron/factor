@@ -241,14 +241,14 @@ class Direction(object):
         self.use_selfcal_clean_threshold = parset['imaging_specific']['selfcal_clean_threshold']
         self.use_selfcal_adaptive_threshold = parset['imaging_specific']['selfcal_adaptive_threshold']
         self.fit_spectral_pol = parset['imaging_specific']['fit_spectral_pol']
-        self.nbands_selfcal_facet_image = parset['imaging_specific']['nbands_selfcal_facet_image']
-        if self.nbands_selfcal_facet_image > len(bands):
-            self.nbands_selfcal_facet_image = len(bands)
+        self.nbands_selfcal_facet_image = min(6, len(bands))
+        self.frac_bandwidth_selfcal_facet_image = parset['imaging_specific']['fractional_bandwidth_selfcal_facet_image']
 
         if facet_cellsize_arcsec is None:
             facet_cellsize_arcsec = parset['imaging_specific']['selfcal_cellsize_arcsec']
         self.cellsize_facet_deg = facet_cellsize_arcsec / 3600.0
-        self.cellsize_facet_low_deg = self.cellsize_facet_deg * 4.0
+        self.cellsize_facet_med_deg = self.cellsize_facet_deg * 4.0
+        self.cellsize_facet_low_deg = self.cellsize_facet_deg * 16.0
 
         if facet_robust is None:
             facet_robust = parset['imaging_specific']['selfcal_robust']
@@ -262,7 +262,8 @@ class Direction(object):
             facet_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
         self.facet_min_uv_lambda = facet_min_uv_lambda
 
-        self.set_imaging_parameters(nbands, self.nbands_selfcal_facet_image, padding)
+        self.set_imaging_parameters(nbands, self.nbands_selfcal_facet_image,
+            self.frac_bandwidth_selfcal_facet_image, padding)
         self.set_averaging_steps_and_solution_intervals(chan_width_hz, nchan,
             timestep_sec, ntimes, nbands, mean_freq_mhz, self.skymodel,
             preaverage_flux_jy, min_peak_smearing_factor, tec_block_mhz,
@@ -310,7 +311,7 @@ class Direction(object):
             self.wsclean_suffix = '-image.fits'
 
         # Set the channel values for the shallow facet imaging steps
-        fb = parset['imaging_specific']['fractional_bandwidth_selfcal_facet_image']
+        fb = self.frac_bandwidth_selfcal_facet_image
         self.startchan_selfcal_facet_image = int((1.0 - fb) * nchan / 2.0)
         self.nchan_selfcal_facet_image = int(fb * nchan)
         while self.nchan_selfcal_facet_image % self.facetimage_freqstep:
@@ -337,10 +338,10 @@ class Direction(object):
             self.facetimage_wsclean_nwavelengths = 0
         if (hasattr(self, 'facetimage_low_timestep_sec') and
             parset['imaging_specific']['wsclean_bl_averaging']):
-            self.facetimage_low_wsclean_nwavelengths = self.get_nwavelengths(self.cellsize_facet_deg,
+            self.facetimage_medlow_wsclean_nwavelengths = self.get_nwavelengths(self.cellsize_facet_deg,
                 self.facetimage_low_timestep_sec)
         else:
-            self.facetimage_low_wsclean_nwavelengths = 0
+            self.facetimage_medlow_wsclean_nwavelengths = 0
 
 
     def get_nwavelengths(self, cellsize_deg, timestep_sec):
@@ -369,7 +370,8 @@ class Direction(object):
         return wsclean_nwavelengths_time
 
 
-    def set_imaging_parameters(self, nbands, nbands_selfcal, padding=1.05):
+    def set_imaging_parameters(self, nbands, nbands_selfcal, frac_bandwidth_selfcal,
+        padding=1.05):
         """
         Sets various parameters for images in facetselfcal and facetimage pipelines
 
@@ -379,6 +381,8 @@ class Direction(object):
             Number of bands
         nbands_selfcal : int
             Number of bands for full facet image during selfcal
+        frac_bandwidth_selfcal : float
+            Fractional bandwidth for full facet image during selfcal
         padding : float, optional
             Padding factor by which size of facet is multiplied to determine
             the facet image size
@@ -389,9 +393,12 @@ class Direction(object):
             self.facet_imsize_nopadding = int(self.width / self.cellsize_facet_deg)
             self.facet_imsize = max(512, self.get_optimum_size(self.width
                 / self.cellsize_facet_deg * padding))
-            self.facet_low_imsize_nopadding = int(self.width / self.cellsize_facet_deg / 4.0)
-            self.facet_low_imsize = max(512, self.get_optimum_size(self.width
+            self.facet_med_imsize_nopadding = int(self.width / self.cellsize_facet_deg / 4.0)
+            self.facet_med_imsize = max(512, self.get_optimum_size(self.width
                 / self.cellsize_facet_deg / 4.0 * padding))
+            self.facet_low_imsize_nopadding = int(self.width / self.cellsize_facet_deg / 16.0)
+            self.facet_low_imsize = max(256, self.get_optimum_size(self.width
+                / self.cellsize_facet_deg / 16.0 * padding))
 
         # Determine whether the total bandwidth is large enough that wide-band
         # imaging is needed
@@ -405,7 +412,7 @@ class Direction(object):
         # image to ensure the imager has a reasonable chance to reach the
         # threshold first (which is set by the masking step)
         scaling_factor = np.sqrt(np.float(nbands))
-        scaling_factor_selfcal = np.sqrt(np.float(nbands_selfcal)*0.25)
+        scaling_factor_selfcal = np.sqrt(np.float(nbands_selfcal)*frac_bandwidth_selfcal)
         self.wsclean_selfcal_full_image_niter = int(2000 * scaling_factor_selfcal)
         self.wsclean_selfcal_full_image_threshold_jy =  1.5e-3 * 0.7 / scaling_factor_selfcal
         self.wsclean_full1_image_niter = int(2000 * scaling_factor)
