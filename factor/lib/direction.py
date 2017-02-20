@@ -397,7 +397,7 @@ class Direction(object):
             self.facet_med_imsize = max(512, self.get_optimum_size(self.width
                 / self.cellsize_facet_deg / 4.0 * padding))
             self.facet_low_imsize_nopadding = int(self.width / self.cellsize_facet_deg / 16.0)
-            self.facet_low_imsize = max(256, self.get_optimum_size(self.width
+            self.facet_low_imsize = max(512, self.get_optimum_size(self.width
                 / self.cellsize_facet_deg / 16.0 * padding))
 
         # Determine whether the total bandwidth is large enough that wide-band
