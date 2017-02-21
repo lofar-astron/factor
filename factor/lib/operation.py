@@ -342,16 +342,16 @@ class Operation(object):
         if os.path.exists(logfile):
             # Read the last 20 lines and look for 'returncode 123456'
             with open(logfile, "rb") as f:
-                for i in range(20):
-                    first = f.readline()      # Read the first line.
-                    f.seek(-2, 2)             # Jump to the second last byte.
-                    while f.read(1) != b"\n": # Until EOL is found...
-                        f.seek(-2, 1)         # ...jump back the read byte plus one more.
-                    last = f.readline()       # Read last line.
+                first = f.readline()      # Read the first line.
+                f.seek(-10000, 2)             # Jump to the second last byte.
+                while f.read(1) != b"\n": # Until EOL is found...
+                    f.seek(-2, 1)         # ...jump back the read byte plus one more.
+                last_lines = f.readlines()       # Read last line.
 
-                    if 'returncode 123456' in last:
-                        can_restart = True
-                        break
+            for line in last_lines:
+                if 'returncode 123456' in line:
+                    can_restart = True
+                    break
 
         return can_restart
 
