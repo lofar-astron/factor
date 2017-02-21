@@ -711,12 +711,12 @@ premask_med.control.inputkey               = imagefile
 premask_med.control.outputkey              = maskfile
 premask_med.argument.flags                 = [imagefile,maskfile]
 premask_med.argument.img_format            = fits
-premask_med.argument.pad_to_size           = {{ facet_low_imsize }}
+premask_med.argument.pad_to_size           = {{ facet_med_imsize }}
 premask_med.argument.skip_source_detection = True
 premask_med.argument.vertices_file         = {{ vertices_file }}
 premask_med.argument.reference_ra_deg      = {{ facet_ra }}
 premask_med.argument.reference_dec_deg     = {{ facet_dec }}
-premask_med.argument.cellsize_deg          = {{ cellsize_facet_low_deg }}
+premask_med.argument.cellsize_deg          = {{ cellsize_facet_med_deg }}
 premask_med.argument.make_blank_image      = True
 
 # image the concatenated data with the preliminary mask at med resolution, length = 1
@@ -900,7 +900,7 @@ premask_low.argument.skip_source_detection = True
 premask_low.argument.vertices_file         = {{ vertices_file }}
 premask_low.argument.reference_ra_deg      = {{ facet_ra }}
 premask_low.argument.reference_dec_deg     = {{ facet_dec }}
-premask_low.argument.cellsize_deg          = {{ cellsize_facet_low_deg*4 }}
+premask_low.argument.cellsize_deg          = {{ cellsize_facet_low_deg }}
 premask_low.argument.make_blank_image      = True
 
 # image the concatenated data with the preliminary mask at low resolution, length = 1
