@@ -551,8 +551,8 @@ wsclean_image_full.argument.j                     = {{ max_cpus_per_proc_single 
 {% if local_dir is not none %}
 wsclean_image_full.argument.tempdir               = {{ local_dir_parent }}
 {% endif %}
-{% if nbands_selfcal_facet_image > 3 %}
-wsclean_image_full.argument.fit-spectral-pol      = 3
+{% if nbands_selfcal_facet_image > 5 %}
+wsclean_image_full.argument.fit-spectral-pol      = 5
 {% elif nbands_selfcal_facet_image > 1 %}
 wsclean_image_full.argument.fit-spectral-pol      = {{ nbands_selfcal_facet_image - 1 }}
 {% endif %}
@@ -746,8 +746,8 @@ wsclean_image_full_med.argument.j                     = {{ max_cpus_per_proc_sin
 wsclean_image_full_med.argument.tempdir               = {{ local_dir_parent }}
 {% endif %}
 wsclean_image_full_med.argument.multiscale-shape      = gaussian
-{% if nbands_selfcal_facet_image > 3 %}
-wsclean_image_full_med.argument.fit-spectral-pol      = 3
+{% if nbands_selfcal_facet_image > 5 %}
+wsclean_image_full_med.argument.fit-spectral-pol      = 5
 {% elif nbands_selfcal_facet_image > 1 %}
 wsclean_image_full_med.argument.fit-spectral-pol      = {{ nbands_selfcal_facet_image - 1 }}
 {% endif %}
@@ -930,8 +930,8 @@ wsclean_image_full_low.argument.j                     = {{ max_cpus_per_proc_sin
 wsclean_image_full_low.argument.tempdir               = {{ local_dir_parent }}
 {% endif %}
 wsclean_image_full_low.argument.multiscale-shape      = gaussian
-{% if nbands_selfcal_facet_image > 3 %}
-wsclean_image_full_low.argument.fit-spectral-pol      = 3
+{% if nbands_selfcal_facet_image > 5 %}
+wsclean_image_full_low.argument.fit-spectral-pol      = 5
 {% elif nbands_selfcal_facet_image > 1 %}
 wsclean_image_full_low.argument.fit-spectral-pol      = {{ nbands_selfcal_facet_image - 1 }}
 {% endif %}
