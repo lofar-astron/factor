@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_cal, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_data, concat_data_compressed_mapfile, {% if selfcal_local_dir is not none %} make_concat_data_sync_mapfile, sync_concat_data_to_local, {% endif %} make_fast_phase_parmdb_map, create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, remove_parmdbs11, solve_ampphase11, apply_ampphase11, merge_phase_parmdbs, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs, smooth_amps, smooth_amps_normalized, {% if selfcal_local_dir is not none %} remove_concat_data, {% endif %} merge_selfcal_parmdbs, convert_merged_selfcal_parmdbs, merge_normalized_selfcal_parmdbs, convert_normalized_merged_selfcal_parmdbs, {% if create_preapply_parmdb %} create_preapply_parmdb, {% endif %} make_selfcal_plots, expand_merged_parmdb_map, expand_normalized_merged_parmdb_map, expand_cal_sourcedb_map, {% if not is_patch %} make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, {% if use_wideband %} select_imaging_bands, select_sourcedb_all_facet_sources, select_sourcedb_cal_facet_sources, select_parmdb_map, select_merged_parmdb_map, select_normalized_merged_parmdb_map, {% endif %} apply_dir_dep, create_compressed_mapfile5, premask, wsclean_image_full, create_imagebase_map, adjust_wsclean_mapfile1, mask5, check_mask_high, create_model5_map, adjust_wsclean_mapfile2, expand_model5_map, expand_mask5_map, make_high_facet_skymodel, make_sourcedb_high, expand_sourcedb_high, select_sourcedb_high, subtract_high, create_compressed_mapfile6, premask_low, wsclean_image_full_low, create_imagebase_low_map, adjust_wsclean_mapfile3, mask6, check_mask_low, expand_model6_map, expand_mask6_map, make_low_facet_skymodel, combine_facet_skymodels,  make_sourcedb_new_facet_sources_for_facet_imaging, expand_sourcedb_new_facet_sources, {% endif %} predict_and_difference_models, create_middle_band_mapfile1, create_middle_band_mapfile2, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_cal, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_data, concat_data_compressed_mapfile, {% if selfcal_local_dir is not none %} make_concat_data_sync_mapfile, sync_concat_data_to_local, {% endif %} make_fast_phase_parmdb_map, create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, remove_parmdbs11, solve_ampphase11, apply_ampphase11, merge_phase_parmdbs, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs, smooth_amps, smooth_amps_normalized, {% if selfcal_local_dir is not none %} remove_concat_data, {% endif %} merge_selfcal_parmdbs, convert_merged_selfcal_parmdbs, merge_normalized_selfcal_parmdbs, convert_normalized_merged_selfcal_parmdbs, {% if create_preapply_parmdb %} create_preapply_parmdb, {% endif %} make_selfcal_plots, expand_merged_parmdb_map, expand_normalized_merged_parmdb_map, expand_cal_sourcedb_map, {% if not is_patch %} make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, prepare_imaging_data, create_compressed_mapfile5, premask, wsclean_image_full, create_imagebase_map, adjust_wsclean_mapfile1, mask5, check_mask_high, create_model5_map, adjust_wsclean_mapfile2, expand_model5_map, expand_mask5_map, make_high_facet_skymodel, expand_peel_skymodel_map, combine_skymodels_high, make_sourcedb_high, expand_sourcedb_high, subtract_high, create_compressed_mapfile6, premask_med, wsclean_image_full_med, create_imagebase_med_map, adjust_wsclean_mapfile3, mask6, check_mask_med, expand_model6_map, expand_mask6_map, make_med_facet_skymodel, combine_facet_skymodels,  {% if mscale_field_do %} make_sourcedb_med, expand_sourcedb_med, subtract_med, create_compressed_mapfile7, premask_low, wsclean_image_full_low, create_imagebase_low_map, adjust_wsclean_mapfile4, mask7, check_mask_low, expand_model7_map, expand_mask7_map, make_low_facet_skymodel, combine_new_skymodels, {% endif %} make_sourcedb_new_facet_sources_for_facet_imaging, expand_sourcedb_new_facet_sources, {% endif %} predict_and_difference_models, create_middle_band_mapfile1, create_middle_band_mapfile2, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath = {{ pipeline_dir }}/plugins
 
@@ -503,9 +503,6 @@ prepare_imaging_data.argument.avg.timestep                          = {{ facetim
 # prepare_imaging_data.argument.msout.storagemanager.normalization  = "AF"
 # {% endif %}
 
-{% if not is_patch %}
-# Now make the high-res facet image
-
 # compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile5.control.kind        = plugin
 create_compressed_mapfile5.control.type        = compressMapfile
@@ -634,18 +631,22 @@ make_high_facet_skymodel.control.inputkeys   = [msfile,rootname,mask]
 make_high_facet_skymodel.control.outputkey   = skymodel
 make_high_facet_skymodel.argument.flags      = [rootname,msfile,skymodel,mask]
 
-# combine the new calibrator and facet sky models, length = nbands
+# expand the peeling sky model to all bands, length = nbands
+expand_peel_skymodel_map.control.kind             = plugin
+expand_peel_skymodel_map.control.type             = expandMapfile
+expand_peel_skymodel_map.control.mapfile_in       = create_peel_skymodel_map.output.mapfile
+expand_peel_skymodel_map.control.mapfile_to_match = shift_cal.output.mapfile
+expand_peel_skymodel_map.control.mapfile_dir      = input.output.mapfile_dir
+expand_peel_skymodel_map.control.filename         = expand_peel_skymodel.mapfile
+
+# combine the peeling and facet sky models, length = nbands
 combine_skymodels_high.control.type        = combine_skymodels
-combine_skymodels_high.control.mapfiles_in = [make_high_facet_skymodel.output.mapfile,make_new_cal_skymodel.output.mapfile]
+combine_skymodels_high.control.mapfiles_in = [make_high_facet_skymodel.output.mapfile,expand_peel_skymodel_map.output.mapfile]
 combine_skymodels_high.control.inputkeys   = [newfacetmodel,calmodel]
 combine_skymodels_high.control.outputkey   = skymodel
 combine_skymodels_high.argument.flags      = [calmodel,newfacetmodel,skymodel]
 
-# end of high-res full facet imaging
-{% endif %}
-
-# Make a medium-res image of the facet or (if wsclean_selfcal_multiscale is True)
-# of the calibrator region to pick up any extended emission missed in the high-
+# Make a medium-res image of the facet to pick up any extended emission missed in the high-
 # res image
 
 # convert the combined sky model into a sourcedb, length = nbands
@@ -834,7 +835,7 @@ combine_facet_skymodels.argument.flags      = [highresmodel,medresmodel,skymodel
 # make a low-res image of the facet, as there may still be extended emission
 # missed in the med-res image, but only if multiscale is activated
 
-{% if wsclean_selfcal_multiscale or mscale_field_do %}
+{% if mscale_field_do %}
 
 # convert the combined medium-res sky model into a sourcedb, length = nbands
 make_sourcedb_med.control.type       = make_sourcedb
@@ -1015,7 +1016,7 @@ combine_new_skymodels.argument.flags      = [calmodel,newfacetmodel,skymodel]
 
 # convert the combined sky model for facet imaging into a sourcedb, length = nbands
 make_sourcedb_new_facet_sources_for_facet_imaging.control.type       = make_sourcedb
-{% if wsclean_selfcal_multiscale or mscale_field_do %}
+{% if mscale_field_do %}
 make_sourcedb_new_facet_sources_for_facet_imaging.control.mapfile_in = combine_new_skymodels.output.mapfile
 {% else %}
 make_sourcedb_new_facet_sources_for_facet_imaging.control.mapfile_in = combine_facet_skymodels.output.mapfile
