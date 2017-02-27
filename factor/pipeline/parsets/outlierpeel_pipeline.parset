@@ -448,11 +448,11 @@ expand_sourcedb_all_facet_sources.control.mapfile_groups = create_msmulti_map.ou
 expand_sourcedb_all_facet_sources.control.mapfile_dir    = input.output.mapfile_dir
 expand_sourcedb_all_facet_sources.control.filename       = expand_sourcedb_all_facet_sources.mapfile
 
-# shift the empty data, add all facet sources, apply the direction-dependent solutions and average, length = nfiles or nbands_selfcal_facet_image * nchunks
+# shift the empty data, add all facet sources, apply the direction-dependent solutions and average, length = nfiles
 # compress data and weights
 prepare_imaging_data.control.type                                   = dppp
-prepare_imaging_data.control.mapfiles_in                            = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-prepare_imaging_data.control.inputkeys                              = [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb]
+prepare_imaging_data.control.mapfiles_in                            = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,expand_cal_sourcedb_map.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile,expand_normalized_merged_parmdb_map.output.mapfile]
+prepare_imaging_data.control.inputkeys                              = [msin,sourcedb,sourcedb_cal,dir_indep_parmdb,dir_dep_parmdb,dir_dep_parmdb_normalized]
 prepare_imaging_data.argument.numthreads                            = {{ max_cpus_per_io_proc_nfiles }}
 prepare_imaging_data.argument.msin.datacolumn                       = {{ subtracted_data_colname }}
 prepare_imaging_data.argument.msin.startchan                        = {{ startchan_selfcal_facet_image }}
@@ -463,9 +463,9 @@ prepare_imaging_data.argument.msout.writefullresflag                = False
 prepare_imaging_data.argument.local_scratch_dir                     = {{ local_dir }}
 {% endif %}
 {% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
-prepare_imaging_data.argument.steps                                 = [shift,add,flag,correct,flagzero,avg]
+prepare_imaging_data.argument.steps                                 = [shift,add,subtract_cal,flag,correct,flagzero,avg]
 {% else %}
-prepare_imaging_data.argument.steps                                 = [shift,add,correct,flagzero,avg]
+prepare_imaging_data.argument.steps                                 = [shift,add,subtract_cal,correct,flagzero,avg]
 {% endif %}
 prepare_imaging_data.argument.shift.type                            = phaseshifter
 prepare_imaging_data.argument.shift.phasecenter                     = [{{ facet_ra }}deg, {{ facet_dec }}deg]
@@ -485,8 +485,12 @@ prepare_imaging_data.argument.flag.baseline                         = {{ flag_ba
 {% if flag_freqrange is not none %}
 prepare_imaging_data.argument.flag.freqrange                        = {{ flag_freqrange }}
 {% endif %}
+prepare_imaging_data.argument.subtract_cal.type                     = predict
+prepare_imaging_data.argument.subtract_cal.sourcedb                 = sourcedb_cal
+prepare_imaging_data.argument.subtract_cal.operation                = subtract
+prepare_imaging_data.argument.subtract_cal.applycal.parmdb          = dir_dep_parmdb
 prepare_imaging_data.argument.correct.type                          = applycal
-prepare_imaging_data.argument.correct.parmdb                        = dir_dep_parmdb
+prepare_imaging_data.argument.correct.parmdb                        = dir_dep_parmdb_normalized
 prepare_imaging_data.argument.correct.invert                        = True
 prepare_imaging_data.argument.flagzero.type                         = preflagger
 prepare_imaging_data.argument.flagzero.amplmin                      = 1e-20
