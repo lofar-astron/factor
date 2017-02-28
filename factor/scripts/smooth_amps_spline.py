@@ -343,7 +343,11 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
         pol_list = ['0:0', '1:1']
 
     times = numpy.copy(sorted( parms[key_names[0]]['times']))
+    orig_times = parms[key_names[0]]['times']
+    timewidths = parms[key_names[0]]['timewidths']
     freqs = numpy.copy(sorted( parms[key_names[0]]['freqs']))/1e6 # get this in MHz
+    orig_freqs = parms[key_names[0]]['freqs']
+    freqwidths = parms[key_names[0]]['freqwidths']
 
     # times not used at the moment, I assume the time axis for a parmdb is regular and does not contain gaps
     times = (times - numpy.min(times))/24. #so we get an axis in hrs
@@ -554,7 +558,34 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
     if os.path.exists(instrument_name_smoothed):
         shutil.rmtree(instrument_name_smoothed)
     pdbnew = lofar.parmdb.parmdb(instrument_name_smoothed, create=True)
-    pdbnew.addValues(parms)
+
+    # Identify any gaps in time (frequency gaps are not allowed), as we need to handle
+    # each section separately if gaps are present
+    delta_times = orig_times[1:] - orig_times[:-1]
+    gaps = numpy.where(delta_times > timewidths[:-1]*1.1)
+    if len(gaps[0]) > 0:
+        gaps_ind = gaps[0] + 1
+    else:
+        gaps_ind = []
+
+    for pol in pol_list:
+        for station in antenna_list:
+            g_start = 0
+            real = parms['Gain:' + pol + ':Real:'+ station]['values']
+            imag = parms['Gain:' + pol + ':Imag:'+ station]['values']
+            for g in gaps_ind:
+                # If time gaps exist, add them one-by-one (except for last one)
+                pdbnew.addValues('Gain:'+pol+':Real:{}'.format(station), real[g_start:g], orig_freqs, freqwidths,
+                    orig_times[g_start:g], timewidths[g_start:g], asStartEnd=False)
+                pdbnew.addValues('Gain:'+pol+':Imag:{}'.format(station), imag[g_start:g], orig_freqs, freqwidths,
+                    orig_times[g_start:g], timewidths[g_start:g], asStartEnd=False)
+                g_start = g
+
+            # Add remaining time slots
+            pdbnew.addValues('Gain:'+pol+':Real:{}'.format(station), real[g_start:], orig_freqs, freqwidths,
+                orig_times[g_start:], timewidths[g_start:], asStartEnd=False)
+            pdbnew.addValues('Gain:'+pol+':Imag:{}'.format(station), imag[g_start:], orig_freqs, freqwidths,
+                orig_times[g_start:], timewidths[g_start:], asStartEnd=False)
     pdbnew.flush()
 
 
