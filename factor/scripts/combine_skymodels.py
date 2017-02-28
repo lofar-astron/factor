@@ -36,6 +36,8 @@ def main(model1, model2, skymodel):
         s2 = lsmtool.load(model2)
 
         # Combine sky models, keeping all sources
+        s1.ungroup()
+        s2.ungroup()
         s1.concatenate(s2, keep='all')
     except:
         # If second sky model is empty or cannot be loaded, just save s1 to output
