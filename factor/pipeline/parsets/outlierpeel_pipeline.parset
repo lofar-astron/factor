@@ -638,31 +638,13 @@ make_high_facet_skymodel.control.inputkeys   = [msfile,rootname,mask]
 make_high_facet_skymodel.control.outputkey   = skymodel
 make_high_facet_skymodel.argument.flags      = [rootname,msfile,skymodel,mask]
 
-# expand the peeling sky model to all bands, length = nbands
-expand_peel_skymodel_map.control.kind             = plugin
-expand_peel_skymodel_map.control.type             = expandMapfile
-expand_peel_skymodel_map.control.mapfile_in       = create_peel_skymodel_map.output.mapfile
-expand_peel_skymodel_map.control.mapfile_to_match = shift_cal.output.mapfile
-expand_peel_skymodel_map.control.mapfile_dir      = input.output.mapfile_dir
-expand_peel_skymodel_map.control.filename         = expand_peel_skymodel.mapfile
-
-# combine the peeling and facet sky models, length = nbands
-combine_skymodels_high.control.type        = combine_skymodels
-combine_skymodels_high.control.mapfiles_in = [make_high_facet_skymodel.output.mapfile,expand_peel_skymodel_map.output.mapfile]
-combine_skymodels_high.control.inputkeys   = [newfacetmodel,calmodel]
-combine_skymodels_high.control.outputkey   = skymodel
-combine_skymodels_high.argument.flags      = [calmodel,newfacetmodel,skymodel]
-
 # Make a medium-res image of the facet to pick up any extended emission missed in the high-
 # res image
 
 # convert the combined sky model into a sourcedb, length = nbands
 make_sourcedb_high.control.type       = make_sourcedb
-{% if is_patch %}
 make_sourcedb_high.control.mapfile_in = make_new_cal_skymodel.output.mapfile
-{% else %}
-make_sourcedb_high.control.mapfile_in = combine_skymodels_high.output.mapfile
-{% endif %}
+make_sourcedb_high.control.mapfile_in = make_high_facet_skymodel.output.mapfile
 make_sourcedb_high.control.inputkey   = in
 make_sourcedb_high.argument.format    = <
 make_sourcedb_high.argument.outtype   = blob
@@ -676,7 +658,7 @@ expand_sourcedb_high.control.mapfile_groups = create_msmulti_map.output.mapfile
 expand_sourcedb_high.control.mapfile_dir    = input.output.mapfile_dir
 expand_sourcedb_high.control.filename       = expand_sourcedb_high.mapfile
 
-# subtract the high-resolution model, length = nfiles or nbands_selfcal_facet_image * nchunks
+# subtract the high-resolution model, length = nfiles
 # compress data and weights
 subtract_high.control.type                                 = dppp
 subtract_high.control.mapfiles_in                          = [prepare_imaging_data.output.mapfile,expand_sourcedb_high.output.mapfile]
@@ -830,11 +812,7 @@ make_med_facet_skymodel.argument.flags      = [rootname,msfile,skymodel,mask,0.0
 
 # combine the medium- and high-res facet sky models, length = nbands
 combine_facet_skymodels.control.type        = combine_skymodels
-{% if is_patch %}
-combine_facet_skymodels.control.mapfiles_in = [make_new_cal_skymodel.output.mapfile,make_med_facet_skymodel.output.mapfile]
-{% else %}
-combine_facet_skymodels.control.mapfiles_in = [combine_skymodels_high.output.mapfile,make_med_facet_skymodel.output.mapfile]
-{% endif %}
+combine_facet_skymodels.control.mapfiles_in = [make_high_facet_skymodel.output.mapfile,make_med_facet_skymodel.output.mapfile]
 combine_facet_skymodels.control.inputkeys   = [highresmodel,medresmodel]
 combine_facet_skymodels.control.outputkey   = skymodel
 combine_facet_skymodels.argument.flags      = [highresmodel,medresmodel,skymodel]
