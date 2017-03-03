@@ -3,6 +3,18 @@
 Changelog
 =========
 
+Version 1.1
+-------------
+
+Changes since version 1.0:
+
+    * The subtraction of sources after self calibration has been improved
+    * The baseline-dependent averaging used during imaging has been reduced, as
+    the previous averaging caused significant smearing away from the facet
+    center
+    * Many bug fixes
+
+
 Version 1.0
 -----------
 
