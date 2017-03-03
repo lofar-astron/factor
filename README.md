@@ -36,7 +36,7 @@ should run the following command before using Factor:
 Factor requires the following:
 
 * The LOFAR offline trunk from the LOFAR software repository (a version of the trunk after 02/11/2016 is required)
-* [WSClean](http://sourceforge.net/p/wsclean/wiki/Home) (version 1.12 or later: to use baseline-dependent averaging, a version of the trunk after 03/11/2016 is required)
+* [WSClean](http://sourceforge.net/p/wsclean/wiki/Home) (version 2.3 or later)
 * [LSMTool](https://github.com/darafferty/LSMTool) (version 1.1 or later)
 * [jinja2](http://jinja.pocoo.org/docs/dev)
 * [Shapely](https://github.com/Toblerity/Shapely)
