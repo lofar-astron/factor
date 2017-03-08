@@ -552,8 +552,13 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
         data = new_mask.getdata()
 
         if skip_source_detection or nisl == 0:
-            # Mask all pixels
-            data[:] = 1
+            if region_file is not None and region_file != '[]':
+                # Unmask all pixels. We will fill the masked regions
+                # below
+                data[:] = 0
+            else:
+                # Mask all pixels
+                data[:] = 1
 
         if region_file is not None and region_file != '[]':
             # Merge the CASA regions with the mask
