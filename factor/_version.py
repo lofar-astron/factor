@@ -11,6 +11,12 @@ def changelog():
     FACTOR Changelog.
     ----------------------------------------------------------------------------
 
+    08/03/2017
+
+        - Use polynomial sky models generated directly by WSClean during
+        imaging, resulting in improved and faster subtraction of extended
+        sources.
+
     24/02/2017 - Version 1.1
 
         - The subtraction of sources after self calibration has been improved

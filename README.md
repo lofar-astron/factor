@@ -1,23 +1,29 @@
 Factor: Facet Calibration for LOFAR
 ===================================
 
-Factor is a tool for producing low-noise, high-resolution wide-field images from LOFAR HBA data. Factor has been designed to use as few free parameters as possible in order to mitigate the effects of over-fitting and thus maximize image fidelity. Factor runs well on single machines or on compute clusters with multiple nodes (with a shared file system). It requires only modest resources (at least 32 GB of memory and 1 TB of disk space).
+Factor is a tool for producing low-noise, high-resolution wide-field images from
+LOFAR HBA data. Factor has been designed to use as few free parameters as
+possible in order to mitigate the effects of over-fitting and thus maximize
+image fidelity. Factor runs well on single machines or on compute clusters with
+multiple nodes (with a shared file system). It requires only modest resources
+(at least 32 GB of memory and 1 TB of disk space).
 
-What's New in v1.0
+What's New since v1.1
+---------------------
+
+* Factor now uses the polynomial sky models generated directly by WSClean
+during imaging, resulting in improved and faster subtraction of extended sources.
+Due to this change, Factor now requires WSClean v2.3 or higher.
+
+
+What's New in v1.1
 ------------------
 
-Note: Factor v1.0 is not compatible with previous versions. If you started a reduction
-with a previous version, you must restart from scratch to use v1.0; the version pervious to v1.0 is still
-available on the "pre1.0" branch.
-
-Since version pre1.0:
-
-* The BBS calibration software has been replaced by GainCal, which is both much faster and more stable
-* The CASA imager has been replaced by WSClean, which is generally much faster and integrates better with the LOFAR pipeline framework that Factor uses
-* A new option has been added to keep the primary data files used in self calibration in memory, speeding up self calibration dramatically on some systems (set "dir\_local\_selfcal = /dev/shm" under the [cluster] section of the parset)
-* The Dysco storage manager can now be used to compress visibilities and weights, reducing file sizes (and IO) by a factor of ~ 2.5
-* The reimage\_selfcaled option has been removed, as facets are always (re)imaged now. A image\_target\_only option has been added if you wish to (re)image only the target
-* The skip\_facet\_imaging option has been removed, as facets are always imaged now to improve the subtraction
+* The subtraction of sources after self calibration has been improved
+* The baseline-dependent averaging used during imaging has been reduced,
+as the previous averaging caused significant smearing away from the
+facet center
+* Many bug fixes
 
 
 Installation
