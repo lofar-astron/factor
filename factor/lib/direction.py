@@ -1060,6 +1060,11 @@ class Direction(object):
                     self.converted_parmdb_mapfile = d['converted_parmdb_mapfile']
                 if 'sourcedb_new_facet_sources' in d:
                     self.sourcedb_new_facet_sources = d['sourcedb_new_facet_sources']
+
+                # Load mapfile of imaging data
+                if 'image_data_mapfile' in d:
+                    self.image_data_mapfile = d['image_data_mapfile']
+
             return True
         except:
             return False

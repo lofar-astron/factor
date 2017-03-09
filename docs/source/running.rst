@@ -51,6 +51,28 @@ You can check the progress of a run with::
     A number of ``checkfactor`` options are configurable in the Factor parset (see :ref:`parset_checkfactor_options`).
 
 
+Archiving a Factor run with ``archivefactor``
+---------------------------------------------
+
+After Factor has finished the run, zou can archive the results with::
+
+    $ archivefactor factor.parset dir_output
+
+where ``factor.parset`` is the parset described in :ref:`factor_parset` and ``dir_output`` is the path to the directory that will contain the archived files (e.g., ``/data/run1_archive``). A number of options are available and are described below::
+
+    Usage: archivefactor parset dir_output
+
+    Options:
+      --version             show program's version number and exit
+      -h, --help            show this help message and exit
+      -d DIRECTIONS, --directions=DIRECTIONS
+                            comma-separated list of directions (e.g., "-d
+                            facet1,facet3") for which to archive the calibrated
+                            data. Use "-d all" to select all directions.
+      -s, --subdata         archive the subtracted data MS files
+      -c, --clobber         clobber existing files in output directory
+
+
 Resuming an interrupted run
 ---------------------------
 

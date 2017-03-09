@@ -11,6 +11,12 @@ def changelog():
     FACTOR Changelog.
     ----------------------------------------------------------------------------
 
+    09/03/2017
+
+        - An archiving tool (archivefactor) has been added that can archive
+        the subtracted datasets, the sky models, the instrument tables, the
+        selfcal plots, and the calibrated data for one or more directions
+
     08/03/2017
 
         - Use polynomial sky models generated directly by WSClean during
