@@ -237,7 +237,6 @@ def archive(parset_file, directions, dir_output, archive_subdata=False, clobber=
                         os.system('rm -rf {0}'.format(outfile))
                 os.system('cp -r {0} {1}'.format(f, outfile))
 
-        # Find the plots
         log.info('Archiving plots for direction {}...'.format(d.name))
         file_list = glob.glob(os.path.join(d.working_dir, 'results', 'facetselfcal', d.name, '*png'))
         if len(file_list) == 0:
@@ -249,7 +248,6 @@ def archive(parset_file, directions, dir_output, archive_subdata=False, clobber=
                 outfile = os.path.join(plot_dir, os.path.basename(f))
                 os.system('cp -r {0} {1}'.format(f, outfile))
 
-        # Copy the calibrated data
         if d.name in directions:
             log.info('Archiving calibrated data for direction {}...'.format(d.name))
             if hasattr(d, 'image_data_mapfile'):
