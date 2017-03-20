@@ -151,10 +151,10 @@ dir_ms = /data/bands
 # subtraction but also longer runtimes
 # fractional_bandwidth_selfcal_facet_image = 0.25
 
-# Use baseline-dependent averaging in WSClean (default = False). If enabled,
+# Use baseline-dependent averaging in WSClean (default = True). If enabled,
 # this option can dramatically speed up imaging with WSClean.
 # NOTE: this option requires the latest development version of WSClean
-# wsclean_bl_averaging = False
+# wsclean_bl_averaging = True
 
 # Selfcal imaging parameters: pixel size in arcsec (default = 1.5), Briggs
 # robust parameter (default = -0.5) and minimum uv distance in lambda (default =
@@ -189,10 +189,12 @@ dir_ms = /data/bands
 # image, which can help selfcal convergence in the presence of strong artifacts
 # selfcal_adaptive_threshold = False
 
-# Fit a polynomial over frequency during clean (default = False). If True,
-# WSClean will use the "-fit-spectral-pol" option to fit an nterms = 3
-# polynomial over the channel images
-# fit_spectral_pol = False
+# Update user-supplied clean regions (i.e., those specified in the
+# directions file under the :term:`region_selfcal` column) with new
+# regions found by the source finder during selfcal (default = ``True``) .
+# Facet regions (specified in the term:`region_facet` column of the
+# directions file) are always updated
+# update_selfcal_clean_regions = True
 
 
 [directions]

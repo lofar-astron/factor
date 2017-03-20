@@ -209,15 +209,14 @@ The available options are described below under their respective sections.
         values produce better results but require longer run times. Wide-band clean is
         activated when there are more than 5 bands.
 
-    nbands_selfcal_facet_image
-        Number of bands to use for facet imaging during selfcal (default = 6). Facet
-        imaing during selfcal is used to improve the subtraction of non-calibrator
-        sources in the facet. More bands will result in a better subtraction but also
-        longer runtimes. When fewer than the total number are used, the bands are
-        selected so that they are evenly spread over the full available bandwidth
+    fractional_bandwidth_selfcal_facet_image
+        Fractional of bandwidth to use for facet imaging during selfcal (default =
+        0.25). Facet imaging during selfcal is used to improve the subtraction of
+        non-calibrator sources in the facet. More bandwidth will result in a better
+        subtraction but also longer runtimes
 
     wsclean_bl_averaging
-        Use baseline-dependent averaging in WSClean (default = ``False``). If enabled,
+        Use baseline-dependent averaging in WSClean (default = ``True``). If enabled,
         this option can dramatically speed up imaging with WSClean.
         NOTE: this option requires WSClean v2.0 or higher.
 
@@ -239,6 +238,13 @@ The available options are described below under their respective sections.
         Use an adaptive masking threshold during selfcal imaging (default = ``False``). If
         ``True``, the masking threshold will be estimated using the negative peaks in the
         image, which can help selfcal convergence in the presence of strong artifacts.
+
+    update_selfcal_clean_regions
+        Update user-supplied clean regions (i.e., those specified in the
+        directions file under the :term:`region_selfcal` column) with new
+        regions found by the source finder during selfcal (default = ``True``) .
+        Facet regions (specified in the term:`region_facet` column of the
+        directions file) are always updated
 
 .. note::
 
@@ -461,7 +467,7 @@ the path) as the section name. Currently, only the initial sky model can
 be specified here.
 
 .. glossary::
-   
+
     init_skymodel
         Full path to the skymodel that was used to subtract the sources in the
 	MS that was given as the section-name. For multi-epoch (interleaved or

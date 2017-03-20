@@ -134,6 +134,7 @@ class Direction(object):
         self.preapply_phase_cal = False
         self.create_preapply_parmdb = False
         self.contains_target = False # whether this direction contains the target (if any)
+        self.skip_selfcal_source_detection = False # whether to do source detection to update supplied clean mask
 
         # Define some directories and files
         self.working_dir = factor_working_dir
@@ -240,7 +241,6 @@ class Direction(object):
         self.selfcal_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
         self.use_selfcal_clean_threshold = parset['imaging_specific']['selfcal_clean_threshold']
         self.use_selfcal_adaptive_threshold = parset['imaging_specific']['selfcal_adaptive_threshold']
-        self.fit_spectral_pol = parset['imaging_specific']['fit_spectral_pol']
         self.nbands_selfcal_facet_image = min(6, len(bands))
         self.frac_bandwidth_selfcal_facet_image = parset['imaging_specific']['fractional_bandwidth_selfcal_facet_image']
 
@@ -261,6 +261,10 @@ class Direction(object):
         if facet_min_uv_lambda is None:
             facet_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
         self.facet_min_uv_lambda = facet_min_uv_lambda
+
+        if (not parset['imaging_specific']['update_selfcal_clean_regions'] and
+            self.region_selfcal != '[]'):
+            self.skip_selfcal_source_detection = True
 
         self.set_imaging_parameters(nbands, self.nbands_selfcal_facet_image,
             self.frac_bandwidth_selfcal_facet_image, padding)

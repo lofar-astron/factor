@@ -359,40 +359,39 @@ def _set_up_compute_parameters(parset, dry_run=False):
         if (cluster_parset['clusterdesc_file'].lower() == 'pbs' or
             ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'pbs')):
             log.info('Using cluster setting: "PBS".')
-            parset['cluster_specific']['clusterdesc'] = factor.cluster.make_pbs_clusterdesc()
-            parset['cluster_specific']['clustertype'] = 'pbs'
+            cluster_parset['clusterdesc'] = factor.cluster.make_pbs_clusterdesc()
+            cluster_parset['clustertype'] = 'pbs'
         elif (cluster_parset['clusterdesc_file'].lower() == 'slurm' or
             ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'slurm')):
             log.info('Using cluster setting: "SLURM".')
-            parset['cluster_specific']['clusterdesc'] = factor.cluster.make_slurm_clusterdesc()
-            parset['cluster_specific']['clustertype'] = 'slurm'
+            cluster_parset['clusterdesc'] = factor.cluster.make_slurm_clusterdesc()
+            cluster_parset['clustertype'] = 'slurm'
         elif (cluster_parset['clusterdesc_file'].lower() == 'juropa_slurm' or
             ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'juropa_slurm')):
             log.info('Using cluster setting: "JUROPA_slurm" (Single genericpipeline using multiple nodes).')
             # slurm_srun on JUROPA uses the local.clusterdesc
-            parset['cluster_specific']['clusterdesc'] = os.path.join(parset['lofarroot'], 'share', 'local.clusterdesc')
-            parset['cluster_specific']['clustertype'] = 'juropa_slurm'
-            parset['cluster_specific']['node_list'] = ['localhost']
+            cluster_parset['clusterdesc'] = os.path.join(parset['lofarroot'], 'share', 'local.clusterdesc')
+            cluster_parset['clustertype'] = 'juropa_slurm'
+            cluster_parset['node_list'] = ['localhost']
         elif (cluster_parset['clusterdesc_file'].lower() == 'mpirun' or
             ('cluster_type' in cluster_parset and cluster_parset['cluster_type'].lower() == 'mpirun')):
             log.info('Using cluster setting: "mpirun".')
             # mpirun uses the local.clusterdesc?
-            parset['cluster_specific']['clusterdesc'] = os.path.join(parset['lofarroot'], 'share', 'local.clusterdesc')
-            parset['cluster_specific']['clustertype'] = 'mpirun'
-            parset['cluster_specific']['node_list'] = ['localhost']
+            cluster_parset['clusterdesc'] = os.path.join(parset['lofarroot'], 'share', 'local.clusterdesc')
+            cluster_parset['clustertype'] = 'mpirun'
+            cluster_parset['node_list'] = ['localhost']
         else:
             log.info('Using cluster setting: "local" (Single node).')
-            parset['cluster_specific']['clusterdesc'] = cluster_parset['clusterdesc_file']
-            parset['cluster_specific']['clustertype'] = 'local'
+            cluster_parset['clusterdesc'] = cluster_parset['clusterdesc_file']
+            cluster_parset['clustertype'] = 'local'
     if not 'node_list' in parset['cluster_specific']:
-        parset['cluster_specific']['node_list'] = factor.cluster.get_compute_nodes(
-            parset['cluster_specific']['clusterdesc'])
+        cluster_parset['node_list'] = factor.cluster.get_compute_nodes(cluster_parset['clusterdesc'])
 
     # check ulimit(s)
     try:
         import resource
         nof_files_limits = resource.getrlimit(resource.RLIMIT_NOFILE)
-        if parset['cluster_specific']['clustertype'] == 'local' and nof_files_limits[0] < nof_files_limits[1]:
+        if cluster_parset['clustertype'] == 'local' and nof_files_limits[0] < nof_files_limits[1]:
             log.debug('Setting limit for number of open files to: {}.'.format(nof_files_limits[1]))
             resource.setrlimit(resource.RLIMIT_NOFILE,(nof_files_limits[1],nof_files_limits[1]))
             nof_files_limits = resource.getrlimit(resource.RLIMIT_NOFILE)
@@ -407,8 +406,7 @@ def _set_up_compute_parameters(parset, dry_run=False):
     factor.cluster.find_executables(parset)
 
     # Set up scheduler for operations (pipeline runs)
-    ndir_simul = len(parset['cluster_specific']['node_list']) * \
-        parset['cluster_specific']['ndir_per_node']
+    ndir_simul = len(cluster_parset['node_list']) * cluster_parset['ndir_per_node']
     if parset['direction_specific']['groupings'] is not None:
         ngroup_max = int(max([int(n.items()[0][0]) for n in
             parset['direction_specific']['groupings']]))

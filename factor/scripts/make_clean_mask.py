@@ -317,8 +317,9 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     skip_source_detection : bool, optional
         If True, source detection is not run on the input image
     region_file : str, optional
-        Filename of region file in CASA format. If given, no mask image
-        is made (the region file is used as the clean mask)
+        Filename of region file in CASA format to use as the mask. If update_user_mask
+        is True, regions in region_file are unioned with ones found by the
+        source finder
     nsig : float, optional
         Number of sigma of returned threshold value
     reference_ra_deg : float, optional
@@ -414,7 +415,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             make_template_image(image_name, reference_ra_deg, reference_dec_deg,
                 cellsize_deg=float(cellsize_deg))
         else:
-            print('ERROR: a refernce position must be given to make an empty template image')
+            print('ERROR: a reference position must be given to make an empty template image')
             sys.exit(1)
 
     trim_by = float(trim_by)
@@ -493,8 +494,12 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             else:
                 # Continue on and use user-supplied region file
                 threshold = nsig * img.clipped_rms
+        else:
+            # Write out the mask
+            img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
+                             img_format=img_format, clobber=True)
 
-        # Check if there are large islands preset (indicating that multi-scale
+        # Check if there are large islands present (indicating that multi-scale
         # clean is needed)
         has_large_isl = False
         for isl in img.islands:
@@ -502,20 +507,6 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                 # Assuming normal sampling, a size of 100 pixels would imply
                 # a source of ~ 10 beams
                 has_large_isl = True
-
-    if (region_file is not None and region_file != '[]' and skip_source_detection
-        and not make_blank_image):
-        # Copy region file and return if source detection was not done
-        os.system('cp {0} {1}'.format(region_file.strip('[]"'), mask_name))
-        if threshold_format == 'float':
-            return {'threshold_5sig': threshold}
-        elif threshold_format == 'str_with_units':
-            # This is done to get around the need for quotes around strings in casapy scripts
-            # 'casastr/' is removed by the generic pipeline
-            return {'threshold_5sig': 'casastr/{0}Jy'.format(threshold)}
-    elif not skip_source_detection and nisl > 0:
-        img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
-                         img_format=img_format, clobber=True)
 
     if (vertices_file is not None or trim_by > 0 or pad_to_size is not None
         or (region_file is not None and region_file != '[]')
