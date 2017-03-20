@@ -77,7 +77,11 @@ def read_casa_polys(filename, image):
             if dist < .5:
                 xvert.pop()
                 yvert.pop()
-            polys.append(Polygon(xvert, yvert))
+            # check if segments intersect
+            newpolygon = Polygon(xvert, yvert)
+            if newpolygon.check_intersections() > 0:
+                raise ValueError("Found intersections in manually defined polygon! Aborting.")
+            polys.append(newpolygon)
 
         elif line.startswith('ellipse'):
             ell_str_temp = line.split('[[')[1]

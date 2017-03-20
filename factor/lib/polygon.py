@@ -172,6 +172,51 @@ class Polygon:
             mindst = float(mindst)
         return mindst
 
+    def  check_intersections(self):
+        """
+        Check all segments of the polygon for intersection.
+
+        Returns
+        -------
+        num_intersections : int
+            Number of intersections found
+        """
+        num_intersections = 0
+        numpoints = len(self.x)
+        # need at least 4 points to have a chance of an intersection
+        if  numpoints < 4:
+            return 0
+        for segA in xrange(2,numpoints-1):
+            for segB in xrange(segA-1):
+                if segA == numpoints-2 and segB == 0:
+                    continue
+                if _segments_intersect(self.x[segA], self.y[segA], self.x[segA+1], self.y[segA+1],
+                                       self.x[segB], self.y[segB], self.x[segB+1], self.y[segB+1]):
+                    num_intersections += 1
+                    print "Found intersection between lines %d-%d ([%.1f, %.1f]-[%.1f, %.1f]) and %d-%d ([%.1f, %.1f]-[%.1f, %.1f])"%(
+                        segA,segA+1,self.x[segA], self.y[segA], self.x[segA+1], self.y[segA+1],
+                        segB,segB+1,self.x[segB], self.y[segB], self.x[segB+1], self.y[segB+1])
+        return num_intersections
+                
+def _segments_intersect(Ax, Ay, Bx, By, Cx, Cy, Dx, Dy):
+    """
+    Check if two line-segments (Ax, Ay) -> (Bx, By) and (Cx, Cy) -> (Dx, Dy)
+    intersect within the length on these segments.
+
+    Returns
+    -------
+    intersect : bool
+        True if the two segments intersect, False otherwise.
+    """
+    # ACD is clockwise:
+    ACD = _det([Ax, Cx, Dx], [Ay, Cy, Dy]) < 0
+    # BCD is clockwise:
+    BCD = _det([Bx, Cx, Dx], [By, Cy, Dy]) < 0
+    # ABC is clockwise:
+    ABC = _det([Ax, Bx, Cx], [Ay, By, Cy]) < 0
+    # ABD is clockwise:
+    ABD = _det([Ax, Bx, Dx], [Ay, By, Dy]) < 0
+    return ACD != BCD and ABC != ABD
 
 def _det(xvert, yvert):
     """
