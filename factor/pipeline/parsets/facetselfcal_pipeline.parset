@@ -556,6 +556,7 @@ mask0.argument.trim_by                = 0.4
 mask0.argument.img_format             = fits
 mask0.argument.threshold_format       = float
 mask0.argument.use_adaptive_threshold = {{ use_selfcal_adaptive_threshold }}
+mask0.argument.skip_source_detection  = {{ skip_selfcal_source_detection }}
 
 # image the concatenated data again with wsclean, length = 1
 wsclean_image02.control.type                    = wsclean
@@ -868,6 +869,7 @@ mask1.argument.trim_by                = 0.4
 mask1.argument.img_format             = fits
 mask1.argument.threshold_format       = float
 mask1.argument.use_adaptive_threshold = {{ use_selfcal_adaptive_threshold }}
+mask1.argument.skip_source_detection  = {{ skip_selfcal_source_detection }}
 
 # image the virtual concatenated data again with wsclean, length = 1
 wsclean_image12.control.type                    = wsclean
@@ -1105,6 +1107,7 @@ mask2.argument.trim_by                = 0.4
 mask2.argument.img_format             = fits
 mask2.argument.threshold_format       = float
 mask2.argument.use_adaptive_threshold = {{ use_selfcal_adaptive_threshold }}
+mask2.argument.skip_source_detection  = {{ skip_selfcal_source_detection }}
 
 # image the virtual concatenated data again with wsclean, length = 1
 wsclean_image22.control.type                    = wsclean
@@ -1421,6 +1424,7 @@ mask3.argument.img_format             = fits
 mask3.argument.adaptive_thresh        = 180
 mask3.argument.threshold_format       = float
 mask3.argument.use_adaptive_threshold = {{ use_selfcal_adaptive_threshold }}
+mask3.argument.skip_source_detection  = {{ skip_selfcal_source_detection }}
 
 # image the virtual concatenated data again with wsclean, length = 1
 wsclean_image32.control.type                    = wsclean
@@ -1748,6 +1752,7 @@ mask4.argument.img_format             = fits
 mask4.argument.adaptive_thresh        = 200
 mask4.argument.threshold_format       = float
 mask4.argument.use_adaptive_threshold = {{ use_selfcal_adaptive_threshold }}
+mask4.argument.skip_source_detection  = {{ skip_selfcal_source_detection }}
 
 # image the virtual concatenated data again with wsclean, length = 1
 wsclean_image42.control.type                    = wsclean

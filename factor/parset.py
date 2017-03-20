@@ -472,12 +472,12 @@ def get_imaging_options(parset):
     else:
         parset_dict['fractional_bandwidth_selfcal_facet_image'] = 0.25
 
-    # Use baseline-dependent averaging in WSClean (default = False). If enabled,
+    # Use baseline-dependent averaging in WSClean (default = True). If enabled,
     # this option can dramatically speed up imaging with WSClean.
     if 'wsclean_bl_averaging' in parset_dict:
         parset_dict['wsclean_bl_averaging'] = parset.getboolean('imaging', 'wsclean_bl_averaging')
     else:
-        parset_dict['wsclean_bl_averaging'] = False
+        parset_dict['wsclean_bl_averaging'] = True
 
     # Max desired peak flux density reduction at center of the facet edges due to
     # bandwidth smearing (at the mean frequency) and time smearing (default = 0.15 =
@@ -592,24 +592,26 @@ def get_imaging_options(parset):
     else:
         parset_dict['wsclean_image_padding'] = 1.4
 
-    # Fit a polynomial over frequency during clean (default = False). If True,
-    # WSClean will use the "-fit-spectral-pol" option to fit an nterms = 3
-    # polynomial over the channel images
-    if 'fit_spectral_pol' in parset_dict:
-        parset_dict['fit_spectral_pol'] = parset.getboolean('imaging', 'fit_spectral_pol')
+    # Update user-supplied clean regions (i.e., those specified in the
+    # directions file under the :term:`region_selfcal` column) with new
+    # regions found by the source finder during selfcal (default = ``True``) .
+    # Facet regions (specified in the term:`region_facet` column of the
+    # directions file) are always updated
+    if 'update_selfcal_clean_regions' in parset_dict:
+        parset_dict['update_selfcal_clean_regions'] = parset.getboolean('imaging', 'update_selfcal_clean_regions')
     else:
-        parset_dict['fit_spectral_pol'] = False
+        parset_dict['update_selfcal_clean_regions'] = False
 
     # Check for unused options
     allowed_options = ['make_mosaic', 'wsclean_nchannels_factor',
         'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
         'selfcal_clean_threshold', 'selfcal_adaptive_threshold',
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
-        'wsclean_image_padding', 'fit_spectral_pol', 'image_target_only',
+        'wsclean_image_padding', 'image_target_only',
         'selfcal_min_uv_lambda', 'facet_min_uv_lambda',
         'selfcal_robust_wsclean', 'wsclean_bl_averaging',
         'fractional_bandwidth_selfcal_facet_image',
-        'selfcal_scales']
+        'update_selfcal_clean_regions']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [imaging] section of the '
