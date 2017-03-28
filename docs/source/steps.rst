@@ -16,3 +16,6 @@ Making a directions file (see :ref:`directions_file`)
 
 Running Factor (see :ref:`runfactor`)
     This step involves running Factor and checking its progress and output.
+
+Archiving the results (see :ref:`archivefactor`)
+    This step involves archiving the Factor results.

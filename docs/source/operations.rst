@@ -6,6 +6,8 @@ Operations and data products
 Most of the processing performed by Factor is done in "operations," which are sets of steps that are grouped together. Operations are generally defined depending on their ability to be run in parallel (e.g., multiple facetselfcal operations can be run in parallel but only one facetsub operation can be run at a time). The available operations and the primary data products of each are described in detail below.
 
 
+.. _outlierpeel:
+
 outlierpeel
 -----------
 
@@ -15,6 +17,8 @@ Primary products (in ``results/outlierpeel/direction_name/``):
     * ``*merge_selfcal_parmdbs`` - the (unnormalized) self-calibration solutions table used to subtract the source
     * ``*make_selfcal_plots*.png`` - plots of the self-calibration solutions
 
+
+.. _facetpeel:
 
 facetpeel
 ---------
@@ -29,6 +33,8 @@ Primary products (in ``results/facetpeel/direction_name/``):
     * ``*wsclean_pre-image.fits`` - residual image of field for middle band before subtraction of new model
     * ``*wsclean_post-image.fits`` - residual image of field for middle band after subtraction of new model
 
+
+.. _facetselfcal:
 
 facetselfcal
 ------------
@@ -49,6 +55,8 @@ Primary products (in ``results/facetselfcal/direction_name/``):
     * ``*wsclean_post-image.fits`` - residual image of field for middle band after subtraction of new model
 
 
+.. _facetsub:
+
 facetsub
 --------
 
@@ -57,6 +65,8 @@ This operation subtracts the improved model of the facet or calibrator made in t
 Primary products:
     * None. The ``CORRECTED_DATA`` column of the chunked MS files in ``chunks/`` is updated.
 
+
+.. _facetimage:
 
 facetimage
 ----------
@@ -71,6 +81,8 @@ Primary products (in ``results/facetimage/direction_name/``):
     * ``*image_full2*`` - facet image
     * files listed in ``mapfiles/imaging_input.mapfile`` - averaged, corrected uv data (kept only if :term:`keep_avg_facet_data` is ``True`` in the Factor parset)
 
+
+.. _fieldmosaic:
 
 fieldmosaic
 -----------

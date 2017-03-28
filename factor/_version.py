@@ -11,6 +11,11 @@ def changelog():
     FACTOR Changelog.
     ----------------------------------------------------------------------------
 
+    28/03/2017
+
+        - An unarchiving tool (unarchivefactor) has been added that can
+        unarchive an archive made with archivefactor.
+
     09/03/2017
 
         - An archiving tool (archivefactor) has been added that can archive
@@ -19,9 +24,9 @@ def changelog():
 
     08/03/2017
 
-        - Use polynomial sky models generated directly by WSClean during
-        imaging, resulting in improved and faster subtraction of extended
-        sources.
+        - Polynomial sky models generated directly by WSClean during imaging are
+        used for prediction, resulting in improved and faster subtraction of
+        extended sources.
 
     24/02/2017 - Version 1.1
 
