@@ -384,7 +384,7 @@ def _set_up_compute_parameters(parset, dry_run=False):
             log.info('Using cluster setting: "local" (Single node).')
             cluster_parset['clusterdesc'] = cluster_parset['clusterdesc_file']
             cluster_parset['clustertype'] = 'local'
-    if not 'node_list' in parset['cluster_specific']:
+    if not 'node_list' in cluster_parset:
         cluster_parset['node_list'] = factor.cluster.get_compute_nodes(cluster_parset['clusterdesc'])
 
     # check ulimit(s)
