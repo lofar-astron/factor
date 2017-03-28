@@ -2,6 +2,7 @@
 Module that holds all archiving functions
 """
 import os
+import shutil
 import logging
 import sys
 import numpy as np
@@ -104,7 +105,53 @@ def load_directions(parset_file):
         if has_state:
             direction_list.append(direction)
 
-    return direction_list
+    return direction_list, parset
+
+
+def copy(path_from, dir_to, clobber, use_symlinks=False):
+    """
+    Copy a file or directory
+
+    Parameters
+    ----------
+    path_from : str
+        Input file or directory
+    dir_to : str
+        Output directory
+    clobber : bool
+        Clobber existing file or directory?
+    use_symlinks : bool, optional
+        Use symlinks instead of copying files?
+
+    """
+    if not os.path.exists(path_from):
+        log.warning('{} not found. Please check the '
+            'working directory'.format(path_from))
+        return
+
+    path_to = os.path.join(dir_to, os.path.basename(path_from))
+    if os.path.exists(path_to):
+        if not clobber:
+            log.warning(' Destination "{}" exists and clobber = False. '
+                'Skipping it...'.format(path_to))
+            return
+    else:
+        create_directory(dir_to)
+
+    if use_symlinks:
+        if os.path.exists(path_to):
+            p = subprocess.Popen('rm -rf {0}'.format(path_to), shell=True,
+                stdout=subprocess.PIPE)
+            r = p.communicate()
+        os.symlink(path_from, dir_to)
+    else:
+        p = subprocess.Popen('rsync -a {0} {1}'.format(path_from, dir_to),
+            shell=True, stdout=subprocess.PIPE)
+        r = p.communicate()
+
+    if p.returncode != 0:
+        log.critical('rsync exited abnormally when attempting to archive {}'.format(path_from))
+        sys.exit(1)
 
 
 def dppp_concat(mslist, msout):
@@ -129,7 +176,10 @@ def dppp_concat(mslist, msout):
         sys.exit(1)
 
 
-def archive(parset_file, directions, dir_output, archive_subdata=False, clobber=False):
+def archive(parset_file, directions, dir_output, full=False, archive_subdata=False,
+    archive_state=False, archive_misc=True, archive_images=True,
+    archive_inst=False, archive_pipestate=False, archive_models=False,
+    archive_plots=True, clobber=False):
     """
     Archives data from a Factor run
 
@@ -141,112 +191,171 @@ def archive(parset_file, directions, dir_output, archive_subdata=False, clobber=
         List of direction names for which to archive the calibrated data
     dir_output : str
         Name of output directory where archived data will be stored
+    full : bool, optional
+        Make a full archive suitable for resuming?
     archive_subdata : bool, optional
         Archive the subtracted data MS files?
+    archive_state : bool, optional
+        Archive the state files?
+    archive_misc : bool, optional
+        Archive miscelaneous files?
+    archive_images : bool, optional
+        Archive the facet and field images?
+    archive_inst : bool, optional
+        Archive the instrument tables?
+    archive_pipestate : bool, optional
+        Archive the pipeline state files?
+    archive_models : bool, optional
+        Archive the sky models?
+    archive_plots : bool, optional
+        Archive the selfcal plots?
     clobber : bool, optional
         Clobber existing files in output directory?
 
     """
     # Read in parset and get directions
-    all_directions = load_directions(parset_file)
+    all_directions, parset = load_directions(parset_file)
     if len(all_directions) == 0:
         log.error('No directions found in Factor working directory. Please check '
             'the parset')
         sys.exit(1)
     all_names = [d.name for d in all_directions]
-    if directions[0].lower() == 'all':
-        directions = all_names
-    for dname in directions:
-        if dname not in all_names:
-            log.warning('Direction {} not found. Skipping it...'.format(dname))
+    if len(directions) != 0:
+        if directions[0].lower() == 'all':
+            directions = all_names
+        for dname in directions:
+            if dname not in all_names:
+                log.warning('Direction {} not found. Skipping it...'.format(dname))
 
+    if full:
+        # Archive everything
+        archive_subdata = True
+        archive_state = True
+        archive_misc = True
+        archive_images = True
+        archive_inst = True
+        archive_pipestate = True
+        archive_models = True
+        archive_plots = True
+
+    working_dir = all_directions[0].working_dir
     if archive_subdata:
-        # Copy chunks directory
-        chunks_dir = os.path.join(all_directions[0].working_dir, 'chunks')
-        if not os.path.exists(chunks_dir):
-            log.critical('No subtracted data files found. Please check the '
-                'working directory')
-            sys.exit(1)
-        os.system('cp -r {0} {1}'.format(chunks_dir, os.path.join(dir_output, '.')))
+        log.info('Archiving subtracted data files...')
+        chunks_dir = os.path.join(working_dir, 'chunks')
+        copy(chunks_dir, dir_output, clobber)
 
-    # Copy the field images
-    log.info('Archiving field images...')
-    file_list = glob.glob(os.path.join(all_directions[0].working_dir, 'results',
-        'field*', 'field', '*.fits'))
-    if len(file_list) == 0:
-        log.warning('No field images found.')
-    else:
-        for i, f in enumerate(file_list):
-            log.info('  Copying image {0} of {1}...'.format(i+1, len(file_list)))
-            dirs = f.split('/')
-            for d in dirs:
-                if 'fieldmosaic' in d:
-                    subdir = d
-                    break
-            image_dir = os.path.join(dir_output, 'images', subdir)
-            create_directory(image_dir)
-            outfile = os.path.join(image_dir, os.path.basename(f))
-            if os.path.exists(outfile):
-                if not clobber:
-                    log.warning(' Output file for this image exists and clobber = False. Skipping it...')
-                    continue
-                else:
-                    os.system('rm -rf {0}'.format(outfile))
-            os.system('cp -r {0} {1}'.format(f, outfile))
+    if archive_state:
+        log.info('Archiving state files...')
+        state_dir = os.path.join(working_dir, 'state')
+        copy(state_dir, dir_output, clobber)
+
+    if archive_misc:
+        log.info('Archiving miscelaneous files...')
+        misc_dir = os.path.join(dir_output, 'misc')
+        if 'directions_file' in parset['direction_specific']:
+            directions_file = parset['direction_specific']['directions_file']
+        else:
+            directions_file = os.path.join(working_dir, 'factor_directions.txt')
+        file_list = [directions_file,
+                     '{}/factor.log'.format(working_dir),
+                     '{}/regions/facets_ds9.reg'.format(working_dir),
+                     '{}/regions/calimages_ds9.reg'.format(working_dir)]
+        for f in file_list:
+            copy(f, misc_dir, clobber)
+
+    if archive_images:
+        log.info('Archiving field images...')
+        file_list = glob.glob(os.path.join(working_dir, 'results',
+            'field*', 'field', '*.fits'))
+        if len(file_list) == 0:
+            log.warning('No field images found.')
+        else:
+            for i, f in enumerate(file_list):
+                log.info('  Archiving image {0} of {1}...'.format(i+1, len(file_list)))
+                subdir = f.split('/')[-3]
+                image_dir = os.path.join(dir_output, 'images', 'field', subdir)
+                copy(f, image_dir, clobber)
 
     for d in all_directions:
-        log.info('Archiving sky models for direction {}...'.format(d.name))
-        if hasattr(d, 'sourcedb_new_facet_sources'):
-            file_list = check_existing_files(d.sourcedb_new_facet_sources)
-        else:
-            file_list = []
-        if len(file_list) == 0:
-            log.warning('No sky models found for direction {}.'.format(d.name))
-        else:
-            sourcedb_dir = os.path.join(dir_output, 'sky_models', d.name)
-            create_directory(sourcedb_dir)
-            for i, f in enumerate(file_list):
-                log.info('  Copying sky model file {0} of {1}...'.format(i+1, len(file_list)))
-                outfile = os.path.join(sourcedb_dir, os.path.basename(f))
-                if os.path.exists(outfile):
-                    if not clobber:
-                        log.warning(' Output file for this sky model exists and clobber = False. Skipping it...')
-                        continue
-                    else:
-                        os.system('rm -rf {0}'.format(outfile))
-                os.system('cp -r {0} {1}'.format(f, outfile))
+        if archive_images:
+            log.info('Archiving facet images for direction {}...'.format(d.name))
+            file_list = glob.glob(os.path.join(working_dir, 'results',
+                'facetimage*', d.name, '*full2*image.fits'))
+            if len(file_list) == 0:
+                log.warning('No facet images found for direction {}.'.format(d.name))
+            else:
+                for i, f in enumerate(file_list):
+                    subdir = f.split('/')[-3]
+                    image_dir = os.path.join(dir_output, 'images', d.name, subdir)
+                    copy(f, image_dir, clobber)
 
-        log.info('Archiving instrument tables for direction {}...'.format(d.name))
-        if hasattr(d, 'converted_parmdb_mapfile'):
-            file_list = check_existing_files(d.converted_parmdb_mapfile)
-        else:
-            file_list = []
-        if len(file_list) == 0:
-            log.warning('No instrument tables found for direction {}.'.format(d.name))
-        else:
-            inst_table_dir = os.path.join(dir_output, 'instrument_tables', d.name)
-            create_directory(inst_table_dir)
-            for i, f in enumerate(file_list):
-                log.info('  Copying instrument table file {0} of {1}...'.format(i+1, len(file_list)))
-                outfile = os.path.join(inst_table_dir, os.path.basename(f))
-                if os.path.exists(outfile):
-                    if not clobber:
-                        log.warning(' Output file for this instrument table exists and clobber = False. Skipping it...')
-                        continue
-                    else:
-                        os.system('rm -rf {0}'.format(outfile))
-                os.system('cp -r {0} {1}'.format(f, outfile))
+        if archive_models:
+            log.info('Archiving sky models for direction {}...'.format(d.name))
+            if hasattr(d, 'sourcedb_new_facet_sources'):
+                file_list = check_existing_files(d.sourcedb_new_facet_sources)
+            else:
+                file_list = []
+            if len(file_list) == 0:
+                log.warning('No sky models found for direction {}.'.format(d.name))
+            else:
+                sourcedb_dir = os.path.join(dir_output, 'sky_models', d.name)
+                for i, f in enumerate(file_list):
+                    log.info('  Copying sky model file {0} of {1}...'.format(i+1, len(file_list)))
+                    copy(f, sourcedb_dir, clobber)
 
-        log.info('Archiving plots for direction {}...'.format(d.name))
-        file_list = glob.glob(os.path.join(d.working_dir, 'results', 'facetselfcal', d.name, '*png'))
-        if len(file_list) == 0:
-            log.warning('No plots found for direction {}.'.format(d.name))
-        else:
-            plot_dir = os.path.join(dir_output, 'plots', d.name)
-            create_directory(plot_dir)
-            for i, f in enumerate(file_list):
-                outfile = os.path.join(plot_dir, os.path.basename(f))
-                os.system('cp -r {0} {1}'.format(f, outfile))
+        if archive_inst:
+            log.info('Archiving instrument tables for direction {}...'.format(d.name))
+            if hasattr(d, 'converted_parmdb_mapfile'):
+                file_list = check_existing_files(d.converted_parmdb_mapfile)
+            else:
+                file_list = []
+            if len(file_list) == 0:
+                log.warning('No instrument tables found for direction {}.'.format(d.name))
+            else:
+                inst_table_dir = os.path.join(dir_output, 'instrument_tables', d.name)
+                for i, f in enumerate(file_list):
+                    log.info('  Copying instrument table file {0} of {1}...'.format(i+1, len(file_list)))
+                    copy(f, inst_table_dir, clobber)
+
+        if archive_plots:
+            log.info('Archiving plots for direction {}...'.format(d.name))
+            file_list = glob.glob(os.path.join(working_dir, 'results', 'facetselfcal', d.name, '*png'))
+            if len(file_list) == 0:
+                file_list = glob.glob(os.path.join(working_dir, 'results', 'facetpeel', d.name, '*png'))
+            if len(file_list) == 0:
+                file_list = glob.glob(os.path.join(working_dir, 'results', 'outlierpeel', d.name, '*png'))
+            if len(file_list) == 0:
+                log.warning('No plots found for direction {}.'.format(d.name))
+            else:
+                plot_dir = os.path.join(dir_output, 'plots', d.name)
+                for i, f in enumerate(file_list):
+                    copy(f, plot_dir, clobber)
+
+        if archive_pipestate:
+            log.info('Archiving pipeline state files for direction {}...'.format(d.name))
+            file_list = glob.glob(os.path.join(working_dir, 'results', 'facetselfcal', d.name, 'mapfiles', '*'))
+            op_name = 'facetselfcal'
+            if len(file_list) == 0:
+                file_list = glob.glob(os.path.join(working_dir, 'results', 'facetpeel', d.name, 'mapfiles', '*'))
+                op_name = 'facetpeel'
+            if len(file_list) == 0:
+                file_list = glob.glob(os.path.join(working_dir, 'results', 'outlierpeel', d.name, 'mapfiles', '*'))
+                op_name = 'outlierpeel'
+            if len(file_list) == 0:
+                log.warning('No pipeline state files found for direction {}.'.format(d.name))
+            else:
+                mapfile_dir = os.path.join(dir_output, 'pipeline_state', d.name, op_name)
+                for f in file_list:
+                    copy(f, mapfile_dir, clobber)
+
+            # Also archive "final_image" mapfile for facetimage (needed for mosaicking)
+            file_list = glob.glob(os.path.join(working_dir, 'results',
+                'facetimage*', d.name, 'mapfiles', 'final_image.mapfile'))
+            if len(file_list) > 0:
+                for i, f in enumerate(file_list):
+                    subdir = f.split('/')[-4]
+                    mapfile_dir = os.path.join(dir_output, 'pipeline_state', d.name, subdir)
+                    copy(f, mapfile_dir, clobber)
 
         if d.name in directions:
             log.info('Archiving calibrated data for direction {}...'.format(d.name))

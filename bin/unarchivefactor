@@ -18,20 +18,14 @@ from factor._version import __version__ as version
 import optparse
 import sys
 import os
-from factor.archive import archive
+from factor.unarchive import unarchive
 
 
 if __name__ == '__main__':
-    parser = optparse.OptionParser(usage='%prog parset dir_output',
+    parser = optparse.OptionParser(usage='%prog dir_archive dir_output',
             version='%%prog %s' % (version))
-    parser.add_option('-d', '--directions', help='comma-separated list of directions '
-        '(e.g., "-d facet1,facet3") for which to archive the calibrated data. Use '
-        '"-d all" to select all directions.',
-            type=str, default=None)
-    parser.add_option('-f', '--full', help='make a full archive suitable for resuming '
-        '(includes the subtracted-data MS files, but not the calibrated data unless '
-        'specified with the "-d" flag)',
-        action='store_true', default=False)
+    parser.add_option('-s', '--symlink', help='use symlinks for subtracted data '
+        'files instead of copying them', action='store_true', default=False)
     parser.add_option('-c', '--clobber', help='clobber existing files in output directory',
         action='store_true', default=False)
     (options, args) = parser.parse_args()
@@ -40,14 +34,8 @@ if __name__ == '__main__':
         parser.print_help()
         sys.exit()
 
-    parset_file = os.path.abspath(args[0])
+    dir_archive = os.path.abspath(args[0])
     dir_output = os.path.abspath(args[1])
 
-    # Construct list of directions to archive
-    if options.directions is not None:
-        parts = options.directions.split(',')
-        directions = [p.strip() for p in parts]
-    else:
-        directions = []
-
-    archive(parset_file, directions, dir_output, full=options.full, clobber=options.clobber)
+    unarchive(dir_archive, dir_output, use_symlinks=options.symlink,
+        clobber=options.clobber)
