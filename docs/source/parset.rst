@@ -189,7 +189,7 @@ The available options are described below under their respective sections.
 
     image_target_only
         Image only the target facet (default = ``False``). If ``True`` and a target is
-        specified in the :ref:`_parset_directions_options` section, then only the facet containing the
+        specified in the :ref:`parset_directions_options` section, then only the facet containing the
         target source is imaged.
 
     wsclean_image_padding
@@ -460,7 +460,7 @@ The available options are described below under their respective sections.
 .. _parset_ms_specific_options:
 
 ``[<Your_MS_Name>]``
------------------
+--------------------
 
 MS-specific parameters (optional). You have to give the name of the MS (without
 the path) as the section name. Currently, only the initial sky model can

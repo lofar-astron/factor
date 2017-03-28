@@ -357,8 +357,7 @@ class Direction(object):
         sampling as:
 
         max baseline in nwavelengths = 1 / theta_rad ~= 1 / (cellsize_deg * 3 * pi / 180)
-        nwavelengths = max baseline in nwavelengths * 2 * pi *
-            integration time in seconds / (24 * 60 * 60) / 4
+        nwavelengths = max baseline in nwavelengths * 2 * pi * integration time in seconds / (24 * 60 * 60) / 4
 
         Parameters
         ----------

@@ -36,7 +36,7 @@ A full archive will include the following:
     Directory containing the time-chunked datasets that Factor uses for processing.
 
 ``images/``
-    Directory containing the images from the :ref:`facetimage` and :ref:`fieldmosiac` operations.
+    Directory containing the images from the :ref:`facetimage` and :ref:`fieldmosaic` operations.
 
 ``instrument_tables/``
     Directory containing the self-calibration solution tables.

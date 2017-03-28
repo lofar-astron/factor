@@ -43,7 +43,7 @@ This operation self calibrates a facet calibrator and images the facet with part
 
 .. note::
 
-    The facet image is made only for facet-type directions (i.e., not the small patch-type directions that lie outside of the faceting radius). It is typically made with only a fraction of the total bandwidth (but distributed to sample the full bandwidth; see :term:`nbands_selfcal_facet_image` for details) and is used to improve the subtraction of non-calibrator sources in the facet. It is not the final facet image (which is made in the facetimage operation).
+    The facet image is made only for facet-type directions (i.e., not the small patch-type directions that lie outside of the faceting radius). It is typically made with only a fraction of the total bandwidth (but distributed to sample the full bandwidth; see :term:`fractional_bandwidth_selfcal_facet_image` for details) and is used to improve the subtraction of non-calibrator sources in the facet. It is not the final facet image (which is made in the facetimage operation).
 
 Primary products (in ``results/facetselfcal/direction_name/``):
     * ``*merge_selfcal_parmdbs`` - the (normalized) self-calibration solutions table
