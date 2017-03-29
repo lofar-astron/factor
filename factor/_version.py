@@ -18,9 +18,9 @@ def changelog():
 
     20/03/2017
 
-        - An option (:term:`update_selfcal_clean_regions`) has been added that
-        controls the update of a user-supplied clean mask
-        - Intersections in the user-supplied clean mask are now detected and an
+        - An option (update_selfcal_clean_regions) has been added that
+        controls whether user-supplied clean masks are updated during selfcal
+        - Intersections in user-supplied clean masks are now detected and an
         error raised
 
     09/03/2017
