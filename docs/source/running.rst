@@ -7,7 +7,7 @@ Factor can be run with::
 
     $ runfactor factor.parset
 
-where ``factor.parset`` is the parset described in :ref:`factor_parset`. A number of options are available and are described below::
+where ``factor.parset`` is the parset described in :ref:`factor_parset`. A number of options are available and are described below:
 
     Usage: runfactor parset
 
@@ -17,11 +17,11 @@ where ``factor.parset`` is the parset described in :ref:`factor_parset`. A numbe
       -d                    enable dry-run mode
       -q                    enable quiet mode
       -r RESET, --reset=RESET
-                            comma-separated list of directions to reset (e.g., -r
-                            facet1,facet3)
+                            comma-separated list of directions to reset (e.g., "-r
+                            facet1,facet3")
       -o OPS, --ops=OPS     comma-separated list of operations to reset for the
-                            directions specified with "-r or --reset" (e.g., -o
-                            facetselfcal,facetsub). By default, all operations are
+                            directions specified with "-r" or "--reset" (e.g., "-o
+                            facetselfcal,facetsub"). By default, all operations are
                             reset. Available operations are: outlierpeel,
                             facetpeel, facetpeelimage, facetselfcal, facetsub,
                             facetimage, fieldmosaic
@@ -75,11 +75,11 @@ one).
 Resetting a direction
 ---------------------
 
-Factor allows for the processing of a direction to be reset. Resetting involves deleting the output products, resetting the state (which tracks which operations have been completed), and if necessary undoing the subtraction of the model resulting from self calibration and the imaging of the facet. Directions can be reset using the "-r" flag to ``runfactor``. For example, to reset all operations for direction1 and direction2::
+Factor allows for the processing of a direction to be reset. Resetting involves deleting the output products, resetting the state (which tracks which operations have been completed), and if necessary undoing the subtraction of the model resulting from self calibration and the imaging of the facet. Directions can be reset using the ``-r`` flag to ``runfactor``. For example, to reset all operations for direction1 and direction2::
 
     $ runfactor factor.parset -r direction1,direction2
 
-Additionally, one or more specific operations can reset by including "-o" flag. For example, the following would reset only the facetimage operation for direction1 and direction2::
+Additionally, one or more specific operations can reset by including ``-o`` flag. For example, the following would reset only the facetimage operation for direction1 and direction2::
 
     $ runfactor factor.parset -r direction1,direction2 -o facetimage
 

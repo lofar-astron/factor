@@ -7,7 +7,7 @@ The results of a Factor run can be archived with::
 
     $ archivefactor factor.parset dir_output
 
-where ``factor.parset`` is the parset described in :ref:`factor_parset` and ``dir_output`` is the output directory in which the archived files will be stored. A number of options are available and are described below::
+where ``factor.parset`` is the parset described in :ref:`factor_parset` and ``dir_output`` is the output directory in which the archived files will be stored. A number of options are available and are described below:
 
     Usage: archivefactor parset dir_output
 
@@ -66,7 +66,7 @@ A Factor archive can be unarchived with::
 
     $ unarchivefactor dir_archive dir_output
 
-where ``dir_archive`` is the archive directory made by described in :ref:`archivefactor` and ``dir_output`` is the output directory in which the unarchived files will be written. A number of options are available and are described below::
+where ``dir_archive`` is the archive directory made as described in :ref:`archivefactor` and ``dir_output`` is the output directory in which the unarchived files will be written. A number of options are available and are described below:
 
     Usage: unarchivefactor dir_archive dir_output
 

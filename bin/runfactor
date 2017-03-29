@@ -30,7 +30,7 @@ if __name__ == '__main__':
     parser.add_option('-r', '--reset', help='comma-separated list of directions to reset '
         '(e.g., "-r facet1,facet3")', type=str, default=None)
     parser.add_option('-o', '--ops', help='comma-separated list of operations '
-        'to reset for the directions specified with "-r or --reset" (e.g., '
+        'to reset for the directions specified with "-r" or "--reset" (e.g., '
         '"-o facetselfcal,facetsub"). By default, all operations are reset. Available '
         'operations are: outlierpeel, facetpeel, facetpeelimage, facetselfcal, facetsub, '
         'facetimage, fieldmosaic', type=str, default=None)

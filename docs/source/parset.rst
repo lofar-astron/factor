@@ -7,7 +7,9 @@ Before Factor can be run, a parset describing the reduction must be made. The
 parset is a simple text file defining the parameters of a run in a number of
 sections. For example, a typical parset for a basic reduction on a single
 machine could look like the following (see :ref:`tips` for tips on setting up an
-optimal parset)::
+optimal parset):
+
+.. code-block:: none
 
         [global]
         dir_working = /path/to/factor/working/dir

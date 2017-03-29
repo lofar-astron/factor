@@ -5,9 +5,11 @@ Changelog
 
 Changes since version 1.1:
 
-    * An unarchiving tool (``unarchivefactor``) has been added that can unarchive an archive made with archivefactor.
-    * An archiving tool (``archivefactor``) has been added that can archive the subtracted datasets, the sky models, the instrument tables, the selfcal plots, and the calibrated data for one or more directions
-    * Polynomial sky models generated directly by WSClean during imaging are used for prediction, resulting in improved and faster subtraction of extended sources.
+    * An unarchiving tool (``unarchivefactor``, see :ref:`unarchivefactor`) has been added that can unarchive an archive made with ``archivefactor``
+    * An option (:term:`update_selfcal_clean_regions`) has been added that controls whether a user-supplied clean mask is updated during selfcal
+    * Intersections in the user-supplied clean mask are now detected and an error raised
+    * An archiving tool (``archivefactor``, see :ref:`archivefactor`) has been added that can archive the subtracted datasets, the sky models, the instrument tables, the selfcal plots, and the calibrated data for one or more directions
+    * Polynomial sky models generated directly by WSClean during imaging are used for prediction, resulting in improved and faster subtraction of extended sources
 
 
 Version 1.1

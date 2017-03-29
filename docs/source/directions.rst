@@ -3,7 +3,9 @@
 The Factor directions file
 ==========================
 
-A file defining the direction-dependent calibrators may be provided. The directions files is a simple text file listing various parameters of the direction-dependent calibrators (e.g., position, size, etc.). A typical directions file is shown below::
+A file defining the direction-dependent calibrators may be provided. The directions files is a simple text file listing various parameters of the direction-dependent calibrators (e.g., position, size, etc.). A typical directions file is shown below:
+
+.. code-block:: none
 
     # This is an example directions file for Factor.
     #

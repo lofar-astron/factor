@@ -383,7 +383,7 @@ class Operation(object):
         Resets the pipeline state to before the given steptype
 
         Steptype is the type of the step as defined in the parset under
-        *.control.type
+        step.control.type
 
         Parameters
         ----------

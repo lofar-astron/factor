@@ -14,7 +14,14 @@ def changelog():
     28/03/2017
 
         - An unarchiving tool (unarchivefactor) has been added that can
-        unarchive an archive made with archivefactor.
+        unarchive an archive made with archivefactor
+
+    20/03/2017
+
+        - An option (:term:`update_selfcal_clean_regions`) has been added that
+        controls the update of a user-supplied clean mask
+        - Intersections in the user-supplied clean mask are now detected and an
+        error raised
 
     09/03/2017
 
