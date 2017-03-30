@@ -1555,7 +1555,7 @@ expand_model4_map.control.filename         = expand_model4_map.mapfile
 
 # Blank (with zeros) regions of the mask that lie outside of the patch region, length = 1
 blank_mask.control.type                    = blank_image
-blank_mask.control.mapfile_in              = mask4.output.mapfile
+blank_mask.control.mapfile_in              = premask_selfcal.output.mapfile
 blank_mask.control.inputkey                = infile
 blank_mask.control.outputkey               = outfile
 blank_mask.argument.flags                  = [infile,{{ vertices_file }},outfile]
