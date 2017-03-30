@@ -724,11 +724,11 @@ create_compressed_mapfile1.control.filename    = image1_input.mapfile
 # image the virtual concatenated data with wsclean, length = 1
 wsclean_image12.control.type                    = wsclean
 {% if region_selfcal != "[]" %}
-wsclean_image12.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile,premask_selfcal.output.mapfile]
+wsclean_image12.control.mapfiles_in             = [create_compressed_mapfile1.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image12.control.inputkeys               = [msfile,fitsmask]
 wsclean_image12.argument.fitsmask               = fitsmask
 {% else %}
-wsclean_image12.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile]
+wsclean_image12.control.mapfiles_in             = [create_compressed_mapfile1.output.mapfile]
 wsclean_image12.control.inputkeys               = [msfile]
 {% endif %}
 {% if wsclean_nchannels_selfcal > 1 %}
@@ -888,11 +888,11 @@ create_compressed_mapfile2.control.filename    = image2_input.mapfile
 # image the virtual concatenated data with wsclean, length = 1
 wsclean_image22.control.type                    = wsclean
 {% if region_selfcal != "[]" %}
-wsclean_image22.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile,premask_selfcal.output.mapfile]
+wsclean_image22.control.mapfiles_in             = [create_compressed_mapfile2.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image22.control.inputkeys               = [msfile,fitsmask]
 wsclean_image22.argument.fitsmask               = fitsmask
 {% else %}
-wsclean_image22.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile]
+wsclean_image22.control.mapfiles_in             = [create_compressed_mapfile2.output.mapfile]
 wsclean_image22.control.inputkeys               = [msfile]
 {% endif %}
 {% if wsclean_nchannels_selfcal > 1 %}
@@ -1129,11 +1129,11 @@ create_compressed_mapfile3.control.filename    = image3_input.mapfile
 
 wsclean_image32.control.type                    = wsclean
 {% if region_selfcal != "[]" %}
-wsclean_image32.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile,premask_selfcal.output.mapfile]
+wsclean_image32.control.mapfiles_in             = [create_compressed_mapfile3.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image32.control.inputkeys               = [msfile,fitsmask]
 wsclean_image32.argument.fitsmask               = fitsmask
 {% else %}
-wsclean_image32.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile]
+wsclean_image32.control.mapfiles_in             = [create_compressed_mapfile3.output.mapfile]
 wsclean_image32.control.inputkeys               = [msfile]
 {% endif %}
 {% if wsclean_nchannels_selfcal > 1 %}
@@ -1382,11 +1382,11 @@ create_compressed_mapfile4.control.filename    = image4_input.mapfile
 # image the virtual concatenated data with wsclean, length = 1
 wsclean_image42.control.type                    = wsclean
 {% if region_selfcal != "[]" %}
-wsclean_image42.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile,premask_selfcal.output.mapfile]
+wsclean_image42.control.mapfiles_in             = [create_compressed_mapfile4.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image42.control.inputkeys               = [msfile,fitsmask]
 wsclean_image42.argument.fitsmask               = fitsmask
 {% else %}
-wsclean_image42.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile]
+wsclean_image42.control.mapfiles_in             = [create_compressed_mapfile4.output.mapfile]
 wsclean_image42.control.inputkeys               = [msfile]
 {% endif %}
 {% if wsclean_nchannels_selfcal > 1 %}
