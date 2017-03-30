@@ -1390,10 +1390,10 @@ wsclean_image42.control.mapfiles_in             = [create_compressed_mapfile4.ou
 wsclean_image42.control.inputkeys               = [msfile]
 {% endif %}
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,-joinchannels,msfile]
+wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,-joinchannels,-save-component-list,msfile]
 wsclean_image42.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,msfile]
+wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,-save-component-list,msfile]
 {% endif %}
 wsclean_image42.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image42.argument.niter                  = 1000
