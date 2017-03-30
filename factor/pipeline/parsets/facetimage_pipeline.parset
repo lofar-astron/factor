@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, {% if not selfcal_ok %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, create_parmdb_map, {% endif %} expand_sourcedb_all_facet_sources, prepare_imaging_data, create_compressed_mapfile, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
+pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_parmdb_map, {% if not selfcal_ok %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, create_parmdb_map, {% endif %} expand_sourcedb_all_facet_sources, prepare_imaging_data, create_compressed_mapfile, {% endif %} premask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
 
 pipeline.pluginpath = {{ pipeline_dir }}/plugins
 
@@ -223,120 +223,64 @@ premask.argument.cellsize_deg          = {{ cellsize_facet_deg }}
 premask.argument.make_blank_image      = True
 
 # do the first round of imaging, length = 1
-wsclean_image_full1.control.type                   = wsclean
+wsclean_image_full.control.type                   = wsclean
 {% if average_image_data %}
-wsclean_image_full1.control.mapfiles_in            = [concat_reaveraged_compressed_map.output.mapfile,premask.output.mapfile]
+{% if region_selfcal != "[]" %}
+wsclean_image_full.control.mapfiles_in            = [concat_reaveraged_compressed_map.output.mapfile,premask.output.mapfile]
+wsclean_image_full.control.inputkeys              = [msfile,fitsmask]
+wsclean_image_full.argument.fitsmask              = fitsmask
 {% else %}
-wsclean_image_full1.control.mapfiles_in            = [{{ image_data_mapfile }},premask.output.mapfile]
+wsclean_image_full.control.mapfiles_in            = [concat_reaveraged_compressed_map.output.mapfile]
+wsclean_image_full.control.inputkeys              = [msfile]
 {% endif %}
-wsclean_image_full1.control.inputkeys              = [msfile,fitsmask]
+{% else %}
+{% if region_selfcal != "[]" %}
+wsclean_image_full.control.mapfiles_in            = [{{ image_data_mapfile }},premask.output.mapfile]
+wsclean_image_full.control.inputkeys              = [msfile,fitsmask]
+wsclean_image_full.argument.fitsmask              = fitsmask
+{% else %}
+wsclean_image_full.control.mapfiles_in            = [{{ image_data_mapfile }}]
+wsclean_image_full.control.inputkeys              = [msfile]
+{% endif %}
+{% endif %}
 {% if wsclean_nchannels > 1 %}
-wsclean_image_full1.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
-wsclean_image_full1.argument.channelsout           = {{ wsclean_nchannels }}
+wsclean_image_full.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-rms-background,-joinchannels,msfile]
+wsclean_image_full.argument.channelsout           = {{ wsclean_nchannels }}
 {% else %}
-wsclean_image_full1.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,msfile]
+wsclean_image_full.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-rms-background,msfile]
 {% endif %}
-wsclean_image_full1.argument.fitsmask              = fitsmask
-wsclean_image_full1.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
-wsclean_image_full1.argument.niter                 = {{ wsclean_full1_image_niter * 2 }}
-wsclean_image_full1.argument.threshold             = {{ wsclean_full1_image_threshold_jy }}
-wsclean_image_full1.argument.pol                   = I
-wsclean_image_full1.argument.weight                = briggs {{ robust_facet }}
-wsclean_image_full1.argument.mgain                 = 0.6
-wsclean_image_full1.argument.cleanborder           = 0
-wsclean_image_full1.argument.minuv-l               = {{ facet_min_uv_lambda }}
-wsclean_image_full1.argument.scale                 = {{ cellsize_facet_deg }}
-wsclean_image_full1.argument.mem                   = {{ max_percent_memory_per_proc_single }}
-wsclean_image_full1.argument.j                     = {{ max_cpus_per_proc_single }}
+wsclean_image_full.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
+wsclean_image_full.argument.niter                 = {{ wsclean_full2_image_niter }}
+wsclean_image_full.argument.pol                   = I
+wsclean_image_full.argument.weight                = briggs {{ robust_facet }}
+wsclean_image_full.argument.mgain                 = 0.6
+wsclean_image_full.argument.cleanborder           = 0
+wsclean_image_full.argument.minuv-l               = {{ facet_min_uv_lambda }}
+wsclean_image_full.argument.scale                 = {{ cellsize_facet_deg }}
+wsclean_image_full.argument.mem                   = {{ max_percent_memory_per_proc_single }}
+wsclean_image_full.argument.j                     = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
-wsclean_image_full1.argument.tempdir               = {{ local_dir_parent }}
+wsclean_image_full.argument.tempdir               = {{ local_dir_parent }}
 {% endif %}
-wsclean_image_full1.argument.weighting-rank-filter = 3
+wsclean_image_full.argument.weighting-rank-filter = 3
 {% if taper_facet_arcsec > 0.0 %}
-wsclean_image_full1.argument.taper-gaussian        =  {{ taper_facet_arcsec }}
+wsclean_image_full.argument.taper-gaussian        =  {{ taper_facet_arcsec }}
 {% endif %}
 {% if facetimage_wsclean_nwavelengths > 0.0 %}
-wsclean_image_full1.argument.baseline-averaging    = {{ facetimage_wsclean_nwavelengths }}
+wsclean_image_full.argument.baseline-averaging    = {{ facetimage_wsclean_nwavelengths }}
 {% endif %}
-
-# make a mapfile with the root-name of the WSClean images, length = 1
-create_imagebase_map1.control.kind        = plugin
-create_imagebase_map1.control.type        = trimMapfile
-create_imagebase_map1.control.mapfile_in  = wsclean_image_full1.output.wsclean_image_full1-image.fits.mapfile
-create_imagebase_map1.control.trim        = -
-create_imagebase_map1.control.mapfile_dir = input.output.mapfile_dir
-create_imagebase_map1.control.filename    = wsclean_image_full1_image_rootnames.mapfile
-
-# make a mapfile with the name of the WSClean image, length = 1
-adjust_wsclean_mapfile1.control.kind        = plugin
-adjust_wsclean_mapfile1.control.type        = appendMapfile
-adjust_wsclean_mapfile1.control.mapfile_in  = create_imagebase_map1.output.mapfile
-adjust_wsclean_mapfile1.control.append      = {{ wsclean_suffix }}
-adjust_wsclean_mapfile1.control.mapfile_dir = input.output.mapfile_dir
-adjust_wsclean_mapfile1.control.filename    = image1.mapfile
-
-# make a mask from the image, length = 1
-mask.control.type             = make_clean_mask
-mask.control.mapfile_in       = adjust_wsclean_mapfile1.output.mapfile
-mask.control.inputkey         = imagefile
-mask.control.outputkey        = maskfile
-mask.argument.flags           = [imagefile,maskfile]
-mask.argument.region_file     = {{ region_field }}
-mask.argument.threshisl       = 3
-mask.argument.threshpix       = 5
-mask.argument.rmsbox          = (300,100)
-mask.argument.rmsbox_bright   = (70,10)
-mask.argument.atrous_jmax     = 3
-mask.argument.adaptive_rmsbox = True
-mask.argument.atrous_do       = True
-mask.argument.img_format      = fits
-mask.argument.vertices_file   = {{ vertices_file }}
-
-# second round of imaging with the mask, length = 1
-wsclean_image_full2.control.type                   = wsclean
-{% if average_image_data %}
-wsclean_image_full2.control.mapfiles_in            = [concat_reaveraged_compressed_map.output.mapfile,mask.output.mapfile,mask.output.threshold_5sig.mapfile]
-{% else %}
-wsclean_image_full2.control.mapfiles_in            = [{{ image_data_mapfile }},mask.output.mapfile,mask.output.threshold_5sig.mapfile]
-{% endif %}
-wsclean_image_full2.control.inputkeys              = [msfile,fitsmask,threshold]
-{% if wsclean_nchannels > 1 %}
-wsclean_image_full2.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-joinchannels,msfile]
-wsclean_image_full2.argument.channelsout           = {{ wsclean_nchannels }}
-{% else %}
-wsclean_image_full2.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,msfile]
-{% endif %}
-wsclean_image_full2.argument.fitsmask              = fitsmask
-wsclean_image_full2.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
-wsclean_image_full2.argument.niter                 = {{ wsclean_full2_image_niter }}
-wsclean_image_full2.argument.threshold             = threshold
-wsclean_image_full2.argument.pol                   = I
-wsclean_image_full2.argument.weight                = briggs {{ robust_facet }}
-wsclean_image_full2.argument.mgain                 = 0.6
-wsclean_image_full2.argument.cleanborder           = 0
-wsclean_image_full2.argument.minuv-l               = {{ facet_min_uv_lambda }}
-wsclean_image_full2.argument.scale                 = {{ cellsize_facet_deg }}
-wsclean_image_full2.argument.channelsout           = {{ wsclean_nchannels }}
-wsclean_image_full2.argument.mem                   = {{ max_percent_memory_per_proc_single }}
-wsclean_image_full2.argument.j                     = {{ max_cpus_per_proc_single }}
-{% if local_dir is not none %}
-wsclean_image_full2.argument.tempdir               = {{ local_dir_parent }}
-{% endif %}
-wsclean_image_full2.argument.weighting-rank-filter = 3
-{% if taper_facet_arcsec > 0.0 %}
-wsclean_image_full2.argument.taper-gaussian        =  {{ taper_facet_arcsec }}
-{% endif %}
-{% if facetimage_wsclean_nwavelengths > 0.0 %}
-wsclean_image_full2.argument.baseline-averaging    = {{ facetimage_wsclean_nwavelengths }}
-{% endif %}
+wsclean_image_full.argument.auto-mask             = 3
+wsclean_image_full.argument.auto-threshold        = 0.3
+wsclean_image_full.argument.rms-background-window = 20
+wsclean_image_full.argument.rms-background-method = rms-with-min
 
 # make a mapfile with the root-name of the WSClean images, length = 1
 create_imagebase_map2.control.kind        = plugin
 create_imagebase_map2.control.type        = trimMapfile
-create_imagebase_map2.control.mapfile_in  = wsclean_image_full2.output.wsclean_image_full2-image.fits.mapfile
+create_imagebase_map2.control.mapfile_in  = wsclean_image_full.output.wsclean_image_full-image.fits.mapfile
 create_imagebase_map2.control.trim        = -
 create_imagebase_map2.control.mapfile_dir = input.output.mapfile_dir
-create_imagebase_map2.control.filename    = wsclean_image_full2_image_rootnames.mapfile
+create_imagebase_map2.control.filename    = wsclean_image_full_image_rootnames.mapfile
 
 # make a mapfile with the name of the WSClean image at a known name, length = 1
 adjust_wsclean_mapfile2.control.kind        = plugin

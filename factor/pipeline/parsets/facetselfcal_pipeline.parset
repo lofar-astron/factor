@@ -487,6 +487,7 @@ wsclean_image02.control.type                    = wsclean
 {% if region_selfcal != "[]" %}
 wsclean_image02.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image02.control.inputkeys               = [msfile,fitsmask]
+wsclean_image02.argument.fitsmask               = fitsmask
 {% else %}
 wsclean_image02.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile]
 wsclean_image02.control.inputkeys               = [msfile]
@@ -497,7 +498,6 @@ wsclean_image02.argument.channelsout            = {{ wsclean_nchannels_selfcal }
 {% else %}
 wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,msfile]
 {% endif %}
-wsclean_image02.argument.fitsmask               = fitsmask
 wsclean_image02.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image02.argument.niter                  = 1000
 wsclean_image02.argument.threshold              = 0.0
@@ -726,6 +726,7 @@ wsclean_image12.control.type                    = wsclean
 {% if region_selfcal != "[]" %}
 wsclean_image12.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image12.control.inputkeys               = [msfile,fitsmask]
+wsclean_image12.argument.fitsmask               = fitsmask
 {% else %}
 wsclean_image12.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile]
 wsclean_image12.control.inputkeys               = [msfile]
@@ -736,7 +737,6 @@ wsclean_image12.argument.channelsout            = {{ wsclean_nchannels_selfcal }
 {% else %}
 wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,msfile]
 {% endif %}
-wsclean_image12.argument.fitsmask               = fitsmask
 wsclean_image12.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image12.argument.niter                  = 1000
 wsclean_image12.argument.threshold              = 0.0
@@ -890,6 +890,7 @@ wsclean_image22.control.type                    = wsclean
 {% if region_selfcal != "[]" %}
 wsclean_image22.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image22.control.inputkeys               = [msfile,fitsmask]
+wsclean_image22.argument.fitsmask               = fitsmask
 {% else %}
 wsclean_image22.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile]
 wsclean_image22.control.inputkeys               = [msfile]
@@ -900,7 +901,6 @@ wsclean_image22.argument.channelsout            = {{ wsclean_nchannels_selfcal }
 {% else %}
 wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,msfile]
 {% endif %}
-wsclean_image22.argument.fitsmask               = fitsmask
 wsclean_image22.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image22.argument.niter                  = 1000
 wsclean_image22.argument.threshold              = 0.0
@@ -1131,6 +1131,7 @@ wsclean_image32.control.type                    = wsclean
 {% if region_selfcal != "[]" %}
 wsclean_image32.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image32.control.inputkeys               = [msfile,fitsmask]
+wsclean_image32.argument.fitsmask               = fitsmask
 {% else %}
 wsclean_image32.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile]
 wsclean_image32.control.inputkeys               = [msfile]
@@ -1141,7 +1142,6 @@ wsclean_image32.argument.channelsout            = {{ wsclean_nchannels_selfcal }
 {% else %}
 wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,msfile]
 {% endif %}
-wsclean_image32.argument.fitsmask               = fitsmask
 wsclean_image32.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image32.argument.niter                  = 1000
 wsclean_image32.argument.threshold              = 0.0
@@ -1384,6 +1384,7 @@ wsclean_image42.control.type                    = wsclean
 {% if region_selfcal != "[]" %}
 wsclean_image42.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image42.control.inputkeys               = [msfile,fitsmask]
+wsclean_image42.argument.fitsmask               = fitsmask
 {% else %}
 wsclean_image42.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile]
 wsclean_image42.control.inputkeys               = [msfile]
@@ -1394,7 +1395,6 @@ wsclean_image42.argument.channelsout            = {{ wsclean_nchannels_selfcal }
 {% else %}
 wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,msfile]
 {% endif %}
-wsclean_image42.argument.fitsmask               = fitsmask
 wsclean_image42.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image42.argument.niter                  = 1000
 wsclean_image42.argument.threshold              = 0.0
