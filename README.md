@@ -11,9 +11,17 @@ multiple nodes (with a shared file system). It requires only modest resources
 What's New since v1.1
 ---------------------
 
-* Factor now uses the polynomial sky models generated directly by WSClean
-during imaging, resulting in improved and faster subtraction of extended sources.
-Due to this change, Factor now requires WSClean v2.3 or higher.
+* An unarchiving tool (`unarchivefactor`) has been added that can unarchive an
+archive made with `archivefactor`
+* An option (`update_selfcal_clean_regions`) has been added that controls
+whether user-supplied clean masks are updated during selfcal
+* Intersections in user-supplied clean masks are now detected and an error raised
+* An archiving tool (`archivefactor`) has been added that can archive the
+subtracted datasets, the sky models, the instrument tables, the selfcal plots,
+and the calibrated data for one or more directions
+* Polynomial sky models generated directly by WSClean during imaging are used
+for prediction, resulting in improved and faster subtraction of extended
+sources. Due to this change, Factor now requires WSClean v2.3 or higher
 
 
 What's New in v1.1
@@ -61,35 +69,6 @@ Then install with:
     cd factor
     python setup.py install
 
-Code Structure
---------------
-The top-level directories are:
-
-* `bin`: contains the `runfactor`  and `checkfactor` executables
-* `docs`: contains the documentation
-* `examples`: contains example parset and directions file
-* `factor`: main code tree
-
-Factor may be thought of as a tool to set up and run LOFAR pipeline scripts that
-perform facet calibration. As such, the main code tree is comprised of the
-following directories:
-
-* `lib`: contains general classes used to define operations, etc.
-* `operations`: contains the operations to perform selfcal, etc.
-* `parsets`: contains parsets used by executables called by the pipeline, such
-as DPPP, etc.
-* `pipeline`: contains all the pipeline files, such as pipeline parsets,
-configuration files, and task definitions
-* `scripts`: contains custom scripts called by the pipeline
-* `skymodels`: contains generic sky models needed by the pipeline
-
-In addition, the `factor` directory contains the following files:
-
-* `check_progress.py`: runs the interactive progress tool
-* `cluster.py`: handles the compute cluster setup
-* `directions.py`: handles the setup of directions (facets)
-* `parset.py`: handles the reading of the Factor parset
-* `process.py`: performs the actual processing (running of pipelines, etc.)
 
 Usage
 -----
