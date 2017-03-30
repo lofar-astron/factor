@@ -70,7 +70,7 @@ sort_average0_into_Groups_maps.control.mapfile_filesmap = sort_average0_into_Gro
 # Note, this step is done to ensure that we get WSClean channel images that match
 # the datasets used for selfcal so that predict will work properly
 # Compress both data and weights
-concat_average0_data.control.type                                 = dppp_concat
+concat_average0_data.control.type                                 = dppp
 concat_average0_data.control.mapfile_out                          = sort_average0_into_Groups_maps.output.groupmap
 concat_average0_data.control.mapfile_in                           = sort_average0_into_Groups_maps.output.filesmap
 concat_average0_data.control.inputkey                             = msin

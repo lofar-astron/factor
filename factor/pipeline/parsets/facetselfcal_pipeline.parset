@@ -225,7 +225,7 @@ sort_into_Groups_maps.control.mapfile_filesmap = sort_into_Groups.output.mapfile
 # Note, this step is done because DPPP cannot handle datasets with multiple spectral
 # windows, as occurs when MSs at several frequencies are virtually concatenated
 # Compress both data and weights
-concat_data.control.type                                 = dppp_concat
+concat_data.control.type                                 = dppp
 concat_data.control.mapfile_out                          = sort_into_Groups_maps.output.groupmap
 concat_data.control.mapfile_in                           = sort_into_Groups_maps.output.filesmap
 concat_data.control.inputkey                             = msin
@@ -284,7 +284,7 @@ make_blavg_data_mapfile.control.filename           = make_blavg_data.mapfile
 
 # Concat the preaveraged data (and weights), length = ntimes * num_cal_blocks
 # Compress both data and weights
-concat_blavg_data.control.type                                 = dppp_concat
+concat_blavg_data.control.type                                 = dppp
 concat_blavg_data.control.mapfile_out                          = make_blavg_data_mapfile.output.mapfile
 concat_blavg_data.control.mapfile_in                           = sort_into_Groups_maps.output.filesmap
 concat_blavg_data.control.inputkey                             = msin
@@ -435,7 +435,7 @@ sort_average0_into_Groups_maps.control.mapfile_filesmap = sort_average0_into_Gro
 # Note, this step is done to ensure that we get WSClean channel images that match
 # the datasets used for selfcal so that predict will work properly
 # Compress both data and weights
-concat_average0_data.control.type                                 = dppp_concat
+concat_average0_data.control.type                                 = dppp
 concat_average0_data.control.mapfile_out                          = sort_average0_into_Groups_maps.output.groupmap
 concat_average0_data.control.mapfile_in                           = sort_average0_into_Groups_maps.output.filesmap
 concat_average0_data.control.inputkey                             = msin
@@ -2023,14 +2023,13 @@ prepare_imaging_data.argument.flagzero.amplmin                      = 1e-20
 prepare_imaging_data.argument.avg.type                              = squash
 prepare_imaging_data.argument.avg.freqstep                          = {{ facetimage_freqstep }}
 prepare_imaging_data.argument.avg.timestep                          = {{ facetimage_timestep }}
-# Don't compress for now, as WSClean tries to allocate too much memory
-# {% if use_compression %}
-# prepare_imaging_data.argument.msout.storagemanager                = "Dysco"
-# prepare_imaging_data.argument.msout.storagemanager.databitrate    = 16
-# prepare_imaging_data.argument.msout.storagemanager.weightbitrate  = 12
-# prepare_imaging_data.argument.msout.storagemanager.distribution   = "TruncatedGaussian"
-# prepare_imaging_data.argument.msout.storagemanager.disttruncation = 1.5
-# prepare_imaging_data.argument.msout.storagemanager.normalization  = "AF"
+{% if use_compression %}
+prepare_imaging_data.argument.msout.storagemanager                = "Dysco"
+prepare_imaging_data.argument.msout.storagemanager.databitrate    = 16
+prepare_imaging_data.argument.msout.storagemanager.weightbitrate  = 12
+prepare_imaging_data.argument.msout.storagemanager.distribution   = "TruncatedGaussian"
+prepare_imaging_data.argument.msout.storagemanager.disttruncation = 1.5
+prepare_imaging_data.argument.msout.storagemanager.normalization  = "AF"
 # {% endif %}
 
 {% if not is_patch %}
@@ -2217,15 +2216,14 @@ subtract_high.argument.subtract.operation                  = subtract
 subtract_high.argument.avg.type                            = squash
 subtract_high.argument.avg.freqstep                        = {{ facetimage_low_freqstep }}
 subtract_high.argument.avg.timestep                        = {{ facetimage_low_timestep }}
-# Don't compress for now, as WSClean tries to allocate too much memory
-# {% if use_compression %}
-# subtract_high.argument.msout.storagemanager                = "Dysco"
-# subtract_high.argument.msout.storagemanager.databitrate    = 0
-# subtract_high.argument.msout.storagemanager.weightbitrate  = 12
-# subtract_high.argument.msout.storagemanager.distribution   = "TruncatedGaussian"
-# subtract_high.argument.msout.storagemanager.disttruncation = 1.5
-# subtract_high.argument.msout.storagemanager.normalization  = "AF"
-# {% endif %}
+{% if use_compression %}
+subtract_high.argument.msout.storagemanager                = "Dysco"
+subtract_high.argument.msout.storagemanager.databitrate    = 0
+subtract_high.argument.msout.storagemanager.weightbitrate  = 12
+subtract_high.argument.msout.storagemanager.distribution   = "TruncatedGaussian"
+subtract_high.argument.msout.storagemanager.disttruncation = 1.5
+subtract_high.argument.msout.storagemanager.normalization  = "AF"
+{% endif %}
 
 # compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile6.control.kind        = plugin
@@ -2401,15 +2399,14 @@ subtract_med.argument.subtract.operation                  = subtract
 subtract_med.argument.avg.type                            = squash
 subtract_med.argument.avg.freqstep                        = {{ facetimage_low_freqstep }}
 subtract_med.argument.avg.timestep                        = {{ facetimage_low_timestep }}
-# Don't compress for now, as WSClean tries to allocate too much memory
-# {% if use_compression %}
-# subtract_med.argument.msout.storagemanager                = "Dysco"
-# subtract_med.argument.msout.storagemanager.databitrate    = 0
-# subtract_med.argument.msout.storagemanager.weightbitrate  = 12
-# subtract_med.argument.msout.storagemanager.distribution   = "TruncatedGaussian"
-# subtract_med.argument.msout.storagemanager.disttruncation = 1.5
-# subtract_med.argument.msout.storagemanager.normalization  = "AF"
-# {% endif %}
+{% if use_compression %}
+subtract_med.argument.msout.storagemanager                = "Dysco"
+subtract_med.argument.msout.storagemanager.databitrate    = 0
+subtract_med.argument.msout.storagemanager.weightbitrate  = 12
+subtract_med.argument.msout.storagemanager.distribution   = "TruncatedGaussian"
+subtract_med.argument.msout.storagemanager.disttruncation = 1.5
+subtract_med.argument.msout.storagemanager.normalization  = "AF"
+{% endif %}
 
 # compress mapfile so that all files are in one group, length = 1
 create_compressed_mapfile7.control.kind        = plugin
