@@ -1859,7 +1859,6 @@ wsclean_image_full_med.argument.channelsout           = {{ nbands_selfcal_facet_
 {% else %}
 wsclean_image_full_med.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-multiscale,-save-component-list,-nonegative,-rms-background,msfile]
 {% endif %}
-wsclean_image_full_med.argument.fitsmask              = fitsmask
 wsclean_image_full_med.argument.size                  = {{ facet_med_imsize }} {{ facet_med_imsize }}
 wsclean_image_full_med.argument.niter                 = {{ wsclean_selfcal_full_image_niter }}
 wsclean_image_full_med.argument.threshold             = {{ wsclean_selfcal_full_image_threshold_jy }}
@@ -2038,15 +2037,14 @@ premask_low.argument.make_blank_image      = True
 
 # image the concatenated data with the preliminary mask at low resolution, length = 1
 wsclean_image_full_low.control.type                   = wsclean
-wsclean_image_full_low.control.mapfiles_in            = [create_compressed_mapfile7.output.mapfile,premask_low.output.mapfile]
-wsclean_image_full_low.control.inputkeys              = [msfile,fitsmask]
+wsclean_image_full_low.control.mapfiles_in            = [create_compressed_mapfile7.output.mapfile]
+wsclean_image_full_low.control.inputkeys              = [msfile]
 {% if nbands_selfcal_facet_image > 1 %}
 wsclean_image_full_low.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,-multiscale,-save-component-list,-nonegative,-rms-background,msfile]
 wsclean_image_full_low.argument.channelsout           = {{ nbands_selfcal_facet_image }}
 {% else %}
 wsclean_image_full_low.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-multiscale,-save-component-list,-nonegative,-rms-background,msfile]
 {% endif %}
-wsclean_image_full_low.argument.fitsmask              = fitsmask
 wsclean_image_full_low.argument.size                  = {{ facet_low_imsize }} {{ facet_low_imsize }}
 wsclean_image_full_low.argument.niter                 = {{ wsclean_selfcal_full_image_niter }}
 wsclean_image_full_low.argument.threshold             = {{ wsclean_selfcal_full_image_threshold_jy }}
