@@ -23,7 +23,7 @@ where ``factor.parset`` is the parset described in :ref:`factor_parset` and ``di
                             data unless specified with the "-d" flag)
       -c, --clobber         clobber existing files in output directory
 
-By default, a basic archive will contain the images, plots, and directions file. The calibrated data for one or more directions can be archived by specifying the direction names with the ``-d`` flag. A full archive that is suitable for resuming with Factor at a later date (or on a different machine) can be made by adding the ``-f`` flag. The full archive will include the sky models, instrument tables, state files, and subtracted-data MS files from a run.
+By default, a basic archive will contain the images, plots, and the directions file. The calibrated data for one or more directions can be archived by specifying the direction names with the ``-d`` flag. A full archive that is suitable for resuming with Factor at a later date (or on a different machine) can be made by adding the ``-f`` flag. The full archive will include the sky models, instrument tables, state files, and subtracted-data MS files from a run.
 
 A full archive will include the following:
 
