@@ -1,5 +1,5 @@
 {% extends "facetselfcal_pipeline.parset" %}
-{% block selfcal_steps %} {% if not preapply_phase_cal %} average0, {% endif %} create_compressed_mapfile0, sort_average0_into_Groups, sort_average0_into_Groups_maps, concat_average0_data, create_compressed_mapfile01, premask_selfcal, wsclean_image01, create_imagebase_map01, adjust_wsclean_mapfile0, mask0, wsclean_image02, create_imagebase_map02, pad_selfcal_model0_images, regroup_concat_data_map, create_expanded_model0_mapfile, expand_selfcal_model_size_map, wsclean_ft0, {% if pre_average %} copy_model_data0, {% endif %} make_fast_phase_parmdb_map, {% if peel_skymodel is not none %} create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, {% endif %} remove_parmdbs1, solve_phaseonly1, {% if selfcal_local_dir is not none %} make_apply_mapfile, {% endif %} apply_phaseonly1, create_compressed_mapfile1, wsclean_image11, create_imagebase_map11, adjust_wsclean_mapfile11, mask1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, pad_selfcal_model1_images, wsclean_ft1, {% if pre_average %} copy_model_data1, {% endif %} remove_parmdbs2, solve_phaseonly2, apply_phaseonly2, loop_phasecal, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, wsclean_image31, create_imagebase_map31, adjust_wsclean_mapfile31, mask3, wsclean_image32, loop_ampcal, {% endblock selfcal_steps %}
+{% block selfcal_steps %} {% if not preapply_phase_cal %} average0, {% endif %} create_compressed_mapfile0, sort_average0_into_Groups, sort_average0_into_Groups_maps, concat_average0_data, create_compressed_mapfile01, premask_selfcal, wsclean_image02, create_imagebase_map02, pad_selfcal_model0_images, regroup_concat_data_map, create_expanded_model0_mapfile, expand_selfcal_model_size_map, wsclean_ft0, {% if pre_average %} copy_model_data0, {% endif %} make_fast_phase_parmdb_map, {% if peel_skymodel is not none %} create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, {% endif %} remove_parmdbs1, solve_phaseonly1, {% if selfcal_local_dir is not none %} make_apply_mapfile, {% endif %} apply_phaseonly1, create_compressed_mapfile1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, pad_selfcal_model1_images, wsclean_ft1, {% if pre_average %} copy_model_data1, {% endif %} remove_parmdbs2, solve_phaseonly2, apply_phaseonly2, loop_phasecal, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, wsclean_image32, loop_ampcal, {% endblock selfcal_steps %}
 
 {% block selfcal_parameters %}
 ########## start of first round of selfcal (20" resolution)
@@ -118,108 +118,27 @@ premask_selfcal.argument.make_blank_image      = True
 premask_selfcal.argument.trim_by               = 0.4
 
 # image the concatenated data with wsclean, length = 1
-wsclean_image01.control.type                    = wsclean
-wsclean_image01.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile,premask_selfcal.output.mapfile]
-wsclean_image01.control.inputkeys               = [msfile,fitsmask]
-{% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image01.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
-wsclean_image01.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
-{% else %}
-wsclean_image01.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
-{% endif %}
-wsclean_image01.argument.fitsmask               = fitsmask
-wsclean_image01.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
-wsclean_image01.argument.niter                  = 1000
-wsclean_image01.argument.threshold              = 0.0
-wsclean_image01.argument.pol                    = I
-wsclean_image01.argument.weight                 = briggs {{ robust_selfcal }}
-wsclean_image01.argument.mgain                  = 0.6
-wsclean_image01.argument.cleanborder            = 0
-wsclean_image01.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
-wsclean_image01.argument.scale                  = {{ cellsize_selfcal_deg }}
-wsclean_image01.argument.mem                    = {{ max_percent_memory_per_proc_single }}
-wsclean_image01.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if local_dir is not none %}
-wsclean_image01.argument.tempdir                = {{ local_dir_parent }}
-{% elif selfcal_local_dir is not none %}
-wsclean_image01.argument.tempdir                = {{ selfcal_local_dir }}
-{% endif %}
-wsclean_image01.argument.multiscale-shape       = gaussian
-{% if not wsclean_selfcal_multiscale %}
-wsclean_image01.argument.multiscale-scales      = 0
-{% endif %}
-{% if wsclean_nchannels_selfcal > 5 %}
-wsclean_image01.argument.fit-spectral-pol       = 5
-{% elif wsclean_nchannels_selfcal > 1 %}
-wsclean_image01.argument.fit-spectral-pol       = {{ wsclean_nchannels_selfcal - 1 }}
-{% endif %}
-wsclean_image01.argument.weighting-rank-filter  = 3
-wsclean_image01.argument.taper-gaussian         = 20arcsec
-{% if facetselfcal_wsclean_nwavelengths > 0.0 %}
-wsclean_image01.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
-{% endif %}
-
-# make a mapfile with the root-name of the WSClean image, length = 1
-create_imagebase_map01.control.kind        = plugin
-create_imagebase_map01.control.type        = trimMapfile
-create_imagebase_map01.control.mapfile_in  = wsclean_image01.output.wsclean_image01-image.fits.mapfile
-create_imagebase_map01.control.trim        = -
-create_imagebase_map01.control.mapfile_dir = input.output.mapfile_dir
-create_imagebase_map01.control.filename    = wsclean_image01_image_rootname.mapfile
-
-# make a mapfile with the name of the WSClean image, length = 1
-adjust_wsclean_mapfile0.control.kind        = plugin
-adjust_wsclean_mapfile0.control.type        = appendMapfile
-adjust_wsclean_mapfile0.control.mapfile_in  = create_imagebase_map01.output.mapfile
-adjust_wsclean_mapfile0.control.append      = {{ wsclean_suffix }}
-adjust_wsclean_mapfile0.control.mapfile_dir = input.output.mapfile_dir
-adjust_wsclean_mapfile0.control.filename    = wsclean_image01_imagename.mapfile
-
-# generate a clean-mask from first image, length = 1
-mask0.control.type                    = make_clean_mask
-mask0.control.mapfile_in              = adjust_wsclean_mapfile0.output.mapfile
-mask0.control.inputkey                = imagefile
-mask0.control.outputkey               = maskfile
-mask0.argument.flags                  = [imagefile,maskfile]
-mask0.argument.region_file            = {{ region_selfcal }}
-mask0.argument.threshpix              = 10
-mask0.argument.threshisl              = 6
-mask0.argument.iterate_threshold      = True
-mask0.argument.atrous_do              = {{ atrous_do }}
-mask0.argument.rmsbox                 = (120,30)
-mask0.argument.rmsbox_bright          = (120,30)
-mask0.argument.adaptive_rmsbox        = True
-mask0.argument.trim_by                = 0.4
-mask0.argument.img_format             = fits
-mask0.argument.threshold_format       = float
-mask0.argument.use_adaptive_threshold = {{ use_selfcal_adaptive_threshold }}
-mask0.argument.skip_source_detection  = {{ skip_selfcal_source_detection }}
-
-# image the concatenated data again with wsclean, length = 1
 wsclean_image02.control.type                    = wsclean
-{% if use_selfcal_clean_threshold %}
-wsclean_image02.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile,mask0.output.mapfile,mask0.output.threshold_5sig.mapfile]
-wsclean_image02.control.inputkeys               = [msfile,fitsmask,threshold]
-wsclean_image02.argument.threshold              = threshold
-wsclean_image02.argument.niter                  = 10000
-{% else %}
-wsclean_image02.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile,mask0.output.mapfile]
+{% if region_selfcal != "[]" %}
+wsclean_image02.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image02.control.inputkeys               = [msfile,fitsmask]
-wsclean_image02.argument.threshold              = 0.0
-wsclean_image02.argument.niter                  = 1000
+wsclean_image02.argument.fitsmask               = fitsmask
+{% else %}
+wsclean_image02.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile]
+wsclean_image02.control.inputkeys               = [msfile]
 {% endif %}
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,-joinchannels,msfile]
 wsclean_image02.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
+wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,msfile]
 {% endif %}
-wsclean_image02.argument.fitsmask               = fitsmask
 wsclean_image02.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
+wsclean_image02.argument.niter                  = 10000
 wsclean_image02.argument.pol                    = I
 wsclean_image02.argument.weight                 = briggs {{ robust_selfcal }}
 wsclean_image02.argument.mgain                  = 0.6
-wsclean_image02.argument.cleanborder            = 0
+wsclean_image02.argument.cleanborder            = 20
 wsclean_image02.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image02.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image02.argument.mem                    = {{ max_percent_memory_per_proc_single }}
@@ -243,6 +162,10 @@ wsclean_image02.argument.taper-gaussian         = 20arcsec
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image02.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
+wsclean_image02.argument.auto-mask              = 3
+wsclean_image02.argument.auto-threshold         = 0.5
+wsclean_image02.argument.rms-background-window  = 20
+wsclean_image02.argument.rms-background-method  = rms-with-min
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map02.control.kind        = plugin
@@ -434,108 +357,27 @@ create_compressed_mapfile1.control.mapfile_dir = input.output.mapfile_dir
 create_compressed_mapfile1.control.filename    = image1_input.mapfile
 
 # image the virtual concatenated data with wsclean, length = 1
-wsclean_image11.control.type                    = wsclean
-wsclean_image11.control.mapfiles_in             = [create_compressed_mapfile1.output.mapfile,premask_selfcal.output.mapfile]
-wsclean_image11.control.inputkeys               = [msfile,fitsmask]
-{% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image11.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
-wsclean_image11.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
-{% else %}
-wsclean_image11.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
-{% endif %}
-wsclean_image11.argument.fitsmask               = fitsmask
-wsclean_image11.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
-wsclean_image11.argument.niter                  = 1000
-wsclean_image11.argument.threshold              = 0.0
-wsclean_image11.argument.pol                    = I
-wsclean_image11.argument.weight                 = briggs {{ robust_selfcal }}
-wsclean_image11.argument.mgain                  = 0.6
-wsclean_image11.argument.cleanborder            = 0
-wsclean_image11.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
-wsclean_image11.argument.scale                  = {{ cellsize_selfcal_deg }}
-wsclean_image11.argument.mem                    = {{ max_percent_memory_per_proc_single }}
-wsclean_image11.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if local_dir is not none %}
-wsclean_image11.argument.tempdir                = {{ local_dir_parent }}
-{% elif selfcal_local_dir is not none %}
-wsclean_image11.argument.tempdir                = {{ selfcal_local_dir }}
-{% endif %}
-wsclean_image11.argument.multiscale-shape       = gaussian
-{% if not wsclean_selfcal_multiscale %}
-wsclean_image11.argument.multiscale-scales      = 0
-{% endif %}
-{% if wsclean_nchannels_selfcal > 5 %}
-wsclean_image11.argument.fit-spectral-pol       = 5
-{% elif wsclean_nchannels_selfcal > 1 %}
-wsclean_image11.argument.fit-spectral-pol       = {{ wsclean_nchannels_selfcal - 1 }}
-{% endif %}
-wsclean_image11.argument.weighting-rank-filter  = 3
-wsclean_image11.argument.taper-gaussian         = 10arcsec
-{% if facetselfcal_wsclean_nwavelengths > 0.0 %}
-wsclean_image11.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
-{% endif %}
-
-# make a mapfile with the root-name of the WSClean image, length = 1
-create_imagebase_map11.control.kind        = plugin
-create_imagebase_map11.control.type        = trimMapfile
-create_imagebase_map11.control.mapfile_in  = wsclean_image11.output.wsclean_image11-image.fits.mapfile
-create_imagebase_map11.control.trim        = -
-create_imagebase_map11.control.mapfile_dir = input.output.mapfile_dir
-create_imagebase_map11.control.filename    = wsclean_image11_image_rootname.mapfile
-
-# make a mapfile with the name of the WSClean image, length = 1
-adjust_wsclean_mapfile11.control.kind        = plugin
-adjust_wsclean_mapfile11.control.type        = appendMapfile
-adjust_wsclean_mapfile11.control.mapfile_in  = create_imagebase_map11.output.mapfile
-adjust_wsclean_mapfile11.control.append      = {{ wsclean_suffix }}
-adjust_wsclean_mapfile11.control.mapfile_dir = input.output.mapfile_dir
-adjust_wsclean_mapfile11.control.filename    = wsclean_image11_imagename.mapfile
-
-# generate a clean-mask from first image, length = 1
-mask1.control.type                    = make_clean_mask
-mask1.control.mapfile_in              = adjust_wsclean_mapfile11.output.mapfile
-mask1.control.inputkey                = imagefile
-mask1.control.outputkey               = maskfile
-mask1.argument.flags                  = [imagefile,maskfile]
-mask1.argument.region_file            = {{ region_selfcal }}
-mask1.argument.threshpix              = 8
-mask1.argument.threshisl              = 7
-mask1.argument.iterate_threshold      = True
-mask1.argument.atrous_do              = {{ atrous_do }}
-mask1.argument.rmsbox                 = (120,30)
-mask1.argument.rmsbox_bright          = (80,20)
-mask1.argument.adaptive_rmsbox        = True
-mask1.argument.trim_by                = 0.4
-mask1.argument.img_format             = fits
-mask1.argument.threshold_format       = float
-mask1.argument.use_adaptive_threshold = {{ use_selfcal_adaptive_threshold }}
-mask1.argument.skip_source_detection  = {{ skip_selfcal_source_detection }}
-
-# image the virtual concatenated data again with wsclean, length = 1
 wsclean_image12.control.type                    = wsclean
-{% if use_selfcal_clean_threshold %}
-wsclean_image12.control.mapfiles_in             = [create_compressed_mapfile1.output.mapfile,mask1.output.mapfile,mask1.output.threshold_5sig.mapfile]
-wsclean_image12.control.inputkeys               = [msfile,fitsmask,threshold]
-wsclean_image12.argument.threshold              = threshold
-wsclean_image12.argument.niter                  = 10000
-{% else %}
-wsclean_image12.control.mapfiles_in             = [create_compressed_mapfile1.output.mapfile,mask1.output.mapfile]
+{% if region_selfcal != "[]" %}
+wsclean_image12.control.mapfiles_in             = [create_compressed_mapfile1.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image12.control.inputkeys               = [msfile,fitsmask]
-wsclean_image12.argument.threshold              = 0.0
-wsclean_image12.argument.niter                  = 1000
+wsclean_image12.argument.fitsmask               = fitsmask
+{% else %}
+wsclean_image12.control.mapfiles_in             = [create_compressed_mapfile1.output.mapfile]
+wsclean_image12.control.inputkeys               = [msfile]
 {% endif %}
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,-joinchannels,msfile]
 wsclean_image12.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
+wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,msfile]
 {% endif %}
-wsclean_image12.argument.fitsmask               = fitsmask
 wsclean_image12.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
+wsclean_image12.argument.niter                  = 10000
 wsclean_image12.argument.pol                    = I
 wsclean_image12.argument.weight                 = briggs {{ robust_selfcal }}
 wsclean_image12.argument.mgain                  = 0.6
-wsclean_image12.argument.cleanborder            = 0
+wsclean_image12.argument.cleanborder            = 20
 wsclean_image12.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image12.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image12.argument.mem                    = {{ max_percent_memory_per_proc_single }}
@@ -559,6 +401,10 @@ wsclean_image12.argument.taper-gaussian         = 10arcsec
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image12.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
+wsclean_image12.argument.auto-mask              = 2.0
+wsclean_image12.argument.auto-threshold         = 0.5
+wsclean_image12.argument.rms-background-window  = 20
+wsclean_image12.argument.rms-background-method  = rms-with-min
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map12.control.kind        = plugin
@@ -657,7 +503,7 @@ apply_phaseonly2.argument.correct_fast2.invert     = True
 loop_phasecal.control.kind      = loop
 loop_phasecal.control.type      = conditional
 loop_phasecal.control.loopcount = {{ loopcount }}
-loop_phasecal.control.loopsteps = [average2,create_compressed_mapfile2,wsclean_image21,create_imagebase_map21,adjust_wsclean_mapfile21,mask2,wsclean_image22,create_imagebase_map22,create_expanded_model2_mapfile,pad_selfcal_model2_images,wsclean_ft2,{% if pre_average %}copy_model_data2,{% endif %}remove_parmdbs11,solve_ampphase11,apply_ampphase11,adjust_wsclean_mapfile22_phaseloop,copy_image1,check_image1]
+loop_phasecal.control.loopsteps = [average2,create_compressed_mapfile2,wsclean_image22,create_imagebase_map22,create_expanded_model2_mapfile,pad_selfcal_model2_images,wsclean_ft2,{% if pre_average %}copy_model_data2,{% endif %}remove_parmdbs11,solve_ampphase11,apply_ampphase11,adjust_wsclean_mapfile22_phaseloop,copy_image1,check_image1]
 
 # average the output of the previous apply step, length = ntimes * num_cal_blocks
 average2.control.type                                 = dppp
@@ -694,106 +540,27 @@ create_compressed_mapfile2.control.mapfile_dir = input.output.mapfile_dir
 create_compressed_mapfile2.control.filename    = image2_input.mapfile
 
 # image the virtual concatenated data with wsclean, length = 1
-wsclean_image21.control.type                    = wsclean
-wsclean_image21.control.mapfiles_in             = [create_compressed_mapfile2.output.mapfile,premask_selfcal.output.mapfile]
-wsclean_image21.control.inputkeys               = [msfile,fitsmask]
-{% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image21.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
-wsclean_image21.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
-{% else %}
-wsclean_image21.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
-{% endif %}
-wsclean_image21.argument.fitsmask               = fitsmask
-wsclean_image21.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
-wsclean_image21.argument.niter                  = 1000
-wsclean_image21.argument.threshold              = 0.0
-wsclean_image21.argument.pol                    = I
-wsclean_image21.argument.weight                 = briggs {{ robust_selfcal }}
-wsclean_image21.argument.mgain                  = 0.6
-wsclean_image21.argument.cleanborder            = 0
-wsclean_image21.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
-wsclean_image21.argument.scale                  = {{ cellsize_selfcal_deg }}
-wsclean_image21.argument.mem                    = {{ max_percent_memory_per_proc_single }}
-wsclean_image21.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if local_dir is not none %}
-wsclean_image21.argument.tempdir                = {{ local_dir_parent }}
-{% elif selfcal_local_dir is not none %}
-wsclean_image21.argument.tempdir                = {{ selfcal_local_dir }}
-{% endif %}
-wsclean_image21.argument.multiscale-shape       = gaussian
-{% if not wsclean_selfcal_multiscale %}
-wsclean_image21.argument.multiscale-scales      = 0
-{% endif %}
-{% if wsclean_nchannels_selfcal > 5 %}
-wsclean_image21.argument.fit-spectral-pol       = 5
-{% elif wsclean_nchannels_selfcal > 1 %}
-wsclean_image21.argument.fit-spectral-pol       = {{ wsclean_nchannels_selfcal - 1 }}
-{% endif %}
-wsclean_image21.argument.weighting-rank-filter  = 3
-{% if facetselfcal_wsclean_nwavelengths > 0.0 %}
-wsclean_image21.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
-{% endif %}
-
-# make a mapfile with the root-name of the WSClean image, length = 1
-create_imagebase_map21.control.kind        = plugin
-create_imagebase_map21.control.type        = trimMapfile
-create_imagebase_map21.control.mapfile_in  = wsclean_image21.output.wsclean_image21-image.fits.mapfile
-create_imagebase_map21.control.trim        = -
-create_imagebase_map21.control.mapfile_dir = input.output.mapfile_dir
-create_imagebase_map21.control.filename    = wsclean_image21_image_rootname.mapfile
-
-# make a mapfile with the name of the WSClean image, length = 1
-adjust_wsclean_mapfile21.control.kind        = plugin
-adjust_wsclean_mapfile21.control.type        = appendMapfile
-adjust_wsclean_mapfile21.control.mapfile_in  = create_imagebase_map21.output.mapfile
-adjust_wsclean_mapfile21.control.append      = {{ wsclean_suffix }}
-adjust_wsclean_mapfile21.control.mapfile_dir = input.output.mapfile_dir
-adjust_wsclean_mapfile21.control.filename    = wsclean_image21_imagename.mapfile
-
-# generate a clean-mask from first image, length = 1
-mask2.control.type                    = make_clean_mask
-mask2.control.mapfile_in              = adjust_wsclean_mapfile21.output.mapfile
-mask2.control.inputkey                = imagefile
-mask2.control.outputkey               = maskfile
-mask2.argument.flags                  = [imagefile,maskfile]
-mask2.argument.region_file            = {{ region_selfcal }}
-mask2.argument.threshpix              = 8
-mask2.argument.threshisl              = 7
-mask2.argument.iterate_threshold      = True
-mask2.argument.atrous_do              = {{ atrous_do }}
-mask2.argument.rmsbox                 = (80,20)
-mask2.argument.adaptive_rmsbox        = True
-mask2.argument.trim_by                = 0.4
-mask2.argument.img_format             = fits
-mask2.argument.threshold_format       = float
-mask2.argument.use_adaptive_threshold = {{ use_selfcal_adaptive_threshold }}
-mask2.argument.skip_source_detection  = {{ skip_selfcal_source_detection }}
-
-# image the virtual concatenated data again with wsclean, length = 1
 wsclean_image22.control.type                    = wsclean
-{% if use_selfcal_clean_threshold %}
-wsclean_image22.control.mapfiles_in             = [create_compressed_mapfile2.output.mapfile,mask2.output.mapfile,mask2.output.threshold_5sig.mapfile]
-wsclean_image22.control.inputkeys               = [msfile,fitsmask,threshold]
-wsclean_image22.argument.threshold              = threshold
-wsclean_image22.argument.niter                  = 10000
-{% else %}
-wsclean_image22.control.mapfiles_in             = [create_compressed_mapfile2.output.mapfile,mask2.output.mapfile]
+{% if region_selfcal != "[]" %}
+wsclean_image22.control.mapfiles_in             = [create_compressed_mapfile2.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image22.control.inputkeys               = [msfile,fitsmask]
-wsclean_image22.argument.threshold              = 0.0
-wsclean_image22.argument.niter                  = 1000
+wsclean_image22.argument.fitsmask               = fitsmask
+{% else %}
+wsclean_image22.control.mapfiles_in             = [create_compressed_mapfile2.output.mapfile]
+wsclean_image22.control.inputkeys               = [msfile]
 {% endif %}
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,-joinchannels,msfile]
 wsclean_image22.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
+wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,msfile]
 {% endif %}
-wsclean_image22.argument.fitsmask               = fitsmask
 wsclean_image22.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
+wsclean_image22.argument.niter                  = 10000
 wsclean_image22.argument.pol                    = I
 wsclean_image22.argument.weight                 = briggs {{ robust_selfcal }}
 wsclean_image22.argument.mgain                  = 0.6
-wsclean_image22.argument.cleanborder            = 0
+wsclean_image22.argument.cleanborder            = 20
 wsclean_image22.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image22.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image22.argument.mem                    = {{ max_percent_memory_per_proc_single }}
@@ -816,6 +583,10 @@ wsclean_image22.argument.weighting-rank-filter  = 3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image22.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
+wsclean_image22.argument.auto-mask              = 1.5
+wsclean_image22.argument.auto-threshold         = 0.5
+wsclean_image22.argument.rms-background-window  = 20
+wsclean_image22.argument.rms-background-method  = rms-with-min
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map22.control.kind        = plugin
@@ -1032,108 +803,27 @@ create_compressed_mapfile3.control.mapfile_in  = apply_amp1.output.mapfile
 create_compressed_mapfile3.control.mapfile_dir = input.output.mapfile_dir
 create_compressed_mapfile3.control.filename    = image3_input.mapfile
 
-# image the virtual concatenated data with wsclean, length = 1
-wsclean_image31.control.type                    = wsclean
-wsclean_image31.control.mapfiles_in             = [create_compressed_mapfile3.output.mapfile,premask_selfcal.output.mapfile]
-wsclean_image31.control.inputkeys               = [msfile,fitsmask]
-{% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image31.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
-wsclean_image31.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
-{% else %}
-wsclean_image31.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
-{% endif %}
-wsclean_image31.argument.fitsmask               = fitsmask
-wsclean_image31.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
-wsclean_image31.argument.niter                  = 1000
-wsclean_image31.argument.threshold              = 0.0
-wsclean_image31.argument.pol                    = I
-wsclean_image31.argument.weight                 = briggs {{ robust_selfcal }}
-wsclean_image31.argument.mgain                  = 0.6
-wsclean_image31.argument.cleanborder            = 0
-wsclean_image31.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
-wsclean_image31.argument.scale                  = {{ cellsize_selfcal_deg }}
-wsclean_image31.argument.mem                    = {{ max_percent_memory_per_proc_single }}
-wsclean_image31.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if local_dir is not none %}
-wsclean_image31.argument.tempdir                = {{ local_dir_parent }}
-{% elif selfcal_local_dir is not none %}
-wsclean_image31.argument.tempdir                = {{ selfcal_local_dir }}
-{% endif %}
-wsclean_image31.argument.multiscale-shape       = gaussian
-{% if not wsclean_selfcal_multiscale %}
-wsclean_image31.argument.multiscale-scales      = 0
-{% endif %}
-{% if wsclean_nchannels_selfcal > 5 %}
-wsclean_image31.argument.fit-spectral-pol       = 5
-{% elif wsclean_nchannels_selfcal > 1 %}
-wsclean_image31.argument.fit-spectral-pol       = {{ wsclean_nchannels_selfcal - 1 }}
-{% endif %}
-wsclean_image31.argument.weighting-rank-filter  = 3
-{% if facetselfcal_wsclean_nwavelengths > 0.0 %}
-wsclean_image31.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
-{% endif %}
-
-# make a mapfile with the root-name of the WSClean image, length = 1
-create_imagebase_map31.control.kind        = plugin
-create_imagebase_map31.control.type        = trimMapfile
-create_imagebase_map31.control.mapfile_in  = wsclean_image31.output.wsclean_image31-image.fits.mapfile
-create_imagebase_map31.control.trim        = -
-create_imagebase_map31.control.mapfile_dir = input.output.mapfile_dir
-create_imagebase_map31.control.filename    = wsclean_image31_image_rootname.mapfile
-
-# make a mapfile with the name of the WSClean image, length = 1
-adjust_wsclean_mapfile31.control.kind        = plugin
-adjust_wsclean_mapfile31.control.type        = appendMapfile
-adjust_wsclean_mapfile31.control.mapfile_in  = create_imagebase_map31.output.mapfile
-adjust_wsclean_mapfile31.control.append      = {{ wsclean_suffix }}
-adjust_wsclean_mapfile31.control.mapfile_dir = input.output.mapfile_dir
-adjust_wsclean_mapfile31.control.filename    = wsclean_image31_imagename.mapfile
-
-# generate a clean-mask from first image, length = 1
-mask3.control.type                    = make_clean_mask
-mask3.control.mapfile_in              = adjust_wsclean_mapfile31.output.mapfile
-mask3.control.inputkey                = imagefile
-mask3.control.outputkey               = maskfile
-mask3.argument.flags                  = [imagefile,maskfile]
-mask3.argument.region_file            = {{ region_selfcal }}
-mask3.argument.threshpix              = 10
-mask3.argument.threshisl              = 10
-mask3.argument.iterate_threshold      = True
-mask3.argument.atrous_do              = {{ atrous_do }}
-mask3.argument.rmsbox                 = (80,20)
-mask3.argument.adaptive_rmsbox        = True
-mask3.argument.trim_by                = 0.4
-mask3.argument.img_format             = fits
-mask3.argument.adaptive_thresh        = 180
-mask3.argument.threshold_format       = float
-mask3.argument.use_adaptive_threshold = {{ use_selfcal_adaptive_threshold }}
-mask3.argument.skip_source_detection  = {{ skip_selfcal_source_detection }}
-
-# image the virtual concatenated data again with wsclean, length = 1
 wsclean_image32.control.type                    = wsclean
-{% if use_selfcal_clean_threshold %}
-wsclean_image32.control.mapfiles_in             = [create_compressed_mapfile3.output.mapfile,mask3.output.mapfile,mask3.output.threshold_5sig.mapfile]
-wsclean_image32.control.inputkeys               = [msfile,fitsmask,threshold]
-wsclean_image32.argument.threshold              = threshold
-wsclean_image32.argument.niter                  = 10000
-{% else %}
-wsclean_image32.control.mapfiles_in             = [create_compressed_mapfile3.output.mapfile,mask3.output.mapfile]
+{% if region_selfcal != "[]" %}
+wsclean_image32.control.mapfiles_in             = [create_compressed_mapfile3.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image32.control.inputkeys               = [msfile,fitsmask]
-wsclean_image32.argument.threshold              = 0.0
-wsclean_image32.argument.niter                  = 1000
+wsclean_image32.argument.fitsmask               = fitsmask
+{% else %}
+wsclean_image32.control.mapfiles_in             = [create_compressed_mapfile3.output.mapfile]
+wsclean_image32.control.inputkeys               = [msfile]
 {% endif %}
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
+wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,-joinchannels,msfile]
 wsclean_image32.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
+wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,msfile]
 {% endif %}
-wsclean_image32.argument.fitsmask               = fitsmask
 wsclean_image32.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
+wsclean_image32.argument.niter                  = 10000
 wsclean_image32.argument.pol                    = I
 wsclean_image32.argument.weight                 = briggs {{ robust_selfcal }}
 wsclean_image32.argument.mgain                  = 0.6
-wsclean_image32.argument.cleanborder            = 0
+wsclean_image32.argument.cleanborder            = 20
 wsclean_image32.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image32.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image32.argument.mem                    = {{ max_percent_memory_per_proc_single }}
@@ -1156,6 +846,10 @@ wsclean_image32.argument.weighting-rank-filter  = 3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image32.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
+wsclean_image32.argument.auto-mask              = 2.0
+wsclean_image32.argument.auto-threshold         = 0.5
+wsclean_image32.argument.rms-background-window  = 20
+wsclean_image32.argument.rms-background-method  = rms-with-min
 
 ########## start of phase+amp selfcal loop
 
@@ -1163,7 +857,7 @@ wsclean_image32.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavel
 loop_ampcal.control.kind      = loop
 loop_ampcal.control.type      = conditional
 loop_ampcal.control.loopcount = {{ loopcount }}
-loop_ampcal.control.loopsteps = [create_imagebase_map32,create_expanded_model3_mapfile,pad_selfcal_model3_images,wsclean_ft3,{% if pre_average %}copy_model_data3,{% endif %}remove_parmdbs21,solve_ampphase21,apply_ampphase21,merge_phase_parmdbs,remove_parmdbs22,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,create_compressed_mapfile4,wsclean_image41,create_imagebase_map41,adjust_wsclean_mapfile41,mask4,wsclean_image42,create_imagebase_map42,adjust_wsclean_mapfile42,copy_image2,check_image2]
+loop_ampcal.control.loopsteps = [create_imagebase_map32,create_expanded_model3_mapfile,pad_selfcal_model3_images,wsclean_ft3,{% if pre_average %}copy_model_data3,{% endif %}remove_parmdbs21,solve_ampphase21,apply_ampphase21,merge_phase_parmdbs,remove_parmdbs22,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,create_compressed_mapfile4,wsclean_image42,create_imagebase_map42,adjust_wsclean_mapfile42,copy_image2,check_image2]
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map32.control.kind        = plugin
@@ -1361,107 +1055,27 @@ create_compressed_mapfile4.control.mapfile_dir = input.output.mapfile_dir
 create_compressed_mapfile4.control.filename    = image4_input.mapfile
 
 # image the virtual concatenated data with wsclean, length = 1
-wsclean_image41.control.type                    = wsclean
-wsclean_image41.control.mapfiles_in             = [create_compressed_mapfile4.output.mapfile,premask_selfcal.output.mapfile]
-wsclean_image41.control.inputkeys               = [msfile,fitsmask]
-{% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image41.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,msfile]
-wsclean_image41.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
-{% else %}
-wsclean_image41.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,msfile]
-{% endif %}
-wsclean_image41.argument.fitsmask               = fitsmask
-wsclean_image41.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
-wsclean_image41.argument.niter                  = 1000
-wsclean_image41.argument.threshold              = 0.0
-wsclean_image41.argument.pol                    = I
-wsclean_image41.argument.weight                 = briggs {{ robust_selfcal }}
-wsclean_image41.argument.mgain                  = 0.6
-wsclean_image41.argument.cleanborder            = 0
-wsclean_image41.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
-wsclean_image41.argument.scale                  = {{ cellsize_selfcal_deg }}
-wsclean_image41.argument.mem                    = {{ max_percent_memory_per_proc_single }}
-wsclean_image41.argument.j                      = {{ max_cpus_per_proc_single }}
-{% if local_dir is not none %}
-wsclean_image41.argument.tempdir                = {{ local_dir_parent }}
-{% elif selfcal_local_dir is not none %}
-wsclean_image41.argument.tempdir                = {{ selfcal_local_dir }}
-{% endif %}
-wsclean_image41.argument.multiscale-shape       = gaussian
-{% if not wsclean_selfcal_multiscale %}
-wsclean_image41.argument.multiscale-scales      = 0
-{% endif %}
-{% if wsclean_nchannels_selfcal > 5 %}
-wsclean_image41.argument.fit-spectral-pol       = 5
-{% elif wsclean_nchannels_selfcal > 1 %}
-wsclean_image41.argument.fit-spectral-pol       = {{ wsclean_nchannels_selfcal - 1 }}
-{% endif %}
-wsclean_image41.argument.weighting-rank-filter  = 3
-{% if facetselfcal_wsclean_nwavelengths > 0.0 %}
-wsclean_image41.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
-{% endif %}
-
-# make a mapfile with the root-name of the WSClean image, length = 1
-create_imagebase_map41.control.kind        = plugin
-create_imagebase_map41.control.type        = trimMapfile
-create_imagebase_map41.control.mapfile_in  = wsclean_image41.output.wsclean_image41-image.fits.mapfile
-create_imagebase_map41.control.trim        = -
-create_imagebase_map41.control.mapfile_dir = input.output.mapfile_dir
-create_imagebase_map41.control.filename    = wsclean_image41_image_rootname.mapfile
-
-# make a mapfile with the name of the WSClean image, length = 1
-adjust_wsclean_mapfile41.control.kind        = plugin
-adjust_wsclean_mapfile41.control.type        = appendMapfile
-adjust_wsclean_mapfile41.control.mapfile_in  = create_imagebase_map41.output.mapfile
-adjust_wsclean_mapfile41.control.append      = {{ wsclean_suffix }}
-adjust_wsclean_mapfile41.control.mapfile_dir = input.output.mapfile_dir
-adjust_wsclean_mapfile41.control.filename    = wsclean_image41_imagename.mapfile
-
-# generate a clean-mask from first image, length = 1
-mask4.control.type                    = make_clean_mask
-mask4.control.mapfile_in              = adjust_wsclean_mapfile41.output.mapfile
-mask4.control.inputkey                = imagefile
-mask4.control.outputkey               = maskfile
-mask4.argument.flags                  = [imagefile,maskfile]
-mask4.argument.region_file            = {{ region_selfcal }}
-mask4.argument.threshpix              = 8
-mask4.argument.threshisl              = 8
-mask4.argument.iterate_threshold      = True
-mask4.argument.atrous_do              = {{ atrous_do }}
-mask4.argument.rmsbox                 = (80,20)
-mask4.argument.adaptive_rmsbox        = True
-mask4.argument.trim_by                = 0.4
-mask4.argument.img_format             = fits
-mask4.argument.adaptive_thresh        = 200
-mask4.argument.threshold_format       = float
-mask4.argument.use_adaptive_threshold = {{ use_selfcal_adaptive_threshold }}
-mask4.argument.skip_source_detection  = {{ skip_selfcal_source_detection }}
-
-# image the virtual concatenated data again with wsclean, length = 1
 wsclean_image42.control.type                    = wsclean
-{% if use_selfcal_clean_threshold %}
-wsclean_image42.control.mapfiles_in             = [create_compressed_mapfile4.output.mapfile,mask4.output.mapfile,mask4.output.threshold_5sig.mapfile]
-wsclean_image42.control.inputkeys               = [msfile,fitsmask,threshold]
-wsclean_image42.argument.threshold              = threshold
-wsclean_image42.argument.niter                  = 10000
-{% else %}
-wsclean_image42.control.mapfiles_in             = [create_compressed_mapfile4.output.mapfile,mask4.output.mapfile]
+{% if region_selfcal != "[]" %}
+wsclean_image42.control.mapfiles_in             = [create_compressed_mapfile4.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image42.control.inputkeys               = [msfile,fitsmask]
-wsclean_image42.argument.threshold              = 0.0
-wsclean_image42.argument.niter                  = 1000
+wsclean_image42.argument.fitsmask               = fitsmask
+{% else %}
+wsclean_image42.control.mapfiles_in             = [create_compressed_mapfile4.output.mapfile]
+wsclean_image42.control.inputkeys               = [msfile]
 {% endif %}
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-joinchannels,-save-component-list,msfile]
+wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,-joinchannels,-save-component-list,msfile]
 wsclean_image42.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-save-component-list,msfile]
+wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,-save-component-list,msfile]
 {% endif %}
-wsclean_image42.argument.fitsmask               = fitsmask
 wsclean_image42.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
+wsclean_image42.argument.niter                  = 10000
 wsclean_image42.argument.pol                    = I
 wsclean_image42.argument.weight                 = briggs {{ robust_selfcal }}
 wsclean_image42.argument.mgain                  = 0.6
-wsclean_image42.argument.cleanborder            = 0
+wsclean_image42.argument.cleanborder            = 20
 wsclean_image42.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image42.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image42.argument.mem                    = {{ max_percent_memory_per_proc_single }}
@@ -1484,6 +1098,10 @@ wsclean_image42.argument.weighting-rank-filter  = 3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image42.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
+wsclean_image42.argument.auto-mask              = 2.0
+wsclean_image42.argument.auto-threshold         = 0.5
+wsclean_image42.argument.rms-background-window  = 20
+wsclean_image42.argument.rms-background-method  = rms-with-min
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map42.control.kind        = plugin
