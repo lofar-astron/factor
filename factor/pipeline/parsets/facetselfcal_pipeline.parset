@@ -526,8 +526,8 @@ wsclean_image02.argument.weighting-rank-filter  = 3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image02.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image02.argument.auto-mask              = 3
-wsclean_image02.argument.auto-threshold         = 0.3
+wsclean_image02.argument.auto-mask              = 4
+wsclean_image02.argument.auto-threshold         = 0.5
 wsclean_image02.argument.rms-background-window  = 20
 wsclean_image02.argument.rms-background-method  = rms-with-min
 
@@ -765,7 +765,7 @@ wsclean_image12.argument.weighting-rank-filter  = 3
 wsclean_image12.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
 wsclean_image12.argument.auto-mask              = 3
-wsclean_image12.argument.auto-threshold         = 0.3
+wsclean_image12.argument.auto-threshold         = 0.5
 wsclean_image12.argument.rms-background-window  = 20
 wsclean_image12.argument.rms-background-method  = rms-with-min
 
@@ -927,8 +927,8 @@ wsclean_image22.argument.weighting-rank-filter  = 3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image22.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image22.argument.auto-mask              = 2.5
-wsclean_image22.argument.auto-threshold         = 0.3
+wsclean_image22.argument.auto-mask              = 2
+wsclean_image22.argument.auto-threshold         = 0.5
 wsclean_image22.argument.rms-background-window  = 20
 wsclean_image22.argument.rms-background-method  = rms-with-min
 
@@ -1167,8 +1167,8 @@ wsclean_image32.argument.weighting-rank-filter  = 3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image32.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image32.argument.auto-mask              = 3
-wsclean_image32.argument.auto-threshold         = 0.3
+wsclean_image32.argument.auto-mask              = 2
+wsclean_image32.argument.auto-threshold         = 0.5
 wsclean_image32.argument.rms-background-window  = 20
 wsclean_image32.argument.rms-background-method  = rms-with-min
 
@@ -1419,8 +1419,8 @@ wsclean_image42.argument.weighting-rank-filter  = 3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image42.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image42.argument.auto-mask              = 2.5
-wsclean_image42.argument.auto-threshold         = 0.3
+wsclean_image42.argument.auto-mask              = 2
+wsclean_image42.argument.auto-threshold         = 0.5
 wsclean_image42.argument.rms-background-window  = 20
 wsclean_image42.argument.rms-background-method  = rms-with-min
 
