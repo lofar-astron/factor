@@ -753,7 +753,7 @@ wsclean_image12.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 wsclean_image12.argument.multiscale-shape       = gaussian
 {% if not wsclean_selfcal_multiscale %}
-wsclean_image12.argument.multiscale-scales      = 0,8
+wsclean_image12.argument.multiscale-scales      = 0
 {% endif %}
 {% if wsclean_nchannels_selfcal > 5 %}
 wsclean_image12.argument.fit-spectral-pol       = 5
@@ -916,7 +916,7 @@ wsclean_image22.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 wsclean_image22.argument.multiscale-shape       = gaussian
 {% if not wsclean_selfcal_multiscale %}
-wsclean_image22.argument.multiscale-scales      = 0,8
+wsclean_image22.argument.multiscale-scales      = 0
 {% endif %}
 {% if wsclean_nchannels_selfcal > 5 %}
 wsclean_image22.argument.fit-spectral-pol       = 5
@@ -1156,7 +1156,7 @@ wsclean_image32.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 wsclean_image32.argument.multiscale-shape       = gaussian
 {% if not wsclean_selfcal_multiscale %}
-wsclean_image32.argument.multiscale-scales      = 0,8
+wsclean_image32.argument.multiscale-scales      = 0
 {% endif %}
 {% if wsclean_nchannels_selfcal > 5 %}
 wsclean_image32.argument.fit-spectral-pol       = 5
@@ -1408,7 +1408,7 @@ wsclean_image42.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 wsclean_image42.argument.multiscale-shape       = gaussian
 {% if not wsclean_selfcal_multiscale %}
-wsclean_image42.argument.multiscale-scales      = 0,8
+wsclean_image42.argument.multiscale-scales      = 0
 {% endif %}
 {% if wsclean_nchannels_selfcal > 5 %}
 wsclean_image42.argument.fit-spectral-pol       = 5
