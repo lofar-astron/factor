@@ -250,7 +250,7 @@ wsclean_image_full.argument.channelsout           = {{ wsclean_nchannels }}
 wsclean_image_full.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-rms-background,msfile]
 {% endif %}
 wsclean_image_full.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
-wsclean_image_full.argument.niter                 = {{ wsclean_full2_image_niter }}
+wsclean_image_full.argument.niter                 = 100000
 wsclean_image_full.argument.pol                   = I
 wsclean_image_full.argument.weight                = briggs {{ robust_facet }}
 wsclean_image_full.argument.mgain                 = 0.6

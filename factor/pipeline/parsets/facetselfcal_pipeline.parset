@@ -499,8 +499,7 @@ wsclean_image02.argument.channelsout            = {{ wsclean_nchannels_selfcal }
 wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,msfile]
 {% endif %}
 wsclean_image02.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
-wsclean_image02.argument.niter                  = 1000
-wsclean_image02.argument.threshold              = 0.0
+wsclean_image02.argument.niter                  = 10000
 wsclean_image02.argument.pol                    = I
 wsclean_image02.argument.weight                 = briggs {{ robust_selfcal }}
 wsclean_image02.argument.mgain                  = 0.6
@@ -738,8 +737,7 @@ wsclean_image12.argument.channelsout            = {{ wsclean_nchannels_selfcal }
 wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,msfile]
 {% endif %}
 wsclean_image12.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
-wsclean_image12.argument.niter                  = 1000
-wsclean_image12.argument.threshold              = 0.0
+wsclean_image12.argument.niter                  = 10000
 wsclean_image12.argument.pol                    = I
 wsclean_image12.argument.weight                 = briggs {{ robust_selfcal }}
 wsclean_image12.argument.mgain                  = 0.6
@@ -902,8 +900,7 @@ wsclean_image22.argument.channelsout            = {{ wsclean_nchannels_selfcal }
 wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,msfile]
 {% endif %}
 wsclean_image22.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
-wsclean_image22.argument.niter                  = 1000
-wsclean_image22.argument.threshold              = 0.0
+wsclean_image22.argument.niter                  = 10000
 wsclean_image22.argument.pol                    = I
 wsclean_image22.argument.weight                 = briggs {{ robust_selfcal }}
 wsclean_image22.argument.mgain                  = 0.6
@@ -930,7 +927,7 @@ wsclean_image22.argument.weighting-rank-filter  = 3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image22.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image22.argument.auto-mask              = 3
+wsclean_image22.argument.auto-mask              = 2.5
 wsclean_image22.argument.auto-threshold         = 0.3
 wsclean_image22.argument.rms-background-window  = 20
 wsclean_image22.argument.rms-background-method  = rms-with-min
@@ -1143,8 +1140,7 @@ wsclean_image32.argument.channelsout            = {{ wsclean_nchannels_selfcal }
 wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,msfile]
 {% endif %}
 wsclean_image32.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
-wsclean_image32.argument.niter                  = 1000
-wsclean_image32.argument.threshold              = 0.0
+wsclean_image32.argument.niter                  = 10000
 wsclean_image32.argument.pol                    = I
 wsclean_image32.argument.weight                 = briggs {{ robust_selfcal }}
 wsclean_image32.argument.mgain                  = 0.6
@@ -1396,8 +1392,7 @@ wsclean_image42.argument.channelsout            = {{ wsclean_nchannels_selfcal }
 wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,-save-component-list,msfile]
 {% endif %}
 wsclean_image42.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
-wsclean_image42.argument.niter                  = 1000
-wsclean_image42.argument.threshold              = 0.0
+wsclean_image42.argument.niter                  = 10000
 wsclean_image42.argument.pol                    = I
 wsclean_image42.argument.weight                 = briggs {{ robust_selfcal }}
 wsclean_image42.argument.mgain                  = 0.6
@@ -1424,7 +1419,7 @@ wsclean_image42.argument.weighting-rank-filter  = 3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image42.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image42.argument.auto-mask              = 3
+wsclean_image42.argument.auto-mask              = 2.5
 wsclean_image42.argument.auto-threshold         = 0.3
 wsclean_image42.argument.rms-background-window  = 20
 wsclean_image42.argument.rms-background-method  = rms-with-min
@@ -1680,8 +1675,7 @@ wsclean_image_full.argument.channelsout           = {{ nbands_selfcal_facet_imag
 wsclean_image_full.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-multiscale,-save-component-list,-nonegative,-rms-background,msfile]
 {% endif %}
 wsclean_image_full.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
-wsclean_image_full.argument.niter                 = {{ wsclean_selfcal_full_image_niter }}
-wsclean_image_full.argument.threshold             = {{ wsclean_selfcal_full_image_threshold_jy }}
+wsclean_image_full.argument.niter                 = 50000
 wsclean_image_full.argument.pol                   = I
 wsclean_image_full.argument.weight                = briggs {{ robust_selfcal }}
 wsclean_image_full.argument.mgain                 = 0.6
@@ -1860,8 +1854,7 @@ wsclean_image_full_med.argument.channelsout           = {{ nbands_selfcal_facet_
 wsclean_image_full_med.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-multiscale,-save-component-list,-nonegative,-rms-background,msfile]
 {% endif %}
 wsclean_image_full_med.argument.size                  = {{ facet_med_imsize }} {{ facet_med_imsize }}
-wsclean_image_full_med.argument.niter                 = {{ wsclean_selfcal_full_image_niter }}
-wsclean_image_full_med.argument.threshold             = {{ wsclean_selfcal_full_image_threshold_jy }}
+wsclean_image_full_med.argument.niter                 = 50000
 wsclean_image_full_med.argument.pol                   = I
 wsclean_image_full_med.argument.weight                = briggs {{ robust_selfcal }}
 wsclean_image_full_med.argument.mgain                 = 0.6
@@ -2046,8 +2039,7 @@ wsclean_image_full_low.argument.channelsout           = {{ nbands_selfcal_facet_
 wsclean_image_full_low.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-multiscale,-save-component-list,-nonegative,-rms-background,msfile]
 {% endif %}
 wsclean_image_full_low.argument.size                  = {{ facet_low_imsize }} {{ facet_low_imsize }}
-wsclean_image_full_low.argument.niter                 = {{ wsclean_selfcal_full_image_niter }}
-wsclean_image_full_low.argument.threshold             = {{ wsclean_selfcal_full_image_threshold_jy }}
+wsclean_image_full_low.argument.niter                 = 50000
 wsclean_image_full_low.argument.pol                   = I
 wsclean_image_full_low.argument.weight                = briggs {{ robust_selfcal }}
 wsclean_image_full_low.argument.mgain                 = 0.6
