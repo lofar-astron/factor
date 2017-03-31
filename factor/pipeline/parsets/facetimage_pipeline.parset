@@ -270,7 +270,7 @@ wsclean_image_full.argument.taper-gaussian        =  {{ taper_facet_arcsec }}
 wsclean_image_full.argument.baseline-averaging    = {{ facetimage_wsclean_nwavelengths }}
 {% endif %}
 wsclean_image_full.argument.auto-mask             = 3
-wsclean_image_full.argument.auto-threshold        = 0.3
+wsclean_image_full.argument.auto-threshold        = 0.5
 wsclean_image_full.argument.rms-background-window = 20
 wsclean_image_full.argument.rms-background-method = rms-with-min
 
