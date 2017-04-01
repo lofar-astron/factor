@@ -164,7 +164,7 @@ wsclean_image02.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavel
 {% endif %}
 wsclean_image02.argument.auto-mask              = 3
 wsclean_image02.argument.auto-threshold         = 0.5
-wsclean_image02.argument.rms-background-window  = 20
+wsclean_image02.argument.rms-background-window  = 40
 wsclean_image02.argument.rms-background-method  = rms-with-min
 
 # make a mapfile with the root-name of the WSClean image, length = 1
