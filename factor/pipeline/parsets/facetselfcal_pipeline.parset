@@ -766,7 +766,7 @@ wsclean_image12.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavel
 {% endif %}
 wsclean_image12.argument.auto-mask              = 3.5
 wsclean_image12.argument.auto-threshold         = 0.5
-wsclean_image12.argument.rms-background-window  = 30
+wsclean_image12.argument.rms-background-window  = 40
 wsclean_image12.argument.rms-background-method  = rms-with-min
 
 # make a mapfile with the root-name of the WSClean image, length = 1
@@ -929,7 +929,7 @@ wsclean_image22.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavel
 {% endif %}
 wsclean_image22.argument.auto-mask              = 3.0
 wsclean_image22.argument.auto-threshold         = 0.5
-wsclean_image22.argument.rms-background-window  = 30
+wsclean_image22.argument.rms-background-window  = 40
 wsclean_image22.argument.rms-background-method  = rms-with-min
 
 # make a mapfile with the root-name of the WSClean image, length = 1
@@ -1169,7 +1169,7 @@ wsclean_image32.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavel
 {% endif %}
 wsclean_image32.argument.auto-mask              = 3.0
 wsclean_image32.argument.auto-threshold         = 0.5
-wsclean_image32.argument.rms-background-window  = 30
+wsclean_image32.argument.rms-background-window  = 40
 wsclean_image32.argument.rms-background-method  = rms-with-min
 
 ########## start of selfcal loop
@@ -1421,7 +1421,7 @@ wsclean_image42.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavel
 {% endif %}
 wsclean_image42.argument.auto-mask              = 3.0
 wsclean_image42.argument.auto-threshold         = 0.5
-wsclean_image42.argument.rms-background-window  = 30
+wsclean_image42.argument.rms-background-window  = 40
 wsclean_image42.argument.rms-background-method  = rms-with-min
 
 # make a mapfile with the root-name of the WSClean image, length = 1
