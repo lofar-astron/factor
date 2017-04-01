@@ -1699,7 +1699,7 @@ wsclean_image_full.argument.baseline-averaging    = {{ facetimage_wsclean_nwavel
 {% endif %}
 wsclean_image_full.argument.auto-mask             = 3
 wsclean_image_full.argument.auto-threshold        = 1.0
-wsclean_image_full.argument.rms-background-window = 20
+wsclean_image_full.argument.rms-background-window = 40
 wsclean_image_full.argument.rms-background-method = rms-with-min
 
 # make a mapfile with the root-name of the WSClean images, length = 1
@@ -1879,7 +1879,7 @@ wsclean_image_full_med.argument.baseline-averaging    = {{ facetimage_medlow_wsc
 {% endif %}
 wsclean_image_full_med.argument.auto-mask             = 3
 wsclean_image_full_med.argument.auto-threshold        = 1.0
-wsclean_image_full_med.argument.rms-background-window = 20
+wsclean_image_full_med.argument.rms-background-window = 40
 wsclean_image_full_med.argument.rms-background-method = rms-with-min
 
 # make a mapfile with the root-name of the WSClean images, length = 1
@@ -2064,7 +2064,7 @@ wsclean_image_full_low.argument.baseline-averaging    = {{ facetimage_medlow_wsc
 {% endif %}
 wsclean_image_full_low.argument.auto-mask             = 3
 wsclean_image_full_low.argument.auto-threshold        = 1.0
-wsclean_image_full_low.argument.rms-background-window = 20
+wsclean_image_full_low.argument.rms-background-window = 30
 wsclean_image_full_low.argument.rms-background-method = rms-with-min
 
 # make a mapfile with the root-name of the WSClean images, length = 1
