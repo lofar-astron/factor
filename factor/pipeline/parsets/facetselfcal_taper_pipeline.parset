@@ -401,9 +401,9 @@ wsclean_image12.argument.taper-gaussian         = 10arcsec
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image12.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image12.argument.auto-mask              = 2.0
+wsclean_image12.argument.auto-mask              = 3.5
 wsclean_image12.argument.auto-threshold         = 0.5
-wsclean_image12.argument.rms-background-window  = 20
+wsclean_image12.argument.rms-background-window  = 40
 wsclean_image12.argument.rms-background-method  = rms-with-min
 
 # make a mapfile with the root-name of the WSClean image, length = 1
@@ -572,7 +572,7 @@ wsclean_image22.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 wsclean_image22.argument.multiscale-shape       = gaussian
 {% if not wsclean_selfcal_multiscale %}
-wsclean_image22.argument.multiscale-scales      = 0
+wsclean_image22.argument.multiscale-scales      = 0,8
 {% endif %}
 {% if wsclean_nchannels_selfcal > 5 %}
 wsclean_image22.argument.fit-spectral-pol       = 5
@@ -583,9 +583,9 @@ wsclean_image22.argument.weighting-rank-filter  = 3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image22.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image22.argument.auto-mask              = 1.5
+wsclean_image22.argument.auto-mask              = 3.0
 wsclean_image22.argument.auto-threshold         = 0.5
-wsclean_image22.argument.rms-background-window  = 20
+wsclean_image22.argument.rms-background-window  = 50
 wsclean_image22.argument.rms-background-method  = rms-with-min
 
 # make a mapfile with the root-name of the WSClean image, length = 1
@@ -835,7 +835,7 @@ wsclean_image32.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 wsclean_image32.argument.multiscale-shape       = gaussian
 {% if not wsclean_selfcal_multiscale %}
-wsclean_image32.argument.multiscale-scales      = 0
+wsclean_image32.argument.multiscale-scales      = 0,8
 {% endif %}
 {% if wsclean_nchannels_selfcal > 5 %}
 wsclean_image32.argument.fit-spectral-pol       = 5
@@ -846,9 +846,9 @@ wsclean_image32.argument.weighting-rank-filter  = 3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image32.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image32.argument.auto-mask              = 2.0
+wsclean_image32.argument.auto-mask              = 3.0
 wsclean_image32.argument.auto-threshold         = 0.5
-wsclean_image32.argument.rms-background-window  = 20
+wsclean_image32.argument.rms-background-window  = 50
 wsclean_image32.argument.rms-background-method  = rms-with-min
 
 ########## start of phase+amp selfcal loop
@@ -1087,7 +1087,7 @@ wsclean_image42.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 wsclean_image42.argument.multiscale-shape       = gaussian
 {% if not wsclean_selfcal_multiscale %}
-wsclean_image42.argument.multiscale-scales      = 0
+wsclean_image42.argument.multiscale-scales      = 0,8
 {% endif %}
 {% if wsclean_nchannels_selfcal > 5 %}
 wsclean_image42.argument.fit-spectral-pol       = 5
@@ -1098,9 +1098,9 @@ wsclean_image42.argument.weighting-rank-filter  = 3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image42.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image42.argument.auto-mask              = 2.0
+wsclean_image42.argument.auto-mask              = 3.0
 wsclean_image42.argument.auto-threshold         = 0.5
-wsclean_image42.argument.rms-background-window  = 20
+wsclean_image42.argument.rms-background-window  = 50
 wsclean_image42.argument.rms-background-method  = rms-with-min
 
 # make a mapfile with the root-name of the WSClean image, length = 1
