@@ -32,15 +32,16 @@ def main(image, counter, indx):
     counter = int(counter)
     indx = int(indx)
 
+    # Copy the image
     image_copy = image.replace('image{0}2'.format(indx), 'image{0}2_iter{1}'.format(indx, counter))
     if os.path.exists(image_copy):
         os.remove(image_copy)
     shutil.copyfile(image, image_copy)
 
-    imageroot = image.split('.fits')[0].replace('image{}2'.format(indx), 'image{}1'.format(indx))
+    # Copy the model image to allow visualization of auto-masked regions
     try:
-        mask = glob.glob(imageroot + '.mask?')[0]
-        mask_copy = mask.replace('image{0}1'.format(indx), 'image{0}1_iter{1}'.format(indx, counter))
+        mask = image.replace('image.fits', 'model.fits')
+        mask_copy = image_copy.replace('image.fits', 'model.fits')
         if os.path.exists(mask_copy):
             os.remove(mask_copy)
         shutil.copyfile(mask, mask_copy)

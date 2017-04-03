@@ -206,13 +206,9 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
     if maskfiles is None:
         maskfiles = []
         for imagefile in imagefiles:
-            for i in range(5):
-                indx = imagefile.find('image{}2'.format(i))
-                if indx >= 0:
-                    break
-            imageroot = imagefile.split('.fits')[0].replace('image{}2'.format(i), 'image{}1'.format(i))
+            maskname = imagefile.replace('image.fits', 'model.fits')
             try:
-                maskfiles.append(glob.glob(imageroot + '.mask?')[0])
+                maskfiles.append(glob.glob(maskname)[0])
             except IndexError:
                 maskfiles.append(None)
     else:
@@ -349,7 +345,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
             f.grid.set_alpha(0.5)
             f.grid.set_linewidth(0.2)
             if mask is not None:
-                f.show_contour(mask, colors='red', levels=[0.0], filled=False, smooth=1,
+                f.show_contour(mask, colors='red', levels=[0.5*imagenoise], filled=False, smooth=3,
                     alpha=0.6, linewidths=1)
         fig.show()
     else:
@@ -378,7 +374,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
             f.add_colorbar()
             f.colorbar.set_axis_label_text('Flux (Jy beam$^{-1}$)')
             if mask is not None:
-                f.show_contour(mask, colors='red', levels=[0.0], filled=False, smooth=1,
+                f.show_contour(mask, colors='red', levels=[0.5*imagenoise], filled=False, smooth=3,
                     alpha=0.6, linewidths=1)
             f.save(outplotname, dpi=100, format='png')
 
