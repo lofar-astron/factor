@@ -530,7 +530,7 @@ wsclean_image02.argument.auto-mask              = 3
 wsclean_image02.argument.auto-threshold         = 0.5
 wsclean_image02.argument.local-rms-window       = 20
 wsclean_image02.argument.local-rms-method       = rms-with-min
-wsclean_image02.argument.multiscale-threshold-bias = 0.8
+wsclean_image02.argument.multiscale-scale-bias  = 0.5
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map02.control.kind        = plugin
@@ -769,7 +769,7 @@ wsclean_image12.argument.auto-mask              = 3.5
 wsclean_image12.argument.auto-threshold         = 0.5
 wsclean_image12.argument.local-rms-window       = 40
 wsclean_image12.argument.local-rms-method       = rms-with-min
-wsclean_image12.argument.multiscale-threshold-bias = 0.8
+wsclean_image12.argument.multiscale-scale-bias  = 0.5
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map12.control.kind        = plugin
@@ -933,7 +933,7 @@ wsclean_image22.argument.auto-mask              = 3.0
 wsclean_image22.argument.auto-threshold         = 0.5
 wsclean_image22.argument.local-rms-window       = 50
 wsclean_image22.argument.local-rms-method       = rms-with-min
-wsclean_image22.argument.multiscale-threshold-bias = 0.8
+wsclean_image22.argument.multiscale-scale-bias  = 0.5
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map22.control.kind        = plugin
@@ -1174,7 +1174,7 @@ wsclean_image32.argument.auto-mask              = 3.0
 wsclean_image32.argument.auto-threshold         = 0.5
 wsclean_image32.argument.local-rms-window       = 50
 wsclean_image32.argument.local-rms-method       = rms-with-min
-wsclean_image32.argument.multiscale-threshold-bias = 0.8
+wsclean_image32.argument.multiscale-scale-bias  = 0.5
 
 ########## start of selfcal loop
 
@@ -1427,7 +1427,7 @@ wsclean_image42.argument.auto-mask              = 3.0
 wsclean_image42.argument.auto-threshold         = 0.5
 wsclean_image42.argument.local-rms-window       = 50
 wsclean_image42.argument.local-rms-method       = rms-with-min
-wsclean_image42.argument.multiscale-threshold-bias = 0.8
+wsclean_image42.argument.multiscale-scale-bias  = 0.5
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map42.control.kind        = plugin
