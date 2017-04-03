@@ -244,17 +244,16 @@ wsclean_image_full.control.inputkeys              = [msfile]
 {% endif %}
 {% endif %}
 {% if wsclean_nchannels > 1 %}
-wsclean_image_full.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-rms-background,-joinchannels,msfile]
+wsclean_image_full.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-local-rms,-joinchannels,msfile]
 wsclean_image_full.argument.channelsout           = {{ wsclean_nchannels }}
 {% else %}
-wsclean_image_full.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-rms-background,msfile]
+wsclean_image_full.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-local-rms,msfile]
 {% endif %}
 wsclean_image_full.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
 wsclean_image_full.argument.niter                 = 100000
 wsclean_image_full.argument.pol                   = I
 wsclean_image_full.argument.weight                = briggs {{ robust_facet }}
 wsclean_image_full.argument.mgain                 = 0.6
-wsclean_image_full.argument.cleanborder           = 0
 wsclean_image_full.argument.minuv-l               = {{ facet_min_uv_lambda }}
 wsclean_image_full.argument.scale                 = {{ cellsize_facet_deg }}
 wsclean_image_full.argument.mem                   = {{ max_percent_memory_per_proc_single }}
@@ -269,10 +268,10 @@ wsclean_image_full.argument.taper-gaussian        =  {{ taper_facet_arcsec }}
 {% if facetimage_wsclean_nwavelengths > 0.0 %}
 wsclean_image_full.argument.baseline-averaging    = {{ facetimage_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image_full.argument.auto-mask             = 3
+wsclean_image_full.argument.auto-mask             = 4
 wsclean_image_full.argument.auto-threshold        = 0.5
-wsclean_image_full.argument.rms-background-window = 40
-wsclean_image_full.argument.rms-background-method = rms-with-min
+wsclean_image_full.argument.local-rms-window      = 50
+wsclean_image_full.argument.local-rms-method      = rms-with-min
 
 # make a mapfile with the root-name of the WSClean images, length = 1
 create_imagebase_map2.control.kind        = plugin
