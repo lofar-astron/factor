@@ -499,7 +499,7 @@ def display_image(images):
     Displays images in an external viewer
     """
     global fig, at, selected_direction
-    
+
     if not isinstance(images, list):
         images = [images]
 
@@ -530,9 +530,17 @@ def display_image(images):
             c.set_text(info_last)
             fig.canvas.draw()
             for i in range(len(images)):
-                if options['ds9_frames'] is None:
-                    ds9.set('frame {:d}'.format(i))
+                if options['ds9_frames'] == 'current':
+                    if len(images) > 1:
+                        # For single image, no need to set frame as current one
+                        # is used by default. For multiple images, use frame i
+                        # for image i
+                        ds9.set('frame {:d}'.format(i))
+                elif options['ds9_frames'] == 'new':
+                    ds9.set('frame new')
                 else:
+                    log.warning('ds9_frames setting "{}" not understood. Using '
+                        '"new" instead'.format(options['ds9_frames']))
                     ds9.set('frame new')
                 ds9.set('file '+images[i])
                 if options['ds9_limits'] is not None:
@@ -541,10 +549,11 @@ def display_image(images):
                     regionfile=os.path.join(selected_direction.working_dir,'regions','facets_ds9.reg')
                     ds9.set('regions delete all')
                     ds9.set('regions load '+regionfile)
-            ds9.set('tile')
-            ds9.set('frame match scale and limits')
-            ds9.set('frame match colorbar')
-            ds9.set('frame match wcs')
+            if len(images) > 1:
+                ds9.set('tile')
+                ds9.set('frame match scale and limits')
+                ds9.set('frame match colorbar')
+                ds9.set('frame match wcs')
     else:
         info = 'Unknown facet viewer specified in config file!'
         c = at.get_child()

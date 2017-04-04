@@ -1019,7 +1019,7 @@ def get_checkfactor_options(parset):
         parset_dict['ds9_limits'] = None
 
     if 'ds9_frames' not in parset_dict:
-        parset_dict['ds9_frames'] = None
+        parset_dict['ds9_frames'] = 'current'
 
     if 'image_display' not in parset_dict:
         parset_dict['image_display'] = 'display -geometry 800x600'
