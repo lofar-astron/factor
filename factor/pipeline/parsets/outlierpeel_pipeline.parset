@@ -513,7 +513,7 @@ create_compressed_mapfile5.control.mapfile_in  = prepare_imaging_data.output.map
 create_compressed_mapfile5.control.mapfile_dir = input.output.mapfile_dir
 create_compressed_mapfile5.control.filename    = concat_averaged_input.mapfile
 
-# make a mask from the last selfcal image, length = 1
+# make a facet clean mask from the last selfcal image, length = 1
 premask.control.type                   = make_clean_mask
 premask.control.mapfile_in             = create_compressed_mapfile5.output.mapfile
 premask.control.inputkey               = imagefile
@@ -534,19 +534,17 @@ wsclean_image_full.control.type                   = wsclean
 wsclean_image_full.control.mapfiles_in            = [create_compressed_mapfile5.output.mapfile,premask.output.mapfile]
 wsclean_image_full.control.inputkeys              = [msfile,fitsmask]
 {% if nbands_selfcal_facet_image > 1 %}
-wsclean_image_full.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,-multiscale,-save-component-list,-nonegative,msfile]
+wsclean_image_full.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,-multiscale,-save-component-list,-nonegative,-local-rms,msfile]
 wsclean_image_full.argument.channelsout           = {{ nbands_selfcal_facet_image }}
 {% else %}
-wsclean_image_full.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-multiscale,-save-component-list,-nonegative,msfile]
+wsclean_image_full.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-multiscale,-save-component-list,-nonegative,-local-rms,msfile]
 {% endif %}
 wsclean_image_full.argument.fitsmask              = fitsmask
 wsclean_image_full.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
-wsclean_image_full.argument.niter                 = {{ wsclean_selfcal_full_image_niter }}
-wsclean_image_full.argument.threshold             = {{ wsclean_selfcal_full_image_threshold_jy }}
+wsclean_image_full.argument.niter                 = 50000
 wsclean_image_full.argument.pol                   = I
 wsclean_image_full.argument.weight                = briggs {{ robust_selfcal }}
 wsclean_image_full.argument.mgain                 = 0.6
-wsclean_image_full.argument.cleanborder           = 0
 wsclean_image_full.argument.minuv-l               = {{ facet_min_uv_lambda }}
 wsclean_image_full.argument.scale                 = {{ cellsize_selfcal_deg }}
 wsclean_image_full.argument.mem                   = {{ max_percent_memory_per_proc_single }}
@@ -564,6 +562,10 @@ wsclean_image_full.argument.weighting-rank-filter = 3
 {% if facetimage_wsclean_nwavelengths > 0.0 %}
 wsclean_image_full.argument.baseline-averaging    = {{ facetimage_wsclean_nwavelengths }}
 {% endif %}
+wsclean_image_full.argument.auto-mask             = 3
+wsclean_image_full.argument.auto-threshold        = 1.0
+wsclean_image_full.argument.local-rms-window      = 50
+wsclean_image_full.argument.local-rms-method      = rms-with-min
 
 # make a mapfile with the root-name of the WSClean images, length = 1
 create_imagebase_map.control.kind        = plugin
@@ -692,7 +694,7 @@ create_compressed_mapfile6.control.mapfile_in  = subtract_high.output.mapfile
 create_compressed_mapfile6.control.mapfile_dir = input.output.mapfile_dir
 create_compressed_mapfile6.control.filename    = concat_averaged_med_input.mapfile
 
-# Make a preliminary clean mask from the facet region, length = 1
+# Make a facet clean mask from the facet region, length = 1
 premask_med.control.type                   = make_clean_mask
 premask_med.control.mapfile_in             = create_compressed_mapfile6.output.mapfile
 premask_med.control.inputkey               = imagefile
@@ -712,19 +714,17 @@ wsclean_image_full_med.control.type                   = wsclean
 wsclean_image_full_med.control.mapfiles_in            = [create_compressed_mapfile6.output.mapfile,premask_med.output.mapfile]
 wsclean_image_full_med.control.inputkeys              = [msfile,fitsmask]
 {% if nbands_selfcal_facet_image > 1 %}
-wsclean_image_full_med.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,-multiscale,-save-component-list,-nonegative,msfile]
+wsclean_image_full_med.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,-multiscale,-save-component-list,-nonegative,-local-rms,msfile]
 wsclean_image_full_med.argument.channelsout           = {{ nbands_selfcal_facet_image }}
 {% else %}
-wsclean_image_full_med.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-multiscale,-save-component-list,-nonegative,msfile]
+wsclean_image_full_med.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-multiscale,-save-component-list,-nonegative,-local-rms,msfile]
 {% endif %}
 wsclean_image_full_med.argument.fitsmask              = fitsmask
 wsclean_image_full_med.argument.size                  = {{ facet_med_imsize }} {{ facet_med_imsize }}
-wsclean_image_full_med.argument.niter                 = {{ wsclean_selfcal_full_image_niter }}
-wsclean_image_full_med.argument.threshold             = {{ wsclean_selfcal_full_image_threshold_jy }}
+wsclean_image_full_med.argument.niter                 = 50000
 wsclean_image_full_med.argument.pol                   = I
 wsclean_image_full_med.argument.weight                = briggs {{ robust_selfcal }}
 wsclean_image_full_med.argument.mgain                 = 0.6
-wsclean_image_full_med.argument.cleanborder           = 0
 wsclean_image_full_med.argument.minuv-l               = {{ facet_min_uv_lambda }}
 wsclean_image_full_med.argument.taper-gaussian        = {{ cellsize_facet_med_deg*3600*3 }}arcsec
 wsclean_image_full_med.argument.scale                 = {{ cellsize_facet_med_deg }}
@@ -743,6 +743,10 @@ wsclean_image_full_med.argument.weighting-rank-filter = 3
 {% if facetimage_medlow_wsclean_nwavelengths > 0.0 %}
 wsclean_image_full_med.argument.baseline-averaging    = {{ facetimage_medlow_wsclean_nwavelengths }}
 {% endif %}
+wsclean_image_full_med.argument.auto-mask             = 4
+wsclean_image_full_med.argument.auto-threshold        = 1.0
+wsclean_image_full_med.argument.local-rms-window      = 50
+wsclean_image_full_med.argument.local-rms-method      = rms-with-min
 
 # make a mapfile with the root-name of the WSClean images, length = 1
 create_imagebase_med_map.control.kind        = plugin
@@ -891,19 +895,17 @@ wsclean_image_full_low.control.type                   = wsclean
 wsclean_image_full_low.control.mapfiles_in            = [create_compressed_mapfile7.output.mapfile,premask_low.output.mapfile]
 wsclean_image_full_low.control.inputkeys              = [msfile,fitsmask]
 {% if nbands_selfcal_facet_image > 1 %}
-wsclean_image_full_low.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,-multiscale,-save-component-list,-nonegative,msfile]
+wsclean_image_full_low.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-joinchannels,-multiscale,-save-component-list,-nonegative,-local-rms,msfile]
 wsclean_image_full_low.argument.channelsout           = {{ nbands_selfcal_facet_image }}
 {% else %}
-wsclean_image_full_low.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-multiscale,-save-component-list,-nonegative,msfile]
+wsclean_image_full_low.argument.flags                 = [-no-update-model-required,-fitbeam,-reorder,-multiscale,-save-component-list,-nonegative,-local-rms,msfile]
 {% endif %}
 wsclean_image_full_low.argument.fitsmask              = fitsmask
 wsclean_image_full_low.argument.size                  = {{ facet_low_imsize }} {{ facet_low_imsize }}
-wsclean_image_full_low.argument.niter                 = {{ wsclean_selfcal_full_image_niter }}
-wsclean_image_full_low.argument.threshold             = {{ wsclean_selfcal_full_image_threshold_jy }}
+wsclean_image_full_low.argument.niter                 = 50000
 wsclean_image_full_low.argument.pol                   = I
 wsclean_image_full_low.argument.weight                = briggs {{ robust_selfcal }}
 wsclean_image_full_low.argument.mgain                 = 0.6
-wsclean_image_full_low.argument.cleanborder           = 0
 wsclean_image_full_low.argument.minuv-l               = {{ facet_min_uv_lambda }}
 wsclean_image_full_low.argument.taper-gaussian        = {{ cellsize_facet_low_deg*3600*3 }}arcsec
 wsclean_image_full_low.argument.scale                 = {{ cellsize_facet_low_deg }}
@@ -922,6 +924,10 @@ wsclean_image_full_low.argument.weighting-rank-filter = 3
 {% if facetimage_medlow_wsclean_nwavelengths > 0.0 %}
 wsclean_image_full_low.argument.baseline-averaging    = {{ facetimage_medlow_wsclean_nwavelengths }}
 {% endif %}
+wsclean_image_full_low.argument.auto-mask             = 4
+wsclean_image_full_low.argument.auto-threshold        = 1.0
+wsclean_image_full_low.argument.local-rms-window      = 50
+wsclean_image_full_low.argument.local-rms-method      = rms-with-min
 
 # make a mapfile with the root-name of the WSClean images, length = 1
 create_imagebase_low_map.control.kind        = plugin

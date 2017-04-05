@@ -225,30 +225,18 @@ premask.argument.make_blank_image      = True
 # do the first round of imaging, length = 1
 wsclean_image_full.control.type                   = wsclean
 {% if average_image_data %}
-{% if region_selfcal != "[]" %}
 wsclean_image_full.control.mapfiles_in            = [concat_reaveraged_compressed_map.output.mapfile,premask.output.mapfile]
-wsclean_image_full.control.inputkeys              = [msfile,fitsmask]
-wsclean_image_full.argument.fitsmask              = fitsmask
 {% else %}
-wsclean_image_full.control.mapfiles_in            = [concat_reaveraged_compressed_map.output.mapfile]
-wsclean_image_full.control.inputkeys              = [msfile]
-{% endif %}
-{% else %}
-{% if region_selfcal != "[]" %}
 wsclean_image_full.control.mapfiles_in            = [{{ image_data_mapfile }},premask.output.mapfile]
+{% endif %}
 wsclean_image_full.control.inputkeys              = [msfile,fitsmask]
-wsclean_image_full.argument.fitsmask              = fitsmask
-{% else %}
-wsclean_image_full.control.mapfiles_in            = [{{ image_data_mapfile }}]
-wsclean_image_full.control.inputkeys              = [msfile]
-{% endif %}
-{% endif %}
 {% if wsclean_nchannels > 1 %}
 wsclean_image_full.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-local-rms,-joinchannels,msfile]
 wsclean_image_full.argument.channelsout           = {{ wsclean_nchannels }}
 {% else %}
 wsclean_image_full.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-local-rms,msfile]
 {% endif %}
+wsclean_image_full.argument.fitsmask              = fitsmask
 wsclean_image_full.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
 wsclean_image_full.argument.niter                 = 100000
 wsclean_image_full.argument.pol                   = I
@@ -268,8 +256,8 @@ wsclean_image_full.argument.taper-gaussian        =  {{ taper_facet_arcsec }}
 {% if facetimage_wsclean_nwavelengths > 0.0 %}
 wsclean_image_full.argument.baseline-averaging    = {{ facetimage_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image_full.argument.auto-mask             = 4
-wsclean_image_full.argument.auto-threshold        = 0.5
+wsclean_image_full.argument.auto-mask             = 3
+wsclean_image_full.argument.auto-threshold        = 0.3
 wsclean_image_full.argument.local-rms-window      = 50
 wsclean_image_full.argument.local-rms-method      = rms-with-min
 
