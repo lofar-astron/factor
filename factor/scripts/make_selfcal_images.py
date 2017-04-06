@@ -345,7 +345,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
             f.grid.set_alpha(0.5)
             f.grid.set_linewidth(0.2)
             if mask is not None:
-                f.show_contour(mask, colors='red', levels=[0.5*imagenoise], filled=False, smooth=3,
+                f.show_contour(mask, colors='red', levels=[0.1*imagenoise], filled=False, smooth=3,
                     alpha=0.6, linewidths=1)
         fig.show()
     else:
@@ -374,7 +374,7 @@ def main(imagefiles, maskfiles=None, imagenoise=None, interactive=False,
             f.add_colorbar()
             f.colorbar.set_axis_label_text('Flux (Jy beam$^{-1}$)')
             if mask is not None:
-                f.show_contour(mask, colors='red', levels=[0.5*imagenoise], filled=False, smooth=3,
+                f.show_contour(mask, colors='red', levels=[0.1*imagenoise], filled=False, smooth=3,
                     alpha=0.6, linewidths=1)
             f.save(outplotname, dpi=100, format='png')
 
