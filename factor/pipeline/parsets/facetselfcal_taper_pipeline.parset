@@ -119,14 +119,9 @@ premask_selfcal.argument.trim_by               = 0.4
 
 # image the concatenated data with wsclean, length = 1
 wsclean_image02.control.type                    = wsclean
-{% if region_selfcal != "[]" %}
 wsclean_image02.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image02.control.inputkeys               = [msfile,fitsmask]
 wsclean_image02.argument.fitsmask               = fitsmask
-{% else %}
-wsclean_image02.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile]
-wsclean_image02.control.inputkeys               = [msfile]
-{% endif %}
 {% if wsclean_nchannels_selfcal > 1 %}
 wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,-joinchannels,msfile]
 wsclean_image02.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
@@ -138,7 +133,6 @@ wsclean_image02.argument.niter                  = 10000
 wsclean_image02.argument.pol                    = I
 wsclean_image02.argument.weight                 = briggs {{ robust_selfcal }}
 wsclean_image02.argument.mgain                  = 0.6
-wsclean_image02.argument.cleanborder            = 20
 wsclean_image02.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image02.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image02.argument.mem                    = {{ max_percent_memory_per_proc_single }}
@@ -162,7 +156,7 @@ wsclean_image02.argument.taper-gaussian         = 20arcsec
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image02.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image02.argument.auto-mask              = 3
+wsclean_image02.argument.auto-mask              = 3.6
 wsclean_image02.argument.auto-threshold         = 0.5
 wsclean_image02.argument.local-rms-window       = 40
 wsclean_image02.argument.local-rms-method       = rms-with-min
@@ -378,7 +372,6 @@ wsclean_image12.argument.niter                  = 10000
 wsclean_image12.argument.pol                    = I
 wsclean_image12.argument.weight                 = briggs {{ robust_selfcal }}
 wsclean_image12.argument.mgain                  = 0.6
-wsclean_image12.argument.cleanborder            = 20
 wsclean_image12.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image12.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image12.argument.mem                    = {{ max_percent_memory_per_proc_single }}
@@ -402,7 +395,7 @@ wsclean_image12.argument.taper-gaussian         = 10arcsec
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image12.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image12.argument.auto-mask              = 3.5
+wsclean_image12.argument.auto-mask              = 3.6
 wsclean_image12.argument.auto-threshold         = 0.5
 wsclean_image12.argument.local-rms-window       = 40
 wsclean_image12.argument.local-rms-method       = rms-with-min
@@ -562,7 +555,6 @@ wsclean_image22.argument.niter                  = 10000
 wsclean_image22.argument.pol                    = I
 wsclean_image22.argument.weight                 = briggs {{ robust_selfcal }}
 wsclean_image22.argument.mgain                  = 0.6
-wsclean_image22.argument.cleanborder            = 20
 wsclean_image22.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image22.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image22.argument.mem                    = {{ max_percent_memory_per_proc_single }}
@@ -585,7 +577,7 @@ wsclean_image22.argument.weighting-rank-filter  = 3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image22.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image22.argument.auto-mask              = 3.0
+wsclean_image22.argument.auto-mask              = 3.1
 wsclean_image22.argument.auto-threshold         = 0.5
 wsclean_image22.argument.local-rms-window       = 50
 wsclean_image22.argument.local-rms-method       = rms-with-min
@@ -826,7 +818,6 @@ wsclean_image32.argument.niter                  = 10000
 wsclean_image32.argument.pol                    = I
 wsclean_image32.argument.weight                 = briggs {{ robust_selfcal }}
 wsclean_image32.argument.mgain                  = 0.6
-wsclean_image32.argument.cleanborder            = 20
 wsclean_image32.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image32.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image32.argument.mem                    = {{ max_percent_memory_per_proc_single }}
@@ -849,7 +840,7 @@ wsclean_image32.argument.weighting-rank-filter  = 3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image32.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image32.argument.auto-mask              = 3.0
+wsclean_image32.argument.auto-mask              = 3.1
 wsclean_image32.argument.auto-threshold         = 0.5
 wsclean_image32.argument.local-rms-window       = 50
 wsclean_image32.argument.local-rms-method       = rms-with-min
@@ -1079,7 +1070,6 @@ wsclean_image42.argument.niter                  = 10000
 wsclean_image42.argument.pol                    = I
 wsclean_image42.argument.weight                 = briggs {{ robust_selfcal }}
 wsclean_image42.argument.mgain                  = 0.6
-wsclean_image42.argument.cleanborder            = 20
 wsclean_image42.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image42.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image42.argument.mem                    = {{ max_percent_memory_per_proc_single }}
@@ -1102,7 +1092,7 @@ wsclean_image42.argument.weighting-rank-filter  = 3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image42.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image42.argument.auto-mask              = 3.0
+wsclean_image42.argument.auto-mask              = 3.1
 wsclean_image42.argument.auto-threshold         = 0.5
 wsclean_image42.argument.local-rms-window       = 50
 wsclean_image42.argument.local-rms-method       = rms-with-min
