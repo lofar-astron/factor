@@ -78,23 +78,29 @@ def smooth(chan, real, imag, window):
     Smooth solutions for a single channel
     """
     phase = numpy.arctan2(imag, real)
-    amp = numpy.sqrt(imag**2 + real**2)
+    allamp = numpy.sqrt(imag**2 + real**2)
 
-    amp = numpy.log10(amp)
-    amp = median_window_filter(amp, window, 6)
-    amp = median_window_filter(amp, window, 6)
-    amp = median_window_filter(amp, 7, 6)
-    amp = median_window_filter(amp, 4, 6)
-    amp = median_window_filter(amp, 3, 6)
-    amp = 10**amp
+    goodmask = numpy.isfinite(allamp)
+    amp = allamp[goodmask]
+    
+    if len(amp)>7:    
+        amp = numpy.log10(amp)
+        amp = median_window_filter(amp, window, 6)
+        amp = median_window_filter(amp, window, 6)
+        amp = median_window_filter(amp, 7, 6)
+        amp = median_window_filter(amp, 4, 6)
+        amp = median_window_filter(amp, 3, 6)
+        amp = 10**amp
 
-    # Clip extremely high amplitude solutions to prevent biasing the
-    # normalization done later
-    high_ind = numpy.where(amp > 5.0)
-    amp[high_ind] = 5.0
-
-    real_smoothed = amp * numpy.cos(phase)
-    imag_smoothed = amp * numpy.sin(phase)
+        # Clip extremely high amplitude solutions to prevent biasing the
+        # normalization done later
+        high_ind = numpy.where(amp > 5.0)
+        amp[high_ind] = 5.0
+        
+        allamp[goodmask] = amp
+        
+    real_smoothed = allamp * numpy.cos(phase)
+    imag_smoothed = allamp * numpy.sin(phase)
 
     return (real_smoothed, imag_smoothed)
 
@@ -143,7 +149,7 @@ def main(instrument_name, instrument_name_smoothed, normalize=True):
                 for antenna in antenna_list:
                     real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
                     imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
-                    amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
+                    amp = numpy.ma.masked_invalid(numpy.copy(numpy.sqrt(real**2 + imag**2))).compressed()
                     amplist.append(amp)
         norm_factor = 1.0/(numpy.mean(numpy.concatenate(amplist)))
         print "smooth_amps.py: Normalization-Factor is:", norm_factor
@@ -159,14 +165,16 @@ def main(instrument_name, instrument_name_smoothed, normalize=True):
 
                     # Clip extremely low amplitude solutions to prevent very high
                     # amplitudes in the corrected data
-                    low_ind = numpy.where(amp < 0.2)
+                    # First get a copy and fill all NANs with dummy values
+                    amp_nonan = numpy.copy(amp) 
+                    amp_nonan[~numpy.isfinite(amp)] = 1.
+                    low_ind = numpy.where( amp_nonan < 0.2)
                     amp[low_ind] = 0.2
 
                     parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = numpy.copy(amp *
                         numpy.cos(phase) * norm_factor)
                     parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = numpy.copy(amp *
                         numpy.sin(phase) * norm_factor)
-
     if os.path.exists(instrument_name_smoothed):
         shutil.rmtree(instrument_name_smoothed)
     pdbnew = lofar.parmdb.parmdb(instrument_name_smoothed, create=True)

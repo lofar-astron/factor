@@ -3,6 +3,7 @@ Module defining the operation scheduler class
 """
 import logging
 import multiprocessing
+import signal
 import os
 import sys
 import imp
@@ -245,6 +246,8 @@ class Scheduler(object):
                 log.error('Operation {0} failed due to an error (direction: '
                     '{1})'.format(op_name, direction_name))
             self.success = False
+            import thread
+            thread.interrupt_main()
 
 
     def run(self, operation_list):
@@ -282,17 +285,32 @@ class Scheduler(object):
         while len(self.operation_list) > 0:
             self.allocate_resources()
             with Timer(log, 'operation'):
+                # change signal-handler so that Keyboard-Interrupts go to the master thread
+                original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
                 pool = multiprocessing.Pool(processes=self.max_procs)
+                signal.signal(signal.SIGINT, original_sigint_handler)
                 self.queued_ops = self.operation_list[self.max_procs:]
+                process_list = []
                 for op in self.operation_list:
                     op.setup()
                     op.set_started()
-                    pool.apply_async(call_generic_pipeline, (op.name,
-                        op.direction.name, op.pipeline_parset_file,
-                        op.pipeline_config_file, op.logbasename,
-                        self.genericpipeline_executable),
-                        callback=self.result_callback)
-                pool.close()
+                    process_list.append(
+                        pool.apply_async(call_generic_pipeline, (op.name,
+                            op.direction.name, op.pipeline_parset_file,
+                            op.pipeline_config_file, op.logbasename,
+                            self.genericpipeline_executable),
+                            callback=self.result_callback)
+                        )
+                pool.close() #no more new processes will be started
+                try:
+                    # We need to wait with a timeout, because otherwise all signals are blocked
+                    # *bleeep*ing python multi-threading/processing
+                    for process in process_list:
+                        while not process.ready():
+                            process.wait(30) 
+                except KeyboardInterrupt:
+                    log.error("Caught an (Keyboard-)Interrupt, stopping all pipelines.")
+                    pool.terminate()
                 pool.join()
 
             # Check for and handle any failed ops
