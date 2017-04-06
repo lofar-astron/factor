@@ -198,7 +198,6 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2, target_rms_rad=0.2):
             p1 = ph[i:]
             p2 = ph[:-i]
             rms = np.linalg.norm(p1-p2) / np.sqrt(len(p1))
-            mad = median_absolute_deviation(p1-p2)
             mean = np.mean(p1-p2)
             if rms + mean > target_rms_rad:
                 rmstime = i
