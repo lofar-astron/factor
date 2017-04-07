@@ -8,8 +8,8 @@ image fidelity. Factor runs well on single machines or on compute clusters with
 multiple nodes (with a shared file system). It requires only modest resources
 (at least 32 GB of memory and 1 TB of disk space).
 
-What's New since v1.1
----------------------
+What's New in v1.2
+------------------
 
 * An unarchiving tool (`unarchivefactor`) has been added that can unarchive an
 archive made with `archivefactor`

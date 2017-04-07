@@ -3,6 +3,9 @@
 Changelog
 =========
 
+Version 1.2
+-----------
+
 Changes since version 1.1:
 
     * An unarchiving tool (``unarchivefactor``, see :ref:`unarchivefactor`) has been added that can unarchive an archive made with ``archivefactor``
@@ -13,7 +16,7 @@ Changes since version 1.1:
 
 
 Version 1.1
--------------
+-----------
 
 Changes since version 1.0:
 

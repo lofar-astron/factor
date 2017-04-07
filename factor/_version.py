@@ -3,13 +3,15 @@ Module that stores the version and changelog
 """
 
 # Version number
-__version__ = '1.1'
+__version__ = '1.2'
 
 # Change log
 def changelog():
     """
     FACTOR Changelog.
     ----------------------------------------------------------------------------
+
+    07/04/2017 - Version 1.2
 
     28/03/2017
 
