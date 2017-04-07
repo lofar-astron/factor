@@ -168,15 +168,16 @@ prepare_imaging_data.argument.add.applycal.parmdb                 = dir_dep_parm
 {% endif %}
 {% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
 prepare_imaging_data.argument.flag.type                           = preflagger
+prepare_imaging_data.argument.flag.expr                           = {{ flag_expr }}
 {% endif %}
 {% if flag_abstime is not none %}
-prepare_imaging_data.argument.flag.abstime                        = {{ flag_abstime }}
+prepare_imaging_data.argument.flag.flag_abstime.abstime           = {{ flag_abstime }}
 {% endif %}
 {% if flag_baseline is not none %}
-prepare_imaging_data.argument.flag.baseline                       = {{ flag_baseline }}
+prepare_imaging_data.argument.flag.flag_baseline.baseline         = {{ flag_baseline }}
 {% endif %}
 {% if flag_freqrange is not none %}
-prepare_imaging_data.argument.flag.freqrange                      = {{ flag_freqrange }}
+prepare_imaging_data.argument.flag.flag_freqrange.freqrange       = {{ flag_freqrange }}
 {% endif %}
 prepare_imaging_data.argument.shift.type                          = phaseshifter
 prepare_imaging_data.argument.shift.phasecenter                   = [{{ facet_ra }}deg, {{ facet_dec }}deg]

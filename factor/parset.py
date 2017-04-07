@@ -166,13 +166,30 @@ def get_global_options(parset):
 
     # Flagging ranges (default = no flagging). A range of times baselines, and
     # frequencies to flag can be specified (see the DPPP documentation for
-    # details of syntax)
+    # details of syntax) By default, the ranges are AND-ed to produce the final flags,
+    # but a set expression can be specified that controls how the selections are
+    # combined
+    flag_list = []
     if 'flag_abstime' not in parset_dict:
         parset_dict['flag_abstime'] = None
+    else:
+        flag_list.append('flag_abstime')
     if 'flag_baseline' not in parset_dict:
         parset_dict['flag_baseline'] = None
+    else:
+        flag_list.append('flag_baseline')
     if 'flag_freqrange' not in parset_dict:
         parset_dict['flag_freqrange'] = None
+    else:
+        flag_list.append('flag_freqrange')
+    if 'flag_expr' not in parset_dict:
+        parset_dict['flag_expr'] = ' and '.join(flag_list)
+    else:
+        for f in flag_list:
+            if f not in parset_dict['flag_expr']:
+                log.error('Flag selection "{}" was specified but does not '
+                    'appear in flag_expr'.format(f))
+                sys.exit(1)
 
     # Make final mosaic (default = True)
     if 'make_mosaic' in parset_dict:
@@ -250,7 +267,6 @@ def get_global_options(parset):
     if 'selfcal_robust' in parset_dict:
         parset._sections['imaging']['selfcal_robust'] = parset_dict['selfcal_robust']
 
-
     # Check for unused options
     given_options = parset.options('global')
     allowed_options = ['dir_working', 'dir_ms', 'exit_on_bad_band', 'parmdb_name',
@@ -261,7 +277,7 @@ def get_global_options(parset):
         'preaverage_flux_jy', 'multiscale_selfcal', 'skymodel_extension',
         'max_peak_smearing', 'tec_block_mhz', 'selfcal_cellsize_arcsec',
         'selfcal_robust', 'use_compression', 'flag_abstime', 'flag_baseline',
-        'flag_freqrange']
+        'flag_freqrange', 'flag_expr']
     allowed_options.extend(['direction_specific', 'calibration_specific',
         'imaging_specific', 'cluster_specific']) # add dicts needed for deprecated options
     deprecated_options_imaging = ['make_mosaic', 'facet_imager',

@@ -11,6 +11,12 @@ def changelog():
     FACTOR Changelog.
     ----------------------------------------------------------------------------
 
+    07/04/2017
+
+        - The combination of flagging ranges specified by the flag_abstime,
+        flag_baseline, and flag_freqrange options can now be set with the
+        flag_expr option
+
     28/03/2017
 
         - An unarchiving tool (unarchivefactor) has been added that can

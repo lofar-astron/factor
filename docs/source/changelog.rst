@@ -5,6 +5,7 @@ Changelog
 
 Changes since version 1.1:
 
+    * The combination of flagging ranges specified by the :term:`flag_abstime`, :term:`flag_baseline`, and :term:`flag_freqrange` options can now be set with the :term:`flag_expr` option
     * An unarchiving tool (``unarchivefactor``, see :ref:`unarchivefactor`) has been added that can unarchive an archive made with ``archivefactor``
     * An option (:term:`update_selfcal_clean_regions`) has been added that controls whether user-supplied clean masks are updated during selfcal
     * Intersections in user-supplied clean masks are now detected and an error raised
