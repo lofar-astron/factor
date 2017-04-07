@@ -257,6 +257,7 @@ def archive(parset_file, directions, dir_output, full=False, archive_subdata=Fal
         else:
             directions_file = os.path.join(working_dir, 'factor_directions.txt')
         file_list = [directions_file,
+                     parset_file,
                      '{}/factor.log'.format(working_dir),
                      '{}/regions/facets_ds9.reg'.format(working_dir),
                      '{}/regions/calimages_ds9.reg'.format(working_dir)]
