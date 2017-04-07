@@ -358,7 +358,7 @@ def get_calibration_options(parset):
         parset_dict['preapply_first_cal_phases'] = parset.getboolean('calibration',
             'preapply_first_cal_phases')
     else:
-        parset_dict['preapply_first_cal_phases'] = False
+        parset_dict['preapply_first_cal_phases'] = True
 
     # Use baseline-dependent preaveraging to increase the signal-to-noise of the
     # phase-only solve for sources below this flux (default = 0.0; i.e., disabled).
@@ -523,22 +523,6 @@ def get_imaging_options(parset):
     else:
         parset_dict['selfcal_min_uv_lambda'] = 80.0
 
-    # Use a clean threshold during selfcal imaging (default = False). If False,
-    # clean will always stop at 1000 iterations. If True, clean will go to 1 sigma
-    # noise level
-    if 'selfcal_clean_threshold' in parset_dict:
-        parset_dict['selfcal_clean_threshold'] = parset.getboolean('imaging', 'selfcal_clean_threshold')
-    else:
-        parset_dict['selfcal_clean_threshold'] = False
-
-    # Use an adaptive masking threshold during selfcal imaging (default = False). If
-    # True, the masking threshold will be estimated using the negative peaks in the
-    # image, which can help selfcal convergence in the presence of strong artifacts
-    if 'selfcal_adaptive_threshold' in parset_dict:
-        parset_dict['selfcal_adaptive_threshold'] = parset.getboolean('imaging', 'selfcal_adaptive_threshold')
-    else:
-        parset_dict['selfcal_adaptive_threshold'] = False
-
     # Facet imaging parameters: pixel size in arcsec, Briggs robust parameter, uv
     # taper in arcsec, and minimum uv distance in lambda. These parameters are used
     # only for making full facet images (and not for making improved models). One
@@ -602,32 +586,31 @@ def get_imaging_options(parset):
     else:
         parset_dict['image_target_only'] = False
 
+    # Use auto-masking during the final (full-bandwidth) facet imaging
+    # (default = True). If enabled, only a single image is made, speeding
+    # up imaging by a factor of ~ 2. However, if a user-supplied mask is
+    # specified in the directions file, it must include all sources in the
+    # facet that are to be cleaned
+    if 'automask_facet_image' in parset_dict:
+        parset_dict['automask_facet_image'] = parset.getboolean('imaging', 'automask_facet_image')
+    else:
+        parset_dict['automask_facet_image'] = False
+
+
    # Padding factor for WSClean images (default = 1.4)
     if 'wsclean_image_padding' in parset_dict:
         parset_dict['wsclean_image_padding'] = parset.getfloat('imaging', 'wsclean_image_padding')
     else:
         parset_dict['wsclean_image_padding'] = 1.4
 
-    # Update user-supplied clean regions (i.e., those specified in the
-    # directions file under the :term:`region_selfcal` column) with new
-    # regions found by the source finder during selfcal (default = ``True``) .
-    # Facet regions (specified in the term:`region_facet` column of the
-    # directions file) are always updated
-    if 'update_selfcal_clean_regions' in parset_dict:
-        parset_dict['update_selfcal_clean_regions'] = parset.getboolean('imaging', 'update_selfcal_clean_regions')
-    else:
-        parset_dict['update_selfcal_clean_regions'] = False
-
     # Check for unused options
     allowed_options = ['make_mosaic', 'wsclean_nchannels_factor',
         'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
-        'selfcal_clean_threshold', 'selfcal_adaptive_threshold',
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
-        'wsclean_image_padding', 'image_target_only',
+        'wsclean_image_padding', 'image_target_only', 'automask_facet_image',
         'selfcal_min_uv_lambda', 'facet_min_uv_lambda',
         'selfcal_robust_wsclean', 'wsclean_bl_averaging',
-        'fractional_bandwidth_selfcal_facet_image',
-        'update_selfcal_clean_regions']
+        'fractional_bandwidth_selfcal_facet_image']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [imaging] section of the '

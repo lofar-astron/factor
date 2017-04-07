@@ -84,10 +84,10 @@ dir_ms = /data/bands
 # target_max_selfcal_loops = 10
 
 # Preapply the direction-dependent phase solutions for the first calibrator to
-# all subsequent ones (default = False). If True, residual clock errors are
+# all subsequent ones (default = True). If True, residual clock errors are
 # removed before calibration and a single TEC+CommonScalarPhase fit is used
 # across the whole bandwidth
-# preapply_first_cal_phases = False
+# preapply_first_cal_phases = True
 
 # Use baseline-dependent preaveraging to increase the signal-to-noise of the
 # phase-only solve for sources below this flux density (default = 0.0; i.e.,
@@ -120,7 +120,7 @@ dir_ms = /data/bands
 # spline_smooth2D = True
 
 # Include XY and YX correlations during the slow gain solve for sources above
-# this flux density (default = 1000.0 i.e. effectively off). Below this value,
+# this flux density (default = 1000.0; i.e., effectively off). Below this value,
 # only the XX and YY correlations are included. Note that spline_smooth2D must
 # be True to solve for all correlations. If you want to use it, then an useful
 # value would be e.g.: 5.0
@@ -156,7 +156,6 @@ dir_ms = /data/bands
 
 # Use baseline-dependent averaging in WSClean (default = True). If enabled,
 # this option can dramatically speed up imaging with WSClean.
-# NOTE: this option requires the latest development version of WSClean
 # wsclean_bl_averaging = True
 
 # Selfcal imaging parameters: pixel size in arcsec (default = 1.5), Briggs
@@ -182,22 +181,12 @@ dir_ms = /data/bands
 # target source is imaged
 # image_target_only = False
 
-# Use a clean threshold during selfcal imaging (default = False). If False,
-# clean will always stop at 1000 iterations. If True, clean will go to 1 sigma
-# noise level
-# selfcal_clean_threshold = False
-
-# Use an adaptive masking threshold during selfcal imaging (default = False). If
-# True, the masking threshold will be estimated using the negative peaks in the
-# image, which can help selfcal convergence in the presence of strong artifacts
-# selfcal_adaptive_threshold = False
-
-# Update user-supplied clean regions (i.e., those specified in the
-# directions file under the :term:`region_selfcal` column) with new
-# regions found by the source finder during selfcal (default = ``True``) .
-# Facet regions (specified in the term:`region_facet` column of the
-# directions file) are always updated
-# update_selfcal_clean_regions = True
+# Use auto-masking during the final (full-bandwidth) facet imaging
+# (default = True). If enabled, only a single image is made, speeding
+# up imaging by a factor of ~ 2. However, if a user-supplied mask is
+# specified in the directions file, it must include all sources in the
+# facet that are to be cleaned
+# automask_facet_image = True
 
 
 [directions]
@@ -349,7 +338,8 @@ flux_min_Jy = 0.3
 
 # When opening images, set ds9_frames = new to load each image in a new frame or
 # ds9_frames = current to open in the current frame (ds9 only; default =
-# current) ds9_frames = current
+# current)
+# ds9_frames = current
 
 # Use display or eog to display PNG images (default = display)
 # image_display = eog

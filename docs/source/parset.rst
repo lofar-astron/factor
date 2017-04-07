@@ -134,7 +134,7 @@ The available options are described below under their respective sections.
 
     preapply_first_cal_phases
         Preapply the direction-dependent phase solutions for the first calibrator to
-        all subsequent ones (default = ``False``). If ``True``, residual clock errors are
+        all subsequent ones (default = ``True``). If ``True``, residual clock errors are
         removed before calibration and a single TEC+CommonScalarPhase fit is used
         across the whole bandwidth.
 
@@ -217,7 +217,6 @@ The available options are described below under their respective sections.
     wsclean_bl_averaging
         Use baseline-dependent averaging in WSClean (default = ``True``). If enabled,
         this option can dramatically speed up imaging with WSClean.
-        NOTE: this option requires WSClean v2.0 or higher.
 
     selfcal_cellsize_arcsec
         Self calibration pixel size in arcsec (default = 1.5).
@@ -228,22 +227,12 @@ The available options are described below under their respective sections.
     selfcal_min_uv_lambda
         Self calibration minimum uv distance in lambda (default = 80).
 
-    selfcal_clean_threshold
-        Use a clean threshold during selfcal imaging (default = ``False``). If ``False``,
-        clean will always stop at 1000 iterations. If ``True``, clean will stop when it
-        reaches the 1 sigma noise level.
-
-    selfcal_adaptive_threshold
-        Use an adaptive masking threshold during selfcal imaging (default = ``False``). If
-        ``True``, the masking threshold will be estimated using the negative peaks in the
-        image, which can help selfcal convergence in the presence of strong artifacts.
-
-    update_selfcal_clean_regions
-        Update user-supplied clean regions (i.e., those specified in the
-        directions file under the :term:`region_selfcal` column) with new
-        regions found by the source finder during selfcal (default = ``True``) .
-        Facet regions (specified in the term:`region_facet` column of the
-        directions file) are always updated
+    automask_facet_image
+        Use auto-masking during the final (full-bandwidth) facet imaging
+        (default = ``True``). If enabled, only a single image is made, speeding
+        up imaging by a factor of ~ 2. However, if a user-supplied mask is
+        specified in the directions file, it must include all sources in the
+        facet that are to be cleaned.
 
 .. note::
 
@@ -436,6 +425,7 @@ The available options are described below under their respective sections.
         (set with the term:`wsclean_fmem` parameter) will be divided among the
         directions on each node.
 
+
 .. _parset_checkfactor_options:
 
 ``[checkfactor]``
@@ -451,6 +441,11 @@ The available options are described below under their respective sections.
 
     ds9_limits
         Scale limits (min max) in Jy/beam (ds9 only; default = full range).
+
+    ds9_frames
+        When opening images, set ``ds9_frames = new`` to load each image in a new frame or
+        ``ds9_frames = current`` to open in the current frame (ds9 only; default =
+        ``current``)
 
     image_display
         Use ``display`` or ``eog`` to display PNG images (default = ``display``).
@@ -469,8 +464,8 @@ be specified here.
 
     init_skymodel
         Full path to the skymodel that was used to subtract the sources in the
-	MS that was given as the section-name. For multi-epoch (interleaved or
-	multi-night) observations the skymodel has to be specified only for one
-	MS of each frequency group, it will then be used for all MSs in this
-	frequency group. (Mixing MSs of the same frequency but in which different
-	skymodels were used to subtract the sources is currently not possible.)
+        MS that was given as the section-name. For multi-epoch (interleaved or
+        multi-night) observations the skymodel has to be specified only for one
+        MS of each frequency group, it will then be used for all MSs in this
+        frequency group. (Mixing MSs of the same frequency but in which different
+        skymodels were used to subtract the sources is currently not possible.)

@@ -301,14 +301,11 @@ class FacetImage(Operation):
     """
     Operation to make the full image of a facet
 
-    Two pipelines can be run, depending on whether an improved model (from
-    selfcal) exists:
+    Two pipelines can be run, depending on whether automask_facet_image is set:
 
-    facetimage_skymodel_pipeline.parset - runs imaging with original
-        skymodel
+    facetimage_pipeline.parset - runs imaging with auto-masking
 
-    facetimage_imgmodel_pipeline.parset - runs imaging with improved
-        model
+    facetimage_noautomask_pipeline.parset - runs imaging with PyBDSF masking
 
     """
     def __init__(self, parset, bands, direction, cellsize_arcsec, robust,
@@ -328,7 +325,10 @@ class FacetImage(Operation):
             name=name)
 
         # Set the pipeline parset to use
-        self.pipeline_parset_template = 'facetimage_pipeline.parset'
+        if parset['imaging_specific']['automask_facet_image']:
+            self.pipeline_parset_template = 'facetimage_pipeline.parset'
+        else:
+            self.pipeline_parset_template = 'facetimage_noautomask_pipeline.parset'
 
         # Set flag for full-resolution run (used in finalize() to ensure that averaging
         # of the calibrated data is not too much for use by later imaging runs)
