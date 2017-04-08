@@ -1667,7 +1667,7 @@ wsclean_image_full.argument.flags                 = [-no-update-model-required,-
 {% endif %}
 wsclean_image_full.argument.fitsmask              = fitsmask
 wsclean_image_full.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
-wsclean_image_full.argument.niter                 = 50000
+wsclean_image_full.argument.niter                 = {{ wsclean_selfcal_full_image_niter }}
 wsclean_image_full.argument.pol                   = I
 wsclean_image_full.argument.weight                = briggs {{ robust_selfcal }}
 wsclean_image_full.argument.mgain                 = 0.6
@@ -1861,7 +1861,7 @@ wsclean_image_full_med.argument.flags                 = [-no-update-model-requir
 {% endif %}
 wsclean_image_full_med.argument.fitsmask              = fitsmask
 wsclean_image_full_med.argument.size                  = {{ facet_med_imsize }} {{ facet_med_imsize }}
-wsclean_image_full_med.argument.niter                 = 50000
+wsclean_image_full_med.argument.niter                 = {{ wsclean_selfcal_full_image_niter }}
 wsclean_image_full_med.argument.pol                   = I
 wsclean_image_full_med.argument.weight                = briggs {{ robust_selfcal }}
 wsclean_image_full_med.argument.mgain                 = 0.6
@@ -2046,7 +2046,7 @@ wsclean_image_full_low.argument.flags                 = [-no-update-model-requir
 {% endif %}
 wsclean_image_full_low.argument.fitsmask              = fitsmask
 wsclean_image_full_low.argument.size                  = {{ facet_low_imsize }} {{ facet_low_imsize }}
-wsclean_image_full_low.argument.niter                 = 50000
+wsclean_image_full_low.argument.niter                 = {{ wsclean_selfcal_full_image_niter }}
 wsclean_image_full_low.argument.pol                   = I
 wsclean_image_full_low.argument.weight                = briggs {{ robust_selfcal }}
 wsclean_image_full_low.argument.mgain                 = 0.6
