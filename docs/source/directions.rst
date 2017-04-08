@@ -57,13 +57,13 @@ Columns
         The solution interval in seconds for the amplitude solve. If ``0``, Factor will set the solution interval based on the brightness of the calibrator or calibrator group.
 
     dynamic_range
-        If ``HD``, amplitudes are solved for every channel. If ``LD``, amplitudes are solved in blocks defined by the :term:`TEC_block_MHz` option in the parset.
+        If ``HD``, amplitudes are solved for every channel. If ``LD``, amplitudes are solved for every band.
 
     region_selfcal
-        The region to use as a clean mask during self calibration. If given, this region will be unioned with the PyBDSM-generated one.
+        The region to use as a clean mask during self calibration. If given, this region must cover all emission in the self calibration image that should be cleaned.
 
     region_facet
-        The region to use as a clean mask during facet imaging. If given, this region will be unioned with the PyBDSM-generated one.
+        The region to use as a clean mask during facet imaging. If given, this region must cover all emission in the facet that should be cleaned, unless the :term:`automask_facet_image` option in the parset is ``False``, in which case this region will be unioned with a PyBDSF-generated one.
 
     peel_skymodel
         The sky model to use during peeling (if the :term:`outlier_source` column is set to ``True`` or if the calibrator flux density exceeds that set with the :term:`peel_flux_Jy` option in the parset).
@@ -72,9 +72,9 @@ Columns
         If ``True``, the calibrator will be peeled using the sky model given in the :term:`peel_skymodel` column and self calibration will not be done.
 
     cal_size_deg
-        The size of the calibrator or calibrator group in degrees.
+        The size of the calibrator or calibrator group in degrees. This value sets the size of the region used for self calibration.
 
     cal_flux_mjy
-        The total flux density of the calibrator or calibrator group in mJy.
+        The total flux density of the calibrator or calibrator group in mJy. This value is not used by Factor.
 
 

@@ -239,9 +239,6 @@ class Direction(object):
         self.robust_selfcal = parset['imaging_specific']['selfcal_robust']
         self.solve_min_uv_lambda = parset['calibration_specific']['solve_min_uv_lambda']
         self.selfcal_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
-        self.use_selfcal_clean_threshold = parset['imaging_specific']['selfcal_clean_threshold']
-        self.use_selfcal_adaptive_threshold = parset['imaging_specific']['selfcal_adaptive_threshold']
-        self.nbands_selfcal_facet_image = min(6, len(bands))
         self.frac_bandwidth_selfcal_facet_image = parset['imaging_specific']['fractional_bandwidth_selfcal_facet_image']
 
         if facet_cellsize_arcsec is None:
@@ -261,10 +258,6 @@ class Direction(object):
         if facet_min_uv_lambda is None:
             facet_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
         self.facet_min_uv_lambda = facet_min_uv_lambda
-
-        if (not parset['imaging_specific']['update_selfcal_clean_regions'] and
-            self.region_selfcal != '[]'):
-            self.skip_selfcal_source_detection = True
 
         self.set_imaging_parameters(nbands, self.nbands_selfcal_facet_image,
             self.frac_bandwidth_selfcal_facet_image, padding)

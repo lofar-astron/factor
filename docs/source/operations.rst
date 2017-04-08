@@ -78,7 +78,7 @@ This operation images a facet using the full bandwidth. The self-calibration sol
     Multiple facetimage operations may be run if more than one set of imaging parameters were specified in the parset. In this case, the operation names will include the parameter values. E.g., ``facetimage_c15.0r-1.0t45.0u80.0`` is the operation to make an image with a cellsize of 15.0 arcsec, a robust value of -1.0, a Gaussian taper of 45.0 arcsec, and a uv cut of 80 lambda.
 
 Primary products (in ``results/facetimage/direction_name/``):
-    * ``*image_full2*`` - facet image
+    * ``*image_full*`` - facet image
     * files listed in ``mapfiles/imaging_input.mapfile`` - averaged, corrected uv data (kept only if :term:`keep_avg_facet_data` is ``True`` in the Factor parset)
 
 
