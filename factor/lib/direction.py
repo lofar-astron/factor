@@ -240,6 +240,7 @@ class Direction(object):
         self.solve_min_uv_lambda = parset['calibration_specific']['solve_min_uv_lambda']
         self.selfcal_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
         self.frac_bandwidth_selfcal_facet_image = parset['imaging_specific']['fractional_bandwidth_selfcal_facet_image']
+        self.nbands_selfcal_facet_image = min(6, len(bands))
 
         if facet_cellsize_arcsec is None:
             facet_cellsize_arcsec = parset['imaging_specific']['selfcal_cellsize_arcsec']
