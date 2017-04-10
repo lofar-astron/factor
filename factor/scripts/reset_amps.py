@@ -10,14 +10,13 @@ import os
 import lofar.parmdb
 import math
 import shutil
+import numpy as np
 
 
 def main(instrument_name, instrument_name_reset):
     pdb = lofar.parmdb.parmdb(instrument_name)
     parms = pdb.getValuesGrid('*')
-
     key_names = parms.keys()
-    nchans = len(parms[key_names[0]]['freqs'])
 
     # determine the number of polarizations in parmdb (2 or 4)
     if any('Gain:0:1:' in s for s in key_names):
@@ -25,20 +24,45 @@ def main(instrument_name, instrument_name_reset):
     else:
         pol_list = ['0:0', '1:1']
 
-    # Get station names and data shape
+    # Get station names
     antenna_list = list(set([s.split(':')[-1] for s in pdb.getNames()]))
-    data_shape = parms['Gain:'+pol_list[0]+':Ampl:'+antenna_list[0]]['values'][:, 0].shape
+
+    # Identify any gaps in time (frequency gaps are not allowed), as we need to handle
+    # each section separately if gaps are present
+    freqs = parms['Gain:1:1:Ampl:{s}'.format(s=antenna_list[0])]['freqs']
+    freqwidths = parms['Gain:1:1:Ampl:{s}'.format(s=antenna_list[0])]['freqwidths']
+    times = parms['Gain:1:1:Ampl:{s}'.format(s=antenna_list[0])]['times']
+    timewidths = parms['Gain:1:1:Ampl:{s}'.format(s=antenna_list[0])]['timewidths']
+    delta_times = times[1:] - times[:-1]
+    gaps = np.where(delta_times > timewidths[:-1]*2.)
+    if len(gaps[0]) > 0:
+        gaps_ind = gaps[0] + 1
+    else:
+        gaps_ind = []
 
     # Reset the amplitude solutions to unity
-    for chan in range(nchans):
-        for pol in pol_list:
-            for antenna in antenna_list:
-                parms['Gain:'+pol+':Ampl:'+antenna]['values'][:, chan] = numpy.ones(data_shape)
-
     if os.path.exists(instrument_name_reset):
         shutil.rmtree(instrument_name_reset)
     pdbnew = lofar.parmdb.parmdb(instrument_name_reset, create=True)
-    pdbnew.addValues(parms)
+    for pol in pol_list:
+        for antenna in antenna_list:
+            g_start = 0
+            phase = parms['Gain:'+pol+':Phase:'+antenna]['values']
+            for g in gaps_ind:
+                # If time gaps exist, add them one-by-one (except for last one)
+                data_shape = phase[g_start:g].shape
+                pdbnew.addValues('Gain:'+pol+':Phase:{}'.format(antenna), phase[g_start:g], freqs, freqwidths,
+                    times[g_start:g], timewidths[g_start:g], asStartEnd=False)
+                pdbnew.addValues('Gain:'+pol+':Ampl:{}'.format(antenna), numpy.ones(data_shape), freqs, freqwidths,
+                    times[g_start:g], timewidths[g_start:g], asStartEnd=False)
+                g_start = g
+
+            # Add remaining time slots
+            data_shape = phase[g_start:].shape
+            pdbnew.addValues('Gain:'+pol+':Phase:{}'.format(antenna), phase[g_start:], freqs, freqwidths,
+                times[g_start:], timewidths[g_start:], asStartEnd=False)
+            pdbnew.addValues('Gain:'+pol+':Ampl:{}'.format(antenna), numpy.ones(data_shape), freqs, freqwidths,
+                times[g_start:], timewidths[g_start:], asStartEnd=False)
     pdbnew.flush()
 
 
