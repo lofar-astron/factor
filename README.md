@@ -15,7 +15,9 @@ What's New since v1.2
 * WSClean's automasking feature is now used during imaging. The old
 image-mask-image sequence is no longer used during self calibration, but can
 still be used during the final, full-bandwidth facet imaging if
-`automask_facet_image = False` under the `[imaging]` section of the parset
+`automask_facet_image = False` under the `[imaging]` section of the parset. The
+option `update_selfcal_clean_regions` has been removed, as it
+no longer applies (PyBDSF masking has been removed from selfcal)
 * The combination of flagging ranges specified by the `flag_abstime`,
 `flag_baseline`, and `flag_freqrange` options can now be set with the
 `flag_expr` option

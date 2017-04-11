@@ -11,7 +11,15 @@ def changelog():
     FACTOR Changelog.
     ----------------------------------------------------------------------------
 
+    11/04/2017
 
+        - WSClean's automasking feature is now used during imaging. The old
+        image-mask-image sequence is no longer used during self calibration, but
+        can still be used during the final, full-bandwidth facet imaging if
+        automask_facet_image = False under the [imaging] section of the
+        parset. The option update_selfcal_clean_regions has been removed, as it
+        no longer applies (PyBDSF masking has been removed from selfcal)
+        - Handling of pipeline failure/interruption has been improved
 
     07/04/2017
 
