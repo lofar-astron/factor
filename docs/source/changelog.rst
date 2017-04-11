@@ -3,6 +3,14 @@
 Changelog
 =========
 
+Changes since version 1.2:
+
+    * WSClean's automasking feature is now used during imaging. The old image-mask-image sequence is no longer used during self calibration, but can still be used during the final, full-bandwidth facet imaging if `automask_facet_image = False` under the `[imaging]` section of the parset
+    * The combination of flagging ranges specified by the `flag_abstime`, `flag_baseline`, and `flag_freqrange` options can now be set with the `flag_expr` option
+
+Version 1.2
+-----------
+
 Changes since version 1.1:
 
     * The combination of flagging ranges specified by the :term:`flag_abstime`, :term:`flag_baseline`, and :term:`flag_freqrange` options can now be set with the :term:`flag_expr` option
@@ -14,7 +22,7 @@ Changes since version 1.1:
 
 
 Version 1.1
--------------
+-----------
 
 Changes since version 1.0:
 

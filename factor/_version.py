@@ -3,7 +3,7 @@ Module that stores the version and changelog
 """
 
 # Version number
-__version__ = '1.1'
+__version__ = '1.2'
 
 # Change log
 def changelog():
@@ -11,11 +11,15 @@ def changelog():
     FACTOR Changelog.
     ----------------------------------------------------------------------------
 
+
+
     07/04/2017
 
         - The combination of flagging ranges specified by the flag_abstime,
         flag_baseline, and flag_freqrange options can now be set with the
         flag_expr option
+
+    07/04/2017 - Version 1.2
 
     28/03/2017
 
