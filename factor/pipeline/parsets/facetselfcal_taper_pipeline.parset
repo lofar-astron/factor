@@ -567,7 +567,7 @@ wsclean_image22.argument.weighting-rank-filter  = 3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image22.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image22.argument.auto-mask              = 3.1
+wsclean_image22.argument.auto-mask              = 3.2
 wsclean_image22.argument.auto-threshold         = 0.5
 wsclean_image22.argument.local-rms-window       = 50
 wsclean_image22.argument.local-rms-method       = rms-with-min
