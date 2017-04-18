@@ -720,7 +720,8 @@ class Direction(object):
             self.log.debug('Using averaging steps of {0} channels and {1} time slots '
                 'for facet imaging'.format(self.facetimage_freqstep, self.facetimage_timestep))
 
-            # Do the same for the low-resolution facet image
+            # Do the same for the low-resolution facet image. Note that these steps
+            # are in addition to the full-res steps
             # generate another (numpy-)array with the divisors of nchan after averaging
             nchan_after_facetimage = nchan / self.facetimage_freqstep
             chan_width_hz_after_facetimage = chan_width_hz * self.facetimage_freqstep
@@ -737,9 +738,12 @@ class Direction(object):
                 delta_theta_deg, resolution_low_deg, peak_smearing_factor))
             self.facetimage_low_freqstep = max(1, min(int(round(target_bandwidth_mhz * 1e6 /
                 chan_width_hz_after_facetimage)), nchan_after_facetimage))
-            self.facetimage_low_freqstep = freq_divisors_low[np.argmin(np.abs(freq_divisors_low - self.facetimage_low_freqstep))]
-            self.facetimage_low_timestep = max(1, int(round(target_timewidth_s / timestep_sec)))
-            self.facetimage_low_timestep_sec = self.facetimage_low_timestep * timestep_sec
+            self.facetimage_low_freqstep = freq_divisors_low[np.argmin(np.abs(
+                freq_divisors_low - self.facetimage_low_freqstep))]
+            self.facetimage_low_timestep = max(1, int(round(target_timewidth_s /
+                self.facetimage_timestep_sec)))
+            self.facetimage_low_timestep_sec = (self.facetimage_low_timestep *
+                self.facetimage_timestep_sec)
 
         # Set time intervals for selfcal solve steps
         if not imaging_only:
