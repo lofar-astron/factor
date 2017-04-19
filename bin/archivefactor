@@ -26,12 +26,10 @@ if __name__ == '__main__':
             version='%%prog %s' % (version))
     parser.add_option('-d', '--directions', help='comma-separated list of directions '
         '(e.g., -d facet1,facet3) for which to archive the calibrated data. Use '
-        '"-d all" to select all directions.',
-            type=str, default=None)
-    parser.add_option('-f', '--full', help='make a full archive suitable for resuming '
+        '"-d all" to select all directions.', type=str, default=None)
+    parser.add_option('-r', '--resumable', help='make an archive suitable for resuming '
         '(includes the subtracted-data MS files, but not the calibrated data unless '
-        'specified with the "-d" flag)',
-        action='store_true', default=False)
+        'specified with the "-d" flag)', action='store_true', default=False)
     parser.add_option('-c', '--clobber', help='clobber existing files in output directory',
         action='store_true', default=False)
     (options, args) = parser.parse_args()
@@ -50,4 +48,4 @@ if __name__ == '__main__':
     else:
         directions = []
 
-    archive(parset_file, directions, dir_output, full=options.full, clobber=options.clobber)
+    archive(parset_file, directions, dir_output, full=options.resumable, clobber=options.clobber)
