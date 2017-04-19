@@ -232,10 +232,10 @@ wsclean_image_full.control.mapfiles_in            = [{{ image_data_mapfile }},pr
 {% endif %}
 wsclean_image_full.control.inputkeys              = [msfile,fitsmask]
 {% if wsclean_nchannels > 1 %}
-wsclean_image_full.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-local-rms,-joinchannels,msfile]
+wsclean_image_full.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-rms-background,-joinchannels,msfile]
 wsclean_image_full.argument.channelsout           = {{ wsclean_nchannels }}
 {% else %}
-wsclean_image_full.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-local-rms,msfile]
+wsclean_image_full.argument.flags                 = [-no-update-model-required,{{ wsclean_multiscale }}-fitbeam,-reorder,-rms-background,msfile]
 {% endif %}
 wsclean_image_full.argument.fitsmask              = fitsmask
 wsclean_image_full.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
@@ -259,8 +259,8 @@ wsclean_image_full.argument.baseline-averaging    = {{ facetimage_wsclean_nwavel
 {% endif %}
 wsclean_image_full.argument.auto-mask             = 3
 wsclean_image_full.argument.auto-threshold        = 0.3
-wsclean_image_full.argument.local-rms-window      = 50
-wsclean_image_full.argument.local-rms-method      = rms-with-min
+wsclean_image_full.argument.rms-background-window      = 50
+wsclean_image_full.argument.rms-background-method      = rms-with-min
 
 # make a mapfile with the root-name of the WSClean images, length = 1
 create_imagebase_map2.control.kind        = plugin
