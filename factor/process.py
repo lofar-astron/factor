@@ -457,7 +457,7 @@ def _set_up_bands(parset, test_run=False):
     bands = []
     for MSkey in msdict.keys():
         # Check for any sky models specified by user
-        # there only needs to be a skymodel specyfied for one file in each band
+        # there only needs to be a skymodel specified for one file in each band
         skymodel_dirindep = None
         for ms in msdict[MSkey]:
             msbase = os.path.basename(ms)
