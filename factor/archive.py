@@ -292,7 +292,7 @@ def archive(parset_file, directions, dir_output, full=False, archive_subdata=Fal
             except:
                 pass
         for i, f in enumerate(file_list):
-            skymodel_dir = os.path.join(dir_output, 'sky_models', band_list[i])
+            skymodel_dir = os.path.join(dir_output, 'chunks', band_list[i])
             log.info('  Copying sky model file {0} of {1}...'.format(i+1, len(file_list)))
             copy(f, skymodel_dir, clobber)
 

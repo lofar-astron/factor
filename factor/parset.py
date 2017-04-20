@@ -80,7 +80,8 @@ def parset_read(parset_file, use_log_file=True):
     for exten in ['MS', 'ms', 'dpppaverage', 'ndppp_prep_target']:
         ms_files += glob.glob(os.path.join(parset_dict['dir_ms'], '*.{}'.format(exten)))
     if len(ms_files) == 0:
-        ms_files = glob.glob(os.path.join(parset_dict['dir_ms'], 'Band_*', '*'))
+        for exten in ['MS', 'ms', 'dpppaverage', 'ndppp_prep_target']:
+            ms_files += glob.glob(os.path.join(parset_dict['dir_ms'], 'Band_*', '*.{}'.format(exten)))
     parset_dict['mss'] = sorted(ms_files)
     if len(parset_dict['mss']) == 0:
         log.error('No MS files found in {}!'.format(parset_dict['dir_ms']))
@@ -983,6 +984,11 @@ def get_ms_options(parset, ms_files, skymodel_extension = '.wsclean_low2-model.m
         if msbase in parset._sections.keys():
             parset_dict['ms_specific'][msbase] = parset._sections[msbase]
         default_skymodel = os.path.splitext(ms)[0]+skymodel_extension
+        if not os.path.exists(default_skymodel):
+            # Also check for filename after splitting '_chunk' in case this is
+            # a run resumed from an archive
+            default_skymodel = ms.split('_chunk')[0]+skymodel_extension
+
         if os.path.exists(default_skymodel):
             if msbase in parset_dict['ms_specific'].keys():
                 if not 'init_skymodel' in parset_dict['ms_specific'][msbase].keys():

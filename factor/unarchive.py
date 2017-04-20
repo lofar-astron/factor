@@ -86,14 +86,6 @@ def unarchive(dir_input, dir_output, use_symlinks=False, clobber=False):
     copy(state_dir, dir_output, clobber)
     update_state(os.path.join(dir_output, 'state'))
 
-    log.info('Unarchiving direction-independent sky models...')
-    skymodels_dir = os.path.join(dir_input, 'sky_models', 'direction_independent')
-    file_list = glob.glob(os.path.join(skymodels_dir, '*'))
-    skymodels_out_dir = os.path.join(dir_output, 'sky_models', 'direction_independent')
-    for i, f in enumerate(file_list):
-        log.info('  Copying direction-independent sky model file {0} of {1}...'.format(i+1, len(file_list)))
-        copy(f, skymodels_out_dir, clobber)
-
     # Derive direction names from directories
     direction_dirs = glob.glob(os.path.join(dir_input, 'sky_models', '*'))
     direction_names = [os.path.basename(d) for d in direction_dirs]
