@@ -74,10 +74,13 @@ def parset_read(parset_file, use_log_file=True):
 
     # Get all the MS files in the input directory. These are identified by the
     # extensions 'ms', 'MS', 'dpppaverage' or 'ndppp_prep_target' (both used by
-    # various versions of the pre-facet pipeline)
+    # various versions of the pre-facet pipeline). If no such files are found,
+    # also check for chunked files in subdirectories
     ms_files = []
     for exten in ['MS', 'ms', 'dpppaverage', 'ndppp_prep_target']:
         ms_files += glob.glob(os.path.join(parset_dict['dir_ms'], '*.{}'.format(exten)))
+    if len(ms_files) == 0:
+        ms_files = glob.glob(os.path.join(parset_dict['dir_ms'], 'Band_*', '*'))
     parset_dict['mss'] = sorted(ms_files)
     if len(parset_dict['mss']) == 0:
         log.error('No MS files found in {}!'.format(parset_dict['dir_ms']))

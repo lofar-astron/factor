@@ -78,3 +78,5 @@ where ``dir_archive`` is a resumable archive made as described in :ref:`archivef
       -s, --symlink  use symlinks for subtracted data files instead of copying
                      them
       -c, --clobber  clobber existing files in output directory
+
+Before resuming, you will need to copy and edit the factor parset (stored in the ``dir_archive/misc`` directory of the archive) to update the various paths. Note that you can give the chunks directory (``dir_output/chunks``) as the ``dir_ms`` directory in the parset if you no longer have the original input MS files. Note also that, When resuming from an archive, you cannot change the chunking time.

@@ -47,7 +47,6 @@ class Band(object):
         self.msnames = [ MS.split('/')[-1] for MS in self.files ]
         self.working_dir = factor_working_dir
         self.dirindparmdbs = [ os.path.join(MS, dirindparmdb) for MS in self.files ]
-        self.skymodel_dirindep = skymodel_dirindep
         self.numMS = len(self.files)
 
         # Get the frequency info and set name
@@ -66,6 +65,7 @@ class Band(object):
 
         # Load state (if any)
         has_state = self.load_state()
+        self.skymodel_dirindep = skymodel_dirindep
 
         # Do some checks if desired
         if process_files or not has_state:

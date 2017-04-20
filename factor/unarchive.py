@@ -49,6 +49,11 @@ def update_state(mapfile_dir):
                         if 'mapfiles' in v:
                             parts = v.split('mapfiles')
                             d[k] = os.path.join(pipe_dir, 'mapfiles', parts[1])
+                        if 'skymodel_dirindep' in v:
+                            filename = os.path.basename(v)
+                            bandname = d['name']
+                            d[k] = os.path.join(pipe_dir.split('state')[0],
+                                'sky_models', bandname, filename)
                 fp = open(f, 'w')
                 pickle.dump(d, fp)
                 fp.close()
@@ -80,6 +85,14 @@ def unarchive(dir_input, dir_output, use_symlinks=False, clobber=False):
     state_dir = os.path.join(dir_input, 'state')
     copy(state_dir, dir_output, clobber)
     update_state(os.path.join(dir_output, 'state'))
+
+    log.info('Unarchiving direction-independent sky models...')
+    skymodels_dir = os.path.join(dir_input, 'sky_models', 'direction_independent')
+    file_list = glob.glob(os.path.join(skymodels_dir, '*'))
+    skymodels_out_dir = os.path.join(dir_output, 'sky_models', 'direction_independent')
+    for i, f in enumerate(file_list):
+        log.info('  Copying direction-independent sky model file {0} of {1}...'.format(i+1, len(file_list)))
+        copy(f, skymodels_out_dir, clobber)
 
     # Derive direction names from directories
     direction_dirs = glob.glob(os.path.join(dir_input, 'sky_models', '*'))
