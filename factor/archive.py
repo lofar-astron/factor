@@ -15,6 +15,7 @@ from lofarpipe.support.data_map import DataMap
 from factor.scripts import sort_times_into_freqGroups
 from lofarpipe.support.utilities import create_directory
 import glob
+import pickle
 
 log = logging.getLogger('factor:archive')
 
