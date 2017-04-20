@@ -278,22 +278,22 @@ def archive(parset_file, directions, dir_output, full=False, archive_subdata=Fal
 
     if archive_models:
         log.info('Archiving direction-independent sky models...')
-            band_state_files = glob.glob(os.path.join(working_dir, 'state',
-                'Band_*'))
-            file_list = []
-            band_list = []
-            for bf in band_state_files:
-                try:
-                    with open(bf, 'r') as f:
-                        b = pickle.load(f)
-                        file_list.append(b['skymodel_dirindep'])
-                        band_list.append(b['name'])
-                except:
-                    pass
-            for i, f in enumerate(file_list):
-                skymodel_dir = os.path.join(dir_output, 'sky_models', band_list[i])
-                log.info('  Copying sky model file {0} of {1}...'.format(i+1, len(file_list)))
-                copy(f, skymodel_dir, clobber)
+        band_state_files = glob.glob(os.path.join(working_dir, 'state',
+            'Band_*'))
+        file_list = []
+        band_list = []
+        for bf in band_state_files:
+            try:
+                with open(bf, 'r') as f:
+                    b = pickle.load(f)
+                    file_list.append(b['skymodel_dirindep'])
+                    band_list.append(b['name'])
+            except:
+                pass
+        for i, f in enumerate(file_list):
+            skymodel_dir = os.path.join(dir_output, 'sky_models', band_list[i])
+            log.info('  Copying sky model file {0} of {1}...'.format(i+1, len(file_list)))
+            copy(f, skymodel_dir, clobber)
 
     for d in all_directions:
         if archive_images:
