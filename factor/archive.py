@@ -143,7 +143,7 @@ def copy(path_from, dir_to, clobber, use_symlinks=False):
             p = subprocess.Popen('rm -rf {0}'.format(path_to), shell=True,
                 stdout=subprocess.PIPE)
             r = p.communicate()
-        os.symlink(path_from, dir_to)
+        os.symlink(path_from, path_to)
     else:
         p = subprocess.Popen('rsync -a {0} {1}'.format(path_from, dir_to),
             shell=True, stdout=subprocess.PIPE)
