@@ -148,10 +148,9 @@ def copy(path_from, dir_to, clobber, use_symlinks=False):
         p = subprocess.Popen('rsync -a {0} {1}'.format(path_from, dir_to),
             shell=True, stdout=subprocess.PIPE)
         r = p.communicate()
-
-    if p.returncode != 0:
-        log.critical('rsync exited abnormally when attempting to archive {}'.format(path_from))
-        sys.exit(1)
+        if p.returncode != 0:
+            log.critical('rsync exited abnormally when attempting to archive {}'.format(path_from))
+            sys.exit(1)
 
 
 def dppp_concat(mslist, msout):
