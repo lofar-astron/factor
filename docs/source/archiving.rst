@@ -33,7 +33,7 @@ A full archive will include the following:
     frequency and uncompressed. These files are suitable for use in CASA, etc.
 
 ``chunks/``
-    Directory containing the time-chunked datasets that Factor uses for processing.
+    Directory containing the time-chunked datasets that Factor uses for processing and the direction-independent sky models.
 
 ``images/``
     Directory containing the images from the :ref:`facetimage` and :ref:`fieldmosaic` operations.
@@ -79,4 +79,4 @@ where ``dir_archive`` is a resumable archive made as described in :ref:`archivef
                      them
       -c, --clobber  clobber existing files in output directory
 
-Before resuming, you will need to copy and edit the factor parset (stored in the ``dir_archive/misc`` directory of the archive) to update the various paths. Note that you can give the chunks directory (``dir_output/chunks``) as the ``dir_ms`` directory in the parset if you no longer have the original input MS files. Note also that, When resuming from an archive, you cannot change the chunking time.
+Before resuming, you will need to copy and edit the factor parset (stored in the ``dir_archive/misc`` directory of the archive) to update the various paths. Note that you can give the chunks directory (``dir_output/chunks``) as the ``dir_ms`` directory in the parset if you no longer have the original input MS files.
