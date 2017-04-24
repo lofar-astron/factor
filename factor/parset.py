@@ -580,7 +580,7 @@ def get_imaging_options(parset):
     if 'facet_robust' not in parset_dict:
         parset_dict['facet_robust'] = [parset_dict['selfcal_robust']] * nvals
     if 'facet_min_uv_lambda' not in parset_dict:
-        parset_dict['facet_min_uv_lambda'] = [parset_dict['selfcal_min_uv_lambda']] * nvals
+        parset_dict['facet_min_uv_lambda'] = [80.0] * nvals
 
     # Image only the target facet (default = False). If True and a target is
     # specified in the [directions] section, then only the facet containing the

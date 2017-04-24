@@ -410,9 +410,9 @@ class Direction(object):
         # threshold first (which is set by the masking step)
         scaling_factor = np.sqrt(np.float(nbands))
         scaling_factor_selfcal = np.sqrt(np.float(nbands_selfcal)*frac_bandwidth_selfcal)
-        self.wsclean_selfcal_full_image_niter = int(2000 * scaling_factor_selfcal)
+        self.wsclean_selfcal_full_image_niter = int(4000 * scaling_factor_selfcal)
         self.wsclean_selfcal_full_image_threshold_jy =  1.5e-3 * 0.7 / scaling_factor_selfcal
-        self.wsclean_full1_image_niter = int(2000 * scaling_factor)
+        self.wsclean_full1_image_niter = int(4000 * scaling_factor)
         self.wsclean_full1_image_threshold_jy =  1.5e-3 * 0.7 / scaling_factor
         self.wsclean_full2_image_niter = int(12000 * scaling_factor)
 
