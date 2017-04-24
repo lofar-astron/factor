@@ -522,11 +522,10 @@ wsclean_image02.argument.weighting-rank-filter  = 3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image02.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image02.argument.auto-mask              = 3.6
+wsclean_image02.argument.auto-mask              = 3.8
 wsclean_image02.argument.auto-threshold         = 0.5
 wsclean_image02.argument.rms-background-window       = 40
 wsclean_image02.argument.rms-background-method       = rms-with-min
-wsclean_image02.argument.multiscale-scale-bias  = 0.5
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map02.control.kind        = plugin
@@ -755,11 +754,10 @@ wsclean_image12.argument.weighting-rank-filter  = 3
 {% if facetselfcal_wsclean_nwavelengths > 0.0 %}
 wsclean_image12.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image12.argument.auto-mask              = 3.6
+wsclean_image12.argument.auto-mask              = 3.7
 wsclean_image12.argument.auto-threshold         = 0.5
 wsclean_image12.argument.rms-background-window       = 40
 wsclean_image12.argument.rms-background-method       = rms-with-min
-wsclean_image12.argument.multiscale-scale-bias  = 0.5
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map12.control.kind        = plugin
@@ -902,7 +900,7 @@ wsclean_image22.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 wsclean_image22.argument.multiscale-shape       = gaussian
 {% if not wsclean_selfcal_multiscale %}
-wsclean_image22.argument.multiscale-scales      = 0,8
+wsclean_image22.argument.multiscale-scales      = 0,5
 {% endif %}
 {% if wsclean_nchannels_selfcal > 3 %}
 wsclean_image22.argument.fit-spectral-pol       = 3
@@ -917,7 +915,7 @@ wsclean_image22.argument.auto-mask              = 3.2
 wsclean_image22.argument.auto-threshold         = 0.5
 wsclean_image22.argument.rms-background-window       = 50
 wsclean_image22.argument.rms-background-method       = rms-with-min
-wsclean_image22.argument.multiscale-scale-bias  = 0.5
+wsclean_image22.argument.multiscale-scale-bias  = 0.4
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map22.control.kind        = plugin
@@ -1137,7 +1135,7 @@ wsclean_image32.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 wsclean_image32.argument.multiscale-shape       = gaussian
 {% if not wsclean_selfcal_multiscale %}
-wsclean_image32.argument.multiscale-scales      = 0,8
+wsclean_image32.argument.multiscale-scales      = 0,5
 {% endif %}
 {% if wsclean_nchannels_selfcal > 3 %}
 wsclean_image32.argument.fit-spectral-pol       = 3
@@ -1152,7 +1150,7 @@ wsclean_image32.argument.auto-mask              = 3.1
 wsclean_image32.argument.auto-threshold         = 0.5
 wsclean_image32.argument.rms-background-window       = 50
 wsclean_image32.argument.rms-background-method       = rms-with-min
-wsclean_image32.argument.multiscale-scale-bias  = 0.5
+wsclean_image32.argument.multiscale-scale-bias  = 0.4
 
 ########## start of selfcal loop
 
@@ -1384,7 +1382,7 @@ wsclean_image42.argument.tempdir                = {{ selfcal_local_dir }}
 {% endif %}
 wsclean_image42.argument.multiscale-shape       = gaussian
 {% if not wsclean_selfcal_multiscale %}
-wsclean_image42.argument.multiscale-scales      = 0,8
+wsclean_image42.argument.multiscale-scales      = 0,5
 {% endif %}
 {% if wsclean_nchannels_selfcal > 3 %}
 wsclean_image42.argument.fit-spectral-pol       = 3
@@ -1399,7 +1397,7 @@ wsclean_image42.argument.auto-mask              = 3.1
 wsclean_image42.argument.auto-threshold         = 0.5
 wsclean_image42.argument.rms-background-window       = 50
 wsclean_image42.argument.rms-background-method       = rms-with-min
-wsclean_image42.argument.multiscale-scale-bias  = 0.5
+wsclean_image42.argument.multiscale-scale-bias  = 0.4
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map42.control.kind        = plugin
@@ -1725,6 +1723,7 @@ mask5.argument.atrous_do          = False
 mask5.argument.img_format         = fits
 mask5.argument.vertices_file      = {{ vertices_file }}
 mask5.argument.exclude_cal_region = True
+mask5.argument.dilate             = 2
 
 # check the mask6 output and modify its mapfile if no sources were found, length = 1
 check_mask_high.control.kind          = plugin
@@ -1863,7 +1862,7 @@ wsclean_image_full_med.argument.fitsmask              = fitsmask
 wsclean_image_full_med.argument.size                  = {{ facet_med_imsize }} {{ facet_med_imsize }}
 wsclean_image_full_med.argument.niter                 = {{ wsclean_selfcal_full_image_niter }}
 wsclean_image_full_med.argument.pol                   = I
-wsclean_image_full_med.argument.weight                = briggs {{ robust_selfcal }}
+wsclean_image_full_med.argument.weight                = briggs 0.0
 wsclean_image_full_med.argument.mgain                 = 0.8
 wsclean_image_full_med.argument.minuv-l               = {{ facet_min_uv_lambda }}
 wsclean_image_full_med.argument.taper-gaussian        = {{ cellsize_facet_med_deg*3600*3 }}arcsec
@@ -1883,8 +1882,8 @@ wsclean_image_full_med.argument.weighting-rank-filter = 3
 {% if facetimage_medlow_wsclean_nwavelengths > 0.0 %}
 wsclean_image_full_med.argument.baseline-averaging    = {{ facetimage_medlow_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image_full_med.argument.auto-mask             = 4
-wsclean_image_full_med.argument.auto-threshold        = 1.0
+wsclean_image_full_med.argument.auto-mask             = 3
+wsclean_image_full_med.argument.auto-threshold        = 0.5
 wsclean_image_full_med.argument.rms-background-window      = 50
 wsclean_image_full_med.argument.rms-background-method      = rms-with-min
 
@@ -1920,6 +1919,7 @@ mask6.argument.atrous_do          = True
 mask6.argument.img_format         = fits
 mask6.argument.vertices_file      = {{ vertices_file }}
 mask6.argument.exclude_cal_region = False
+mask6.argument.dilate             = 2
 
 # check the mask6 output and modify its mapfile if no sources were found, length = 1
 check_mask_med.control.kind          = plugin
