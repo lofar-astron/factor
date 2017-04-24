@@ -273,7 +273,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
          pad_to_size=None, skip_source_detection=False, region_file=None, nsig=1.0,
          reference_ra_deg=None, reference_dec_deg=None, cellsize_deg=0.000417,
          use_adaptive_threshold=False, make_blank_image=False, adaptive_thresh=150.0,
-         exclude_cal_region=False):
+         exclude_cal_region=False, dilate=0):
     """
     Make a clean mask and return clean threshold
 
@@ -340,6 +340,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
     exclude_cal_region : bool, optional
         If True, and a vertices_file is given, the calibrator region is also
         exclude from the output mask
+    dilate : int, optional
+        Number of dilation iterations for PyBDSF mask
 
     Returns
     -------
@@ -404,6 +406,8 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
             exclude_cal_region = True
         else:
             exclude_cal_region = False
+
+    dilate = int(dilate)
 
     if make_blank_image:
         print('Making empty template image...')
@@ -496,7 +500,7 @@ def main(image_name, mask_name, atrous_do=False, threshisl=0.0, threshpix=0.0, r
                 threshold = nsig * img.clipped_rms
         else:
             # Write out the mask
-            img.export_image(img_type='island_mask', mask_dilation=0, outfile=mask_name,
+            img.export_image(img_type='island_mask', mask_dilation=dilate, outfile=mask_name,
                              img_format=img_format, clobber=True)
 
         # Check if there are large islands present (indicating that multi-scale
