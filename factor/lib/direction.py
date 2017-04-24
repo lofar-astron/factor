@@ -257,7 +257,7 @@ class Direction(object):
         self.taper_facet_arcsec = facet_taper_arcsec
 
         if facet_min_uv_lambda is None:
-            facet_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
+            facet_min_uv_lambda = 80.0
         self.facet_min_uv_lambda = facet_min_uv_lambda
 
         self.set_imaging_parameters(nbands, self.nbands_selfcal_facet_image,
