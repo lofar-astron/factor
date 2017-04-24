@@ -598,7 +598,7 @@ def get_imaging_options(parset):
     if 'automask_facet_image' in parset_dict:
         parset_dict['automask_facet_image'] = parset.getboolean('imaging', 'automask_facet_image')
     else:
-        parset_dict['automask_facet_image'] = False
+        parset_dict['automask_facet_image'] = True
 
 
    # Padding factor for WSClean images (default = 1.4)
