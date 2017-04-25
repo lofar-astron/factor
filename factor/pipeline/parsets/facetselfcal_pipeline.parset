@@ -915,7 +915,7 @@ wsclean_image22.argument.auto-mask              = 3.2
 wsclean_image22.argument.auto-threshold         = 0.5
 wsclean_image22.argument.rms-background-window       = 50
 wsclean_image22.argument.rms-background-method       = rms-with-min
-wsclean_image22.argument.multiscale-scale-bias  = 0.4
+wsclean_image22.argument.multiscale-scale-bias  = 0.7
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map22.control.kind        = plugin
@@ -1150,7 +1150,7 @@ wsclean_image32.argument.auto-mask              = 3.1
 wsclean_image32.argument.auto-threshold         = 0.5
 wsclean_image32.argument.rms-background-window       = 50
 wsclean_image32.argument.rms-background-method       = rms-with-min
-wsclean_image32.argument.multiscale-scale-bias  = 0.4
+wsclean_image32.argument.multiscale-scale-bias  = 0.7
 
 ########## start of selfcal loop
 
@@ -1397,7 +1397,7 @@ wsclean_image42.argument.auto-mask              = 3.1
 wsclean_image42.argument.auto-threshold         = 0.5
 wsclean_image42.argument.rms-background-window       = 50
 wsclean_image42.argument.rms-background-method       = rms-with-min
-wsclean_image42.argument.multiscale-scale-bias  = 0.4
+wsclean_image42.argument.multiscale-scale-bias  = 0.7
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map42.control.kind        = plugin
