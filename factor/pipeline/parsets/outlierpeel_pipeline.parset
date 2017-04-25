@@ -322,11 +322,14 @@ solve_ampphase12.argument.solvegain.solint   = {{ solint_time_a }}
 solve_ampphase12.argument.solvegain.nchan    = {{ solint_freq_a }}
 
 # merge the parmDBs with the amplitude solutions into one, length = 1
-merge_amp_parmdbs.control.type       = merge_parmdbs_in_time
-merge_amp_parmdbs.control.mapfile_in = concat_data_compressed_mapfile.output.mapfile
-merge_amp_parmdbs.control.inputkey   = mslist
-merge_amp_parmdbs.control.outputkey  = outparmdb
-merge_amp_parmdbs.argument.flags     = [mslist,instrument_slow,outparmdb]
+merge_amp_parmdbs.control.type         = merge_parmdbs_in_time
+merge_amp_parmdbs.control.mapfile_in   = concat_data_compressed_mapfile.output.mapfile
+merge_amp_parmdbs.control.inputkey     = mslist
+merge_amp_parmdbs.control.outputkey    = outparmdb
+merge_amp_parmdbs.argument.flags       = [mslist,instrument_slow,outparmdb]
+{% if selfcal_local_dir is not none %}
+merge_amp_parmdbs.argument.scratch_dir = {{ selfcal_local_dir }}
+{% endif %}
 
 # Smooth the amplitude solutions, but do not normalize them as the sky model is  // length = 1
 # in absolute flux and not apparent flux
@@ -339,12 +342,15 @@ smooth_amps.argument.normalize = False
 
 # Now smooth the amplitude solutions and normalize them (for use later during
 # imaging of facets for peeled calibrators), length = 1
-smooth_amps_normalized.control.type       = {{ smooth_amps_task }}
-smooth_amps_normalized.control.mapfile_in = merge_amp_parmdbs.output.mapfile
-smooth_amps_normalized.control.inputkey   = ampparmdb
-smooth_amps_normalized.control.outputkey  = outparmdb
-smooth_amps_normalized.control.arguments  = [ampparmdb,outparmdb]
-smooth_amps_normalized.argument.normalize = True
+smooth_amps_normalized.control.type         = {{ smooth_amps_task }}
+smooth_amps_normalized.control.mapfile_in   = merge_amp_parmdbs.output.mapfile
+smooth_amps_normalized.control.inputkey     = ampparmdb
+smooth_amps_normalized.control.outputkey    = outparmdb
+smooth_amps_normalized.control.arguments    = [ampparmdb,outparmdb]
+smooth_amps_normalized.argument.normalize   = True
+{% if selfcal_local_dir is not none %}
+smooth_amps_normalized.argument.scratch_dir = {{ selfcal_local_dir }}
+{% endif %}
 
 {% if selfcal_local_dir is not none %}
 # remove concat_data files, length = ntimes * num_cal_blocks
@@ -362,11 +368,14 @@ merge_selfcal_parmdbs.control.outputkey   = parmdb_out
 merge_selfcal_parmdbs.argument.flags      = [parmdb_p,parmdb_a,parmdb_out]
 
 # convert the merged phase and amplitude parmDBs to gain parmDBs, length = 1
-convert_merged_selfcal_parmdbs.control.type        = convert_solutions_to_gain
-convert_merged_selfcal_parmdbs.control.mapfiles_in = [merge_phase_parmdbs.output.mapfile,smooth_amps.output.mapfile]
-convert_merged_selfcal_parmdbs.control.inputkeys   = [fast_parmdb_in,slow_parmdb_in]
-convert_merged_selfcal_parmdbs.control.outputkey   = parmdb_out
-convert_merged_selfcal_parmdbs.argument.flags      = [fast_parmdb_in,slow_parmdb_in,parmdb_out]
+convert_merged_selfcal_parmdbs.control.type         = convert_solutions_to_gain
+convert_merged_selfcal_parmdbs.control.mapfiles_in  = [merge_phase_parmdbs.output.mapfile,smooth_amps.output.mapfile]
+convert_merged_selfcal_parmdbs.control.inputkeys    = [fast_parmdb_in,slow_parmdb_in]
+convert_merged_selfcal_parmdbs.control.outputkey    = parmdb_out
+convert_merged_selfcal_parmdbs.argument.flags       = [fast_parmdb_in,slow_parmdb_in,parmdb_out]
+{% if selfcal_local_dir is not none %}
+convert_merged_selfcal_parmdbs.argument.scratch_dir = {{ selfcal_local_dir }}
+{% endif %}
 
 # merge the phases and normalized amplitudes parmDBs, length = 1
 merge_normalized_selfcal_parmdbs.control.type        = merge_parmdbs_selfcal
@@ -376,11 +385,14 @@ merge_normalized_selfcal_parmdbs.control.outputkey   = parmdb_out
 merge_normalized_selfcal_parmdbs.argument.flags      = [parmdb_p,parmdb_a,parmdb_out]
 
 # convert the merged phase and normalized amplitude parmDBs to gain parmDBs, length = 1
-convert_normalized_merged_selfcal_parmdbs.control.type        = convert_solutions_to_gain
-convert_normalized_merged_selfcal_parmdbs.control.mapfiles_in = [merge_phase_parmdbs.output.mapfile,smooth_amps_normalized.output.mapfile]
-convert_normalized_merged_selfcal_parmdbs.control.inputkeys   = [fast_parmdb_in,slow_parmdb_in]
-convert_normalized_merged_selfcal_parmdbs.control.outputkey   = parmdb_out
-convert_normalized_merged_selfcal_parmdbs.argument.flags      = [fast_parmdb_in,slow_parmdb_in,parmdb_out]
+convert_normalized_merged_selfcal_parmdbs.control.type         = convert_solutions_to_gain
+convert_normalized_merged_selfcal_parmdbs.control.mapfiles_in  = [merge_phase_parmdbs.output.mapfile,smooth_amps_normalized.output.mapfile]
+convert_normalized_merged_selfcal_parmdbs.control.inputkeys    = [fast_parmdb_in,slow_parmdb_in]
+convert_normalized_merged_selfcal_parmdbs.control.outputkey    = parmdb_out
+convert_normalized_merged_selfcal_parmdbs.argument.flags       = [fast_parmdb_in,slow_parmdb_in,parmdb_out]
+{% if selfcal_local_dir is not none %}
+convert_normalized_merged_selfcal_parmdbs.argument.scratch_dir = {{ selfcal_local_dir }}
+{% endif %}
 
 {% if create_preapply_parmdb %}
 # make a phase-only parmDB suitable for preapplication, length = 1
@@ -543,7 +555,7 @@ wsclean_image_full.argument.flags                 = [-no-update-model-required,-
 {% endif %}
 wsclean_image_full.argument.fitsmask              = fitsmask
 wsclean_image_full.argument.size                  = {{ facet_imsize }} {{ facet_imsize }}
-wsclean_image_full.argument.niter                 = 50000
+wsclean_image_full.argument.niter                 = {{ wsclean_selfcal_full_image_niter }}
 wsclean_image_full.argument.pol                   = I
 wsclean_image_full.argument.weight                = briggs {{ robust_selfcal }}
 wsclean_image_full.argument.mgain                 = 0.8
@@ -601,6 +613,7 @@ mask5.argument.atrous_do          = False
 mask5.argument.img_format         = fits
 mask5.argument.vertices_file      = {{ vertices_file }}
 mask5.argument.exclude_cal_region = True
+mask5.argument.dilate             = 2
 
 # check the mask6 output and modify its mapfile if no sources were found, length = 1
 check_mask_high.control.kind          = plugin
@@ -723,9 +736,9 @@ wsclean_image_full_med.argument.flags                 = [-no-update-model-requir
 {% endif %}
 wsclean_image_full_med.argument.fitsmask              = fitsmask
 wsclean_image_full_med.argument.size                  = {{ facet_med_imsize }} {{ facet_med_imsize }}
-wsclean_image_full_med.argument.niter                 = 50000
+wsclean_image_full_med.argument.niter                 = {{ wsclean_selfcal_full_image_niter }}
 wsclean_image_full_med.argument.pol                   = I
-wsclean_image_full_med.argument.weight                = briggs {{ robust_selfcal }}
+wsclean_image_full_med.argument.weight                = briggs 0.0
 wsclean_image_full_med.argument.mgain                 = 0.8
 wsclean_image_full_med.argument.minuv-l               = {{ facet_min_uv_lambda }}
 wsclean_image_full_med.argument.taper-gaussian        = {{ cellsize_facet_med_deg*3600*3 }}arcsec
@@ -736,8 +749,8 @@ wsclean_image_full_med.argument.j                     = {{ max_cpus_per_proc_sin
 wsclean_image_full_med.argument.tempdir               = {{ local_dir_parent }}
 {% endif %}
 wsclean_image_full_med.argument.multiscale-shape      = gaussian
-{% if nbands_selfcal_facet_image > 5 %}
-wsclean_image_full_med.argument.fit-spectral-pol      = 5
+{% if nbands_selfcal_facet_image > 3 %}
+wsclean_image_full_med.argument.fit-spectral-pol      = 3
 {% elif nbands_selfcal_facet_image > 1 %}
 wsclean_image_full_med.argument.fit-spectral-pol      = {{ nbands_selfcal_facet_image - 1 }}
 {% endif %}
@@ -745,8 +758,8 @@ wsclean_image_full_med.argument.weighting-rank-filter = 3
 {% if facetimage_medlow_wsclean_nwavelengths > 0.0 %}
 wsclean_image_full_med.argument.baseline-averaging    = {{ facetimage_medlow_wsclean_nwavelengths }}
 {% endif %}
-wsclean_image_full_med.argument.auto-mask             = 4
-wsclean_image_full_med.argument.auto-threshold        = 1.0
+wsclean_image_full_med.argument.auto-mask             = 3
+wsclean_image_full_med.argument.auto-threshold        = 0.5
 wsclean_image_full_med.argument.rms-background-window      = 50
 wsclean_image_full_med.argument.rms-background-method      = rms-with-min
 
@@ -782,6 +795,7 @@ mask6.argument.atrous_do          = True
 mask6.argument.img_format         = fits
 mask6.argument.vertices_file      = {{ vertices_file }}
 mask6.argument.exclude_cal_region = False
+mask6.argument.dilate             = 2
 
 # check the mask6 output and modify its mapfile if no sources were found, length = 1
 check_mask_med.control.kind          = plugin

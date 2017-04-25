@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 """
-Script to pre-average data using a sliding Gaussian kernel on the weights
+Script to pre-average data using a sliding Gaussian kernel in time
 """
 import argparse
 from argparse import RawTextHelpFormatter
@@ -19,7 +19,7 @@ from astropy.stats import median_absolute_deviation
 def main(ms_input, parmdb_input, input_colname, output_data_colname, output_weights_colname,
     target_rms_rad, minutes_per_block=10.0, baseline_file=None, verbose=True):
     """
-    Pre-average data using a sliding Gaussian kernel on the weights
+    Pre-average data using a sliding Gaussian kernel in time
 
     Parameters
     ----------
@@ -43,7 +43,7 @@ def main(ms_input, parmdb_input, input_colname, output_data_colname, output_weig
     parmdb_list = input2strlist(parmdb_input)
     verbose = input2bool(verbose)
     if len(ms_list) != len(parmdb_list):
-        raise ValueError('pre_average_multi: Length of MS-list ({0}) and length of parmdb-list ({1}) differ.'.format(len(ms_list),len(parmdb_list)))
+        raise ValueError('pre_average_time: Length of MS-list ({0}) and length of parmdb-list ({1}) differ.'.format(len(ms_list),len(parmdb_list)))
 
     if type(target_rms_rad) is str:
         target_rms_rad = float(target_rms_rad)
@@ -219,7 +219,8 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2, target_rms_rad=0.2):
 
 
 def BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_data_colname,
-        output_weights_colname, ionfactor, clobber=True, maxgap_sec=1800, check_files = True):
+        output_weights_colname, ionfactor, clobber=True, maxgap_sec=1800,
+        check_files = True):
     """
     Averages data using a sliding Gaussian kernel on the weights
     """

@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} shift_cal, {% if preapply_phase_cal %} shift_cal_dir_indep, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, concat_blavg_data, {% endif %} {% if selfcal_local_dir is not none %} make_concat_data_sync_mapfile, adjust_concat_data_hosts, sync_concat_data_to_local, {% if pre_average %} make_concat_blavg_data_sync_mapfile, adjust_concat_blavg_data_hosts, sync_concat_blavg_data_to_local, {% endif %} {% endif %} concat_data_compressed_mapfile, {% block selfcal_steps %} {% if not preapply_phase_cal %} average0, {% endif %} create_compressed_mapfile0, sort_average0_into_Groups, sort_average0_into_Groups_maps, concat_average0_data, create_compressed_mapfile01, premask_selfcal, wsclean_image02, create_imagebase_map02, pad_selfcal_model0_images, regroup_concat_data_map, create_expanded_model0_mapfile, expand_selfcal_model_size_map, wsclean_ft0, {% if pre_average %} copy_model_data0, {% endif %} make_fast_phase_parmdb_map, {% if peel_skymodel is not none %} create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, {% endif %} remove_parmdbs1, solve_phaseonly1, {% if selfcal_local_dir is not none %} make_apply_mapfile, {% endif %} apply_phaseonly1, create_compressed_mapfile1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, pad_selfcal_model1_images, wsclean_ft1, {% if pre_average %} copy_model_data1, {% endif %} remove_parmdbs2, solve_phaseonly2, apply_phaseonly2, create_compressed_mapfile2, wsclean_image22, create_imagebase_map22, create_expanded_model2_mapfile, pad_selfcal_model2_images, wsclean_ft2, {% if pre_average %} copy_model_data2, {% endif %} remove_parmdbs11, solve_ampphase11, apply_ampphase11, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, wsclean_image32, loop_ampcal, {% endblock selfcal_steps %} {% if selfcal_local_dir is not none %} remove_concat_data, {% if pre_average %} remove_concat_blavg_data, {% endif %} {% endif %} merge_selfcal_parmdbs, convert_merged_selfcal_parmdbs, {% if create_preapply_parmdb %} create_preapply_parmdb, {% endif %} make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, create_model4_map, expand_model4_map, blank_mask, expand_mask4_map, make_new_cal_skymodel, {% if not is_patch or wsclean_selfcal_multiscale %} make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, prepare_imaging_data, {% if not is_patch %} create_compressed_mapfile5, premask, wsclean_image_full, create_imagebase_map, adjust_wsclean_mapfile1, mask5, check_mask_high, create_model5_map, expand_model5_map, expand_mask5_map, make_high_facet_skymodel, combine_skymodels_high, {% endif %} make_sourcedb_high, expand_sourcedb_high, subtract_high, create_compressed_mapfile6, premask_med, wsclean_image_full_med, create_imagebase_med_map, adjust_wsclean_mapfile3, mask6, check_mask_med, expand_model6_map, expand_mask6_map, make_med_facet_skymodel, combine_facet_skymodels, make_sourcedb_new_facet_sources, expand_sourcedb_new_facet_sources, {% else %} make_sourcedb_new_facet_sources, expand_sourcedb_new_facet_sources, {% endif %} predict_and_difference_models, create_middle_band_mapfile1, create_middle_band_mapfile2, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} shift_cal, {% if preapply_phase_cal %} shift_cal_dir_indep, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, pre_average, make_blavg_data_mapfile, concat_blavg_data, pre_average_freq, {% endif %} {% if selfcal_local_dir is not none %} make_concat_data_sync_mapfile, adjust_concat_data_hosts, sync_concat_data_to_local, {% if pre_average %} make_concat_blavg_data_sync_mapfile, adjust_concat_blavg_data_hosts, sync_concat_blavg_data_to_local, {% endif %} {% endif %} concat_data_compressed_mapfile, {% block selfcal_steps %} {% if not preapply_phase_cal %} average0, {% endif %} create_compressed_mapfile0, sort_average0_into_Groups, sort_average0_into_Groups_maps, concat_average0_data, create_compressed_mapfile01, premask_selfcal, wsclean_image02, create_imagebase_map02, pad_selfcal_model0_images, regroup_concat_data_map, create_expanded_model0_mapfile, expand_selfcal_model_size_map, wsclean_ft0, {% if pre_average %} copy_model_data0, {% endif %} make_fast_phase_parmdb_map, {% if peel_skymodel is not none %} create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, {% endif %} remove_parmdbs1, solve_phaseonly1, {% if selfcal_local_dir is not none %} make_apply_mapfile, {% endif %} apply_phaseonly1, create_compressed_mapfile1, wsclean_image12, create_imagebase_map12, create_expanded_model1_mapfile, pad_selfcal_model1_images, wsclean_ft1, {% if pre_average %} copy_model_data1, {% endif %} remove_parmdbs2, solve_phaseonly2, apply_phaseonly2, create_compressed_mapfile2, wsclean_image22, create_imagebase_map22, create_expanded_model2_mapfile, pad_selfcal_model2_images, wsclean_ft2, {% if pre_average %} copy_model_data2, {% endif %} remove_parmdbs11, solve_ampphase11, apply_ampphase11, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, wsclean_image32, loop_ampcal, {% endblock selfcal_steps %} {% if selfcal_local_dir is not none %} remove_concat_data, {% if pre_average %} remove_concat_blavg_data, {% endif %} {% endif %} merge_selfcal_parmdbs, convert_merged_selfcal_parmdbs, {% if create_preapply_parmdb %} create_preapply_parmdb, {% endif %} make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, create_model4_map, expand_model4_map, blank_mask, expand_mask4_map, make_new_cal_skymodel, {% if not is_patch or wsclean_selfcal_multiscale %} make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, prepare_imaging_data, {% if not is_patch %} create_compressed_mapfile5, premask, wsclean_image_full, create_imagebase_map, adjust_wsclean_mapfile1, mask5, check_mask_high, create_model5_map, expand_model5_map, expand_mask5_map, make_high_facet_skymodel, combine_skymodels_high, {% endif %} make_sourcedb_high, expand_sourcedb_high, subtract_high, create_compressed_mapfile6, premask_med, wsclean_image_full_med, create_imagebase_med_map, adjust_wsclean_mapfile3, mask6, check_mask_med, expand_model6_map, expand_mask6_map, make_med_facet_skymodel, combine_facet_skymodels, make_sourcedb_new_facet_sources, expand_sourcedb_new_facet_sources, {% else %} make_sourcedb_new_facet_sources, expand_sourcedb_new_facet_sources, {% endif %} predict_and_difference_models, create_middle_band_mapfile1, create_middle_band_mapfile2, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath = {{ pipeline_dir }}/plugins
 
@@ -308,6 +308,14 @@ concat_blavg_data.argument.msout.storagemanager.distribution   = "TruncatedGauss
 concat_blavg_data.argument.msout.storagemanager.disttruncation = 1.5
 concat_blavg_data.argument.msout.storagemanager.normalization  = "AF"
 {% endif %}
+
+# preaverage in frequency, length = ntimes * num_cal_blocks
+# this step overwrites the DATA and WEIGHT_SPECTRUM columns
+pre_average_freq.control.type        = pre_average_freq
+pre_average_freq.control.mapfiles_in = [concat_blavg_data.output.mapfile]
+pre_average_freq.control.inputkeys   = [datafile]
+pre_average_freq.argument.flags      = [datafile,DATA,DATA,WEIGHT_SPECTRUM,{{ solint_freq_a*2 }}]
+
 {% endif %}
 
 {% if selfcal_local_dir is not none %}
@@ -915,7 +923,8 @@ wsclean_image22.argument.auto-mask              = 3.2
 wsclean_image22.argument.auto-threshold         = 0.5
 wsclean_image22.argument.rms-background-window       = 50
 wsclean_image22.argument.rms-background-method       = rms-with-min
-wsclean_image22.argument.multiscale-scale-bias  = 0.7
+wsclean_image22.argument.multiscale-scale-bias       = 0.5
+wsclean_image22.argument.multiscale-gain             = 0.1
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map22.control.kind        = plugin
@@ -988,7 +997,7 @@ solve_ampphase11.argument.solvetec.nchan          = {{ solint_freq_a }}
 
 # apply the phase-only solutions from the previous calibration, length = ntimes * num_cal_blocks
 apply_ampphase11.control.type                                 = dppp_inplace
-apply_ampphase11.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
+apply_ampphase11.control.mapfiles_in                          = [{{ phase_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 apply_ampphase11.control.inputkeys                            = [msin,parmdb]
 apply_ampphase11.argument.numthreads                          = {{ max_cpus_per_proc_ntimes }}
 apply_ampphase11.argument.msin.datacolumn                     = DATA
@@ -1031,7 +1040,7 @@ remove_parmdbs12.argument.flags     = [-rf,parmdb]
 # note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
 # GainCal has a filter parameter, we can switch to that
 solve_ampphase12.control.type                      = dppp_inplace
-solve_ampphase12.control.mapfiles_in               = [{{ concat_data_mapfile }},make_slow_gain_parmdb_map.output.mapfile]
+solve_ampphase12.control.mapfiles_in               = [{{ phase_concat_data_mapfile }},make_slow_gain_parmdb_map.output.mapfile]
 solve_ampphase12.control.inputkeys                 = [msin,parmdb]
 solve_ampphase12.argument.numthreads               = {{ max_cpus_per_proc_ntimes }}
 solve_ampphase12.argument.msin.datacolumn          = CORRECTED_DATA
@@ -1047,19 +1056,24 @@ solve_ampphase12.argument.solvegain.solint         = {{ solint_time_a }}
 solve_ampphase12.argument.solvegain.nchan          = {{ solint_freq_a }}
 
 # merge the parmDBs with the amplitude solutions into one, length = 1
-merge_amp_parmdbs1.control.type       = merge_parmdbs_in_time
-merge_amp_parmdbs1.control.mapfile_in = concat_data_compressed_mapfile.output.mapfile
-merge_amp_parmdbs1.control.inputkey   = mslist
-merge_amp_parmdbs1.control.outputkey  = outparmdb
-merge_amp_parmdbs1.argument.flags     = [mslist,instrument_slow,outparmdb]
+merge_amp_parmdbs1.control.type         = merge_parmdbs_in_time
+merge_amp_parmdbs1.control.mapfile_in   = concat_data_compressed_mapfile.output.mapfile
+merge_amp_parmdbs1.control.inputkey     = mslist
+merge_amp_parmdbs1.control.outputkey    = outparmdb
+merge_amp_parmdbs1.argument.flags       = [mslist,instrument_slow,outparmdb]
+{% if selfcal_local_dir is not none %}
+merge_amp_parmdbs1.argument.scratch_dir = {{ selfcal_local_dir }}
+{% endif %}
 
 # smooth the amplitues in the merged parmDB, length = 1
-# smooth_amps uses only ANTENNA subtable of inputms, so it should work on virtual concatenated MS
-smooth_amp1.control.type       = {{ smooth_amps_task }}
-smooth_amp1.control.mapfile_in = merge_amp_parmdbs1.output.mapfile
-smooth_amp1.control.inputkey   = ampparmdb
-smooth_amp1.control.outputkey  = outparmdb
-smooth_amp1.control.arguments  = [ampparmdb,outparmdb]
+smooth_amp1.control.type         = {{ smooth_amps_task }}
+smooth_amp1.control.mapfile_in   = merge_amp_parmdbs1.output.mapfile
+smooth_amp1.control.inputkey     = ampparmdb
+smooth_amp1.control.outputkey    = outparmdb
+smooth_amp1.argument.flags       = [ampparmdb,outparmdb]
+{% if selfcal_local_dir is not none %}
+smooth_amp1.argument.scratch_dir = {{ selfcal_local_dir }}
+{% endif %}
 
 # expand the mapfile with the smoothd parmDB to all time-steps, length = ntimes * num_cal_blocks
 expand_smoothed_amp1_parmdb_map.control.kind             = plugin
@@ -1071,7 +1085,7 @@ expand_smoothed_amp1_parmdb_map.control.filename         = expand_amp1_smoothed_
 
 # apply the smoothed amplitudes and average, length = ntimes * num_cal_blocks
 apply_amp1.control.type                                 = dppp
-apply_amp1.control.mapfiles_in                          = [{{ concat_data_mapfile }},expand_smoothed_amp1_parmdb_map.output.mapfile]
+apply_amp1.control.mapfiles_in                          = [{{ phase_concat_data_mapfile }},expand_smoothed_amp1_parmdb_map.output.mapfile]
 apply_amp1.control.inputkeys                            = [msin,parmdb]
 {% if selfcal_local_dir is not none %}
 apply_amp1.control.mapfile_out                          = make_apply_mapfile.output.mapfile
@@ -1150,7 +1164,8 @@ wsclean_image32.argument.auto-mask              = 3.1
 wsclean_image32.argument.auto-threshold         = 0.5
 wsclean_image32.argument.rms-background-window       = 50
 wsclean_image32.argument.rms-background-method       = rms-with-min
-wsclean_image32.argument.multiscale-scale-bias  = 0.7
+wsclean_image32.argument.multiscale-scale-bias       = 0.5
+wsclean_image32.argument.multiscale-gain             = 0.1
 
 ########## start of selfcal loop
 
@@ -1232,7 +1247,7 @@ solve_ampphase21.argument.solvetec.nchan          = {{ solint_freq_a }}
 
 # apply the phase-only solutions from the previous calibration, length = ntimes * num_cal_blocks
 apply_ampphase21.control.type                                 = dppp_inplace
-apply_ampphase21.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
+apply_ampphase21.control.mapfiles_in                          = [{{ phase_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 apply_ampphase21.control.inputkeys                            = [msin,parmdb]
 apply_ampphase21.argument.numthreads                          = {{ max_cpus_per_proc_ntimes }}
 apply_ampphase21.argument.msin.datacolumn                     = DATA
@@ -1274,7 +1289,7 @@ remove_parmdbs22.argument.flags     = [-rf,parmdb]
 # note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
 # GainCal has a filter parameter, we can switch to that
 solve_ampphase22.control.type                      = dppp_inplace
-solve_ampphase22.control.mapfiles_in               = [{{ concat_data_mapfile }},make_slow_gain_parmdb_map.output.mapfile]
+solve_ampphase22.control.mapfiles_in               = [{{ phase_concat_data_mapfile }},make_slow_gain_parmdb_map.output.mapfile]
 solve_ampphase22.control.inputkeys                 = [msin,parmdb]
 solve_ampphase22.argument.numthreads               = {{ max_cpus_per_proc_ntimes }}
 solve_ampphase22.argument.msin.datacolumn          = CORRECTED_DATA
@@ -1291,19 +1306,24 @@ solve_ampphase22.argument.solvegain.nchan          = {{ solint_freq_a }}
 
 # merge the parmDBs with the amplitude solutions into one, length = 1
 # This is also used after the loop, but also now for smoothing the amplitudes
-merge_amp_parmdbs2.control.type       = merge_parmdbs_in_time
-merge_amp_parmdbs2.control.mapfile_in = concat_data_compressed_mapfile.output.mapfile
-merge_amp_parmdbs2.control.inputkey   = mslist
-merge_amp_parmdbs2.control.outputkey  = outparmdb
-merge_amp_parmdbs2.argument.flags     = [mslist,instrument_slow,outparmdb]
+merge_amp_parmdbs2.control.type         = merge_parmdbs_in_time
+merge_amp_parmdbs2.control.mapfile_in   = concat_data_compressed_mapfile.output.mapfile
+merge_amp_parmdbs2.control.inputkey     = mslist
+merge_amp_parmdbs2.control.outputkey    = outparmdb
+merge_amp_parmdbs2.argument.flags       = [mslist,instrument_slow,outparmdb]
+{% if selfcal_local_dir is not none %}
+merge_amp_parmdbs2.argument.scratch_dir = {{ selfcal_local_dir }}
+{% endif %}
 
 # smooth the amplitudes in the merged parmDB, length = 1
-# smooth_amps uses only ANTENNA subtable of inputms, so it should work on virtual concatenated MS
-smooth_amp2.control.type       = {{ smooth_amps_task }}
-smooth_amp2.control.mapfile_in = merge_amp_parmdbs2.output.mapfile
-smooth_amp2.control.inputkey   = ampparmdb
-smooth_amp2.control.outputkey  = outparmdb
-smooth_amp2.control.arguments  = [ampparmdb,outparmdb]
+smooth_amp2.control.type         = {{ smooth_amps_task }}
+smooth_amp2.control.mapfile_in   = merge_amp_parmdbs2.output.mapfile
+smooth_amp2.control.inputkey     = ampparmdb
+smooth_amp2.control.outputkey    = outparmdb
+smooth_amp2.argument.flags       = [ampparmdb,outparmdb]
+{% if selfcal_local_dir is not none %}
+smooth_amp2.argument.scratch_dir = {{ selfcal_local_dir }}
+{% endif %}
 
 # expand the mapfile with the smoothd parmDB to all time-steps, length = ntimes * num_cal_blocks
 expand_smoothed_amp2_parmdb_map.control.kind             = plugin
@@ -1315,7 +1335,7 @@ expand_smoothed_amp2_parmdb_map.control.filename         = expand_amp2_smoothed_
 
 # apply the smoothed amplitudes and average, length = ntimes * num_cal_blocks
 apply_amp2.control.type                                 = dppp
-apply_amp2.control.mapfiles_in                          = [{{ concat_data_mapfile }},expand_smoothed_amp2_parmdb_map.output.mapfile]
+apply_amp2.control.mapfiles_in                          = [{{ phase_concat_data_mapfile }},expand_smoothed_amp2_parmdb_map.output.mapfile]
 apply_amp2.control.inputkeys                            = [msin,parmdb]
 {% if selfcal_local_dir is not none %}
 apply_amp2.control.mapfile_out                          = make_apply_mapfile.output.mapfile
@@ -1397,7 +1417,8 @@ wsclean_image42.argument.auto-mask              = 3.1
 wsclean_image42.argument.auto-threshold         = 0.5
 wsclean_image42.argument.rms-background-window       = 50
 wsclean_image42.argument.rms-background-method       = rms-with-min
-wsclean_image42.argument.multiscale-scale-bias  = 0.7
+wsclean_image42.argument.multiscale-scale-bias       = 0.5
+wsclean_image42.argument.multiscale-gain             = 0.1
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map42.control.kind        = plugin
@@ -1455,17 +1476,19 @@ merge_selfcal_parmdbs.argument.flags      = [parmdb_p,parmdb_a,parmdb_out]
 
 # convert the merged phase and amplitude parmDBs to gain parmDBs, length = 1
 # if phases are pre-applied, then also add them in
-convert_merged_selfcal_parmdbs.control.type        = convert_solutions_to_gain
+convert_merged_selfcal_parmdbs.control.type         = convert_solutions_to_gain
 {% if preapply_phase_cal %}
-convert_merged_selfcal_parmdbs.control.mapfiles_in = [merge_phase_parmdbs.output.mapfile,smooth_amp2.output.mapfile,{{ preapply_parmdb_mapfile }}]
-convert_merged_selfcal_parmdbs.control.inputkeys   = [fast_parmdb_in,slow_parmdb_in,parmdb_pre]
-convert_merged_selfcal_parmdbs.control.outputkey   = parmdb_out
-convert_merged_selfcal_parmdbs.argument.flags      = [fast_parmdb_in,slow_parmdb_in,parmdb_out,{{ facetselfcal_freqstep * solint_freq_a }},parmdb_pre]
+convert_merged_selfcal_parmdbs.control.mapfiles_in  = [merge_phase_parmdbs.output.mapfile,smooth_amp2.output.mapfile,{{ preapply_parmdb_mapfile }}]
+convert_merged_selfcal_parmdbs.control.inputkeys    = [fast_parmdb_in,slow_parmdb_in,parmdb_pre]
+convert_merged_selfcal_parmdbs.argument.flags       = [fast_parmdb_in,slow_parmdb_in,parmdb_out,{{ facetselfcal_freqstep * solint_freq_a }},parmdb_pre]
 {% else %}
-convert_merged_selfcal_parmdbs.control.mapfiles_in = [merge_phase_parmdbs.output.mapfile,smooth_amp2.output.mapfile]
-convert_merged_selfcal_parmdbs.control.inputkeys   = [fast_parmdb_in,slow_parmdb_in]
-convert_merged_selfcal_parmdbs.control.outputkey   = parmdb_out
-convert_merged_selfcal_parmdbs.argument.flags      = [fast_parmdb_in,slow_parmdb_in,parmdb_out,{{ facetselfcal_freqstep * solint_freq_a }}]
+convert_merged_selfcal_parmdbs.control.mapfiles_in  = [merge_phase_parmdbs.output.mapfile,smooth_amp2.output.mapfile]
+convert_merged_selfcal_parmdbs.control.inputkeys    = [fast_parmdb_in,slow_parmdb_in]
+convert_merged_selfcal_parmdbs.argument.flags       = [fast_parmdb_in,slow_parmdb_in,parmdb_out,{{ facetselfcal_freqstep * solint_freq_a }}]
+{% endif %}
+convert_merged_selfcal_parmdbs.control.outputkey    = parmdb_out
+{% if selfcal_local_dir is not none %}
+convert_merged_selfcal_parmdbs.argument.scratch_dir = {{ selfcal_local_dir }}
 {% endif %}
 
 {% if create_preapply_parmdb %}

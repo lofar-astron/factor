@@ -132,7 +132,7 @@ wsclean_image02.argument.size                   = {{ cal_imsize }} {{ cal_imsize
 wsclean_image02.argument.niter                  = 10000
 wsclean_image02.argument.pol                    = I
 wsclean_image02.argument.weight                 = briggs {{ robust_selfcal }}
-wsclean_image02.argument.mgain                  = 0.6
+wsclean_image02.argument.mgain                  = 0.8
 wsclean_image02.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image02.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image02.argument.mem                    = {{ max_percent_memory_per_proc_single }}
@@ -365,7 +365,7 @@ wsclean_image12.argument.size                   = {{ cal_imsize }} {{ cal_imsize
 wsclean_image12.argument.niter                  = 10000
 wsclean_image12.argument.pol                    = I
 wsclean_image12.argument.weight                 = briggs {{ robust_selfcal }}
-wsclean_image12.argument.mgain                  = 0.6
+wsclean_image12.argument.mgain                  = 0.8
 wsclean_image12.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image12.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image12.argument.mem                    = {{ max_percent_memory_per_proc_single }}
@@ -542,7 +542,7 @@ wsclean_image22.argument.size                   = {{ cal_imsize }} {{ cal_imsize
 wsclean_image22.argument.niter                  = 10000
 wsclean_image22.argument.pol                    = I
 wsclean_image22.argument.weight                 = briggs {{ robust_selfcal }}
-wsclean_image22.argument.mgain                  = 0.6
+wsclean_image22.argument.mgain                  = 0.8
 wsclean_image22.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image22.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image22.argument.mem                    = {{ max_percent_memory_per_proc_single }}
@@ -569,7 +569,8 @@ wsclean_image22.argument.auto-mask              = 3.2
 wsclean_image22.argument.auto-threshold         = 0.5
 wsclean_image22.argument.rms-background-window       = 50
 wsclean_image22.argument.rms-background-method       = rms-with-min
-wsclean_image22.argument.multiscale-scale-bias  = 0.7
+wsclean_image22.argument.multiscale-scale-bias       = 0.5
+wsclean_image22.argument.multiscale-gain             = 0.1
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map22.control.kind        = plugin
@@ -642,7 +643,7 @@ solve_ampphase11.argument.solvetec.nchan          = {{ solint_freq_a }}
 
 # apply the phase-only solutions from the previous calibration, length = ntimes * num_cal_blocks
 apply_ampphase11.control.type                                 = dppp_inplace
-apply_ampphase11.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
+apply_ampphase11.control.mapfiles_in                          = [{{ phase_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 apply_ampphase11.control.inputkeys                            = [msin,parmdb]
 apply_ampphase11.argument.numthreads                          = {{ max_cpus_per_proc_ntimes }}
 apply_ampphase11.argument.msin.datacolumn                     = DATA
@@ -708,7 +709,7 @@ remove_parmdbs12.argument.flags     = [-rf,parmdb]
 # note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
 # GainCal has a filter parameter, we can switch to that
 solve_ampphase12.control.type                      = dppp_inplace
-solve_ampphase12.control.mapfiles_in               = [{{ concat_data_mapfile }},make_slow_gain_parmdb_map.output.mapfile]
+solve_ampphase12.control.mapfiles_in               = [{{ phase_concat_data_mapfile }},make_slow_gain_parmdb_map.output.mapfile]
 solve_ampphase12.control.inputkeys                 = [msin,parmdb]
 solve_ampphase12.argument.numthreads               = {{ max_cpus_per_proc_ntimes }}
 solve_ampphase12.argument.msin.datacolumn          = CORRECTED_DATA
@@ -724,19 +725,24 @@ solve_ampphase12.argument.solvegain.solint         = {{ solint_time_a }}
 solve_ampphase12.argument.solvegain.nchan          = {{ solint_freq_a }}
 
 # merge the parmDBs with the amplitude solutions into one, length = 1
-merge_amp_parmdbs1.control.type       = merge_parmdbs_in_time
-merge_amp_parmdbs1.control.mapfile_in = concat_data_compressed_mapfile.output.mapfile
-merge_amp_parmdbs1.control.inputkey   = mslist
-merge_amp_parmdbs1.control.outputkey  = outparmdb
-merge_amp_parmdbs1.argument.flags     = [mslist,instrument_slow,outparmdb]
+merge_amp_parmdbs1.control.type         = merge_parmdbs_in_time
+merge_amp_parmdbs1.control.mapfile_in   = concat_data_compressed_mapfile.output.mapfile
+merge_amp_parmdbs1.control.inputkey     = mslist
+merge_amp_parmdbs1.control.outputkey    = outparmdb
+merge_amp_parmdbs1.argument.flags       = [mslist,instrument_slow,outparmdb]
+{% if selfcal_local_dir is not none %}
+merge_amp_parmdbs1.argument.scratch_dir = {{ selfcal_local_dir }}
+{% endif %}
 
 # smooth the amplitues in the merged parmDB, length = 1
-# smooth_amps uses only ANTENNA subtable of inputms, so it should work on virtual concatenated MS
-smooth_amp1.control.type       = {{ smooth_amps_task }}
-smooth_amp1.control.mapfile_in = merge_amp_parmdbs1.output.mapfile
-smooth_amp1.control.inputkey   = ampparmdb
-smooth_amp1.control.outputkey  = outparmdb
-smooth_amp1.control.arguments  = [ampparmdb,outparmdb]
+smooth_amp1.control.type         = {{ smooth_amps_task }}
+smooth_amp1.control.mapfile_in   = merge_amp_parmdbs1.output.mapfile
+smooth_amp1.control.inputkey     = ampparmdb
+smooth_amp1.control.outputkey    = outparmdb
+smooth_amp1.argument.flags       = [ampparmdb,outparmdb]
+{% if selfcal_local_dir is not none %}
+smooth_amp1.argument.scratch_dir = {{ selfcal_local_dir }}
+{% endif %}
 
 # expand the mapfile with the smoothd parmDB to all time-steps, length = ntimes * num_cal_blocks
 expand_smoothed_amp1_parmdb_map.control.kind             = plugin
@@ -748,7 +754,7 @@ expand_smoothed_amp1_parmdb_map.control.filename         = expand_amp1_smoothed_
 
 # apply the smoothed amplitudes and average, length = ntimes * num_cal_blocks
 apply_amp1.control.type                                 = dppp
-apply_amp1.control.mapfiles_in                          = [{{ concat_data_mapfile }},expand_smoothed_amp1_parmdb_map.output.mapfile]
+apply_amp1.control.mapfiles_in                          = [{{ phase_concat_data_mapfile }},expand_smoothed_amp1_parmdb_map.output.mapfile]
 apply_amp1.control.inputkeys                            = [msin,parmdb]
 {% if selfcal_local_dir is not none %}
 apply_amp1.control.mapfile_out                          = make_apply_mapfile.output.mapfile
@@ -800,7 +806,7 @@ wsclean_image32.argument.size                   = {{ cal_imsize }} {{ cal_imsize
 wsclean_image32.argument.niter                  = 10000
 wsclean_image32.argument.pol                    = I
 wsclean_image32.argument.weight                 = briggs {{ robust_selfcal }}
-wsclean_image32.argument.mgain                  = 0.6
+wsclean_image32.argument.mgain                  = 0.8
 wsclean_image32.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image32.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image32.argument.mem                    = {{ max_percent_memory_per_proc_single }}
@@ -827,7 +833,8 @@ wsclean_image32.argument.auto-mask              = 3.1
 wsclean_image32.argument.auto-threshold         = 0.5
 wsclean_image32.argument.rms-background-window       = 50
 wsclean_image32.argument.rms-background-method       = rms-with-min
-wsclean_image32.argument.multiscale-scale-bias  = 0.7
+wsclean_image32.argument.multiscale-scale-bias       = 0.5
+wsclean_image32.argument.multiscale-gain             = 0.1
 
 ########## start of phase+amp selfcal loop
 
@@ -909,7 +916,7 @@ solve_ampphase21.argument.solvetec.nchan          = {{ solint_freq_a }}
 
 # apply the phase-only solutions from the previous calibration, length = ntimes * num_cal_blocks
 apply_ampphase21.control.type                                 = dppp_inplace
-apply_ampphase21.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
+apply_ampphase21.control.mapfiles_in                          = [{{ phase_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 apply_ampphase21.control.inputkeys                            = [msin,parmdb]
 apply_ampphase21.argument.numthreads                          = {{ max_cpus_per_proc_ntimes }}
 apply_ampphase21.argument.msin.datacolumn                     = DATA
@@ -951,7 +958,7 @@ remove_parmdbs22.argument.flags     = [-rf,parmdb]
 # note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
 # GainCal has a filter parameter, we can switch to that
 solve_ampphase22.control.type                      = dppp_inplace
-solve_ampphase22.control.mapfiles_in               = [{{ concat_data_mapfile }},make_slow_gain_parmdb_map.output.mapfile]
+solve_ampphase22.control.mapfiles_in               = [{{ phase_concat_data_mapfile }},make_slow_gain_parmdb_map.output.mapfile]
 solve_ampphase22.control.inputkeys                 = [msin,parmdb]
 solve_ampphase22.argument.numthreads               = {{ max_cpus_per_proc_ntimes }}
 solve_ampphase22.argument.msin.datacolumn          = CORRECTED_DATA
@@ -968,19 +975,24 @@ solve_ampphase22.argument.solvegain.nchan          = {{ solint_freq_a }}
 
 # merge the parmDBs with the amplitude solutions into one, length = 1
 # This is also used after the loop, but also now for smoothing the amplitudes
-merge_amp_parmdbs2.control.type       = merge_parmdbs_in_time
-merge_amp_parmdbs2.control.mapfile_in = concat_data_compressed_mapfile.output.mapfile
-merge_amp_parmdbs2.control.inputkey   = mslist
-merge_amp_parmdbs2.control.outputkey  = outparmdb
-merge_amp_parmdbs2.argument.flags     = [mslist,instrument_slow,outparmdb]
+merge_amp_parmdbs2.control.type         = merge_parmdbs_in_time
+merge_amp_parmdbs2.control.mapfile_in   = concat_data_compressed_mapfile.output.mapfile
+merge_amp_parmdbs2.control.inputkey     = mslist
+merge_amp_parmdbs2.control.outputkey    = outparmdb
+merge_amp_parmdbs2.argument.flags       = [mslist,instrument_slow,outparmdb]
+{% if selfcal_local_dir is not none %}
+merge_amp_parmdbs2.argument.scratch_dir = {{ selfcal_local_dir }}
+{% endif %}
 
 # smooth the amplitudes in the merged parmDB, length = 1
-# smooth_amps uses only ANTENNA subtable of inputms, so it should work on virtual concatenated MS
-smooth_amp2.control.type       = {{ smooth_amps_task }}
-smooth_amp2.control.mapfile_in = merge_amp_parmdbs2.output.mapfile
-smooth_amp2.control.inputkey   = ampparmdb
-smooth_amp2.control.outputkey  = outparmdb
-smooth_amp2.control.arguments  = [ampparmdb,outparmdb]
+smooth_amp2.control.type         = {{ smooth_amps_task }}
+smooth_amp2.control.mapfile_in   = merge_amp_parmdbs2.output.mapfile
+smooth_amp2.control.inputkey     = ampparmdb
+smooth_amp2.control.outputkey    = outparmdb
+smooth_amp2.argument.flags       = [ampparmdb,outparmdb]
+{% if selfcal_local_dir is not none %}
+smooth_amp2.argument.scratch_dir = {{ selfcal_local_dir }}
+{% endif %}
 
 # expand the mapfile with the smoothd parmDB to all time-steps, length = ntimes * num_cal_blocks
 expand_smoothed_amp2_parmdb_map.control.kind             = plugin
@@ -992,7 +1004,7 @@ expand_smoothed_amp2_parmdb_map.control.filename         = expand_amp2_smoothed_
 
 # apply the smoothed amplitudes and average, length = ntimes * num_cal_blocks
 apply_amp2.control.type                                 = dppp
-apply_amp2.control.mapfiles_in                          = [{{ concat_data_mapfile }},expand_smoothed_amp2_parmdb_map.output.mapfile]
+apply_amp2.control.mapfiles_in                          = [{{ phase_concat_data_mapfile }},expand_smoothed_amp2_parmdb_map.output.mapfile]
 apply_amp2.control.inputkeys                            = [msin,parmdb]
 {% if selfcal_local_dir is not none %}
 apply_amp2.control.mapfile_out                          = make_apply_mapfile.output.mapfile
@@ -1047,7 +1059,7 @@ wsclean_image42.argument.size                   = {{ cal_imsize }} {{ cal_imsize
 wsclean_image42.argument.niter                  = 10000
 wsclean_image42.argument.pol                    = I
 wsclean_image42.argument.weight                 = briggs {{ robust_selfcal }}
-wsclean_image42.argument.mgain                  = 0.6
+wsclean_image42.argument.mgain                  = 0.8
 wsclean_image42.argument.minuv-l                = {{ selfcal_min_uv_lambda }}
 wsclean_image42.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image42.argument.mem                    = {{ max_percent_memory_per_proc_single }}
@@ -1074,7 +1086,8 @@ wsclean_image42.argument.auto-mask              = 3.1
 wsclean_image42.argument.auto-threshold         = 0.5
 wsclean_image42.argument.rms-background-window       = 50
 wsclean_image42.argument.rms-background-method       = rms-with-min
-wsclean_image42.argument.multiscale-scale-bias  = 0.7
+wsclean_image42.argument.multiscale-scale-bias       = 0.5
+wsclean_image42.argument.multiscale-gain             = 0.1
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map42.control.kind        = plugin
