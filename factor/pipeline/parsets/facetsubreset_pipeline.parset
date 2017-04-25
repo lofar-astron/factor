@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_old_sourcedb_map, expand_new_sourcedb_map, predict_and_difference_models, add_diff_model_from_empty_data]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_old_sourcedb_map, expand_new_sourcedb_map, predict_and_difference_models, add_diff_model_to_empty_data]
 
 pipeline.pluginpath = {{ pipeline_dir }}/plugins
 
@@ -111,7 +111,7 @@ predict_and_difference_models.argument.msout.storagemanager.normalization  = "AF
 {% endif %}
 
 # add model difference from facet-selfcal to original data, length = nfiles
-add_diff_model_from_empty_data.control.type        = add_subtract_columns
-add_diff_model_from_empty_data.control.mapfiles_in = [create_ms_map.output.mapfile,predict_and_difference_models.output.mapfile]
-add_diff_model_from_empty_data.control.inputkeys   = [file1,file2]
-add_diff_model_from_empty_data.argument.flags      = [file1,file2,CORRECTED_DATA,DATA,CORRECTED_DATA,add,True,False]
+add_diff_model_to_empty_data.control.type        = add_subtract_columns
+add_diff_model_to_empty_data.control.mapfiles_in = [create_ms_map.output.mapfile,predict_and_difference_models.output.mapfile]
+add_diff_model_to_empty_data.control.inputkeys   = [file1,file2]
+add_diff_model_to_empty_data.argument.flags      = [file1,file2,CORRECTED_DATA,DATA,CORRECTED_DATA,add]
