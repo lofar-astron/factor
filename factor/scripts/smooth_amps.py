@@ -82,8 +82,8 @@ def smooth(chan, real, imag, window):
 
     goodmask = numpy.isfinite(allamp)
     amp = allamp[goodmask]
-    
-    if len(amp)>7:    
+
+    if len(amp)>7:
         amp = numpy.log10(amp)
         amp = median_window_filter(amp, window, 6)
         amp = median_window_filter(amp, window, 6)
@@ -96,16 +96,16 @@ def smooth(chan, real, imag, window):
         # normalization done later
         high_ind = numpy.where(amp > 5.0)
         amp[high_ind] = 5.0
-        
+
         allamp[goodmask] = amp
-        
+
     real_smoothed = allamp * numpy.cos(phase)
     imag_smoothed = allamp * numpy.sin(phase)
 
     return (real_smoothed, imag_smoothed)
 
 
-def main(instrument_name, instrument_name_smoothed, normalize=True):
+def main(instrument_name, instrument_name_smoothed, normalize=True, scratch_dir=None):
     if type(normalize) is str:
         if normalize.lower() == 'true':
             normalize = True
@@ -114,6 +114,14 @@ def main(instrument_name, instrument_name_smoothed, normalize=True):
 
     pol_list = ['0:0','1:1']
     gain = 'Gain'
+
+    # Copy to scratch directory if specified
+    if scratch_dir is not None:
+        instrument_name_orig = instrument_name
+        instrument_name = os.path.join(scratch_dir, os.path.basename(instrument_name_orig))
+        instrument_name_smoothed_orig = instrument_name_smoothed
+        instrument_name_smoothed = os.path.join(scratch_dir, os.path.basename(instrument_name_smoothed_orig))
+        shutil.copytree(instrument_name_orig, instrument_name)
 
     pdb = lofar.parmdb.parmdb(instrument_name)
     parms = pdb.getValuesGrid('*')
@@ -166,7 +174,7 @@ def main(instrument_name, instrument_name_smoothed, normalize=True):
                     # Clip extremely low amplitude solutions to prevent very high
                     # amplitudes in the corrected data
                     # First get a copy and fill all NANs with dummy values
-                    amp_nonan = numpy.copy(amp) 
+                    amp_nonan = numpy.copy(amp)
                     amp_nonan[~numpy.isfinite(amp)] = 1.
                     low_ind = numpy.where( amp_nonan < 0.2)
                     amp[low_ind] = 0.2
@@ -180,6 +188,14 @@ def main(instrument_name, instrument_name_smoothed, normalize=True):
     pdbnew = lofar.parmdb.parmdb(instrument_name_smoothed, create=True)
     pdbnew.addValues(parms)
     pdbnew.flush()
+
+    # Copy output to original path and delete copies if scratch directory is specified
+    if scratch_dir is not None:
+        if os.path.exists(instrument_name_smoothed_orig):
+            shutil.rmtree(instrument_name_smoothed_orig)
+        shutil.copytree(instrument_name_smoothed, instrument_name_smoothed_orig)
+        shutil.rmtree(instrument_name)
+        shutil.rmtree(instrument_name_smoothed)
 
 
 if __name__ == '__main__':

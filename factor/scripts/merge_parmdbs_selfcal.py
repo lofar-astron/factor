@@ -11,7 +11,7 @@ import shutil
 import numpy as np
 
 
-def main(parmdb_p, parmdb_a, parmdb_out, clobber=True):
+def main(parmdb_p, parmdb_a, parmdb_out, clobber=True, scratch_dir=None):
     """
     Merges facet selfcal parmdbs into a single parmdb
 
@@ -26,6 +26,8 @@ def main(parmdb_p, parmdb_a, parmdb_out, clobber=True):
         Filename of output file
     clobber : bool, optional
         If True, overwrite existing output file
+    scratch_dir : str, optional
+        Scratch directory for temp storage
 
     """
     if type(clobber) is str:
@@ -40,7 +42,17 @@ def main(parmdb_p, parmdb_a, parmdb_out, clobber=True):
         else:
             return
 
-    os.system('cp -r {0} {1}'.format(parmdb_p,parmdb_out))
+    # Copy to scratch directory if specified
+    if scratch_dir is not None:
+        parmdb_p_orig = parmdb_p
+        parmdb_p = os.path.join(scratch_dir, os.path.basename(parmdb_p_orig))
+        parmdb_a_orig = parmdb_a
+        parmdb_a = os.path.join(scratch_dir, os.path.basename(parmdb_a_orig))
+        parmdb_out_orig = parmdb_out
+        parmdb_out = os.path.join(scratch_dir, os.path.basename(parmdb_out_orig))
+        shutil.copytree(parmdb_p_orig, parmdb_p)
+        shutil.copytree(parmdb_a_orig, parmdb_a)
+    shutil.copytree(parmdb_p, parmdb_out)
 
     ## Copy over the Gains
     pdb_out = pdb.parmdb(parmdb_out)
@@ -60,6 +72,13 @@ def main(parmdb_p, parmdb_a, parmdb_out, clobber=True):
 
         pdb_out.addValues(parmname,ValueHolder)
     pdb_out.flush()
+
+    # Copy output to original path and delete copies if scratch directory is specified
+    if scratch_dir is not None:
+        shutil.copytree(parmdb_out, parmdb_out_orig)
+        shutil.rmtree(parmdb_out)
+        shutil.rmtree(parmdb_p)
+        shutil.rmtree(parmdb_a)
 
 
 if __name__ == '__main__':

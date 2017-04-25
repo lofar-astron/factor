@@ -6,12 +6,13 @@ import argparse
 from argparse import RawTextHelpFormatter
 import os
 import casacore.tables as pt
+import shutil
 import lofar.parmdb as pdb
 import sys
 import numpy as np
 
 
-def main(input_mslist, parmdb_name, outparmdb, clobber=True):
+def main(input_mslist, parmdb_name, outparmdb, clobber=True, scratch_dir=None):
     """
     Merges parmdbs in time into a single parmdb
 
@@ -28,6 +29,8 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
         Name of output merged parmdb
     clobber : bool, optional
         If True, overwrite existing output file
+    scratch_dir : str, optional
+        Scratch directory for temp storage
 
     """
     if type(input_mslist) is str:
@@ -46,6 +49,17 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
             os.system('rm -rf {0}'.format(outparmdb))
         else:
             return
+
+    # Copy to scratch directory if specified
+    if scratch_dir is not None:
+        inparmdbs_orig = inparmdbs
+        inparmdbs = [os.path.join(scratch_dir, os.path.basename(inp)+'_{}'.format(i))
+            for i, inp in enumerate(inparmdbs_orig)]
+        outparmdb_orig = outparmdb
+        outparmdb = os.path.join(scratch_dir, os.path.basename(outparmdb_orig))
+        for inp_orig, inp in zip(inparmdbs_orig, inparmdbs):
+            shutil.copytree(inp_orig, inp)
+
     pdb_concat = pdb.parmdb(outparmdb, create=True)
 
     for i, inparmdb in enumerate(inparmdbs):
@@ -65,6 +79,13 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True):
         pdb_concat.flush()
         pdb_add = False
     pdb_concat = False
+
+    # Copy output to original path and delete copies if scratch directory is specified
+    if scratch_dir is not None:
+        shutil.copytree(outparmdb, outparmdb_orig)
+        shutil.rmtree(outparmdb)
+        for inp in inparmdbs:
+            shutil.rmtree(inp)
 
 
 if __name__ == '__main__':

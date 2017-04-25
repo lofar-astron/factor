@@ -304,7 +304,8 @@ def median2Dampfilter(amp_orig):
     return amp_cleaned, amp_median, baddata
 
 
-def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=False):
+def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=False,
+    scratch_dir=None):
     if type(normalize) is str:
         if normalize.lower() == 'true':
             normalize = True
@@ -317,6 +318,14 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
             plotting = False
 
     gain = 'Gain'
+
+    # Copy to scratch directory if specified
+    if scratch_dir is not None:
+        instrument_name_orig = instrument_name
+        instrument_name = os.path.join(scratch_dir, os.path.basename(instrument_name_orig))
+        instrument_name_smoothed_orig = instrument_name_smoothed
+        instrument_name_smoothed = os.path.join(scratch_dir, os.path.basename(instrument_name_smoothed_orig))
+        shutil.copytree(instrument_name_orig, instrument_name)
 
     pdb = lofar.parmdb.parmdb(instrument_name)
     parms = pdb.getValuesGrid('*')
@@ -587,6 +596,14 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
             pdbnew.addValues('Gain:'+pol+':Imag:{}'.format(station), imag[g_start:], orig_freqs, freqwidths,
                 orig_times[g_start:], timewidths[g_start:], asStartEnd=False)
     pdbnew.flush()
+
+    # Copy output to original path and delete copies if scratch directory is specified
+    if scratch_dir is not None:
+        if os.path.exists(instrument_name_smoothed_orig):
+            shutil.rmtree(instrument_name_smoothed_orig)
+        shutil.copytree(instrument_name_smoothed, instrument_name_smoothed_orig)
+        shutil.rmtree(instrument_name)
+        shutil.rmtree(instrument_name_smoothed)
 
 
 if __name__ == '__main__':

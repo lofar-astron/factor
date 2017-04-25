@@ -5,12 +5,14 @@ Script to convert selfcal solutions to single gain table
 import argparse
 from argparse import RawTextHelpFormatter
 import lofar.parmdb as lp
+import shutil
 import numpy as np
 import sys
 import os
 
 
-def main(fast_parmdb, slow_parmdb, output_file, freqstep=1, preapply_parmdb=None):
+def main(fast_parmdb, slow_parmdb, output_file, freqstep=1, preapply_parmdb=None,
+    scratch_dir=None):
     """
     Converts multiple selfcal tables to single gain table
 
@@ -27,8 +29,22 @@ def main(fast_parmdb, slow_parmdb, output_file, freqstep=1, preapply_parmdb=None
     preapply_parmdb : str
         File with combined fast phase (TEC and CommonScalarPhase) and slow phase
         solutions for pre-application
+    scratch_dir : str, optional
+        Scratch directory for temp storage
+
     """
     freqstep = int(freqstep)
+
+    # Copy to scratch directory if specified
+    if scratch_dir is not None:
+        fast_parmdb_orig = fast_parmdb
+        fast_parmdb = os.path.join(scratch_dir, os.path.basename(fast_parmdb_orig))
+        slow_parmdb_orig = slow_parmdb
+        slow_parmdb = os.path.join(scratch_dir, os.path.basename(slow_parmdb_orig))
+        output_file_orig = output_file
+        output_file = os.path.join(scratch_dir, os.path.basename(output_file_orig))
+        shutil.copytree(fast_parmdb_orig, fast_parmdb)
+        shutil.copytree(slow_parmdb_orig, slow_parmdb)
 
     fast_pdb = lp.parmdb(fast_parmdb)
     fast_soldict = fast_pdb.getValuesGrid('*')
@@ -150,6 +166,15 @@ def main(fast_parmdb, slow_parmdb, output_file, freqstep=1, preapply_parmdb=None
 
     # Write values
     output_pdb.flush()
+
+    # Copy output to original path and delete copies if scratch directory is specified
+    if scratch_dir is not None:
+        if os.path.exists(output_file_orig):
+            shutil.rmtree(output_file_orig)
+        shutil.copytree(output_file, output_file_orig)
+        shutil.rmtree(output_file)
+        shutil.rmtree(fast_parmdb)
+        shutil.rmtree(slow_parmdb)
 
 
 if __name__ == '__main__':
