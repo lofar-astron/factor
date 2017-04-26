@@ -76,15 +76,15 @@ class FacetSelfcal(Operation):
         # Set mapfile for selfcal operations
         if self.local_selfcal_scratch_dir is not None:
             if self.direction.pre_average:
-                self.direction.phase_concat_data_mapfile = 'make_concat_blavg_data_sync_mapfile.output.mapfile'
+                self.direction.solve_concat_data_mapfile = 'make_concat_blavg_data_sync_mapfile.output.mapfile'
             else:
-                self.direction.phase_concat_data_mapfile = 'make_concat_data_sync_mapfile.output.mapfile'
+                self.direction.solve_concat_data_mapfile = 'make_concat_data_sync_mapfile.output.mapfile'
             self.direction.concat_data_mapfile = 'make_concat_data_sync_mapfile.output.mapfile'
         else:
             if self.direction.pre_average:
-                self.direction.phase_concat_data_mapfile = 'concat_blavg_data.output.mapfile'
+                self.direction.solve_concat_data_mapfile = 'concat_blavg_data.output.mapfile'
             else:
-                self.direction.phase_concat_data_mapfile = 'concat_data.output.mapfile'
+                self.direction.solve_concat_data_mapfile = 'concat_data.output.mapfile'
             self.direction.concat_data_mapfile = 'concat_data.output.mapfile'
 
         # Parset and sky model for initial solve (not used for later selfcal
