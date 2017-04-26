@@ -734,19 +734,34 @@ expand_smoothed_amp1_parmdb_map.control.filename         = expand_amp1_smoothed_
 
 # apply the smoothed amplitudes and average, length = ntimes * num_cal_blocks
 apply_amp1.control.type                                 = dppp
-apply_amp1.control.mapfiles_in                          = [{{ concat_data_mapfile }},expand_smoothed_amp1_parmdb_map.output.mapfile]
-apply_amp1.control.inputkeys                            = [msin,parmdb]
 {% if selfcal_local_dir is not none %}
 apply_amp1.control.mapfile_out                          = make_apply_mapfile.output.mapfile
 {% endif %}
 apply_amp1.argument.numthreads                          = {{ max_cpus_per_io_proc_ntimes }}
+{% if not pre_average %}
+apply_amp1.control.mapfiles_in                          = [{{ concat_data_mapfile }},expand_smoothed_amp1_parmdb_map.output.mapfile]
+apply_amp1.control.inputkeys                            = [msin,parmdb]
 apply_amp1.argument.msin.datacolumn                     = CORRECTED_DATA
+apply_amp1.argument.steps                               = [correct_slow,avg]
+{% else %}
+apply_amp1.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile,expand_smoothed_amp1_parmdb_map.output.mapfile]
+apply_amp1.control.inputkeys                            = [msin,fast_parmdb,parmdb]
+apply_amp1.argument.msin.datacolumn                     = DATA
+apply_amp1.argument.steps                               = [correct_fast1,correct_fast2,correct_slow,avg]
+apply_amp1.argument.correct_fast1.type                  = applycal
+apply_amp1.argument.correct_fast1.parmdb                = fast_parmdb
+apply_amp1.argument.correct_fast1.correction            = tec
+apply_amp1.argument.correct_fast1.invert                = True
+apply_amp1.argument.correct_fast2.type                  = applycal
+apply_amp1.argument.correct_fast2.parmdb                = fast_parmdb
+apply_amp1.argument.correct_fast2.correction            = commonscalarphase
+apply_amp1.argument.correct_fast2.invert                = True
+{% endif %}
 apply_amp1.argument.msout.overwrite                     = True
 apply_amp1.argument.msout.writefullresflag              = False
 {% if local_dir is not none %}
 apply_amp1.argument.local_scratch_dir                   = {{ local_dir }}
 {% endif %}
-apply_amp1.argument.steps                               = [correct_slow,avg]
 apply_amp1.argument.correct_slow.type                   = applycal
 apply_amp1.argument.correct_slow.parmdb                 = parmdb
 apply_amp1.argument.correct_slow.invert                 = True
@@ -976,19 +991,34 @@ expand_smoothed_amp2_parmdb_map.control.filename         = expand_amp2_smoothed_
 
 # apply the smoothed amplitudes and average, length = ntimes * num_cal_blocks
 apply_amp2.control.type                                 = dppp
-apply_amp2.control.mapfiles_in                          = [{{ concat_data_mapfile }},expand_smoothed_amp2_parmdb_map.output.mapfile]
-apply_amp2.control.inputkeys                            = [msin,parmdb]
 {% if selfcal_local_dir is not none %}
 apply_amp2.control.mapfile_out                          = make_apply_mapfile.output.mapfile
 {% endif %}
 apply_amp2.argument.numthreads                          = {{ max_cpus_per_io_proc_ntimes }}
+{% if not pre_average %}
+apply_amp2.control.mapfiles_in                          = [{{ concat_data_mapfile }},expand_smoothed_amp2_parmdb_map.output.mapfile]
+apply_amp2.control.inputkeys                            = [msin,parmdb]
 apply_amp2.argument.msin.datacolumn                     = CORRECTED_DATA
+apply_amp2.argument.steps                               = [correct_slow,avg]
+{% else %}
+apply_amp2.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile,expand_smoothed_amp2_parmdb_map.output.mapfile]
+apply_amp2.control.inputkeys                            = [msin,fast_parmdb,parmdb]
+apply_amp2.argument.msin.datacolumn                     = DATA
+apply_amp2.argument.steps                               = [correct_fast1,correct_fast2,correct_slow,avg]
+apply_amp2.argument.correct_fast1.type                  = applycal
+apply_amp2.argument.correct_fast1.parmdb                = fast_parmdb
+apply_amp2.argument.correct_fast1.correction            = tec
+apply_amp2.argument.correct_fast1.invert                = True
+apply_amp2.argument.correct_fast2.type                  = applycal
+apply_amp2.argument.correct_fast2.parmdb                = fast_parmdb
+apply_amp2.argument.correct_fast2.correction            = commonscalarphase
+apply_amp2.argument.correct_fast2.invert                = True
+{% endif %}
 apply_amp2.argument.msout.overwrite                     = True
 apply_amp2.argument.msout.writefullresflag              = False
 {% if local_dir is not none %}
 apply_amp2.argument.local_scratch_dir                   = {{ local_dir }}
 {% endif %}
-apply_amp2.argument.steps                               = [correct_slow,avg]
 apply_amp2.argument.correct_slow.type                   = applycal
 apply_amp2.argument.correct_slow.parmdb                 = parmdb
 apply_amp2.argument.correct_slow.invert                 = True
