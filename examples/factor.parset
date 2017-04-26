@@ -13,7 +13,10 @@ dir_working = /data/wdir
 # enough chunks, then it will not make a copy but modify the input files.
 dir_ms = /data/bands
 
-# Exit if a band is has too little useable data (default = False)
+# Minimum allowable fraction of unflagged data per band (default = 0.5)
+# min_fraction_per_band = 0.5
+
+# Exit if a band is has too little unflagged data (default = False)
 # exit_on_bad_band = False
 
 # Parmdb name for dir-indep. selfcal solutions (stored inside the input band
@@ -92,8 +95,8 @@ dir_ms = /data/bands
 # Use baseline-dependent preaveraging to increase the signal-to-noise of the
 # phase-only solve for sources below this flux density (default = 2.0). When
 # activated, averaging in time is done to exploit the time coherence in the TEC
-# solutions, and averaging in frequency to exploit the frequency coherence of
-# the beam effects
+# solutions, and averaging in frequency is done to exploit the frequency coherence of
+# the slow-gain solutions
 # preaverage_flux_Jy = 2.0
 
 # Use multi-resolution selfcal that starts at 20 arcsec resolution and increases

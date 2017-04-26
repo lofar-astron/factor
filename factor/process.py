@@ -472,7 +472,8 @@ def _set_up_bands(parset, test_run=False):
         band = Band(msdict[MSkey], parset['dir_working'], parset['parmdb_name'],
             skymodel_dirindep, local_dir=parset['cluster_specific']['dir_local'],
             test_run=test_run, chunk_size_sec=parset['chunk_size_sec'],
-            use_compression=parset['use_compression'])
+            use_compression=parset['use_compression'],
+            min_fraction=parset['min_fraction_per_band'])
         if len(band.files) == 0:
             # No useable files found for this band (likely due to too little
             # unflagged data)

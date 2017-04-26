@@ -37,11 +37,15 @@ class Band(object):
         Size of chunks in seconds
     use_compression : bool, optional
         If True, use Dysco comprossion on output chunk files
+    min_fraction : float, optional
+        Minimum fraction of unflaggged data in a time-chunk needed for the chunk
+        to be kept
 
     """
     def __init__(self, MSfiles, factor_working_dir, dirindparmdb,
         skymodel_dirindep=None, local_dir=None, test_run=False, check_files=True,
-        process_files=False, chunk_size_sec=2400.0, use_compression=False):
+        process_files=False, chunk_size_sec=2400.0, use_compression=False,
+        min_fraction=0.5):
 
         self.files = MSfiles
         self.msnames = [ MS.split('/')[-1] for MS in self.files ]
@@ -124,7 +128,8 @@ class Band(object):
 
             # cut input files into chunks if needed
             self.chunk_input_files(chunk_size_sec, dirindparmdb, local_dir=local_dir,
-                                   test_run=test_run, use_compression=use_compression)
+                                   test_run=test_run, use_compression=use_compression,
+                                   min_fraction=min_fraction)
             if len(self.files) == 0:
                 self.log.warn('No data left after checking input files for band: {}. '
                                'Probably too little unflagged data.'.format(self.name))

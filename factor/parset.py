@@ -125,7 +125,13 @@ def get_global_options(parset):
                         'imaging_specific': {}, 'cluster_specific': {},
                         'checkfactor': {}})
 
-    # Exit if a band is has too little useable data (default = False)
+    # Minimum allowable fraction of unflagged data per band (default = 0.5)
+    if 'min_fraction_per_band' in parset_dict:
+        parset_dict['min_fraction_per_band'] = parset.getfloat('global', 'min_fraction_per_band')
+    else:
+        parset_dict['min_fraction_per_band'] = 0.5
+
+    # Exit if a band is has too little unflagged data (default = False)
     if 'exit_on_bad_band' in parset_dict:
         parset_dict['exit_on_bad_band'] = parset.getboolean('global', 'exit_on_bad_band')
     else:
@@ -195,19 +201,6 @@ def get_global_options(parset):
                     'appear in flag_expr'.format(f))
                 sys.exit(1)
 
-    # Make final mosaic (default = True)
-    if 'make_mosaic' in parset_dict:
-        parset._sections['imaging']['make_mosaic'] = parset_dict['make_mosaic']
-
-    # Exit if selfcal fails for any direction (default = True). If False, processing
-    # will continue and the failed direction will receive the selfcal solutions of
-    # the nearest successful direction unless skip_selfcal_check is True, in which
-    # case processing continues as if the selfcal succeeded
-    if 'exit_on_selfcal_failure' in parset_dict:
-        parset._sections['calibration']['exit_on_selfcal_failure'] = parset_dict['exit_on_selfcal_failure']
-    if 'skip_selfcal_check' in parset_dict:
-        parset._sections['calibration']['skip_selfcal_check'] = parset_dict['skip_selfcal_check']
-
     # Keep calibrated data for each facet (default = True for averaged data and
     # False for unaveraged data). If a target is specified (see below), the averaged
     # data for the target is always kept, regardless of this setting. If the
@@ -222,84 +215,17 @@ def get_global_options(parset):
     else:
         parset_dict['keep_unavg_facet_data'] = False
 
-    # Maximum number of cycles of the last step of selfcal to perform (default =
-    # 10). The last step is looped until the number of cycles reaches this value or
-    # until the improvement in dynamic range over the previous image is less than
-    # 1.25%
-    if 'max_selfcal_loops' in parset_dict:
-        parset._sections['calibration']['max_selfcal_loops'] = parset_dict['max_selfcal_loops']
-
-    # Use baseline-dependent preaveraging to increase the signal-to-noise of the
-    # phase-only solve for sources below this flux (default = 2.0). When
-    # activated, averaging in time is done to exploit the time coherence in the TEC
-    # solutions, and averaging in frequency to exploit the frequency coherence of
-    # the beam effects
-    if 'preaverage_flux_jy' in parset_dict:
-        parset._sections['calibration']['preaverage_flux_jy'] = parset_dict['preaverage_flux_jy']
-
-    # Peel the calibrator for sources above this flux density (default = 25.0).
-    # When activated, the calibrator is peeled using a supplied sky model and
-    # the facet is then imaged as normal. Note: a sky model must be specified in the
-    # directions file in the peel_skymodel column for each source that should be
-    # peeled
-    if 'peel_flux_jy' in parset_dict:
-        parset._sections['calibration']['peel_flux_jy'] = parset_dict['peel_flux_jy']
-
-    # Use multi-scale selfcal that starts at 20 arcsec resolution and increases the
-    # resolution in stages to the full resolution (default = False). This method may
-    # improve convergence, especially when the starting model is poor
-    if 'multiscale_selfcal' in parset_dict:
-        log.warning('Option "multiscale_selfcal" is deprecated and should be changed to "multires_selfcal"')
-        parset._sections['calibration']['multires_selfcal'] = parset_dict['multiscale_selfcal']
-
-    # Max desired peak flux density reduction at center of the facet edges due to
-    # bandwidth smearing (at the mean frequency) and time smearing (default = 0.15 =
-    # 15% reduction in peak flux). Higher values result in shorter run times but
-    # more smearing away from the facet centers. This value only applies to the
-    # facet imaging (selfcal always uses a value of 0.15)
-    if 'max_peak_smearing' in parset_dict:
-        parset._sections['imaging']['max_peak_smearing'] = parset_dict['max_peak_smearing']
-
-    # Size of frequency block in MHz over which a single TEC solution is fit
-    # (default = 10)
-    if 'tec_block_mhz' in parset_dict:
-        parset._sections['calibration']['tec_block_mhz'] = parset_dict['tec_block_mhz']
-
-    # Selfcal imaging parameters: pixel size in arcsec (default = 1.5) and Briggs
-    # robust parameter (default = -0.25)
-    if 'selfcal_cellsize_arcsec' in parset_dict:
-        parset._sections['imaging']['selfcal_cellsize_arcsec'] = parset_dict['selfcal_cellsize_arcsec']
-    if 'selfcal_robust' in parset_dict:
-        parset._sections['imaging']['selfcal_robust'] = parset_dict['selfcal_robust']
-
     # Check for unused options
     given_options = parset.options('global')
-    allowed_options = ['dir_working', 'dir_ms', 'exit_on_bad_band', 'parmdb_name',
-        'interactive', 'make_mosaic', 'exit_on_selfcal_failure',
-        'skip_selfcal_check', 'wsclean_nbands', 'keep_avg_facet_data',
-        'chunk_size_sec', 'wsclean_image_padding', 'wsclean_model_padding',
-        'peel_flux_jy', 'keep_unavg_facet_data', 'max_selfcal_loops',
-        'preaverage_flux_jy', 'multiscale_selfcal', 'skymodel_extension',
-        'max_peak_smearing', 'tec_block_mhz', 'selfcal_cellsize_arcsec',
-        'selfcal_robust', 'use_compression', 'flag_abstime', 'flag_baseline',
-        'flag_freqrange', 'flag_expr']
-    allowed_options.extend(['direction_specific', 'calibration_specific',
-        'imaging_specific', 'cluster_specific']) # add dicts needed for deprecated options
-    deprecated_options_imaging = ['make_mosaic', 'facet_imager',
-        'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust']
-    deprecated_options_cal = ['exit_on_selfcal_failure',
-        'skip_selfcal_check', 'max_selfcal_loops', 'preaverage_flux_jy',
-        'multiscale_selfcal', 'tec_block_mhz', 'peel_flux_jy']
+    allowed_options = ['dir_working', 'dir_ms', 'min_fraction_per_band',
+        'exit_on_bad_band', 'parmdb_name', 'interactive', 'keep_avg_facet_data',
+        'keep_unavg_facet_data', 'chunk_size_sec', 'skymodel_extension',
+        'use_compression', 'flag_abstime', 'flag_baseline', 'flag_freqrange',
+        'flag_expr']
     for option in given_options:
         if option not in allowed_options:
             log.warning('Option "{}" was given in the [global] section of the '
                 'parset but is not a valid global option'.format(option))
-        if option in deprecated_options_imaging:
-            log.warning('Option "{}" was given in the [global] section of the '
-                'parset but should be in the [imaging] section'.format(option))
-        if option in deprecated_options_cal:
-            log.warning('Option "{}" was given in the [global] section of the '
-                'parset but should be in the [calibration] section'.format(option))
 
     return parset_dict
 

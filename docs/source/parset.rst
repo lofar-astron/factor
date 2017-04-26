@@ -41,6 +41,12 @@ The available options are described below under their respective sections.
         copy of these files and does not modify the originals in any way. E.g.,
         ``dir_ms = /data/bands``.
 
+    min_fraction_per_band
+        Minimum allowable fraction of unflagged data per band (default = 0.5)
+
+    exit_on_bad_band
+        Exit if a band is has too little unflagged data (default = False)
+
     parmdb_name
         Parmdb name for dir-indep. selfcal solutions (stored inside the input
         band measurement sets, so path should be relative to those; default =
@@ -140,9 +146,10 @@ The available options are described below under their respective sections.
 
     preaverage_flux_Jy
         Use baseline-dependent preaveraging to increase the signal-to-noise of the
-        phase-only solve for sources below this flux density (default = 0.0; i.e.,
-        disabled). When activated, averaging in time is done to exploit the time
-        coherence in the TEC solutions.
+        phase-only solve for sources below this flux density (default = 2.0). When
+        activated, averaging in time is done to exploit the time coherence in the TEC
+        solutions, and averaging in frequency is done to exploit the frequency coherence of
+        the slow-gain solutions
 
     multires_selfcal
         Use multi-resolution selfcal that starts at 20 arcsec resolution and increases the
