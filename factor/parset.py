@@ -292,14 +292,14 @@ def get_calibration_options(parset):
         parset_dict['preapply_first_cal_phases'] = True
 
     # Use baseline-dependent preaveraging to increase the signal-to-noise of the
-    # phase-only solve for sources below this flux (default = 2.0). When
+    # phase-only solve for sources below this flux density (default = 1.0 Jy). When
     # activated, averaging in time is done to exploit the time coherence in the TEC
     # solutions, and averaging in frequency to exploit the frequency coherence of
     # the beam effects
     if 'preaverage_flux_jy' in parset_dict:
         parset_dict['preaverage_flux_jy'] = parset.getfloat('calibration', 'preaverage_flux_jy')
     else:
-        parset_dict['preaverage_flux_jy'] = 2.0
+        parset_dict['preaverage_flux_jy'] = 1.0
 
     # Use multi-resolution selfcal that starts at 20 arcsec resolution and increases the
     # resolution in stages to the full resolution (default = False). This method may

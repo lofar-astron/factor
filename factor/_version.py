@@ -11,6 +11,14 @@ def changelog():
     FACTOR Changelog.
     ----------------------------------------------------------------------------
 
+    25/04/2017
+
+        - Preaveraging is now done in frequency as well as in time (but is not
+        baseline-dependent). This improves the S/N of the slow-gain solutions
+        for fainter sources by a factor of ~ 2
+        - An option (min_fraction_per_band) has been added that sets the
+        minimum allowed unflagged fraction per band
+
     11/04/2017
 
         - WSClean's automasking feature is now used during imaging. The old

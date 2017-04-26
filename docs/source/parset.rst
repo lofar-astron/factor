@@ -146,7 +146,7 @@ The available options are described below under their respective sections.
 
     preaverage_flux_Jy
         Use baseline-dependent preaveraging to increase the signal-to-noise of the
-        phase-only solve for sources below this flux density (default = 2.0). When
+        phase-only solve for sources below this flux density (default = 1.0 Jy). When
         activated, averaging in time is done to exploit the time coherence in the TEC
         solutions, and averaging in frequency is done to exploit the frequency coherence of
         the slow-gain solutions

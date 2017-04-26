@@ -93,11 +93,11 @@ dir_ms = /data/bands
 # preapply_first_cal_phases = True
 
 # Use baseline-dependent preaveraging to increase the signal-to-noise of the
-# phase-only solve for sources below this flux density (default = 2.0). When
+# phase-only solve for sources below this flux density (default = 1.0 Jy). When
 # activated, averaging in time is done to exploit the time coherence in the TEC
 # solutions, and averaging in frequency is done to exploit the frequency coherence of
 # the slow-gain solutions
-# preaverage_flux_Jy = 2.0
+# preaverage_flux_Jy = 1.0
 
 # Use multi-resolution selfcal that starts at 20 arcsec resolution and increases
 # the resolution in stages to the full resolution (default = False). This method
