@@ -17,7 +17,7 @@ from astropy.stats import median_absolute_deviation
 
 
 def main(ms_input, parmdb_input, input_colname, output_data_colname, output_weights_colname,
-    target_rms_rad, minutes_per_block=10.0, baseline_file=None, verbose=True):
+    target_rms_rad, baseline_file, minutes_per_block=10.0, verbose=True):
     """
     Pre-average data using a sliding Gaussian kernel in time
 
@@ -36,6 +36,9 @@ def main(ms_input, parmdb_input, input_colname, output_data_colname, output_weig
         Name of the column in the MS into which the averaged data weights are written
     target_rms_rad : float (str)
         The target RMS for the phase noise in the input parmDBs. (Or whatever???)
+    baseline_file : str
+        Filename of pickled baseline lengths
+
     """
 
     # convert input to needed types
@@ -47,12 +50,8 @@ def main(ms_input, parmdb_input, input_colname, output_data_colname, output_weig
 
     if type(target_rms_rad) is str:
         target_rms_rad = float(target_rms_rad)
-    if baseline_file is None:
-        if verbose:
-            print('Calculating baseline lengths...')
-        baseline_dict = get_baseline_lengths(ms_list)
-    elif os.path.exists(baseline_file):
-        f = open('baseline_file', 'r')
+    if os.path.exists(baseline_file):
+        f = open(baseline_file, 'r')
         baseline_dict = pickle.load(f)
         f.close()
     else:
@@ -101,46 +100,6 @@ def main(ms_input, parmdb_input, input_colname, output_data_colname, output_weig
         print('Averaging...')
     BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_data_colname,
         output_weights_colname, ionfactor_min)
-
-
-def get_baseline_lengths(ms_list, check_antennas=True):
-    """
-    Returns dict of baseline lengths in km for all baselines in input dataset
-    """
-    anttab = pt.table(ms_list[0]+'::ANTENNA', ack=False)
-    antnames = anttab.getcol('NAME')
-    anttab.close()
-    if check_antennas:
-        for ms_file in ms_list[1:]:
-            anttab = pt.table(ms_file+'::ANTENNA', ack=False)
-            if not all([a == b for a, b in zip(antnames, anttab.getcol('NAME'))]):
-                raise ValueError('pre_average_multi: Measurement sets "'+ms_list[0]+'" and "'+ms_file+'" have different ANTENNA tables!')
-            anttab.close()
-    # concatenate the UW-data from all MSs
-    t = pt.table(ms_list[0], ack=False)
-    ant1 = t.getcol('ANTENNA1')
-    ant2 = t.getcol('ANTENNA2')
-    all_uvw = t.getcol('UVW')
-    t.close()
-    for ms_file in ms_list[1:]:
-        t = pt.table(ms_list[0], ack=False)
-        ant1 = np.concatenate( (ant1,t.getcol('ANTENNA1')) )
-        ant2 = np.concatenate( (ant2,t.getcol('ANTENNA2')) )
-        all_uvw = np.concatenate( (all_uvw,t.getcol('UVW')) )
-        t.close()
-    baseline_dict = {}
-    for ant in itertools.product(set(ant1), set(ant2)):
-        if ant[0] >= ant[1]:
-            continue
-        sel1 = np.where(ant1 == ant[0])[0]
-        sel2 = np.where(ant2 == ant[1])[0]
-        sel = sorted(list(frozenset(sel1).intersection(sel2)))
-        uvw = all_uvw[sel, :]
-        uvw_dist = np.sqrt(uvw[:, 0]**2 + uvw[:, 1]**2 + uvw[:, 2]**2)
-        baseline_dict['{0}'.format(ant[0])] = antnames[ant[0]]
-        baseline_dict['{0}'.format(ant[1])] = antnames[ant[1]]
-        baseline_dict['{0}-{1}'.format(ant[0], ant[1])] = np.mean(uvw_dist) / 1.e3
-    return baseline_dict
 
 
 def find_ionfactor(parmdb_file, baseline_dict, t1, t2, target_rms_rad=0.2):
@@ -365,61 +324,6 @@ def BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_data_colnam
         print "BLavg_multi: Finished one group of measurement sets."
 
 
-def smooth(x, window_len=10, window='hanning'):
-    """smooth the data using a window with requested size.
-
-    This method is based on the convolution of a scaled window with the signal.
-    The signal is prepared by introducing reflected copies of the signal
-    (with the window size) in both ends so that transient parts are minimized
-    in the begining and end part of the output signal.
-
-    input:
-        x: the input signal
-        window_len: the dimension of the smoothing window
-        window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
-            flat window will produce a moving average smoothing.
-
-    output:
-        the smoothed signal
-
-    example:
-
-    import numpy as np
-    t = np.linspace(-2,2,0.1)
-    x = np.sin(t)+np.random.randn(len(t))*0.1
-    y = smooth(x)
-
-    see also:
-
-    numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
-    scipy.signal.lfilter
-
-    TODO: the window parameter could be the window itself if an array instead of a string
-    """
-
-    if x.ndim != 1:
-        raise ValueError, "smooth only accepts 1 dimension arrays."
-
-    if x.size < window_len:
-        raise ValueError, "Input vector needs to be bigger than window size."
-
-    if window_len < 3:
-        return x
-
-    if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-        raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
-
-    s=np.r_[2*x[0]-x[window_len:1:-1], x, 2*x[-1]-x[-1:-window_len:-1]]
-    #print(len(s))
-
-    if window == 'flat': #moving average
-        w = np.ones(window_len,'d')
-    else:
-        w = getattr(np, window)(window_len)
-    y = np.convolve(w/w.sum(), s, mode='same')
-    return y[window_len-1:-window_len+1]
-
-
 def unwrap_fft(phase, iterations=3):
     """
     Unwrap phase using Fourier techniques.
@@ -461,6 +365,7 @@ def unwrap_fft(phase, iterations=3):
 
     return phase
 
+
 def input2bool(invar):
     if isinstance(invar, bool):
         return invar
@@ -475,6 +380,7 @@ def input2bool(invar):
         return bool(invar)
     else:
         raise TypeError('input2bool: Unsupported data type:'+str(type(invar)))
+
 
 def input2strlist(invar):
     str_list = None
