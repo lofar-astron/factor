@@ -43,9 +43,6 @@ def update_state(mapfile_dir):
                 fp.close()
                 for k, v in d.iteritems():
                     if type(v) is str:
-                        if 'chunks' in v:
-                            parts = v.split('chunks')
-                            d[k] = os.path.join(pipe_dir, 'chunks', parts[1])
                         if 'mapfiles' in v:
                             parts = v.split('mapfiles')
                             d[k] = os.path.join(pipe_dir, 'mapfiles', parts[1])
@@ -54,6 +51,13 @@ def update_state(mapfile_dir):
                             bandname = d['name']
                             d[k] = os.path.join(pipe_dir.split('state')[0],
                                 'sky_models', bandname, filename)
+                    elif type(v) is list:
+                        for i, l in enumerate(v):
+                            if '/chunks/' in l:
+                                parts = l.split('/chunks/')
+                                v[i] = os.path.join(pipe_dir, 'chunks', parts[1])
+                        d[k] = v
+
                 fp = open(f, 'w')
                 pickle.dump(d, fp)
                 fp.close()
