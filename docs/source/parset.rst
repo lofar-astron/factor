@@ -148,8 +148,8 @@ The available options are described below under their respective sections.
         Use baseline-dependent preaveraging to increase the signal-to-noise of the
         phase-only solve for sources below this flux density (default = 1.0 Jy). When
         activated, averaging in time is done to exploit the time coherence in the TEC
-        solutions, and averaging in frequency is done to exploit the frequency coherence of
-        the slow-gain solutions
+        effects, and averaging in frequency is done to exploit the frequency coherence of
+        the beam errors
 
     multires_selfcal
         Use multi-resolution selfcal that starts at 20 arcsec resolution and increases the

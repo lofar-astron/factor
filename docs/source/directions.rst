@@ -72,9 +72,9 @@ Columns
         If ``True``, the calibrator will be peeled using the sky model given in the :term:`peel_skymodel` column and self calibration will not be done.
 
     cal_size_deg
-        The size of the calibrator or calibrator group in degrees. This value sets the size of the region used for self calibration.
+        The size (diameter or width) of the calibrator or calibrator group in degrees. This value sets the size of the region used for self calibration and determines which sources are added back for self calibration (so all sources used for self calibration must lie in a region of this size centered on the position given in the :term:`position` column).
 
     cal_flux_mjy
-        The total flux density of the calibrator or calibrator group in mJy. This value is not used by Factor.
+        The total flux density of the calibrator or calibrator group in mJy. This value is not used by Factor but is written by LSMTool for convenience.
 
 

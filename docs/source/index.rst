@@ -38,6 +38,7 @@ Setting Up and Running Factor
    running
    archiving
    tips
+   help
 
 
 Factor Operations and Primary Data Products
