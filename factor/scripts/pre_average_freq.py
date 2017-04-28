@@ -90,8 +90,8 @@ def main(ms_input, input_colname, output_data_colname, output_weights_colname,
         dist_km = baseline_dict['{0}-{1}'.format(ant[0], ant[1])]
         resolution_deg = lambda_km / dist_km * 180.0 / np.pi
         stddev_hz = min(3e6, get_target_bandwidth(freq_hz, delta_theta_deg,
-            resolution_deg, target_peak_reduction_factor))
-        stddev_nchan = stddev_hz / chan_width_hz
+            resolution_deg, target_peak_reduction_factor)/4.0)
+        stddev_nchan = stddev_hz / chan_width_hz * np.sqrt(0.5 / dist_km)
 
         # smear weighted data and weights
         dataR = gfilter(np.real(data), stddev_nchan, axis=1)

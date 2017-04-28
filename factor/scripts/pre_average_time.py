@@ -283,19 +283,19 @@ def BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_data_colnam
             stddev = 30.0 * ionfactor * np.sqrt((25.0 / dist)) * (freq / 60.e6) # in sec
             stddev = stddev/timepersample # in samples
 
-            #    Multiply every element of the data by the weights, convolve both
-            #    the scaled data and the weights, and then divide the convolved data
-            #    by the convolved weights (translating flagged data into weight=0).
-            #    That's basically the equivalent of a running weighted average with
-            #    a Gaussian window function.
+            # Multiply every element of the data by the weights, convolve both
+            # the scaled data and the weights, and then divide the convolved data
+            # by the convolved weights (translating flagged data into weight=0).
+            # That's basically the equivalent of a running weighted average with
+            # a Gaussian window function.
 
             # weigth data and set bad data to 0 so nans do not propagate
             data = np.nan_to_num(data*weights)
 
             # smear weighted data and weights
-            dataR = gfilter(np.real(data), stddev, axis=0)#, truncate=4.)
-            dataI = gfilter(np.imag(data), stddev, axis=0)#, truncate=4.)
-            weights = gfilter(weights, stddev, axis=0)#, truncate=4.)
+            dataR = gfilter(np.real(data), stddev, axis=0)
+            dataI = gfilter(np.imag(data), stddev, axis=0)
+            weights = gfilter(weights, stddev, axis=0)
 
             # re-create data
             data = (dataR + 1j * dataI)
