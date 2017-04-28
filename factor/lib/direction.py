@@ -774,9 +774,7 @@ class Direction(object):
                     # solution interval instead (which affects the width of the
                     # preaveraging Gaussian)
                     self.solint_time_p = 1
-                    self.target_rms_rad = int(round(0.5 * (ref_flux_jy / effective_flux_jy)**2))
-                    if self.target_rms_rad < 0.2:
-                        self.target_rms_rad = 0.2
+                    self.target_rms_rad = 0.5 * (ref_flux_jy / effective_flux_jy)**2
                     if self.target_rms_rad > 0.5:
                         self.target_rms_rad = 0.5
                 else:
