@@ -323,8 +323,9 @@ The available options are described below under their respective sections.
 
     faceting_radius_deg
         Radius within which facets will be used (default = 1.25 * FWHM / 2 of primary beam
-        of highest-frequency band); outside of this radius, small patches are used
-        that do not appear in the final mosaic.
+	of highest-frequency band); outside of this radius, small patches are used
+	that do not appear in the final mosaic. (The given radius will be expanded in the
+	N-S direction - i.e. along the DEC axis - by the elongation of the primary beam.)
 
     check_edges
         Check whether any sources from the initial subtract sky model fall on facet
