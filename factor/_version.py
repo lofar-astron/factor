@@ -13,8 +13,8 @@ def changelog():
 
     25/04/2017
 
-        - Preaveraging is now done in frequency as well as in time (but is not
-        baseline-dependent). This improves the S/N of the slow-gain solutions
+        - Preaveraging is now done in frequency as well as in time. This
+        preaveraging generally improves the S/N of the CS slow-gain solutions
         for fainter sources by a factor of ~ 2
         - An option (min_fraction_per_band) has been added that sets the
         minimum allowed unflagged fraction per band
