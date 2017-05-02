@@ -12,12 +12,10 @@ import lofar.parmdb
 import math
 import shutil
 import multiprocessing
-import matplotlib.pyplot as plt
 from scipy.interpolate import LSQUnivariateSpline
 import sys
 import scipy.ndimage
 import astropy.convolution
-import matplotlib as mpl
 
 
 def std(inputData, Zero=False, axis=None, dtype=None):
@@ -532,6 +530,9 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
     Nr = int(numpy.ceil(numpy.sqrt(len(antenna_list))))
     Nc = int(numpy.ceil(numpy.float(len(antenna_list))/Nr))
     if plotting:
+        import matplotlib as mpl
+        import matplotlib.pyplot as plt
+
         mpl.rc('font',size =6 )
         mpl.rc('figure.subplot',left=0.05, bottom=0.05, right=0.95, top=0.95 )
         fa, axa = plt.subplots(Nr, Nc, sharex=True, sharey=True, figsize=(16,12))
