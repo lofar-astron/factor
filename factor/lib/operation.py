@@ -341,17 +341,20 @@ class Operation(object):
         can_restart = False
         if os.path.exists(logfile):
             # Read the last 20 lines and look for 'returncode 123456'
-            with open(logfile, "rb") as f:
-                first = f.readline()      # Read the first line.
-                f.seek(-10000, 2)             # Jump back from end
-                while f.read(1) != b"\n": # Until EOL is found...
-                    f.seek(-2, 1)         # ...jump back the read byte plus one more.
-                last_lines = f.readlines()       # Read last line.
+            try:
+                with open(logfile, "rb") as f:
+                    first = f.readline()      # Read the first line.
+                    f.seek(-10000, 2)             # Jump back from end
+                    while f.read(1) != b"\n": # Until EOL is found...
+                        f.seek(-2, 1)         # ...jump back the read byte plus one more.
+                    last_lines = f.readlines()       # Read last line.
 
-            for line in last_lines:
-                if 'returncode 123456' in line:
-                    can_restart = True
-                    break
+                for line in last_lines:
+                    if 'returncode 123456' in line:
+                        can_restart = True
+                        break
+            except IOError:
+                can_restart = False
 
         return can_restart
 
