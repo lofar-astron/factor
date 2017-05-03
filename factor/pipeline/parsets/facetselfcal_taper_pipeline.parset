@@ -487,7 +487,7 @@ apply_phaseonly2.argument.correct_fast2.invert     = True
 loop_phasecal.control.kind      = loop
 loop_phasecal.control.type      = conditional
 loop_phasecal.control.loopcount = {{ loopcount }}
-loop_phasecal.control.loopsteps = [average2,create_compressed_mapfile2,wsclean_image22,create_imagebase_map22,create_expanded_model2_mapfile,pad_selfcal_model2_images,wsclean_ft2,{% if pre_average %}copy_model_data2,{% endif %}remove_parmdbs11,solve_ampphase11,apply_ampphase11,adjust_wsclean_mapfile22_phaseloop,copy_image1,check_image1]
+loop_phasecal.control.loopsteps = [average2,create_compressed_mapfile2,wsclean_image22,create_imagebase_map22,create_expanded_model2_mapfile,pad_selfcal_model2_images,wsclean_ft2,remove_parmdbs11,solve_ampphase11,apply_ampphase11,adjust_wsclean_mapfile22_phaseloop,copy_image1,check_image1]
 
 # average the output of the previous apply step, length = ntimes * num_cal_blocks
 average2.control.type                                 = dppp
