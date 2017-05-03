@@ -89,8 +89,8 @@ def main(fast_parmdb, slow_parmdb, output_file, freqstep=1, preapply_parmdb=None
             fast_times = fast_times_preapply
             fast_timewidths = fast_timewidths_preapply
 
-    # Get values on the final time and frequency grid. This is not needed if
-    # a preapply_parmdb is specified, as it will already be made on the final grids
+    # Determine final time and frequency grid. This step is not needed if a
+    # preapply_parmdb is specified, as it will already be made on the final grids
     if freqstep > 1 and preapply_parmdb is None:
         final_freqs = []
         final_freqwidths = []
@@ -105,13 +105,6 @@ def main(fast_parmdb, slow_parmdb, output_file, freqstep=1, preapply_parmdb=None
     else:
         final_freqs = slow_freqs
         final_freqwidths = slow_freqwidths
-    if preapply_parmdb is not None:
-        preapply_soldict = preapply_pdb.getValues('*', final_freqs, final_freqwidths,
-            fast_times, fast_timewidths, asStartEnd=False)
-    fast_soldict = fast_pdb.getValues('*', final_freqs, final_freqwidths, fast_times,
-        fast_timewidths, asStartEnd=False)
-    slow_soldict = slow_pdb.getValues('*', final_freqs, final_freqwidths, fast_times,
-        fast_timewidths, asStartEnd=False)
 
     # Identify any gaps in time (frequency gaps are not allowed), as we need to handle
     # each section separately if gaps are present
@@ -120,49 +113,56 @@ def main(fast_parmdb, slow_parmdb, output_file, freqstep=1, preapply_parmdb=None
     if len(gaps[0]) > 0:
         gaps_ind = gaps[0] + 1
     else:
-        gaps_ind = []
+        gaps_ind = [len(delta_times)]
 
-    # Add various phase and amp corrections together
-    for station in station_names:
-        fast_phase = np.copy(fast_soldict['CommonScalarPhase:{s}'.format(s=station)]['values'])
-        tec = np.copy(fast_soldict['TEC:{s}'.format(s=station)]['values'])
-        tec_phase =  -8.44797245e9 * tec / final_freqs
+    # Get values on the final time and frequency grid
+    g_start = 0
+    for g in gaps_ind:
+        if preapply_parmdb is not None:
+            preapply_soldict = preapply_pdb.getValues('*', final_freqs, final_freqwidths,
+                fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
+        fast_soldict = fast_pdb.getValues('*', final_freqs, final_freqwidths,
+            fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
+        slow_soldict = slow_pdb.getValues('*', final_freqs, final_freqwidths,
+            fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
 
-        for pol in pol_list:
-            slow_real = np.copy(slow_soldict['Gain:'+pol+':Real:{s}'.format(s=station)]['values'])
-            slow_imag = np.copy(slow_soldict['Gain:'+pol+':Imag:{s}'.format(s=station)]['values'])
-            slow_amp = np.sqrt((slow_real**2) + (slow_imag**2))
-            slow_phase = np.arctan2(slow_imag, slow_real)
+        # Add various phase and amp corrections together
+        for station in station_names:
+            if station in fast_soldict:
+                fast_phase = np.copy(fast_soldict['CommonScalarPhase:{s}'.format(s=station)]['values'])
+                tec = np.copy(fast_soldict['TEC:{s}'.format(s=station)]['values'])
+                tec_phase =  -8.44797245e9 * tec / final_freqs
 
-            total_amp = slow_amp
-            if preapply_parmdb is not None:
-                fast_phase_preapply = np.copy(preapply_soldict['Gain:'+pol+':Phase:{s}'.format(s=station)]['values'])
-                total_phase = np.mod(fast_phase + tec_phase + slow_phase + fast_phase_preapply + np.pi, 2*np.pi) - np.pi
+                for pol in pol_list:
+                    slow_real = np.copy(slow_soldict['Gain:'+pol+':Real:{s}'.format(s=station)]['values'])
+                    slow_imag = np.copy(slow_soldict['Gain:'+pol+':Imag:{s}'.format(s=station)]['values'])
+                    slow_amp = np.sqrt((slow_real**2) + (slow_imag**2))
+                    slow_phase = np.arctan2(slow_imag, slow_real)
 
-                # Identify zero phase solutions and set the corresponding entries in total_phase and total_amp to NaN
-                total_phase = np.where(fast_phase_preapply == 0.0, np.nan, total_phase)
-                total_amp = np.where(fast_phase_preapply == 0.0, np.nan, total_amp)
-            else:
-                total_phase = np.mod(fast_phase + tec_phase + slow_phase + np.pi, 2*np.pi) - np.pi
+                    total_amp = slow_amp
+                    if preapply_parmdb is not None:
+                        fast_phase_preapply = np.copy(preapply_soldict['Gain:'+pol+':Phase:{s}'.format(s=station)]['values'])
+                        total_phase = np.mod(fast_phase + tec_phase + slow_phase +
+                            fast_phase_preapply + np.pi, 2*np.pi) - np.pi
 
-            # Identify zero phase solutions and set the corresponding entries in total_phase and total_amp to NaN
-            total_phase = np.where(np.logical_or(fast_phase == 0.0, tec_phase == 0.0), np.nan, total_phase)
-            total_amp = np.where(np.logical_or(fast_phase == 0.0, tec_phase == 0.0), np.nan, total_amp)
+                        # Identify zero phase solutions and set the corresponding entries in total_phase and total_amp to NaN
+                        total_phase = np.where(fast_phase_preapply == 0.0, np.nan, total_phase)
+                        total_amp = np.where(fast_phase_preapply == 0.0, np.nan, total_amp)
+                    else:
+                        total_phase = np.mod(fast_phase + tec_phase + slow_phase + np.pi, 2*np.pi) - np.pi
 
-            g_start = 0
-            for g in gaps_ind:
-                # If time gaps exist, add them one-by-one (except for last one)
-                output_pdb.addValues('Gain:'+pol+':Phase:{}'.format(station), total_phase[g_start:g], final_freqs, final_freqwidths,
-                    fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
-                output_pdb.addValues('Gain:'+pol+':Ampl:{}'.format(station), total_amp[g_start:g], final_freqs, final_freqwidths,
-                    fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
-                g_start = g
+                    # Identify zero phase solutions and set the corresponding entries in total_phase and total_amp to NaN
+                    total_phase = np.where(np.logical_or(fast_phase == 0.0, tec_phase == 0.0), np.nan, total_phase)
+                    total_amp = np.where(np.logical_or(fast_phase == 0.0, tec_phase == 0.0), np.nan, total_amp)
 
-            # Add remaining time slots
-            output_pdb.addValues('Gain:'+pol+':Phase:{}'.format(station), total_phase[g_start:], final_freqs, final_freqwidths,
-                fast_times[g_start:], fast_timewidths[g_start:], asStartEnd=False)
-            output_pdb.addValues('Gain:'+pol+':Ampl:{}'.format(station), total_amp[g_start:], final_freqs, final_freqwidths,
-                fast_times[g_start:], fast_timewidths[g_start:], asStartEnd=False)
+                    # If time gaps exist, add them one-by-one (except for last one)
+                    output_pdb.addValues('Gain:'+pol+':Phase:{}'.format(station),
+                        total_phase, final_freqs, final_freqwidths,
+                        fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
+                    output_pdb.addValues('Gain:'+pol+':Ampl:{}'.format(station),
+                        total_amp, final_freqs, final_freqwidths,
+                        fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
+        g_start = g
 
     # Write values
     output_pdb.flush()
