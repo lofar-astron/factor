@@ -764,6 +764,7 @@ class Direction(object):
             # Set baseline-dependent pre-averaging flag
             if effective_flux_jy < preaverage_flux_jy:
                 self.pre_average = True
+                self.log.debug('Preaveraging in frequency and time will be done')
             else:
                 self.pre_average = False
 
