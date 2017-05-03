@@ -128,7 +128,7 @@ def main(fast_parmdb, slow_parmdb, output_file, freqstep=1, preapply_parmdb=None
 
         # Add various phase and amp corrections together
         for station in station_names:
-            if station in fast_soldict:
+            if 'CommonScalarPhase:{s}'.format(s=station) in fast_soldict:
                 fast_phase = np.copy(fast_soldict['CommonScalarPhase:{s}'.format(s=station)]['values'])
                 tec = np.copy(fast_soldict['TEC:{s}'.format(s=station)]['values'])
                 tec_phase =  -8.44797245e9 * tec / final_freqs
