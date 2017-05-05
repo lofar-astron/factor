@@ -30,13 +30,15 @@ def update_state(dir_input):
 
     if dir_input.endswith('mapfiles'):
         # Assume path is a pipeline mapfiles directory. In this case, we can
-        # simply substitute the new path for the old one in each of the mapfiles
+        # simply substitute the new working_dir for the old one in each of the
+        # mapfiles
+        working_dir = dir_input.split('/results/')[0]
         for f in file_list:
             map = DataMap.load(f)
             for item in map:
-                # Check whether the string stored as the "file" is really a path
                 if '/' in item.file:
-                    item.file = os.path.join(dir_input, os.path.basename(item.file))
+                    old_working_dir = item.file.split('/results/')[0]
+                    item.file = item.file.replace(old_working_dir, working_dir)
             map.save(f)
     elif dir_input.endswith('state'):
         # Assume path is the Factor state directory. In this case, we can try to
@@ -52,8 +54,6 @@ def update_state(dir_input):
                             if k == 'working_dir':
                                 d[k] = working_dir
                             if '/' in v:
-                                # Change the parent directory of the path to the
-                                # new one
                                 for infix in ['results/', 'state/', 'chunks/']:
                                     parts = v.split(infix)
                                     if len(parts) > 1:
