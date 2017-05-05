@@ -15,52 +15,60 @@ import glob
 log = logging.getLogger('factor:unarchive')
 
 
-def update_state(mapfile_dir):
+def update_state(dir_input):
     """
-    Updates the paths in state files
+    Updates the paths in mapfiles or state files
 
     Parameters
     ----------
     dir_input : str
-        Path to files to update
+        Directory containing files to update
 
     """
-    pipe_dir = os.path.dirname(mapfile_dir)
-    file_list = glob.glob(os.path.join(mapfile_dir, '*'))
-    for f in file_list:
-        # Try to load file as a pipeline mapfile
-        try:
+    file_list = glob.glob(os.path.join(dir_input, '*'))
+
+    if '/mapfiles' in dir_input:
+        # Assume path is a pipeline mapfiles directory. In this case, we can
+        # simply substitute the new path for the old one in each of the mapfiles
+        for f in file_list:
             map = DataMap.load(f)
             for item in map:
+                # Check whether the string stored as the "file" is really a path
                 if '/' in item.file:
                     item.file = os.path.join(pipe_dir, os.path.basename(item.file))
             map.save(f)
-        except:
-            # Try to load file as a pickled file and look for paths inside
+    elif '/state' in dir_input:
+        # Assume path is the Factor state directory. In this case, we can try to
+        # load files as pickled state files and look for paths inside. If found,
+        # substitute new path for old one
+        parent_dir = os.path.dirname(dir_input)
+        for f in file_list:
             try:
-                fp = open(f, 'r')
-                d = pickle.load(fp)
-                fp.close()
-                for k, v in d.iteritems():
-                    if type(v) is str:
-                        if 'mapfiles' in v:
-                            parts = v.split('mapfiles')
-                            d[k] = os.path.join(pipe_dir, 'mapfiles', parts[1])
-                        if 'skymodel_dirindep' in v:
-                            filename = os.path.basename(v)
-                            bandname = d['name']
-                            d[k] = os.path.join(pipe_dir.split('state')[0],
-                                'sky_models', bandname, filename)
-                    elif type(v) is list:
-                        for i, l in enumerate(v):
-                            if '/chunks/' in l:
-                                parts = l.split('/chunks/')
-                                v[i] = os.path.join(pipe_dir, 'chunks', parts[1])
-                        d[k] = v
-
-                fp = open(f, 'w')
-                pickle.dump(d, fp)
-                fp.close()
+                with open(f, "rb") as fp:
+                    d = pickle.load(fp)
+                    for k, v in d.iteritems():
+                        if type(v) is str:
+                            if 'skymodel_dirindep' in v:
+                                # For the dir-indep sky models, we have to change
+                                # the path so that it points to the new "sky_models"
+                                # directory
+                                filename = os.path.basename(v)
+                                bandname = d['name']
+                                d[k] = os.path.join(parent_dir, 'sky_models',
+                                    bandname, filename)
+                            elif '/' in v:
+                                # For all other paths, we can just change the
+                                # parent directory of the path
+                                parts = v.split('/results/')
+                                d[k] = os.path.join(parent_dir, 'results', parts[1])
+                        elif type(v) is list:
+                            for i, l in enumerate(v):
+                                if '/' in l:
+                                    parts = l.split('/results/')
+                                    v[i] = os.path.join(parent_dir, 'results', parts[1])
+                            d[k] = v
+                with open(f, "w") as fp:
+                    pickle.dump(d, fp)
             except:
                 pass
 
@@ -130,6 +138,6 @@ def unarchive(dir_input, dir_output, use_symlinks=False, clobber=False):
             subdir = f.split('/')[-2]
             mapfile_dir = os.path.join(dir_output, 'results', subdir, d, 'mapfiles')
             copy(f, mapfile_dir, clobber)
-        update_state(mapfile_dir)
+            update_state(mapfile_dir)
 
     log.info('Unarchiving complete.')
