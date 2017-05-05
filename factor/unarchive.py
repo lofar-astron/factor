@@ -48,24 +48,22 @@ def update_state(dir_input):
                     d = pickle.load(fp)
                     for k, v in d.iteritems():
                         if type(v) is str:
-                            if 'skymodel_dirindep' in v:
-                                # For the dir-indep sky models, we have to change
-                                # the path so that it points to the new "sky_models"
-                                # directory
-                                filename = os.path.basename(v)
-                                bandname = d['name']
-                                d[k] = os.path.join(parent_dir, 'sky_models',
-                                    bandname, filename)
-                            elif '/' in v:
+                            if '/' in v:
                                 # For all other paths, we can just change the
-                                # parent directory of the path
-                                parts = v.split('/results/')
-                                d[k] = os.path.join(parent_dir, 'results', parts[1])
+                                # parent directory of the path to the new one
+                                for infix in ['/results', '/state', '/chunks']:
+                                    parts = v.split(infix)
+                                    if len(parts) > 1:
+                                        d[k] = os.path.join(parent_dir, infix, parts[-1])
+                                        break
                         elif type(v) is list:
                             for i, l in enumerate(v):
                                 if '/' in l:
-                                    parts = l.split('/results/')
-                                    v[i] = os.path.join(parent_dir, 'results', parts[1])
+                                    for infix in ['/results', '/state', '/chunks']:
+                                        parts = l.split(infix)
+                                        if len(parts) > 1:
+                                            v[i] = os.path.join(parent_dir, infix, parts[-1])
+                                            break
                             d[k] = v
                 with open(f, "w") as fp:
                     pickle.dump(d, fp)
