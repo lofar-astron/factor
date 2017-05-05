@@ -329,6 +329,8 @@ def archive(parset_file, directions, dir_output, full=False, archive_subdata=Fal
                 file_list = check_existing_files(d.converted_parmdb_mapfile)
             else:
                 file_list = []
+            if hasattr(d, 'preapply_parmdb_mapfile'):
+                file_list.append(check_existing_files(d.preapply_parmdb_mapfile))
             if len(file_list) == 0:
                 log.warning('No instrument tables found for direction {}.'.format(d.name))
             else:

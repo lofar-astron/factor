@@ -32,12 +32,12 @@ def update_state(dir_input):
         # Assume path is a pipeline mapfiles directory. In this case, we can
         # simply substitute the new working_dir for the old one in each of the
         # mapfiles
-        working_dir = dir_input.split('/results/')[0]
+        working_dir = dir_input.split('results/')[0]
         for f in file_list:
             map = DataMap.load(f)
             for item in map:
                 if '/' in item.file:
-                    old_working_dir = item.file.split('/results/')[0]
+                    old_working_dir = item.file.split('results/')[0]
                     item.file = item.file.replace(old_working_dir, working_dir)
             map.save(f)
     elif dir_input.endswith('state'):
