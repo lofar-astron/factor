@@ -11,6 +11,7 @@ import factor._logging
 from factor.archive import copy
 from lofarpipe.support.data_map import DataMap, DataProduct
 import glob
+import pickle
 
 log = logging.getLogger('factor:unarchive')
 
@@ -37,33 +38,33 @@ def update_state(dir_input):
                 if '/' in item.file:
                     item.file = os.path.join(dir_input, os.path.basename(item.file))
             map.save(f)
-    elif '/state' in dir_input:
+    elif dir_input.endswith('state'):
         # Assume path is the Factor state directory. In this case, we can try to
         # load files as pickled state files and look for paths inside. If found,
-        # substitute new path for old one
-        parent_dir = os.path.dirname(dir_input)
+        # substitute new working_dir for the old one
+        working_dir = os.path.dirname(dir_input)
         for f in file_list:
             try:
                 with open(f, "rb") as fp:
                     d = pickle.load(fp)
                     for k, v in d.iteritems():
                         if type(v) is str:
+                            if k == 'working_dir':
+                                d[k] = working_dir
                             if '/' in v:
-                                # For all other paths, we can just change the
-                                # parent directory of the path to the new one
-                                for infix in ['/results', '/state', '/chunks']:
+                                # Change the parent directory of the path to the
+                                # new one
+                                for infix in ['results/', 'state/', 'chunks/']:
                                     parts = v.split(infix)
                                     if len(parts) > 1:
-                                        d[k] = os.path.join(parent_dir, infix, parts[-1])
-                                        break
+                                        d[k] = os.path.join(working_dir, infix, parts[-1])
                         elif type(v) is list:
                             for i, l in enumerate(v):
                                 if '/' in l:
-                                    for infix in ['/results', '/state', '/chunks']:
+                                    for infix in ['results/', 'state/', 'chunks/']:
                                         parts = l.split(infix)
                                         if len(parts) > 1:
-                                            v[i] = os.path.join(parent_dir, infix, parts[-1])
-                                            break
+                                            v[i] = os.path.join(working_dir, infix, parts[-1])
                             d[k] = v
                 with open(f, "w") as fp:
                     pickle.dump(d, fp)
@@ -87,6 +88,9 @@ def unarchive(dir_input, dir_output, use_symlinks=False, clobber=False):
         Clobber existing files in output directory?
 
     """
+    dir_input = os.path.abspath(dir_input)
+    dir_output = os.path.abspath(dir_output)
+
     log.info('Unarchiving subtracted data files...')
     chunks_dir = os.path.join(dir_input, 'chunks')
     copy(chunks_dir, dir_output, clobber, use_symlinks=use_symlinks)
