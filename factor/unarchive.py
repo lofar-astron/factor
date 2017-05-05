@@ -132,10 +132,13 @@ def unarchive(dir_input, dir_output, use_symlinks=False, clobber=False):
         log.info('Unarchiving pipeline state files for direction {}...'.format(d))
         direction_dir = os.path.join(dir_input, 'pipeline_state', d)
         file_list = glob.glob(os.path.join(direction_dir, '*', '*'))
+        mapfile_dir_list = []
         for i, f in enumerate(file_list):
             subdir = f.split('/')[-2]
             mapfile_dir = os.path.join(dir_output, 'results', subdir, d, 'mapfiles')
+            mapfile_dir_list.append(mapfile_dir)
             copy(f, mapfile_dir, clobber)
+        for mapfile_dir in set(mapfile_dir_list):
             update_state(mapfile_dir)
 
     log.info('Unarchiving complete.')
