@@ -94,7 +94,7 @@ This operation creates a mosaic of the field by joining the facet images togethe
     Multiple fieldmosaic operations may be run if more than one set of imaging parameters were specified in the parset. In this case, the operation names will include the parameter values. E.g., ``fieldmosaic_c15.0r-1.0t45.0u80.0`` is the operation to mosaic the images with a cellsize of 15.0 arcsec, a robust value of -1.0, a Gaussian taper of 45.0 arcsec, and a uv cut of 80 lambda.
 
 Primary products (in ``results/fieldmosaic/field/``):
-    * ``*correct_mosaic.pbcor.fits`` - primary-beam-corrected mosaic
-    * ``*correct_mosaic.pbcut.fits`` - primary-beam-corrected mosaic (blanked beyond 40% power point of primary beam)
+    * ``*correct_mosaic.pbcor.fits`` - the primary-beam-corrected mosaic. This image should be used for measurements of the source flux densities.
+    * ``*correct_mosaic.pbcut.fits`` - the uncorrected mosaic (blanked beyond 40% power point of primary beam). This image can be used as the detection image for source detection in PyBDSF.
 
 
