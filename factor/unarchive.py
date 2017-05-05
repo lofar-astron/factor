@@ -27,7 +27,7 @@ def update_state(dir_input):
     """
     file_list = glob.glob(os.path.join(dir_input, '*'))
 
-    if '/mapfiles' in dir_input:
+    if dir_input.endswith('mapfiles'):
         # Assume path is a pipeline mapfiles directory. In this case, we can
         # simply substitute the new path for the old one in each of the mapfiles
         for f in file_list:
@@ -35,7 +35,7 @@ def update_state(dir_input):
             for item in map:
                 # Check whether the string stored as the "file" is really a path
                 if '/' in item.file:
-                    item.file = os.path.join(pipe_dir, os.path.basename(item.file))
+                    item.file = os.path.join(dir_input, os.path.basename(item.file))
             map.save(f)
     elif '/state' in dir_input:
         # Assume path is the Factor state directory. In this case, we can try to
