@@ -38,31 +38,25 @@ def main(instrument_name, instrument_name_reset):
     if len(gaps[0]) > 0:
         gaps_ind = gaps[0] + 1
     else:
-        gaps_ind = []
+        gaps_ind = [len(delta_times)]
 
     # Reset the amplitude solutions to unity
     if os.path.exists(instrument_name_reset):
         shutil.rmtree(instrument_name_reset)
     pdbnew = lofar.parmdb.parmdb(instrument_name_reset, create=True)
-    for pol in pol_list:
-        for antenna in antenna_list:
-            g_start = 0
-            phase = parms['Gain:'+pol+':Phase:'+antenna]['values']
-            for g in gaps_ind:
-                # If time gaps exist, add them one-by-one (except for last one)
-                data_shape = phase[g_start:g].shape
-                pdbnew.addValues('Gain:'+pol+':Phase:{}'.format(antenna), phase[g_start:g], freqs, freqwidths,
+    g_start = 0
+    for g in gaps_ind:
+        parms = pdb.getValues('*', freqs, freqwidths, times[g_start:g],
+            timewidths[g_start:g], asStartEnd=False)
+        for pol in pol_list:
+            for antenna in antenna_list:
+                phase = np.copy(parms['Gain:'+pol+':Phase:'+antenna]['values'])
+                data_shape = phase.shape
+                pdbnew.addValues('Gain:'+pol+':Phase:{}'.format(antenna), phase, freqs, freqwidths,
                     times[g_start:g], timewidths[g_start:g], asStartEnd=False)
                 pdbnew.addValues('Gain:'+pol+':Ampl:{}'.format(antenna), numpy.ones(data_shape), freqs, freqwidths,
                     times[g_start:g], timewidths[g_start:g], asStartEnd=False)
-                g_start = g
-
-            # Add remaining time slots
-            data_shape = phase[g_start:].shape
-            pdbnew.addValues('Gain:'+pol+':Phase:{}'.format(antenna), phase[g_start:], freqs, freqwidths,
-                times[g_start:], timewidths[g_start:], asStartEnd=False)
-            pdbnew.addValues('Gain:'+pol+':Ampl:{}'.format(antenna), numpy.ones(data_shape), freqs, freqwidths,
-                times[g_start:], timewidths[g_start:], asStartEnd=False)
+        g_start = g
     pdbnew.flush()
 
 
