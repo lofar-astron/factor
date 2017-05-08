@@ -37,8 +37,7 @@ def main(instrument_name, instrument_name_reset):
     gaps = np.where(delta_times > timewidths[:-1]*2.)
     if len(gaps[0]) > 0:
         gaps_ind = gaps[0] + 1
-    else:
-        gaps_ind = [len(delta_times)]
+    gaps_ind = np.append(gaps_ind, np.array([len(times)]))
 
     # Reset the amplitude solutions to unity
     if os.path.exists(instrument_name_reset):

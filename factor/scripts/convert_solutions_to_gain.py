@@ -112,8 +112,7 @@ def main(fast_parmdb, slow_parmdb, output_file, freqstep=1, preapply_parmdb=None
     gaps = np.where(delta_times > fast_timewidths[:-1]*2.)
     if len(gaps[0]) > 0:
         gaps_ind = gaps[0] + 1
-    else:
-        gaps_ind = [len(delta_times)]
+    gaps_ind = np.append(gaps_ind, np.array([len(times)]))
 
     # Get values on the final time and frequency grid
     g_start = 0
@@ -155,7 +154,6 @@ def main(fast_parmdb, slow_parmdb, output_file, freqstep=1, preapply_parmdb=None
                     total_phase = np.where(np.logical_or(fast_phase == 0.0, tec_phase == 0.0), np.nan, total_phase)
                     total_amp = np.where(np.logical_or(fast_phase == 0.0, tec_phase == 0.0), np.nan, total_amp)
 
-                    # If time gaps exist, add them one-by-one (except for last one)
                     output_pdb.addValues('Gain:'+pol+':Phase:{}'.format(station),
                         total_phase, final_freqs, final_freqwidths,
                         fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
