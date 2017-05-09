@@ -49,12 +49,17 @@ def main(instrument_name, instrument_name_reset):
             timewidths[g_start:g], asStartEnd=False)
         for pol in pol_list:
             for antenna in antenna_list:
-                phase = np.copy(parms['Gain:'+pol+':Phase:'+antenna]['values'])
-                data_shape = phase.shape
-                pdbnew.addValues('Gain:'+pol+':Phase:{}'.format(antenna), phase, freqs, freqwidths,
-                    times[g_start:g], timewidths[g_start:g], asStartEnd=False)
-                pdbnew.addValues('Gain:'+pol+':Ampl:{}'.format(antenna), numpy.ones(data_shape), freqs, freqwidths,
-                    times[g_start:g], timewidths[g_start:g], asStartEnd=False)
+                try:
+                    phase = np.copy(parms['Gain:'+pol+':Phase:'+antenna]['values'])
+                    data_shape = phase.shape
+                    pdbnew.addValues('Gain:'+pol+':Phase:{}'.format(antenna), phase, freqs, freqwidths,
+                        times[g_start:g], timewidths[g_start:g], asStartEnd=False)
+                    pdbnew.addValues('Gain:'+pol+':Ampl:{}'.format(antenna), numpy.ones(data_shape), freqs, freqwidths,
+                        times[g_start:g], timewidths[g_start:g], asStartEnd=False)
+                except KeyError:
+                    # The antenna in question does not have solutions for this
+                    # time period
+                    continue
         g_start = g
     pdbnew.flush()
 

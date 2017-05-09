@@ -127,7 +127,7 @@ def main(fast_parmdb, slow_parmdb, output_file, freqstep=1, preapply_parmdb=None
 
         # Add various phase and amp corrections together
         for station in station_names:
-            if 'CommonScalarPhase:{s}'.format(s=station) in fast_soldict:
+            try:
                 fast_phase = np.copy(fast_soldict['CommonScalarPhase:{s}'.format(s=station)]['values'])
                 tec = np.copy(fast_soldict['TEC:{s}'.format(s=station)]['values'])
                 tec_phase =  -8.44797245e9 * tec / final_freqs
@@ -160,6 +160,10 @@ def main(fast_parmdb, slow_parmdb, output_file, freqstep=1, preapply_parmdb=None
                     output_pdb.addValues('Gain:'+pol+':Ampl:{}'.format(station),
                         total_amp, final_freqs, final_freqwidths,
                         fast_times[g_start:g], fast_timewidths[g_start:g], asStartEnd=False)
+            except KeyError:
+                # The station in question does not have solutions for this
+                # time period
+                continue
         g_start = g
 
     # Write values
