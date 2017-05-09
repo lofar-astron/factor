@@ -35,8 +35,7 @@ def main(instrument_name, instrument_name_reset):
     timewidths = parms['Gain:1:1:Ampl:{s}'.format(s=antenna_list[0])]['timewidths']
     delta_times = times[1:] - times[:-1]
     gaps = np.where(delta_times > timewidths[:-1]*2.)
-    if len(gaps[0]) > 0:
-        gaps_ind = gaps[0] + 1
+    gaps_ind = gaps[0] + 1
     gaps_ind = np.append(gaps_ind, np.array([len(times)]))
 
     # Reset the amplitude solutions to unity
