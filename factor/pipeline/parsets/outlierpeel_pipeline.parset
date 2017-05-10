@@ -835,8 +835,6 @@ combine_facet_skymodels.control.inputkeys   = [highresmodel,medresmodel]
 combine_facet_skymodels.control.outputkey   = skymodel
 combine_facet_skymodels.argument.flags      = [highresmodel,medresmodel,skymodel]
 
-{% endif %}
-
 # convert the combined sky model for facet imaging into a sourcedb, length = nbands
 make_sourcedb_new_facet_sources_for_facet_imaging.control.type       = make_sourcedb
 make_sourcedb_new_facet_sources_for_facet_imaging.control.mapfile_in = combine_facet_skymodels.output.mapfile
