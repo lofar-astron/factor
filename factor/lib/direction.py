@@ -419,7 +419,9 @@ class Direction(object):
         # Set multiscale imaging mode for facet imaging: Get source sizes and
         # check for large sources (anything above 4 arcmin -- the CC sky model
         # was convolved with a Gaussian of 1 arcmin, so unresolved sources have
-        # sizes of ~ 1 arcmin)
+        # sizes of ~ 1 arcmin). For the target facet, always turn on multiscale
+        if self.contains_target:
+            self.mscale_field_do = True
         large_size_arcmin = 4.0
         if self.mscale_field_do is None:
             sizes_arcmin = self.get_source_sizes()
