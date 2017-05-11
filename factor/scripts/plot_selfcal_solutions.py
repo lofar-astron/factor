@@ -664,8 +664,8 @@ def solplot_amp(parmdb, imageroot, refstationi, norm_amp_lim=False, median_amp=F
                 infix = '_period{}'.format(gind)
             else:
                 infix = ''
-            fp.savefig(imageroot+"_phase_channel{0}{1}.png".format(chan_indx, infix),dpi=100)
-            plt.close(fp)
+            fa.savefig(imageroot+"_amp_channel{0}{1}.png".format(chan_indx, infix),dpi=100)
+            plt.close(fa)
         g_start = g
     parmdbmtable = False
     del(soldict)
