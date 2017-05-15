@@ -25,7 +25,10 @@ where ``factor.parset`` is the parset described in :ref:`factor_parset`. A numbe
                             reset. Available operations are: outlierpeel,
                             facetpeel, facetpeelimage, facetselfcal, facetsub,
                             facetimage, fieldmosaic
-      -t                    enable test mode
+      -s STOP_AFTER, --stop_after=STOP_AFTER
+                            Stop after processing so many facetselfcal groups.
+                            (Please note the difference between directions and
+                            groups!)
       -v                    enable verbose mode
 
 Factor begins a run by checking the input measurement sets and the direction-independent instrument tables. If the instrument tables contain real/imaginary values, they are converted the phase/amplitude. The input measurement sets are chunked in time to allow more efficient processing.
@@ -83,6 +86,10 @@ Additionally, one or more specific operations can reset by including ``-o`` flag
 
     $ runfactor factor.parset -r direction1,direction2 -o facetimage
 
+.. note::
+
+    If you want to reset all directions and all operations (i.e., to start the processing over from the very start), you can simply delete (or move) the ``results`` and ``state`` directories in the Factor working directory (see below), then restart Factor (without the ``-r`` or ``-o`` flags). Factor will then start
+    the entire reduction again, but will skip the chunking of the input data files.
 
 Output
 ------
