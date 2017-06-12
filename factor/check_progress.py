@@ -29,8 +29,12 @@ except Exception as e:
     raise ImportError('PyPlot could not be imported. Plotting is not '
         'available: {0}'.format(e.message))
 try:
-    from wcsaxes import WCSAxes
-    hasWCSaxes = True
+    try:
+        from astropy.visualization.wcsaxes import WCSAxes
+        hasWCSaxes = True
+    except:
+        from wcsaxes import WCSAxes
+        hasWCSaxes = True
 except:
     hasWCSaxes = False
 try:
@@ -275,7 +279,7 @@ def plot_state(directions_list, trim_names=True):
         reimage_patch=plt.Rectangle((0, 0), 1, 1, edgecolor='#a9a9a9',
             facecolor=color, linewidth=2)
         patch_list.append(reimage_patch)
-    l = ax.legend(patch_list,label_list)
+    l = ax.legend(patch_list, label_list, loc="upper right")
     l.set_zorder(1002)
 
     # Add check for mouse clicks and key presses
