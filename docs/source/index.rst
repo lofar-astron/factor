@@ -36,13 +36,14 @@ Setting Up and Running Factor
    parset
    directions
    running
+   products
    archiving
    tips
    help
 
 
-Factor Operations and Primary Data Products
--------------------------------------------
+Factor Structure
+----------------
 
 .. toctree::
    :maxdepth: 2

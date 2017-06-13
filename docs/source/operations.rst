@@ -1,7 +1,7 @@
 .. _operations:
 
-Operations and data products
-============================
+Operations
+==========
 
 Most of the processing performed by Factor is done in "operations," which are sets of steps that are grouped together. Operations are generally defined depending on their ability to be run in parallel (e.g., multiple facetselfcal operations can be run in parallel but only one facetsub operation can be run at a time). The available operations and the primary data products of each are described in detail below.
 
