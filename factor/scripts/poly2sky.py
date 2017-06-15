@@ -119,37 +119,33 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
         mask = None
 
     # Discard components not in the mask, if given
-    sRAs = s.getColValues('RA')
-    sDecs = s.getColValues('Dec')
     if mask is not None:
-        pix = w.wcs_world2pix(np.array([sRAs, sDecs, [0]*len(s), [0]*len(s)]).T, 0)
+        pix = w.wcs_world2pix(np.array([s.getColValues('RA'), s.getColValues('Dec'),
+            [0]*len(s), [0]*len(s)]).T, 0)
         not_in_mask = []
         for i, p in enumerate(pix):
             if mask[0, 0, int(round(p[1])), int(round(p[0]))] < 1:
                 not_in_mask.append(i)
         s.remove(np.array(not_in_mask))
 
-    # Write sky model
+    # Set fluxes
     specterms = s.getColValues('SpectralIndex')
     stokesI = s.getColValues('I')
-    with open(skymodel, 'w') as outfile:
-        outfile.write('FORMAT = Name, Type, Ra, Dec, I, Q, U, V, ReferenceFrequency, '
-            'MajorAxis, MinorAxis, Orientation\n')
-        for i in range(len(s)):
-            # Find flux at sky_freq (nu), where:
-            #     flux(nu) = stokesI + term0 (nu/refnu - 1) + term1 (nu/refnu - 1)^2 + ...
-            polyterms = specterms[i].tolist()
-            polyterms.insert(0, stokesI[i])
-            flux = polyval(sky_freq/ref_freq-1.0, polyterms)
-            name = 'cc{}'.format(i)
-            if s.getColValues('Type')[i] == 'POINT':
-                outfile.write('{0}, POINT, {1}, {2}, {3}, 0.0, 0.0, 0.0, {4}, , , \n'
-                    .format(name, sRAs[i], sDecs[i], flux, ms_freq))
-            elif s.getColValues('Type')[i] == 'GAUSSIAN':
-                outfile.write('{0}, GAUSSIAN, {1}, {2}, {3}, 0.0, 0.0, 0.0, {4}, {5}, {6}, {7}\n'
-                    .format(name, sRAs[i], sDecs[i], flux, ms_freq,
-                    s.getColValues('MajorAxis')[i], s.getColValues('MinorAxis')[i],
-                    s.getColValues('Orientation')[i]))
+    fluxes = []
+    for i in range(len(s)):
+        # Find flux as follows:
+        #     flux(nu) = stokesI + term0 (nu/refnu - 1) + term1 (nu/refnu - 1)^2 + ...,
+        # where nu = sky_freq and refnu = ref_freq
+        polyterms = specterms[i].tolist()
+        polyterms.insert(0, stokesI[i])
+        fluxes.append(polyval(sky_freq/ref_freq-1.0, polyterms))
+    s.setColValues('I', fluxes)
+
+    # Remove spectral index values
+    s.setColValues('SpectralIndex', []*len(s))
+
+    # Write new sky model
+    s.write(fileName=skymodel, clobber=True)
 
 
 if __name__ == '__main__':
