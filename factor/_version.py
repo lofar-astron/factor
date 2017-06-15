@@ -13,7 +13,7 @@ def changelog():
 
     14/06/2017 - Version 1.3
 
-        - Updated to use WSClean v2.4
+        - Updated to use WSClean v2.4 and LSMTool v1.2.0
 
     25/04/2017
 

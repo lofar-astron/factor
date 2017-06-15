@@ -62,7 +62,7 @@ Factor requires the following:
 
 * The LOFAR offline trunk from the LOFAR software repository (a version of the trunk after 02/11/2016 is required)
 * [WSClean](http://sourceforge.net/p/wsclean/wiki/Home) (version 2.4 or later)
-* [LSMTool](https://github.com/darafferty/LSMTool) (version 1.2 or later)
+* [LSMTool](https://github.com/darafferty/LSMTool) (version 1.2.0 or later)
 * [jinja2](http://jinja.pocoo.org/docs/dev)
 * [Shapely](https://github.com/Toblerity/Shapely)
 * [APLpy](http://aplpy.github.io) (version 1.0 or later)
