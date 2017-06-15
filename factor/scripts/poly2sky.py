@@ -117,7 +117,7 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
     if fits_mask is not None:
         if fits_mask.lower() == 'empty':
             # Handle case in which no sources were found during masking
-            data = []
+            s.remove(np.array(range(len(s))))
             mask = None
         else:
             mask = fits.getdata(fits_mask, 0, ignore_missing_end=True)
@@ -135,7 +135,7 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
         for i, p in enumerate(pix):
             if mask[0, 0, int(round(p[1])), int(round(p[0]))] < 1:
                 not_in_mask.append(i)
-        data.remove_rows(not_in_mask)
+        s.remove(np.array(not_in_mask))
 
     # Write sky model
     specterms = s.getColValues('SpectralIndex')
