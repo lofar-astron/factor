@@ -16,31 +16,6 @@ import os
 import glob
 
 
-def ra2hhmmss(deg):
-    """Convert RA coordinate (in degrees) to HH MM SS"""
-
-    from math import modf
-    if deg < 0:
-        deg += 360.0
-    x, hh = modf(deg/15.)
-    x, mm = modf(x*60)
-    ss = x*60
-
-    return (int(hh), int(mm), ss)
-
-
-def dec2ddmmss(deg):
-    """Convert DEC coordinate (in degrees) to DD MM SS"""
-
-    from math import modf
-    sign = (-1 if deg < 0 else 1)
-    x, dd = modf(abs(deg))
-    x, ma = modf(x*60)
-    sa = x*60
-
-    return (int(dd), int(ma), sa, sign)
-
-
 def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
     max_residual_jy=0.0):
     """
@@ -128,7 +103,7 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
                 not_in_mask.append(i)
         s.remove(np.array(not_in_mask))
 
-    # Set fluxes
+    # Set fluxes and ref frequency
     specterms = s.getColValues('SpectralIndex')
     stokesI = s.getColValues('I')
     fluxes = []
@@ -140,11 +115,13 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
         polyterms.insert(0, stokesI[i])
         fluxes.append(polyval(sky_freq/ref_freq-1.0, polyterms))
     s.setColValues('I', fluxes)
+    s.setColValues('ReferenceFrequency', [ms_freq]*len(s))
 
     # Remove spectral index values
-    s.setColValues('SpectralIndex', []*len(s))
+    s.table.remove_column('SpectralIndex')
+    s.table.remove_column('LogarithmicSI')
 
-    # Write new sky model
+    # Write the new sky model
     s.write(fileName=skymodel, clobber=True)
 
 
