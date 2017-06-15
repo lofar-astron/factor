@@ -149,13 +149,14 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
             polyterms = processSpectralTerms(specterms[i].tolist()).insert(0, stokesI[i])
             flux = polyval(sky_freq/ref_freq-1.0, polyterms)
             name = 'cc{}'.format(i)
-            if s['Type'] == 'POINT':
+            if s.getColValues('Type')[i] == 'POINT':
                 outfile.write('{0}, POINT, {1}, {2}, {3}, 0.0, 0.0, 0.0, {4}, , , \n'
-                    .format(name, s['Ra'], s['Dec'], flux, ms_freq))
-            elif s['Type'] == 'GAUSSIAN':
+                    .format(name, sRAs[i], sDecs[i], flux, ms_freq))
+            elif s.getColValues('Type')[i] == 'GAUSSIAN':
                 outfile.write('{0}, GAUSSIAN, {1}, {2}, {3}, 0.0, 0.0, 0.0, {4}, {5}, {6}, {7}\n'
-                    .format(name, s['Ra'], s['Dec'], flux, ms_freq,
-                    s['MajorAxis'], s['MinorAxis'], s['Orientation']))
+                    .format(name, sRAs[i], sDecs[i], flux, ms_freq,
+                    s.getColValues('MajorAxis')[i], s.getColValues('MinorAxis')[i],
+                    s.getColValues('Orientation')[i]))
 
 
 if __name__ == '__main__':
