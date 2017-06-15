@@ -41,14 +41,6 @@ def dec2ddmmss(deg):
     return (int(dd), int(ma), sa, sign)
 
 
-def processSpectralTerms(terms):
-    if type(terms) is str or type(terms) is np.string_:
-        terms = terms.strip('[]').split(';')
-        terms = [float(t) for t in terms]
-
-    return terms
-
-
 def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
     max_residual_jy=0.0):
     """
@@ -146,7 +138,8 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
         for i in range(len(s)):
             # Find flux at sky_freq (nu), where:
             #     flux(nu) = stokesI + term0 (nu/refnu - 1) + term1 (nu/refnu - 1)^2 + ...
-            polyterms = processSpectralTerms(specterms[i].tolist()).insert(0, stokesI[i])
+            polyterms = specterms[i].tolist()
+            polyterms.insert(0, stokesI[i])
             flux = polyval(sky_freq/ref_freq-1.0, polyterms)
             name = 'cc{}'.format(i)
             if s.getColValues('Type')[i] == 'POINT':
