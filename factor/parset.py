@@ -576,7 +576,7 @@ def get_directions_options(parset):
     # Full path to sky model (in makesourcedb format) to be used for calibrator
     # selection and facet-boundary source avoidance (default is to use
     # direction-independent sky model of the highest-frequency band). The sky
-    # model must be grouped into patches by source (in PyBDSM, this grouping can be
+    # model must be grouped into patches by source (in PyBDSF, this grouping can be
     # done by setting bbs_patches = 'source' in the write_catalog task)
     if 'faceting_skymodel' not in parset_dict:
         parset_dict['faceting_skymodel'] = None

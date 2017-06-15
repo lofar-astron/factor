@@ -123,10 +123,10 @@ wsclean_image02.control.mapfiles_in             = [create_compressed_mapfile01.o
 wsclean_image02.control.inputkeys               = [msfile,fitsmask]
 wsclean_image02.argument.fitsmask               = fitsmask
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,-joinchannels,msfile]
+wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,-joinchannels,msfile]
 wsclean_image02.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,msfile]
+wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,msfile]
 {% endif %}
 wsclean_image02.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image02.argument.niter                  = 10000
@@ -162,8 +162,8 @@ wsclean_image02.argument.auto-mask              = 2.6
 wsclean_image02.argument.auto-mask              = 3.6
 {% endif %}
 wsclean_image02.argument.auto-threshold         = 0.5
-wsclean_image02.argument.rms-background-window       = 50
-wsclean_image02.argument.rms-background-method       = rms-with-min
+wsclean_image02.argument.local-rms-window       = 50
+wsclean_image02.argument.local-rms-method       = rms-with-min
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map02.control.kind        = plugin
@@ -356,10 +356,10 @@ wsclean_image12.control.mapfiles_in             = [create_compressed_mapfile1.ou
 wsclean_image12.control.inputkeys               = [msfile,fitsmask]
 wsclean_image12.argument.fitsmask               = fitsmask
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,-joinchannels,msfile]
+wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,-joinchannels,msfile]
 wsclean_image12.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,msfile]
+wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,msfile]
 {% endif %}
 wsclean_image12.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image12.argument.niter                  = 10000
@@ -395,8 +395,8 @@ wsclean_image12.argument.auto-mask              = 2.3
 wsclean_image12.argument.auto-mask              = 3.3
 {% endif %}
 wsclean_image12.argument.auto-threshold         = 0.5
-wsclean_image12.argument.rms-background-window       = 50
-wsclean_image12.argument.rms-background-method       = rms-with-min
+wsclean_image12.argument.local-rms-window       = 50
+wsclean_image12.argument.local-rms-method       = rms-with-min
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map12.control.kind        = plugin
@@ -529,10 +529,10 @@ wsclean_image22.control.mapfiles_in             = [create_compressed_mapfile2.ou
 wsclean_image22.control.inputkeys               = [msfile,fitsmask]
 wsclean_image22.argument.fitsmask               = fitsmask
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,-joinchannels,msfile]
+wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,-joinchannels,msfile]
 wsclean_image22.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,msfile]
+wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,msfile]
 {% endif %}
 wsclean_image22.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image22.argument.niter                  = 10000
@@ -567,10 +567,10 @@ wsclean_image22.argument.auto-mask              = 2.0
 wsclean_image22.argument.auto-mask              = 3.0
 {% endif %}
 wsclean_image22.argument.auto-threshold         = 0.5
-wsclean_image22.argument.rms-background-window       = 50
-wsclean_image22.argument.rms-background-method       = rms-with-min
-wsclean_image22.argument.multiscale-scale-bias       = 0.5
-wsclean_image22.argument.multiscale-gain             = 0.1
+wsclean_image22.argument.local-rms-window       = 50
+wsclean_image22.argument.local-rms-method       = rms-with-min
+wsclean_image22.argument.multiscale-scale-bias  = 0.5
+wsclean_image22.argument.multiscale-gain        = 0.1
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map22.control.kind        = plugin
@@ -805,10 +805,10 @@ wsclean_image32.control.mapfiles_in             = [create_compressed_mapfile3.ou
 wsclean_image32.control.inputkeys               = [msfile,fitsmask]
 wsclean_image32.argument.fitsmask               = fitsmask
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,-joinchannels,msfile]
+wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,-joinchannels,msfile]
 wsclean_image32.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,msfile]
+wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,msfile]
 {% endif %}
 wsclean_image32.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image32.argument.niter                  = 10000
@@ -843,10 +843,10 @@ wsclean_image32.argument.auto-mask              = 2.5
 wsclean_image32.argument.auto-mask              = 3.5
 {% endif %}
 wsclean_image32.argument.auto-threshold         = 0.5
-wsclean_image32.argument.rms-background-window       = 50
-wsclean_image32.argument.rms-background-method       = rms-with-min
-wsclean_image32.argument.multiscale-scale-bias       = 0.5
-wsclean_image32.argument.multiscale-gain             = 0.1
+wsclean_image32.argument.local-rms-window       = 50
+wsclean_image32.argument.local-rms-method       = rms-with-min
+wsclean_image32.argument.multiscale-scale-bias  = 0.5
+wsclean_image32.argument.multiscale-gain        = 0.1
 
 ########## start of phase+amp selfcal loop
 
@@ -1069,10 +1069,10 @@ wsclean_image42.control.mapfiles_in             = [create_compressed_mapfile4.ou
 wsclean_image42.control.inputkeys               = [msfile,fitsmask]
 wsclean_image42.argument.fitsmask               = fitsmask
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,-joinchannels,-save-component-list,msfile]
+wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,-joinchannels,-save-source-list,msfile]
 wsclean_image42.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-rms-background,-save-component-list,msfile]
+wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,-save-source-list,msfile]
 {% endif %}
 wsclean_image42.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image42.argument.niter                  = 10000
@@ -1107,10 +1107,10 @@ wsclean_image42.argument.auto-mask              = 2.0
 wsclean_image42.argument.auto-mask              = 3.0
 {% endif %}
 wsclean_image42.argument.auto-threshold         = 0.5
-wsclean_image42.argument.rms-background-window       = 50
-wsclean_image42.argument.rms-background-method       = rms-with-min
-wsclean_image42.argument.multiscale-scale-bias       = 0.5
-wsclean_image42.argument.multiscale-gain             = 0.1
+wsclean_image42.argument.local-rms-window       = 50
+wsclean_image42.argument.local-rms-method       = rms-with-min
+wsclean_image42.argument.multiscale-scale-bias  = 0.5
+wsclean_image42.argument.multiscale-gain        = 0.1
 
 # make a mapfile with the root-name of the WSClean image, length = 1
 create_imagebase_map42.control.kind        = plugin

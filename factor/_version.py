@@ -3,13 +3,17 @@ Module that stores the version and changelog
 """
 
 # Version number
-__version__ = '1.2'
+__version__ = '1.3'
 
 # Change log
 def changelog():
     """
     FACTOR Changelog.
     ----------------------------------------------------------------------------
+
+    14/06/2017 - Version 1.3
+
+        - Updated to use WSClean v2.4
 
     25/04/2017
 

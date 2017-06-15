@@ -23,10 +23,10 @@ the primary beam attenuation during the fieldmosaic operation (see
 See :ref:`fieldmosaic` for more details.
 
 
-Self calibration solutions and sky models
+Self-calibration solutions and sky models
 -----------------------------------------
 
-For each facet that undergoes self calibration, a set of self calibration
+For each facet that undergoes self calibration, a set of self-calibration
 solutions and sky models are generated. These solutions and models are used to
 subtract or add sources in each facet. They are found in the facet directories
 under ``results/facetselfcal``. See :ref:`facetselfcal` for more details.
@@ -57,3 +57,15 @@ inside of which will be measurement sets with the calibrated data (in the DATA
 column). Note that these data have not been corrected for the primary-beam
 attenuation but have had been corrected for the beam effects at the field phase
 center.
+
+
+Residual data
+-------------
+
+The subtraction of sources in the residual datasets (originally produced by
+Prefactor) is improved during a Factor run. These datasets are those in the
+``chunks/`` directory. Normally, these data are not needed once a Factor run for
+a field is complete, but they are needed if the Factor run is later resumed. The
+``archivefactor`` script will archive these datasets if the ``-r`` flag is used::
+
+    $ archivefactor factor.parset dir_output -r

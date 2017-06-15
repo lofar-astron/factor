@@ -34,7 +34,7 @@ class Direction(object):
     dec : float
         Dec in degrees of calibrator center
     atrous_do : bool
-        Fit to wavelet images in PyBDSM?
+        Fit to wavelet images in PyBDSF?
     mscale_field_do : bool
         Use multiscale clean for facet field?
     cal_imsize : int

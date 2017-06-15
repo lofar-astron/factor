@@ -42,7 +42,7 @@ Columns
         The RA and Dec (J2000) of the calibrator, written as ``RA,Dec`` in sexagesimal format (note that there should be no space after the comma). If the calibrator is a group of more than one source, this position should define the center of a calibration group.
 
     atrous_do
-        If ``True``, the wavelet module of PyBDSM will be used during self calibration and facet imaging. If empty, Factor will activate the wavelet module if it identifies a source with a diameter of 6 arcmin or larger in the facet sky model.
+        If ``True``, the wavelet module of PyBDSF will be used during facet imaging. If empty, Factor will activate the wavelet module if it identifies a source with a diameter of 6 arcmin or larger in the facet sky model.
 
     mscale_field_do
         If ``True``, multiscale clean will be used during facet imaging (it is always used during self calibration). If empty, Factor will activate multiscale clean if it identifies a source with a diameter of 6 arcmin or larger in the facet sky model.

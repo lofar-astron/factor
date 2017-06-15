@@ -6,11 +6,10 @@ import argparse
 from argparse import RawTextHelpFormatter
 from astropy.io import fits
 from astropy import wcs
-from astropy.coordinates import Angle
-from astropy.table import Table
 import numpy as np
 from numpy.polynomial.polynomial import polyval
 import casacore.tables as pt
+import lsmtool
 import re
 import sys
 import os
@@ -42,123 +41,11 @@ def dec2ddmmss(deg):
     return (int(dd), int(ma), sa, sign)
 
 
-def RA2Angle(RA):
-    """
-    Returns Angle objects for input RA values.
-
-    Parameters
-    ----------
-    RA : str, float or list of str, float
-        Values of RA to convert. Can be strings in makesourcedb format or floats
-        in degrees.
-
-    Returns
-    -------
-    RAAngle : astropy.coordinates.Angle object
-
-    """
-    import astropy.units as u
-
-    if type(RA) is not list:
-        RA = [RA]
-
-    if type(RA[0]) is str:
-        try:
-            RAAngle = Angle(Angle(RA, unit=u.hourangle), unit=u.deg)
-        except KeyboardInterrupt:
-            raise
-        except Exception as e:
-            raise ValueError('RA not understood (must be string in '
-                'makesourcedb format or float in degrees): {0}'.format(e.message))
-    else:
-        RAAngle = Angle(RA, unit=u.deg)
-
-    return RAAngle
-
-
-def Dec2Angle(Dec):
-    """
-    Returns Angle objects for input Dec values.
-
-    Parameters
-    ----------
-    Dec : str, float or list of str, float
-        Values of Dec to convert. Can be strings in makesourcedb format or floats
-        in degrees
-
-    Returns
-    -------
-    DecAngle : astropy.coordinates.Angle object
-
-    """
-    import astropy.units as u
-
-    if type(Dec) is not list:
-        Dec = [Dec]
-
-    if type(Dec[0]) is str or type(Dec[0]) is np.string_:
-        try:
-            DecAngle = Angle(Dec, unit=u.deg)
-        except KeyboardInterrupt:
-            raise
-        except ValueError:
-            try:
-                DecSex = [decstr.replace('.', ':', 2) for decstr in Dec]
-                DecAngle = Angle(DecSex, unit=u.deg)
-            except Exception as e:
-                raise ValueError('Dec not understood (must be string in '
-                    'makesourcedb format or float in degrees): {0}'.format(e.message))
-        except Exception as e:
-            raise ValueError('Dec not understood (must be string in '
-                'makesourcedb format or float in degrees): {0}'.format(e.message))
-    else:
-        DecAngle = Angle(Dec, unit=u.deg)
-
-    return DecAngle
-
-
-def processLine(line, ncols):
-    """
-    Processes a makesourcedb line.
-
-    Parameters
-    ----------
-    line : str
-        Data line
-    ncols : int
-        Number of columns
-
-    Returns
-    -------
-    line : str
-        Processed line
-
-    """
-    if line.startswith("FORMAT") or line.startswith("format") or line.startswith("#"):
-        return None
-
-    # Check for SpectralIndex or SpectralTerms entries, which are unreadable as they use
-    # the same separator for multiple orders as used for the columns
-    line = line.strip('\n')
-    a = re.search('\[.*\]', line)
-    if a is not None:
-        b = line[a.start(): a.end()]
-        c = b.strip('[]')
-        if ',' in c:
-            c = c.replace(',', ';')
-        line = line.replace(b, c)
-    colLines = line.split(',')
-
-    while len(colLines) < ncols:
-        colLines.append(' ')
-
-    return ','.join(colLines)
-
-
 def processSpectralTerms(terms):
     if type(terms) is str or type(terms) is np.string_:
         terms = terms.strip('[]').split(';')
         terms = [float(t) for t in terms]
+
     return terms
 
 
@@ -203,19 +90,9 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
     sw.close()
 
     # Read in sky model
-    ncols = 8
-    outlines = ['Name, Type, Ra, Dec, SpectralTerms, MajorAxis, MinorAxis, Orientation']
-    polymodel = model_root + '-components.txt'
-    with open(polymodel) as f:
-        for line in f:
-            if line.startswith("# ReferenceFrequency"):
-                ref_freq = float(line.split('=')[1].strip())
-            else:
-                outline = processLine(line, ncols)
-                if outline is not None:
-                    outlines.append(outline)
-    data = Table.read(outlines, format='ascii', guess=False, delimiter=',',
-        header_start=0, data_start=1)
+    polymodel = model_root + '-sources.txt'
+    s = lsmtool.load(polymodel)
+    ref_freq = float(s.getColValues('ReferenceFrequency')[0]) # Hz
 
     # Find model images and read in frequencies
     fits_models = glob.glob(model_root+'-00*-model.fits')
@@ -250,9 +127,10 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
         mask = None
 
     # Discard components not in the mask, if given
+    sRAs = s.getColValues('RA')
+    sDecs = s.getColValues('Dec')
     if mask is not None:
-        pix = w.wcs_world2pix(np.array([RA2Angle(data['Ra'].tolist()),
-            Dec2Angle(data['Dec'].tolist()), [0]*len(data), [0]*len(data)]).T, 0)
+        pix = w.wcs_world2pix(np.array([sRAs, sDecs, [0]*len(s), [0]*len(s)]).T, 0)
         not_in_mask = []
         for i, p in enumerate(pix):
             if mask[0, 0, int(round(p[1])), int(round(p[0]))] < 1:
@@ -260,12 +138,16 @@ def main(model_root, ms_file, skymodel, fits_mask=None, min_peak_flux_jy=0.0001,
         data.remove_rows(not_in_mask)
 
     # Write sky model
+    specterms = s.getColValues('SpectralIndex')
+    stokesI = s.getColValues('I')
     with open(skymodel, 'w') as outfile:
         outfile.write('FORMAT = Name, Type, Ra, Dec, I, Q, U, V, ReferenceFrequency, '
             'MajorAxis, MinorAxis, Orientation\n')
-        for i, s in enumerate(data):
-            polyterms = processSpectralTerms(s['SpectralTerms'])
-            flux = polyval(sky_freq/ref_freq, polyterms)
+        for i in range(len(s)):
+            # Find flux at sky_freq (nu), where:
+            #     flux(nu) = stokesI + term0 (nu/refnu - 1) + term1 (nu/refnu - 1)^2 + ...
+            polyterms = processSpectralTerms(specterms[i].tolist()).insert(0, stokesI[i])
+            flux = polyval(sky_freq/ref_freq-1.0, polyterms)
             name = 'cc{}'.format(i)
             if s['Type'] == 'POINT':
                 outfile.write('{0}, POINT, {1}, {2}, {3}, 0.0, 0.0, 0.0, {4}, , , \n'

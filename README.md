@@ -9,9 +9,10 @@ multiple nodes (with a shared file system). It requires only modest resources
 (at least 32 GB of memory and 1 TB of disk space).
 
 
-What's New since v1.2
----------------------
+What's New in v1.3
+------------------
 
+* Updated to use WSClean 2.4. Earlier versions are no longer supported
 * Preaveraging is now done in frequency as well as in time. This
 preaveraging generally improves the S/N of the CS slow-gain solutions for
 fainter sources by a factor of ~ 2
@@ -60,8 +61,8 @@ should run the following command before using Factor:
 Factor requires the following:
 
 * The LOFAR offline trunk from the LOFAR software repository (a version of the trunk after 02/11/2016 is required)
-* [WSClean](http://sourceforge.net/p/wsclean/wiki/Home) (version 2.3 or later)
-* [LSMTool](https://github.com/darafferty/LSMTool) (version 1.1 or later)
+* [WSClean](http://sourceforge.net/p/wsclean/wiki/Home) (version 2.4 or later)
+* [LSMTool](https://github.com/darafferty/LSMTool) (version 1.2 or later)
 * [jinja2](http://jinja.pocoo.org/docs/dev)
 * [Shapely](https://github.com/Toblerity/Shapely)
 * [APLpy](http://aplpy.github.io) (version 1.0 or later)
