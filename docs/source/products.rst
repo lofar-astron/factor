@@ -1,11 +1,48 @@
 .. _products:
 
-Primary output products
-=======================
+Output
+======
 
-The primary output products of Factor are the images, solutions, sky models, and
-calibrated data for one or more facets and the improved residual datasets of the
-field. Each of these is described in detail below.
+Directory structure
+-------------------
+
+Factor produces the following output inside the working directory:
+
+``factor.log``
+    Log file containing only the higher-level log messages. Detailed logs for each operation are available in the ``logs`` directory (see below).
+
+``factor_directions.txt``
+    Optional file listing the DDE calibrators. This file is generated only when no directions file is supplied by the user.
+
+``chunks/``
+    Directory containing the time-chunked datasets that Factor uses for processing.
+
+``logs/``
+    Directory containing the detailed operation logs.
+
+    .. note::
+
+        The log of each operation is stored as ``logs/operation_name/direction_name.out.log``. For example, the log of the ``facetselfcal`` operation for a direction named ``facet_patch_200`` will be stored in ``logs/facetselfcal/facet_patch_200.out.log``.
+
+    .. note::
+
+        Some error messages are stored in the ``logs/operation_name/direction_name.err.log`` file, but these are rarely of interest. Generally, important error messages will appear in the ``logs/operation_name/direction_name.out.log`` file. These log files can be very large, so a search for "error" is usually the easiest way to find any error messages.
+
+``regions/``
+    Directory containing the ds9 region files for the facet and self-calibration images. The following region files are made:
+
+    * ``calimages_ds9.reg`` - the self-calibration image regions. The inner box shows the area over which sources are added back and cleaned. The outer box shows the area that is imaged.
+    * ``facets_ds9.reg`` - the facet image regions.
+
+``results/``
+    Directory containing the results (images, etc.) of each operation. See :ref:`operations` for details of the primary output products of each operation.
+
+    .. note::
+
+        The output of each operation is stored in a directory named ``results/operation_name/direction_name/``. For example, the results of the ``facetselfcal`` operation for a direction named ``facet_patch_200`` will be stored in ``results/facetselfcal/facet_patch_200/``.
+
+``state/``
+    Directory containing files that save the state of a reduction.
 
 
 Final, primary-beam-corrected images

@@ -46,11 +46,11 @@ This operation self calibrates a facet calibrator and images the facet with part
     The facet image is made only for facet-type directions (i.e., not the small patch-type directions that lie outside of the faceting radius). It is typically made with only a fraction of the total bandwidth (but distributed to sample the full bandwidth; see :term:`fractional_bandwidth_selfcal_facet_image` for details) and is used to improve the subtraction of non-calibrator sources in the facet. It is not the final facet image (which is made in the facetimage operation).
 
 Primary products (in ``results/facetselfcal/direction_name/``):
-    * ``*merge_selfcal_parmdbs`` - the (normalized) self-calibration solutions table
+    * ``*merge_selfcal_parmdbs`` - the (normalized) self-calibration solutions table, with dTEC, CommonScalarPhase, and Gain solutions for all times and frequencies
     * ``*make_selfcal_plots*.png`` - plots of the self-calibration solutions
-    * ``*wsclean_image*.image(.tt0)`` - self-calibration images
+    * ``*wsclean_image*.fits`` - self-calibration images (FITS format)
     * ``*wsclean_image*.png`` - self-calibration images (png format)
-    * ``*image_full*`` - facet image made with part of the total bandwidth (not made if direction is a patch)
+    * ``*image_full*.fits`` - facet image made with part of the total bandwidth (not made if direction is a patch)
     * ``*wsclean_pre-image.fits`` - residual image of field for middle band before subtraction of new model
     * ``*wsclean_post-image.fits`` - residual image of field for middle band after subtraction of new model
 
