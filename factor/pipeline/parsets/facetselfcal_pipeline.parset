@@ -1803,7 +1803,7 @@ mask5.argument.vertices_file      = {{ vertices_file }}
 mask5.argument.exclude_cal_region = True
 mask5.argument.dilate             = 2
 
-# check the mask6 output and modify its mapfile if no sources were found, length = 1
+# check the mask5 output and modify its mapfile if no sources were found, length = 1
 check_mask_high.control.kind          = plugin
 check_mask_high.control.type          = checkMapfile
 check_mask_high.control.mapfile_in    = mask5.output.mapfile
@@ -1830,7 +1830,7 @@ expand_model5_map.control.filename         = expand_model5_map.mapfile
 # expand the model mapfile so that there is one entry for every band, length = nbands
 expand_mask5_map.control.kind             = plugin
 expand_mask5_map.control.type             = expandMapfile
-expand_mask5_map.control.mapfile_in       = mask5.output.mapfile
+expand_mask5_map.control.mapfile_in       = check_mask_high.output.mapfile
 expand_mask5_map.control.mapfile_to_match = create_msmulti_map.output.mapfile
 expand_mask5_map.control.mapfile_dir      = input.output.mapfile_dir
 expand_mask5_map.control.filename         = expand_mask5_map.mapfile
