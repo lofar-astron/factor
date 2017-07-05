@@ -151,7 +151,7 @@ class Band(object):
                             self.minSamplesPerFile = min(self.minSamplesPerFile,numsamples)
                             break
                     tab.close()
-            self.save_state()
+        self.save_state()
 
         self.log.debug("Using {0} files.".format(len(self.files)))
         if skymodel_dirindep != None:
