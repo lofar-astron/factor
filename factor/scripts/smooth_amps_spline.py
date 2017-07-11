@@ -266,12 +266,16 @@ def median2Dampfilter(amp_orig):
 
     amp = pad(amp_orig, ((numpy.shape(amp_orig)[0],numpy.shape(amp_orig)[0]),
         (numpy.shape(amp_orig)[1],numpy.shape(amp_orig)[1])), mode='reflect')
+    flagged = numpy.where(amp == 1.0)
 
     # take the log
     amp = numpy.log10(amp)
 
-    # create median filtered array
-    amp_median = scipy.ndimage.median_filter(amp, (3,5)) # so a bit more smoothing along the time-axis
+    # Set flagged values to NaN
+    amp[flagged] = numpy.nan
+
+    # create median filtered array, ignoring NaNs
+    amp_median = scipy.ndimage.filters.generic_filter(amp, numpy.nanmedian, (3,5)) # so a bit more smoothing along the time-axis
 
     # find scatter
     scatter_freq = findscatter_freq(amp)
@@ -358,6 +362,7 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
 
     # times not used at the moment, I assume the time axis for a parmdb is regular and does not contain gaps
     times = (times - numpy.min(times))/24. #so we get an axis in hrs
+    ntimes = len(times)
 
     # Get station names
     antenna_list = set([s.split(':')[-1] for s in pdb.getNames()])
@@ -411,58 +416,59 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
                     channel_amp_interp.append(None)
 
             # now find the bad data
-            pool = multiprocessing.Pool()
-            results = pool.map(spline1D, channel_amp_interp)
-            pool.close()
-            pool.join()
+            if ntimes > 5:
+                pool = multiprocessing.Pool()
+                results = pool.map(spline1D, channel_amp_interp)
+                pool.close()
+                pool.join()
 
-            for chan, (amp_cleaned, model, noisevec, scatter, n_knots, idxbad, weights) in enumerate(results):
-                # put back the results
-                phase = numpy.arctan2(channel_parms_imag[chan], channel_parms_real[chan])
-                if amp_cleaned is None:
-                    amp_cleaned = channel_amp_orig[chan]
-                parms[gain + ':' + pol + ':Real:' + antenna]['values'][:, chan] = numpy.copy(amp_cleaned*numpy.cos(phase))
-                parms[gain + ':' + pol + ':Imag:' + antenna]['values'][:, chan] = numpy.copy(amp_cleaned*numpy.sin(phase))
-
-                if pol in pol_list[0]:
-                    cc = 'blue'
-                    ccf = 'orange'
-                else:
-                    cc = 'green'
-                    ccf= 'red'
-
-                timevec = numpy.arange(0,len(channel_amp_orig[chan]))
-
-                # only plot one channel, just to verify code works
-                if plotting and chan == nchans-1: # plot last channel
-                    axsa[istat][0].plot(timevec, amp_cleaned, marker=fmt, ls=ls,
-                        markersize=0.1*len(amp_cleaned), c=cc,mec=cc)
-                    axsa[istat][0].plot(timevec,noisevec, c=cc, lw=0.75, ls='--')
+                for chan, (amp_cleaned, model, noisevec, scatter, n_knots, idxbad, weights) in enumerate(results):
+                    # put back the results
+                    phase = numpy.arctan2(channel_parms_imag[chan], channel_parms_real[chan])
+                    if amp_cleaned is None:
+                        amp_cleaned = channel_amp_orig[chan]
+                    parms[gain + ':' + pol + ':Real:' + antenna]['values'][:, chan] = numpy.copy(amp_cleaned*numpy.cos(phase))
+                    parms[gain + ':' + pol + ':Imag:' + antenna]['values'][:, chan] = numpy.copy(amp_cleaned*numpy.sin(phase))
 
                     if pol in pol_list[0]:
-                        axsa[istat][0].annotate('scatter=' +'{:.2g}'.format(scatter),
-                            xy=(0.5,0.15), color=cc,textcoords='axes fraction')
-                        axsa[istat][0].annotate('#knots=' +'{:d}'.format(n_knots),
-                            xy=(0.01,0.15), color=cc,textcoords='axes fraction') # we divded by three beucase we mirrored the array
+                        cc = 'blue'
+                        ccf = 'orange'
                     else:
-                        axsa[istat][0].annotate('scatter=' +'{:.2g}'.format(scatter),
-                            xy=(0.5,0.02), color=cc, textcoords='axes fraction')
-                        axsa[istat][0].annotate('#knots=' +'{:d}'.format(n_knots),
-                            xy=(0.01,0.02), color=cc,textcoords='axes fraction')
+                        cc = 'green'
+                        ccf= 'red'
 
-                    if numpy.any(idxbad):
-                        axsa[istat][0].plot(timevec[idxbad],channel_amp_orig[chan][idxbad],
-                            marker='o', c=ccf, ls=ls, markersize=4)
+                    timevec = numpy.arange(0,len(channel_amp_orig[chan]))
 
-                    idxbadi = numpy.where(weights < 1.0)
-                    if numpy.any(idxbadi):
-                        axsa[istat][0].plot(timevec[idxbadi],channel_amp_orig[chan][idxbadi],
-                            marker='o', c='black', ls=ls, markersize=4, mec='black')
+                    # only plot one channel, just to verify code works
+                    if plotting and chan == nchans-1: # plot last channel
+                        axsa[istat][0].plot(timevec, amp_cleaned, marker=fmt, ls=ls,
+                            markersize=0.1*len(amp_cleaned), c=cc,mec=cc)
+                        axsa[istat][0].plot(timevec,noisevec, c=cc, lw=0.75, ls='--')
 
-                    axsa[istat][0].plot(timevec, model, c=ccf, lw=1.0)
-                    axsa[istat][0].set_title(antenna)
-                    axsa[istat][0].set_ylim(-0.3, 2)
-                    axsa[istat][0].set_xlim(0, max(timevec))
+                        if pol in pol_list[0]:
+                            axsa[istat][0].annotate('scatter=' +'{:.2g}'.format(scatter),
+                                xy=(0.5,0.15), color=cc,textcoords='axes fraction')
+                            axsa[istat][0].annotate('#knots=' +'{:d}'.format(n_knots),
+                                xy=(0.01,0.15), color=cc,textcoords='axes fraction') # we divded by three beucase we mirrored the array
+                        else:
+                            axsa[istat][0].annotate('scatter=' +'{:.2g}'.format(scatter),
+                                xy=(0.5,0.02), color=cc, textcoords='axes fraction')
+                            axsa[istat][0].annotate('#knots=' +'{:d}'.format(n_knots),
+                                xy=(0.01,0.02), color=cc,textcoords='axes fraction')
+
+                        if numpy.any(idxbad):
+                            axsa[istat][0].plot(timevec[idxbad],channel_amp_orig[chan][idxbad],
+                                marker='o', c=ccf, ls=ls, markersize=4)
+
+                        idxbadi = numpy.where(weights < 1.0)
+                        if numpy.any(idxbadi):
+                            axsa[istat][0].plot(timevec[idxbadi],channel_amp_orig[chan][idxbadi],
+                                marker='o', c='black', ls=ls, markersize=4, mec='black')
+
+                        axsa[istat][0].plot(timevec, model, c=ccf, lw=1.0)
+                        axsa[istat][0].set_title(antenna)
+                        axsa[istat][0].set_ylim(-0.3, 2)
+                        axsa[istat][0].set_xlim(0, max(timevec))
 
             if nchans > 5: # Do 2D smooth
                 channel_parms_real = [parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan]
@@ -481,10 +487,7 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
                 x, y = numpy.meshgrid(times, range(nchans))
                 if numpy.any(unflagged_sols):
                     flagged_sols = numpy.where(channel_parms_real == 1.0)
-                    if numpy.any(flagged_sols):
-                        finterp = interp2d(x[unflagged_sols], y[unflagged_sols], channel_amp_orig[unflagged_sols],
-                            kind='linear', bounds_error=False, fill_value=numpy.mean(channel_amp_orig[unflagged_sols]))
-                        channel_amp_orig[flagged_sols] = finterp(x[flagged_sols], y[flagged_sols])
+                    channel_amp_orig[flagged_sols] = 1.0
                     amp_cleaned, amp_median, baddata = median2Dampfilter(channel_amp_orig)
 
                     for chan in range(nchans):
@@ -539,7 +542,7 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
                     imag = numpy.copy(parms[key_name]['values'])
                     amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
                     amplist.append(amp[initial_unflagged_dict[key_name]])
-        norm_factor = 1.0/(numpy.mean(numpy.concatenate(amplist)))
+        norm_factor = 1.0/(numpy.nanmean(numpy.concatenate(amplist)))
         print "smooth_amps_spline.py: Normalization-Factor is:", norm_factor
 
         # Now do the normalization
@@ -553,8 +556,9 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
 
                     # Clip extremely low amplitude solutions to prevent very high
                     # amplitudes in the corrected data
-                    low_ind = numpy.where(amp < 0.2)
-                    amp[low_ind] = 0.2
+                    unflagged = numpy.where(~numpy.isnan(amp))
+                    low_ind = numpy.where(amp[unflagged] < 0.2)
+                    amp[unflagged][low_ind] = 0.2
 
                     parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = numpy.copy(amp *
                         numpy.cos(phase) * norm_factor)
