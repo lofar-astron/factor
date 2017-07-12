@@ -445,13 +445,13 @@ def get_imaging_options(parset):
     # directions file
     if 'selfcal_multiscale_scales_pixel' in parset_dict:
         val_list = parset_dict['selfcal_multiscale_scales_pixel'].strip('[]').split(',')
-        str_list = ','.join(val_list)
+        str_list = ','.join([v.strip() for v in val_list])
         parset_dict['selfcal_multiscale_scales_pixel'] = str_list
     else:
         parset_dict['selfcal_multiscale_scales_pixel'] = None
     if 'facet_multiscale_scales_pixel' in parset_dict:
         val_list = parset_dict['facet_multiscale_scales_pixel'].strip('[]').split(',')
-        str_list = ','.join(val_list)
+        str_list = ','.join([v.strip() for v in val_list])
         parset_dict['facet_multiscale_scales_pixel'] = str_list
     else:
         parset_dict['facet_multiscale_scales_pixel'] = None
