@@ -47,7 +47,7 @@ def directions_read(directions_file, factor_working_dir):
     log.info("Reading directions file: %s" % (directions_file))
     try:
         types = np.dtype({
-            'names': ['name', 'radec', 'atrous_do', 'mscale_field_do',
+            'names': ['name', 'radec', 'mscale_selfcal_do', 'mscale_facet_do',
                'cal_imsize', 'solint_p', 'solint_a', 'dynamic_range',
                 'region_selfcal', 'region_field', 'peel_skymodel', 'outlier_source',
                 'cal_size_deg', 'cal_flux_mjy'],
@@ -56,7 +56,7 @@ def directions_read(directions_file, factor_working_dir):
         directions = np.genfromtxt(directions_file, comments='#', dtype=types)
     except ValueError:
         types = np.dtype({
-            'names': ['name', 'radec', 'atrous_do', 'mscale_field_do',
+            'names': ['name', 'radec', 'mscale_selfcal_do', 'mscale_facet_do',
               'cal_imsize', 'solint_p', 'solint_a', 'dynamic_range',
                 'region_selfcal', 'region_field', 'peel_skymodel', 'outlier_source'],
             'formats':['S255', 'S255', 'S5', 'S5', int, int, int, 'S2',
@@ -79,21 +79,21 @@ def directions_read(directions_file, factor_working_dir):
                 % (direction['radec'], direction['name']))
             continue
 
-        # Check atrous_do (wavelet) setting
-        if direction['atrous_do'].lower() == 'empty':
-            atrous_do = None
-        elif direction['atrous_do'].lower() == 'true':
-            atrous_do = True
+        # Check mscale_selfcal_do (multi-scale) setting
+        if direction['mscale_selfcal_do'].lower() == 'empty':
+            mscale_selfcal_do = None
+        elif direction['mscale_selfcal_do'].lower() == 'true':
+            mscale_selfcal_do = True
         else:
-            atrous_do = False
+            mscale_selfcal_do = False
 
-        # Check mscale_field_do (multi-scale) setting
-        if direction['mscale_field_do'].lower() == 'empty':
-            mscale_field_do = None
-        elif direction['mscale_field_do'].lower() == 'true':
-            mscale_field_do = True
+        # Check mscale_facet_do (multi-scale) setting
+        if direction['mscale_facet_do'].lower() == 'empty':
+            mscale_facet_do = None
+        elif direction['mscale_facet_do'].lower() == 'true':
+            mscale_facet_do = True
         else:
-            mscale_field_do = False
+            mscale_facet_do = False
 
         # Check outlier_source (peeling) setting
         if direction['outlier_source'].lower() == 'empty':
@@ -116,8 +116,8 @@ def directions_read(directions_file, factor_working_dir):
         else:
             cal_size_deg = None
 
-        data.append(Direction(direction['name'], ra, dec, atrous_do,
-        	mscale_field_do, direction['cal_imsize'], direction['solint_p'],
+        data.append(Direction(direction['name'], ra, dec, mscale_selfcal_do,
+        	mscale_facet_do, direction['cal_imsize'], direction['solint_p'],
         	direction['solint_a'], direction['dynamic_range'],
         	direction['region_selfcal'], direction['region_field'],
         	direction['peel_skymodel'], outlier_source, factor_working_dir,

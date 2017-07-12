@@ -249,6 +249,9 @@ wsclean_image_full1.argument.minuv-l               = {{ facet_min_uv_lambda }}
 wsclean_image_full1.argument.scale                 = {{ cellsize_facet_deg }}
 wsclean_image_full1.argument.mem                   = {{ max_percent_memory_per_proc_single }}
 wsclean_image_full1.argument.j                     = {{ max_cpus_per_proc_single }}
+{% if mscale_facet_do and facet_multiscale_scales_pixel is not none %}
+wsclean_image_full1.argument.multiscale-scales     = {{ facet_multiscale_scales_pixel }}
+{% endif %}
 {% if local_dir is not none %}
 wsclean_image_full1.argument.tempdir               = {{ local_dir_parent }}
 {% endif %}
@@ -320,6 +323,9 @@ wsclean_image_full2.argument.scale                 = {{ cellsize_facet_deg }}
 wsclean_image_full2.argument.channelsout           = {{ wsclean_nchannels }}
 wsclean_image_full2.argument.mem                   = {{ max_percent_memory_per_proc_single }}
 wsclean_image_full2.argument.j                     = {{ max_cpus_per_proc_single }}
+{% if mscale_facet_do and facet_multiscale_scales_pixel is not none %}
+wsclean_image_full2.argument.multiscale-scales     = {{ facet_multiscale_scales_pixel }}
+{% endif %}
 {% if local_dir is not none %}
 wsclean_image_full2.argument.tempdir               = {{ local_dir_parent }}
 {% endif %}

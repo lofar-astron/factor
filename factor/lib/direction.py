@@ -33,9 +33,9 @@ class Direction(object):
         RA in degrees of calibrator center
     dec : float
         Dec in degrees of calibrator center
-    atrous_do : bool
-        Fit to wavelet images in PyBDSF?
-    mscale_field_do : bool
+    mscale_selfcal_do : bool
+        Use multiscale clean for selfcal?
+    mscale_facet_do : bool
         Use multiscale clean for facet field?
     cal_imsize : int
         Size of calibrator image in 1.5 arcsec pixels
@@ -59,7 +59,7 @@ class Direction(object):
         Size in degrees of calibrator source(s)
 
     """
-    def __init__(self, name, ra, dec, atrous_do=False, mscale_field_do=False,
+    def __init__(self, name, ra, dec, mscale_selfcal_do=False, mscale_facet_do=False,
     	cal_imsize=512, solint_p=1, solint_a=30, dynamic_range='LD',
     	region_selfcal='empty', region_field='empty', peel_skymodel='empty',
     	outlier_do=False, factor_working_dir='', cal_size_deg=None):
@@ -71,8 +71,8 @@ class Direction(object):
             dec = Angle(dec).to('deg').value
         self.ra = ra
         self.dec = dec
-        self.atrous_do = atrous_do
-        self.mscale_field_do = mscale_field_do
+        self.mscale_selfcal_do = mscale_selfcal_do
+        self.mscale_facet_do = mscale_facet_do
         self.cal_imsize = cal_imsize
         self.solint_time_p = solint_p
         self.solint_time_a = solint_a
@@ -239,6 +239,7 @@ class Direction(object):
         self.robust_selfcal = parset['imaging_specific']['selfcal_robust']
         self.solve_min_uv_lambda = parset['calibration_specific']['solve_min_uv_lambda']
         self.selfcal_min_uv_lambda = parset['imaging_specific']['selfcal_min_uv_lambda']
+        self.selfcal_multiscale_scales_pixel = parset['imaging_specific']['selfcal_multiscale_scales_pixel']
         self.frac_bandwidth_selfcal_facet_image = parset['imaging_specific']['fractional_bandwidth_selfcal_facet_image']
         self.nbands_selfcal_facet_image = min(6, len(bands))
 
@@ -259,6 +260,8 @@ class Direction(object):
         if facet_min_uv_lambda is None:
             facet_min_uv_lambda = 80.0
         self.facet_min_uv_lambda = facet_min_uv_lambda
+
+        self.facet_multiscale_scales_pixel = parset['imaging_specific']['facet_multiscale_scales_pixel']
 
         self.set_imaging_parameters(nbands, self.nbands_selfcal_facet_image,
             self.frac_bandwidth_selfcal_facet_image, padding)
@@ -416,46 +419,41 @@ class Direction(object):
         self.wsclean_full1_image_threshold_jy =  1.5e-3 * 0.7 / scaling_factor
         self.wsclean_full2_image_niter = int(12000 * scaling_factor)
 
-        # Set multiscale imaging mode for facet imaging: Get source sizes and
-        # check for large sources (anything above 4 arcmin -- the CC sky model
-        # was convolved with a Gaussian of 1 arcmin, so unresolved sources have
-        # sizes of ~ 1 arcmin). For the target facet, always turn on multiscale
+        # Set multiscale imaging parameters: Get source sizes and check for large
+        # sources (anything above 4 arcmin -- the CC sky model was convolved
+        # with a Gaussian of 1 arcmin, so unresolved sources have sizes of ~ 1
+        # arcmin). For the target facet, always turn on multiscale
         if self.contains_target:
-            self.mscale_field_do = True
+            self.mscale_facet_do = True
+
         large_size_arcmin = 4.0
-        if self.mscale_field_do is None:
+        if self.mscale_selfcal_do is None:
+            sizes_arcmin = self.get_source_sizes(cal_only=True)
+            if sizes_arcmin is not None and any([s > large_size_arcmin for s in sizes_arcmin]):
+                self.mscale_selfcal_do = True
+            else:
+                self.mscale_selfcal_do = False
+        if self.mscale_facet_do is None:
             sizes_arcmin = self.get_source_sizes()
             if any([s > large_size_arcmin for s in sizes_arcmin]):
-                self.mscale_field_do = True
+                self.mscale_facet_do = True
             else:
-                self.mscale_field_do = False
-        if self.mscale_field_do:
+                self.mscale_facet_do = False
+        if self.mscale_facet_do:
+            # Set some parameters, needed only for full facet imaging since
+            # they are always set in selfcal
             self.wsclean_multiscale = '-multiscale,'
             self.wsclean_full1_image_niter /= 2 # fewer iterations are needed
             self.wsclean_full2_image_niter /= 2 # fewer iterations are needed
         else:
             self.wsclean_multiscale = ''
 
-        # Set whether to use wavelet module in calibrator masking
-        if self.atrous_do is None:
-            sizes_arcmin = self.get_source_sizes(cal_only=True)
-            if sizes_arcmin is not None and any([s > large_size_arcmin for s in sizes_arcmin]):
-                self.atrous_do = True
-            else:
-                self.atrous_do = False
-
-        # If wavelet module is activated, also activate multiscale clean
-        if self.atrous_do:
-            self.wsclean_selfcal_multiscale = True
-        else:
-            self.wsclean_selfcal_multiscale = False
-
         # Let the user know what we are doing
-        if self.wsclean_selfcal_multiscale and self.mscale_field_do:
+        if self.mscale_selfcal_do and self.mscale_facet_do:
             self.log.debug("Will do multiscale-cleaning for calibrator and facet.")
-        elif self.wsclean_selfcal_multiscale:
+        elif self.mscale_selfcal_do:
             self.log.debug("Will do multiscale-cleaning for calibrator only.")
-        elif self.mscale_field_do:
+        elif self.mscale_facet_do:
             self.log.debug("Will do multiscale-cleaning for facet only.")
 
     def get_optimum_size(self, size):

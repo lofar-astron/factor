@@ -4,7 +4,7 @@
 #
 # Columns are defined as follows:
 #
-# name position atrous_do mscale_field_do cal_imsize solint_ph solint_amp dynamic_range region_selfcal region_facet peel_skymodel outlier_source cal_size_deg cal_flux_mjy
+# name position mscale_selfcal_do mscale_facet_do cal_imsize solint_ph solint_amp dynamic_range region_selfcal region_facet peel_skymodel outlier_source cal_size_deg cal_flux_mjy
 #
 # Values of "empty" (for string or boolean entries) or 0 (for integer entries) indicate
 # that they should be derived internally by Factor.

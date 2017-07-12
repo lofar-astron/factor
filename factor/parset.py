@@ -437,6 +437,25 @@ def get_imaging_options(parset):
     else:
         parset_dict['max_peak_smearing'] = 0.15
 
+    # List of scales in pixels to use when multiscale clean is activated (default =
+    # auto). Note that multiscale clean is activated for a direction only when the
+    # calibrator or a source in the facet is determined to be larger than 4 arcmin,
+    # the facet contains the target (specified below with target_ra and target_dec),
+    # or mscale_selfcal_do / mscale_facet_do is set for the direction in the
+    # directions file
+    if 'selfcal_multiscale_scales_pixel' in parset_dict:
+        val_list = parset_dict['selfcal_multiscale_scales_pixel'].strip('[]').split(',')
+        str_list = ','.join(val_list)
+        parset_dict['selfcal_multiscale_scales_pixel'] = str_list
+    else:
+        parset_dict['selfcal_multiscale_scales_pixel'] = None
+    if 'facet_multiscale_scales_pixel' in parset_dict:
+        val_list = parset_dict['facet_multiscale_scales_pixel'].strip('[]').split(',')
+        str_list = ','.join(val_list)
+        parset_dict['facet_multiscale_scales_pixel'] = str_list
+    else:
+        parset_dict['facet_multiscale_scales_pixel'] = None
+
     # Selfcal imaging parameters: pixel size in arcsec (default = 1.5), Briggs
     # robust parameter (default = -0.5) and minimum uv distance in lambda
     # (default = 80). These settings apply both to selfcal images and to the
@@ -538,6 +557,7 @@ def get_imaging_options(parset):
     # Check for unused options
     allowed_options = ['make_mosaic', 'wsclean_nchannels_factor',
         'max_peak_smearing', 'selfcal_cellsize_arcsec', 'selfcal_robust',
+        'selfcal_multiscale_scales_pixel', 'facet_multiscale_scales_pixel',
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
         'wsclean_image_padding', 'image_target_only', 'automask_facet_image',
         'selfcal_min_uv_lambda', 'facet_min_uv_lambda',

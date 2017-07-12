@@ -162,6 +162,15 @@ dir_ms = /data/bands
 # this option can dramatically speed up imaging with WSClean.
 # wsclean_bl_averaging = True
 
+# List of scales in pixels to use when multiscale clean is activated (default =
+# auto). Note that multiscale clean is activated for a direction only when the
+# calibrator or a source in the facet is determined to be larger than 4 arcmin,
+# the facet contains the target (specified below with target_ra and target_dec),
+# or mscale_selfcal_do / mscale_facet_do is set for the direction in the
+# directions file
+# selfcal_multiscale_scales_pixel = [0, 5, 10, 15]
+# facet_multiscale_scales_pixel = [0, 5, 10, 15]
+
 # Selfcal imaging parameters: pixel size in arcsec (default = 1.5), Briggs
 # robust parameter (default = -0.5) and minimum uv distance in lambda (default =
 # 80). These settings apply both to selfcal images and to the full facet image

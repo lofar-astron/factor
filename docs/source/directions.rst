@@ -13,7 +13,7 @@ A file defining the direction-dependent calibrators may be provided. The directi
     #
     # Columns are defined as follows:
     #
-    # name position atrous_do mscale_field_do cal_imsize solint_ph solint_amp dynamic_range region_selfcal region_facet peel_skymodel outlier_source cal_size_deg cal_flux_mjy
+    # name position mscale_selfcal_do mscale_facet_do cal_imsize solint_ph solint_amp dynamic_range region_selfcal region_facet peel_skymodel outlier_source cal_size_deg cal_flux_mjy
     #
     # Values of "empty" (for string or boolean entries) or 0 (for integer entries) indicate
     # that they should be derived internally by Factor.
@@ -41,11 +41,11 @@ Columns
     position
         The RA and Dec (J2000) of the calibrator, written as ``RA,Dec`` in sexagesimal format (note that there should be no space after the comma). If the calibrator is a group of more than one source, this position should define the center of a calibration group.
 
-    atrous_do
-        If ``True``, the wavelet module of PyBDSF will be used during facet imaging. If empty, Factor will activate the wavelet module if it identifies a source with a diameter of 6 arcmin or larger in the facet sky model.
+    mscale_selfcal_do
+        If ``True``, multiscale clean will be used during selfcal with the scales specified by :term:`selfcal_multiscale_scales_pixel` or auto selected by WSClean (note that when ``mscale_selfcal_do = False``, multiscale clean is still done, but with only scales of 0 and 7 pixels). If empty, Factor will activate multiscale clean if it determines that the calibrator has a diameter of 4 arcmin or larger in the facet sky model.
 
-    mscale_field_do
-        If ``True``, multiscale clean will be used during facet imaging (it is always used during self calibration). If empty, Factor will activate multiscale clean if it identifies a source with a diameter of 6 arcmin or larger in the facet sky model.
+    mscale_facet_do
+        If ``True``, multiscale clean will be used during facet imaging. If empty, Factor will activate multiscale clean if it identifies a source with a diameter of 4 arcmin or larger in the facet sky model or if the facet contains the target (specified with the :term:`target_ra`, :term:`target_dec`, and :term:`target_radius_arcmin` parameters).
 
     cal_imsize
         The width in pixels of calibrator image. If ``0``, Factor will determine the width from the size of the calibrator or calibrator group.
