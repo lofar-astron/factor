@@ -131,6 +131,9 @@ def spline1D(amp_orig):
         idx = max(0, ndata-2-i)
         amp[ndata+ndata+i] = amp_orig[idx]
 
+    # Find flagged values
+    flagged = numpy.where(amp == 1.0)
+
     # work in log-sapce
     amp_orig_ext = numpy.copy(amp)
     amp = numpy.log10(amp)
@@ -143,6 +146,9 @@ def spline1D(amp_orig):
     weights[idxbadi1] = 1e-10 # small value, zero generates NaN in spline
     idxbadi2 = numpy.where(amp < (numpy.median(amp) - (35.*std(amp))))
     weights[idxbadi2] = 1e-10  # small value, zero generates NaN in spline
+
+    # Set weights for flagged values
+    weights[flagged] = 1e-10  # small value, zero generates NaN in spline
 
     # make the noisevec
     if len(amp) > 30:  # so at least 30/3 = 10 good data points
@@ -220,8 +226,8 @@ def spline1D(amp_orig):
     amp[idx] = model[idx]
 
     # go out of log-space
-    #idxnodata = numpy.where(amp_orig_ext == 1.0)
-    #amp[idxnodata] = 0.0 # to avoid problem with amplitudes that are 1.0
+    idxnodata = numpy.where(amp > 1.0)
+    amp[idxnodata] = 0.0
     amp = 10**amp
 
     amp_clean = amp[ndata:ndata + ndata]
@@ -401,16 +407,14 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
             channel_amp_orig = [numpy.sqrt(channel_parms_real[chan]**2 +
                 channel_parms_imag[chan]**2) for chan in range(nchans)]
 
-            # Interpolate across flagged solutions
+            # Find flagged solutions and set to 1.0
             channel_amp_interp = []
             for chan in range(nchans):
                 unflagged_times = numpy.where(channel_parms_real[chan] != 1.0)
                 flagged_times = numpy.where(channel_parms_real[chan] == 1.0)
                 if numpy.any(unflagged_times):
                     if numpy.any(flagged_times):
-                        finterp = interp1d(times[unflagged_times], channel_amp_orig[chan][unflagged_times],
-                            kind='linear', bounds_error=False, fill_value=numpy.mean(channel_amp_orig[chan][unflagged_times]))
-                        channel_amp_orig[chan][flagged_times] = finterp(times[flagged_times])
+                        channel_amp_orig[chan][flagged_times] = 1.0
                     channel_amp_interp.append(channel_amp_orig[chan])
                 else:
                     channel_amp_interp.append(None)
@@ -481,11 +485,12 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
                     channel_parms_imag[chan]**2) for chan in range(nchans)])
                 phase = numpy.arctan2(channel_parms_imag[:], channel_parms_real[:])
 
-                # Interpolate across flagged solutions
+                # Smooth
                 channel_amp_interp = []
                 unflagged_sols = numpy.where(channel_parms_real != 1.0)
                 x, y = numpy.meshgrid(times, range(nchans))
                 if numpy.any(unflagged_sols):
+                    # Set flagged solutions to 1.0
                     flagged_sols = numpy.where(channel_parms_real == 1.0)
                     channel_amp_orig[flagged_sols] = 1.0
                     amp_cleaned, amp_median, baddata = median2Dampfilter(channel_amp_orig)
