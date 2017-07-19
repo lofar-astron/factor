@@ -9,6 +9,20 @@ multiple nodes (with a shared file system). It requires only modest resources
 (at least 32 GB of memory and 1 TB of disk space).
 
 
+What's New Since v1.3
+---------------------
+
+* Options have been added to allow the scales used by WSClean during
+clean to be specified (`selfcal_multiscale_scales_pixel` and
+`facet_multiscale_scales_pixel` under `[imaging]`)
+
+* The `atrous_do column` in the directions file has been renamed to
+`mscale_selfcal_do`, as this name better describes its purpose
+
+* Improved handling of flagged solutions during smoothing of the amplitude
+solutions
+
+
 What's New in v1.3
 ------------------
 

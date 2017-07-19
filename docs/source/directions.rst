@@ -42,10 +42,10 @@ Columns
         The RA and Dec (J2000) of the calibrator, written as ``RA,Dec`` in sexagesimal format (note that there should be no space after the comma). If the calibrator is a group of more than one source, this position should define the center of a calibration group.
 
     mscale_selfcal_do
-        If ``True``, multiscale clean will be used during selfcal with the scales specified by :term:`selfcal_multiscale_scales_pixel` or auto selected by WSClean (note that when ``mscale_selfcal_do = False``, multiscale clean is still done, but with only scales of 0 and 7 pixels). If empty, Factor will activate multiscale clean if it determines that the calibrator has a diameter of 4 arcmin or larger in the facet sky model.
+        If ``True``, multiscale clean will be used during selfcal with the scales specified by :term:`selfcal_multiscale_scales_pixel` or auto-selected by WSClean (note that when ``mscale_selfcal_do = False``, multiscale clean is still done for the later stages of selfcal, but only with scales of 0 and 7 pixels). If empty, Factor will activate multiscale clean if it determines that the calibrator has a diameter of 4 arcmin or larger in the facet sky model.
 
     mscale_facet_do
-        If ``True``, multiscale clean will be used during facet imaging. If empty, Factor will activate multiscale clean if it identifies a source with a diameter of 4 arcmin or larger in the facet sky model or if the facet contains the target (specified with the :term:`target_ra`, :term:`target_dec`, and :term:`target_radius_arcmin` parameters).
+        If ``True``, multiscale clean will be used during facet imaging with the scales specified by :term:`facet_multiscale_scales_pixel` or auto-selected by WSClean. If empty, Factor will activate multiscale clean if it identifies a source with a diameter of 4 arcmin or larger in the facet sky model or if the facet contains the target (specified with the :term:`target_ra`, :term:`target_dec`, and :term:`target_radius_arcmin` parameters).
 
     cal_imsize
         The width in pixels of calibrator image. If ``0``, Factor will determine the width from the size of the calibrator or calibrator group.

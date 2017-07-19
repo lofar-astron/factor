@@ -225,6 +225,23 @@ The available options are described below under their respective sections.
         Use baseline-dependent averaging in WSClean (default = ``True``). If enabled,
         this option can dramatically speed up imaging with WSClean.
 
+    selfcal_multiscale_scales_pixel
+        List of scales in pixels to use when multiscale clean is activated
+        during self calibration (default = auto). Note that multiscale clean is
+        activated for a direction only when the calibrator is determined to be
+        larger than 4 arcmin or :term:`mscale_selfcal_do` is set for the
+        direction in the directions file
+
+    facet_multiscale_scales_pixel
+        List of scales in pixels to use when multiscale clean is activated
+        during facet imaging (default = auto). Note that multiscale clean is
+        activated for a direction only when a source in the facet is determined
+        to be larger than 4 arcmin, the facet contains the target (specified
+        with the :term:`target_ra`, :term:`target_dec`, and
+        :term:`target_radius_arcmin` parameters), or
+        :term:`mscale_facet_do` is set for the direction in the
+        directions file
+
     selfcal_cellsize_arcsec
         Self calibration pixel size in arcsec (default = 1.5).
 
@@ -323,9 +340,9 @@ The available options are described below under their respective sections.
 
     faceting_radius_deg
         Radius within which facets will be used (default = 1.25 * FWHM / 2 of primary beam
-	of highest-frequency band); outside of this radius, small patches are used
-	that do not appear in the final mosaic. (The given radius will be expanded in the
-	N-S direction - i.e. along the DEC axis - by the elongation of the primary beam.)
+        of highest-frequency band); outside of this radius, small patches are used
+        that do not appear in the final mosaic. (The given radius will be expanded in the
+        N-S direction - i.e. along the DEC axis - by the elongation of the primary beam.)
 
     check_edges
         Check whether any sources from the initial subtract sky model fall on facet
