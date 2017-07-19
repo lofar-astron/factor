@@ -3,6 +3,13 @@
 Changelog
 =========
 
+Changes since version 1.3:
+
+    * Options have been added to allow the scales used by WSClean during clean to be specified (selfcal_multiscale_scales_pixel and facet_multiscale_scales_pixel under [imaging])
+    * The atrous_do column in the directions file has been renamed to mscale_selfcal_do, as this name better describes its purpose
+    * Improved handling of flagged solutions during smoothing of the amplitude solutions
+
+
 Version 1.3
 -----------
 
