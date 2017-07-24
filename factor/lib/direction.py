@@ -435,7 +435,7 @@ class Direction(object):
                 self.mscale_selfcal_do = False
         if self.mscale_facet_do is None:
             sizes_arcmin = self.get_source_sizes()
-            if any([s > large_size_arcmin for s in sizes_arcmin]):
+            if sizes_arcmin is not None and any([s > large_size_arcmin for s in sizes_arcmin]):
                 self.mscale_facet_do = True
             else:
                 self.mscale_facet_do = False
@@ -755,11 +755,16 @@ class Direction(object):
             # flux density to set the intervals. A scaling with a power of 1/1.5
             # seems to work well
             total_flux_jy, peak_flux_jy_bm = self.get_cal_fluxes()
-            effective_flux_jy = peak_flux_jy_bm * (total_flux_jy / peak_flux_jy_bm)**0.667
-            ref_flux_jy = 1.4 * (4.0 / nbands)**0.5
-            self.log.debug('Total flux density of calibrator: {} Jy'.format(total_flux_jy))
-            self.log.debug('Peak flux density of calibrator: {} Jy/beam'.format(peak_flux_jy_bm))
-            self.log.debug('Effective flux density of calibrator: {} Jy'.format(effective_flux_jy))
+            if total_flux_jy == 0.0 or peak_flux_jy_bm == 0.0:
+                self.log.warn('Could not find source components for the calibrator '
+                    'in one or more of the direction-independent sky models. Using '
+                    'largest allowable solution intervals')
+                effective_flux_jy = 0.0
+            else:
+                effective_flux_jy = peak_flux_jy_bm * (total_flux_jy / peak_flux_jy_bm)**0.667
+                self.log.debug('Total flux density of calibrator: {} Jy'.format(total_flux_jy))
+                self.log.debug('Peak flux density of calibrator: {} Jy/beam'.format(peak_flux_jy_bm))
+                self.log.debug('Effective flux density of calibrator: {} Jy'.format(effective_flux_jy))
 
             # Set baseline-dependent pre-averaging flag
             if effective_flux_jy < preaverage_flux_jy:
@@ -769,17 +774,24 @@ class Direction(object):
                 self.pre_average = False
 
             # Set fast (phase-only) solution time interval
+            ref_flux_jy = 1.4 * (4.0 / nbands)**0.5
             if self.solint_time_p == 0:
                 if self.pre_average:
                     # Set solution interval to 1 timeslot and vary the target rms per
                     # solution interval instead (which affects the width of the
                     # preaveraging Gaussian)
                     self.solint_time_p = 1
-                    self.target_rms_rad = 0.5 * (ref_flux_jy / effective_flux_jy)**2
+                    if effective_flux_jy > 0.0:
+                        self.target_rms_rad = 0.5 * (ref_flux_jy / effective_flux_jy)**2
+                    else:
+                        self.target_rms_rad = 0.5
                     if self.target_rms_rad > 0.5:
                         self.target_rms_rad = 0.5
                 else:
-                    target_timewidth_s = 16.0 * (ref_flux_jy / effective_flux_jy)**2
+                    if effective_flux_jy > 0.0:
+                        target_timewidth_s = 16.0 * (ref_flux_jy / effective_flux_jy)**2
+                    else:
+                        target_timewidth_s = 16.0
                     if target_timewidth_s > 16.0:
                         target_timewidth_s = 16.0
                     self.solint_time_p = max(1, int(round(target_timewidth_s / timestep_sec)))
@@ -792,7 +804,10 @@ class Direction(object):
                 # than the target interval (for the smallest time chunk; this
                 # assumes that the chunks are all about the same length)
                 ref_flux_jy = 1.4
-                target_timewidth_s = 1200.0 * (ref_flux_jy / effective_flux_jy)**2
+                if effective_flux_jy > 0.0:
+                    target_timewidth_s = 1200.0 * (ref_flux_jy / effective_flux_jy)**2
+                else:
+                    target_timewidth_s = 1200.0
                 if target_timewidth_s < 240.0:
                     target_timewidth_s = 240.0
                 if target_timewidth_s > 1200.0:
