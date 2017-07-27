@@ -155,7 +155,10 @@ class Band(object):
 
         self.log.debug("Using {0} files.".format(len(self.files)))
         if skymodel_dirindep != None:
-            self.log.debug("Using Skymodel: {}".format(os.path.basename(skymodel_dirindep)))
+            if not os.path.exists(skymodel_dirindep):
+                self.log.debug("Could not find Skymodel: {}".format(skymodel_dirindep))
+            else:
+                self.log.debug("Using Skymodel: {}".format(os.path.basename(skymodel_dirindep)))
 
 
     def check_parmdb(self):
