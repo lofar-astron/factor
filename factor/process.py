@@ -600,7 +600,7 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
             "choose not to continue and you let FACTOR generate the directions\n"
             "internally, you must delete the FACTOR-made directions file\n"
             "(dir_working/factor_directions.txt) before restarting if you want\n"
-            "to FACTOR to regenerate it\n")
+            "FACTOR to regenerate it\n")
         prompt = "Continue processing (y/n)? "
         answ = raw_input(prompt)
         while answ.lower() not in  ['y', 'n', 'yes', 'no']:
