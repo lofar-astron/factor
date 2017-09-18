@@ -56,7 +56,7 @@ The available options are described below under their respective sections.
         Extension that when concatenated with the "extension-stripped" MS path gives
         a path that is checked if it contains a skymodel. The default finds the skymodel
         files from the standard prefactor ``Initial-Subtract.parset``
-        (default = ``.wsclean_low2-model.merge`` ; note the leading ".").
+        (default = ``.merge`` ; note the leading ".").
 
     chunk_size_sec
         Size of time chunks in seconds (default = 2400; minimum allowed value is

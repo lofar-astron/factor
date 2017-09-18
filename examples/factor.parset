@@ -27,8 +27,8 @@ dir_ms = /data/bands
 # Extension that when concatenated with the 'extension-stripped' MS path gives a
 # path that is checked if it contains a sky model. The default finds the sky
 # model files from the standard prefactor Initial-Subtract.parset (default =
-# .wsclean_low2-model.merge ; notice the leading ".")
-# skymodel_extension = .wsclean_low2-model.merge
+# .merge ; notice the leading ".")
+# skymodel_extension = .merge
 
 # Size of time chunks in seconds (default = 2400; minimum allowed value is
 # 1200). Ideally, the number of chunks should be evenly divisible by the total

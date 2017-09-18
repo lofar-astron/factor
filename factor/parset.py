@@ -146,7 +146,7 @@ def get_global_options(parset):
     # Extension that when concatenated with the 'extension-stripped' MS path gives
     # a path that is checked if it contains a skymodel
     if 'skymodel_extension' not in parset_dict:
-        parset_dict['skymodel_extension'] = '.wsclean_low2-model.merge'
+        parset_dict['skymodel_extension'] = '.merge'
 
     # Size of time chunks in seconds (default = 2400; minimum allowed value is
     # 1200). Generally, the number of chunks should be at least the number of
@@ -907,7 +907,7 @@ def get_cluster_options(parset):
     return parset_dict
 
 
-def get_ms_options(parset, ms_files, skymodel_extension = '.wsclean_low2-model.merge'):
+def get_ms_options(parset, ms_files, skymodel_extension = '.merge'):
     """
     Handle the ms-specific options
 
