@@ -156,9 +156,8 @@ def find_ionfactor(parmdb_file, baseline_dict, t1, t2, target_rms_rad=0.2):
         for i in range(1, len(ph)/2, step):
             p1 = ph[i:]
             p2 = ph[:-i]
-            rms = np.linalg.norm(p1-p2) / np.sqrt(len(p1))
             mean = np.mean(p1-p2)
-            if rms + mean > target_rms_rad:
+            if mean > target_rms_rad:
                 rmstime = i
                 break
         if rmstime is None:
