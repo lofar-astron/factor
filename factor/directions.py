@@ -538,7 +538,7 @@ def make_initial_skymodel(band):
 
     # Group clean components by thresholding after convolving model with
     # 1-arcmin beam
-    s.group('threshold', FWHM='60.0 arcsec', root='facet')
+    s.group('threshold', FWHM='60.0 arcsec', root='facet', threshold=0.01)
     s.remove('Patch = patch_*', force=True) # Remove sources that did not threshold
     if len(s) == 0:
         log.critical("No sources found through thresholding.")
