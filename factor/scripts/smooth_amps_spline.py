@@ -73,7 +73,7 @@ def std(inputData, Zero=False, axis=None, dtype=None):
 def findscatter(datavector):
     shifted_vec = numpy.roll(datavector, 1)
     #scatter = sum(abs(shifted_vec - datavector))/numpy.float(len(datavector))
-    scatter = numpy.median(abs(shifted_vec - datavector))
+    scatter = numpy.nanmedian(abs(shifted_vec - datavector))
     return scatter
 
 
@@ -83,7 +83,7 @@ def findscatter_time(dataarray):
       #print 'findscatter_time', freq
       scatter = findscatter(dataarray[freq,:])
       scattervec.append(scatter)
-    return numpy.median(scattervec)
+    return numpy.nanmedian(scattervec)
 
 
 def findscatter_freq(dataarray):
@@ -92,7 +92,7 @@ def findscatter_freq(dataarray):
       #print 'findscatter_freq', time
       scatter = findscatter(dataarray[:,time])
       scattervec.append(scatter)
-    return numpy.median(scattervec)
+    return numpy.nanmedian(scattervec)
 
 
 def findnoisevec(datavector):
@@ -193,8 +193,6 @@ def spline1D(amp_orig):
         splineorder = 3 # reduce order, data is  bad
         if scatter > 0.2:
             splineorder = 1 # very bad data
-
-    #print 'knots CL', knotvec
     spl2 = LSQUnivariateSpline(timevec, amp, knotvec, w=weights, k=splineorder)
 
     # now find bad data devatiating from the fit 30 x scatter
@@ -226,7 +224,7 @@ def spline1D(amp_orig):
     amp[idx] = model[idx]
 
     # go out of log-space
-    idxnodata = numpy.where(amp > 1.0)
+    idxnodata = numpy.where(numpy.logical_or(amp > 1.0, amp < -10.0))
     amp[idxnodata] = 0.0
     amp = 10**amp
 
@@ -272,7 +270,7 @@ def median2Dampfilter(amp_orig):
 
     amp = pad(amp_orig, ((numpy.shape(amp_orig)[0],numpy.shape(amp_orig)[0]),
         (numpy.shape(amp_orig)[1],numpy.shape(amp_orig)[1])), mode='reflect')
-    flagged = numpy.where(amp == 1.0)
+    flagged = numpy.where(numpy.logical_or(amp == 1.0, amp == 0.0))
 
     # take the log
     amp = numpy.log10(amp)
@@ -491,9 +489,12 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
                 x, y = numpy.meshgrid(times, range(nchans))
                 if numpy.any(unflagged_sols):
                     # Set flagged solutions to 1.0
-                    flagged_sols = numpy.where(channel_parms_real == 1.0)
+                    flagged_sols = numpy.where(numpy.logical_or(channel_parms_real == 1.0, channel_amp_orig <= 0.0))
                     channel_amp_orig[flagged_sols] = 1.0
+
+                    # Filter
                     amp_cleaned, amp_median, baddata = median2Dampfilter(channel_amp_orig)
+                    amp_cleaned[flagged_sols] = 1.0
 
                     for chan in range(nchans):
                         # put back the results
