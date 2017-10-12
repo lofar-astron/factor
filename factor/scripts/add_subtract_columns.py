@@ -121,12 +121,15 @@ def main(ms1, ms2, column1, column2, column_out, op='add',in_memory=True,
             print('Compression not yet supported with in_memory = False')
             sys.exit(1)
 
-        if op.lower() == 'subtract21':
+        if op.lower() == 'add' or op.lower() == 'subtract12' or op.lower() == 'subtract':
             os.system("taql 'update {0}, {1} t2 set {2}={3}{4}t2.{5}'".format(
                 ms1, ms2, column_out, column1, op_sym, column2))
-        else:
+        elif op.lower() == 'subtract21':
             os.system("taql 'update {0}, {1} t2 set {2}=t2.{5}{4}{3}'".format(
                 ms1, ms2, column_out, column1, op_sym, column2))
+        else:
+            print('Operation not understood. Must be either "add" or "subtract[12,21]"')
+            sys.exit(1)
 
 
 if __name__ == '__main__':
