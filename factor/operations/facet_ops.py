@@ -413,7 +413,7 @@ class FacetImage(Operation):
             os.path.join(self.pipeline_mapfile_dir, 'image1.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'add_all_facet_sources.mapfile'),
             os.path.join(self.pipeline_mapfile_dir, 'corrupt_final_model.mapfile')]
-        if ((not self.parset['keep_avg_facet_data'] and self.direction.contains_target) or
+        if ((not self.parset['keep_avg_facet_data'] and not self.direction.contains_target) or
            self.direction.use_existing_data):
             # Add averaged calibrated data for the facet to files to be deleted.
             # These are only needed if the user wants to reimage by hand (e.g.,
