@@ -195,7 +195,7 @@ def spline1D(amp_orig):
             splineorder = 1 # very bad data
     spl2 = LSQUnivariateSpline(timevec, amp, knotvec, w=weights, k=splineorder)
 
-    # now find bad data devatiating from the fit 30 x scatter
+    # now find bad data devatiating from the fit 15 x scatter
     residual = numpy.abs(spl2(timevec)-amp)
     idx      = numpy.where(residual > 15.*scatter)
 
@@ -226,6 +226,8 @@ def spline1D(amp_orig):
     # go out of log-space
     idxnodata = numpy.where(numpy.logical_or(amp > 1.0, amp < -10.0))
     amp[idxnodata] = 0.0
+    amp[flagged] = 0.0
+    model[flagged] = 0.0
     amp = 10**amp
 
     amp_clean = amp[ndata:ndata + ndata]
@@ -410,9 +412,9 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
             for chan in range(nchans):
                 unflagged_times = numpy.where(channel_parms_real[chan] != 1.0)
                 flagged_times = numpy.where(channel_parms_real[chan] == 1.0)
+                if numpy.any(flagged_times):
+                    channel_amp_orig[chan][flagged_times] = 1.0
                 if numpy.any(unflagged_times):
-                    if numpy.any(flagged_times):
-                        channel_amp_orig[chan][flagged_times] = 1.0
                     channel_amp_interp.append(channel_amp_orig[chan])
                 else:
                     channel_amp_interp.append(None)
