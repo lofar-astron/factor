@@ -19,56 +19,56 @@ import astropy.convolution
 
 
 def std(inputData, Zero=False, axis=None, dtype=None):
-	"""
-	Robust estimator of the standard deviation of a data set.
+    """
+    Robust estimator of the standard deviation of a data set.
 
-	Based on the robust_sigma function from the AstroIDL User's Library.
+    Based on the robust_sigma function from the AstroIDL User's Library.
 
-	.. versionchanged:: 1.0.3
-		Added the 'axis' and 'dtype' keywords to make this function more
-		compatible with numpy.std()
-	"""
-	epsilon = 1.0e-20
-	if axis is not None:
-		fnc = lambda x: std(x, dtype=dtype)
-		sigma = numpy.apply_along_axis(fnc, axis, inputData)
-	else:
-		data = inputData.ravel()
-		if type(data).__name__ == "MaskedArray":
-			data = data.compressed()
-		if dtype is not None:
-			data = data.astype(dtype)
+    .. versionchanged:: 1.0.3
+        Added the 'axis' and 'dtype' keywords to make this function more
+        compatible with numpy.std()
+    """
+    epsilon = 1.0e-20
+    if axis is not None:
+        fnc = lambda x: std(x, dtype=dtype)
+        sigma = numpy.apply_along_axis(fnc, axis, inputData)
+    else:
+        data = inputData.ravel()
+        if type(data).__name__ == "MaskedArray":
+            data = data.compressed()
+        if dtype is not None:
+            data = data.astype(dtype)
 
-		if Zero:
-			data0 = 0.0
-		else:
-			data0 = numpy.median(data)
-		maxAbsDev = numpy.median(numpy.abs(data-data0)) / 0.6745
-		if maxAbsDev < epsilon:
-			maxAbsDev = (numpy.abs(data-data0)).mean() / 0.8000
-		if maxAbsDev < epsilon:
-			sigma = 0.0
-			return sigma
+        if Zero:
+            data0 = 0.0
+        else:
+            data0 = numpy.median(data)
+        maxAbsDev = numpy.median(numpy.abs(data-data0)) / 0.6745
+        if maxAbsDev < epsilon:
+            maxAbsDev = (numpy.abs(data-data0)).mean() / 0.8000
+        if maxAbsDev < epsilon:
+            sigma = 0.0
+            return sigma
 
-		u = (data-data0) / 6.0 / maxAbsDev
-		u2 = u**2.0
-		good = numpy.where( u2 <= 1.0 )
-		good = good[0]
-		if len(good) < 3:
-			print "WARNING:  Distribution is too strange to compute standard deviation"
-			sigma = -1.0
-			return sigma
+        u = (data-data0) / 6.0 / maxAbsDev
+        u2 = u**2.0
+        good = numpy.where( u2 <= 1.0 )
+        good = good[0]
+        if len(good) < 3:
+            print "WARNING:  Distribution is too strange to compute standard deviation"
+            sigma = -1.0
+            return sigma
 
-		numerator = ((data[good]-data0)**2.0 * (1.0-u2[good])**2.0).sum()
-		nElements = (data.ravel()).shape[0]
-		denominator = ((1.0-u2[good])*(1.0-5.0*u2[good])).sum()
-		sigma = nElements*numerator / (denominator*(denominator-1.0))
-		if sigma > 0:
-			sigma = math.sqrt(sigma)
-		else:
-			sigma = 0.0
+        numerator = ((data[good]-data0)**2.0 * (1.0-u2[good])**2.0).sum()
+        nElements = (data.ravel()).shape[0]
+        denominator = ((1.0-u2[good])*(1.0-5.0*u2[good])).sum()
+        sigma = nElements*numerator / (denominator*(denominator-1.0))
+        if sigma > 0:
+            sigma = math.sqrt(sigma)
+        else:
+            sigma = 0.0
 
-	return sigma
+    return sigma
 
 def findscatter(datavector):
     shifted_vec = numpy.roll(datavector, 1)
@@ -578,7 +578,7 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
         parms[key_name]['values'][initial_flagged_dict[key_name]] = numpy.nan
 
     if os.path.exists(instrument_name_smoothed):
-        shutil.rmtree(instrument_name_smoothed)
+        os.system("rm -rf {}".format(instrument_name_smoothed))
     pdbnew = lofar.parmdb.parmdb(instrument_name_smoothed, create=True)
 
     # Identify any gaps in time (frequency gaps are not allowed), as we need to handle
@@ -613,10 +613,10 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
     # Copy output to original path and delete copies if scratch directory is specified
     if scratch_dir is not None:
         if os.path.exists(instrument_name_smoothed_orig):
-            shutil.rmtree(instrument_name_smoothed_orig)
+            os.system("rm -rf {}".format(instrument_name_smoothed_orig))
         shutil.copytree(instrument_name_smoothed, instrument_name_smoothed_orig)
-        shutil.rmtree(instrument_name)
-        shutil.rmtree(instrument_name_smoothed)
+        os.system("rm -rf {}".format(instrument_name))
+        os.system("rm -rf {}".format(instrument_name_smoothed))
 
 
 if __name__ == '__main__':
