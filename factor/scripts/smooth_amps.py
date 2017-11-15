@@ -184,7 +184,7 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, scratch_dir=
                     parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = numpy.copy(amp *
                         numpy.sin(phase) * norm_factor)
     if os.path.exists(instrument_name_smoothed):
-        shutil.rmtree(instrument_name_smoothed)
+        os.system("rm -rf {}".format(instrument_name_smoothed))
     pdbnew = lofar.parmdb.parmdb(instrument_name_smoothed, create=True)
     pdbnew.addValues(parms)
     pdbnew.flush()
@@ -192,10 +192,10 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, scratch_dir=
     # Copy output to original path and delete copies if scratch directory is specified
     if scratch_dir is not None:
         if os.path.exists(instrument_name_smoothed_orig):
-            shutil.rmtree(instrument_name_smoothed_orig)
+            os.system("rm -rf {}".format(instrument_name_smoothed_orig))
         shutil.copytree(instrument_name_smoothed, instrument_name_smoothed_orig)
-        shutil.rmtree(instrument_name)
-        shutil.rmtree(instrument_name_smoothed)
+        os.system("rm -rf {}".format(instrument_name))
+        os.system("rm -rf {}".format(instrument_name_smoothed))
 
 
 if __name__ == '__main__':
