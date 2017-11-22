@@ -676,7 +676,7 @@ def group_directions(directions, n_per_grouping=[{'1':0}], allow_reordering=True
 
 def thiessen(directions_list, field_ra_deg, field_dec_deg, faceting_radius_deg,
     s=None, check_edges=False, target_ra=None, target_dec=None,
-    target_radius_arcmin=None, beam_ratio=None):
+    target_radius_arcmin=None, beam_ratio=1.0):
     """
     Generates and add thiessen polygons or patches to input directions
 
