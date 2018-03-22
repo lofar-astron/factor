@@ -650,9 +650,9 @@ remove_h5parms1.argument.flags     = [-rf,h5parm]
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
 solve_phaseonly1.control.type                         = dppp_inplace
 {% if peel_skymodel is not none %}
-solve_phaseonly1.control.mapfiles_in                  = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile,expand_peel_sourcedb_map.output.mapfile]
+solve_phaseonly1.control.mapfiles_in                  = [{{ solve_concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile,expand_peel_sourcedb_map.output.mapfile]
 {% else %}
-solve_phaseonly1.control.mapfiles_in                  = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile,expand_sourcedb0_map.output.mapfile]
+solve_phaseonly1.control.mapfiles_in                  = [{{ solve_concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile,expand_sourcedb0_map.output.mapfile]
 {% endif %}
 solve_phaseonly1.control.inputkeys                    = [msin,h5parm,sourcedb]
 solve_phaseonly1.argument.numthreads                  = {{ max_cpus_per_proc_ntimes }}
