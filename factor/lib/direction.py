@@ -242,6 +242,12 @@ class Direction(object):
         self.selfcal_multiscale_scales_pixel = parset['imaging_specific']['selfcal_multiscale_scales_pixel']
         self.frac_bandwidth_selfcal_facet_image = parset['imaging_specific']['fractional_bandwidth_selfcal_facet_image']
         self.nbands_selfcal_facet_image = min(6, len(bands))
+        self.approximatetec = parset['calibration_specific']['approximatetec']
+        self.maxapproxiter = parset['calibration_specific']['maxapproxiter']
+        self.maxiter = parset['calibration_specific']['maxiter']
+        self.propagatesolutions = parset['calibration_specific']['propagatesolutions']
+        self.stepsize = parset['calibration_specific']['stepsize']
+        self.tolerance = parset['calibration_specific']['tolerance']
 
         if facet_cellsize_arcsec is None:
             facet_cellsize_arcsec = parset['imaging_specific']['selfcal_cellsize_arcsec']

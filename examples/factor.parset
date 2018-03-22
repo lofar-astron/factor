@@ -130,6 +130,14 @@ dir_ms = /data/bands
 # value would be e.g.: 5.0
 # solve_all_correlations_flux_Jy = 1000.0
 
+# TEC solver parameters:
+# approximatetec = True
+# maxapproxiter = 50
+# maxiter = 75
+# propagatesolutions = True
+# stepsize = 0.02
+# tolerance = 1e-8
+
 
 [imaging]
 # Make final mosaic (default = True)
