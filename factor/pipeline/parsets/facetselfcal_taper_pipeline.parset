@@ -262,8 +262,6 @@ remove_parmdbs1.control.inputkey   = parmdb
 remove_parmdbs1.argument.flags     = [-rf,parmdb]
 
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
-# note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
-# GainCal has a filter parameter, we can switch to that
 solve_phaseonly1.control.type                     = dppp_inplace
 {% if peel_skymodel is not none %}
 solve_phaseonly1.control.mapfiles_in              = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile,expand_peel_sourcedb_map.output.mapfile]
@@ -275,9 +273,8 @@ solve_phaseonly1.control.inputkeys                = [msin,parmdb]
 solve_phaseonly1.argument.numthreads              = {{ max_cpus_per_proc_ntimes }}
 solve_phaseonly1.argument.msin.datacolumn         = DATA
 solve_phaseonly1.argument.msout                   = .
-solve_phaseonly1.argument.steps                   = [uvcut,solvetec]
-solve_phaseonly1.argument.uvcut.type              = uvwflagger
-solve_phaseonly1.argument.uvcut.uvlambdamin       = {{ solve_min_uv_lambda }}
+solve_phaseonly1.argument.steps                   = [solvetec]
+solve_phaseonly1.argument.solvetec.uvlambdamin    = {{ solve_min_uv_lambda }}
 solve_phaseonly1.argument.solvetec.type           = gaincal
 solve_phaseonly1.argument.solvetec.caltype        = tecandphase
 solve_phaseonly1.argument.solvetec.parmdb         = parmdb
@@ -445,17 +442,14 @@ remove_parmdbs2.control.inputkey   = parmdb
 remove_parmdbs2.argument.flags     = [-rf,parmdb]
 
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
-# note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
-# GainCal has a filter parameter, we can switch to that
 solve_phaseonly2.control.type                     = dppp_inplace
 solve_phaseonly2.control.mapfiles_in              = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 solve_phaseonly2.control.inputkeys                = [msin,parmdb]
 solve_phaseonly2.argument.numthreads              = {{ max_cpus_per_proc_ntimes }}
 solve_phaseonly2.argument.msin.datacolumn         = DATA
 solve_phaseonly2.argument.msout                   = .
-solve_phaseonly2.argument.steps                   = [uvcut,solvetec]
-solve_phaseonly2.argument.uvcut.type              = uvwflagger
-solve_phaseonly2.argument.uvcut.uvlambdamin       = {{ solve_min_uv_lambda }}
+solve_phaseonly2.argument.steps                   = [solvetec]
+solve_phaseonly2.argument.solvetec.uvlambdamin    = {{ solve_min_uv_lambda }}
 solve_phaseonly2.argument.solvetec.type           = gaincal
 solve_phaseonly2.argument.solvetec.caltype        = tecandphase
 solve_phaseonly2.argument.solvetec.parmdb         = parmdb
@@ -621,17 +615,14 @@ remove_parmdbs11.control.inputkey   = parmdb
 remove_parmdbs11.argument.flags     = [-rf,parmdb]
 
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
-# note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
-# GainCal has a filter parameter, we can switch to that
 solve_ampphase11.control.type                     = dppp_inplace
 solve_ampphase11.control.mapfiles_in              = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 solve_ampphase11.control.inputkeys                = [msin,parmdb]
 solve_ampphase11.argument.numthreads              = {{ max_cpus_per_proc_ntimes }}
 solve_ampphase11.argument.msin.datacolumn         = DATA
 solve_ampphase11.argument.msout                   = .
-solve_ampphase11.argument.steps                   = [uvcut,solvetec]
-solve_ampphase11.argument.uvcut.type              = uvwflagger
-solve_ampphase11.argument.uvcut.uvlambdamin       = {{ solve_min_uv_lambda }}
+solve_ampphase11.argument.steps                   = [solvetec]
+solve_ampphase11.argument.solvetec.uvlambdamin    = {{ solve_min_uv_lambda }}
 solve_ampphase11.argument.solvetec.type           = gaincal
 solve_ampphase11.argument.solvetec.caltype        = tecandphase
 solve_ampphase11.argument.solvetec.parmdb         = parmdb
@@ -704,17 +695,14 @@ remove_parmdbs12.control.inputkey   = parmdb
 remove_parmdbs12.argument.flags     = [-rf,parmdb]
 
 # run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
-# note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
-# GainCal has a filter parameter, we can switch to that
 solve_ampphase12.control.type                      = dppp_inplace
 solve_ampphase12.control.mapfiles_in               = [{{ solve_concat_data_mapfile }},make_slow_gain_parmdb_map.output.mapfile]
 solve_ampphase12.control.inputkeys                 = [msin,parmdb]
 solve_ampphase12.argument.numthreads               = {{ max_cpus_per_proc_ntimes }}
 solve_ampphase12.argument.msin.datacolumn          = CORRECTED_DATA
 solve_ampphase12.argument.msout                    = .
-solve_ampphase12.argument.steps                    = [uvcut,solvegain]
-solve_ampphase12.argument.uvcut.type               = uvwflagger
-solve_ampphase12.argument.uvcut.uvlambdamin        = {{ solve_min_uv_lambda }}
+solve_ampphase12.argument.steps                    = [solvegain]
+solve_ampphase12.argument.solvegain.uvlambdamin    = {{ solve_min_uv_lambda }}
 solve_ampphase12.argument.solvegain.type           = gaincal
 solve_ampphase12.argument.solvegain.caltype        = {{ selfcal_caltype }}
 solve_ampphase12.argument.solvegain.parmdb         = parmdb
@@ -908,17 +896,14 @@ remove_parmdbs21.control.inputkey   = parmdb
 remove_parmdbs21.argument.flags     = [-rf,parmdb]
 
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
-# note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
-# GainCal has a filter parameter, we can switch to that
 solve_ampphase21.control.type                     = dppp_inplace
 solve_ampphase21.control.mapfiles_in              = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 solve_ampphase21.control.inputkeys                = [msin,parmdb]
 solve_ampphase21.argument.numthreads              = {{ max_cpus_per_proc_ntimes }}
 solve_ampphase21.argument.msin.datacolumn         = DATA
 solve_ampphase21.argument.msout                   = .
-solve_ampphase21.argument.steps                   = [uvcut,solvetec]
-solve_ampphase21.argument.uvcut.type              = uvwflagger
-solve_ampphase21.argument.uvcut.uvlambdamin       = {{ solve_min_uv_lambda }}
+solve_ampphase21.argument.steps                   = [solvetec]
+solve_ampphase21.argument.solvetec.uvlambdamin    = {{ solve_min_uv_lambda }}
 solve_ampphase21.argument.solvetec.type           = gaincal
 solve_ampphase21.argument.solvetec.caltype        = tecandphase
 solve_ampphase21.argument.solvetec.parmdb         = parmdb
@@ -967,17 +952,14 @@ remove_parmdbs22.control.inputkey   = parmdb
 remove_parmdbs22.argument.flags     = [-rf,parmdb]
 
 # run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes * num_cal_blocks
-# note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
-# GainCal has a filter parameter, we can switch to that
 solve_ampphase22.control.type                      = dppp_inplace
 solve_ampphase22.control.mapfiles_in               = [{{ solve_concat_data_mapfile }},make_slow_gain_parmdb_map.output.mapfile]
 solve_ampphase22.control.inputkeys                 = [msin,parmdb]
 solve_ampphase22.argument.numthreads               = {{ max_cpus_per_proc_ntimes }}
 solve_ampphase22.argument.msin.datacolumn          = CORRECTED_DATA
 solve_ampphase22.argument.msout                    = .
-solve_ampphase22.argument.steps                    = [uvcut,solvegain]
-solve_ampphase22.argument.uvcut.type               = uvwflagger
-solve_ampphase22.argument.uvcut.uvlambdamin        = {{ solve_min_uv_lambda }}
+solve_ampphase22.argument.steps                    = [solvegain]
+solve_ampphase22.argument.solvegain.uvlambdamin    = {{ solve_min_uv_lambda }}
 solve_ampphase22.argument.solvegain.type           = gaincal
 solve_ampphase22.argument.solvegain.caltype        = {{ selfcal_caltype }}
 solve_ampphase22.argument.solvegain.parmdb         = parmdb

@@ -341,6 +341,8 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
     key_names = parms.keys()
     initial_flagged_dict = {}
     initial_unflagged_dict = {}
+    ntimes = 0
+    nfreqs = 0
     for key_name in key_names:
         # Check for NaNs and zeros. If found, set to 1
         initial_flagged_indx = numpy.where(numpy.logical_or(numpy.isnan(parms[key_name]['values']),
@@ -351,20 +353,25 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
         initial_unflagged_dict[key_name] = initial_unflagged_indx
         parms[key_name]['values'][initial_flagged_indx] = 1.0
 
-    nchans = len(parms[key_names[0]]['freqs'])
+        # Determine the times and freqs (check all keys in case one or more are
+        # missing some)
+        times = numpy.copy(sorted( parms[key_name]['times']))
+        if len(times) > ntimes:
+            ntimes = len(times)
+            orig_times = parms[key_name]['times']
+            timewidths = parms[key_name]['timewidths']
+        freqs = numpy.copy(sorted( parms[key_name]['freqs']))/1e6 # get this in MHz
+        if len(freqs) > nfreqs:
+            nfreqs = len(freqs)
+            orig_freqs = parms[key_name]['freqs']
+            freqwidths = parms[key_name]['freqwidths']
+            nchans = len(parms[key_name]['freqs'])
 
     # determine the number of polarizations in parmdb (2 or 4)
     if any(gain+':0:1:' in s for s in key_names):
         pol_list = ['0:0', '1:1', '0:1', '1:0']
     else:
         pol_list = ['0:0', '1:1']
-
-    times = numpy.copy(sorted( parms[key_names[0]]['times']))
-    orig_times = parms[key_names[0]]['times']
-    timewidths = parms[key_names[0]]['timewidths']
-    freqs = numpy.copy(sorted( parms[key_names[0]]['freqs']))/1e6 # get this in MHz
-    orig_freqs = parms[key_names[0]]['freqs']
-    freqwidths = parms[key_names[0]]['freqwidths']
 
     # times not used at the moment, I assume the time axis for a parmdb is regular and does not contain gaps
     times = (times - numpy.min(times))/24. #so we get an axis in hrs

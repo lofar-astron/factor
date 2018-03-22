@@ -625,14 +625,14 @@ wsclean_ft0.argument.j           = {{ max_cpus_per_io_proc_ntimes }}
 wsclean_ft0.argument.tempdir     = {{ local_dir_parent }}
 {% endif %}
 
-# generate mapfile for the fast-phase parmDBs generated in the solve_phaseonly steps, length = ntimes * num_cal_blocks
-make_fast_phase_parmdb_map.control.kind               = plugin
-make_fast_phase_parmdb_map.control.type               = createMapfile
-make_fast_phase_parmdb_map.control.method             = add_suffix_to_file
-make_fast_phase_parmdb_map.control.mapfile_in         = concat_data.output.mapfile
-make_fast_phase_parmdb_map.control.add_suffix_to_file = /instrument
-make_fast_phase_parmdb_map.control.mapfile_dir        = input.output.mapfile_dir
-make_fast_phase_parmdb_map.control.filename           = fast_parmdb.mapfile
+# generate mapfile for the fast-phase h5parms generated in the solve_phaseonly steps, length = ntimes * num_cal_blocks
+make_fast_phase_h5parm_map.control.kind               = plugin
+make_fast_phase_h5parm_map.control.type               = createMapfile
+make_fast_phase_h5parm_map.control.method             = add_suffix_to_file
+make_fast_phase_h5parm_map.control.mapfile_in         = concat_data.output.mapfile
+make_fast_phase_h5parm_map.control.add_suffix_to_file = /instrument.h5
+make_fast_phase_h5parm_map.control.mapfile_dir        = input.output.mapfile_dir
+make_fast_phase_h5parm_map.control.filename           = fast_h5parm.mapfile
 
 {% if peel_skymodel is not none %}
 # create a mapfile with the outlier skymodel from supplied list, length = 1
@@ -658,42 +658,57 @@ expand_peel_sourcedb_map.control.mapfile_in       = make_peel_sourcedb.output.ma
 expand_peel_sourcedb_map.control.mapfile_to_match = concat_data.output.mapfile
 expand_peel_sourcedb_map.control.mapfile_dir      = input.output.mapfile_dir
 expand_peel_sourcedb_map.control.filename         = expand_peel_sourcedb.mapfile
+
+{% else %}
+
+# convert the WSClean skymodel into a sourcedb, length = 1
+make_sourcedb0.control.type       = make_sourcedb
+make_sourcedb0.control.mapfile_in = wsclean_image02.output.wsclean_image02-sources.txt.mapfile
+make_sourcedb0.control.inputkey   = in
+make_sourcedb0.argument.format    = <
+make_sourcedb0.argument.outtype   = blob
+make_sourcedb0.argument.append    = False
+
+# expand the sourcedb mapfile so that there is one entry for every file, length = ntimes * num_cal_blocks
+expand_sourcedb0_map.control.kind             = plugin
+expand_sourcedb0_map.control.type             = expandMapfile
+expand_sourcedb0_map.control.mapfile_in       = make_sourcedb0.output.mapfile
+expand_sourcedb0_map.control.mapfile_to_match = concat_data.output.mapfile
+expand_sourcedb0_map.control.mapfile_dir      = input.output.mapfile_dir
+expand_sourcedb0_map.control.filename         = expand_sourcedb0.mapfile
 {% endif %}
 
-# remove any existing parmdbs before solving, length = ntimes * num_cal_blocks
-remove_parmdbs1.control.type       = remove_file
-remove_parmdbs1.control.mapfile_in = make_fast_phase_parmdb_map.output.mapfile
-remove_parmdbs1.control.inputkey   = parmdb
-remove_parmdbs1.argument.flags     = [-rf,parmdb]
+# remove any existing h5parms before solving, length = ntimes * num_cal_blocks
+remove_h5parmdbs1.control.type       = remove_file
+remove_h5parmdbs1.control.mapfile_in = make_fast_phase_h5parm_map.output.mapfile
+remove_h5parmdbs1.control.inputkey   = h5parm
+remove_h5parmdbs1.argument.flags     = [-rf,h5parm]
 
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
-# note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
-# GainCal has a filter parameter, we can switch to that
-solve_phaseonly1.control.type                     = dppp_inplace
+solve_phaseonly1.control.type                         = dppp_inplace
 {% if peel_skymodel is not none %}
-solve_phaseonly1.control.mapfiles_in              = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile,expand_peel_sourcedb_map.output.mapfile]
-solve_phaseonly1.control.inputkeys                = [msin,parmdb,sourcedb]
+solve_phaseonly1.control.mapfiles_in                  = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile,expand_peel_sourcedb_map.output.mapfile]
 {% else %}
-solve_phaseonly1.control.mapfiles_in              = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
-solve_phaseonly1.control.inputkeys                = [msin,parmdb]
+solve_phaseonly1.control.mapfiles_in                  = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile,expand_sourcedb0_map.output.mapfile]
 {% endif %}
-solve_phaseonly1.argument.numthreads              = {{ max_cpus_per_proc_ntimes }}
-solve_phaseonly1.argument.msin.datacolumn         = DATA
-solve_phaseonly1.argument.msout                   = .
-solve_phaseonly1.argument.steps                   = [uvcut,solvetec]
-solve_phaseonly1.argument.uvcut.type              = uvwflagger
-solve_phaseonly1.argument.uvcut.uvlambdamin       = {{ solve_min_uv_lambda }}
-solve_phaseonly1.argument.solvetec.type           = gaincal
-solve_phaseonly1.argument.solvetec.caltype        = tecandphase
-solve_phaseonly1.argument.solvetec.parmdb         = parmdb
-{% if peel_skymodel is not none %}
-solve_phaseonly1.argument.solvetec.usemodelcolumn = False
-solve_phaseonly1.argument.solvetec.sourcedb       = sourcedb
-{% else %}
-solve_phaseonly1.argument.solvetec.usemodelcolumn = True
-{% endif %}
-solve_phaseonly1.argument.solvetec.solint         = {{ solint_time_p }}
-solve_phaseonly1.argument.solvetec.nchan          = {{ solint_freq_a }}
+solve_phaseonly1.control.inputkeys                    = [msin,h5parm,sourcedb]
+solve_phaseonly1.argument.numthreads                  = {{ max_cpus_per_proc_ntimes }}
+solve_phaseonly1.argument.msin.datacolumn             = DATA
+solve_phaseonly1.argument.msout                       = .
+solve_phaseonly1.argument.steps                       = [solvetec]
+solve_phaseonly1.argument.solvetec.type               = ddecal
+solve_phaseonly1.argument.solvetec.mode               = tecandphase
+solve_phaseonly1.argument.solvetec.h5parm             = h5parm
+solve_phaseonly1.argument.solvetec.sourcedb           = sourcedb
+solve_phaseonly1.argument.solvetec.solint             = {{ solint_time_p }}
+solve_phaseonly1.argument.solvetec.nchan              = {{ solint_freq_a }}
+solve_phaseonly1.argument.solvetec.approximatetec     = {{ approximatetec }}
+solve_phaseonly1.argument.solvetec.maxapproxiter      = {{ maxapproxiter }}
+solve_phaseonly1.argument.solvetec.maxiter            = {{ maxiter }}
+solve_phaseonly1.argument.solvetec.propagatesolutions = {{ propagatesolutions }}
+solve_phaseonly1.argument.solvetec.stepsize           = {{ stepsize }}
+solve_phaseonly1.argument.solvetec.tolerance          = {{ tolerance }}
+solve_phaseonly1.argument.solvetec.uvlambdamin        = {{ solve_min_uv_lambda }}
 
 ########## end of first round of selfcal
 ########## start of second round of selfcal
@@ -717,8 +732,8 @@ make_apply_mapfile.control.filename     = apply_output.mapfile
 
 # apply the previous calibration and average, length = ntimes * num_cal_blocks
 apply_phaseonly1.control.type                                 = dppp
-apply_phaseonly1.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
-apply_phaseonly1.control.inputkeys                            = [msin,parmdb]
+apply_phaseonly1.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile]
+apply_phaseonly1.control.inputkeys                            = [msin,h5parm]
 {% if selfcal_local_dir is not none %}
 apply_phaseonly1.control.mapfile_out                          = make_apply_mapfile.output.mapfile
 {% endif %}
@@ -731,12 +746,12 @@ apply_phaseonly1.argument.local_scratch_dir                   = {{ local_dir }}
 {% endif %}
 apply_phaseonly1.argument.steps                               = [correct_fast1,correct_fast2,avg]
 apply_phaseonly1.argument.correct_fast1.type                  = applycal
-apply_phaseonly1.argument.correct_fast1.parmdb                = parmdb
-apply_phaseonly1.argument.correct_fast1.correction            = tec
+apply_phaseonly1.argument.correct_fast1.parmdb                = h5parm
+apply_phaseonly1.argument.correct_fast1.correction            = tec000
 apply_phaseonly1.argument.correct_fast1.invert                = True
 apply_phaseonly1.argument.correct_fast2.type                  = applycal
-apply_phaseonly1.argument.correct_fast2.parmdb                = parmdb
-apply_phaseonly1.argument.correct_fast2.correction            = commonscalarphase
+apply_phaseonly1.argument.correct_fast2.parmdb                = h5parm
+apply_phaseonly1.argument.correct_fast2.correction            = phase000
 apply_phaseonly1.argument.correct_fast2.invert                = True
 apply_phaseonly1.argument.avg.type                            = squash
 apply_phaseonly1.argument.avg.freqstep                        = 1
@@ -849,17 +864,14 @@ remove_parmdbs2.control.inputkey   = parmdb
 remove_parmdbs2.argument.flags     = [-rf,parmdb]
 
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
-# note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
-# GainCal has a filter parameter, we can switch to that
 solve_phaseonly2.control.type                     = dppp_inplace
 solve_phaseonly2.control.mapfiles_in              = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 solve_phaseonly2.control.inputkeys                = [msin,parmdb]
 solve_phaseonly2.argument.numthreads              = {{ max_cpus_per_proc_ntimes }}
 solve_phaseonly2.argument.msin.datacolumn         = DATA
 solve_phaseonly2.argument.msout                   = .
-solve_phaseonly2.argument.steps                   = [uvcut,solvetec]
-solve_phaseonly2.argument.uvcut.type              = uvwflagger
-solve_phaseonly2.argument.uvcut.uvlambdamin       = {{ solve_min_uv_lambda }}
+solve_phaseonly2.argument.steps                   = [solvetec]
+solve_phaseonly2.argument.solvetec.uvlambdamin    = {{ solve_min_uv_lambda }}
 solve_phaseonly2.argument.solvetec.type           = gaincal
 solve_phaseonly2.argument.solvetec.caltype        = tecandphase
 solve_phaseonly2.argument.solvetec.parmdb         = parmdb
@@ -1006,17 +1018,14 @@ remove_parmdbs11.control.inputkey   = parmdb
 remove_parmdbs11.argument.flags     = [-rf,parmdb]
 
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
-# note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
-# GainCal has a filter parameter, we can switch to that
 solve_ampphase11.control.type                     = dppp_inplace
 solve_ampphase11.control.mapfiles_in              = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 solve_ampphase11.control.inputkeys                = [msin,parmdb]
 solve_ampphase11.argument.numthreads              = {{ max_cpus_per_proc_ntimes }}
 solve_ampphase11.argument.msin.datacolumn         = DATA
 solve_ampphase11.argument.msout                   = .
-solve_ampphase11.argument.steps                   = [uvcut,solvetec]
-solve_ampphase11.argument.uvcut.type              = uvwflagger
-solve_ampphase11.argument.uvcut.uvlambdamin       = {{ solve_min_uv_lambda }}
+solve_ampphase11.argument.steps                   = [solvetec]
+solve_ampphase11.argument.solvetec.uvlambdamin    = {{ solve_min_uv_lambda }}
 solve_ampphase11.argument.solvetec.type           = gaincal
 solve_ampphase11.argument.solvetec.caltype        = tecandphase
 solve_ampphase11.argument.solvetec.parmdb         = parmdb
@@ -1066,17 +1075,14 @@ remove_parmdbs12.control.inputkey   = parmdb
 remove_parmdbs12.argument.flags     = [-rf,parmdb]
 
 # run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
-# note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
-# GainCal has a filter parameter, we can switch to that
 solve_ampphase12.control.type                      = dppp_inplace
 solve_ampphase12.control.mapfiles_in               = [{{ solve_concat_data_mapfile }},make_slow_gain_parmdb_map.output.mapfile]
 solve_ampphase12.control.inputkeys                 = [msin,parmdb]
 solve_ampphase12.argument.numthreads               = {{ max_cpus_per_proc_ntimes }}
 solve_ampphase12.argument.msin.datacolumn          = CORRECTED_DATA
 solve_ampphase12.argument.msout                    = .
-solve_ampphase12.argument.steps                    = [uvcut,solvegain]
-solve_ampphase12.argument.uvcut.type               = uvwflagger
-solve_ampphase12.argument.uvcut.uvlambdamin        = {{ solve_min_uv_lambda }}
+solve_ampphase12.argument.steps                    = [solvegain]
+solve_ampphase12.argument.solvegain.uvlambdamin    = {{ solve_min_uv_lambda }}
 solve_ampphase12.argument.solvegain.type           = gaincal
 solve_ampphase12.argument.solvegain.caltype        = {{ selfcal_caltype }}
 solve_ampphase12.argument.solvegain.parmdb         = parmdb
@@ -1270,17 +1276,14 @@ remove_parmdbs21.control.inputkey   = parmdb
 remove_parmdbs21.argument.flags     = [-rf,parmdb]
 
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
-# note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
-# GainCal has a filter parameter, we can switch to that
 solve_ampphase21.control.type                     = dppp_inplace
 solve_ampphase21.control.mapfiles_in              = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
 solve_ampphase21.control.inputkeys                = [msin,parmdb]
 solve_ampphase21.argument.numthreads              = {{ max_cpus_per_proc_ntimes }}
 solve_ampphase21.argument.msin.datacolumn         = DATA
 solve_ampphase21.argument.msout                   = .
-solve_ampphase21.argument.steps                   = [uvcut,solvetec]
-solve_ampphase21.argument.uvcut.type              = uvwflagger
-solve_ampphase21.argument.uvcut.uvlambdamin       = {{ solve_min_uv_lambda }}
+solve_ampphase21.argument.steps                   = [solvetec]
+solve_ampphase21.argument.solvetec.uvlambdamin    = {{ solve_min_uv_lambda }}
 solve_ampphase21.argument.solvetec.type           = gaincal
 solve_ampphase21.argument.solvetec.caltype        = tecandphase
 solve_ampphase21.argument.solvetec.parmdb         = parmdb
@@ -1329,17 +1332,14 @@ remove_parmdbs22.control.inputkey   = parmdb
 remove_parmdbs22.argument.flags     = [-rf,parmdb]
 
 # run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes * num_cal_blocks
-# note: for now, we use the uvwflagger to exclude baselines shorter than solve_min_uv_lambda. Once
-# GainCal has a filter parameter, we can switch to that
 solve_ampphase22.control.type                      = dppp_inplace
 solve_ampphase22.control.mapfiles_in               = [{{ solve_concat_data_mapfile }},make_slow_gain_parmdb_map.output.mapfile]
 solve_ampphase22.control.inputkeys                 = [msin,parmdb]
 solve_ampphase22.argument.numthreads               = {{ max_cpus_per_proc_ntimes }}
 solve_ampphase22.argument.msin.datacolumn          = CORRECTED_DATA
 solve_ampphase22.argument.msout                    = .
-solve_ampphase22.argument.steps                    = [uvcut,solvegain]
-solve_ampphase22.argument.uvcut.type               = uvwflagger
-solve_ampphase22.argument.uvcut.uvlambdamin        = {{ solve_min_uv_lambda }}
+solve_ampphase22.argument.steps                    = [solvegain]
+solve_ampphase22.argument.solvegain.uvlambdamin    = {{ solve_min_uv_lambda }}
 solve_ampphase22.argument.solvegain.type           = gaincal
 solve_ampphase22.argument.solvegain.caltype        = {{ selfcal_caltype }}
 solve_ampphase22.argument.solvegain.parmdb         = parmdb
