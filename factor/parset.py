@@ -365,7 +365,7 @@ def get_calibration_options(parset):
     else:
         parset_dict['maxapproxiter'] = 50
     if 'maxiter' in parset_dict:
-        parset_dict['maxiter'] = parset.getfloat('calibration', 'maxiter')
+        parset_dict['maxiter'] = parset.getint('calibration', 'maxiter')
     else:
         parset_dict['maxiter'] = 75
     if 'stepsize' in parset_dict:
