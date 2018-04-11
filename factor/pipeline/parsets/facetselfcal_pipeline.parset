@@ -739,12 +739,12 @@ create_compressed_mapfile1.control.filename    = image1_input.mapfile
 wsclean_image12.control.type                    = wsclean
 wsclean_image12.control.mapfiles_in             = [create_compressed_mapfile1.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image12.control.inputkeys               = [msfile,fitsmask]
-wsclean_image12.argument.fitsmask               = fitsmask
+wsclean_image12.argument.fits-mask              = fitsmask
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,-joinchannels,msfile]
-wsclean_image12.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
+wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-join-channels,-save-source-list,msfile]
+wsclean_image12.argument.channels-out           = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,msfile]
+wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-save-source-list,msfile]
 {% endif %}
 wsclean_image12.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image12.argument.niter                  = 10000
@@ -756,9 +756,9 @@ wsclean_image12.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image12.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image12.argument.j                      = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
-wsclean_image12.argument.tempdir                = {{ local_dir_parent }}
+wsclean_image12.argument.temp-dir               = {{ local_dir_parent }}
 {% elif selfcal_local_dir is not none %}
-wsclean_image12.argument.tempdir                = {{ selfcal_local_dir }}
+wsclean_image12.argument.temp-dir               = {{ selfcal_local_dir }}
 {% endif %}
 wsclean_image12.argument.multiscale-shape       = gaussian
 {% if not mscale_selfcal_do %}
@@ -884,12 +884,12 @@ create_compressed_mapfile2.control.filename    = image2_input.mapfile
 wsclean_image22.control.type                    = wsclean
 wsclean_image22.control.mapfiles_in             = [create_compressed_mapfile2.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image22.control.inputkeys               = [msfile,fitsmask]
-wsclean_image22.argument.fitsmask               = fitsmask
+wsclean_image22.argument.fits-mask              = fitsmask
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,-joinchannels,msfile]
-wsclean_image22.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
+wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-join-channels,-save-source-list,msfile]
+wsclean_image22.argument.channels-out           = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,msfile]
+wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-save-source-list,msfile]
 {% endif %}
 wsclean_image22.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image22.argument.niter                  = 10000
@@ -901,9 +901,9 @@ wsclean_image22.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image22.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image22.argument.j                      = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
-wsclean_image22.argument.tempdir                = {{ local_dir_parent }}
+wsclean_image22.argument.temp-dir               = {{ local_dir_parent }}
 {% elif selfcal_local_dir is not none %}
-wsclean_image22.argument.tempdir                = {{ selfcal_local_dir }}
+wsclean_image22.argument.temp-dir               = {{ selfcal_local_dir }}
 {% endif %}
 wsclean_image22.argument.multiscale-shape       = gaussian
 {% if not mscale_selfcal_do %}
