@@ -319,7 +319,7 @@ def main(instrument_name, normalize=True):
         else:
             normalize = False
 
-    h = h5parm(instrument_name)
+    H = h5parm(instrument_name, readonly=False)
     solset = H.getSolset('sol000')
     soltab = solset.getSoltab('amplitude000')
     parms = soltab.val[:]
@@ -334,14 +334,14 @@ def main(instrument_name, normalize=True):
     # Get station names
     antenna_list = soltab.ant[:]
     axis_names = soltab.getAxesNames()
-    for pol in len(soltab.pol[:]):
+    for pol in range(len(soltab.pol[:])):
         for istat, antenna in enumerate(sorted(antenna_list)[::-1]):
             soltab.setSelection(ant=[antenna])
             channel_amp_orig = soltab.val[:] # ['time', 'freq', 'ant', 'dir', 'pol']
 
             # Find flagged solutions and set to 1.0
             channel_amp_interp = []
-            for chan in range(nchans):
+            for chan in range(nfreqs):
                 unflagged_times = numpy.where(channel_amp_orig[:, chan, 0, 0, pol] != 1.0)
                 flagged_times = numpy.where(channel_amp_orig[:, chan, 0, 0, pol] == 1.0)
                 if numpy.any(flagged_times):
@@ -364,7 +364,7 @@ def main(instrument_name, normalize=True):
                         amp_cleaned = channel_amp_orig[:, chan, 0, 0, pol]
                     parms[:, chan, istat, 0, pol] = numpy.copy(amp_cleaned)
 
-            if nchans > 5: # Do 2D smooth
+            if nfreqs > 5: # Do 2D smooth
                 channel_amp_orig = parms[:, :, istat, 0, pol]
 
                 # Smooth
@@ -393,15 +393,21 @@ def main(instrument_name, normalize=True):
         # amplitudes in the corrected data
         unflagged = numpy.where(~numpy.isnan(parms))
         low_ind = numpy.where(parms[unflagged] < 0.2)
-        amp[unflagged][parms] = 0.2
+        parms[unflagged][low_ind] = 0.2
 
     # Make sure flagged solutions are still flagged
     parms[initial_flagged_indx] = numpy.nan
 
     # Write the results to the output soltab
+    try:
+        new_soltab = solset.getSoltab('amplitude001')
+        new_soltab.delete()
+    except:
+        pass
     st = solset.makeSoltab('amplitude', 'amplitude001', axesNames=axis_names,
-                           axesVals=soltab.getAxisValues(), vals=parms,
-                           weights=np.ones(parms.shape))
+                           axesVals=[soltab.time[:], soltab.freq[:], antenna_list,
+                           soltab.dir[:], soltab.pol[:]], vals=parms,
+                           weights=numpy.ones(parms.shape))
 
 if __name__ == '__main__':
     descriptiontext = "Smooth and normalize amplitude solutions.\n"

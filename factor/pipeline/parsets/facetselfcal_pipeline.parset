@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} shift_cal, {% if preapply_phase_cal %} shift_cal_dir_indep, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, calc_bl, create_bl_mapfile1, pre_average, make_blavg_data_mapfile, concat_blavg_data, create_bl_mapfile2, pre_average_freq, {% endif %} {% if selfcal_local_dir is not none %} {% if not pre_average %} make_concat_data_sync_mapfile, adjust_concat_data_hosts, sync_concat_data_to_local, {% else %} make_concat_blavg_data_sync_mapfile, adjust_concat_blavg_data_hosts, adjust_concat_data_hosts, sync_concat_blavg_data_to_local, {% endif %} {% endif %} concat_data_compressed_mapfile, {% block selfcal_steps %} {% if not preapply_phase_cal %} average0, {% endif %} create_compressed_mapfile0, sort_average0_into_Groups, sort_average0_into_Groups_maps, concat_average0_data, create_compressed_mapfile01, premask_selfcal, wsclean_image02, regroup_concat_data_map, make_fast_phase_h5parm_map, {% if peel_skymodel is not none %} create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, {% else %} group_skymodel0, make_sourcedb0, expand_sourcedb0_map, {% endif %} remove_h5parms1, solve_phaseonly1, {% if selfcal_local_dir is not none %} make_apply_mapfile, {% endif %} apply_phaseonly1, create_compressed_mapfile1, wsclean_image12, group_skymodel1, make_sourcedb1, expand_sourcedb1_map, remove_h5parms2, solve_phaseonly2, apply_phaseonly2, create_compressed_mapfile2, wsclean_image22, group_skymodel2, make_sourcedb2, expand_sourcedb2_map, remove_h5parms11, solve_ampphase11, apply_ampphase11, make_slow_gain_h5parm_map, remove_h5parms12, solve_ampphase12, create_compressed_mapfile_slow, create_combined_slow_output_map, combine_slow_gains1, smooth_amp1, expand_smoothed_amp1_parmdb_map, apply_amp1, create_compressed_mapfile3, wsclean_image32, loop_ampcal, {% endblock selfcal_steps %} {% if selfcal_local_dir is not none %} {% if not pre_average %} remove_concat_data, {% else %} remove_concat_blavg_data, {% endif %} {% endif %} merge_selfcal_parmdbs, convert_merged_selfcal_parmdbs, {% if create_preapply_parmdb %} create_preapply_parmdb, {% endif %} make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, create_model4_map, expand_model4_map, blank_mask, expand_mask4_map, make_new_cal_skymodel, {% if not is_patch or mscale_selfcal_do %} make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, prepare_imaging_data, {% if not is_patch %} create_compressed_mapfile5, premask, wsclean_image_full, create_imagebase_map, adjust_wsclean_mapfile1, mask5, check_mask_high, create_model5_map, expand_model5_map, expand_mask5_map, make_high_facet_skymodel, combine_skymodels_high, {% endif %} make_sourcedb_high, expand_sourcedb_high, subtract_high, create_compressed_mapfile6, premask_med, wsclean_image_full_med, create_imagebase_med_map, adjust_wsclean_mapfile3, mask6, check_mask_med, expand_model6_map, expand_mask6_map, make_med_facet_skymodel, combine_facet_skymodels, make_sourcedb_new_facet_sources, expand_sourcedb_new_facet_sources, {% else %} make_sourcedb_new_facet_sources, expand_sourcedb_new_facet_sources, {% endif %} predict_and_difference_models, create_middle_band_mapfile1, create_middle_band_mapfile2, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, {% if preapply_phase_cal %} expand_preapply_parmdb_map, {% endif %} shift_cal, {% if preapply_phase_cal %} shift_cal_dir_indep, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, calc_bl, create_bl_mapfile1, pre_average, make_blavg_data_mapfile, concat_blavg_data, create_bl_mapfile2, pre_average_freq, {% endif %} {% if selfcal_local_dir is not none %} {% if not pre_average %} make_concat_data_sync_mapfile, adjust_concat_data_hosts, sync_concat_data_to_local, {% else %} make_concat_blavg_data_sync_mapfile, adjust_concat_blavg_data_hosts, adjust_concat_data_hosts, sync_concat_blavg_data_to_local, {% endif %} {% endif %} concat_data_compressed_mapfile, {% block selfcal_steps %} {% if not preapply_phase_cal %} average0, {% endif %} create_compressed_mapfile0, sort_average0_into_Groups, sort_average0_into_Groups_maps, concat_average0_data, create_compressed_mapfile01, premask_selfcal, wsclean_image02, regroup_concat_data_map, make_fast_phase_h5parm_map, {% if peel_skymodel is not none %} create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, {% else %} group_skymodel0, make_sourcedb0, expand_sourcedb0_map, {% endif %} remove_h5parms1, solve_phaseonly1, {% if selfcal_local_dir is not none %} make_apply_mapfile, {% endif %} apply_phaseonly1, create_compressed_mapfile1, wsclean_image12, group_skymodel1, make_sourcedb1, expand_sourcedb1_map, remove_h5parms2, solve_phaseonly2, apply_phaseonly2, create_compressed_mapfile2, wsclean_image22, group_skymodel2, make_sourcedb2, expand_sourcedb2_map, remove_h5parms11, solve_ampphase11, apply_ampphase11, make_slow_gain_h5parm_map, remove_h5parms12, solve_ampphase12, create_compressed_mapfile_slow, create_combined_slow_output_map, combine_slow_gains1, smooth_amp1, expand_smoothed_amp1_h5parm_map, apply_amp1, create_compressed_mapfile3, wsclean_image32, loop_ampcal, {% endblock selfcal_steps %} {% if selfcal_local_dir is not none %} {% if not pre_average %} remove_concat_data, {% else %} remove_concat_blavg_data, {% endif %} {% endif %} merge_selfcal_parmdbs, convert_merged_selfcal_parmdbs, {% if create_preapply_parmdb %} create_preapply_parmdb, {% endif %} make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, expand_merged_parmdb_map, create_model4_map, expand_model4_map, blank_mask, expand_mask4_map, make_new_cal_skymodel, {% if not is_patch or mscale_selfcal_do %} make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, prepare_imaging_data, {% if not is_patch %} create_compressed_mapfile5, premask, wsclean_image_full, create_imagebase_map, adjust_wsclean_mapfile1, mask5, check_mask_high, create_model5_map, expand_model5_map, expand_mask5_map, make_high_facet_skymodel, combine_skymodels_high, {% endif %} make_sourcedb_high, expand_sourcedb_high, subtract_high, create_compressed_mapfile6, premask_med, wsclean_image_full_med, create_imagebase_med_map, adjust_wsclean_mapfile3, mask6, check_mask_med, expand_model6_map, expand_mask6_map, make_med_facet_skymodel, combine_facet_skymodels, make_sourcedb_new_facet_sources, expand_sourcedb_new_facet_sources, {% else %} make_sourcedb_new_facet_sources, expand_sourcedb_new_facet_sources, {% endif %} predict_and_difference_models, create_middle_band_mapfile1, create_middle_band_mapfile2, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath = {{ pipeline_dir }}/plugins
 
@@ -1037,8 +1037,6 @@ solve_ampphase12.argument.solvegain.h5parm             = h5parm
 solve_ampphase12.argument.solvegain.sourcedb           = sourcedb
 solve_ampphase12.argument.solvegain.solint             = {{ solint_time_a }}
 solve_ampphase12.argument.solvegain.nchan              = {{ solint_freq_a }}
-solve_ampphase12.argument.solvegain.approximatetec     = {{ approximatetec }}
-solve_ampphase12.argument.solvegain.maxapproxiter      = {{ maxapproxiter }}
 solve_ampphase12.argument.solvegain.maxiter            = {{ maxiter }}
 solve_ampphase12.argument.solvegain.propagatesolutions = {{ propagatesolutions }}
 solve_ampphase12.argument.solvegain.stepsize           = {{ stepsize }}
@@ -1073,43 +1071,39 @@ combine_slow_gains1.argument.outh5parm  = outfile
 smooth_amp1.control.type         = {{ smooth_amps_task }}
 smooth_amp1.control.mapfile_in   = combine_slow_gains1.output.mapfile
 smooth_amp1.control.inputkey     = amph5parm
-smooth_amp1.control.outputkey    = outh5parm
-smooth_amp1.argument.flags       = [amph5parm,outh5parm]
-{% if selfcal_local_dir is not none %}
-smooth_amp1.argument.scratch_dir = {{ selfcal_local_dir }}
-{% endif %}
+smooth_amp1.argument.flags       = [amph5parm]
 
-# expand the mapfile with the smoothd parmDB to all time-steps, length = ntimes * num_cal_blocks
-expand_smoothed_amp1_parmdb_map.control.kind             = plugin
-expand_smoothed_amp1_parmdb_map.control.type             = expandMapfile
-expand_smoothed_amp1_parmdb_map.control.mapfile_in       = smooth_amp1.output.mapfile
-expand_smoothed_amp1_parmdb_map.control.mapfile_to_match = concat_data.output.mapfile
-expand_smoothed_amp1_parmdb_map.control.mapfile_dir      = input.output.mapfile_dir
-expand_smoothed_amp1_parmdb_map.control.filename         = expand_amp1_smoothed_parmdbs.mapfile
+# expand the mapfile with the smoothd h5parm to all time-steps, length = ntimes * num_cal_blocks
+expand_smoothed_amp1_h5parm_map.control.kind             = plugin
+expand_smoothed_amp1_h5parm_map.control.type             = expandMapfile
+expand_smoothed_amp1_h5parm_map.control.mapfile_in       = smooth_amp1.output.mapfile
+expand_smoothed_amp1_h5parm_map.control.mapfile_to_match = concat_data.output.mapfile
+expand_smoothed_amp1_h5parm_map.control.mapfile_dir      = input.output.mapfile_dir
+expand_smoothed_amp1_h5parm_map.control.filename         = expand_amp1_smoothed_h5parmd.mapfile
 
-# apply the smoothed amplitudes and average, length = ntimes * num_cal_blocks
+# apply the solutions and average, length = ntimes * num_cal_blocks
 apply_amp1.control.type                                 = dppp
 {% if selfcal_local_dir is not none %}
 apply_amp1.control.mapfile_out                          = make_apply_mapfile.output.mapfile
 {% endif %}
 apply_amp1.argument.numthreads                          = {{ max_cpus_per_io_proc_ntimes }}
 {% if not pre_average %}
-apply_amp1.control.mapfiles_in                          = [{{ concat_data_mapfile }},expand_smoothed_amp1_parmdb_map.output.mapfile]
-apply_amp1.control.inputkeys                            = [msin,parmdb]
+apply_amp1.control.mapfiles_in                          = [{{ concat_data_mapfile }},expand_smoothed_amp1_h5parm_map.output.mapfile]
+apply_amp1.control.inputkeys                            = [msin,slow_h5parm]
 apply_amp1.argument.msin.datacolumn                     = CORRECTED_DATA
 apply_amp1.argument.steps                               = [correct_slow,avg]
 {% else %}
-apply_amp1.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile,expand_smoothed_amp1_parmdb_map.output.mapfile]
-apply_amp1.control.inputkeys                            = [msin,fast_parmdb,parmdb]
+apply_amp1.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile,expand_smoothed_amp1_h5parm_map.output.mapfile]
+apply_amp1.control.inputkeys                            = [msin,fast_h5parmdb,slow_h5parm]
 apply_amp1.argument.msin.datacolumn                     = DATA
 apply_amp1.argument.steps                               = [correct_fast1,correct_fast2,correct_slow,avg]
 apply_amp1.argument.correct_fast1.type                  = applycal
-apply_amp1.argument.correct_fast1.parmdb                = fast_parmdb
-apply_amp1.argument.correct_fast1.correction            = tec
+apply_amp1.argument.correct_fast1.parmdb                = fast_h5parm
+apply_amp1.argument.correct_fast1.correction            = tec000
 apply_amp1.argument.correct_fast1.invert                = True
 apply_amp1.argument.correct_fast2.type                  = applycal
-apply_amp1.argument.correct_fast2.parmdb                = fast_parmdb
-apply_amp1.argument.correct_fast2.correction            = commonscalarphase
+apply_amp1.argument.correct_fast2.parmdb                = fast_h5parm
+apply_amp1.argument.correct_fast2.correction            = phase000
 apply_amp1.argument.correct_fast2.invert                = True
 {% endif %}
 apply_amp1.argument.msout.overwrite                     = True
@@ -1118,7 +1112,8 @@ apply_amp1.argument.msout.writefullresflag              = False
 apply_amp1.argument.local_scratch_dir                   = {{ local_dir }}
 {% endif %}
 apply_amp1.argument.correct_slow.type                   = applycal
-apply_amp1.argument.correct_slow.parmdb                 = parmdb
+apply_amp1.argument.correct_slow.parmdb                 = slow_h5parm
+apply_amp1.argument.correct_slow.correction             = amplitude001
 apply_amp1.argument.correct_slow.invert                 = True
 apply_amp1.argument.avg.type                            = squash
 apply_amp1.argument.avg.freqstep                        = 1
@@ -1146,12 +1141,12 @@ create_compressed_mapfile3.control.filename    = image3_input.mapfile
 wsclean_image32.control.type                    = wsclean
 wsclean_image32.control.mapfiles_in             = [create_compressed_mapfile3.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image32.control.inputkeys               = [msfile,fitsmask]
-wsclean_image32.argument.fitsmask               = fitsmask
+wsclean_image32.argument.fits-mask              = fitsmask
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,-joinchannels,msfile]
-wsclean_image32.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
+wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-join-channels,-save-source-list,msfile]
+wsclean_image32.argument.channels-out           = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,msfile]
+wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-save-source-list,msfile]
 {% endif %}
 wsclean_image32.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image32.argument.niter                  = 10000
@@ -1163,9 +1158,9 @@ wsclean_image32.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image32.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image32.argument.j                      = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
-wsclean_image32.argument.tempdir                = {{ local_dir_parent }}
+wsclean_image32.argument.temp-dir               = {{ local_dir_parent }}
 {% elif selfcal_local_dir is not none %}
-wsclean_image32.argument.tempdir                = {{ selfcal_local_dir }}
+wsclean_image32.argument.temp-dir               = {{ selfcal_local_dir }}
 {% endif %}
 wsclean_image32.argument.multiscale-shape       = gaussian
 {% if not mscale_selfcal_do %}
