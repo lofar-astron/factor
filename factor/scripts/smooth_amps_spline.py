@@ -8,7 +8,7 @@ from argparse import RawTextHelpFormatter
 import casacore.tables as pt
 import numpy
 import os
-import lofar.parmdb
+from losoto.h5parm import h5parm
 import math
 import shutil
 import multiprocessing
@@ -312,117 +312,42 @@ def median2Dampfilter(amp_orig):
     return amp_cleaned, amp_median, baddata
 
 
-def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=False,
-    scratch_dir=None):
+def main(instrument_name, normalize=True):
     if type(normalize) is str:
         if normalize.lower() == 'true':
             normalize = True
         else:
             normalize = False
-    if type(plotting) is str:
-        if plotting.lower() == 'true':
-            plotting = True
-        else:
-            plotting = False
 
-    gain = 'Gain'
+    h = h5parm(instrument_name)
+    solset = H.getSolset('sol000')
+    soltab = solset.getSoltab('amplitude000')
+    parms = soltab.val[:]
 
-    # Copy to scratch directory if specified
-    if scratch_dir is not None:
-        instrument_name_orig = instrument_name
-        instrument_name = os.path.join(scratch_dir, os.path.basename(instrument_name_orig))
-        instrument_name_smoothed_orig = instrument_name_smoothed
-        instrument_name_smoothed = os.path.join(scratch_dir, os.path.basename(instrument_name_smoothed_orig))
-        shutil.copytree(instrument_name_orig, instrument_name)
-
-    pdb = lofar.parmdb.parmdb(instrument_name)
-    parms = pdb.getValuesGrid('*')
-
-    key_names = parms.keys()
-    initial_flagged_dict = {}
-    initial_unflagged_dict = {}
-    ntimes = 0
-    nfreqs = 0
-    for key_name in key_names:
-        # Check for NaNs and zeros. If found, set to 1
-        initial_flagged_indx = numpy.where(numpy.logical_or(numpy.isnan(parms[key_name]['values']),
-            parms[key_name]['values'] == 0.0))
-        initial_flagged_dict[key_name] = initial_flagged_indx
-        initial_unflagged_indx = numpy.where(numpy.logical_and(~numpy.isnan(parms[key_name]['values']),
-            parms[key_name]['values'] != 0.0))
-        initial_unflagged_dict[key_name] = initial_unflagged_indx
-        parms[key_name]['values'][initial_flagged_indx] = 1.0
-
-        # Determine the times and freqs (check all keys in case one or more are
-        # missing some)
-        times = numpy.copy(sorted( parms[key_name]['times']))
-        if len(times) > ntimes:
-            ntimes = len(times)
-            orig_times = parms[key_name]['times']
-            timewidths = parms[key_name]['timewidths']
-        freqs = numpy.copy(sorted( parms[key_name]['freqs']))/1e6 # get this in MHz
-        if len(freqs) > nfreqs:
-            nfreqs = len(freqs)
-            orig_freqs = parms[key_name]['freqs']
-            freqwidths = parms[key_name]['freqwidths']
-            nchans = len(parms[key_name]['freqs'])
-
-    # determine the number of polarizations in parmdb (2 or 4)
-    if any(gain+':0:1:' in s for s in key_names):
-        pol_list = ['0:0', '1:1', '0:1', '1:0']
-    else:
-        pol_list = ['0:0', '1:1']
-
-    # times not used at the moment, I assume the time axis for a parmdb is regular and does not contain gaps
-    times = (times - numpy.min(times))/24. #so we get an axis in hrs
-    ntimes = len(times)
+    # Check for NaNs and zeros. If found, set to 1
+    ntimes = len(soltab.time[:])
+    nfreqs = len(soltab.freq[:])
+    initial_flagged_indx = numpy.where(numpy.logical_or(numpy.isnan(parms), parms == 0.0))
+    initial_unflagged_indx = numpy.where(numpy.logical_and(~numpy.isnan(parms), parms != 0.0))
+    parms[initial_flagged_indx] = 1.0
 
     # Get station names
-    antenna_list = set([s.split(':')[-1] for s in pdb.getNames()])
-
-    # for plotting
-    Nr = int(numpy.ceil(numpy.sqrt(len(antenna_list))))
-    Nc = int(numpy.ceil(numpy.float(len(antenna_list))/Nr))
-    if plotting:
-        import matplotlib as mpl
-        import matplotlib.pyplot as plt
-
-        mpl.rc('font',size =6 )
-        mpl.rc('figure.subplot',left=0.05, bottom=0.05, right=0.95, top=0.95 )
-        fa, axa = plt.subplots(Nr, Nc, sharex=True, sharey=True, figsize=(16,12))
-        axsa = axa.reshape((Nr*Nc,1))
-        if nchans > 5: # 2D filter
-            Nr = len(antenna_list)
-            Nc = int(4)
-            fa2, axa2 = plt.subplots(Nr, Nc, sharex=True, sharey=True, figsize=(8,108),)
-            axsa2 = axa2.reshape((Nr*Nc,1))
-
-    for pol in pol_list:
-        for istat,antenna in enumerate(sorted(antenna_list)[::-1]):
-            channel_parms_real = [parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan]
-                for chan in range(nchans)]
-            channel_parms_imag = [parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan]
-                for chan in range(nchans)]
-
-            # some plotting setup
-            if len(channel_parms_real[0]) > 500:
-                fmt = ','
-            else:
-                fmt = 'o'
-            ls='none'
-
-            channel_amp_orig = [numpy.sqrt(channel_parms_real[chan]**2 +
-                channel_parms_imag[chan]**2) for chan in range(nchans)]
+    antenna_list = soltab.ant[:]
+    axis_names = soltab.getAxesNames()
+    for pol in len(soltab.pol[:]):
+        for istat, antenna in enumerate(sorted(antenna_list)[::-1]):
+            soltab.setSelection(ant=[antenna])
+            channel_amp_orig = soltab.val[:] # ['time', 'freq', 'ant', 'dir', 'pol']
 
             # Find flagged solutions and set to 1.0
             channel_amp_interp = []
             for chan in range(nchans):
-                unflagged_times = numpy.where(channel_parms_real[chan] != 1.0)
-                flagged_times = numpy.where(channel_parms_real[chan] == 1.0)
+                unflagged_times = numpy.where(channel_amp_orig[:, chan, 0, 0, pol] != 1.0)
+                flagged_times = numpy.where(channel_amp_orig[:, chan, 0, 0, pol] == 1.0)
                 if numpy.any(flagged_times):
-                    channel_amp_orig[chan][flagged_times] = 1.0
+                    channel_amp_orig[flagged_times, chan, 0, 0, pol] = 1.0
                 if numpy.any(unflagged_times):
-                    channel_amp_interp.append(channel_amp_orig[chan])
+                    channel_amp_interp.append(channel_amp_orig[:, chan, 0, 0, pol])
                 else:
                     channel_amp_interp.append(None)
 
@@ -435,205 +360,55 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
 
                 for chan, (amp_cleaned, model, noisevec, scatter, n_knots, idxbad, weights) in enumerate(results):
                     # put back the results
-                    phase = numpy.arctan2(channel_parms_imag[chan], channel_parms_real[chan])
                     if amp_cleaned is None:
-                        amp_cleaned = channel_amp_orig[chan]
-                    parms[gain + ':' + pol + ':Real:' + antenna]['values'][:, chan] = numpy.copy(amp_cleaned*numpy.cos(phase))
-                    parms[gain + ':' + pol + ':Imag:' + antenna]['values'][:, chan] = numpy.copy(amp_cleaned*numpy.sin(phase))
-
-                    if pol in pol_list[0]:
-                        cc = 'blue'
-                        ccf = 'orange'
-                    else:
-                        cc = 'green'
-                        ccf= 'red'
-
-                    timevec = numpy.arange(0,len(channel_amp_orig[chan]))
-
-                    # only plot one channel, just to verify code works
-                    if plotting and chan == nchans-1: # plot last channel
-                        axsa[istat][0].plot(timevec, amp_cleaned, marker=fmt, ls=ls,
-                            markersize=0.1*len(amp_cleaned), c=cc,mec=cc)
-                        axsa[istat][0].plot(timevec,noisevec, c=cc, lw=0.75, ls='--')
-
-                        if pol in pol_list[0]:
-                            axsa[istat][0].annotate('scatter=' +'{:.2g}'.format(scatter),
-                                xy=(0.5,0.15), color=cc,textcoords='axes fraction')
-                            axsa[istat][0].annotate('#knots=' +'{:d}'.format(n_knots),
-                                xy=(0.01,0.15), color=cc,textcoords='axes fraction') # we divded by three beucase we mirrored the array
-                        else:
-                            axsa[istat][0].annotate('scatter=' +'{:.2g}'.format(scatter),
-                                xy=(0.5,0.02), color=cc, textcoords='axes fraction')
-                            axsa[istat][0].annotate('#knots=' +'{:d}'.format(n_knots),
-                                xy=(0.01,0.02), color=cc,textcoords='axes fraction')
-
-                        if numpy.any(idxbad):
-                            axsa[istat][0].plot(timevec[idxbad],channel_amp_orig[chan][idxbad],
-                                marker='o', c=ccf, ls=ls, markersize=4)
-
-                        idxbadi = numpy.where(weights < 1.0)
-                        if numpy.any(idxbadi):
-                            axsa[istat][0].plot(timevec[idxbadi],channel_amp_orig[chan][idxbadi],
-                                marker='o', c='black', ls=ls, markersize=4, mec='black')
-
-                        axsa[istat][0].plot(timevec, model, c=ccf, lw=1.0)
-                        axsa[istat][0].set_title(antenna)
-                        axsa[istat][0].set_ylim(-0.3, 2)
-                        axsa[istat][0].set_xlim(0, max(timevec))
+                        amp_cleaned = channel_amp_orig[:, chan, 0, 0, pol]
+                    parms[:, chan, istat, 0, pol] = numpy.copy(amp_cleaned)
 
             if nchans > 5: # Do 2D smooth
-                channel_parms_real = [parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan]
-                    for chan in range(nchans)]
-                channel_parms_imag = [parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan]
-                    for chan in range(nchans)]
-                channel_parms_real =  numpy.asarray(channel_parms_real)
-                channel_parms_imag =  numpy.asarray(channel_parms_imag)
-                channel_amp_orig = numpy.asarray([numpy.sqrt(channel_parms_real[chan]**2 +
-                    channel_parms_imag[chan]**2) for chan in range(nchans)])
-                phase = numpy.arctan2(channel_parms_imag[:], channel_parms_real[:])
+                channel_amp_orig = parms[:, :, istat, 0, pol]
 
                 # Smooth
                 channel_amp_interp = []
-                unflagged_sols = numpy.where(channel_parms_real != 1.0)
-                x, y = numpy.meshgrid(times, range(nchans))
+                unflagged_sols = numpy.where(channel_amp_orig != 1.0)
                 if numpy.any(unflagged_sols):
                     # Set flagged solutions to 1.0
-                    flagged_sols = numpy.where(numpy.logical_or(channel_parms_real == 1.0, channel_amp_orig <= 0.0))
+                    flagged_sols = numpy.where(numpy.logical_or(channel_amp_orig == 1.0, channel_amp_orig <= 0.0))
                     channel_amp_orig[flagged_sols] = 1.0
 
                     # Filter
-                    amp_cleaned, amp_median, baddata = median2Dampfilter(channel_amp_orig)
+                    amp_cleaned, amp_median, baddata = median2Dampfilter(channel_amp_orig.transpose([1, 0]))
+                    amp_cleaned = amp_cleaned.transpose([1, 0])
                     amp_cleaned[flagged_sols] = 1.0
-
-                    for chan in range(nchans):
-                        # put back the results
-                        parms[gain + ':' + pol + ':Real:' + antenna]['values'][:, chan] = numpy.copy((amp_cleaned[chan,:])*numpy.cos(phase[chan,:]))
-                        parms[gain + ':' + pol + ':Imag:' + antenna]['values'][:, chan] = numpy.copy((amp_cleaned[chan,:])*numpy.sin(phase[chan,:]))
-
-                    if plotting:
-                        axsa2[4*istat][0].imshow(numpy.transpose(channel_amp_orig),
-                            interpolation='none',origin='lower',clim=(0.5, 1.5),aspect='auto')
-                        axsa2[4*istat][0].set_xlabel('freq')
-                        axsa2[4*istat][0].set_ylabel('time')
-                        axsa2[4*istat][0].set_title('Original' + '    ' + antenna)
-
-                        axsa2[4*istat+1][0].imshow(numpy.transpose(amp_median),
-                            interpolation='none',origin='lower',aspect='auto', clim=(0.5,1.5))
-                        axsa2[4*istat+1][0].set_xlabel('freq')
-                        axsa2[4*istat+1][0].set_ylabel('time')
-                        axsa2[4*istat+1][0].set_title('2D median model')
-
-                        axsa2[4*istat+2][0].imshow(numpy.transpose(numpy.abs(channel_amp_orig-amp_median)),
-                            interpolation='none',origin='lower',clim=(0.0, 0.3),aspect='auto')
-                        axsa2[4*istat+2][0].set_xlabel('freq')
-                        axsa2[4*istat+2][0].set_ylabel('time')
-                        axsa2[4*istat+2][0].set_title('abs(Residual)')
-
-                        axsa2[4*istat+3][0].imshow(numpy.transpose(baddata),
-                            interpolation='none',origin='lower',clim=(0.0, 2.0),
-                            aspect='auto', cmap='gnuplot')
-                        axsa2[4*istat+3][0].set_xlabel('freq')
-                        axsa2[4*istat+3][0].set_ylabel('time')
-                        axsa2[4*istat+3][0].set_title('Replaced solutions')
-
-    if plotting:
-        fa.savefig('1Dsmooth.png', dpi=100)
-        if nchans > 5: # make 2D plot
-            fa2.tight_layout()
-            fa2.savefig('2Dsmooth.png')
-        plt.show()
+                    parms[:, :, istat, 0, pol] = numpy.copy(amp_cleaned)
 
     # Normalize the amplitude solutions to a mean of one across all channels
     if normalize:
-        # First find the normalization factor
+        # First find the normalization factor from unflagged solutions
         amplist = []
-        for pol in ['0:0','1:1']:  # hard code here in case the data contains 0:1 and 1:0
-            for antenna in antenna_list:
-                key_name = gain + ':' + pol + ':Real:'+ antenna
-                if numpy.any(initial_unflagged_dict[key_name]):
-                    # Only use unflagged data for normalization
-                    real = numpy.copy(parms[key_name]['values'])
-                    key_name = gain + ':' + pol + ':Imag:'+ antenna
-                    imag = numpy.copy(parms[key_name]['values'])
-                    amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
-                    amplist.append(amp[initial_unflagged_dict[key_name]])
-        norm_factor = 1.0/(numpy.nanmean(numpy.concatenate(amplist)))
+        norm_factor = 1.0/(numpy.nanmean(parms[initial_unflagged_indx]))
         print "smooth_amps_spline.py: Normalization-Factor is:", norm_factor
+        parms *= norm_factor
 
-        # Now do the normalization
-        for chan in range(nchans):
-            for pol in pol_list:
-                for antenna in antenna_list:
-                    real = numpy.copy(parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan])
-                    imag = numpy.copy(parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan])
-                    phase = numpy.arctan2(imag, real)
-                    amp  = numpy.copy(numpy.sqrt(real**2 + imag**2))
-
-                    # Clip extremely low amplitude solutions to prevent very high
-                    # amplitudes in the corrected data
-                    unflagged = numpy.where(~numpy.isnan(amp))
-                    low_ind = numpy.where(amp[unflagged] < 0.2)
-                    amp[unflagged][low_ind] = 0.2
-
-                    parms[gain + ':' + pol + ':Real:'+ antenna]['values'][:, chan] = numpy.copy(amp *
-                        numpy.cos(phase) * norm_factor)
-                    parms[gain + ':' + pol + ':Imag:'+ antenna]['values'][:, chan] = numpy.copy(amp *
-                        numpy.sin(phase) * norm_factor)
+        # Clip extremely low amplitude solutions to prevent very high
+        # amplitudes in the corrected data
+        unflagged = numpy.where(~numpy.isnan(parms))
+        low_ind = numpy.where(parms[unflagged] < 0.2)
+        amp[unflagged][parms] = 0.2
 
     # Make sure flagged solutions are still flagged
-    for key_name in key_names:
-        parms[key_name]['values'][initial_flagged_dict[key_name]] = numpy.nan
+    parms[initial_flagged_indx] = numpy.nan
 
-    if os.path.exists(instrument_name_smoothed):
-        os.system("rm -rf {}".format(instrument_name_smoothed))
-    pdbnew = lofar.parmdb.parmdb(instrument_name_smoothed, create=True)
-
-    # Identify any gaps in time (frequency gaps are not allowed), as we need to handle
-    # each section separately if gaps are present
-    delta_times = orig_times[1:] - orig_times[:-1]
-    gaps = numpy.where(delta_times > timewidths[:-1]*1.1)
-    if len(gaps[0]) > 0:
-        gaps_ind = gaps[0] + 1
-    else:
-        gaps_ind = []
-
-    for pol in pol_list:
-        for station in antenna_list:
-            g_start = 0
-            real = parms['Gain:' + pol + ':Real:'+ station]['values']
-            imag = parms['Gain:' + pol + ':Imag:'+ station]['values']
-            for g in gaps_ind:
-                # If time gaps exist, add them one-by-one (except for last one)
-                pdbnew.addValues('Gain:'+pol+':Real:{}'.format(station), real[g_start:g], orig_freqs, freqwidths,
-                    orig_times[g_start:g], timewidths[g_start:g], asStartEnd=False)
-                pdbnew.addValues('Gain:'+pol+':Imag:{}'.format(station), imag[g_start:g], orig_freqs, freqwidths,
-                    orig_times[g_start:g], timewidths[g_start:g], asStartEnd=False)
-                g_start = g
-
-            # Add remaining time slots
-            pdbnew.addValues('Gain:'+pol+':Real:{}'.format(station), real[g_start:], orig_freqs, freqwidths,
-                orig_times[g_start:], timewidths[g_start:], asStartEnd=False)
-            pdbnew.addValues('Gain:'+pol+':Imag:{}'.format(station), imag[g_start:], orig_freqs, freqwidths,
-                orig_times[g_start:], timewidths[g_start:], asStartEnd=False)
-    pdbnew.flush()
-
-    # Copy output to original path and delete copies if scratch directory is specified
-    if scratch_dir is not None:
-        if os.path.exists(instrument_name_smoothed_orig):
-            os.system("rm -rf {}".format(instrument_name_smoothed_orig))
-        shutil.copytree(instrument_name_smoothed, instrument_name_smoothed_orig)
-        os.system("rm -rf {}".format(instrument_name))
-        os.system("rm -rf {}".format(instrument_name_smoothed))
-
+    # Write the results to the output soltab
+    st = solset.makeSoltab('amplitude', 'amplitude001', axesNames=axis_names,
+                           axesVals=soltab.getAxisValues(), vals=parms,
+                           weights=np.ones(parms.shape))
 
 if __name__ == '__main__':
     descriptiontext = "Smooth and normalize amplitude solutions.\n"
 
     parser = argparse.ArgumentParser(description=descriptiontext, formatter_class=RawTextHelpFormatter)
-    parser.add_argument('instrument_name', help='name of the instrument parmdb to smooth')
-    parser.add_argument('instrument_name_smoothed', help='name of the output parmdb')
+    parser.add_argument('instrument_name', help='name of the instrument h5parm to smooth')
     parser.add_argument('normalize', help='normalize?')
-    parser.add_argument('plotting', help='make plots?')
     args = parser.parse_args()
 
-    main(args.instrument_name, args.instrument_name_smoothed, args.normalize, args.plotting)
+    main(args.instrument_name, args.normalize)
