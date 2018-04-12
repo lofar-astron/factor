@@ -1091,7 +1091,7 @@ apply_amp1.argument.numthreads                          = {{ max_cpus_per_io_pro
 apply_amp1.control.mapfiles_in                          = [{{ concat_data_mapfile }},expand_smoothed_amp1_h5parm_map.output.mapfile]
 apply_amp1.control.inputkeys                            = [msin,slow_h5parm]
 apply_amp1.argument.msin.datacolumn                     = CORRECTED_DATA
-apply_amp1.argument.steps                               = [correct_slow,avg]
+apply_amp1.argument.steps                               = [correct_slow_amp,correct_slow_phase,avg]
 {% else %}
 apply_amp1.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile,expand_smoothed_amp1_h5parm_map.output.mapfile]
 apply_amp1.control.inputkeys                            = [msin,fast_h5parmdb,slow_h5parm]
@@ -1364,7 +1364,7 @@ apply_amp2.argument.numthreads                          = {{ max_cpus_per_io_pro
 apply_amp2.control.mapfiles_in                          = [{{ concat_data_mapfile }},expand_smoothed_amp2_h5parm_map.output.mapfile]
 apply_amp2.control.inputkeys                            = [msin,parmdb]
 apply_amp2.argument.msin.datacolumn                     = CORRECTED_DATA
-apply_amp2.argument.steps                               = [correct_slow,avg]
+apply_amp2.argument.steps                               = [correct_slow_amp,correct_slow_phase,avg]
 {% else %}
 apply_amp2.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile,expand_smoothed_amp2_h5parm_map.output.mapfile]
 apply_amp2.control.inputkeys                            = [msin,fast_h5parmdb,slow_h5parm]
