@@ -335,7 +335,7 @@ def main(instrument_name, normalize=True):
     antenna_list = soltab.ant[:]
     axis_names = soltab.getAxesNames()
     for pol in range(len(soltab.pol[:])):
-        for istat, antenna in enumerate(sorted(antenna_list)[::-1]):
+        for istat, antenna in enumerate(antenna_list):
             soltab.setSelection(ant=[antenna])
             channel_amp_orig = soltab.val[:] # ['time', 'freq', 'ant', 'dir', 'pol']
 
