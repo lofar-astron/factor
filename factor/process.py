@@ -86,7 +86,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         # Set flag for first non-outlier direction (if any) to create preapply parmdb
         for d in peel_directions:
             if not d.is_outlier:
-                d.create_preapply_parmdb = True
+                d.create_preapply_h5parm = True
                 break
 
         # Reset if needed
@@ -180,7 +180,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
 
         # Set flag for first direction to create preapply parmdb
         if set_preapply_flag:
-            direction_group[0].create_preapply_parmdb = True
+            direction_group[0].create_preapply_h5parm = True
 
         # Do selfcal on calibrator only
         ops = [FacetSelfcal(parset, bands, d) for d in direction_group]

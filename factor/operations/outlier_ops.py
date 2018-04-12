@@ -84,9 +84,9 @@ class OutlierPeel(Operation):
             'full_skymodels.mapfile')
         self.direction.selfcal_plots_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'make_selfcal_plots.mapfile')
-        if self.direction.create_preapply_parmdb:
+        if self.direction.create_preapply_h5parm:
             self.direction.preapply_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
-                'create_preapply_parmdb.mapfile')
+                'create_preapply_h5parm.mapfile')
         self.direction.sourcedb_new_facet_sources = os.path.join(self.pipeline_mapfile_dir,
             'make_sourcedb_new_facet_sources_for_facet_imaging.mapfile')
         self.direction.diff_models_field_mapfile = os.path.join(self.pipeline_mapfile_dir,

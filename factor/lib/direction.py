@@ -132,7 +132,7 @@ class Direction(object):
         self.reset_operations = []
         self.cleanup_mapfiles = []
         self.preapply_phase_cal = False
-        self.create_preapply_parmdb = False
+        self.create_preapply_h5parm = False
         self.contains_target = False # whether this direction contains the target (if any)
         self.skip_selfcal_source_detection = False # whether to do source detection to update supplied clean mask
 
