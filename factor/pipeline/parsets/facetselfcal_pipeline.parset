@@ -1231,8 +1231,8 @@ remove_h5parms21.argument.flags     = [-rf,h5parm]
 
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
 solve_ampphase21.control.type                         = dppp_inplace
-solve_ampphase21.control.mapfiles_in                  = [{{ solve_concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile]
-solve_ampphase21.control.inputkeys                    = [msin,h5parm]
+solve_ampphase21.control.mapfiles_in                  = [{{ solve_concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile,expand_sourcedb3_map.output.mapfile]
+solve_ampphase21.control.inputkeys                    = [msin,h5parm,sourcedb]
 solve_ampphase21.argument.numthreads                  = {{ max_cpus_per_proc_ntimes }}
 solve_ampphase21.argument.msin.datacolumn             = DATA
 solve_ampphase21.argument.msout                       = .
