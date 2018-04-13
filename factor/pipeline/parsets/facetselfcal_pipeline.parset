@@ -1362,7 +1362,7 @@ apply_amp2.control.mapfile_out                          = make_apply_mapfile.out
 apply_amp2.argument.numthreads                          = {{ max_cpus_per_io_proc_ntimes }}
 {% if not pre_average %}
 apply_amp2.control.mapfiles_in                          = [{{ concat_data_mapfile }},expand_smoothed_amp2_h5parm_map.output.mapfile]
-apply_amp2.control.inputkeys                            = [msin,parmdb]
+apply_amp2.control.inputkeys                            = [msin,slow_h5parm]
 apply_amp2.argument.msin.datacolumn                     = CORRECTED_DATA
 apply_amp2.argument.steps                               = [correct_slow_amp,correct_slow_phase,avg]
 {% else %}
