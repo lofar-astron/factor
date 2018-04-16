@@ -26,10 +26,10 @@ def main(h5parm1, h5parm2, outh5parm, solset1='sol000', solset2='sol000'):
     solset2 : str, optional
         Name of solset for h5parm2
     """
-    h1 = h5parm(h5parm1)
-    h2 = h5parm(h5parm2)
-    ss1 = h1.getSolset(solset=solset1, readonly=False)
-    ss2 = h2.getSolset(solset=solset2, readonly=False)
+    h1 = h5parm(h5parm1, readonly=False)
+    h2 = h5parm(h5parm2, readonly=False)
+    ss1 = h1.getSolset(solset=solset1)
+    ss2 = h2.getSolset(solset=solset2)
 
     # Rename slow-phase soltab before combining to avoid conflict with fast-phase soltab
     soltab = ss2.getSoltab('phase000')
