@@ -812,7 +812,7 @@ def find_selfcal_gain_plots(direction):
         return []
 
     selfcal_plots = glob.glob(os.path.join(latest_dir, 'slow-amplitude*.png'))
-    selfcal_plots.extend(glob.glob(os.path.join(latest_dir, 'slow-phase*.png')))
+    selfcal_plots.extend(glob.glob(os.path.join(latest_dir, 'slow-phases*.png')))
     selfcal_plots.sort()
 
     return selfcal_plots

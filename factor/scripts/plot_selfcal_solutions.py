@@ -31,7 +31,7 @@ def main(h5file, refstat=None):
         st = ss.getSoltab(sol)
         if sol == 'phase000':
             # add tec000
-            stadd = 'tec000'
+            stadd = ['tec000']
         else:
             stadd = ''
         if refstat is not None:
