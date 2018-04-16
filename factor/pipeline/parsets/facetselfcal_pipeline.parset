@@ -65,20 +65,20 @@ expand_sourcedb_cal_facet_sources.control.filename       = expand_sourcedb_cal_f
 
 {% if preapply_phase_cal %}
 # expand mapfile of the dir-dependent parmDB to all files, length = nfiles
-expand_preapply_parmdb_map.control.kind             = plugin
-expand_preapply_parmdb_map.control.type             = expandMapfile
-expand_preapply_parmdb_map.control.mapfile_in       = {{ preapply_h5parm_mapfile }}
-expand_preapply_parmdb_map.control.mapfile_to_match = create_ms_map.output.mapfile
-expand_preapply_parmdb_map.control.mapfile_dir      = input.output.mapfile_dir
-expand_preapply_parmdb_map.control.filename         = expand_preapply_parmdbs.mapfile
+expand_preapply_h5parm_map.control.kind             = plugin
+expand_preapply_h5parm_map.control.type             = expandMapfile
+expand_preapply_h5parm_map.control.mapfile_in       = {{ preapply_h5parm_mapfile }}
+expand_preapply_h5parm_map.control.mapfile_to_match = create_ms_map.output.mapfile
+expand_preapply_h5parm_map.control.mapfile_dir      = input.output.mapfile_dir
+expand_preapply_h5parm_map.control.filename         = expand_preapply_h5parms.mapfile
 {% endif %}
 
 # shift data to calibrator position, predict and add calibrator sources, and average in frequency, length = nfiles
 # Compress both data and weights
 shift_cal.control.type                                 = dppp
 {% if preapply_phase_cal %}
-shift_cal.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_cal_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_preapply_parmdb_map.output.mapfile]
-shift_cal.control.inputkeys                            = [msin,sourcedb,dir_indep_parmdb,preapply_parmdb]
+shift_cal.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_cal_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_preapply_h5parm_map.output.mapfile]
+shift_cal.control.inputkeys                            = [msin,sourcedb,dir_indep_parmdb,pre_h5parm]
 {% else %}
 shift_cal.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_cal_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
 shift_cal.control.inputkeys                            = [msin,sourcedb,dir_indep_parmdb]
@@ -92,13 +92,22 @@ shift_cal.argument.local_scratch_dir                   = {{ local_dir }}
 {% endif %}
 {% if preapply_phase_cal %}
 {% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
-shift_cal.argument.steps                               = [shift,add,flag,correct,avg]
+shift_cal.argument.steps                               = [shift,add,flag,correct_prefast1,correct_prefast2,correct_preslow,avg]
 {% else %}
-shift_cal.argument.steps                               = [shift,add,correct,avg]
+shift_cal.argument.steps                               = [shift,add,correct_prefast1,correct_prefast2,correct_preslow,avg]
 {% endif %}
-shift_cal.argument.correct.type                        = applycal
-shift_cal.argument.correct.parmdb                      = preapply_parmdb
-shift_cal.argument.correct.invert                      = True
+shift_cal.argument.correct_prefast1.type               = applycal
+shift_cal.argument.correct_prefast1.parmdb             = pre_h5parm
+shift_cal.argument.correct_prefast1.correction         = tec000
+shift_cal.argument.correct_prefast1.invert             = True
+shift_cal.argument.correct_prefast2.type               = applycal
+shift_cal.argument.correct_prefast2.parmdb             = pre_h5parm
+shift_cal.argument.correct_prefast2.correction         = phase000
+shift_cal.argument.correct_prefast2.invert             = True
+shift_cal.argument.correct_preslow.type                = applycal
+shift_cal.argument.correct_preslow.parmdb              = pre_h5parm
+shift_cal.argument.correct_preslow.correction          = phase001
+shift_cal.argument.correct_preslow.invert              = True
 {% else %}
 {% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
 shift_cal.argument.steps                               = [shift,add,flag,avg]
