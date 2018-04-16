@@ -31,11 +31,11 @@ def main(h5file, root=None, refstat=None):
     for sol, ncol, color, minmax in zip(sols, ncols, colors, minmaxes):
         st = ss.getSoltab(sol)
         if root is None:
-            root = soltype + '_'
+            root = sol + '_'
         ref = st.ant[0]
         if refstat is not None:
             ref = refstat
-        print('Plotting {} solutions...'.format(soltype))
+        print('Plotting {} solutions...'.format(sol))
         plot.run(st, ['time'], axisInTable='ant', axisInCol=color, NColFig=ncol, refAnt=ref,
                  prefix=root, minmax=minmax)
     h.close()
