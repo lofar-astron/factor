@@ -162,8 +162,8 @@ class FacetSelfcal(Operation):
         self.direction.verify_subtract_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'verify_subtract.break.mapfile')
         if self.direction.create_preapply_h5parm:
-            self.direction.preapply_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
-                'create_preapply_h5parm.mapfile')
+            self.direction.preapply_h5parm_mapfile = os.path.join(self.pipeline_mapfile_dir,
+                'combine_all_h5parms_output.mapfile')
 
         # We also need to save the averaging steps for the image_data, so that for
         # any subsequent imaging runs that use these data, we can determine

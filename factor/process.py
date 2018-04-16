@@ -144,8 +144,9 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                 log.info('Exiting...')
                 sys.exit(1)
 
-    if stop_after: log.debug('Will stop after processing {} selfcal-groups.'.format(stop_after))
     # Run selfcal and subtract operations on direction groups
+    if stop_after:
+        log.debug('Will stop after processing {} selfcal-groups.'.format(stop_after))
     for gindx, direction_group in enumerate(direction_groups):
         if stop_after and gindx >= stop_after:
             log.warn('Stopping after having processed {} groups.'.format(stop_after))
@@ -206,7 +207,7 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
                     for d in directions:
                         if d.name != direction_group_ok[0].name:
                             d.preapply_phase_cal = True
-                            d.preapply_parmdb_mapfile = direction_group_ok[0].preapply_parmdb_mapfile
+                            d.preapply_h5parm_mapfile = direction_group_ok[0].preapply_h5parm_mapfile
                 set_preapply_flag = False
 
         # Subtract final model(s) for directions for which selfcal went OK
