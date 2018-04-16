@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, {% if preapply_phase_cal %} expand_preapply_h5parm_map, {% endif %} shift_cal, {% if preapply_phase_cal %} shift_cal_dir_indep, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, calc_bl, create_bl_mapfile1, pre_average, make_blavg_data_mapfile, concat_blavg_data, create_bl_mapfile2, pre_average_freq, {% endif %} {% if selfcal_local_dir is not none %} {% if not pre_average %} make_concat_data_sync_mapfile, adjust_concat_data_hosts, sync_concat_data_to_local, {% else %} make_concat_blavg_data_sync_mapfile, adjust_concat_blavg_data_hosts, adjust_concat_data_hosts, sync_concat_blavg_data_to_local, {% endif %} {% endif %} concat_data_compressed_mapfile, {% block selfcal_steps %} {% if not preapply_phase_cal %} average0, {% endif %} create_compressed_mapfile0, sort_average0_into_Groups, sort_average0_into_Groups_maps, concat_average0_data, create_compressed_mapfile01, premask_selfcal, wsclean_image02, regroup_concat_data_map, make_fast_phase_h5parm_map, {% if peel_skymodel is not none %} create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, {% else %} group_skymodel0, make_sourcedb0, expand_sourcedb0_map, {% endif %} remove_h5parms1, solve_phaseonly1, {% if selfcal_local_dir is not none %} make_apply_mapfile, {% endif %} apply_phaseonly1, create_compressed_mapfile1, wsclean_image12, group_skymodel1, make_sourcedb1, expand_sourcedb1_map, remove_h5parms2, solve_phaseonly2, apply_phaseonly2, create_compressed_mapfile2, wsclean_image22, group_skymodel2, make_sourcedb2, expand_sourcedb2_map, remove_h5parms11, solve_ampphase11, apply_ampphase11, make_slow_gain_h5parm_map, remove_h5parms12, solve_ampphase12, create_compressed_mapfile_slow, create_combined_slow_output_map, combine_slow_gains1, smooth_amp1, expand_smoothed_amp1_h5parm_map, apply_amp1, create_compressed_mapfile3, wsclean_image32, loop_ampcal, {% endblock selfcal_steps %} {% if selfcal_local_dir is not none %} {% if not pre_average %} remove_concat_data, {% else %} remove_concat_blavg_data, {% endif %} {% endif %} make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, create_model4_map, expand_model4_map, blank_mask, expand_mask4_map, make_new_cal_skymodel, create_combined_output_map, combine_h5parms, {% if not is_patch or mscale_selfcal_do %} make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, expand_combined_h5parm, prepare_imaging_data, {% if not is_patch %} create_compressed_mapfile5, premask, wsclean_image_full, create_imagebase_map, adjust_wsclean_mapfile1, mask5, check_mask_high, create_model5_map, expand_model5_map, expand_mask5_map, make_high_facet_skymodel, combine_skymodels_high, {% endif %} make_sourcedb_high, expand_sourcedb_high, subtract_high, create_compressed_mapfile6, premask_med, wsclean_image_full_med, create_imagebase_med_map, adjust_wsclean_mapfile3, mask6, check_mask_med, expand_model6_map, expand_mask6_map, make_med_facet_skymodel, combine_facet_skymodels, make_sourcedb_new_facet_sources, expand_sourcedb_new_facet_sources, {% else %} make_sourcedb_new_facet_sources, expand_sourcedb_new_facet_sources, {% endif %} predict_and_difference_models, create_middle_band_mapfile1, create_middle_band_mapfile2, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, {% if preapply_phase_cal %} expand_preapply_h5parm_map, {% endif %} shift_cal, {% if preapply_phase_cal %} shift_cal_dir_indep, {% endif %} create_compressed_mapfile_data, sort_into_Groups, sort_into_Groups_maps, concat_data, {% if pre_average %} regroup_shift_cal, regroup_parmdb, calc_bl, create_bl_mapfile1, pre_average, make_blavg_data_mapfile, concat_blavg_data, create_bl_mapfile2, pre_average_freq, {% endif %} {% if selfcal_local_dir is not none %} {% if not pre_average %} make_concat_data_sync_mapfile, adjust_concat_data_hosts, sync_concat_data_to_local, {% else %} make_concat_blavg_data_sync_mapfile, adjust_concat_blavg_data_hosts, adjust_concat_data_hosts, sync_concat_blavg_data_to_local, {% endif %} {% endif %} concat_data_compressed_mapfile, {% block selfcal_steps %} {% if not preapply_phase_cal %} average0, {% endif %} create_compressed_mapfile0, sort_average0_into_Groups, sort_average0_into_Groups_maps, concat_average0_data, create_compressed_mapfile01, premask_selfcal, wsclean_image02, regroup_concat_data_map, make_fast_phase_h5parm_map, {% if peel_skymodel is not none %} create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, {% else %} group_skymodel0, make_sourcedb0, expand_sourcedb0_map, {% endif %} remove_h5parms1, solve_phaseonly1, {% if selfcal_local_dir is not none %} make_apply_mapfile, {% endif %} apply_phaseonly1, create_compressed_mapfile1, wsclean_image12, group_skymodel1, make_sourcedb1, expand_sourcedb1_map, remove_h5parms2, solve_phaseonly2, apply_phaseonly2, create_compressed_mapfile2, wsclean_image22, group_skymodel2, make_sourcedb2, expand_sourcedb2_map, remove_h5parms11, solve_ampphase11, apply_ampphase11, make_slow_gain_h5parm_map, remove_h5parms12, solve_ampphase12, create_compressed_mapfile_slow, create_combined_slow_output_map, combine_slow_gains1, smooth_amp1, expand_smoothed_amp1_h5parm_map, apply_amp1, create_compressed_mapfile3, wsclean_image32, loop_ampcal, {% endblock selfcal_steps %} {% if selfcal_local_dir is not none %} {% if not pre_average %} remove_concat_data, {% else %} remove_concat_blavg_data, {% endif %} {% endif %} create_combined_output_map, combine_h5parms, make_selfcal_plots, create_selfcal_images_mapfile, make_selfcal_images, create_model4_map, expand_model4_map, blank_mask, expand_mask4_map, make_new_cal_skymodel, {% if not is_patch or mscale_selfcal_do %} make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, expand_combined_h5parm, prepare_imaging_data, {% if not is_patch %} create_compressed_mapfile5, premask, wsclean_image_full, create_imagebase_map, adjust_wsclean_mapfile1, mask5, check_mask_high, create_model5_map, expand_model5_map, expand_mask5_map, make_high_facet_skymodel, combine_skymodels_high, {% endif %} make_sourcedb_high, expand_sourcedb_high, subtract_high, create_compressed_mapfile6, premask_med, wsclean_image_full_med, create_imagebase_med_map, adjust_wsclean_mapfile3, mask6, check_mask_med, expand_model6_map, expand_mask6_map, make_med_facet_skymodel, combine_facet_skymodels, make_sourcedb_new_facet_sources, expand_sourcedb_new_facet_sources, {% else %} make_sourcedb_new_facet_sources, expand_sourcedb_new_facet_sources, {% endif %} predict_and_difference_models, create_middle_band_mapfile1, create_middle_band_mapfile2, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath = {{ pipeline_dir }}/plugins
 
@@ -1515,13 +1515,28 @@ remove_concat_blavg_data.argument.flags     = [msfile]
 {% endif %}
 {% endif %}
 
+# create a mapfile for output of combine step, length = 1
+create_combined_output_map.control.kind        = plugin
+create_combined_output_map.control.type        = addListMapfile
+create_combined_output_map.control.hosts       = {{ hosts }}
+create_combined_output_map.control.files       = [input.output.working_directory/input.output.job_name/combined_solutions.h5]
+create_combined_output_map.control.mapfile_dir = input.output.mapfile_dir
+create_combined_output_map.control.filename    = combine_all_h5parms_output.mapfile
+
+# combine fast and slow h5parms, length = 2 -> 1
+combine_h5parms.control.type        = combine_h5parms
+combine_h5parms.control.mapfiles_in = [create_combined_fast_output_map.output.mapfile,create_combined_slow_output_map.output.mapfile]
+combine_h5parms.control.inputkeys   = [h1,h2]
+combine_h5parms.control.mapfile_out = create_combined_output_map.output.mapfile
+combine_h5parms.control.outputkey   = outfile
+combine_h5parms.argument.flags      = [h1,h2,outfile]
+
 # make plots of the selfcal solutions from the merged parmDB, length = 1
 make_selfcal_plots.control.type       = make_selfcal_plots
-make_selfcal_plots.control.mapfile_in = merge_selfcal_parmdbs.output.mapfile
-make_selfcal_plots.control.inputkeys  = parmdb
+make_selfcal_plots.control.mapfile_in = combine_h5parms.output.mapfile
+make_selfcal_plots.control.inputkeys  = h5parm
 make_selfcal_plots.control.outputkey  = plots_root
-make_selfcal_plots.argument.flags     = [parmdb,plots_root]
-make_selfcal_plots.argument.fourpol   = {{ fourpol }}
+make_selfcal_plots.argument.flags     = [h5parm,plots_root]
 
 # create a mapfile with the selfcal images, length = 1
 create_selfcal_images_mapfile.control.kind        = plugin
@@ -1576,22 +1591,6 @@ make_new_cal_skymodel.control.mapfiles_in = [create_msmulti_map.output.mapfile,e
 make_new_cal_skymodel.control.inputkeys   = [msfile,rootname,mask]
 make_new_cal_skymodel.control.outputkey   = skymodel
 make_new_cal_skymodel.argument.flags      = [rootname,msfile,skymodel,mask]
-
-# create a mapfile for output of combine step, length = 1
-create_combined_output_map.control.kind        = plugin
-create_combined_output_map.control.type        = addListMapfile
-create_combined_output_map.control.hosts       = {{ hosts }}
-create_combined_output_map.control.files       = [input.output.working_directory/input.output.job_name/combined_solutions.h5]
-create_combined_output_map.control.mapfile_dir = input.output.mapfile_dir
-create_combined_output_map.control.filename    = combine_all_h5parms_output.mapfile
-
-# combine fast and slow h5parms, length = 2 -> 1
-combine_h5parms.control.type        = combine_h5parms
-combine_h5parms.control.mapfiles_in = [create_combined_fast_output_map.output.mapfile,create_combined_slow_output_map.output.mapfile]
-combine_h5parms.control.inputkeys   = [h1,h2]
-combine_h5parms.control.mapfile_out = create_combined_output_map.output.mapfile
-combine_h5parms.control.outputkey   = outfile
-combine_h5parms.argument.flags      = [h1,h2,outfile]
 
 {% if not is_patch or mscale_selfcal_do %}
 # Image the full facet at high-res to improve the model (if direction is a patch,
