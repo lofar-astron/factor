@@ -780,7 +780,7 @@ def find_selfcal_tec_plots(direction):
         # ValueError or TypeError indicates mtimes list is all NaNs
         return []
 
-    selfcal_plots = glob.glob(os.path.join(latest_dir, '*.make_selfcal_plots_tec*.png'))
+    selfcal_plots = glob.glob(os.path.join(latest_dir, 'tec+scalarphase*.png'))
     selfcal_plots.sort()
 
     return selfcal_plots
@@ -811,8 +811,8 @@ def find_selfcal_gain_plots(direction):
         # ValueError or TypeError indicates mtimes list is all NaNs
         return []
 
-    selfcal_plots = glob.glob(os.path.join(latest_dir, '*.make_selfcal_plots_amp*.png'))
-    selfcal_plots.extend(glob.glob(os.path.join(latest_dir, '*.make_selfcal_plots_phase*.png')))
+    selfcal_plots = glob.glob(os.path.join(latest_dir, 'slow-amplitude*.png'))
+    selfcal_plots.extend(glob.glob(os.path.join(latest_dir, 'slow-phase*.png')))
     selfcal_plots.sort()
 
     return selfcal_plots

@@ -1544,8 +1544,7 @@ combine_h5parms.argument.flags      = [h1,h2,outfile]
 make_selfcal_plots.control.type       = make_selfcal_plots
 make_selfcal_plots.control.mapfile_in = combine_h5parms.output.mapfile
 make_selfcal_plots.control.inputkeys  = h5parm
-make_selfcal_plots.control.outputkey  = plots_root
-make_selfcal_plots.argument.flags     = [h5parm,plots_root]
+make_selfcal_plots.argument.flags     = [h5parm]
 
 # create a mapfile with the selfcal images, length = 1
 create_selfcal_images_mapfile.control.kind        = plugin
