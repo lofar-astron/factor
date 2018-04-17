@@ -40,7 +40,7 @@ def main(h5file, refstat=None):
             ref = st.ant[0]
         if sol == 'amplitude001':
             ref = ''
-        print('Plotting {} solutions...'.format(root))
+        print('Plotting {} solutions...'.format(root[:-1]))
         plot.run(st, ['time'], axisInTable='ant', axisInCol=color, NColFig=ncol, refAnt=ref,
                  prefix=root, minmax=minmax, soltabsToAdd=stadd)
     h.close()
