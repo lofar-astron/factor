@@ -831,7 +831,7 @@ class Direction(object):
                     self.solint_time_a = solint_time_a_lower
                 else:
                     self.solint_time_a = solint_time_a_upper
-
+                self.solint_time_a += 1
             self.log.debug('Using solution intervals of {0} (fast) and {1} '
                 '(slow) time slots'.format(self.solint_time_p, self.solint_time_a))
 
