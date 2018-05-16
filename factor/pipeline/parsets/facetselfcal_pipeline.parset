@@ -1044,7 +1044,6 @@ solve_ampphase12.argument.solvegain.uvlambdamin    = {{ solve_min_uv_lambda }}
 solve_ampphase12.argument.solvegain.type           = gaincal
 solve_ampphase12.argument.solvegain.caltype        = {{ selfcal_caltype }}
 solve_ampphase12.argument.solvegain.parmdb         = h5parm
-solve_ampphase12.argument.solvegain.sourcedb       = sourcedb
 solve_ampphase12.argument.solvegain.solint         = {{ solint_time_a }}
 solve_ampphase12.argument.solvegain.nchan          = {{ solint_freq_a }}
 
@@ -1342,7 +1341,6 @@ solve_ampphase22.argument.solvegain.uvlambdamin    = {{ solve_min_uv_lambda }}
 solve_ampphase22.argument.solvegain.type           = gaincal
 solve_ampphase22.argument.solvegain.caltype        = {{ selfcal_caltype }}
 solve_ampphase22.argument.solvegain.parmdb         = h5parm
-solve_ampphase22.argument.solvegain.sourcedb       = sourcedb
 solve_ampphase22.argument.solvegain.solint         = {{ solint_time_a }}
 solve_ampphase22.argument.solvegain.nchan          = {{ solint_freq_a }}
 
