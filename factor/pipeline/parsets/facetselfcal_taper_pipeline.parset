@@ -121,12 +121,12 @@ premask_selfcal.argument.trim_by               = 0.4
 wsclean_image02.control.type                    = wsclean
 wsclean_image02.control.mapfiles_in             = [create_compressed_mapfile01.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image02.control.inputkeys               = [msfile,fitsmask]
-wsclean_image02.argument.fitsmask               = fitsmask
+wsclean_image02.argument.fits-mask              = fitsmask
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,-joinchannels,msfile]
-wsclean_image02.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
+wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-join-channels,-save-source-list,msfile]
+wsclean_image02.argument.channels-out           = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,msfile]
+wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-save-source-list,msfile]
 {% endif %}
 wsclean_image02.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image02.argument.niter                  = 10000
@@ -138,9 +138,9 @@ wsclean_image02.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image02.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image02.argument.j                      = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
-wsclean_image02.argument.tempdir                = {{ local_dir_parent }}
+wsclean_image02.argument.temp-dir               = {{ local_dir_parent }}
 {% elif selfcal_local_dir is not none %}
-wsclean_image02.argument.tempdir                = {{ selfcal_local_dir }}
+wsclean_image02.argument.temp-dir               = {{ selfcal_local_dir }}
 {% endif %}
 wsclean_image02.argument.multiscale-shape       = gaussian
 {% if not mscale_selfcal_do %}
@@ -167,20 +167,6 @@ wsclean_image02.argument.auto-threshold         = 0.5
 wsclean_image02.argument.local-rms-window       = 50
 wsclean_image02.argument.local-rms-method       = rms-with-min
 
-# make a mapfile with the root-name of the WSClean image, length = 1
-create_imagebase_map02.control.kind        = plugin
-create_imagebase_map02.control.type        = trimMapfile
-create_imagebase_map02.control.mapfile_in  = wsclean_image02.output.wsclean_image02-image.fits.mapfile
-create_imagebase_map02.control.trim        = -
-create_imagebase_map02.control.mapfile_dir = input.output.mapfile_dir
-create_imagebase_map02.control.filename    = image02_rootname.mapfile
-
-# pad the model image with zeros, length = 1
-pad_selfcal_model0_images.control.type       = pad_image
-pad_selfcal_model0_images.control.mapfile_in = create_imagebase_map02.output.mapfile
-pad_selfcal_model0_images.control.inputkey   = imagefile
-pad_selfcal_model0_images.argument.flags     = [imagefile]
-
 # make compressed mapfile of concatenated data, length = ntimes
 # needed for the wsclean_ft steps to get full frequency coverage per group
 regroup_concat_data_map.control.kind               = plugin
@@ -190,47 +176,17 @@ regroup_concat_data_map.control.nitems_to_compress = {{ num_cal_blocks }}
 regroup_concat_data_map.control.mapfile_dir        = input.output.mapfile_dir
 regroup_concat_data_map.control.filename           = regroup_concat_data.mapfile
 
-# expand the mapfile of the model image to match ft files, length = ntimes
-create_expanded_model0_mapfile.control.kind             = plugin
-create_expanded_model0_mapfile.control.type             = expandMapfile
-create_expanded_model0_mapfile.control.mapfile_in       = create_imagebase_map02.output.mapfile
-create_expanded_model0_mapfile.control.mapfile_to_match = regroup_concat_data_map.output.mapfile
-create_expanded_model0_mapfile.control.mapfile_dir      = input.output.mapfile_dir
-create_expanded_model0_mapfile.control.filename         = expand_model0.mapfile
-
-# expand mapfile of the model image sizes to all groups, length = ntimes
-expand_selfcal_model_size_map.control.kind             = plugin
-expand_selfcal_model_size_map.control.type             = expandMapfile
-expand_selfcal_model_size_map.control.mapfile_in       = pad_selfcal_model0_images.output.padsize.mapfile
-expand_selfcal_model_size_map.control.mapfile_to_match = regroup_concat_data_map.output.mapfile
-expand_selfcal_model_size_map.control.mapfile_dir      = input.output.mapfile_dir
-expand_selfcal_model_size_map.control.filename         = expand_selfcal_model_size.mapfile
-
-# predict model visibilities, length = ntimes
-wsclean_ft0.control.type         = wsclean_ft
-wsclean_ft0.control.mapfiles_in  = [regroup_concat_data_map.output.mapfile,create_expanded_model0_mapfile.output.mapfile,expand_selfcal_model_size_map.output.mapfile]
-wsclean_ft0.control.inputkeys    = [msfile,name,size]
-wsclean_ft0.argument.flags       = [-predict,msfile]
-wsclean_ft0.argument.scale       = {{ cellsize_selfcal_deg }}
-wsclean_ft0.argument.mem         = {{ max_percent_memory_per_io_proc_ntimes }}
-wsclean_ft0.argument.channelsout = {{ wsclean_nchannels_selfcal }}
-wsclean_ft0.argument.j           = {{ max_cpus_per_io_proc_ntimes }}
-{% if selfcal_local_dir is none and local_dir is not none %}
-# WSClean uses selfcal_local_dir automatically if the output files are there
-wsclean_ft0.argument.tempdir     = {{ local_dir_parent }}
-{% endif %}
-
-# generate mapfile for the fast-phase parmDBs generated in the solve_phaseonly steps, length = ntimes * num_cal_blocks
-make_fast_phase_parmdb_map.control.kind               = plugin
-make_fast_phase_parmdb_map.control.type               = createMapfile
-make_fast_phase_parmdb_map.control.method             = add_suffix_to_file
-make_fast_phase_parmdb_map.control.mapfile_in         = concat_data.output.mapfile
-make_fast_phase_parmdb_map.control.add_suffix_to_file = /instrument
-make_fast_phase_parmdb_map.control.mapfile_dir        = input.output.mapfile_dir
-make_fast_phase_parmdb_map.control.filename           = fast_parmdb.mapfile
+# generate mapfile for the fast-phase h5parms generated in the solve_phaseonly steps, length = ntimes * num_cal_blocks
+make_fast_phase_h5parm_map.control.kind               = plugin
+make_fast_phase_h5parm_map.control.type               = createMapfile
+make_fast_phase_h5parm_map.control.method             = add_suffix_to_file
+make_fast_phase_h5parm_map.control.mapfile_in         = concat_data.output.mapfile
+make_fast_phase_h5parm_map.control.add_suffix_to_file = /instrument.h5
+make_fast_phase_h5parm_map.control.mapfile_dir        = input.output.mapfile_dir
+make_fast_phase_h5parm_map.control.filename           = fast_h5parm.mapfile
 
 {% if peel_skymodel is not none %}
-# create a mapfile with the outlier skymodel from supplied list, length = 1
+# create a mapfile with the outlier sky model from supplied list, length = 1
 create_peel_skymodel_map.control.kind        = plugin
 create_peel_skymodel_map.control.type        = addListMapfile
 create_peel_skymodel_map.control.hosts       = {{ hosts }}
@@ -238,7 +194,7 @@ create_peel_skymodel_map.control.files       = [{{ peel_skymodel }}]
 create_peel_skymodel_map.control.mapfile_dir = input.output.mapfile_dir
 create_peel_skymodel_map.control.filename    = peel_skymodel.mapfile
 
-# convert the outlier skymodel into a sourcedb, length = 1
+# convert the outlier sky model into a sourcedb, length = 1
 make_peel_sourcedb.control.type       = make_sourcedb
 make_peel_sourcedb.control.mapfile_in = create_peel_skymodel_map.output.mapfile
 make_peel_sourcedb.control.inputkey   = in
@@ -253,39 +209,64 @@ expand_peel_sourcedb_map.control.mapfile_in       = make_peel_sourcedb.output.ma
 expand_peel_sourcedb_map.control.mapfile_to_match = concat_data.output.mapfile
 expand_peel_sourcedb_map.control.mapfile_dir      = input.output.mapfile_dir
 expand_peel_sourcedb_map.control.filename         = expand_peel_sourcedb.mapfile
+
+{% else %}
+
+# group the WSClean sky model into a single patch, length = 1
+group_skymodel0.control.type       = group_skymodel
+group_skymodel0.control.mapfile_in = wsclean_image02.output.wsclean_image02-sources.txt.mapfile
+group_skymodel0.control.inputkey   = inmod
+group_skymodel0.control.outputkey  = outmod
+group_skymodel0.argument.flags     = [inmod,outmod]
+
+# convert the WSClean sky model into a sourcedb, length = 1
+make_sourcedb0.control.type       = make_sourcedb
+make_sourcedb0.control.mapfile_in = group_skymodel0.output.mapfile
+make_sourcedb0.control.inputkey   = in
+make_sourcedb0.argument.format    = <
+make_sourcedb0.argument.outtype   = blob
+make_sourcedb0.argument.append    = False
+
+# expand the sourcedb mapfile so that there is one entry for every file, length = ntimes * num_cal_blocks
+expand_sourcedb0_map.control.kind             = plugin
+expand_sourcedb0_map.control.type             = expandMapfile
+expand_sourcedb0_map.control.mapfile_in       = make_sourcedb0.output.mapfile
+expand_sourcedb0_map.control.mapfile_to_match = concat_data.output.mapfile
+expand_sourcedb0_map.control.mapfile_dir      = input.output.mapfile_dir
+expand_sourcedb0_map.control.filename         = expand_sourcedb0.mapfile
 {% endif %}
 
-# remove any existing parmdbs before solving, length = ntimes * num_cal_blocks
-remove_parmdbs1.control.type       = remove_file
-remove_parmdbs1.control.mapfile_in = make_fast_phase_parmdb_map.output.mapfile
-remove_parmdbs1.control.inputkey   = parmdb
-remove_parmdbs1.argument.flags     = [-rf,parmdb]
+# remove any existing h5parms before solving, length = ntimes * num_cal_blocks
+remove_h5parms1.control.type       = remove_file
+remove_h5parms1.control.mapfile_in = make_fast_phase_h5parm_map.output.mapfile
+remove_h5parms1.control.inputkey   = h5parm
+remove_h5parms1.argument.flags     = [-rf,h5parm]
 
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
-solve_phaseonly1.control.type                     = dppp_inplace
+solve_phaseonly1.control.type                         = dppp_inplace
 {% if peel_skymodel is not none %}
-solve_phaseonly1.control.mapfiles_in              = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile,expand_peel_sourcedb_map.output.mapfile]
-solve_phaseonly1.control.inputkeys                = [msin,parmdb,sourcedb]
+solve_phaseonly1.control.mapfiles_in                  = [{{ solve_concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile,expand_peel_sourcedb_map.output.mapfile]
 {% else %}
-solve_phaseonly1.control.mapfiles_in              = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
-solve_phaseonly1.control.inputkeys                = [msin,parmdb]
+solve_phaseonly1.control.mapfiles_in                  = [{{ solve_concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile,expand_sourcedb0_map.output.mapfile]
 {% endif %}
-solve_phaseonly1.argument.numthreads              = {{ max_cpus_per_proc_ntimes }}
-solve_phaseonly1.argument.msin.datacolumn         = DATA
-solve_phaseonly1.argument.msout                   = .
-solve_phaseonly1.argument.steps                   = [solvetec]
-solve_phaseonly1.argument.solvetec.uvlambdamin    = {{ solve_min_uv_lambda }}
-solve_phaseonly1.argument.solvetec.type           = gaincal
-solve_phaseonly1.argument.solvetec.caltype        = tecandphase
-solve_phaseonly1.argument.solvetec.parmdb         = parmdb
-{% if peel_skymodel is not none %}
-solve_phaseonly1.argument.solvetec.usemodelcolumn = False
-solve_phaseonly1.argument.solvetec.sourcedb       = sourcedb
-{% else %}
-solve_phaseonly1.argument.solvetec.usemodelcolumn = True
-{% endif %}
-solve_phaseonly1.argument.solvetec.solint         = {{ solint_time_p }}
-solve_phaseonly1.argument.solvetec.nchan          = {{ solint_freq_a }}
+solve_phaseonly1.control.inputkeys                    = [msin,h5parm,sourcedb]
+solve_phaseonly1.argument.numthreads                  = {{ max_cpus_per_proc_ntimes }}
+solve_phaseonly1.argument.msin.datacolumn             = DATA
+solve_phaseonly1.argument.msout                       = .
+solve_phaseonly1.argument.steps                       = [solvetec]
+solve_phaseonly1.argument.solvetec.type               = ddecal
+solve_phaseonly1.argument.solvetec.mode               = tecandphase
+solve_phaseonly1.argument.solvetec.h5parm             = h5parm
+solve_phaseonly1.argument.solvetec.sourcedb           = sourcedb
+solve_phaseonly1.argument.solvetec.solint             = {{ solint_time_p }}
+solve_phaseonly1.argument.solvetec.nchan              = {{ solint_freq_a }}
+solve_phaseonly1.argument.solvetec.approximatetec     = {{ approximatetec }}
+solve_phaseonly1.argument.solvetec.maxapproxiter      = {{ maxapproxiter }}
+solve_phaseonly1.argument.solvetec.maxiter            = {{ maxiter }}
+solve_phaseonly1.argument.solvetec.propagatesolutions = {{ propagatesolutions }}
+solve_phaseonly1.argument.solvetec.stepsize           = {{ stepsize }}
+solve_phaseonly1.argument.solvetec.tolerance          = {{ tolerance }}
+solve_phaseonly1.argument.solvetec.uvlambdamin        = {{ solve_min_uv_lambda }}
 
 ########## end of first round of selfcal (20" resolution)
 ########## start of second round of selfcal (10" resolution)
@@ -309,8 +290,8 @@ make_apply_mapfile.control.filename     = apply_output.mapfile
 
 # apply the previous calibration and average, length = ntimes * num_cal_blocks
 apply_phaseonly1.control.type                                 = dppp
-apply_phaseonly1.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
-apply_phaseonly1.control.inputkeys                            = [msin,parmdb]
+apply_phaseonly1.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile]
+apply_phaseonly1.control.inputkeys                            = [msin,h5parm]
 {% if selfcal_local_dir is not none %}
 apply_phaseonly1.control.mapfile_out                          = make_apply_mapfile.output.mapfile
 {% endif %}
@@ -323,12 +304,12 @@ apply_phaseonly1.argument.local_scratch_dir                   = {{ local_dir }}
 {% endif %}
 apply_phaseonly1.argument.steps                               = [correct_fast1,correct_fast2,avg]
 apply_phaseonly1.argument.correct_fast1.type                  = applycal
-apply_phaseonly1.argument.correct_fast1.parmdb                = parmdb
-apply_phaseonly1.argument.correct_fast1.correction            = tec
+apply_phaseonly1.argument.correct_fast1.parmdb                = h5parm
+apply_phaseonly1.argument.correct_fast1.correction            = tec000
 apply_phaseonly1.argument.correct_fast1.invert                = True
 apply_phaseonly1.argument.correct_fast2.type                  = applycal
-apply_phaseonly1.argument.correct_fast2.parmdb                = parmdb
-apply_phaseonly1.argument.correct_fast2.correction            = commonscalarphase
+apply_phaseonly1.argument.correct_fast2.parmdb                = h5parm
+apply_phaseonly1.argument.correct_fast2.correction            = phase000
 apply_phaseonly1.argument.correct_fast2.invert                = True
 apply_phaseonly1.argument.avg.type                            = squash
 apply_phaseonly1.argument.avg.freqstep                        = 1
@@ -353,12 +334,12 @@ create_compressed_mapfile1.control.filename    = image1_input.mapfile
 wsclean_image12.control.type                    = wsclean
 wsclean_image12.control.mapfiles_in             = [create_compressed_mapfile1.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image12.control.inputkeys               = [msfile,fitsmask]
-wsclean_image12.argument.fitsmask               = fitsmask
+wsclean_image12.argument.fits-mask              = fitsmask
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,-joinchannels,msfile]
-wsclean_image12.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
+wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-join-channels,-save-source-list,msfile]
+wsclean_image12.argument.channels-out           = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,msfile]
+wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-save-source-list,msfile]
 {% endif %}
 wsclean_image12.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image12.argument.niter                  = 10000
@@ -370,9 +351,9 @@ wsclean_image12.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image12.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image12.argument.j                      = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
-wsclean_image12.argument.tempdir                = {{ local_dir_parent }}
+wsclean_image12.argument.temp-dir               = {{ local_dir_parent }}
 {% elif selfcal_local_dir is not none %}
-wsclean_image12.argument.tempdir                = {{ selfcal_local_dir }}
+wsclean_image12.argument.temp-dir               = {{ selfcal_local_dir }}
 {% endif %}
 wsclean_image12.argument.multiscale-shape       = gaussian
 {% if not mscale_selfcal_do %}
@@ -399,83 +380,76 @@ wsclean_image12.argument.auto-threshold         = 0.5
 wsclean_image12.argument.local-rms-window       = 50
 wsclean_image12.argument.local-rms-method       = rms-with-min
 
-# make a mapfile with the root-name of the WSClean image, length = 1
-create_imagebase_map12.control.kind        = plugin
-create_imagebase_map12.control.type        = trimMapfile
-create_imagebase_map12.control.mapfile_in  = wsclean_image12.output.wsclean_image12-image.fits.mapfile
-create_imagebase_map12.control.trim        = -
-create_imagebase_map12.control.mapfile_dir = input.output.mapfile_dir
-create_imagebase_map12.control.filename    = wsclean_image12_image_rootname.mapfile
+# group the WSClean sky model into a single patch, length = 1
+group_skymodel1.control.type       = group_skymodel
+group_skymodel1.control.mapfile_in = wsclean_image12.output.wsclean_image12-sources.txt.mapfile
+group_skymodel1.control.inputkey   = inmod
+group_skymodel1.control.outputkey  = outmod
+group_skymodel1.argument.flags     = [inmod,outmod]
 
-# expand the mapfile of the model image to all files, length = ntimes
-create_expanded_model1_mapfile.control.kind             = plugin
-create_expanded_model1_mapfile.control.type             = expandMapfile
-create_expanded_model1_mapfile.control.mapfile_in       = create_imagebase_map12.output.mapfile
-create_expanded_model1_mapfile.control.mapfile_to_match = regroup_concat_data_map.output.mapfile
-create_expanded_model1_mapfile.control.mapfile_dir      = input.output.mapfile_dir
-create_expanded_model1_mapfile.control.filename         = expand_wsclean_model1.mapfile
+# convert the WSClean sky model into a sourcedb, length = 1
+make_sourcedb1.control.type       = make_sourcedb
+make_sourcedb1.control.mapfile_in = group_skymodel1.output.mapfile
+make_sourcedb1.control.inputkey   = in
+make_sourcedb1.argument.format    = <
+make_sourcedb1.argument.outtype   = blob
+make_sourcedb1.argument.append    = False
 
-## pad the model image with zeros, length = 1
-pad_selfcal_model1_images.control.type       = pad_image
-pad_selfcal_model1_images.control.mapfile_in = create_imagebase_map12.output.mapfile
-pad_selfcal_model1_images.control.inputkey   = imagefile
-pad_selfcal_model1_images.argument.flags     = [imagefile]
+# expand the sourcedb mapfile so that there is one entry for every file, length = ntimes * num_cal_blocks
+expand_sourcedb1_map.control.kind             = plugin
+expand_sourcedb1_map.control.type             = expandMapfile
+expand_sourcedb1_map.control.mapfile_in       = make_sourcedb1.output.mapfile
+expand_sourcedb1_map.control.mapfile_to_match = concat_data.output.mapfile
+expand_sourcedb1_map.control.mapfile_dir      = input.output.mapfile_dir
+expand_sourcedb1_map.control.filename         = expand_sourcedb1.mapfile
 
-# predict model visibilities, length = ntimes
-wsclean_ft1.control.type         = wsclean_ft
-wsclean_ft1.control.mapfiles_in  = [regroup_concat_data_map.output.mapfile,create_expanded_model1_mapfile.output.mapfile,expand_selfcal_model_size_map.output.mapfile]
-wsclean_ft1.control.inputkeys    = [msfile,name,size]
-wsclean_ft1.argument.flags       = [-predict,msfile]
-wsclean_ft1.argument.scale       = {{ cellsize_selfcal_deg }}
-wsclean_ft1.argument.mem         = {{ max_percent_memory_per_io_proc_ntimes }}
-wsclean_ft1.argument.channelsout = {{ wsclean_nchannels_selfcal }}
-wsclean_ft1.argument.j           = {{ max_cpus_per_io_proc_ntimes }}
-{% if selfcal_local_dir is none and local_dir is not none %}
-# WSClean uses selfcal_local_dir automatically if the output files are there
-wsclean_ft1.argument.tempdir     = {{ local_dir_parent }}
-{% endif %}
-
-# remove any existing parmdbs before solving, length = ntimes * num_cal_blocks
-remove_parmdbs2.control.type       = remove_file
-remove_parmdbs2.control.mapfile_in = make_fast_phase_parmdb_map.output.mapfile
-remove_parmdbs2.control.inputkey   = parmdb
-remove_parmdbs2.argument.flags     = [-rf,parmdb]
+# remove any existing h5parms before solving, length = ntimes * num_cal_blocks
+remove_h5parms2.control.type       = remove_file
+remove_h5parms2.control.mapfile_in = make_fast_phase_h5parm_map.output.mapfile
+remove_h5parms2.control.inputkey   = h5parm
+remove_h5parms2.argument.flags     = [-rf,h5parm]
 
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
-solve_phaseonly2.control.type                     = dppp_inplace
-solve_phaseonly2.control.mapfiles_in              = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
-solve_phaseonly2.control.inputkeys                = [msin,parmdb]
-solve_phaseonly2.argument.numthreads              = {{ max_cpus_per_proc_ntimes }}
-solve_phaseonly2.argument.msin.datacolumn         = DATA
-solve_phaseonly2.argument.msout                   = .
-solve_phaseonly2.argument.steps                   = [solvetec]
-solve_phaseonly2.argument.solvetec.uvlambdamin    = {{ solve_min_uv_lambda }}
-solve_phaseonly2.argument.solvetec.type           = gaincal
-solve_phaseonly2.argument.solvetec.caltype        = tecandphase
-solve_phaseonly2.argument.solvetec.parmdb         = parmdb
-solve_phaseonly2.argument.solvetec.usemodelcolumn = True
-solve_phaseonly2.argument.solvetec.solint         = {{ solint_time_p }}
-solve_phaseonly2.argument.solvetec.nchan          = {{ solint_freq_a }}
+solve_phaseonly2.control.type                         = dppp_inplace
+solve_phaseonly2.control.mapfiles_in                  = [{{ solve_concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile,,expand_sourcedb1_map.output.mapfile]
+solve_phaseonly2.control.inputkeys                    = [msin,h5parm,sourcedb]
+solve_phaseonly2.argument.numthreads                  = {{ max_cpus_per_proc_ntimes }}
+solve_phaseonly2.argument.msin.datacolumn             = DATA
+solve_phaseonly2.argument.msout                       = .
+solve_phaseonly2.argument.steps                       = [solvetec]
+solve_phaseonly2.argument.solvetec.type               = ddecal
+solve_phaseonly2.argument.solvetec.mode               = tecandphase
+solve_phaseonly2.argument.solvetec.h5parm             = h5parm
+solve_phaseonly2.argument.solvetec.sourcedb           = sourcedb
+solve_phaseonly2.argument.solvetec.solint             = {{ solint_time_p }}
+solve_phaseonly2.argument.solvetec.nchan              = {{ solint_freq_a }}
+solve_phaseonly2.argument.solvetec.approximatetec     = {{ approximatetec }}
+solve_phaseonly2.argument.solvetec.maxapproxiter      = {{ maxapproxiter }}
+solve_phaseonly2.argument.solvetec.maxiter            = {{ maxiter }}
+solve_phaseonly2.argument.solvetec.propagatesolutions = {{ propagatesolutions }}
+solve_phaseonly2.argument.solvetec.stepsize           = {{ stepsize }}
+solve_phaseonly2.argument.solvetec.tolerance          = {{ tolerance }}
+solve_phaseonly2.argument.solvetec.uvlambdamin        = {{ solve_min_uv_lambda }}
 
 ########## end of second round of selfcal
 ########## start of third round of selfcal
 
 # apply the previous calibration, length = ntimes * num_cal_blocks
 apply_phaseonly2.control.type                      = dppp_inplace
-apply_phaseonly2.control.mapfiles_in               = [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
-apply_phaseonly2.control.inputkeys                 = [msin,parmdb]
+apply_phaseonly2.control.mapfiles_in               = [{{ concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile]
+apply_phaseonly2.control.inputkeys                 = [msin,h5parm]
 apply_phaseonly2.argument.numthreads               = {{ max_cpus_per_proc_ntimes }}
 apply_phaseonly2.argument.msin.datacolumn          = DATA
 apply_phaseonly2.argument.msout                    = .
 apply_phaseonly2.argument.msout.datacolumn         = CORRECTED_DATA
 apply_phaseonly2.argument.steps                    = [correct_fast1,correct_fast2]
 apply_phaseonly2.argument.correct_fast1.type       = applycal
-apply_phaseonly2.argument.correct_fast1.parmdb     = parmdb
-apply_phaseonly2.argument.correct_fast1.correction = tec
+apply_phaseonly2.argument.correct_fast1.parmdb     = h5parm
+apply_phaseonly2.argument.correct_fast1.correction = tec000
 apply_phaseonly2.argument.correct_fast1.invert     = True
 apply_phaseonly2.argument.correct_fast2.type       = applycal
-apply_phaseonly2.argument.correct_fast2.parmdb     = parmdb
-apply_phaseonly2.argument.correct_fast2.correction = commonscalarphase
+apply_phaseonly2.argument.correct_fast2.parmdb     = h5parm
+apply_phaseonly2.argument.correct_fast2.correction = phase000
 apply_phaseonly2.argument.correct_fast2.invert     = True
 
 ########## end of second round of selfcal (10" resolution)
@@ -525,12 +499,12 @@ create_compressed_mapfile2.control.filename    = image2_input.mapfile
 wsclean_image22.control.type                    = wsclean
 wsclean_image22.control.mapfiles_in             = [create_compressed_mapfile2.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image22.control.inputkeys               = [msfile,fitsmask]
-wsclean_image22.argument.fitsmask               = fitsmask
+wsclean_image22.argument.fits-mask              = fitsmask
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,-joinchannels,msfile]
-wsclean_image22.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
+wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-join-channels,-save-source-list,msfile]
+wsclean_image22.argument.channels-out           = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,msfile]
+wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-save-source-list,msfile]
 {% endif %}
 wsclean_image22.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image22.argument.niter                  = 10000
@@ -542,9 +516,9 @@ wsclean_image22.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image22.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image22.argument.j                      = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
-wsclean_image22.argument.tempdir                = {{ local_dir_parent }}
+wsclean_image22.argument.temp-dir               = {{ local_dir_parent }}
 {% elif selfcal_local_dir is not none %}
-wsclean_image22.argument.tempdir                = {{ selfcal_local_dir }}
+wsclean_image22.argument.temp-dir               = {{ selfcal_local_dir }}
 {% endif %}
 wsclean_image22.argument.multiscale-shape       = gaussian
 {% if not mscale_selfcal_do %}
@@ -572,80 +546,73 @@ wsclean_image22.argument.local-rms-method       = rms-with-min
 wsclean_image22.argument.multiscale-scale-bias  = 0.5
 wsclean_image22.argument.multiscale-gain        = 0.1
 
-# make a mapfile with the root-name of the WSClean image, length = 1
-create_imagebase_map22.control.kind        = plugin
-create_imagebase_map22.control.type        = trimMapfile
-create_imagebase_map22.control.mapfile_in  = wsclean_image22.output.wsclean_image22-image.fits.mapfile
-create_imagebase_map22.control.trim        = -
-create_imagebase_map22.control.mapfile_dir = input.output.mapfile_dir
-create_imagebase_map22.control.filename    = wsclean_image22_image_rootname.mapfile
+# group the WSClean sky model into a single patch, length = 1
+group_skymodel2.control.type       = group_skymodel
+group_skymodel2.control.mapfile_in = wsclean_image22.output.wsclean_image22-sources.txt.mapfile
+group_skymodel2.control.inputkey   = inmod
+group_skymodel2.control.outputkey  = outmod
+group_skymodel2.argument.flags     = [inmod,outmod]
 
-# expand the mapfile of the model image to all files, length = ntimes
-create_expanded_model2_mapfile.control.kind             = plugin
-create_expanded_model2_mapfile.control.type             = expandMapfile
-create_expanded_model2_mapfile.control.mapfile_in       = create_imagebase_map22.output.mapfile
-create_expanded_model2_mapfile.control.mapfile_to_match = regroup_concat_data_map.output.mapfile
-create_expanded_model2_mapfile.control.mapfile_dir      = input.output.mapfile_dir
-create_expanded_model2_mapfile.control.filename         = expand_wsclean_model1.mapfile
+# convert the WSClean sky model into a sourcedb, length = 1
+make_sourcedb2.control.type       = make_sourcedb
+make_sourcedb2.control.mapfile_in = group_skymodel2.output.mapfile
+make_sourcedb2.control.inputkey   = in
+make_sourcedb2.argument.format    = <
+make_sourcedb2.argument.outtype   = blob
+make_sourcedb2.argument.append    = False
 
-# pad the model image with zeros, length = 1
-pad_selfcal_model2_images.control.type       = pad_image
-pad_selfcal_model2_images.control.mapfile_in = create_imagebase_map22.output.mapfile
-pad_selfcal_model2_images.control.inputkey   = imagefile
-pad_selfcal_model2_images.argument.flags     = [imagefile]
+# expand the sourcedb mapfile so that there is one entry for every file, length = ntimes * num_cal_blocks
+expand_sourcedb2_map.control.kind             = plugin
+expand_sourcedb2_map.control.type             = expandMapfile
+expand_sourcedb2_map.control.mapfile_in       = make_sourcedb2.output.mapfile
+expand_sourcedb2_map.control.mapfile_to_match = concat_data.output.mapfile
+expand_sourcedb2_map.control.mapfile_dir      = input.output.mapfile_dir
+expand_sourcedb2_map.control.filename         = expand_sourcedb2.mapfile
 
-# predict model visibilities, length = ntimes
-wsclean_ft2.control.type         = wsclean_ft
-wsclean_ft2.control.mapfiles_in  = [regroup_concat_data_map.output.mapfile,create_expanded_model2_mapfile.output.mapfile,expand_selfcal_model_size_map.output.mapfile]
-wsclean_ft2.control.inputkeys    = [msfile,name,size]
-wsclean_ft2.argument.flags       = [-predict,msfile]
-wsclean_ft2.argument.scale       = {{ cellsize_selfcal_deg }}
-wsclean_ft2.argument.mem         = {{ max_percent_memory_per_io_proc_ntimes }}
-wsclean_ft2.argument.channelsout = {{ wsclean_nchannels_selfcal }}
-wsclean_ft2.argument.j           = {{ max_cpus_per_io_proc_ntimes }}
-{% if selfcal_local_dir is none and local_dir is not none %}
-# WSClean uses selfcal_local_dir automatically if the output files are there
-wsclean_ft2.argument.tempdir     = {{ local_dir_parent }}
-{% endif %}
-
-# remove any existing parmdbs before solving, length = ntimes * num_cal_blocks
-remove_parmdbs11.control.type       = remove_file
-remove_parmdbs11.control.mapfile_in = make_fast_phase_parmdb_map.output.mapfile
-remove_parmdbs11.control.inputkey   = parmdb
-remove_parmdbs11.argument.flags     = [-rf,parmdb]
+# remove any existing h5parms before solving, length = ntimes * num_cal_blocks
+remove_h5parms11.control.type       = remove_file
+remove_h5parms11.control.mapfile_in = make_fast_phase_h5parm_map.output.mapfile
+remove_h5parms11.control.inputkey   = h5parm
+remove_h5parms11.argument.flags     = [-rf,h5parm]
 
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
-solve_ampphase11.control.type                     = dppp_inplace
-solve_ampphase11.control.mapfiles_in              = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
-solve_ampphase11.control.inputkeys                = [msin,parmdb]
-solve_ampphase11.argument.numthreads              = {{ max_cpus_per_proc_ntimes }}
-solve_ampphase11.argument.msin.datacolumn         = DATA
-solve_ampphase11.argument.msout                   = .
-solve_ampphase11.argument.steps                   = [solvetec]
-solve_ampphase11.argument.solvetec.uvlambdamin    = {{ solve_min_uv_lambda }}
-solve_ampphase11.argument.solvetec.type           = gaincal
-solve_ampphase11.argument.solvetec.caltype        = tecandphase
-solve_ampphase11.argument.solvetec.parmdb         = parmdb
-solve_ampphase11.argument.solvetec.usemodelcolumn = True
-solve_ampphase11.argument.solvetec.solint         = {{ solint_time_p }}
-solve_ampphase11.argument.solvetec.nchan          = {{ solint_freq_a }}
+solve_ampphase11.control.type                         = dppp_inplace
+solve_ampphase11.control.mapfiles_in                  = [{{ solve_concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile,expand_sourcedb2_map.output.mapfile]
+solve_ampphase11.control.inputkeys                    = [msin,h5parm,sourcedb]
+solve_ampphase11.argument.numthreads                  = {{ max_cpus_per_proc_ntimes }}
+solve_ampphase11.argument.msin.datacolumn             = DATA
+solve_ampphase11.argument.msout                       = .
+solve_ampphase11.argument.steps                       = [solvetec]
+solve_ampphase11.argument.solvetec.type               = ddecal
+solve_ampphase11.argument.solvetec.mode               = tecandphase
+solve_ampphase11.argument.solvetec.h5parm             = h5parm
+solve_ampphase11.argument.solvetec.sourcedb           = sourcedb
+solve_ampphase11.argument.solvetec.solint             = {{ solint_time_p }}
+solve_ampphase11.argument.solvetec.nchan              = {{ solint_freq_a }}
+solve_ampphase11.argument.solvetec.approximatetec     = {{ approximatetec }}
+solve_ampphase11.argument.solvetec.maxapproxiter      = {{ maxapproxiter }}
+solve_ampphase11.argument.solvetec.maxiter            = {{ maxiter }}
+solve_ampphase11.argument.solvetec.propagatesolutions = {{ propagatesolutions }}
+solve_ampphase11.argument.solvetec.stepsize           = {{ stepsize }}
+solve_ampphase11.argument.solvetec.tolerance          = {{ tolerance }}
+solve_ampphase11.argument.solvetec.uvlambdamin        = {{ solve_min_uv_lambda }}
 
 # apply the phase-only solutions from the previous calibration, length = ntimes * num_cal_blocks
 apply_ampphase11.control.type                                 = dppp_inplace
-apply_ampphase11.control.mapfiles_in                          = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
-apply_ampphase11.control.inputkeys                            = [msin,parmdb]
+apply_ampphase11.control.mapfiles_in                          = [{{ solve_concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile]
+apply_ampphase11.control.inputkeys                            = [msin,h5parm]
 apply_ampphase11.argument.numthreads                          = {{ max_cpus_per_proc_ntimes }}
 apply_ampphase11.argument.msin.datacolumn                     = DATA
 apply_ampphase11.argument.msout                               = .
 apply_ampphase11.argument.msout.datacolumn                    = CORRECTED_DATA
 apply_ampphase11.argument.steps                               = [correct_fast1,correct_fast2]
 apply_ampphase11.argument.correct_fast1.type                  = applycal
-apply_ampphase11.argument.correct_fast1.parmdb                = parmdb
-apply_ampphase11.argument.correct_fast1.correction            = tec
+apply_ampphase11.argument.correct_fast1.parmdb                = h5parm
+apply_ampphase11.argument.correct_fast1.correction            = tec000
 apply_ampphase11.argument.correct_fast1.invert                = True
 apply_ampphase11.argument.correct_fast2.type                  = applycal
-apply_ampphase11.argument.correct_fast2.parmdb                = parmdb
-apply_ampphase11.argument.correct_fast2.correction            = commonscalarphase
+apply_ampphase11.argument.correct_fast2.parmdb                = h5parm
+apply_ampphase11.argument.correct_fast2.correction            = phase000
 apply_ampphase11.argument.correct_fast2.invert                = True
 {% if use_compression %}
 apply_ampphase11.argument.msout.storagemanager                = "Dysco"
@@ -656,111 +623,102 @@ apply_ampphase11.argument.msout.storagemanager.disttruncation = 1.5
 apply_ampphase11.argument.msout.storagemanager.normalization  = "AF"
 {% endif %}
 
-# fiddle with the image mapfiles, length = 1
-adjust_wsclean_mapfile22_phaseloop.control.kind        = plugin
-adjust_wsclean_mapfile22_phaseloop.control.type        = appendMapfile
-adjust_wsclean_mapfile22_phaseloop.control.mapfile_in  = create_imagebase_map22.output.mapfile
-adjust_wsclean_mapfile22_phaseloop.control.append      = {{ wsclean_suffix }}
-adjust_wsclean_mapfile22_phaseloop.control.mapfile_dir = input.output.mapfile_dir
-adjust_wsclean_mapfile22_phaseloop.control.filename    = compare_image_input_new1.mapfile
-
-# copy the output image so that we can compare it later, length = 1
-copy_image1.control.type       = copy_image
-copy_image1.control.mapfile_in = adjust_wsclean_mapfile22_phaseloop.output.mapfile
-copy_image1.control.inputkey   = image
-copy_image1.argument.flags     = [image,loop_phasecal.output.counter,2]
-
-# compare the current and the previous image to see if we can stop the loop, length = 1
-check_image1.control.type        = compare_image_stats
-check_image1.control.mapfiles_in = [adjust_wsclean_mapfile22_phaseloop.output.mapfile,copy_image1.output.previous_image.mapfile]
-check_image1.control.inputkeys   = [image_new,image_prev]
-check_image1.argument.flags      = [image_new,image_prev,loop_phasecal.output.counter,1.05]
-
-###### end of phase-only selfcal loop
-###### continue to amplitude calibration
-
 # generate mapfile for the slow-gain parmDBs generated in the solve_ampphase12 step
-make_slow_gain_parmdb_map.control.kind               =  plugin
-make_slow_gain_parmdb_map.control.type               =  createMapfile
-make_slow_gain_parmdb_map.control.method             =  add_suffix_to_file
-make_slow_gain_parmdb_map.control.mapfile_in         =  concat_data.output.mapfile
-make_slow_gain_parmdb_map.control.add_suffix_to_file =  /instrument_slow
-make_slow_gain_parmdb_map.control.mapfile_dir        =  input.output.mapfile_dir
-make_slow_gain_parmdb_map.control.filename           =  slow_parmdb.mapfile
+make_slow_gain_h5parm_map.control.kind               =  plugin
+make_slow_gain_h5parm_map.control.type               =  createMapfile
+make_slow_gain_h5parm_map.control.method             =  add_suffix_to_file
+make_slow_gain_h5parm_map.control.mapfile_in         =  concat_data.output.mapfile
+make_slow_gain_h5parm_map.control.add_suffix_to_file =  /instrument_slow.h5
+make_slow_gain_h5parm_map.control.mapfile_dir        =  input.output.mapfile_dir
+make_slow_gain_h5parm_map.control.filename           =  slow_h5parm.mapfile
 
-# remove any existing parmdbs before solving, length = ntimes * num_cal_blocks
-remove_parmdbs12.control.type       = remove_file
-remove_parmdbs12.control.mapfile_in = make_slow_gain_parmdb_map.output.mapfile
-remove_parmdbs12.control.inputkey   = parmdb
-remove_parmdbs12.argument.flags     = [-rf,parmdb]
+# remove any existing h5parms before solving, length = ntimes * num_cal_blocks
+remove_h5parms12.control.type       = remove_file
+remove_h5parms12.control.mapfile_in = make_slow_gain_h5parm_map.output.mapfile
+remove_h5parms12.control.inputkey   = h5parm
+remove_h5parms12.argument.flags     = [-rf,h5parm]
 
 # run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
-solve_ampphase12.control.type                      = dppp_inplace
-solve_ampphase12.control.mapfiles_in               = [{{ solve_concat_data_mapfile }},make_slow_gain_parmdb_map.output.mapfile]
-solve_ampphase12.control.inputkeys                 = [msin,parmdb]
-solve_ampphase12.argument.numthreads               = {{ max_cpus_per_proc_ntimes }}
-solve_ampphase12.argument.msin.datacolumn          = CORRECTED_DATA
-solve_ampphase12.argument.msout                    = .
-solve_ampphase12.argument.steps                    = [solvegain]
-solve_ampphase12.argument.solvegain.uvlambdamin    = {{ solve_min_uv_lambda }}
-solve_ampphase12.argument.solvegain.type           = gaincal
-solve_ampphase12.argument.solvegain.caltype        = {{ selfcal_caltype }}
-solve_ampphase12.argument.solvegain.parmdb         = parmdb
-solve_ampphase12.argument.solvegain.usemodelcolumn = True
-solve_ampphase12.argument.solvegain.solint         = {{ solint_time_a }}
-solve_ampphase12.argument.solvegain.nchan          = {{ solint_freq_a }}
+solve_ampphase12.control.type                          = dppp_inplace
+solve_ampphase12.control.mapfiles_in                   = [{{ solve_concat_data_mapfile }},make_slow_gain_h5parm_map.output.mapfile,expand_sourcedb2_map.output.mapfile]
+solve_ampphase12.control.inputkeys                     = [msin,h5parm,sourcedb]
+solve_ampphase12.argument.numthreads                   = {{ max_cpus_per_proc_ntimes }}
+solve_ampphase12.argument.msin.datacolumn              = CORRECTED_DATA
+solve_ampphase12.argument.msout                        = .
+solve_ampphase12.argument.steps                        = [solvegain]
+solve_ampphase12.argument.solvegain.type               = ddecal
+solve_ampphase12.argument.solvegain.mode               = complexgain
+solve_ampphase12.argument.solvegain.h5parm             = h5parm
+solve_ampphase12.argument.solvegain.sourcedb           = sourcedb
+solve_ampphase12.argument.solvegain.solint             = {{ solint_time_a }}
+solve_ampphase12.argument.solvegain.nchan              = {{ solint_freq_a }}
+solve_ampphase12.argument.solvegain.maxiter            = {{ maxiter }}
+solve_ampphase12.argument.solvegain.propagatesolutions = {{ propagatesolutions }}
+solve_ampphase12.argument.solvegain.stepsize           = {{ stepsize }}
+solve_ampphase12.argument.solvegain.tolerance          = {{ tolerance }}
+solve_ampphase12.argument.solvegain.uvlambdamin        = {{ solve_min_uv_lambda }}
 
-# merge the parmDBs with the amplitude solutions into one, length = 1
-merge_amp_parmdbs1.control.type         = merge_parmdbs_in_time
-merge_amp_parmdbs1.control.mapfile_in   = concat_data_compressed_mapfile.output.mapfile
-merge_amp_parmdbs1.control.inputkey     = mslist
-merge_amp_parmdbs1.control.outputkey    = outparmdb
-merge_amp_parmdbs1.argument.flags       = [mslist,instrument_slow,outparmdb]
-{% if selfcal_local_dir is not none %}
-merge_amp_parmdbs1.argument.scratch_dir = {{ selfcal_local_dir }}
-{% endif %}
+# compress slow-gain mapfile so that all files are in one group, length = 1
+create_compressed_mapfile_slow.control.kind        = plugin
+create_compressed_mapfile_slow.control.type        = compressMapfile
+create_compressed_mapfile_slow.control.mapfile_in  = make_slow_gain_h5parm_map.output.mapfile
+create_compressed_mapfile_slow.control.mapfile_dir = input.output.mapfile_dir
+create_compressed_mapfile_slow.control.filename    = compress_slow.mapfile
 
-# smooth the amplitues in the merged parmDB, length = 1
+# create a mapfile for output of combine step, length = 1
+create_combined_slow_output_map.control.kind        = plugin
+create_combined_slow_output_map.control.type        = addListMapfile
+create_combined_slow_output_map.control.hosts       = {{ hosts }}
+create_combined_slow_output_map.control.files       = [input.output.working_directory/input.output.job_name/slow_gains.h5]
+create_combined_slow_output_map.control.mapfile_dir = input.output.mapfile_dir
+create_combined_slow_output_map.control.filename    = combine_slow_h5parms_output.mapfile
+
+# collect all the slow-gain solutions, length = ntimes -> 1
+combine_slow_gains1.control.type        = collect_h5parms
+combine_slow_gains1.control.mapfile_in  = create_compressed_mapfile_slow.output.mapfile
+combine_slow_gains1.control.inputkey    = infiles
+combine_slow_gains1.control.mapfile_out = create_combined_slow_output_map.output.mapfile
+combine_slow_gains1.control.outputkey   = outfile
+combine_slow_gains1.argument.flags      = [-c,infiles]
+combine_slow_gains1.argument.outh5parm  = outfile
+
+# smooth the amplitues in the merged h5parm, length = 1
 smooth_amp1.control.type         = {{ smooth_amps_task }}
-smooth_amp1.control.mapfile_in   = merge_amp_parmdbs1.output.mapfile
-smooth_amp1.control.inputkey     = ampparmdb
-smooth_amp1.control.outputkey    = outparmdb
-smooth_amp1.argument.flags       = [ampparmdb,outparmdb]
-{% if selfcal_local_dir is not none %}
-smooth_amp1.argument.scratch_dir = {{ selfcal_local_dir }}
-{% endif %}
+smooth_amp1.control.mapfile_in   = combine_slow_gains1.output.mapfile
+smooth_amp1.control.inputkey     = amph5parm
+smooth_amp1.argument.flags       = [amph5parm]
 
-# expand the mapfile with the smoothd parmDB to all time-steps, length = ntimes * num_cal_blocks
-expand_smoothed_amp1_parmdb_map.control.kind             = plugin
-expand_smoothed_amp1_parmdb_map.control.type             = expandMapfile
-expand_smoothed_amp1_parmdb_map.control.mapfile_in       = smooth_amp1.output.mapfile
-expand_smoothed_amp1_parmdb_map.control.mapfile_to_match = concat_data.output.mapfile
-expand_smoothed_amp1_parmdb_map.control.mapfile_dir      = input.output.mapfile_dir
-expand_smoothed_amp1_parmdb_map.control.filename         = expand_amp1_smoothed_parmdbs.mapfile
+# expand the mapfile with the smoothd h5parm to all time-steps, length = ntimes * num_cal_blocks
+expand_smoothed_amp1_h5parm_map.control.kind             = plugin
+expand_smoothed_amp1_h5parm_map.control.type             = expandMapfile
+expand_smoothed_amp1_h5parm_map.control.mapfile_in       = smooth_amp1.output.mapfile
+expand_smoothed_amp1_h5parm_map.control.mapfile_to_match = concat_data.output.mapfile
+expand_smoothed_amp1_h5parm_map.control.mapfile_dir      = input.output.mapfile_dir
+expand_smoothed_amp1_h5parm_map.control.filename         = expand_amp1_smoothed_h5parms.mapfile
 
-# apply the smoothed amplitudes and average, length = ntimes * num_cal_blocks
+# apply the solutions and average, length = ntimes * num_cal_blocks
 apply_amp1.control.type                                 = dppp
 {% if selfcal_local_dir is not none %}
 apply_amp1.control.mapfile_out                          = make_apply_mapfile.output.mapfile
 {% endif %}
 apply_amp1.argument.numthreads                          = {{ max_cpus_per_io_proc_ntimes }}
 {% if not pre_average %}
-apply_amp1.control.mapfiles_in                          = [{{ concat_data_mapfile }},expand_smoothed_amp1_parmdb_map.output.mapfile]
-apply_amp1.control.inputkeys                            = [msin,parmdb]
+apply_amp1.control.mapfiles_in                          = [{{ concat_data_mapfile }},expand_smoothed_amp1_h5parm_map.output.mapfile]
+apply_amp1.control.inputkeys                            = [msin,slow_h5parm]
 apply_amp1.argument.msin.datacolumn                     = CORRECTED_DATA
-apply_amp1.argument.steps                               = [correct_slow,avg]
+apply_amp1.argument.steps                               = [correct_slow_amp,correct_slow_phase,avg]
 {% else %}
-apply_amp1.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile,expand_smoothed_amp1_parmdb_map.output.mapfile]
-apply_amp1.control.inputkeys                            = [msin,fast_parmdb,parmdb]
+apply_amp1.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile,expand_smoothed_amp1_h5parm_map.output.mapfile]
+apply_amp1.control.inputkeys                            = [msin,fast_h5parmdb,slow_h5parm]
 apply_amp1.argument.msin.datacolumn                     = DATA
-apply_amp1.argument.steps                               = [correct_fast1,correct_fast2,correct_slow,avg]
+apply_amp1.argument.steps                               = [correct_fast1,correct_fast2,correct_slow_amp,correct_slow_phase,avg]
 apply_amp1.argument.correct_fast1.type                  = applycal
-apply_amp1.argument.correct_fast1.parmdb                = fast_parmdb
-apply_amp1.argument.correct_fast1.correction            = tec
+apply_amp1.argument.correct_fast1.parmdb                = fast_h5parm
+apply_amp1.argument.correct_fast1.correction            = tec000
 apply_amp1.argument.correct_fast1.invert                = True
 apply_amp1.argument.correct_fast2.type                  = applycal
-apply_amp1.argument.correct_fast2.parmdb                = fast_parmdb
-apply_amp1.argument.correct_fast2.correction            = commonscalarphase
+apply_amp1.argument.correct_fast2.parmdb                = fast_h5parm
+apply_amp1.argument.correct_fast2.correction            = phase000
 apply_amp1.argument.correct_fast2.invert                = True
 {% endif %}
 apply_amp1.argument.msout.overwrite                     = True
@@ -768,9 +726,14 @@ apply_amp1.argument.msout.writefullresflag              = False
 {% if local_dir is not none %}
 apply_amp1.argument.local_scratch_dir                   = {{ local_dir }}
 {% endif %}
-apply_amp1.argument.correct_slow.type                   = applycal
-apply_amp1.argument.correct_slow.parmdb                 = parmdb
-apply_amp1.argument.correct_slow.invert                 = True
+apply_amp1.argument.correct_slow_amp.type               = applycal
+apply_amp1.argument.correct_slow_amp.parmdb             = slow_h5parm
+apply_amp1.argument.correct_slow_amp.correction         = amplitude001
+apply_amp1.argument.correct_slow_amp.invert             = True
+apply_amp1.argument.correct_slow_phase.type             = applycal
+apply_amp1.argument.correct_slow_phase.parmdb           = slow_h5parm
+apply_amp1.argument.correct_slow_phase.correction       = phase000
+apply_amp1.argument.correct_slow_phase.invert           = True
 apply_amp1.argument.avg.type                            = squash
 apply_amp1.argument.avg.freqstep                        = 1
 apply_amp1.argument.avg.timestep                        = {{ facetselfcal_timestep }}
@@ -797,12 +760,12 @@ create_compressed_mapfile3.control.filename    = image3_input.mapfile
 wsclean_image32.control.type                    = wsclean
 wsclean_image32.control.mapfiles_in             = [create_compressed_mapfile3.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image32.control.inputkeys               = [msfile,fitsmask]
-wsclean_image32.argument.fitsmask               = fitsmask
+wsclean_image32.argument.fits-mask              = fitsmask
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,-joinchannels,msfile]
-wsclean_image32.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
+wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-join-channels,-save-source-list,msfile]
+wsclean_image32.argument.channels-out           = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,msfile]
+wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-save-source-list,msfile]
 {% endif %}
 wsclean_image32.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image32.argument.niter                  = 10000
@@ -814,9 +777,9 @@ wsclean_image32.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image32.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image32.argument.j                      = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
-wsclean_image32.argument.tempdir                = {{ local_dir_parent }}
+wsclean_image32.argument.temp-dir               = {{ local_dir_parent }}
 {% elif selfcal_local_dir is not none %}
-wsclean_image32.argument.tempdir                = {{ selfcal_local_dir }}
+wsclean_image32.argument.temp-dir               = {{ selfcal_local_dir }}
 {% endif %}
 wsclean_image32.argument.multiscale-shape       = gaussian
 {% if not mscale_selfcal_do %}
@@ -852,81 +815,74 @@ loop_ampcal.control.type      = conditional
 loop_ampcal.control.loopcount = {{ loopcount }}
 loop_ampcal.control.loopsteps = [create_imagebase_map32,create_expanded_model3_mapfile,pad_selfcal_model3_images,wsclean_ft3,remove_parmdbs21,solve_ampphase21,apply_ampphase21,merge_phase_parmdbs,remove_parmdbs22,solve_ampphase22,merge_amp_parmdbs2,smooth_amp2,expand_smoothed_amp2_parmdb_map,apply_amp2,create_compressed_mapfile4,wsclean_image42,create_imagebase_map42,adjust_wsclean_mapfile42,copy_image2,check_image2]
 
-# make a mapfile with the root-name of the WSClean image, length = 1
-create_imagebase_map32.control.kind        = plugin
-create_imagebase_map32.control.type        = trimMapfile
-create_imagebase_map32.control.mapfile_in  = wsclean_image32.output.wsclean_image32-image.fits.mapfile
-create_imagebase_map32.control.trim        = -
-create_imagebase_map32.control.mapfile_dir = input.output.mapfile_dir
-create_imagebase_map32.control.filename    = model3_rootnames.mapfile
-create_imagebase_map32.control.counter     = loop_ampcal.output.counter
+# group the WSClean sky model into a single patch, length = 1
+group_skymodel3.control.type       = group_skymodel
+group_skymodel3.control.mapfile_in = wsclean_image32.output.wsclean_image32-sources.txt.mapfile
+group_skymodel3.control.inputkey   = inmod
+group_skymodel3.control.outputkey  = outmod
+group_skymodel3.argument.flags     = [inmod,outmod]
 
-# expand the mapfile of the model image to all files, length = ntimes
-create_expanded_model3_mapfile.control.kind             = plugin
-create_expanded_model3_mapfile.control.type             = expandMapfile
-create_expanded_model3_mapfile.control.mapfile_in       = create_imagebase_map32.output.mapfile
-create_expanded_model3_mapfile.control.mapfile_to_match = regroup_concat_data_map.output.mapfile
-create_expanded_model3_mapfile.control.mapfile_dir      = input.output.mapfile_dir
-create_expanded_model3_mapfile.control.filename         = expand_wsclean_model1.mapfile
+# convert the WSClean sky model into a sourcedb, length = 1
+make_sourcedb3.control.type       = make_sourcedb
+make_sourcedb3.control.mapfile_in = group_skymodel3.output.mapfile
+make_sourcedb3.control.inputkey   = in
+make_sourcedb3.argument.format    = <
+make_sourcedb3.argument.outtype   = blob
+make_sourcedb3.argument.append    = False
 
-# pad the model image with zeros, length = 1
-pad_selfcal_model3_images.control.type       = pad_image
-pad_selfcal_model3_images.control.mapfile_in = create_imagebase_map32.output.mapfile
-pad_selfcal_model3_images.control.inputkey   = imagefile
-pad_selfcal_model3_images.argument.flags     = [imagefile]
+# expand the sourcedb mapfile so that there is one entry for every file, length = ntimes * num_cal_blocks
+expand_sourcedb3_map.control.kind             = plugin
+expand_sourcedb3_map.control.type             = expandMapfile
+expand_sourcedb3_map.control.mapfile_in       = make_sourcedb3.output.mapfile
+expand_sourcedb3_map.control.mapfile_to_match = concat_data.output.mapfile
+expand_sourcedb3_map.control.mapfile_dir      = input.output.mapfile_dir
+expand_sourcedb3_map.control.filename         = expand_sourcedb3.mapfile
 
-# predict model visibilities, length =  times
-wsclean_ft3.control.type         = wsclean_ft
-wsclean_ft3.control.mapfiles_in  = [regroup_concat_data_map.output.mapfile,create_expanded_model3_mapfile.output.mapfile,expand_selfcal_model_size_map.output.mapfile]
-wsclean_ft3.control.inputkeys    = [msfile,name,size]
-wsclean_ft3.argument.flags       = [-predict,msfile]
-wsclean_ft3.argument.scale       = {{ cellsize_selfcal_deg }}
-wsclean_ft3.argument.mem         = {{ max_percent_memory_per_io_proc_ntimes }}
-wsclean_ft3.argument.channelsout = {{ wsclean_nchannels_selfcal }}
-wsclean_ft3.argument.j           = {{ max_cpus_per_io_proc_ntimes }}
-{% if selfcal_local_dir is none and local_dir is not none %}
-# WSClean uses selfcal_local_dir automatically if the output files are there
-wsclean_ft3.argument.tempdir     = {{ local_dir_parent }}
-{% endif %}
-
-# remove any existing parmdbs before solving, length = ntimes * num_cal_blocks
-remove_parmdbs21.control.type       = remove_file
-remove_parmdbs21.control.mapfile_in = make_fast_phase_parmdb_map.output.mapfile
-remove_parmdbs21.control.inputkey   = parmdb
-remove_parmdbs21.argument.flags     = [-rf,parmdb]
+# remove any existing h5parms before solving, length = ntimes * num_cal_blocks
+remove_h5parms21.control.type       = remove_file
+remove_h5parms21.control.mapfile_in = make_fast_phase_h5parm_map.output.mapfile
+remove_h5parms21.control.inputkey   = h5parm
+remove_h5parms21.argument.flags     = [-rf,h5parm]
 
 # run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
-solve_ampphase21.control.type                     = dppp_inplace
-solve_ampphase21.control.mapfiles_in              = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
-solve_ampphase21.control.inputkeys                = [msin,parmdb]
-solve_ampphase21.argument.numthreads              = {{ max_cpus_per_proc_ntimes }}
-solve_ampphase21.argument.msin.datacolumn         = DATA
-solve_ampphase21.argument.msout                   = .
-solve_ampphase21.argument.steps                   = [solvetec]
-solve_ampphase21.argument.solvetec.uvlambdamin    = {{ solve_min_uv_lambda }}
-solve_ampphase21.argument.solvetec.type           = gaincal
-solve_ampphase21.argument.solvetec.caltype        = tecandphase
-solve_ampphase21.argument.solvetec.parmdb         = parmdb
-solve_ampphase21.argument.solvetec.usemodelcolumn = True
-solve_ampphase21.argument.solvetec.solint         = {{ solint_time_p }}
-solve_ampphase21.argument.solvetec.nchan          = {{ solint_freq_a }}
+solve_ampphase21.control.type                         = dppp_inplace
+solve_ampphase21.control.mapfiles_in                  = [{{ solve_concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile,expand_sourcedb3_map.output.mapfile]
+solve_ampphase21.control.inputkeys                    = [msin,h5parm,sourcedb]
+solve_ampphase21.argument.numthreads                  = {{ max_cpus_per_proc_ntimes }}
+solve_ampphase21.argument.msin.datacolumn             = DATA
+solve_ampphase21.argument.msout                       = .
+solve_ampphase21.argument.steps                       = [solvetec]
+solve_ampphase21.argument.solvetec.uvlambdamin        = {{ solve_min_uv_lambda }}
+solve_ampphase21.argument.solvetec.type               = ddecal
+solve_ampphase21.argument.solvetec.mode               = tecandphase
+solve_ampphase21.argument.solvetec.h5parm             = h5parm
+solve_ampphase21.argument.solvetec.sourcedb           = sourcedb
+solve_ampphase21.argument.solvetec.solint             = {{ solint_time_p }}
+solve_ampphase21.argument.solvetec.nchan              = {{ solint_freq_a }}
+solve_ampphase21.argument.solvetec.approximatetec     = {{ approximatetec }}
+solve_ampphase21.argument.solvetec.maxapproxiter      = {{ maxapproxiter }}
+solve_ampphase21.argument.solvetec.maxiter            = {{ maxiter }}
+solve_ampphase21.argument.solvetec.propagatesolutions = {{ propagatesolutions }}
+solve_ampphase21.argument.solvetec.stepsize           = {{ stepsize }}
+solve_ampphase21.argument.solvetec.tolerance          = {{ tolerance }}
+solve_ampphase21.argument.solvetec.uvlambdamin        = {{ solve_min_uv_lambda }}
 
 # apply the phase-only solutions from the previous calibration, length = ntimes * num_cal_blocks
 apply_ampphase21.control.type                                 = dppp_inplace
-apply_ampphase21.control.mapfiles_in                          = [{{ solve_concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
-apply_ampphase21.control.inputkeys                            = [msin,parmdb]
+apply_ampphase21.control.mapfiles_in                          = [{{ solve_concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile]
+apply_ampphase21.control.inputkeys                            = [msin,h5parm]
 apply_ampphase21.argument.numthreads                          = {{ max_cpus_per_proc_ntimes }}
 apply_ampphase21.argument.msin.datacolumn                     = DATA
 apply_ampphase21.argument.msout                               = .
 apply_ampphase21.argument.msout.datacolumn                    = CORRECTED_DATA
 apply_ampphase21.argument.steps                               = [correct_fast1,correct_fast2]
 apply_ampphase21.argument.correct_fast1.type                  = applycal
-apply_ampphase21.argument.correct_fast1.parmdb                = parmdb
-apply_ampphase21.argument.correct_fast1.correction            = tec
+apply_ampphase21.argument.correct_fast1.parmdb                = h5parm
+apply_ampphase21.argument.correct_fast1.correction            = tec000
 apply_ampphase21.argument.correct_fast1.invert                = True
 apply_ampphase21.argument.correct_fast2.type                  = applycal
-apply_ampphase21.argument.correct_fast2.parmdb                = parmdb
-apply_ampphase21.argument.correct_fast2.correction            = commonscalarphase
+apply_ampphase21.argument.correct_fast2.parmdb                = h5parm
+apply_ampphase21.argument.correct_fast2.correction            = phase000
 apply_ampphase21.argument.correct_fast2.invert                = True
 {% if use_compression %}
 apply_ampphase21.argument.msout.storagemanager                = "Dysco"
@@ -937,64 +893,81 @@ apply_ampphase21.argument.msout.storagemanager.disttruncation = 1.5
 apply_ampphase21.argument.msout.storagemanager.normalization  = "AF"
 {% endif %}
 
-# merge the parmDBs with the phase solutions into one, length = 1
-# This is needed later when the loop is done and we want to apply the solutions to the original data
-merge_phase_parmdbs.control.type       = merge_parmdbs_in_time
-merge_phase_parmdbs.control.mapfile_in = concat_data_compressed_mapfile.output.mapfile
-merge_phase_parmdbs.control.inputkey   = mslist
-merge_phase_parmdbs.control.outputkey  = outparmdb
-merge_phase_parmdbs.argument.flags     = [mslist,instrument,outparmdb]
+# compress fast-phase mapfile so that all files are in one group, length = 1
+create_compressed_mapfile_fast.control.kind        = plugin
+create_compressed_mapfile_fast.control.type        = compressMapfile
+create_compressed_mapfile_fast.control.mapfile_in  = make_fast_phase_h5parm_map.output.mapfile
+create_compressed_mapfile_fast.control.mapfile_dir = input.output.mapfile_dir
+create_compressed_mapfile_fast.control.filename    = compress_fast.mapfile
 
-# remove any existing parmdbs before solving, length = ntimes * num_cal_blocks
-remove_parmdbs22.control.type       = remove_file
-remove_parmdbs22.control.mapfile_in = make_slow_gain_parmdb_map.output.mapfile
-remove_parmdbs22.control.inputkey   = parmdb
-remove_parmdbs22.argument.flags     = [-rf,parmdb]
+# create a mapfile for output of combine step, length = 1
+create_combined_fast_output_map.control.kind        = plugin
+create_combined_fast_output_map.control.type        = addListMapfile
+create_combined_fast_output_map.control.hosts       = {{ hosts }}
+create_combined_fast_output_map.control.files       = [input.output.working_directory/input.output.job_name/fast_phases.h5]
+create_combined_fast_output_map.control.mapfile_dir = input.output.mapfile_dir
+create_combined_fast_output_map.control.filename    = combine_fast_h5parms_output.mapfile
+
+# merge the h5parms with the phase solutions into one, length = 1
+# This is needed later when the loop is done and we want to apply the solutions to the original data
+merge_phase_h5parms.control.type        = collect_h5parms
+merge_phase_h5parms.control.mapfile_in  = create_compressed_mapfile_fast.output.mapfile
+merge_phase_h5parms.control.inputkey    = infiles
+merge_phase_h5parms.control.mapfile_out = create_combined_fast_output_map.output.mapfile
+merge_phase_h5parms.control.outputkey   = outfile
+merge_phase_h5parms.argument.flags      = [-c,infiles]
+merge_phase_h5parms.argument.outh5parm  = outfile
+
+# remove any existing h5parms before solving, length = ntimes * num_cal_blocks
+remove_h5parms22.control.type       = remove_file
+remove_h5parms22.control.mapfile_in = make_slow_gain_h5parm_map.output.mapfile
+remove_h5parms22.control.inputkey   = h5parm
+remove_h5parms22.argument.flags     = [-rf,h5parm]
 
 # run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes * num_cal_blocks
-solve_ampphase22.control.type                      = dppp_inplace
-solve_ampphase22.control.mapfiles_in               = [{{ solve_concat_data_mapfile }},make_slow_gain_parmdb_map.output.mapfile]
-solve_ampphase22.control.inputkeys                 = [msin,parmdb]
-solve_ampphase22.argument.numthreads               = {{ max_cpus_per_proc_ntimes }}
-solve_ampphase22.argument.msin.datacolumn          = CORRECTED_DATA
-solve_ampphase22.argument.msout                    = .
-solve_ampphase22.argument.steps                    = [solvegain]
-solve_ampphase22.argument.solvegain.uvlambdamin    = {{ solve_min_uv_lambda }}
-solve_ampphase22.argument.solvegain.type           = gaincal
-solve_ampphase22.argument.solvegain.caltype        = {{ selfcal_caltype }}
-solve_ampphase22.argument.solvegain.parmdb         = parmdb
-solve_ampphase22.argument.solvegain.usemodelcolumn = True
-solve_ampphase22.argument.solvegain.solint         = {{ solint_time_a }}
-solve_ampphase22.argument.solvegain.nchan          = {{ solint_freq_a }}
+solve_ampphase22.control.type                          = dppp_inplace
+solve_ampphase22.control.mapfiles_in                   = [{{ solve_concat_data_mapfile }},make_slow_gain_h5parm_map.output.mapfile,expand_sourcedb3_map.output.mapfile]
+solve_ampphase22.control.inputkeys                     = [msin,h5parm,sourcedb]
+solve_ampphase22.argument.numthreads                   = {{ max_cpus_per_proc_ntimes }}
+solve_ampphase22.argument.msin.datacolumn              = CORRECTED_DATA
+solve_ampphase22.argument.msout                        = .
+solve_ampphase22.argument.steps                        = [solvegain]
+solve_ampphase22.argument.solvegain.type               = ddecal
+solve_ampphase22.argument.solvegain.mode               = complexgain
+solve_ampphase22.argument.solvegain.h5parm             = h5parm
+solve_ampphase22.argument.solvegain.sourcedb           = sourcedb
+solve_ampphase22.argument.solvegain.solint             = {{ solint_time_a }}
+solve_ampphase22.argument.solvegain.nchan              = {{ solint_freq_a }}
+solve_ampphase22.argument.solvegain.maxiter            = {{ maxiter }}
+solve_ampphase22.argument.solvegain.propagatesolutions = {{ propagatesolutions }}
+solve_ampphase22.argument.solvegain.stepsize           = {{ stepsize }}
+solve_ampphase22.argument.solvegain.tolerance          = {{ tolerance }}
+solve_ampphase22.argument.solvegain.uvlambdamin        = {{ solve_min_uv_lambda }}
 
-# merge the parmDBs with the amplitude solutions into one, length = 1
+# merge the h5parms with the amplitude solutions into one, length = 1
 # This is also used after the loop, but also now for smoothing the amplitudes
-merge_amp_parmdbs2.control.type         = merge_parmdbs_in_time
-merge_amp_parmdbs2.control.mapfile_in   = concat_data_compressed_mapfile.output.mapfile
-merge_amp_parmdbs2.control.inputkey     = mslist
-merge_amp_parmdbs2.control.outputkey    = outparmdb
-merge_amp_parmdbs2.argument.flags       = [mslist,instrument_slow,outparmdb]
-{% if selfcal_local_dir is not none %}
-merge_amp_parmdbs2.argument.scratch_dir = {{ selfcal_local_dir }}
-{% endif %}
+# collect all the slow-gain solutions, length = ntimes -> 1
+combine_slow_gains2.control.type        = collect_h5parms
+combine_slow_gains2.control.mapfile_in  = create_compressed_mapfile_slow.output.mapfile
+combine_slow_gains2.control.inputkey    = infiles
+combine_slow_gains2.control.mapfile_out = create_combined_slow_output_map.output.mapfile
+combine_slow_gains2.control.outputkey   = outfile
+combine_slow_gains2.argument.flags      = [-c,infiles]
+combine_slow_gains2.argument.outh5parm  = outfile
 
-# smooth the amplitudes in the merged parmDB, length = 1
+# smooth the amplitues in the merged h5parm, length = 1
 smooth_amp2.control.type         = {{ smooth_amps_task }}
-smooth_amp2.control.mapfile_in   = merge_amp_parmdbs2.output.mapfile
-smooth_amp2.control.inputkey     = ampparmdb
-smooth_amp2.control.outputkey    = outparmdb
-smooth_amp2.argument.flags       = [ampparmdb,outparmdb]
-{% if selfcal_local_dir is not none %}
-smooth_amp2.argument.scratch_dir = {{ selfcal_local_dir }}
-{% endif %}
+smooth_amp2.control.mapfile_in   = combine_slow_gains2.output.mapfile
+smooth_amp2.control.inputkey     = amph5parm
+smooth_amp2.argument.flags       = [amph5parm]
 
-# expand the mapfile with the smoothd parmDB to all time-steps, length = ntimes * num_cal_blocks
-expand_smoothed_amp2_parmdb_map.control.kind             = plugin
-expand_smoothed_amp2_parmdb_map.control.type             = expandMapfile
-expand_smoothed_amp2_parmdb_map.control.mapfile_in       = smooth_amp2.output.mapfile
-expand_smoothed_amp2_parmdb_map.control.mapfile_to_match = concat_data.output.mapfile
-expand_smoothed_amp2_parmdb_map.control.mapfile_dir      = input.output.mapfile_dir
-expand_smoothed_amp2_parmdb_map.control.filename         = expand_amp2_smoothed_parmdbs.mapfile
+# expand the mapfile with the smoothd h5parm to all time-steps, length = ntimes * num_cal_blocks
+expand_smoothed_amp2_h5parm_map.control.kind             = plugin
+expand_smoothed_amp2_h5parm_map.control.type             = expandMapfile
+expand_smoothed_amp2_h5parm_map.control.mapfile_in       = smooth_amp2.output.mapfile
+expand_smoothed_amp2_h5parm_map.control.mapfile_to_match = concat_data.output.mapfile
+expand_smoothed_amp2_h5parm_map.control.mapfile_dir      = input.output.mapfile_dir
+expand_smoothed_amp2_h5parm_map.control.filename         = expand_amp2_smoothed_h5parms.mapfile
 
 # apply the smoothed amplitudes and average, length = ntimes * num_cal_blocks
 apply_amp2.control.type                                 = dppp
@@ -1003,22 +976,22 @@ apply_amp2.control.mapfile_out                          = make_apply_mapfile.out
 {% endif %}
 apply_amp2.argument.numthreads                          = {{ max_cpus_per_io_proc_ntimes }}
 {% if not pre_average %}
-apply_amp2.control.mapfiles_in                          = [{{ concat_data_mapfile }},expand_smoothed_amp2_parmdb_map.output.mapfile]
-apply_amp2.control.inputkeys                            = [msin,parmdb]
+apply_amp2.control.mapfiles_in                          = [{{ concat_data_mapfile }},expand_smoothed_amp2_h5parm_map.output.mapfile]
+apply_amp2.control.inputkeys                            = [msin,slow_h5parm]
 apply_amp2.argument.msin.datacolumn                     = CORRECTED_DATA
-apply_amp2.argument.steps                               = [correct_slow,avg]
+apply_amp2.argument.steps                               = [correct_slow_amp,correct_slow_phase,avg]
 {% else %}
-apply_amp2.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile,expand_smoothed_amp2_parmdb_map.output.mapfile]
-apply_amp2.control.inputkeys                            = [msin,fast_parmdb,parmdb]
+apply_amp2.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile,expand_smoothed_amp2_h5parm_map.output.mapfile]
+apply_amp2.control.inputkeys                            = [msin,fast_h5parmdb,slow_h5parm]
 apply_amp2.argument.msin.datacolumn                     = DATA
-apply_amp2.argument.steps                               = [correct_fast1,correct_fast2,correct_slow,avg]
+apply_amp2.argument.steps                               = [correct_fast1,correct_fast2,correct_slow_amp,correct_slow_phase,avg]
 apply_amp2.argument.correct_fast1.type                  = applycal
-apply_amp2.argument.correct_fast1.parmdb                = fast_parmdb
-apply_amp2.argument.correct_fast1.correction            = tec
+apply_amp2.argument.correct_fast1.parmdb                = fast_h5parmdb
+apply_amp2.argument.correct_fast1.correction            = tec000
 apply_amp2.argument.correct_fast1.invert                = True
 apply_amp2.argument.correct_fast2.type                  = applycal
-apply_amp2.argument.correct_fast2.parmdb                = fast_parmdb
-apply_amp2.argument.correct_fast2.correction            = commonscalarphase
+apply_amp2.argument.correct_fast2.parmdb                = fast_h5parmdb
+apply_amp2.argument.correct_fast2.correction            = phase000
 apply_amp2.argument.correct_fast2.invert                = True
 {% endif %}
 apply_amp2.argument.msout.overwrite                     = True
@@ -1026,9 +999,14 @@ apply_amp2.argument.msout.writefullresflag              = False
 {% if local_dir is not none %}
 apply_amp2.argument.local_scratch_dir                   = {{ local_dir }}
 {% endif %}
-apply_amp2.argument.correct_slow.type                   = applycal
-apply_amp2.argument.correct_slow.parmdb                 = parmdb
-apply_amp2.argument.correct_slow.invert                 = True
+apply_amp2.argument.correct_slow_amp.type               = applycal
+apply_amp2.argument.correct_slow_amp.parmdb             = slow_h5parm
+apply_amp2.argument.correct_slow_amp.correction         = amplitude001
+apply_amp2.argument.correct_slow_amp.invert             = True
+apply_amp2.argument.correct_slow_phase.type             = applycal
+apply_amp2.argument.correct_slow_phase.parmdb           = slow_h5parm
+apply_amp2.argument.correct_slow_phase.correction       = phase000
+apply_amp2.argument.correct_slow_phase.invert           = True
 apply_amp2.argument.avg.type                            = squash
 apply_amp2.argument.avg.freqstep                        = 1
 apply_amp2.argument.avg.timestep                        = {{ facetselfcal_timestep }}
@@ -1057,12 +1035,12 @@ create_compressed_mapfile4.control.filename    = image4_input.mapfile
 wsclean_image42.control.type                    = wsclean
 wsclean_image42.control.mapfiles_in             = [create_compressed_mapfile4.output.mapfile,premask_selfcal.output.mapfile]
 wsclean_image42.control.inputkeys               = [msfile,fitsmask]
-wsclean_image42.argument.fitsmask               = fitsmask
+wsclean_image42.argument.fits-mask              = fitsmask
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,-joinchannels,-save-source-list,msfile]
-wsclean_image42.argument.channelsout            = {{ wsclean_nchannels_selfcal }}
+wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-join-channels,-save-source-list,msfile]
+wsclean_image42.argument.channels-out           = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fitbeam,-reorder,-local-rms,-save-source-list,msfile]
+wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-save-source-list,msfile]
 {% endif %}
 wsclean_image42.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image42.argument.niter                  = 10000
@@ -1074,9 +1052,9 @@ wsclean_image42.argument.scale                  = {{ cellsize_selfcal_deg }}
 wsclean_image42.argument.mem                    = {{ max_percent_memory_per_proc_single }}
 wsclean_image42.argument.j                      = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
-wsclean_image42.argument.tempdir                = {{ local_dir_parent }}
+wsclean_image42.argument.temp-dir               = {{ local_dir_parent }}
 {% elif selfcal_local_dir is not none %}
-wsclean_image42.argument.tempdir                = {{ selfcal_local_dir }}
+wsclean_image42.argument.temp-dir               = {{ selfcal_local_dir }}
 {% endif %}
 wsclean_image42.argument.multiscale-shape       = gaussian
 {% if not mscale_selfcal_do %}
