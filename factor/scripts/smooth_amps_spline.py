@@ -341,6 +341,8 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
     key_names = parms.keys()
     initial_flagged_dict = {}
     initial_unflagged_dict = {}
+    ntimes = 0
+    nfreqs = 0
     for key_name in key_names:
         # Check for NaNs and zeros. If found, set to 1
         initial_flagged_indx = numpy.where(numpy.logical_or(numpy.isnan(parms[key_name]['values']),
@@ -351,7 +353,21 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
         initial_unflagged_dict[key_name] = initial_unflagged_indx
         parms[key_name]['values'][initial_flagged_indx] = 1.0
 
-    nchans = len(parms[key_names[0]]['freqs'])
+        # Determine the times and freqs (check all keys in case one or more are
+        # missing some times or freqs)
+        times_current = numpy.copy(sorted( parms[key_name]['times']))
+        if len(times_current) > ntimes:
+            times = numpy.copy(sorted( parms[key_name]['times']))
+            ntimes = len(times)
+            orig_times = parms[key_name]['times']
+            timewidths = parms[key_name]['timewidths']
+        freqs_current = numpy.copy(sorted( parms[key_name]['freqs']))/1e6 # get this in MHz
+        if len(freqs_current) > nfreqs:
+            freqs = numpy.copy(sorted( parms[key_name]['freqs']))/1e6 # get this in MHz
+            nfreqs = len(freqs)
+            orig_freqs = parms[key_name]['freqs']
+            freqwidths = parms[key_name]['freqwidths']
+            nchans = len(parms[key_name]['freqs'])
 
     # determine the number of polarizations in parmdb (2 or 4)
     if any(gain+':0:1:' in s for s in key_names):
@@ -595,19 +611,32 @@ def main(instrument_name, instrument_name_smoothed, normalize=True, plotting=Fal
             g_start = 0
             real = parms['Gain:' + pol + ':Real:'+ station]['values']
             imag = parms['Gain:' + pol + ':Imag:'+ station]['values']
+            orig_times = parms['Gain:' + pol + ':Real:'+ station]['times']
+            timewidths = parms['Gain:' + pol + ':Real:'+ station]['timewidths']
+            orig_freqs = parms['Gain:' + pol + ':Real:'+ station]['freqs']
+            freqwidths = parms['Gain:' + pol + ':Real:'+ station]['freqwidths']
+
             for g in gaps_ind:
                 # If time gaps exist, add them one-by-one (except for last one)
-                pdbnew.addValues('Gain:'+pol+':Real:{}'.format(station), real[g_start:g], orig_freqs, freqwidths,
-                    orig_times[g_start:g], timewidths[g_start:g], asStartEnd=False)
-                pdbnew.addValues('Gain:'+pol+':Imag:{}'.format(station), imag[g_start:g], orig_freqs, freqwidths,
-                    orig_times[g_start:g], timewidths[g_start:g], asStartEnd=False)
+                try:
+                    pdbnew.addValues('Gain:'+pol+':Real:{}'.format(station), real[g_start:g], orig_freqs, freqwidths,
+                        orig_times[g_start:g], timewidths[g_start:g], asStartEnd=False)
+                    pdbnew.addValues('Gain:'+pol+':Imag:{}'.format(station), imag[g_start:g], orig_freqs, freqwidths,
+                        orig_times[g_start:g], timewidths[g_start:g], asStartEnd=False)
+                except RuntimeError:
+                    # RuntimeError indicates parameters are already present, so skip
+                    pass
                 g_start = g
 
             # Add remaining time slots
-            pdbnew.addValues('Gain:'+pol+':Real:{}'.format(station), real[g_start:], orig_freqs, freqwidths,
-                orig_times[g_start:], timewidths[g_start:], asStartEnd=False)
-            pdbnew.addValues('Gain:'+pol+':Imag:{}'.format(station), imag[g_start:], orig_freqs, freqwidths,
-                orig_times[g_start:], timewidths[g_start:], asStartEnd=False)
+            try:
+                pdbnew.addValues('Gain:'+pol+':Real:{}'.format(station), real[g_start:], orig_freqs, freqwidths,
+                    orig_times[g_start:], timewidths[g_start:], asStartEnd=False)
+                pdbnew.addValues('Gain:'+pol+':Imag:{}'.format(station), imag[g_start:], orig_freqs, freqwidths,
+                    orig_times[g_start:], timewidths[g_start:], asStartEnd=False)
+            except RuntimeError:
+                # RuntimeError indicates parameters are already present, so skip
+                pass
     pdbnew.flush()
 
     # Copy output to original path and delete copies if scratch directory is specified
