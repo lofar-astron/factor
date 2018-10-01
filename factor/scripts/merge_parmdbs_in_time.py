@@ -69,13 +69,19 @@ def main(input_mslist, parmdb_name, outparmdb, clobber=True, scratch_dir=None):
             flagged = np.where(np.logical_or(parms[parmname]['values'] == 0.0,
                 np.isnan(parms[parmname]['values'])))
             parms[parmname]['values'][flagged] = np.nan
-            ValueHolder = pdb_concat.makeValue(values=parms[parmname]['values'],
-                                               sfreq=parms[parmname]['freqs'],
-                                               efreq=parms[parmname]['freqwidths'],
-                                               stime=parms[parmname]['times'],
-                                               etime=parms[parmname]['timewidths'],
-                                               asStartEnd=False)
-            pdb_concat.addValues(parmname, ValueHolder)
+            for t, (t1, t2, tw1, tw2) in enumerate(zip(parms[parmname]['times'][:-1], parms[parmname]['times'][1:],
+                                        parms[parmname]['timewidths'][:-1], parms[parmname]['timewidths'][1:])):
+                if (t2 - t1) < (tw1 + tw2) / 2.0:
+                    # check for overlaps and adjust widths if needed (but don't adjust last
+                    # solution's width, as it may be truncated)
+                    parms[parmname]['timewidths'][t] = t2 - t1
+                    if t < len(parms[parmname]['times'])-2:
+                        parms[parmname]['timewidths'][t+1] = t2 - t1
+            pdb_concat.addValues(parmname, parms[parmname]['values'],
+                                 sfreq=parms[parmname]['freqs'],
+                                 efreq=parms[parmname]['freqwidths'],
+                                 stime=parms[parmname]['times'],
+                                 etime=parms[parmname]['timewidths'], asStartEnd=False)
         pdb_concat.flush()
         pdb_add = False
     pdb_concat = False
