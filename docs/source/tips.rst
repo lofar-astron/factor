@@ -35,7 +35,7 @@ If you are interested only in a single target in the field, the following strate
 
     * Reorder the directions in the directions file (see :ref:`directions_file` for details) so that the facets you wish to process are at the top. Generally, these facets should be those that contain the brightest sources and those that neighbor the target facet (or include the target). Note, however, that you do not need to put the target facet last since it will be automatically imaged after all directions have been processed.
     * Set the maximum number of selfcal cycles with :term:`max_selfcal_loops` to a low number (2 or 3) to speed up self calibration for non-target sources. Spending a lot of time self calibrating non-target sources will generally not significantly improve the noise in the target facet (unless the calibrator is very bright and nearby). The number of selfcal cycles used for the target can be controlled with the :term:`target_max_selfcal_loops` option, which defaults to 10.
-    * Set :term:`image_target_only` = ``True`` to skip imaging of the non-target facets.
+    * Set :term:`image_target_only` = ``True`` to skip imaging of the non-target facets. Note however that it is a good idea to check the global flux scale, and in order to do this, one generally needs to image 5-10 facets to have enough sources for comparison with other catalogs (e.g., the TGSS catalog).
 
 
 
