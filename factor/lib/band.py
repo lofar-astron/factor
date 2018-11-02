@@ -184,6 +184,14 @@ class Band(object):
                     'for band {1}'.format(self.dirindparmdbs[pdb_id], self.files[pdb_id]))
                 sys.exit(1)
 
+            # Check whether this a parmdb or h5parm
+            try:
+                pdb = lofar.parmdb.parmdb(self.dirindparmdbs[pdb_id])
+                self.dirindeptype_is_h5parm = False
+            except:
+                self.dirindeptype_is_h5parm = True
+                break
+
             # Check whether there are ampl/phase or real/imag
             try:
                 pdb = lofar.parmdb.parmdb(self.dirindparmdbs[pdb_id])

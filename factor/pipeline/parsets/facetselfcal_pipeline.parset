@@ -121,6 +121,12 @@ shift_cal.argument.add.type                            = predict
 shift_cal.argument.add.sourcedb                        = sourcedb
 shift_cal.argument.add.operation                       = add
 shift_cal.argument.add.applycal.parmdb                 = dir_indep_parmdb
+{% if dirindeptype_is_h5parm %}
+shift_cal.argument.add.applycal.solset                 = target
+shift_cal.argument.add.applycal.steps                  = [ph,amp]
+shift_cal.argument.add.applycal.ph.correction          = phase000
+shift_cal.argument.add.applycal.amp.correction         = amplitude000
+{% endif %}
 {% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
 shift_cal.argument.flag.type                           = preflagger
 shift_cal.argument.flag.expr                           = {{ flag_expr }}
@@ -171,6 +177,12 @@ shift_cal_dir_indep.argument.add.type                            = predict
 shift_cal_dir_indep.argument.add.sourcedb                        = sourcedb
 shift_cal_dir_indep.argument.add.operation                       = add
 shift_cal_dir_indep.argument.add.applycal.parmdb                 = dir_indep_parmdb
+{% if dirindeptype_is_h5parm %}
+shift_cal_dir_indep.argument.add.applycal.solset                 = target
+shift_cal_dir_indep.argument.add.applycal.steps                  = [ph,amp]
+shift_cal_dir_indep.argument.add.applycal.ph.correction          = phase000
+shift_cal_dir_indep.argument.add.applycal.amp.correction         = amplitude000
+{% endif %}
 {% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
 shift_cal_dir_indep.argument.flag.type                           = preflagger
 shift_cal_dir_indep.argument.flag.expr                           = {{ flag_expr }}
@@ -1051,6 +1063,8 @@ solve_ampphase12.argument.solvegain.propagatesolutions = {{ propagatesolutions }
 solve_ampphase12.argument.solvegain.stepsize           = {{ stepsize }}
 solve_ampphase12.argument.solvegain.tolerance          = {{ tolerance }}
 solve_ampphase12.argument.solvegain.uvlambdamin        = {{ solve_min_uv_lambda }}
+solve_ampphase12.argument.solve.smoothnessconstraint   = 6e6
+
 
 # compress slow-gain mapfile so that all files are in one group, length = 1
 create_compressed_mapfile_slow.control.kind        = plugin
@@ -1353,6 +1367,7 @@ solve_ampphase22.argument.solvegain.propagatesolutions = {{ propagatesolutions }
 solve_ampphase22.argument.solvegain.stepsize           = {{ stepsize }}
 solve_ampphase22.argument.solvegain.tolerance          = {{ tolerance }}
 solve_ampphase22.argument.solvegain.uvlambdamin        = {{ solve_min_uv_lambda }}
+solve_ampphase12.argument.solve.smoothnessconstraint   = 6e6
 
 # merge the h5parms with the amplitude solutions into one, length = 1
 # This is also used after the loop, but also now for smoothing the amplitudes
@@ -1690,6 +1705,12 @@ prepare_imaging_data.argument.add.type                            = predict
 prepare_imaging_data.argument.add.sourcedb                        = sourcedb
 prepare_imaging_data.argument.add.operation                       = add
 prepare_imaging_data.argument.add.applycal.parmdb                 = dir_indep_parmdb
+{% if dirindeptype_is_h5parm %}
+prepare_imaging_data.argument.add.applycal.solset                 = target
+prepare_imaging_data.argument.add.applycal.steps                  = [ph,amp]
+prepare_imaging_data.argument.add.applycal.ph.correction          = phase000
+prepare_imaging_data.argument.add.applycal.amp.correction         = amplitude000
+{% endif %}
 {% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
 prepare_imaging_data.argument.flag.type                           = preflagger
 prepare_imaging_data.argument.flag.expr                           = {{ flag_expr }}
@@ -2155,32 +2176,31 @@ predict_and_difference_models.argument.pred_new.applycal.steps                 =
 predict_and_difference_models.argument.pred_new.applycal.steps                 = [fast1,fast2,slow_amp,slow_phase]
 {% endif %}
 {% if preapply_phase_cal %}
-predict_and_difference_models.argument.pred_new.applycal.prefast1.type         = applycal
 predict_and_difference_models.argument.pred_new.applycal.prefast1.parmdb       = pre_h5parm
 predict_and_difference_models.argument.pred_new.applycal.prefast1.correction   = tec000
-predict_and_difference_models.argument.pred_new.applycal.prefast2.type         = applycal
 predict_and_difference_models.argument.pred_new.applycal.prefast2.parmdb       = pre_h5parm
 predict_and_difference_models.argument.pred_new.applycal.prefast2.correction   = phase000
-predict_and_difference_models.argument.pred_new.applycal.preslow.type          = applycal
 predict_and_difference_models.argument.pred_new.applycal.preslow.parmdb        = pre_h5parm
 predict_and_difference_models.argument.pred_new.applycal.preslow.correction    = phase001
 {% endif %}
-predict_and_difference_models.argument.pred_new.applycal.fast1.type            = applycal
 predict_and_difference_models.argument.pred_new.applycal.fast1.parmdb          = dir_dep_h5parm
 predict_and_difference_models.argument.pred_new.applycal.fast1.correction      = tec000
-predict_and_difference_models.argument.pred_new.applycal.fast2.type            = applycal
 predict_and_difference_models.argument.pred_new.applycal.fast2.parmdb          = dir_dep_h5parm
 predict_and_difference_models.argument.pred_new.applycal.fast2.correction      = phase000
-predict_and_difference_models.argument.pred_new.applycal.slow_amp.type         = applycal
 predict_and_difference_models.argument.pred_new.applycal.slow_amp.parmdb       = dir_dep_h5parm
 predict_and_difference_models.argument.pred_new.applycal.slow_amp.correction   = amplitude001
-predict_and_difference_models.argument.pred_new.applycal.slow_phase.type       = applycal
 predict_and_difference_models.argument.pred_new.applycal.slow_phase.parmdb     = dir_dep_h5parm
 predict_and_difference_models.argument.pred_new.applycal.slow_phase.correction = phase001
 predict_and_difference_models.argument.pred_new.operation                      = replace
 predict_and_difference_models.argument.subtract_old.type                       = predict
 predict_and_difference_models.argument.subtract_old.sourcedb                   = dir_indep_sourcedb
 predict_and_difference_models.argument.subtract_old.applycal.parmdb            = dir_indep_parmdb
+{% if dirindeptype_is_h5parm %}
+predict_and_difference_models.argument.subtract_old.applycal.solset            = target
+predict_and_difference_models.argument.subtract_old.applycal.steps             = [ph,amp]
+predict_and_difference_models.argument.subtract_old.applycal.ph.correction     = phase000
+predict_and_difference_models.argument.subtract_old.applycal.amp.correction    = amplitude000
+{% endif %}
 predict_and_difference_models.argument.subtract_old.operation                  = subtract
 {% if use_compression %}
 predict_and_difference_models.argument.msout.storagemanager                    = "Dysco"
