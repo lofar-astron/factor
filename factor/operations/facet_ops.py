@@ -134,10 +134,8 @@ class FacetSelfcal(Operation):
             'full_skymodels.mapfile')
         self.direction.dir_indep_facet_skymodels_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'make_facet_skymodels_all.mapfile')
-        self.direction.dir_dep_parmdb_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'merge_selfcal_parmdbs.mapfile')
-        self.direction.converted_parmdb_mapfile= os.path.join(self.pipeline_mapfile_dir,
-            'convert_merged_selfcal_parmdbs.mapfile')
+        self.direction.dir_dep_h5parm_mapfile = os.path.join(self.pipeline_mapfile_dir,
+            'combine_all_h5parms_output.mapfile')
         self.direction.selfcal_plots_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'make_selfcal_plots.mapfile')
         # Store mapfile of facet image and mask, needed by the fieldmosaic op. Here
@@ -153,8 +151,6 @@ class FacetSelfcal(Operation):
                 'final_image.mapfile')}
             self.direction.facet_premask_mapfile = {'facetimage': os.path.join(self.pipeline_mapfile_dir,
                 'premask.mapfile')}
-        self.direction.wsclean_modelimg_size_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'pad_model_images.padsize.mapfile')
         self.direction.diff_models_field_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'predict_and_difference_models.mapfile')
         self.direction.sourcedb_new_facet_sources = os.path.join(self.pipeline_mapfile_dir,

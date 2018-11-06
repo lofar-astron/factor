@@ -12,13 +12,17 @@ multiple nodes (with a shared file system). It requires only modest resources
 What's New Since v1.3
 ---------------------
 
+* Updated to use WSClean v2.6. Earlier versions are no longer supported
+* Support for Prefactor v3.0 has been added (earlier versions are supported as well)
+* Calibration is now done with the improved solver in DPPP, resulting in improved
+results
+* Solutions are now stored in H5parm format instead of ParmDB format; hence, LoSoTo is
+now required
 * Options have been added to allow the scales used by WSClean during
 clean to be specified (`selfcal_multiscale_scales_pixel` and
 `facet_multiscale_scales_pixel` under `[imaging]`)
-
 * The `atrous_do` column in the directions file has been renamed to
 `mscale_selfcal_do`, as this name better describes its purpose
-
 * Improved handling of flagged solutions during smoothing of the amplitude
 solutions
 
@@ -26,7 +30,7 @@ solutions
 What's New in v1.3
 ------------------
 
-* Updated to use WSClean 2.4. Earlier versions are no longer supported
+* Updated to use WSClean v2.4. Earlier versions are no longer supported
 * Preaveraging is now done in frequency as well as in time. This
 preaveraging generally improves the S/N of the CS slow-gain solutions for
 fainter sources by a factor of ~ 2
@@ -75,8 +79,9 @@ should run the following command before using Factor:
 Factor requires the following:
 
 * The LOFAR offline trunk from the LOFAR software repository (a version of the trunk after 02/11/2016 is required)
-* [WSClean](http://sourceforge.net/p/wsclean/wiki/Home) (version 2.4 or later)
+* [WSClean](http://sourceforge.net/p/wsclean/wiki/Home) (version 2.6 or later)
 * [LSMTool](https://github.com/darafferty/LSMTool) (version 1.2.0 or later)
+* [LoSoTo](https://github.com/revoltek/losoto) (version 2.0 or later)
 * [jinja2](http://jinja.pocoo.org/docs/dev)
 * [Shapely](https://github.com/Toblerity/Shapely)
 * [APLpy](http://aplpy.github.io) (version 1.0 or later)

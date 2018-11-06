@@ -256,7 +256,11 @@ def run(parset_file, logging_level='info', dry_run=False, test_run=False,
         nearest, sep = factor.directions.find_nearest(d, dirs_with_selfcal)
         log.debug('Using solutions from direction {0} for direction {1} '
             '(separation = {2} deg).'.format(nearest.name, d.name, sep))
-        d.converted_parmdb_mapfile = nearest.converted_parmdb_mapfile
+        d.dir_dep_h5parm_mapfile = nearest.dir_dep_h5parm_mapfile
+        d.preapply_h5parm_mapfile = nearest.preapply_h5parm_mapfile
+        if nearest.create_preapply_h5parm:
+            # Nearest is calibrator for which preapply solutions were made, so don't preapply them
+            d.preapply_phase_cal = False
         d.save_state()
     if len(dirs_with_selfcal_to_image + dirs_without_selfcal_to_image) > 0:
         for image_indx, (cellsize_arcsec, taper_arcsec, robust, min_uv_lambda) in enumerate(

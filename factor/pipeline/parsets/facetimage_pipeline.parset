@@ -83,12 +83,22 @@ create_msmulti_map.control.mapfile_dir = input.output.mapfile_dir
 create_msmulti_map.control.filename    = input_files_grouped.mapfile
 
 # expand mapfile of the dir-dependent parmDB to all files, length = nfiles
-expand_merged_parmdb_map.control.kind             = plugin
-expand_merged_parmdb_map.control.type             = expandMapfile
-expand_merged_parmdb_map.control.mapfile_in       = {{ converted_parmdb_mapfile }}
-expand_merged_parmdb_map.control.mapfile_to_match = create_ms_map.output.mapfile
-expand_merged_parmdb_map.control.mapfile_dir      = input.output.mapfile_dir
-expand_merged_parmdb_map.control.filename         = expand_merged_parmdbs.mapfile
+expand_merged_h5parm_map.control.kind             = plugin
+expand_merged_h5parm_map.control.type             = expandMapfile
+expand_merged_h5parm_map.control.mapfile_in       = {{ dir_dep_h5parm_mapfile }}
+expand_merged_h5parm_map.control.mapfile_to_match = create_ms_map.output.mapfile
+expand_merged_h5parm_map.control.mapfile_dir      = input.output.mapfile_dir
+expand_merged_h5parm_map.control.filename         = expand_merged_h5parms.mapfile
+
+{% if preapply_phase_cal %}
+# expand mapfile of the dir-dependent parmDB to all files, length = nfiles
+expand_preapply_h5parm_map.control.kind             = plugin
+expand_preapply_h5parm_map.control.type             = expandMapfile
+expand_preapply_h5parm_map.control.mapfile_in       = {{ preapply_h5parm_mapfile }}
+expand_preapply_h5parm_map.control.mapfile_to_match = create_ms_map.output.mapfile
+expand_preapply_h5parm_map.control.mapfile_dir      = input.output.mapfile_dir
+expand_preapply_h5parm_map.control.filename         = expand_preapply_h5parms.mapfile
+{% endif %}
 
 {% if not selfcal_ok %}
 
@@ -139,13 +149,32 @@ expand_sourcedb_all_facet_sources.control.filename       = expand_sourcedb_all_f
 
 # add the model visibilities, shift, apply the direction-dependent solutions, and average, length = nfiles
 prepare_imaging_data.control.type                                 = dppp
+
 {% if not selfcal_ok %}
-prepare_imaging_data.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-prepare_imaging_data.control.inputkeys                            = [msin,sourcedb,dir_indep_parmdb,dir_dep_parmdb]
+
+# if selfcal did not work, we need dir-indep sols (for add) and nearest preapply sols (if done) and dir-dep sols
+{% if preapply_phase_cal %}
+# here we need the preapply h5parm
+prepare_imaging_data.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_preapply_h5parm_map.output.mapfile,expand_merged_h5parm_map.output.mapfile]
+prepare_imaging_data.control.inputkeys                            = [msin,sourcedb,dir_indep_parmdb,pre_h5parm,h5parm]
 {% else %}
-prepare_imaging_data.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,expand_merged_parmdb_map.output.mapfile]
-prepare_imaging_data.control.inputkeys                            = [msin,sourcedb,dir_dep_parmdb]
+# no need for the preapply h5parm
+prepare_imaging_data.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_h5parm_map.output.mapfile]
+prepare_imaging_data.control.inputkeys                            = [msin,sourcedb,dir_indep_parmdb,h5parm]
 {% endif %}
+
+{% else %}
+
+# if selfcal worked, we need nearest preapply sols (if done) and dir-dep sols
+{% if preapply_phase_cal %}
+prepare_imaging_data.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,expand_preapply_h5parm_map.output.mapfile,expand_merged_h5parm_map.output.mapfile]
+prepare_imaging_data.control.inputkeys                            = [msin,sourcedb,pre_h5parm,h5parm]
+{% else %}
+prepare_imaging_data.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,expand_merged_h5parm_map.output.mapfile]
+prepare_imaging_data.control.inputkeys                            = [msin,sourcedb,h5parm]
+{% endif %}
+{% endif %}
+
 prepare_imaging_data.argument.numthreads                          = {{ max_cpus_per_io_proc_nfiles }}
 prepare_imaging_data.argument.msin.datacolumn                     = CORRECTED_DATA
 prepare_imaging_data.argument.msout.overwrite                     = True
@@ -154,18 +183,60 @@ prepare_imaging_data.argument.msout.writefullresflag              = False
 prepare_imaging_data.argument.local_scratch_dir                   = {{ local_dir }}
 {% endif %}
 {% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
-prepare_imaging_data.argument.steps                               = [add,flag,shift,correct,flagzero,avg]
+{% if preapply_phase_cal %}
+prepare_imaging_data.argument.steps                               = [shift,add,flag,correct_prefast1,correct_prefast2,correct_preslow,correct_fast1,correct_fast2,correct_slow_amp,correct_slow_phase,flagzero,avg]
 {% else %}
-prepare_imaging_data.argument.steps                               = [add,shift,correct,flagzero,avg]
+prepare_imaging_data.argument.steps                               = [shift,add,flag,correct_fast1,correct_fast2,correct_slow_amp,correct_slow_phase,flagzero,avg]
+{% endif %}
+{% else %}
+{% if preapply_phase_cal %}
+prepare_imaging_data.argument.steps                               = [shift,add,correct_prefast1,correct_prefast2,correct_preslow,correct_fast1,correct_fast2,correct_slow_amp,correct_slow_phase,flagzero,avg]
+{% else %}
+prepare_imaging_data.argument.steps                               = [shift,add,correct_fast1,correct_fast2,correct_slow_amp,correct_slow_phase,flagzero,avg]
+{% endif %}
 {% endif %}
 prepare_imaging_data.argument.add.type                            = predict
 prepare_imaging_data.argument.add.sourcedb                        = sourcedb
 prepare_imaging_data.argument.add.operation                       = add
 {% if not selfcal_ok %}
-prepare_imaging_data.argument.add.applycal.parmdb                 = dir_indep_parmdb
+
+# add with dir-indep sols only
+{% if dirindeptype_is_h5parm %}
+prepare_imaging_data.argument.add.applycal.solset                 = target
+prepare_imaging_data.argument.add.applycal.steps                  = [ph,amp]
+prepare_imaging_data.argument.add.applycal.ph.correction          = phase000
+prepare_imaging_data.argument.add.applycal.ph.parmdb              = dir_indep_parmdb
+prepare_imaging_data.argument.add.applycal.amp.correction         = amplitude000
+prepare_imaging_data.argument.add.applycal.amp.parmdb             = dir_indep_parmdb
 {% else %}
-prepare_imaging_data.argument.add.applycal.parmdb                 = dir_dep_parmdb
+prepare_imaging_data.argument.add.applycal.parmdb                 = dir_indep_parmdb
 {% endif %}
+
+{% else %}
+
+# add with preapply sols (if done) and dir-dep sols
+{% if preapply_phase_cal %}
+prepare_imaging_data.argument.add.applycal.steps                  = [pf1,pf2,ps1,f1,f2,s1,s2]
+prepare_imaging_data.argument.add.applycal.pf1.parmdb             = pre_h5parm
+prepare_imaging_data.argument.add.applycal.pf1.correction         = tec000
+prepare_imaging_data.argument.add.applycal.pf2.parmdb             = pre_h5parm
+prepare_imaging_data.argument.add.applycal.pf2.correction         = phase000
+prepare_imaging_data.argument.add.applycal.ps1.parmdb             = pre_h5parm
+prepare_imaging_data.argument.add.applycal.ps1.correction         = phase001
+{% else %}
+prepare_imaging_data.argument.add.applycal.steps                  = [f1,f2,s1,s2]
+{% endif %}
+prepare_imaging_data.argument.add.applycal.f1.parmdb              = h5parm
+prepare_imaging_data.argument.add.applycal.f1.correction          = tec000
+prepare_imaging_data.argument.add.applycal.f2.parmdb              = h5parm
+prepare_imaging_data.argument.add.applycal.f2.correction          = phase000
+prepare_imaging_data.argument.add.applycal.s1.parmdb              = h5parm
+prepare_imaging_data.argument.add.applycal.s1.correction          = phase001
+prepare_imaging_data.argument.add.applycal.s2.parmdb              = h5parm
+prepare_imaging_data.argument.add.applycal.s2.correction          = amplitude001
+
+{% endif %}
+
 {% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
 prepare_imaging_data.argument.flag.type                           = preflagger
 prepare_imaging_data.argument.flag.expr                           = {{ flag_expr }}
@@ -179,11 +250,38 @@ prepare_imaging_data.argument.flag.flag_baseline.baseline         = {{ flag_base
 {% if flag_freqrange is not none %}
 prepare_imaging_data.argument.flag.flag_freqrange.freqrange       = {{ flag_freqrange }}
 {% endif %}
+{% if preapply_phase_cal %}
+prepare_imaging_data.argument.correct_prefast1.type               = applycal
+prepare_imaging_data.argument.correct_prefast1.parmdb             = pre_h5parm
+prepare_imaging_data.argument.correct_prefast1.correction         = tec000
+prepare_imaging_data.argument.correct_prefast1.invert             = True
+prepare_imaging_data.argument.correct_prefast2.type               = applycal
+prepare_imaging_data.argument.correct_prefast2.parmdb             = pre_h5parm
+prepare_imaging_data.argument.correct_prefast2.correction         = phase000
+prepare_imaging_data.argument.correct_prefast2.invert             = True
+prepare_imaging_data.argument.correct_preslow.type                = applycal
+prepare_imaging_data.argument.correct_preslow.parmdb              = pre_h5parm
+prepare_imaging_data.argument.correct_preslow.correction          = phase001
+prepare_imaging_data.argument.correct_preslow.invert              = True
+{% endif %}
+prepare_imaging_data.argument.correct_fast1.type                  = applycal
+prepare_imaging_data.argument.correct_fast1.parmdb                = h5parm
+prepare_imaging_data.argument.correct_fast1.correction            = tec000
+prepare_imaging_data.argument.correct_fast1.invert                = True
+prepare_imaging_data.argument.correct_fast2.type                  = applycal
+prepare_imaging_data.argument.correct_fast2.parmdb                = h5parm
+prepare_imaging_data.argument.correct_fast2.correction            = phase000
+prepare_imaging_data.argument.correct_fast2.invert                = True
+prepare_imaging_data.argument.correct_slow_amp.type               = applycal
+prepare_imaging_data.argument.correct_slow_amp.parmdb             = h5parm
+prepare_imaging_data.argument.correct_slow_amp.correction         = amplitude001
+prepare_imaging_data.argument.correct_slow_amp.invert             = True
+prepare_imaging_data.argument.correct_slow_phase.type             = applycal
+prepare_imaging_data.argument.correct_slow_phase.parmdb           = h5parm
+prepare_imaging_data.argument.correct_slow_phase.correction       = phase001
+prepare_imaging_data.argument.correct_slow_phase.invert           = True
 prepare_imaging_data.argument.shift.type                          = phaseshifter
 prepare_imaging_data.argument.shift.phasecenter                   = [{{ facet_ra }}deg, {{ facet_dec }}deg]
-prepare_imaging_data.argument.correct.type                        = applycal
-prepare_imaging_data.argument.correct.parmdb                      = dir_dep_parmdb
-prepare_imaging_data.argument.correct.invert                      = True
 prepare_imaging_data.argument.flagzero.type                       = preflagger
 prepare_imaging_data.argument.flagzero.amplmin                    = 1e-20
 prepare_imaging_data.argument.avg.type                            = squash
