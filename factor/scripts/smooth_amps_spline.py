@@ -342,9 +342,11 @@ def main(instrument_name, normalize=True):
             # Find flagged solutions and set to 1.0
             channel_amp_interp = []
             for chan in range(nfreqs):
-                unflagged_times = numpy.where(numpy.logical_and(~numpy.isnan(channel_amp_orig[:, chan, 0, 0, pol]),
+                unflagged_times = numpy.where(numpy.logical_and(channel_amp_orig[:, chan, 0, 0, pol] > 0.0,
                                                                 soltab.weight[:, chan, 0, 0, pol] != 0.0))
-                flagged_times = numpy.where(numpy.logical_or(numpy.isnan(channel_amp_orig[:, chan, 0, 0, pol]),
+                flagged_times = numpy.where(numpy.logical_or(numpy.logical_or(
+                                                              numpy.isnan(channel_amp_orig[:, chan, 0, 0, pol]),
+                                                              channel_amp_orig[:, chan, 0, 0, pol] == 0.0),
                                                               soltab.weight[:, chan, 0, 0, pol] == 0.0))
                 if numpy.any(flagged_times):
                     channel_amp_orig[flagged_times, chan, 0, 0, pol] = 1.0
