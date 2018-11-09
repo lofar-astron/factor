@@ -242,6 +242,12 @@ class Direction(object):
         self.selfcal_multiscale_scales_pixel = parset['imaging_specific']['selfcal_multiscale_scales_pixel']
         self.frac_bandwidth_selfcal_facet_image = parset['imaging_specific']['fractional_bandwidth_selfcal_facet_image']
         self.nbands_selfcal_facet_image = min(6, len(bands))
+        self.use_idg = parset['imaging_specific']['wsclean_use_idg']
+        if self.use_idg:
+            self.idg_arg = '-use-idg,'
+        else:
+            self.idg_arg = ''
+        self.idg_mode = parset['imaging_specific']['idg_mode']
         self.approximatetec = parset['calibration_specific']['approximatetec']
         self.maxapproxiter = parset['calibration_specific']['maxapproxiter']
         self.maxiter = parset['calibration_specific']['maxiter']
@@ -330,21 +336,22 @@ class Direction(object):
         else:
             self.wsclean_selfcal_facet_image_suffix = '-image.fits'
 
-        # Set the baseline-averaging limit for WSClean
+        # Set the baseline-dependent averaging limit for WSClean
+        # Note: IDG does not work with baseline-dependent averaging
         if (hasattr(self, 'facetselfcal_timestep_sec') and
-            parset['imaging_specific']['wsclean_bl_averaging']):
+            parset['imaging_specific']['wsclean_bl_averaging'] and not self.use_idg):
             self.facetselfcal_wsclean_nwavelengths = self.get_nwavelengths(self.cellsize_selfcal_deg,
                 self.facetselfcal_timestep_sec)
         else:
             self.facetselfcal_wsclean_nwavelengths = 0
         if (hasattr(self, 'facetimage_timestep_sec') and
-            parset['imaging_specific']['wsclean_bl_averaging']):
+            parset['imaging_specific']['wsclean_bl_averaging'] and not self.use_idg):
             self.facetimage_wsclean_nwavelengths = self.get_nwavelengths(self.cellsize_facet_deg,
                 self.facetimage_timestep_sec)
         else:
             self.facetimage_wsclean_nwavelengths = 0
         if (hasattr(self, 'facetimage_low_timestep_sec') and
-            parset['imaging_specific']['wsclean_bl_averaging']):
+            parset['imaging_specific']['wsclean_bl_averaging'] and not self.use_idg):
             self.facetimage_medlow_wsclean_nwavelengths = self.get_nwavelengths(self.cellsize_facet_deg,
                 self.facetimage_low_timestep_sec)
         else:

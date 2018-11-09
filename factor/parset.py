@@ -454,6 +454,14 @@ def get_imaging_options(parset):
     else:
         parset_dict['wsclean_bl_averaging'] = True
 
+    # Use IDG in WSClean (default = False). If enabled, the IDG mode can also be set
+    if 'wsclean_use_idg' in parset_dict:
+        parset_dict['wsclean_use_idg'] = parset.getboolean('imaging', 'wsclean_use_idg')
+    else:
+        parset_dict['wsclean_use_idg'] = True
+    if 'idg_mode' not in parset_dict:
+        parset_dict['idg_mode'] = 'cpu'
+
     # Max desired peak flux density reduction at center of the facet edges due to
     # bandwidth smearing (at the mean frequency) and time smearing (default = 0.15 =
     # 15% reduction in peak flux). Higher values result in shorter run times but
@@ -588,7 +596,7 @@ def get_imaging_options(parset):
         'facet_cellsize_arcsec', 'facet_taper_arcsec', 'facet_robust',
         'wsclean_image_padding', 'image_target_only', 'automask_facet_image',
         'selfcal_min_uv_lambda', 'facet_min_uv_lambda',
-        'selfcal_robust_wsclean', 'wsclean_bl_averaging',
+        'selfcal_robust_wsclean', 'wsclean_bl_averaging', 'wsclean_use_idg', 'idg_mode',
         'fractional_bandwidth_selfcal_facet_image']
     for option in given_options:
         if option not in allowed_options:

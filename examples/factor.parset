@@ -170,6 +170,10 @@ dir_ms = /data/bands
 # this option can dramatically speed up imaging with WSClean.
 # wsclean_bl_averaging = True
 
+# Use IDG in WSClean (default = False). If enabled, the IDG mode can also be set
+# wsclean_use_idg = True
+# idg_mode = cpu
+
 # List of scales in pixels to use when multiscale clean is activated (default =
 # auto). Note that multiscale clean is activated for a direction only when the
 # calibrator or a source in the facet is determined to be larger than 4 arcmin,
