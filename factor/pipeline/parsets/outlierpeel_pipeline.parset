@@ -86,6 +86,12 @@ shift_cal.argument.add.type                            = predict
 shift_cal.argument.add.sourcedb                        = sourcedb
 shift_cal.argument.add.operation                       = add
 shift_cal.argument.add.applycal.parmdb                 = dir_indep_parmdb
+{% if dirindeptype_is_h5parm %}
+shift_cal.argument.add.applycal.solset                 = target
+shift_cal.argument.add.applycal.steps                  = [ph,amp]
+shift_cal.argument.add.applycal.ph.correction          = phase000
+shift_cal.argument.add.applycal.amp.correction         = amplitude000
+{% endif %}
 {% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
 shift_cal.argument.flag.type                           = preflagger
 shift_cal.argument.flag.expr                           = {{ flag_expr }}
@@ -195,16 +201,17 @@ sync_concat_data_to_local.control.outputkey   = msout
 sync_concat_data_to_local.argument.flags      = [msin,msout]
 {% endif %}
 
-# generate mapfile for the fast-phase parmDBs generated in the solve_ampphase11 step, length = ntimes * num_cal_blocks
-make_fast_phase_parmdb_map.control.kind               =  plugin
-make_fast_phase_parmdb_map.control.type               =  createMapfile
-make_fast_phase_parmdb_map.control.method             =  add_suffix_to_file
-make_fast_phase_parmdb_map.control.mapfile_in         =  concat_data.output.mapfile
-make_fast_phase_parmdb_map.control.add_suffix_to_file =  /instrument
-make_fast_phase_parmdb_map.control.mapfile_dir        =  input.output.mapfile_dir
-make_fast_phase_parmdb_map.control.filename           =  fast_parmdb.mapfile
+# generate mapfile for the fast-phase h5parms generated in the solve_ampphase11 step, length = ntimes * num_cal_blocks
+make_fast_phase_h5parm_map.control.kind               = plugin
+make_fast_phase_h5parm_map.control.type               = createMapfile
+make_fast_phase_h5parm_map.control.method             = add_suffix_to_file
+make_fast_phase_h5parm_map.control.mapfile_in         = concat_data.output.mapfile
+make_fast_phase_h5parm_map.control.add_suffix_to_file = /instrument.h5
+make_fast_phase_h5parm_map.control.mapfile_dir        = input.output.mapfile_dir
+make_fast_phase_h5parm_map.control.filename           = fast_h5parm.mapfile
 
-# create a mapfile with the outlier skymodel from supplied list, length = 1
+
+# create a mapfile with the outlier sky model from supplied list, length = 1
 create_peel_skymodel_map.control.kind        = plugin
 create_peel_skymodel_map.control.type        = addListMapfile
 create_peel_skymodel_map.control.hosts       = {{ hosts }}
@@ -212,7 +219,7 @@ create_peel_skymodel_map.control.files       = [{{ peel_skymodel }}]
 create_peel_skymodel_map.control.mapfile_dir = input.output.mapfile_dir
 create_peel_skymodel_map.control.filename    = peel_skymodel.mapfile
 
-# convert the outlier skymodel into a sourcedb, length = 1
+# convert the outlier sky model into a sourcedb, length = 1
 make_peel_sourcedb.control.type       = make_sourcedb
 make_peel_sourcedb.control.mapfile_in = create_peel_skymodel_map.output.mapfile
 make_peel_sourcedb.control.inputkey   = in
@@ -228,45 +235,50 @@ expand_peel_sourcedb_map.control.mapfile_to_match = concat_data.output.mapfile
 expand_peel_sourcedb_map.control.mapfile_dir      = input.output.mapfile_dir
 expand_peel_sourcedb_map.control.filename         = expand_peel_sourcedb.mapfile
 
-# remove any existing parmdbs before solving, length = ntimes * num_cal_blocks
-remove_parmdbs11.control.type       = remove_file
-remove_parmdbs11.control.mapfile_in = make_fast_phase_parmdb_map.output.mapfile
-remove_parmdbs11.control.inputkey   = parmdb
-remove_parmdbs11.argument.flags     = [-rf,parmdb]
+# remove any existing h5parms before solving, length = ntimes * num_cal_blocks
+remove_h5parms1.control.type       = remove_file
+remove_h5parms1.control.mapfile_in = make_fast_phase_h5parm_map.output.mapfile
+remove_h5parms1.control.inputkey   = h5parm
+remove_h5parms1.argument.flags     = [-rf,h5parm]
 
 # run GainCal with peel sourcedb on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
-solve_ampphase11.control.type                     = dppp_inplace
-solve_ampphase11.control.mapfiles_in              = [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile,expand_peel_sourcedb_map.output.mapfile]
-solve_ampphase11.control.inputkeys                = [msin,parmdb,sourcedb]
-solve_ampphase11.argument.numthreads              = {{ max_cpus_per_proc_ntimes }}
-solve_ampphase11.argument.msin.datacolumn         = DATA
-solve_ampphase11.argument.msout                   = .
-solve_ampphase11.argument.steps                   = [solvetec]
-solve_ampphase11.argument.solvetec.uvlambdamin       = {{ solve_min_uv_lambda }}
-solve_ampphase11.argument.solvetec.type           = gaincal
-solve_ampphase11.argument.solvetec.caltype        = tecandphase
-solve_ampphase11.argument.solvetec.parmdb         = parmdb
-solve_ampphase11.argument.solvetec.usemodelcolumn = False
-solve_ampphase11.argument.solvetec.sourcedb       = sourcedb
-solve_ampphase11.argument.solvetec.solint         = {{ solint_time_p }}
-solve_ampphase11.argument.solvetec.nchan          = {{ solint_freq_a }}
+solve_ampphase11.control.type                         = dppp_inplace
+solve_ampphase11.control.mapfiles_in                  = [{{ concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile,expand_peel_sourcedb_map.output.mapfile]
+solve_ampphase11.control.inputkeys                    = [msin,h5parm,sourcedb]
+solve_ampphase11.argument.numthreads                  = {{ max_cpus_per_proc_ntimes }}
+solve_ampphase11.argument.msin.datacolumn             = DATA
+solve_ampphase11.argument.msout                       = .
+solve_ampphase11.argument.steps                       = [solvetec]
+solve_ampphase11.argument.solvetec.type               = ddecal
+solve_ampphase11.argument.solvetec.mode               = tecandphase
+solve_ampphase11.argument.solvetec.h5parm             = h5parm
+solve_ampphase11.argument.solvetec.sourcedb           = sourcedb
+solve_ampphase11.argument.solvetec.solint             = {{ solint_time_p }}
+solve_ampphase11.argument.solvetec.nchan              = {{ solint_freq_a }}
+solve_ampphase11.argument.solvetec.approximatetec     = {{ approximatetec }}
+solve_ampphase11.argument.solvetec.maxapproxiter      = {{ maxapproxiter }}
+solve_ampphase11.argument.solvetec.maxiter            = {{ maxiter }}
+solve_ampphase11.argument.solvetec.propagatesolutions = {{ propagatesolutions }}
+solve_ampphase11.argument.solvetec.stepsize           = {{ stepsize }}
+solve_ampphase11.argument.solvetec.tolerance          = {{ tolerance }}
+solve_ampphase11.argument.solvetec.uvlambdamin        = {{ solve_min_uv_lambda }}
 
 # apply the phase-only solutions from the previous calibration, length = ntimes * num_cal_blocks
 apply_ampphase11.control.type                                 = dppp_inplace
-apply_ampphase11.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_parmdb_map.output.mapfile]
-apply_ampphase11.control.inputkeys                            = [msin,parmdb]
+apply_ampphase11.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile]
+apply_ampphase11.control.inputkeys                            = [msin,h5parm]
 apply_ampphase11.argument.numthreads                          = {{ max_cpus_per_proc_ntimes }}
 apply_ampphase11.argument.msin.datacolumn                     = DATA
 apply_ampphase11.argument.msout                               = .
 apply_ampphase11.argument.msout.datacolumn                    = CORRECTED_DATA
 apply_ampphase11.argument.steps                               = [correct_fast1,correct_fast2]
 apply_ampphase11.argument.correct_fast1.type                  = applycal
-apply_ampphase11.argument.correct_fast1.parmdb                = parmdb
-apply_ampphase11.argument.correct_fast1.correction            = tec
+apply_ampphase11.argument.correct_fast1.parmdb                = h5parm
+apply_ampphase11.argument.correct_fast1.correction            = tec000
 apply_ampphase11.argument.correct_fast1.invert                = True
 apply_ampphase11.argument.correct_fast2.type                  = applycal
-apply_ampphase11.argument.correct_fast2.parmdb                = parmdb
-apply_ampphase11.argument.correct_fast2.correction            = commonscalarphase
+apply_ampphase11.argument.correct_fast2.parmdb                = h5parm
+apply_ampphase11.argument.correct_fast2.correction            = phase000
 apply_ampphase11.argument.correct_fast2.invert                = True
 {% if use_compression %}
 apply_ampphase11.argument.msout.storagemanager                = "Dysco"
@@ -277,53 +289,106 @@ apply_ampphase11.argument.msout.storagemanager.disttruncation = 1.5
 apply_ampphase11.argument.msout.storagemanager.normalization  = "AF"
 {% endif %}
 
-# merge the parmDBs with the phase solutions into one, length = 1
-merge_phase_parmdbs.control.type       = merge_parmdbs_in_time
-merge_phase_parmdbs.control.mapfile_in = concat_data_compressed_mapfile.output.mapfile
-merge_phase_parmdbs.control.inputkey   = mslist
-merge_phase_parmdbs.control.outputkey  = outparmdb
-merge_phase_parmdbs.argument.flags     = [mslist,instrument,outparmdb]
+# compress fast-phase mapfile so that all files are in one group, length = 1
+create_compressed_mapfile_fast.control.kind        = plugin
+create_compressed_mapfile_fast.control.type        = compressMapfile
+create_compressed_mapfile_fast.control.mapfile_in  = make_fast_phase_h5parm_map.output.mapfile
+create_compressed_mapfile_fast.control.mapfile_dir = input.output.mapfile_dir
+create_compressed_mapfile_fast.control.filename    = compress_fast.mapfile
 
-# generate mapfile for the slow-gain parmDBs generated in the solve_ampphase12 step, length = ntimes * num_cal_blocks
-make_slow_gain_parmdb_map.control.kind               =  plugin
-make_slow_gain_parmdb_map.control.type               =  createMapfile
-make_slow_gain_parmdb_map.control.method             =  add_suffix_to_file
-make_slow_gain_parmdb_map.control.mapfile_in         =  concat_data.output.mapfile
-make_slow_gain_parmdb_map.control.add_suffix_to_file =  /instrument_slow
-make_slow_gain_parmdb_map.control.mapfile_dir        =  input.output.mapfile_dir
-make_slow_gain_parmdb_map.control.filename           =  slow_parmdb.mapfile
+# create a mapfile for output of combine step, length = 1
+create_combined_fast_output_map.control.kind        = plugin
+create_combined_fast_output_map.control.type        = addListMapfile
+create_combined_fast_output_map.control.hosts       = {{ hosts }}
+create_combined_fast_output_map.control.files       = [input.output.working_directory/input.output.job_name/fast_phases.h5]
+create_combined_fast_output_map.control.mapfile_dir = input.output.mapfile_dir
+create_combined_fast_output_map.control.filename    = combine_fast_h5parms_output.mapfile
 
-# remove any existing parmdbs before solving, length = ntimes * num_cal_blocks
-remove_parmdbs12.control.type       = remove_file
-remove_parmdbs12.control.mapfile_in = make_slow_gain_parmdb_map.output.mapfile
-remove_parmdbs12.control.inputkey   = parmdb
-remove_parmdbs12.argument.flags     = [-rf,parmdb]
+# match the host before combining, length = 1
+match_host_fast.control.kind             = plugin
+match_host_fast.control.type             = matchHosts
+match_host_fast.control.mapfile_in       = create_compressed_mapfile_fast.output.mapfile
+match_host_fast.control.mapfile_to_match = create_combined_fast_output_map.output.mapfile
+match_host_fast.control.mapfile_dir      = input.output.mapfile_dir
+match_host_fast.control.filename         = match_host_slow.mapfile
 
-# run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes * num_cal_blocks
-solve_ampphase12.control.type                   = dppp_inplace
-solve_ampphase12.control.mapfiles_in            = [{{ concat_data_mapfile }},make_slow_gain_parmdb_map.output.mapfile,expand_peel_sourcedb_map.output.mapfile]
-solve_ampphase12.control.inputkeys              = [msin,parmdb,sourcedb]
-solve_ampphase12.argument.numthreads            = {{ max_cpus_per_io_proc_ntimes }}
-solve_ampphase12.argument.msin.datacolumn       = CORRECTED_DATA
-solve_ampphase12.argument.msout                 = .
-solve_ampphase12.argument.steps                 = [solvegain]
-solve_ampphase12.argument.solvegain.uvlambdamin = {{ solve_min_uv_lambda }}
-solve_ampphase12.argument.solvegain.type        = gaincal
-solve_ampphase12.argument.solvegain.caltype     = {{ selfcal_caltype }}
-solve_ampphase12.argument.solvegain.parmdb      = parmdb
-solve_ampphase12.argument.solvegain.sourcedb    = sourcedb
-solve_ampphase12.argument.solvegain.solint      = {{ solint_time_a }}
-solve_ampphase12.argument.solvegain.nchan       = {{ solint_freq_a }}
+# merge the h5parms with the phase solutions into one, length = 1
+# This is needed later when the loop is done and we want to apply the solutions to the original data
+merge_phase_h5parms.control.type        = collect_h5parms
+merge_phase_h5parms.control.mapfile_in  = create_compressed_mapfile_fast.output.mapfile
+merge_phase_h5parms.control.inputkey    = infiles
+merge_phase_h5parms.control.mapfile_out = create_combined_fast_output_map.output.mapfile
+merge_phase_h5parms.control.outputkey   = outfile
+merge_phase_h5parms.argument.flags      = [-c,infiles]
+merge_phase_h5parms.argument.outh5parm  = outfile
 
-# merge the parmDBs with the amplitude solutions into one, length = 1
-merge_amp_parmdbs.control.type         = merge_parmdbs_in_time
-merge_amp_parmdbs.control.mapfile_in   = concat_data_compressed_mapfile.output.mapfile
-merge_amp_parmdbs.control.inputkey     = mslist
-merge_amp_parmdbs.control.outputkey    = outparmdb
-merge_amp_parmdbs.argument.flags       = [mslist,instrument_slow,outparmdb]
-{% if selfcal_local_dir is not none %}
-merge_amp_parmdbs.argument.scratch_dir = {{ selfcal_local_dir }}
-{% endif %}
+# generate mapfile for the slow-gain h5parms generated in the solve_ampphase12 step, length = ntimes * num_cal_blocks
+make_slow_gain_h5parm_map.control.kind               =  plugin
+make_slow_gain_h5parm_map.control.type               =  createMapfile
+make_slow_gain_h5parm_map.control.method             =  add_suffix_to_file
+make_slow_gain_h5parm_map.control.mapfile_in         =  concat_data.output.mapfile
+make_slow_gain_h5parm_map.control.add_suffix_to_file =  /instrument_slow.h5
+make_slow_gain_h5parm_map.control.mapfile_dir        =  input.output.mapfile_dir
+make_slow_gain_h5parm_map.control.filename           =  slow_h5parm.mapfile
+
+# remove any existing h5parms before solving, length = ntimes * num_cal_blocks
+remove_h5parms12.control.type       = remove_file
+remove_h5parms12.control.mapfile_in = make_slow_gain_h5parm_map.output.mapfile
+remove_h5parms12.control.inputkey   = h5parm
+remove_h5parms12.argument.flags     = [-rf,h5parm]
+
+# run DDECal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes * num_cal_blocks
+solve_ampphase12.control.type                            = dppp_inplace
+solve_ampphase12.control.mapfiles_in                     = [{{ concat_data_mapfile }},make_slow_gain_h5parm_map.output.mapfile,expand_peel_sourcedb_map.output.mapfile]
+solve_ampphase12.control.inputkeys                       = [msin,h5parm,sourcedb]
+solve_ampphase12.argument.numthreads                     = {{ max_cpus_per_io_proc_ntimes }}
+solve_ampphase12.argument.msin.datacolumn                = CORRECTED_DATA
+solve_ampphase12.argument.msout                          = .
+solve_ampphase12.argument.steps                          = [solvegain]
+solve_ampphase12.argument.solvegain.type                 = ddecal
+solve_ampphase12.argument.solvegain.mode                 = complexgain
+solve_ampphase12.argument.solvegain.h5parm               = h5parm
+solve_ampphase12.argument.solvegain.sourcedb             = sourcedb
+solve_ampphase12.argument.solvegain.solint               = {{ solint_time_a }}
+solve_ampphase12.argument.solvegain.nchan                = {{ solint_freq_a }}
+solve_ampphase12.argument.solvegain.maxiter              = {{ maxiter }}
+solve_ampphase12.argument.solvegain.propagatesolutions   = {{ propagatesolutions }}
+solve_ampphase12.argument.solvegain.stepsize             = {{ stepsize }}
+solve_ampphase12.argument.solvegain.tolerance            = {{ tolerance }}
+solve_ampphase12.argument.solvegain.uvlambdamin          = {{ solve_min_uv_lambda }}
+solve_ampphase12.argument.solvegain.smoothnessconstraint = 6e6
+
+# compress slow-gain mapfile so that all files are in one group, length = 1
+create_compressed_mapfile_slow.control.kind        = plugin
+create_compressed_mapfile_slow.control.type        = compressMapfile
+create_compressed_mapfile_slow.control.mapfile_in  = make_slow_gain_h5parm_map.output.mapfile
+create_compressed_mapfile_slow.control.mapfile_dir = input.output.mapfile_dir
+create_compressed_mapfile_slow.control.filename    = compress_slow.mapfile
+
+# create a mapfile for output of combine step, length = 1
+create_combined_slow_output_map.control.kind        = plugin
+create_combined_slow_output_map.control.type        = addListMapfile
+create_combined_slow_output_map.control.hosts       = {{ hosts }}
+create_combined_slow_output_map.control.files       = [input.output.working_directory/input.output.job_name/slow_gains.h5]
+create_combined_slow_output_map.control.mapfile_dir = input.output.mapfile_dir
+create_combined_slow_output_map.control.filename    = combine_slow_h5parms_output.mapfile
+
+# match the host before combining, length = 1
+match_host_slow.control.kind             = plugin
+match_host_slow.control.type             = matchHosts
+match_host_slow.control.mapfile_in       = create_compressed_mapfile_slow.output.mapfile
+match_host_slow.control.mapfile_to_match = create_combined_slow_output_map.output.mapfile
+match_host_slow.control.mapfile_dir      = input.output.mapfile_dir
+match_host_slow.control.filename         = match_host_slow.mapfile
+
+# collect all the slow-gain solutions, length = ntimes -> 1
+combine_slow_gains1.control.type        = collect_h5parms
+combine_slow_gains1.control.mapfile_in  = create_compressed_mapfile_slow.output.mapfile
+combine_slow_gains1.control.inputkey    = infiles
+combine_slow_gains1.control.mapfile_out = create_combined_slow_output_map.output.mapfile
+combine_slow_gains1.control.outputkey   = outfile
+combine_slow_gains1.argument.flags      = [-c,infiles]
+combine_slow_gains1.argument.outh5parm  = outfile
 
 # Smooth the amplitude solutions, but do not normalize them as the sky model is  // length = 1
 # in absolute flux and not apparent flux
@@ -354,22 +419,53 @@ remove_concat_data.control.inputkey   = msfile
 remove_concat_data.argument.flags     = [msfile]
 {% endif %}
 
-# merge the phases and amplitudes parmDBs, length = 1
-merge_selfcal_parmdbs.control.type        = merge_parmdbs_selfcal
-merge_selfcal_parmdbs.control.mapfiles_in = [merge_phase_parmdbs.output.mapfile,smooth_amps.output.mapfile]
-merge_selfcal_parmdbs.control.inputkeys   = [parmdb_p,parmdb_a]
-merge_selfcal_parmdbs.control.outputkey   = parmdb_out
-merge_selfcal_parmdbs.argument.flags      = [parmdb_p,parmdb_a,parmdb_out]
+# create a mapfile for output of combine step, length = 1
+create_combined_output_map.control.kind        = plugin
+create_combined_output_map.control.type        = addListMapfile
+create_combined_output_map.control.hosts       = {{ hosts }}
+create_combined_output_map.control.files       = [input.output.working_directory/input.output.job_name/combined_solutions_unnorm.h5]
+create_combined_output_map.control.mapfile_dir = input.output.mapfile_dir
+create_combined_output_map.control.filename    = combine_unnorm_h5parms_output.mapfile
 
-# convert the merged phase and amplitude parmDBs to gain parmDBs, length = 1
-convert_merged_selfcal_parmdbs.control.type         = convert_solutions_to_gain
-convert_merged_selfcal_parmdbs.control.mapfiles_in  = [merge_phase_parmdbs.output.mapfile,smooth_amps.output.mapfile]
-convert_merged_selfcal_parmdbs.control.inputkeys    = [fast_parmdb_in,slow_parmdb_in]
-convert_merged_selfcal_parmdbs.control.outputkey    = parmdb_out
-convert_merged_selfcal_parmdbs.argument.flags       = [fast_parmdb_in,slow_parmdb_in,parmdb_out]
-{% if selfcal_local_dir is not none %}
-convert_merged_selfcal_parmdbs.argument.scratch_dir = {{ selfcal_local_dir }}
-{% endif %}
+# create a mapfile for output of combine step, length = 1
+create_combined_unnorm_output_map.control.kind        = plugin
+create_combined_unnorm_output_map.control.type        = addListMapfile
+create_combined_unnorm_output_map.control.hosts       = {{ hosts }}
+create_combined_unnorm_output_map.control.files       = [input.output.working_directory/input.output.job_name/slow_gains.h5]
+create_combined_unnorm_output_map.control.mapfile_dir = input.output.mapfile_dir
+create_combined_unnorm_output_map.control.filename    = combine_slow_h5parms_output.mapfile
+
+# merge the phases and unnormalized amplitude h5parms, length = 2 -> 1
+combine_unnormalized_h5parms.control.type        = combine_h5parms
+combine_unnormalized_h5parms.control.mapfiles_in = [create_combined_fast_output_map.output.mapfile,create_combined_unnorm_output_map.output.mapfile]
+combine_unnormalized_h5parms.control.inputkeys   = [h1,h2]
+combine_unnormalized_h5parms.control.mapfile_out = create_combined_output_map.output.mapfile
+combine_unnormalized_h5parms.control.outputkey   = outfile
+combine_unnormalized_h5parms.argument.flags      = [h1,h2,outfile]
+
+# create a mapfile for output of combine step, length = 1
+create_combined_output_map.control.kind        = plugin
+create_combined_output_map.control.type        = addListMapfile
+create_combined_output_map.control.hosts       = {{ hosts }}
+create_combined_output_map.control.files       = [input.output.working_directory/input.output.job_name/combined_solutions_unnorm.h5]
+create_combined_output_map.control.mapfile_dir = input.output.mapfile_dir
+create_combined_output_map.control.filename    = combine_unnorm_h5parms_output.mapfile
+
+# create a mapfile for output of combine step, length = 1
+create_combined_norm_output_map.control.kind        = plugin
+create_combined_norm_output_map.control.type        = addListMapfile
+create_combined_norm_output_map.control.hosts       = {{ hosts }}
+create_combined_norm_output_map.control.files       = [input.output.working_directory/input.output.job_name/slow_gains.h5]
+create_combined_norm_output_map.control.mapfile_dir = input.output.mapfile_dir
+create_combined_norm_output_map.control.filename    = combine_slow_h5parms_output.mapfile
+
+# merge the phases and unnormalized amplitude h5parms, length = 2 -> 1
+combine_normalized_h5parms.control.type        = combine_h5parms
+combine_normalized_h5parms.control.mapfiles_in = [create_combined_fast_output_map.output.mapfile,create_combined_unnorm_output_map.output.mapfile]
+combine_normalized_h5parms.control.inputkeys   = [h1,h2]
+combine_normalized_h5parms.control.mapfile_out = create_combined_output_map.output.mapfile
+combine_normalized_h5parms.control.outputkey   = outfile
+combine_normalized_h5parms.argument.flags      = [h1,h2,outfile]
 
 # merge the phases and normalized amplitudes parmDBs, length = 1
 merge_normalized_selfcal_parmdbs.control.type        = merge_parmdbs_selfcal
