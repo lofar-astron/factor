@@ -668,7 +668,7 @@ remove_h5parms1.control.mapfile_in = make_fast_phase_h5parm_map.output.mapfile
 remove_h5parms1.control.inputkey   = h5parm
 remove_h5parms1.argument.flags     = [-rf,h5parm]
 
-# run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
+# run DDECal with sourcedb on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
 solve_phaseonly1.control.type                         = dppp_inplace
 {% if peel_skymodel is not none %}
 solve_phaseonly1.control.mapfiles_in                  = [{{ solve_concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile,expand_peel_sourcedb_map.output.mapfile]
@@ -1029,7 +1029,7 @@ apply_ampphase11.argument.msout.storagemanager.disttruncation = 1.5
 apply_ampphase11.argument.msout.storagemanager.normalization  = "AF"
 {% endif %}
 
-# generate mapfile for the slow-gain parmDBs generated in the solve_ampphase12 step
+# generate mapfile for the slow-gain h5parms generated in the solve_ampphase12 step, length = ntimes * num_cal_blocks
 make_slow_gain_h5parm_map.control.kind               =  plugin
 make_slow_gain_h5parm_map.control.type               =  createMapfile
 make_slow_gain_h5parm_map.control.method             =  add_suffix_to_file
@@ -1044,7 +1044,7 @@ remove_h5parms12.control.mapfile_in = make_slow_gain_h5parm_map.output.mapfile
 remove_h5parms12.control.inputkey   = h5parm
 remove_h5parms12.argument.flags     = [-rf,h5parm]
 
-# run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
+# run DDECAl with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes * num_cal_blocks
 solve_ampphase12.control.type                            = dppp_inplace
 solve_ampphase12.control.mapfiles_in                     = [{{ solve_concat_data_mapfile }},make_slow_gain_h5parm_map.output.mapfile,expand_sourcedb2_map.output.mapfile]
 solve_ampphase12.control.inputkeys                       = [msin,h5parm,sourcedb]
@@ -1128,11 +1128,11 @@ apply_amp1.control.inputkeys                            = [msin,fast_h5parmdb,sl
 apply_amp1.argument.msin.datacolumn                     = DATA
 apply_amp1.argument.steps                               = [correct_fast1,correct_fast2,correct_slow_amp,correct_slow_phase,avg]
 apply_amp1.argument.correct_fast1.type                  = applycal
-apply_amp1.argument.correct_fast1.parmdb                = fast_h5parm
+apply_amp1.argument.correct_fast1.parmdb                = fast_h5parmdb
 apply_amp1.argument.correct_fast1.correction            = tec000
 apply_amp1.argument.correct_fast1.invert                = True
 apply_amp1.argument.correct_fast2.type                  = applycal
-apply_amp1.argument.correct_fast2.parmdb                = fast_h5parm
+apply_amp1.argument.correct_fast2.parmdb                = fast_h5parmdb
 apply_amp1.argument.correct_fast2.correction            = phase000
 apply_amp1.argument.correct_fast2.invert                = True
 {% endif %}
