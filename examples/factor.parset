@@ -171,7 +171,7 @@ dir_ms = /data/bands
 # wsclean_bl_averaging = True
 
 # Use IDG in WSClean (default = False). If enabled, the IDG mode can also be set
-# wsclean_use_idg = True
+# wsclean_use_idg = False
 # idg_mode = cpu
 
 # List of scales in pixels to use when multiscale clean is activated (default =
