@@ -853,7 +853,7 @@ wsclean_image32.argument.multiscale-gain        = 0.1
 loop_ampcal.control.kind      = loop
 loop_ampcal.control.type      = conditional
 loop_ampcal.control.loopcount = {{ loopcount }}
-loop_ampcal.control.loopsteps = [group_skymodel3,make_sourcedb3,expand_sourcedb3_map,remove_h5parms21,solve_ampphase21,apply_ampphase21,create_compressed_mapfile_fast,create_combined_fast_output_map,match_host_fast,merge_phase_h5parms,remove_h5parms22,solve_ampphase22,combine_slow_gains2,smooth_amp2,apply_amp2,create_compressed_mapfile4,wsclean_image42,create_imagebase_map42,adjust_wsclean_mapfile42,copy_image2,check_image2]
+loop_ampcal.control.loopsteps = [group_skymodel3,make_sourcedb3,expand_sourcedb3_map,remove_h5parms21,solve_ampphase21,apply_ampphase21,create_compressed_mapfile_fast,create_combined_fast_output_map,match_host_fast,merge_phase_h5parms,remove_h5parms22,solve_ampphase22,combine_slow_gains2,smooth_amp2,expand_smoothed_amp2_h5parm_map,apply_amp2,create_compressed_mapfile4,wsclean_image42,create_imagebase_map42,adjust_wsclean_mapfile42,copy_image2,check_image2]
 
 # group the WSClean sky model into a single patch, length = 1
 group_skymodel3.control.type       = group_skymodel
