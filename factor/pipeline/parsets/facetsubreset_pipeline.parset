@@ -154,9 +154,7 @@ predict_and_difference_models.argument.subtract_old.applycal.parmdb             
 predict_and_difference_models.argument.subtract_old.operation                     = subtract
 {% if dirindeptype_is_h5parm %}
 predict_and_difference_models.argument.subtract_old.applycal.solset               = target
-predict_and_difference_models.argument.subtract_old.applycal.steps                = [ph,amp]
-predict_and_difference_models.argument.subtract_old.applycal.ph.correction        = phase000
-predict_and_difference_models.argument.subtract_old.applycal.amp.correction       = amplitude000
+predict_and_difference_models.argument.subtract_old.applycal.correction           = phase000
 {% endif %}
 {% if use_compression %}
 predict_and_difference_models.argument.msout.storagemanager                       = "Dysco"

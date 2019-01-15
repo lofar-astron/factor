@@ -88,9 +88,7 @@ shift_cal.argument.add.operation                       = add
 shift_cal.argument.add.applycal.parmdb                 = dir_indep_parmdb
 {% if dirindeptype_is_h5parm %}
 shift_cal.argument.add.applycal.solset                 = target
-shift_cal.argument.add.applycal.steps                  = [ph,amp]
-shift_cal.argument.add.applycal.ph.correction          = phase000
-shift_cal.argument.add.applycal.amp.correction         = amplitude000
+shift_cal.argument.add.applycal.correction             = phase000
 {% endif %}
 {% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
 shift_cal.argument.flag.type                           = preflagger

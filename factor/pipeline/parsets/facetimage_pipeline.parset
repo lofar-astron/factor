@@ -203,11 +203,8 @@ prepare_imaging_data.argument.add.operation                       = add
 # add with dir-indep sols only
 {% if dirindeptype_is_h5parm %}
 prepare_imaging_data.argument.add.applycal.solset                 = target
-prepare_imaging_data.argument.add.applycal.steps                  = [ph,amp]
-prepare_imaging_data.argument.add.applycal.ph.correction          = phase000
-prepare_imaging_data.argument.add.applycal.ph.parmdb              = dir_indep_parmdb
-prepare_imaging_data.argument.add.applycal.amp.correction         = amplitude000
-prepare_imaging_data.argument.add.applycal.amp.parmdb             = dir_indep_parmdb
+prepare_imaging_data.argument.add.applycal.correction             = phase000
+prepare_imaging_data.argument.add.applycal.parmdb                 = dir_indep_parmdb
 {% else %}
 prepare_imaging_data.argument.add.applycal.parmdb                 = dir_indep_parmdb
 {% endif %}
