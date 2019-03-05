@@ -651,9 +651,6 @@ def _set_up_directions(parset, bands, dry_run=False, test_run=False,
         # Set direction sky model
         direction.set_skymodel(initial_skymodel.copy())
 
-        # Set dir-indep parm file type
-        direction.dirindeptype_is_h5parm = bands[0].dirindeptype_is_h5parm
-
         # Set peeling flag (i.e., facet calibrator should be peeled before facet
         # is imaged)
         total_flux_jy, peak_flux_jy_bm = direction.get_cal_fluxes()
