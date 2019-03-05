@@ -71,7 +71,6 @@ class Band(object):
         # Do some checks if desired
         if process_files or not has_state:
             self.check_freqs()
-            self.check_parmdb()
 
             # Get the field RA and Dec
             obs = pt.table(self.files[0]+'::FIELD', ack=False)
