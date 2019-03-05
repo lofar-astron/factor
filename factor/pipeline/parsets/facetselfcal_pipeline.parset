@@ -152,9 +152,9 @@ shift_cal_dir_indep.argument.msout.writefullresflag              = False
 shift_cal_dir_indep.argument.local_scratch_dir                   = {{ local_dir }}
 {% endif %}
 {% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
-shift_cal_dir_indep.argument.steps                               = [shift,add,flag,correct,avg]
+shift_cal_dir_indep.argument.steps                               = [shift,add,flag,avg]
 {% else %}
-shift_cal_dir_indep.argument.steps                               = [shift,add,correct,avg]
+shift_cal_dir_indep.argument.steps                               = [shift,add,avg]
 {% endif %}
 shift_cal_dir_indep.argument.shift.type                          = phaseshifter
 shift_cal_dir_indep.argument.shift.phasecenter                   = [{{ ra }}deg, {{ dec }}deg]
@@ -174,10 +174,6 @@ shift_cal_dir_indep.argument.flag.flag_baseline.baseline         = {{ flag_basel
 {% if flag_freqrange is not none %}
 shift_cal_dir_indep.argument.flag.flag_freqrange.freqrange       = {{ flag_freqrange }}
 {% endif %}
-shift_cal_dir_indep.argument.correct.type                        = applycal
-shift_cal_dir_indep.argument.correct.parmdb                      = dir_indep_parmdb
-shift_cal_dir_indep.argument.correct.correction                  = gain
-shift_cal_dir_indep.argument.correct.invert                      = True
 shift_cal_dir_indep.argument.avg.type                            = squash
 shift_cal_dir_indep.argument.avg.freqstep                        = {{ facetselfcal_freqstep }}
 shift_cal_dir_indep.argument.avg.timestep                        = {{ facetselfcal_timestep }}
