@@ -406,7 +406,7 @@ def process_chunk_star(inputs):
     return process_chunk(*inputs)
 
 
-def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, chunksize,
+def process_chunk(ms_file, chunkid, nchunks, mystarttime, myendtime, chunksize,
     colnames_to_keep, newdirname, local_dir=None, min_fraction=0.1, use_compression=True):
     """
     Processes one time chunk of input ms_file and returns new file names
@@ -415,8 +415,6 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
     ----------
     ms_file : str
         Input MS file to chunk
-    ms_parmdb : str
-        Input dir-independent parmdb for input MS file
     chunkid : int
         ID of chunk
     nchunks : int
