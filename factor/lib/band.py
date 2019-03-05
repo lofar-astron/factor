@@ -256,8 +256,8 @@ class Band(object):
                 pool.close()
                 pool.join()
 
-                for chunk_file, chunk_parmdb in results:
-                    if bool(chunk_file) and bool(chunk_parmdb) :
+                for chunk_file in results:
+                    if bool(chunk_file):
                         newfiles.append(chunk_file)
             else:
                 # Make symlinks for the files
@@ -274,7 +274,6 @@ class Band(object):
                                        ' data'.format(os.path.basename(self.files[MS_id])))
                         continue
                     os.symlink(self.files[MS_id], chunk_file)
-
                 newfiles.append(chunk_file)
 
         # Check that each file has at least min_fraction unflagged data. If not, remove
