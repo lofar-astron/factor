@@ -12,7 +12,7 @@
 # Compress both data and weights
 {% if not preapply_phase_cal %}
 average0.control.type                                 = dppp
-average0.control.mapfiles_in                          = [shift_cal.output.mapfile,create_parmdb_map.output.mapfile]
+average0.control.mapfiles_in                          = [shift_cal.output.mapfile]
 average0.control.inputkeys                            = [msin,parmdb]
 average0.argument.numthreads                          = {{ max_cpus_per_io_proc_nfiles }}
 average0.argument.msin.datacolumn                     = DATA
@@ -21,11 +21,7 @@ average0.argument.msout.writefullresflag              = False
 {% if local_dir is not none %}
 average0.argument.local_scratch_dir                   = {{ local_dir }}
 {% endif %}
-average0.argument.steps                               = [correct,avg]
-average0.argument.correct.type                        = applycal
-average0.argument.correct.parmdb                      = parmdb
-average0.argument.correct.correction                  = gain
-average0.argument.correct.invert                      = True
+average0.argument.steps                               = [avg]
 average0.argument.avg.type                            = squash
 average0.argument.avg.freqstep                        = 1
 average0.argument.avg.timestep                        = {{ facetselfcal_timestep }}

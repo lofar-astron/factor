@@ -32,10 +32,6 @@ class OutlierPeel(Operation):
         for bandfiles in ms_files:
             for filename in bandfiles:
                 ms_files_single.append(filename)
-        dir_indep_parmDBs = []
-        for band in self.bands:
-            for parmdb in band.dirindparmdbs:
-                dir_indep_parmDBs.append(parmdb)
         skymodels = [band.skymodel_dirindep for band in self.bands]
 
         # Parset for slow gain solve
@@ -61,7 +57,6 @@ class OutlierPeel(Operation):
         self.parms_dict.update({'ms_files_single': ms_files_single,
                                 'ms_files_grouped' : str(ms_files),
                                 'skymodels': skymodels,
-                                'dir_indep_parmDBs': dir_indep_parmDBs,
                                 'fourpol': fourpol,
                                 'selfcal_caltype': selfcal_caltype,
                                 'smooth_amps_task': smooth_amps_task})

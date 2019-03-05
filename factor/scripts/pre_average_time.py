@@ -16,7 +16,7 @@ import lofar.parmdb
 from astropy.stats import median_absolute_deviation
 
 
-def main(ms_input, parmdb_input, input_colname, output_data_colname, output_weights_colname,
+def main(ms_input, input_colname, output_data_colname, output_weights_colname,
     target_rms_rad, baseline_file, minutes_per_block=10.0, verbose=True):
     """
     Pre-average data using a sliding Gaussian kernel in time
@@ -25,9 +25,6 @@ def main(ms_input, parmdb_input, input_colname, output_data_colname, output_weig
     ----------
     ms_input : list or str
         List of MS filenames, or string with list, or path to a mapfile
-    parmdb_input : list or str
-        List of parmdb filenames, or string with list, or path to a mapfile
-        The resulting list from parmdb_input must match the one from ms_input
     input_colname : str
         Name of the column in the MS from which the data are read
     output_data_colname : str
@@ -43,10 +40,7 @@ def main(ms_input, parmdb_input, input_colname, output_data_colname, output_weig
 
     # convert input to needed types
     ms_list = input2strlist(ms_input)
-    parmdb_list = input2strlist(parmdb_input)
     verbose = input2bool(verbose)
-    if len(ms_list) != len(parmdb_list):
-        raise ValueError('pre_average_time: Length of MS-list ({0}) and length of parmdb-list ({1}) differ.'.format(len(ms_list),len(parmdb_list)))
 
     if type(target_rms_rad) is str:
         target_rms_rad = float(target_rms_rad)
@@ -81,17 +75,18 @@ def main(ms_input, parmdb_input, input_colname, output_data_colname, output_weig
             remaining_time -= t_delta
 
             # Find ionfactor for this period
-            ionfactors.append(find_ionfactor(parmdb_list[msind], baseline_dict, t1+start_time,
-                                             t1+start_time+t_delta, target_rms_rad=target_rms_rad))
-            if verbose:
-                print('    ionfactor (for timerange {0}-{1} sec) = {2}'.format(t1,
-                      t1+t_delta, ionfactors[-1]))
+            ionfactors.append(0.1)
+#             ionfactors.append(find_ionfactor(parmdb_list[msind], baseline_dict, t1+start_time,
+#                                              t1+start_time+t_delta, target_rms_rad=target_rms_rad))
+#             if verbose:
+#                 print('    ionfactor (for timerange {0}-{1} sec) = {2}'.format(t1,
+#                       t1+t_delta, ionfactors[-1]))
             t1 += t_delta
 
     sorted_ms_tuples = sorted(zip(start_times,end_times,range(len(ms_list)),ms_list))
-    sorted_ms_dict = { 'msnames' :[ms for starttime,endtime,index,ms in sorted_ms_tuples],
-                       'starttimes' : [starttime for starttime,endtime,index,ms in sorted_ms_tuples],
-                       'endtimes' : [endtime for starttime,endtime,index,ms in sorted_ms_tuples] }
+    sorted_ms_dict = { 'msnames': [ms for starttime,endtime,index,ms in sorted_ms_tuples],
+                       'starttimes': [starttime for starttime,endtime,index,ms in sorted_ms_tuples],
+                       'endtimes': [endtime for starttime,endtime,index,ms in sorted_ms_tuples] }
 
     # Do pre-averaging using lowest ionfactor
     ionfactor_min = min(ionfactors)
@@ -408,7 +403,6 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description=descriptiontext, formatter_class=RawTextHelpFormatter)
     parser.add_argument('ms_file_pattern', help='Glob-able filename-pattern of input datasets')
-    parser.add_argument('parmdb_file_pattern', help='Glob-able filename-pattern of input direction-independent selfcal instrument parmdbs')
     parser.add_argument('input_colname', help='Name of input column to pre-average')
     parser.add_argument('output_data_colname', help='Name of output column')
     parser.add_argument('output_weights_colname', help='Name of output column')
@@ -416,7 +410,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     ms_input = glob.glob(args.ms_file_pattern)
-    parmdb_input = glob.glob(args.parmdb_file_pattern)
 
-    main(ms_input, parmdb_input, args.input_colname, args.output_data_colname,
+    main(ms_input, args.input_colname, args.output_data_colname,
         args.output_weights_colname, args.target_rms)

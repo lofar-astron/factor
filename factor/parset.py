@@ -137,12 +137,6 @@ def get_global_options(parset):
     else:
         parset_dict['exit_on_bad_band'] = False
 
-    # Parmdb name for dir-indep. selfcal solutions (stored inside the input band
-    # measurement sets, so path should be relative to those; default =
-    # instrument_directionindependent)
-    if 'parmdb_name' not in parset_dict:
-        parset_dict['parmdb_name'] = 'instrument_directionindependent'
-
     # Extension that when concatenated with the 'extension-stripped' MS path gives
     # a path that is checked if it contains a skymodel
     if 'skymodel_extension' not in parset_dict:
@@ -218,7 +212,7 @@ def get_global_options(parset):
     # Check for unused options
     given_options = parset.options('global')
     allowed_options = ['dir_working', 'dir_ms', 'min_fraction_per_band',
-        'exit_on_bad_band', 'parmdb_name', 'interactive', 'keep_avg_facet_data',
+        'exit_on_bad_band', 'interactive', 'keep_avg_facet_data',
         'keep_unavg_facet_data', 'chunk_size_sec', 'skymodel_extension',
         'use_compression', 'flag_abstime', 'flag_baseline', 'flag_freqrange',
         'flag_expr']

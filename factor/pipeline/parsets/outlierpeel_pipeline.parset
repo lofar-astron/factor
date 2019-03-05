@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, create_full_skymodels_map, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_cal, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_data, concat_data_compressed_mapfile, {% if selfcal_local_dir is not none %} make_concat_data_sync_mapfile, sync_concat_data_to_local, {% endif %} make_fast_phase_parmdb_map, create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, remove_parmdbs11, solve_ampphase11, apply_ampphase11, merge_phase_parmdbs, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs, smooth_amps, smooth_amps_normalized, {% if selfcal_local_dir is not none %} remove_concat_data, {% endif %} merge_selfcal_parmdbs, convert_merged_selfcal_parmdbs, merge_normalized_selfcal_parmdbs, convert_normalized_merged_selfcal_parmdbs, {% if create_preapply_h5parm %} create_preapply_h5parm, {% endif %} make_selfcal_plots, expand_merged_parmdb_map, expand_normalized_merged_parmdb_map, expand_cal_sourcedb_map, {% if not is_patch %} make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, prepare_imaging_data, create_compressed_mapfile5, premask, wsclean_image_full, create_imagebase_map, adjust_wsclean_mapfile1, mask5, check_mask_high, create_model5_map, expand_model5_map, expand_mask5_map, make_high_facet_skymodel, make_sourcedb_high, expand_sourcedb_high, subtract_high, create_compressed_mapfile6, premask_med, wsclean_image_full_med, create_imagebase_med_map, adjust_wsclean_mapfile3, mask6, check_mask_med, expand_model6_map, expand_mask6_map, make_med_facet_skymodel, combine_facet_skymodels, make_sourcedb_new_facet_sources_for_facet_imaging, expand_sourcedb_new_facet_sources, {% endif %} predict_and_difference_models, create_middle_band_mapfile1, create_middle_band_mapfile2, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_full_skymodels_map, make_facet_skymodels_cal, make_sourcedb_cal_facet_sources, expand_sourcedb_cal_facet_sources, shift_cal, create_compressed_mapfile, sort_into_Groups, sort_into_Groups_maps, concat_data, concat_data_compressed_mapfile, {% if selfcal_local_dir is not none %} make_concat_data_sync_mapfile, sync_concat_data_to_local, {% endif %} make_fast_phase_parmdb_map, create_peel_skymodel_map, make_peel_sourcedb, expand_peel_sourcedb_map, remove_parmdbs11, solve_ampphase11, apply_ampphase11, merge_phase_parmdbs, make_slow_gain_parmdb_map, remove_parmdbs12, solve_ampphase12, merge_amp_parmdbs, smooth_amps, smooth_amps_normalized, {% if selfcal_local_dir is not none %} remove_concat_data, {% endif %} merge_selfcal_parmdbs, convert_merged_selfcal_parmdbs, merge_normalized_selfcal_parmdbs, convert_normalized_merged_selfcal_parmdbs, {% if create_preapply_h5parm %} create_preapply_h5parm, {% endif %} make_selfcal_plots, expand_merged_parmdb_map, expand_normalized_merged_parmdb_map, expand_cal_sourcedb_map, {% if not is_patch %} make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_sourcedb_all_facet_sources, prepare_imaging_data, create_compressed_mapfile5, premask, wsclean_image_full, create_imagebase_map, adjust_wsclean_mapfile1, mask5, check_mask_high, create_model5_map, expand_model5_map, expand_mask5_map, make_high_facet_skymodel, make_sourcedb_high, expand_sourcedb_high, subtract_high, create_compressed_mapfile6, premask_med, wsclean_image_full_med, create_imagebase_med_map, adjust_wsclean_mapfile3, mask6, check_mask_med, expand_model6_map, expand_mask6_map, make_med_facet_skymodel, combine_facet_skymodels, make_sourcedb_new_facet_sources_for_facet_imaging, expand_sourcedb_new_facet_sources, {% endif %} predict_and_difference_models, create_middle_band_mapfile1, create_middle_band_mapfile2, subtract_single, average_pre, average_post, average_pre_compressed_map, wsclean_pre, average_post_compressed_map, wsclean_post, verify_subtract]
 
 pipeline.pluginpath = {{ pipeline_dir }}/plugins
 
@@ -22,14 +22,6 @@ create_msmulti_map.control.hosts       = {{ hosts }}
 create_msmulti_map.control.files       = {{ ms_files_grouped }}
 create_msmulti_map.control.mapfile_dir = input.output.mapfile_dir
 create_msmulti_map.control.filename    = input_files_grouped.mapfile
-
-# create a mapfile with the direction-independent parmDBs from supplied list, length = nfiles
-create_parmdb_map.control.kind        = plugin
-create_parmdb_map.control.type        = addListMapfile
-create_parmdb_map.control.hosts       = {{ hosts }}
-create_parmdb_map.control.files       = {{ dir_indep_parmDBs }}
-create_parmdb_map.control.mapfile_dir = input.output.mapfile_dir
-create_parmdb_map.control.filename    = dir_indep_instrument_parmdbs.mapfile
 
 # create a mapfile with the current skymodels from supplied list, length = nbands
 create_full_skymodels_map.control.kind        = plugin
@@ -66,8 +58,8 @@ expand_sourcedb_cal_facet_sources.control.filename       = expand_sourcedb_cal_f
 # shift data to calibrator position, predict and add calibrator sources, and average in frequency, length = nfiles
 # Compress both data and weights
 shift_cal.control.type                                 = dppp
-shift_cal.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_cal_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
-shift_cal.control.inputkeys                            = [msin,sourcedb,dir_indep_parmdb]
+shift_cal.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_cal_facet_sources.output.mapfile]
+shift_cal.control.inputkeys                            = [msin,sourcedb]
 shift_cal.argument.numthreads                          = {{ max_cpus_per_io_proc_nfiles }}
 shift_cal.argument.msin.datacolumn                     = {{ subtracted_data_colname }}
 shift_cal.argument.msout.overwrite                     = True
@@ -85,11 +77,6 @@ shift_cal.argument.shift.phasecenter                   = [{{ ra }}deg, {{ dec }}
 shift_cal.argument.add.type                            = predict
 shift_cal.argument.add.sourcedb                        = sourcedb
 shift_cal.argument.add.operation                       = add
-shift_cal.argument.add.applycal.parmdb                 = dir_indep_parmdb
-{% if dirindeptype_is_h5parm %}
-shift_cal.argument.add.applycal.solset                 = target
-shift_cal.argument.add.applycal.correction             = phase000
-{% endif %}
 {% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
 shift_cal.argument.flag.type                           = preflagger
 shift_cal.argument.flag.expr                           = {{ flag_expr }}
@@ -552,8 +539,8 @@ expand_sourcedb_all_facet_sources.control.filename       = expand_sourcedb_all_f
 # shift the empty data, add all facet sources, apply the direction-dependent solutions and average, length = nfiles
 # compress data and weights
 prepare_imaging_data.control.type                                 = dppp
-prepare_imaging_data.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,expand_cal_sourcedb_map.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile,expand_normalized_merged_parmdb_map.output.mapfile]
-prepare_imaging_data.control.inputkeys                            = [msin,sourcedb,sourcedb_cal,dir_indep_parmdb,dir_dep_parmdb,dir_dep_parmdb_normalized]
+prepare_imaging_data.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,expand_cal_sourcedb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile,expand_normalized_merged_parmdb_map.output.mapfile]
+prepare_imaging_data.control.inputkeys                            = [msin,sourcedb,sourcedb_cal,dir_dep_parmdb,dir_dep_parmdb_normalized]
 prepare_imaging_data.argument.numthreads                          = {{ max_cpus_per_io_proc_nfiles }}
 prepare_imaging_data.argument.msin.datacolumn                     = {{ subtracted_data_colname }}
 prepare_imaging_data.argument.msin.startchan                      = {{ startchan_selfcal_facet_image }}
@@ -573,7 +560,6 @@ prepare_imaging_data.argument.shift.phasecenter                   = [{{ facet_ra
 prepare_imaging_data.argument.add.type                            = predict
 prepare_imaging_data.argument.add.sourcedb                        = sourcedb
 prepare_imaging_data.argument.add.operation                       = add
-prepare_imaging_data.argument.add.applycal.parmdb                 = dir_indep_parmdb
 {% if flag_abstime is not none or flag_baseline is not none or flag_freqrange is not none %}
 prepare_imaging_data.argument.flag.type                             = preflagger
 prepare_imaging_data.argument.flag.expr                           = {{ flag_expr }}
@@ -946,11 +932,11 @@ expand_sourcedb_new_facet_sources.control.filename       = expand_sourcedb_new_f
 # compress weights only
 predict_and_difference_models.control.type                                 = dppp
 {% if not is_patch %}
-predict_and_difference_models.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_new_facet_sources.output.mapfile,expand_normalized_merged_parmdb_map.output.mapfile,expand_cal_sourcedb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
-predict_and_difference_models.control.inputkeys                            = [msin,facet_sourcedb,dir_dep_parmdb_normalized,cal_sourcedb,dir_dep_parmdb_unnormalized,dir_indep_sourcedb,dir_indep_parmdb]
+predict_and_difference_models.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_new_facet_sources.output.mapfile,expand_normalized_merged_parmdb_map.output.mapfile,expand_cal_sourcedb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile]
+predict_and_difference_models.control.inputkeys                            = [msin,facet_sourcedb,dir_dep_parmdb_normalized,cal_sourcedb,dir_dep_parmdb_unnormalized,dir_indep_sourcedb]
 {% else %}
-predict_and_difference_models.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_cal_sourcedb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile,expand_sourcedb_cal_facet_sources.output.mapfile,create_parmdb_map.output.mapfile]
-predict_and_difference_models.control.inputkeys                            = [msin,cal_sourcedb,dir_dep_parmdb_unnormalized,dir_indep_sourcedb,dir_indep_parmdb]
+predict_and_difference_models.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_cal_sourcedb_map.output.mapfile,expand_merged_parmdb_map.output.mapfile,expand_sourcedb_cal_facet_sources.output.mapfile]
+predict_and_difference_models.control.inputkeys                            = [msin,cal_sourcedb,dir_dep_parmdb_unnormalized,dir_indep_sourcedb]
 {% endif %}
 predict_and_difference_models.argument.numthreads                          = {{ max_cpus_per_io_proc_nfiles }}
 predict_and_difference_models.argument.msin.datacolumn                     = DATA
@@ -974,7 +960,6 @@ predict_and_difference_models.argument.pred_cal.applycal.parmdb            = dir
 predict_and_difference_models.argument.pred_cal.operation                  = replace
 predict_and_difference_models.argument.subtract_old.type                   = predict
 predict_and_difference_models.argument.subtract_old.sourcedb               = dir_indep_sourcedb
-predict_and_difference_models.argument.subtract_old.applycal.parmdb        = dir_indep_parmdb
 predict_and_difference_models.argument.subtract_old.operation              = subtract
 {% if use_compression %}
 predict_and_difference_models.argument.msout.storagemanager                = "Dysco"

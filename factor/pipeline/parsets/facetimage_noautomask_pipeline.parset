@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_h5parm_map, {% if preapply_phase_cal %} expand_preapply_h5parm_map, {% endif %} {% if not selfcal_ok %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, create_parmdb_map, {% endif %} expand_sourcedb_all_facet_sources, prepare_imaging_data, create_compressed_mapfile, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
+pipeline.steps = [update_mapfile_hosts, {% if use_existing_data %} update_image_data_mapfile_hosts, {% if average_image_data %} concat_averaged_uncompressed_map, average_image_data, concat_reaveraged_compressed_map, {% endif %} {% else %} create_ms_map, create_msmulti_map, expand_merged_h5parm_map, {% if preapply_phase_cal %} expand_preapply_h5parm_map, {% endif %} {% if not selfcal_ok %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, {% endif %} expand_sourcedb_all_facet_sources, prepare_imaging_data, create_compressed_mapfile, {% endif %} premask, wsclean_image_full1, create_imagebase_map1, adjust_wsclean_mapfile1, mask, wsclean_image_full2, create_imagebase_map2, adjust_wsclean_mapfile2]
 
 pipeline.pluginpath = {{ pipeline_dir }}/plugins
 
@@ -125,14 +125,6 @@ make_sourcedb_all_facet_sources.argument.format    = <
 make_sourcedb_all_facet_sources.argument.outtype   = blob
 make_sourcedb_all_facet_sources.argument.append    = False
 
-# create a mapfile with the direction-independent parmDBs from supplied list, length = nfiles
-create_parmdb_map.control.kind        = plugin
-create_parmdb_map.control.type        = addListMapfile
-create_parmdb_map.control.hosts       = {{ hosts }}
-create_parmdb_map.control.files       = {{ dir_indep_parmDBs }}
-create_parmdb_map.control.mapfile_dir = input.output.mapfile_dir
-create_parmdb_map.control.filename    = dir_indep_instrument_parmdbs.mapfile
-
 {% endif %}
 
 # expand the sourcedb mapfile so that there is one entry for every file, length = nfiles
@@ -149,23 +141,6 @@ expand_sourcedb_all_facet_sources.control.filename       = expand_sourcedb_all_f
 
 # add the model visibilities, shift, apply the direction-dependent solutions, and average, length = nfiles
 prepare_imaging_data.control.type                                 = dppp
-
-{% if not selfcal_ok %}
-
-# if selfcal did not work, we need dir-indep sols (for add) and nearest preapply sols (if done) and dir-dep sols
-{% if preapply_phase_cal %}
-# here we need the preapply h5parm
-prepare_imaging_data.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_preapply_h5parm_map.output.mapfile,expand_merged_h5parm_map.output.mapfile]
-prepare_imaging_data.control.inputkeys                            = [msin,sourcedb,dir_indep_parmdb,pre_h5parm,h5parm]
-{% else %}
-# no need for the preapply h5parm
-prepare_imaging_data.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,create_parmdb_map.output.mapfile,expand_merged_h5parm_map.output.mapfile]
-prepare_imaging_data.control.inputkeys                            = [msin,sourcedb,dir_indep_parmdb,h5parm]
-{% endif %}
-
-{% else %}
-
-# if selfcal worked, we need nearest preapply sols (if done) and dir-dep sols
 {% if preapply_phase_cal %}
 prepare_imaging_data.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,expand_preapply_h5parm_map.output.mapfile,expand_merged_h5parm_map.output.mapfile]
 prepare_imaging_data.control.inputkeys                            = [msin,sourcedb,pre_h5parm,h5parm]
@@ -173,8 +148,6 @@ prepare_imaging_data.control.inputkeys                            = [msin,source
 prepare_imaging_data.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile,expand_merged_h5parm_map.output.mapfile]
 prepare_imaging_data.control.inputkeys                            = [msin,sourcedb,h5parm]
 {% endif %}
-{% endif %}
-
 prepare_imaging_data.argument.numthreads                          = {{ max_cpus_per_io_proc_nfiles }}
 prepare_imaging_data.argument.msin.datacolumn                     = CORRECTED_DATA
 prepare_imaging_data.argument.msout.overwrite                     = True
@@ -198,23 +171,10 @@ prepare_imaging_data.argument.steps                               = [shift,add,c
 prepare_imaging_data.argument.add.type                            = predict
 prepare_imaging_data.argument.add.sourcedb                        = sourcedb
 prepare_imaging_data.argument.add.operation                       = add
-{% if not selfcal_ok %}
 
-# add with dir-indep sols only
-{% if dirindeptype_is_h5parm %}
-prepare_imaging_data.argument.add.applycal.solset                 = target
-prepare_imaging_data.argument.add.applycal.steps                  = [ph,amp]
-prepare_imaging_data.argument.add.applycal.ph.correction          = phase000
-prepare_imaging_data.argument.add.applycal.ph.parmdb              = dir_indep_parmdb
-prepare_imaging_data.argument.add.applycal.amp.correction         = amplitude000
-prepare_imaging_data.argument.add.applycal.amp.parmdb             = dir_indep_parmdb
-{% else %}
-prepare_imaging_data.argument.add.applycal.parmdb                 = dir_indep_parmdb
-{% endif %}
-
-{% else %}
-
+{% if selfcal_ok %}
 # add with preapply sols (if done) and dir-dep sols
+
 {% if preapply_phase_cal %}
 prepare_imaging_data.argument.add.applycal.steps                  = [pf1,pf2,ps1,f1,f2,s1,s2]
 prepare_imaging_data.argument.add.applycal.pf1.parmdb             = pre_h5parm

@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, create_parmdb_map, expand_merged_parmdb_map, {% if preapply_phase_cal %} expand_preapply_h5parm_map, {% endif %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_old_sourcedb_map, expand_new_sourcedb_map, predict_and_difference_models, add_diff_model_to_empty_data]
+pipeline.steps = [update_mapfile_hosts, create_ms_map, create_msmulti_map, expand_merged_parmdb_map, {% if preapply_phase_cal %} expand_preapply_h5parm_map, {% endif %} create_full_skymodels_map, make_facet_skymodels_all, make_sourcedb_all_facet_sources, expand_old_sourcedb_map, expand_new_sourcedb_map, predict_and_difference_models, add_diff_model_to_empty_data]
 
 pipeline.pluginpath = {{ pipeline_dir }}/plugins
 
@@ -23,14 +23,6 @@ create_msmulti_map.control.hosts       = {{ hosts }}
 create_msmulti_map.control.files       = {{ ms_files_grouped }}
 create_msmulti_map.control.mapfile_dir = input.output.mapfile_dir
 create_msmulti_map.control.filename    = input_files_grouped.mapfile
-
-# create a mapfile with the direction-independent parmDBs/h5parms from supplied list, length = nfiles
-create_parmdb_map.control.kind        = plugin
-create_parmdb_map.control.type        = addListMapfile
-create_parmdb_map.control.hosts       = {{ hosts }}
-create_parmdb_map.control.files       = {{ dir_indep_parmDBs }}
-create_parmdb_map.control.mapfile_dir = input.output.mapfile_dir
-create_parmdb_map.control.filename    = dir_indep_instrument_parmdbs.mapfile
 
 # expand mapfile of the dir-dependent h5parm to all files, length = nfiles
 expand_merged_h5parm_map.control.kind             = plugin
@@ -94,11 +86,11 @@ expand_new_sourcedb_map.control.filename       = expand_new_sourcedbs.mapfile
 # compress weights only
 predict_and_difference_models.control.type                                        = dppp
 {% if preapply_phase_cal %}
-predict_and_difference_models.control.mapfiles_in                                 = [create_ms_map.output.mapfile,expand_new_sourcedb_map.output.mapfile,expand_preapply_h5parm_map.output.mapfile,expand_merged_h5parm_map.output.mapfile,expand_old_sourcedb_map.output.mapfile,create_parmdb_map.output.mapfile]
-predict_and_difference_models.control.inputkeys                                   = [msin,dir_dep_sourcedb,preh5parm,h5parm,dir_indep_sourcedb,dir_indep_parmdb]
+predict_and_difference_models.control.mapfiles_in                                 = [create_ms_map.output.mapfile,expand_new_sourcedb_map.output.mapfile,expand_preapply_h5parm_map.output.mapfile,expand_merged_h5parm_map.output.mapfile,expand_old_sourcedb_map.output.mapfile]
+predict_and_difference_models.control.inputkeys                                   = [msin,dir_dep_sourcedb,preh5parm,h5parm,dir_indep_sourcedb]
 {% else %}
-predict_and_difference_models.control.mapfiles_in                                 = [create_ms_map.output.mapfile,expand_new_sourcedb_map.output.mapfile,expand_merged_h5parm_map.output.mapfile,expand_old_sourcedb_map.output.mapfile,create_parmdb_map.output.mapfile]
-predict_and_difference_models.control.inputkeys                                   = [msin,dir_dep_sourcedb,h5parm,dir_indep_sourcedb,dir_indep_parmdb]
+predict_and_difference_models.control.mapfiles_in                                 = [create_ms_map.output.mapfile,expand_new_sourcedb_map.output.mapfile,expand_merged_h5parm_map.output.mapfile,expand_old_sourcedb_map.output.mapfile]
+predict_and_difference_models.control.inputkeys                                   = [msin,dir_dep_sourcedb,h5parm,dir_indep_sourcedb]
 {% endif %}
 predict_and_difference_models.argument.numthreads                                 = {{ max_cpus_per_io_proc_nfiles }}
 predict_and_difference_models.argument.msin.datacolumn                            = DATA
@@ -150,12 +142,7 @@ predict_and_difference_models.argument.pred_new.applycal.slow_phase.invert      
 predict_and_difference_models.argument.pred_new.operation                         = replace
 predict_and_difference_models.argument.subtract_old.type                          = predict
 predict_and_difference_models.argument.subtract_old.sourcedb                      = dir_indep_sourcedb
-predict_and_difference_models.argument.subtract_old.applycal.parmdb               = dir_indep_parmdb
 predict_and_difference_models.argument.subtract_old.operation                     = subtract
-{% if dirindeptype_is_h5parm %}
-predict_and_difference_models.argument.subtract_old.applycal.solset               = target
-predict_and_difference_models.argument.subtract_old.applycal.correction           = phase000
-{% endif %}
 {% if use_compression %}
 predict_and_difference_models.argument.msout.storagemanager                       = "Dysco"
 predict_and_difference_models.argument.msout.storagemanager.databitrate           = 0

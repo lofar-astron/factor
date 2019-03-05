@@ -57,10 +57,6 @@ class FacetSelfcal(Operation):
         for bandfiles in ms_files:
             for filename in bandfiles:
                 ms_files_single.append(filename)
-        dir_indep_parmDBs = []
-        for band in self.bands:
-            for parmdb in band.dirindparmdbs:
-                dir_indep_parmDBs.append(parmdb)
         skymodels = [band.skymodel_dirindep for band in self.bands]
         if self.direction.contains_target:
             loopcount = max(1, self.parset['calibration_specific']['target_max_selfcal_loops'])
@@ -113,7 +109,6 @@ class FacetSelfcal(Operation):
         self.parms_dict.update({'ms_files_single': ms_files_single,
                                 'ms_files_grouped': str(ms_files),
                                 'skymodels': skymodels,
-                                'dir_indep_parmDBs': dir_indep_parmDBs,
                                 'initial_selfcal_skymodel': initial_selfcal_skymodel,
                                 'initial_selfcal_parset': initial_selfcal_parset,
                                 'selfcal_caltype': selfcal_caltype,
@@ -128,8 +123,6 @@ class FacetSelfcal(Operation):
         # Add output datamaps to direction object for later use
         self.direction.input_files_single_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'input_files_single.mapfile')
-        self.direction.dir_indep_parmdbs_mapfile = os.path.join(self.pipeline_mapfile_dir,
-            'dir_indep_instrument_parmdbs.mapfile')
         self.direction.dir_indep_skymodels_mapfile = os.path.join(self.pipeline_mapfile_dir,
             'full_skymodels.mapfile')
         self.direction.dir_indep_facet_skymodels_mapfile = os.path.join(self.pipeline_mapfile_dir,
@@ -272,15 +265,10 @@ class FacetSubReset(Operation):
         for bandfiles in ms_files:
             for filename in bandfiles:
                 ms_files_single.append(filename)
-        dir_indep_parmDBs = []
-        for band in self.bands:
-            for parmdb in band.dirindparmdbs:
-                dir_indep_parmDBs.append(parmdb)
         skymodels = [band.skymodel_dirindep for band in self.bands]
         self.parms_dict.update({'ms_files_single': ms_files_single,
                                 'ms_files_grouped': str(ms_files),
-                                'skymodels': skymodels,
-                                'dir_indep_parmDBs': dir_indep_parmDBs})
+                                'skymodels': skymodels})
 
 
     def finalize(self):
@@ -361,15 +349,10 @@ class FacetImage(Operation):
         for bandfiles in ms_files:
             for filename in bandfiles:
                 ms_files_single.append(filename)
-        dir_indep_parmDBs = []
-        for band in self.bands:
-            for parmdb in band.dirindparmdbs:
-                dir_indep_parmDBs.append(parmdb)
         skymodels = [band.skymodel_dirindep for band in self.bands]
         self.parms_dict.update({'ms_files_single': ms_files_single,
                                 'ms_files_grouped' : str(ms_files),
-                                'skymodels': skymodels,
-                                'dir_indep_parmDBs': dir_indep_parmDBs})
+                                'skymodels': skymodels})
 
 
     def finalize(self):

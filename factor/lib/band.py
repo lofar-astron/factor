@@ -22,8 +22,6 @@ class Band(object):
         Filename of MS
     factor_working_dir : str
         Full path of working directory
-    dirindparmdb : str
-        Name of direction-independent instrument parmdb (relative to MSfile)
     skymodel_dirindep : str
         Full path of direction-independent sky model
     local_dir : str
@@ -42,15 +40,14 @@ class Band(object):
         to be kept
 
     """
-    def __init__(self, MSfiles, factor_working_dir, dirindparmdb,
-        skymodel_dirindep=None, local_dir=None, test_run=False, check_files=True,
+    def __init__(self, MSfiles, factor_working_dir, skymodel_dirindep=None,
+        local_dir=None, test_run=False, check_files=True,
         process_files=False, chunk_size_sec=2400.0, use_compression=False,
         min_fraction=0.5):
 
         self.files = MSfiles
         self.msnames = [ MS.split('/')[-1] for MS in self.files ]
         self.working_dir = factor_working_dir
-        self.dirindparmdbs = [ os.path.join(MS, dirindparmdb) for MS in self.files ]
         self.numMS = len(self.files)
 
         # Get the frequency info and set name
@@ -127,7 +124,7 @@ class Band(object):
                 sys.exit(1)
 
             # cut input files into chunks if needed
-            self.chunk_input_files(chunk_size_sec, dirindparmdb, local_dir=local_dir,
+            self.chunk_input_files(chunk_size_sec, local_dir=local_dir,
                                    test_run=test_run, use_compression=use_compression,
                                    min_fraction=min_fraction)
             if len(self.files) == 0:
@@ -161,127 +158,6 @@ class Band(object):
                 self.log.debug("Using Skymodel: {}".format(os.path.basename(skymodel_dirindep)))
 
 
-    def check_parmdb(self):
-        """
-        Checks the dir-indep instrument parmdb for various problems
-        """
-        for pdb_id in xrange(self.numMS):
-            # Check for special BBS table name "instrument"
-            if os.path.basename(self.dirindparmdbs[pdb_id]) == 'instrument':
-                self.dirindparmdbs[pdb_id] += '_dirindep'
-                if not os.path.exists(self.dirindparmdbs[pdb_id]):
-                    if not os.path.exists(os.path.join(self.files[pdb_id], 'instrument')):
-                        self.log.critical('Direction-independent instument parmdb not found '
-                            'for band {0}'.format(self.files[pdb_id]))
-                        sys.exit(1)
-                    self.log.warn('Direction-independent instument parmdb for band {0} is '
-                        'named "instrument". Copying to "instrument_dirindep" so that BBS '
-                        'will not overwrite this table...'.format(self.files[pdb_id]))
-                    os.system('cp -r {0} {1}'.format(os.path.join(self.files[pdb_id],
-                        'instrument'), self.dirindparmdbs[pdb_id]))
-            if not os.path.exists(self.dirindparmdbs[pdb_id]):
-                self.log.critical('Direction-independent instrument parmdb "{0}" not found '
-                    'for band {1}'.format(self.dirindparmdbs[pdb_id], self.files[pdb_id]))
-                sys.exit(1)
-
-            # Check whether this a parmdb or h5parm
-            try:
-                pdb = lofar.parmdb.parmdb(self.dirindparmdbs[pdb_id])
-                self.dirindeptype_is_h5parm = False
-            except:
-                self.dirindeptype_is_h5parm = True
-                break
-
-            # Check whether there are ampl/phase or real/imag
-            try:
-                pdb = lofar.parmdb.parmdb(self.dirindparmdbs[pdb_id])
-                solname = pdb.getNames()[0]
-            except IndexError:
-                self.log.critical('Direction-independent instument parmdb appears to be empty '
-                            'for band {0}'.format(self.files[pdb_id]))
-                sys.exit(1)
-            if solname[0:4] != 'Gain':
-                self.log.critical('Direction-independent instument parmdb contains not-handled value {0} '
-                                  'for band {1}'.format(solname,self.files[pdb_id]))
-                sys.exit(1)
-
-            if 'Real' in solname or 'Imag' in solname:
-                # Convert real/imag to phasors
-                self.log.warn('Direction-independent instument parmdb for band {0} contains '
-                    'real/imaginary values. Converting to phase/amplitude...'.format(self.files[pdb_id]))
-                self.convert_parmdb_to_phasors_id(pdb_id)
-            pdb = False
-
-            # Check that there aren't extra default values in the parmdb, as this
-            # confuses DPPP
-            pdb = lofar.parmdb.parmdb(self.dirindparmdbs[pdb_id])
-            solname = pdb.getNames()[0]
-            defvals = pdb.getDefValues()
-            for v in defvals:
-                if 'Ampl' not in v and 'Phase' not in v:
-                    pdb.deleteDefValues(v)
-            pdb.flush()
-
-
-    def convert_parmdb_to_phasors_id(self, pdb_id=0):
-        """
-        Converts a single instrument parmdb from real/imag to phasors
-
-        Parameters
-        ----------
-        pdb_id : int
-            index of the instrument parmdb to convert
-        """
-        phasors_parmdb_file = self.dirindparmdbs[pdb_id] + '_phasors'
-        pdb_in = lofar.parmdb.parmdb(self.dirindparmdbs[pdb_id])
-        pdb_out = lofar.parmdb.parmdb(phasors_parmdb_file, create=True)
-
-        # Check parmdb for non-handled values
-        solnames = pdb_in.getNames()
-        for name in solnames:
-            if name[0:9] != 'Gain:0:0:' and name[0:9] != 'Gain:1:1:':
-                self.log.critical('Direction-independent instument parmdb contains not-handled value {0} '
-                                  'for band {1}'.format(name,self.files[pdb_id]))
-                sys.exit(1)
-
-        # Get station names
-        stations = set([s.split(':')[-1] for s in pdb_in.getNames()])
-
-        # Calculate and store phase and amp values for each station
-        parms = pdb_in.getValuesGrid('*')
-        for i, s in enumerate(stations):
-            if i == 0:
-                freqs = np.copy(parms['Gain:0:0:Imag:{}'.format(s)]['freqs'])
-                freqwidths = np.copy(parms['Gain:0:0:Imag:{}'.format(s)]['freqwidths'])
-                times = np.copy(parms['Gain:0:0:Imag:{}'.format(s)]['times'])
-                timewidths = np.copy(parms['Gain:0:0:Imag:{}'.format(s)]['timewidths'])
-
-            valIm_00 = np.copy(parms['Gain:0:0:Imag:{}'.format(s)]['values'][:, 0])
-            valIm_11 = np.copy(parms['Gain:1:1:Imag:{}'.format(s)]['values'][:, 0])
-            valRe_00 = np.copy(parms['Gain:0:0:Real:{}'.format(s)]['values'][:, 0])
-            valRe_11 = np.copy(parms['Gain:1:1:Real:{}'.format(s)]['values'][:, 0])
-
-            valAmp_00 = np.sqrt((valRe_00**2) + (valIm_00**2))
-            valAmp_11 = np.sqrt((valRe_11**2) + (valIm_11**2))
-            valPh_00 = np.arctan2(valIm_00, valRe_00)
-            valPh_11 = np.arctan2(valIm_11, valRe_11)
-
-            pdb_out.addValues({'Gain:0:0:Phase:{}'.format(s): {'freqs': freqs, 'freqwidths':
-                freqwidths, 'times': times, 'timewidths': timewidths, 'values': valPh_00[:,np.newaxis]}})
-            pdb_out.addValues({'Gain:1:1:Phase:{}'.format(s): {'freqs': freqs, 'freqwidths':
-                freqwidths, 'times': times, 'timewidths': timewidths, 'values': valPh_11[:,np.newaxis]}})
-            pdb_out.addValues({'Gain:0:0:Ampl:{}'.format(s): {'freqs': freqs, 'freqwidths':
-                freqwidths, 'times': times, 'timewidths': timewidths, 'values': valAmp_00[:,np.newaxis]}})
-            pdb_out.addValues({'Gain:1:1:Ampl:{}'.format(s): {'freqs': freqs, 'freqwidths':
-                freqwidths, 'times': times, 'timewidths': timewidths, 'values': valAmp_11[:,np.newaxis]}})
-
-        # Write values
-        pdb_out.flush()
-        pdb_in = False
-        pdb_out = False
-        self.dirindparmdbs[pdb_id] = phasors_parmdb_file
-
-
     def check_freqs(self):
         """
         Checks for gaps in the frequency channels and that all MSs have the same frequency axis
@@ -305,21 +181,19 @@ class Band(object):
         self.log.debug('Missing channels: {}'.format(self.missing_channels))
 
 
-    def chunk_input_files(self, chunksize, dirindparmdb, local_dir=None,
-        test_run=False, min_fraction=0.5, use_compression=False):
+    def chunk_input_files(self, chunksize, local_dir=None, test_run=False,
+        min_fraction=0.5, use_compression=False):
         """
         Make copies of input files that are smaller than 2*chunksize
 
         Chops off chunk of chunksize length until remainder is smaller than 2*chunksize
-        Generates new self.files, self.msnames, and self.dirindparmdbs
+        Generates new self.files and self.msnames.
         The direction independent parmDBs are fully copied into the new MSs
 
         Parameters
         ----------
         chunksize : float
             length of a chunk in seconds
-        dirindparmdb : str
-            Name of direction-independent instrument parmdb inside the new chunk files
         local_dir : str
             Path to local scratch directory for temp output. The file is then
             copied to the original output directory
@@ -333,7 +207,6 @@ class Band(object):
 
         """
         newfiles = []
-        newdirindparmdbs = []
         for MS_id in xrange(self.numMS):
             nchunks = 1
             tab = pt.table(self.files[MS_id], ack=False)
@@ -373,11 +246,9 @@ class Band(object):
                 pool = multiprocessing.Pool()
                 results = pool.map(process_chunk_star,
                     itertools.izip(itertools.repeat(self.files[MS_id]),
-                    itertools.repeat(self.dirindparmdbs[MS_id]),
                     range(nchunks), itertools.repeat(nchunks),
                     itertools.repeat(mystarttime),
                     itertools.repeat(myendtime), itertools.repeat(chunksize),
-                    itertools.repeat(dirindparmdb),
                     itertools.repeat(colnames_to_keep),
                     itertools.repeat(newdirname),
                     itertools.repeat(local_dir),
@@ -389,12 +260,10 @@ class Band(object):
                 for chunk_file, chunk_parmdb in results:
                     if bool(chunk_file) and bool(chunk_parmdb) :
                         newfiles.append(chunk_file)
-                        newdirindparmdbs.append(chunk_parmdb)
             else:
                 # Make symlinks for the files
                 chunk_name = '{0}_chunk0.ms'.format(os.path.splitext(os.path.basename(self.files[MS_id]))[0])
                 chunk_file = os.path.join(newdirname, chunk_name)
-                newdirindparmdb = os.path.join(chunk_file, dirindparmdb)
 
                 if not os.path.exists(chunk_file):
                     # It's a "new" file, check that the chunk has at least min_fraction
@@ -407,21 +276,16 @@ class Band(object):
                         continue
                     os.symlink(self.files[MS_id], chunk_file)
 
-                if not os.path.exists(newdirindparmdb):
-                    os.symlink(self.dirindparmdbs[MS_id], newdirindparmdb)
-
                 newfiles.append(chunk_file)
-                newdirindparmdbs.append(newdirindparmdb)
 
         # Check that each file has at least min_fraction unflagged data. If not, remove
         # it from the file list.
         # This may be come an option, so I kept the code for the time being. AH 14.3.2016
         check_all_unflagged = False
         if check_all_unflagged:
-            for f, p in zip(newfiles[:], newdirindparmdbs[:]):
+            for f in newfiles[:]:
                 if self.find_unflagged_fraction(f) < min_fraction:
                     newfiles.remove(f)
-                    newdirindparmdbs.remove(p)
                     self.log.debug('Skipping file {0} in further processing '
                         '(unflagged fraction < {1}%)'.format(f, min_fraction*100.0))
 
@@ -429,7 +293,6 @@ class Band(object):
             return
         self.files = newfiles
         self.msnames = [ os.path.basename(MS) for MS in self.files ]
-        self.dirindparmdbs = newdirindparmdbs
         self.numMS = len(self.files)
 
 
@@ -544,7 +407,7 @@ def process_chunk_star(inputs):
     return process_chunk(*inputs)
 
 
-def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, chunksize, dirindparmdb,
+def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, chunksize,
     colnames_to_keep, newdirname, local_dir=None, min_fraction=0.1, use_compression=True):
     """
     Processes one time chunk of input ms_file and returns new file names
@@ -565,8 +428,6 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
         End time of MS file
     chunksize : float
         length of a chunk in seconds
-    dirindparmdb : str
-        Name of direction-independent instrument parmdb inside the new chunk files
     colnames_to_keep : list
         List of column names to keep in output chunk
     newdirname : str
@@ -584,8 +445,6 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
     -------
     chunk_file : str
         Filename of chunk MS or None
-    newdirindparmdb : str
-        Filename of direction-independent instrument parmdb for chunk_file or None
 
     """
     log = logging.getLogger('factor:MS-chunker')
@@ -634,8 +493,6 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
             copy = True
     else:
         copy = True
-
-    newdirindparmdb = os.path.join(chunk_file, dirindparmdb)
 
     if copy:
         log.debug('Going to copy {0} samples to file {1}'.format(str(len(seltab)),chunk_file))
@@ -715,7 +572,6 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
                 shutil.rmtree(chunk_file)
             chunk_file = chunk_file_original
 
-        shutil.copytree(ms_parmdb, newdirindparmdb)
     else:
         log.debug('Chunk {} exists with correct length, not copying!'.format(chunk_name))
 
@@ -732,4 +588,4 @@ def process_chunk(ms_file, ms_parmdb, chunkid, nchunks, mystarttime, myendtime, 
         tab.close()
         return (None, None)
 
-    return (chunk_file, newdirindparmdb)
+    return chunk_file
