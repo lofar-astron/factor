@@ -546,16 +546,6 @@ def _set_up_bands(parset, test_run=False):
         log.info('Exiting...')
         sys.exit(1)
 
-    # Check that all bands use the same format
-    for i, band in enumerate(bands):
-        if i == 0:
-            dirindeptype_is_h5parm = band.dirindeptype_is_h5parm
-        else:
-            if band.dirindeptype_is_h5parm != dirindeptype_is_h5parm:
-                log.error('All dir-indep parameter files must be of the same type (parmdb or h5parm)')
-                log.info('Exiting...')
-                sys.exit(1)
-
     return bands
 
 
