@@ -14,7 +14,7 @@ outlierpeel
 This operation peels an outlier source and subtracts it. Since no self calibration is done during peeling, a sky model of the source must either be supplied by the user or must be one of those included in Factor (see ``factor/skymodels`` in the Factor installation for a list of available ones). To specify that a source is an outlier source and should be peeled, set :term:`outlier_source` to ``True`` in the directions file.
 
 Primary products (in ``results/outlierpeel/direction_name/``):
-    * ``*merge_selfcal_parmdbs`` - the (unnormalized) self-calibration solutions table used to subtract the source
+    * ``combined_solutions_unnorm.h5`` - the (unnormalized) self-calibration solutions table used to subtract the source
     * ``*make_selfcal_plots*.png`` - plots of the self-calibration solutions
 
 
@@ -26,8 +26,8 @@ facetpeel
 This operation peels a facet calibrator. It is the same as the outlierpeel operation except that the facet is imaged (without adding back the calibrator) to improve the subtraction.
 
 Primary products (in ``results/facetpeel/direction_name/``):
-    * ``*merge_selfcal_parmdbs`` - the (unnormalized) self-calibration solutions table used to subtract the source
-    * ``*merge_normalized_selfcal_parmdbs`` - the (normalized) self-calibration solutions table used to correct the facet data before imaging
+    * ``combined_solutions_unnorm.h5`` - the (unnormalized) self-calibration solutions table used to subtract the source
+    * ``combined_solutions_norm.h5`` - the (normalized) self-calibration solutions table used to correct the facet data before imaging
     * ``*make_selfcal_plots*.png`` - plots of the self-calibration solutions
     * ``*image_full*`` - facet image made with part of the total bandwidth (not made if direction is a patch)
     * ``*wsclean_pre-image.fits`` - residual image of field for middle band before subtraction of new model
@@ -46,7 +46,7 @@ This operation self calibrates a facet calibrator and images the facet with part
     The facet image is made only for facet-type directions (i.e., not the small patch-type directions that lie outside of the faceting radius). It is typically made with only a fraction of the total bandwidth (but distributed to sample the full bandwidth; see :term:`fractional_bandwidth_selfcal_facet_image` for details) and is used to improve the subtraction of non-calibrator sources in the facet. It is not the final facet image (which is made in the facetimage operation).
 
 Primary products (in ``results/facetselfcal/direction_name/``):
-    * ``*merge_selfcal_parmdbs`` - the (normalized) self-calibration solutions table, with dTEC, CommonScalarPhase, and Gain solutions for all times and frequencies
+    * ``combined_solutions.h5`` - the (normalized) self-calibration solutions table, with dTEC, CommonScalarPhase, and Gain solutions for all times and frequencies
     * ``*make_selfcal_plots*.png`` - plots of the self-calibration solutions
     * ``*wsclean_image*.fits`` - self-calibration images (FITS format)
     * ``*wsclean_image*.png`` - self-calibration images (png format)

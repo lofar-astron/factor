@@ -68,6 +68,10 @@ Columns
     peel_skymodel
         The sky model to use during peeling (if the :term:`outlier_source` column is set to ``True`` or if the calibrator flux density exceeds that set with the :term:`peel_flux_Jy` option in the parset).
 
+    .. note::
+
+         All sources in the sky model must be grouped into a single patch.
+
     outlier_source
         If ``True``, the calibrator will be peeled using the sky model given in the :term:`peel_skymodel` column and self calibration will not be done.
 
