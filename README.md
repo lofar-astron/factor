@@ -9,15 +9,19 @@ multiple nodes (with a shared file system). It requires only modest resources
 (at least 32 GB of memory and 1 TB of disk space).
 
 
-What's New Since v1.3
----------------------
+What's New Since v1.4 (v2.0 prerelease)
+---------------------------------------
 
 * Updated to use WSClean v2.6. Earlier versions are no longer supported
-* Support for Prefactor v3.0 has been added (earlier versions are supported as well)
-* Calibration is now done with the improved solver in DPPP, resulting in improved
-results
+* Prefactor v3.0 is now required for preprocessing (earlier versions are no longer supported)
+* Calibration is now done with the improved TEC solver in DPPP
 * Solutions are now stored in H5parm format instead of ParmDB format; hence, LoSoTo is
 now required
+
+
+What's New in v1.4
+------------------
+
 * Options have been added to allow the scales used by WSClean during
 clean to be specified (`selfcal_multiscale_scales_pixel` and
 `facet_multiscale_scales_pixel` under `[imaging]`)

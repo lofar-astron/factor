@@ -47,11 +47,6 @@ The available options are described below under their respective sections.
     exit_on_bad_band
         Exit if a band is has too little unflagged data (default = False)
 
-    parmdb_name
-        Parmdb name for dir-indep. selfcal solutions (stored inside the input
-        band measurement sets, so path should be relative to those; default =
-        ``instrument_directionindependent``).
-
     skymodel_extension
         Extension that when concatenated with the "extension-stripped" MS path gives
         a path that is checked if it contains a skymodel. The default finds the skymodel
