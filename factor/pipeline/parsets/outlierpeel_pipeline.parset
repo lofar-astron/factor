@@ -384,11 +384,11 @@ smooth_amps.argument.normalize = False
 
 # Now smooth the amplitude solutions and normalize them (for use later during
 # imaging of facets for peeled calibrators), length = 1
-smooth_amps.control.type       = {{ smooth_amps_task }}
-smooth_amps.control.mapfile_in = combine_slow_gains1.output.mapfile
-smooth_amps.control.inputkey   = amph5parm
-smooth_amps.argument.flags     = [amph5parm]
-smooth_amps.argument.normalize = True
+smooth_amps_normalized.control.type       = {{ smooth_amps_task }}
+smooth_amps_normalized.control.mapfile_in = combine_slow_gains1.output.mapfile
+smooth_amps_normalized.control.inputkey   = amph5parm
+smooth_amps_normalized.argument.flags     = [amph5parm]
+smooth_amps_normalized.argument.normalize = True
 
 {% if selfcal_local_dir is not none %}
 # remove concat_data files, length = ntimes * num_cal_blocks
