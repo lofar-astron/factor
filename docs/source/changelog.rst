@@ -3,7 +3,17 @@
 Changelog
 =========
 
-Changes since version 1.3:
+Version 2.0
+-----------
+
+    * Prefactor v3.0 is now required for preprocessing. Earlier versions are no longer supported
+    * Updated to use WSClean v2.6 (including IDG support). Earlier versions are no longer supported
+    * Calibration is now done with the improved TEC solver in DPPP
+    * Solutions are now stored in H5parm format instead of ParmDB format; hence, LoSoTo is now required
+
+
+Version 1.4
+-----------
 
     * Options have been added to allow the scales used by WSClean during clean to be specified (:term:`selfcal_multiscale_scales_pixel` and :term:`facet_multiscale_scales_pixel` under `[imaging]`)
     * The `atrous_do` column in the directions file has been renamed to :term:`mscale_selfcal_do`, as this name better describes its purpose
@@ -12,8 +22,6 @@ Changes since version 1.3:
 
 Version 1.3
 -----------
-
-Changes since version 1.2:
 
     * Updated to use WSClean v2.4 and LSMTool v1.2.0
     * Preaveraging is now done in frequency as well as in time. This preaveraging generally improves the S/N of the CS slow-gain solutions for fainter sources by a factor of ~ 2
@@ -26,8 +34,6 @@ Changes since version 1.2:
 Version 1.2
 -----------
 
-Changes since version 1.1:
-
     * The combination of flagging ranges specified by the :term:`flag_abstime`, :term:`flag_baseline`, and :term:`flag_freqrange` options can now be set with the :term:`flag_expr` option
     * An unarchiving tool (``unarchivefactor``, see :ref:`unarchivefactor`) has been added that can unarchive an archive made with ``archivefactor``
     * An option (`update_selfcal_clean_regions``) has been added that controls whether user-supplied clean masks are updated during selfcal
@@ -38,8 +44,6 @@ Changes since version 1.1:
 
 Version 1.1
 -----------
-
-Changes since version 1.0:
 
     * The subtraction of sources after self calibration has been improved
     * The baseline-dependent averaging used during imaging has been reduced, as the previous averaging caused significant smearing away from the facet center

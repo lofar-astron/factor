@@ -3,7 +3,7 @@ Module that stores the version and changelog
 """
 
 # Version number
-__version__ = '1.3'
+__version__ = '2.0'
 
 # Change log
 def changelog():
@@ -11,15 +11,22 @@ def changelog():
     FACTOR Changelog.
     ----------------------------------------------------------------------------
 
-    18/07/2017
+    03/03/2019 - Version 2.0
+
+        - Prefactor v3.0 is now required for preprocessing. Earlier versions are
+        no longer supported
+        - Updated to use WSClean v2.6. Earlier versions are no longer supported
+        - Calibration is now done with the improved TEC solver in DPPP
+        - Solutions are now stored in H5parm format instead of ParmDB format;
+        hence, LoSoTo is now required
+
+    03/03/2019 - Version 1.4
 
         - Options have been added to allow the scales used by WSClean during
         clean to be specified (selfcal_multiscale_scales_pixel and
         facet_multiscale_scales_pixel under [imaging])
-
         - The atrous_do column in the directions file has been renamed to
         mscale_selfcal_do, as this name better describes its purpose
-
         - Improved handling of flagged solutions during smoothing of the
         amplitude solutions
 
