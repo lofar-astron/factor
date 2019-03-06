@@ -13,7 +13,7 @@ import scipy.ndimage
 from scipy import interpolate
 
 
-def main(mosaicfits, pbfits, outroot):
+def main(mosaicfits, pbfits, nopbfits, outroot):
     """
     Corrects mosaic image with primary beam
 
@@ -22,7 +22,9 @@ def main(mosaicfits, pbfits, outroot):
     mosaicfits : str
         Filename of mosaic image
     pbfits : str
-        Filename of zeroed avgpb image
+        Filename of pb-corrected image
+    nopbfits : str
+        Filename of pb-uncorrected image
     outroot : str
         Filename root of output files (outroot.pbcor.fits and outroot.pbcut.fits)
 
@@ -33,6 +35,8 @@ def main(mosaicfits, pbfits, outroot):
         raise Exception, "missing file: {m}".format(m=mosaicfits)
     if not os.path.exists(pbfits):
         raise Exception, "missing file: {m}".format(m=pbfits)
+    if not os.path.exists(nopbfits):
+        raise Exception, "missing file: {m}".format(m=nopbfits)
 
     mosaicpbfits = '{0}.pbcor.fits'.format(outroot)
     if os.path.isfile(mosaicpbfits):
@@ -70,7 +74,9 @@ def main(mosaicfits, pbfits, outroot):
     if pbhead['CDELT4'] == 0.0:
         # Causes WCS init problems if zero
         pbhead['CDELT4'] = -8.236827542606E+07
-    pbcordat = pf.getdata(pbfits)
+    pbdat = pf.getdata(pbfits)
+    nopbdat = pf.getdata(nopbfits)
+    pbcordat = nopbdat / pbdat
     pbhdulist = pf.open(pbfits)
     pbwcs = pywcs.WCS(pbhead)
 
@@ -162,21 +168,21 @@ def main(mosaicfits, pbfits, outroot):
 
     Pcut = 0.4  # cut at Pcut power point of PB
     if rescale:
-        pbcordat_resampled[pbcordat_resampled**0.5<Pcut] = np.nan  # set nan beyond
-        mosaiccut[pbcordat_resampled**0.5<Pcut] = np.nan  # set nan beyond
+        pbcordat_resampled[pbcordat_resampled<Pcut] = np.nan  # set nan beyond
+        mosaiccut[pbcordat_resampled<Pcut] = np.nan  # set nan beyond
         mosaiccut[np.isnan(pbcordat_resampled)] = np.nan  # set nan beyond
-        mosaiccor = mosaicdat/(pbcordat_resampled**0.5)   #assuming awimager output is avgpb
+        mosaiccor = mosaicdat/(pbcordat_resampled)   #assuming awimager output is avgpb
 
         if os.path.isfile(pb_rescaled_fits):
             print "warning: overwriting {m}".format(m=pb_rescaled_fits)
             os.system("rm -rf %s" %(pb_rescaled_fits))
-        pf.writeto(pb_rescaled_fits, pbcordat_resampled**0.5, header=mosaichead)
+        pf.writeto(pb_rescaled_fits, pbcordat_resampled, header=mosaichead)
     else:
-        pbcordat[pbcordat**0.5<Pcut] = np.nan
-        mosaiccut[pbcordat**0.5<Pcut] = np.nan
+        pbcordat[pbcordat<Pcut] = np.nan
+        mosaiccut[pbcordat<Pcut] = np.nan
         mosaiccut[np.isnan(pbcordat)] = np.nan
 
-        mosaiccor = mosaicdat/(pbcordat**0.5)   #assuming awimager output is avgpb
+        mosaiccor = mosaicdat/pbcordat   #assuming awimager output is avgpb
 
     pf.writeto(mosaicpbfits, mosaiccor, header=mosaichead)
     pf.writeto(mosaicpbcutfits, mosaiccut, header=mosaichead)
@@ -186,8 +192,9 @@ if __name__ == '__main__':
     descriptiontext = "Apply a primary-beam correction to a mosaic image.\n"
     parser = argparse.ArgumentParser(description=descriptiontext, formatter_class=RawTextHelpFormatter)
     parser.add_argument('mosaicfits', help='filenames of mosaic image')
-    parser.add_argument('pbfits', help='filenames of pbcor image')
+    parser.add_argument('pbfits', help='filenames of pb corrected image')
+    parser.add_argument('nopbfits', help='filenames of pb uncorrected image')
     parser.add_argument('outroot', help='Output root name of corrected mosaic fits file')
 
     args = parser.parse_args()
-    main(args.mosaicfits, args.pbfits, args.outroot)
+    main(args.mosaicfits, args.pbfits, args.nopbfits, args.outroot)

@@ -325,18 +325,14 @@ def archive(parset_file, directions, dir_output, full=False, archive_subdata=Fal
 
         if archive_inst:
             log.info('Archiving instrument tables for direction {}...'.format(d.name))
-            if hasattr(d, 'converted_parmdb_mapfile'):
-                file_list = check_existing_files(d.converted_parmdb_mapfile)
-            else:
-                file_list = []
-            if hasattr(d, 'preapply_parmdb_mapfile'):
+            if hasattr(d, 'preapply_h5parm_mapfile'):
                 file_list.append(check_existing_files(d.preapply_parmdb_mapfile))
             if len(file_list) == 0:
-                log.warning('No instrument tables found for direction {}.'.format(d.name))
+                log.warning('No h5parms found for direction {}.'.format(d.name))
             else:
-                inst_table_dir = os.path.join(dir_output, 'instrument_tables', d.name)
+                inst_table_dir = os.path.join(dir_output, 'h5parms', d.name)
                 for i, f in enumerate(file_list):
-                    log.info('  Copying instrument table file {0} of {1}...'.format(i+1, len(file_list)))
+                    log.info('  Copying h5parm file {0} of {1}...'.format(i+1, len(file_list)))
                     copy(f, inst_table_dir, clobber)
 
         if archive_plots:
