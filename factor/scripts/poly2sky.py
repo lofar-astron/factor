@@ -132,11 +132,9 @@ if __name__ == '__main__':
     parser.add_argument('fits_model_root', help='Root of model images')
     parser.add_argument('ms_file', help='Filename of MS for which sky model is to be made')
     parser.add_argument('skymodel', help='Filename of output sky model')
-    parser.add_argument('-f' '--fits_mask', help='Filename of fits mask', type=str, default=None)
+    parser.add_argument('-f', '--fits_mask', help='Filename of fits mask', type=str, default=None)
     parser.add_argument('-p', '--min_peak_flux_jy', help='Minimum absolute value of flux in Jy', type=float, default=0.0001)
     parser.add_argument('-r', '--max_residual_jy', help='Maximum acceptible total residual absolute flux in Jy', type=float, default=0.0)
-    parser.add_argument('-i', '--interp', help='Interpolation method', type=str, default='linear')
     args = parser.parse_args()
     main(args.fits_model_root, args.ms_file, args.skymodel, fits_mask=args.fits_mask,
-        min_peak_flux_jy=args.min_peak_flux_jy, max_residual_jy=args.max_residual_jy,
-        interp=args.interp)
+        min_peak_flux_jy=args.min_peak_flux_jy, max_residual_jy=args.max_residual_jy)

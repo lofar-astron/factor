@@ -20,7 +20,7 @@ def changelog():
         - Solutions are now stored in H5parm format instead of ParmDB format;
         hence, LoSoTo is now required
 
-    03/03/2019 - Version 1.4
+    07/03/2019 - Version 1.4
 
         - Options have been added to allow the scales used by WSClean during
         clean to be specified (selfcal_multiscale_scales_pixel and

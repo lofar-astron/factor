@@ -109,7 +109,7 @@ def main(fast_parmdb, slow_parmdb, output_file, freqstep=1, preapply_parmdb=None
     # Identify any gaps in time (frequency gaps are not allowed), as we need to handle
     # each section separately if gaps are present
     delta_times = fast_times[1:] - fast_times[:-1]
-    gaps = np.where(delta_times > fast_timewidths[:-1]*2.)
+    gaps = np.where( np.logical_or(delta_times > fast_timewidths[:-1]*2., np.array([d%99 for d in range(delta_times.shape[0])]) == 0) )
     gaps_ind = gaps[0] + 1
     gaps_ind = np.append(gaps_ind, np.array([len(fast_times)]))
 
