@@ -3,6 +3,9 @@
 Changelog
 =========
 
+Version 1.4
+-----------
+
 Changes since version 1.3:
 
     * Options have been added to allow the scales used by WSClean during clean to be specified (:term:`selfcal_multiscale_scales_pixel` and :term:`facet_multiscale_scales_pixel` under `[imaging]`)

@@ -9,8 +9,8 @@ multiple nodes (with a shared file system). It requires only modest resources
 (at least 32 GB of memory and 1 TB of disk space).
 
 
-What's New Since v1.3
----------------------
+What's New in v1.4
+------------------
 
 * Options have been added to allow the scales used by WSClean during
 clean to be specified (`selfcal_multiscale_scales_pixel` and
@@ -22,41 +22,7 @@ clean to be specified (`selfcal_multiscale_scales_pixel` and
 * Improved handling of flagged solutions during smoothing of the amplitude
 solutions
 
-
-What's New in v1.3
-------------------
-
-* Updated to use WSClean 2.4. Earlier versions are no longer supported
-* Preaveraging is now done in frequency as well as in time. This
-preaveraging generally improves the S/N of the CS slow-gain solutions for
-fainter sources by a factor of ~ 2
-* An option (`min_fraction_per_band`) has been added that sets the
-minimum allowed unflagged fraction per band
-* WSClean's automasking feature is now used during imaging. The old
-image-mask-image sequence is no longer used during self calibration, but can
-still be used during the final, full-bandwidth facet imaging if
-`automask_facet_image = False` under the `[imaging]` section of the parset. The
-option `update_selfcal_clean_regions` has been removed, as it
-no longer applies (PyBDSF masking has been removed from selfcal)
-* The combination of flagging ranges specified by the `flag_abstime`,
-`flag_baseline`, and `flag_freqrange` options can now be set with the
-`flag_expr` option
-
-
-What's New in v1.2
-------------------
-
-* An unarchiving tool (`unarchivefactor`) has been added that can unarchive an
-archive made with `archivefactor`
-* An option (`update_selfcal_clean_regions`) has been added that controls
-whether user-supplied clean masks are updated during selfcal
-* Intersections in user-supplied clean masks are now detected and an error raised
-* An archiving tool (`archivefactor`) has been added that can archive the
-subtracted datasets, the sky models, the instrument tables, the selfcal plots,
-and the calibrated data for one or more directions
-* Polynomial sky models generated directly by WSClean during imaging are used
-for prediction, resulting in improved and faster subtraction of extended
-sources. Due to this change, Factor now requires WSClean v2.3 or higher
+* Many bug fixes
 
 
 Installation

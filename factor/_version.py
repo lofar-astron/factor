@@ -3,7 +3,7 @@ Module that stores the version and changelog
 """
 
 # Version number
-__version__ = '1.3'
+__version__ = '1.4'
 
 # Change log
 def changelog():
@@ -11,7 +11,7 @@ def changelog():
     FACTOR Changelog.
     ----------------------------------------------------------------------------
 
-    18/07/2017
+    07/03/2019 - Version 1.4
 
         - Options have been added to allow the scales used by WSClean during
         clean to be specified (selfcal_multiscale_scales_pixel and
