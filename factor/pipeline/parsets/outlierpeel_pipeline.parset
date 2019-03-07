@@ -445,7 +445,6 @@ make_selfcal_plots.control.mapfile_in = combine_normalized_h5parms.output.mapfil
 make_selfcal_plots.control.inputkeys  = h5parm
 make_selfcal_plots.control.outputkey  = plots_root
 make_selfcal_plots.argument.flags     = [h5parm,plots_root]
-make_selfcal_plots.argument.fourpol   = {{ fourpol }}
 
 # expand the merged parmDB to all files, length = nfiles
 expand_unnormalized_merged_h5parm_map.control.kind             = plugin
