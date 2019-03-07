@@ -890,45 +890,64 @@ expand_sourcedb_new_facet_sources.control.filename       = expand_sourcedb_new_f
 
 # predict the old and new models and subtract the old one from the new one, length = nfiles
 # compress weights only
-predict_and_difference_models.control.type                                 = dppp
+predict_and_difference_models.control.type                                     = dppp
 {% if not is_patch %}
-predict_and_difference_models.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_sourcedb_new_facet_sources.output.mapfile,expand_normalized_merged_h5parm_map.output.mapfile,expand_cal_sourcedb_map.output.mapfile,expand_unnormalized_merged_h5parm_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile]
-predict_and_difference_models.control.inputkeys                            = [msin,facet_sourcedb,dir_dep_parmdb_normalized,cal_sourcedb,dir_dep_parmdb_unnormalized,dir_indep_sourcedb]
+predict_and_difference_models.control.mapfiles_in                              = [create_ms_map.output.mapfile,expand_sourcedb_new_facet_sources.output.mapfile,expand_normalized_merged_h5parm_map.output.mapfile,expand_cal_sourcedb_map.output.mapfile,expand_unnormalized_merged_h5parm_map.output.mapfile,expand_sourcedb_all_facet_sources.output.mapfile]
+predict_and_difference_models.control.inputkeys                                = [msin,facet_sourcedb,dir_dep_parmdb_normalized,cal_sourcedb,dir_dep_parmdb_unnormalized,dir_indep_sourcedb]
 {% else %}
-predict_and_difference_models.control.mapfiles_in                          = [create_ms_map.output.mapfile,expand_cal_sourcedb_map.output.mapfile,expand_unnormalized_merged_h5parm_map.output.mapfile,expand_sourcedb_cal_facet_sources.output.mapfile]
-predict_and_difference_models.control.inputkeys                            = [msin,cal_sourcedb,dir_dep_parmdb_unnormalized,dir_indep_sourcedb]
+predict_and_difference_models.control.mapfiles_in                              = [create_ms_map.output.mapfile,expand_cal_sourcedb_map.output.mapfile,expand_unnormalized_merged_h5parm_map.output.mapfile,expand_sourcedb_cal_facet_sources.output.mapfile]
+predict_and_difference_models.control.inputkeys                                = [msin,cal_sourcedb,dir_dep_parmdb_unnormalized,dir_indep_sourcedb]
 {% endif %}
-predict_and_difference_models.argument.numthreads                          = {{ max_cpus_per_io_proc_nfiles }}
-predict_and_difference_models.argument.msin.datacolumn                     = DATA
-predict_and_difference_models.argument.msout.overwrite                     = True
-predict_and_difference_models.argument.msout.writefullresflag              = False
+predict_and_difference_models.argument.numthreads                              = {{ max_cpus_per_io_proc_nfiles }}
+predict_and_difference_models.argument.msin.datacolumn                         = DATA
+predict_and_difference_models.argument.msout.overwrite                         = True
+predict_and_difference_models.argument.msout.writefullresflag                  = False
 {% if local_dir is not none %}
-predict_and_difference_models.argument.local_scratch_dir                   = {{ local_dir }}
+predict_and_difference_models.argument.local_scratch_dir                       = {{ local_dir }}
 {% endif %}
 {% if not is_patch %}
-predict_and_difference_models.argument.steps                               = [pred_cal,pred_facet,subtract_old]
-predict_and_difference_models.argument.pred_facet.type                     = predict
-predict_and_difference_models.argument.pred_facet.sourcedb                 = facet_sourcedb
-predict_and_difference_models.argument.pred_facet.applycal.parmdb          = dir_dep_parmdb_normalized
-predict_and_difference_models.argument.pred_facet.operation                = add
+predict_and_difference_models.argument.steps                                     = [pred_new,pred_facet,subtract_old]
+predict_and_difference_models.argument.pred_facet.type                           = predict
+predict_and_difference_models.argument.pred_facet.sourcedb                       = facet_sourcedb
+predict_and_difference_models.argument.pred_facet.applycal.parmdb                = dir_dep_parmdb_normalized
+predict_and_difference_models.argument.pred_facet.applycal.steps                 = [fast1,fast2,slow_amp,slow_phase]
+predict_and_difference_models.argument.pred_facet.applycal.fast1.parmdb          = dir_dep_parmdb_normalized
+predict_and_difference_models.argument.pred_facet.applycal.fast1.correction      = tec000
+predict_and_difference_models.argument.pred_facet.applycal.fast2.parmdb          = dir_dep_parmdb_normalized
+predict_and_difference_models.argument.pred_facet.applycal.fast2.correction      = phase000
+predict_and_difference_models.argument.pred_facet.applycal.slow_amp.parmdb       = dir_dep_parmdb_normalized
+predict_and_difference_models.argument.pred_facet.applycal.slow_amp.correction   = amplitude001
+predict_and_difference_models.argument.pred_facet.applycal.slow_phase.parmdb     = dir_dep_parmdb_normalized
+predict_and_difference_models.argument.pred_facet.applycal.slow_phase.correction = phase001
+predict_and_difference_models.argument.pred_facet.operation                      = add
 {% else %}
-predict_and_difference_models.argument.steps                               = [pred_cal,subtract_old]
+predict_and_difference_models.argument.steps                                   = [pred_new,subtract_old]
 {% endif %}
-predict_and_difference_models.argument.pred_cal.type                       = predict
-predict_and_difference_models.argument.pred_cal.sourcedb                   = cal_sourcedb
-predict_and_difference_models.argument.pred_cal.applycal.parmdb            = dir_dep_parmdb_unnormalized
-predict_and_difference_models.argument.pred_cal.operation                  = replace
-predict_and_difference_models.argument.subtract_old.type                   = predict
-predict_and_difference_models.argument.subtract_old.sourcedb               = dir_indep_sourcedb
-predict_and_difference_models.argument.subtract_old.operation              = subtract
+predict_and_difference_models.argument.pred_new.applycal.steps                 = [fast1,fast2,slow_amp,slow_phase]
+predict_and_difference_models.argument.pred_new.applycal.fast1.parmdb          = dir_dep_parmdb_unnormalized
+predict_and_difference_models.argument.pred_new.applycal.fast1.correction      = tec000
+predict_and_difference_models.argument.pred_new.applycal.fast2.parmdb          = dir_dep_parmdb_unnormalized
+predict_and_difference_models.argument.pred_new.applycal.fast2.correction      = phase000
+predict_and_difference_models.argument.pred_new.applycal.slow_amp.parmdb       = dir_dep_parmdb_unnormalized
+predict_and_difference_models.argument.pred_new.applycal.slow_amp.correction   = amplitude001
+predict_and_difference_models.argument.pred_new.applycal.slow_phase.parmdb     = dir_dep_parmdb_unnormalized
+predict_and_difference_models.argument.pred_new.applycal.slow_phase.correction = phase001
+predict_and_difference_models.argument.pred_new.operation                      = replace
+predict_and_difference_models.argument.subtract_old.type                       = predict
+predict_and_difference_models.argument.subtract_old.sourcedb                   = dir_indep_sourcedb
+predict_and_difference_models.argument.subtract_old.operation                  = subtract
 {% if use_compression %}
-predict_and_difference_models.argument.msout.storagemanager                = "Dysco"
-predict_and_difference_models.argument.msout.storagemanager.databitrate    = 0
-predict_and_difference_models.argument.msout.storagemanager.weightbitrate  = 12
-predict_and_difference_models.argument.msout.storagemanager.distribution   = "TruncatedGaussian"
-predict_and_difference_models.argument.msout.storagemanager.disttruncation = 1.5
-predict_and_difference_models.argument.msout.storagemanager.normalization  = "AF"
+predict_and_difference_models.argument.msout.storagemanager                    = "Dysco"
+predict_and_difference_models.argument.msout.storagemanager.databitrate        = 0
+predict_and_difference_models.argument.msout.storagemanager.weightbitrate      = 12
+predict_and_difference_models.argument.msout.storagemanager.distribution       = "TruncatedGaussian"
+predict_and_difference_models.argument.msout.storagemanager.disttruncation     = 1.5
+predict_and_difference_models.argument.msout.storagemanager.normalization      = "AF"
 {% endif %}
+
+
+
+
 
 #
 # Verify the quality of selfcal on the middle band
