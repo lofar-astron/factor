@@ -39,8 +39,8 @@ class FieldMosaic(Operation):
         self.pipeline_parset_template = 'fieldmosaic_pipeline.parset'
 
         # Check whether avgpb image exists already from a previous run
-        if hasattr(self.direction, 'avgpb_mapfile'):
-            self.direction.use_existing_data = self.check_existing_files(self.direction.avgpb_mapfile)
+        if hasattr(self.direction, 'pb_mapfile'):
+            self.direction.use_existing_data = self.check_existing_files(self.direction.pb_mapfile)
         else:
             self.direction.use_existing_data = False
 
@@ -59,11 +59,11 @@ class FieldMosaic(Operation):
         """
         # Add output datamaps to direction object for later use
         if not self.direction.use_existing_data:
-            # Store the avgpb mapfile for use by other mosaicking runs. We do not
+            # Store the pb mapfile for use by other mosaicking runs. We do not
             # update this if use_existing_data is True, as in this case it should
             # point to the mapfile from the first mosaicking run for this direction
-            self.direction.avgpb_mapfile = os.path.join(self.pipeline_mapfile_dir,
-                'image2fits.mapfile')
+            self.direction.pb_mapfile = os.path.join(self.pipeline_mapfile_dir,
+                'pb_image.mapfile')
 
         # Delete averaged data as they're no longer needed
         self.direction.cleanup_mapfiles = [

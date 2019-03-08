@@ -183,7 +183,7 @@ createmap_image_nopb.control.type        = appendMapfile
 createmap_image_nopb.control.mapfile_in  = create_imagebase_map.output.mapfile
 createmap_image_nopb.control.append      = -image.fits
 createmap_image_nopb.control.mapfile_dir = input.output.mapfile_dir
-createmap_image_nopb.control.filename    = pb_image.mapfile
+createmap_image_nopb.control.filename    = nopb_image.mapfile
 
 # correct the mosaic image for the primary beam, length = 1
 correct_mosaic.control.type        = pb_correct
