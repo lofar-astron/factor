@@ -1780,7 +1780,7 @@ wsclean_image_full.argument.scale                 = {{ cellsize_selfcal_deg }}
 wsclean_image_full.argument.mem                   = {{ max_percent_memory_per_proc_single }}
 wsclean_image_full.argument.j                     = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
-wsclean_image_full.argument.tempdir               = {{ local_dir_parent }}
+wsclean_image_full.argument.temp-dir              = {{ local_dir_parent }}
 {% endif %}
 {% if nbands_selfcal_facet_image > 3 %}
 wsclean_image_full.argument.fit-spectral-pol      = 3
@@ -1979,7 +1979,7 @@ wsclean_image_full_med.argument.scale                 = {{ cellsize_facet_med_de
 wsclean_image_full_med.argument.mem                   = {{ max_percent_memory_per_proc_single }}
 wsclean_image_full_med.argument.j                     = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
-wsclean_image_full_med.argument.tempdir               = {{ local_dir_parent }}
+wsclean_image_full_med.argument.temp-dir              = {{ local_dir_parent }}
 {% endif %}
 wsclean_image_full_med.argument.multiscale-shape      = gaussian
 {% if nbands_selfcal_facet_image > 3 %}
@@ -2279,7 +2279,7 @@ wsclean_pre.argument.scale       = 0.00833
 wsclean_pre.argument.mem         = {{ max_percent_memory_per_proc_single }}
 wsclean_pre.argument.j           = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
-wsclean_pre.argument.tempdir     = {{ local_dir_parent }}
+wsclean_pre.argument.temp-dir    = {{ local_dir_parent }}
 {% endif %}
 
 # make compressed mapfile of new empty data, length = 1
@@ -2307,7 +2307,7 @@ wsclean_post.argument.scale       = 0.00833
 wsclean_post.argument.mem         = {{ max_percent_memory_per_proc_single }}
 wsclean_post.argument.j           = {{ max_cpus_per_proc_single }}
 {% if local_dir is not none %}
-wsclean_post.argument.tempdir     = {{ local_dir_parent }}
+wsclean_post.argument.temp-dir    = {{ local_dir_parent }}
 {% endif %}
 
 # do a "verify_subtract" on the two "empty" images, length = 1

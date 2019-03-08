@@ -311,7 +311,7 @@ wsclean_image_full1.argument.j                     = {{ max_cpus_per_proc_single
 wsclean_image_full1.argument.multiscale-scales     = {{ facet_multiscale_scales_pixel }}
 {% endif %}
 {% if local_dir is not none %}
-wsclean_image_full1.argument.tempdir               = {{ local_dir_parent }}
+wsclean_image_full1.argument.temp-dir              = {{ local_dir_parent }}
 {% endif %}
 wsclean_image_full1.argument.weighting-rank-filter = 3
 {% if taper_facet_arcsec > 0.0 %}
@@ -385,7 +385,7 @@ wsclean_image_full2.argument.j                     = {{ max_cpus_per_proc_single
 wsclean_image_full2.argument.multiscale-scales     = {{ facet_multiscale_scales_pixel }}
 {% endif %}
 {% if local_dir is not none %}
-wsclean_image_full2.argument.tempdir               = {{ local_dir_parent }}
+wsclean_image_full2.argument.temp-dir              = {{ local_dir_parent }}
 {% endif %}
 wsclean_image_full2.argument.weighting-rank-filter = 3
 {% if taper_facet_arcsec > 0.0 %}
