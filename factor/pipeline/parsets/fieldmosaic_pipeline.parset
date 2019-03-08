@@ -173,7 +173,7 @@ create_imagebase_map.control.filename    = make_pbimage_rootname.mapfile
 createmap_image_pb.control.kind        = plugin
 createmap_image_pb.control.type        = appendMapfile
 createmap_image_pb.control.mapfile_in  = create_imagebase_map.output.mapfile
-createmap_image_pb.control.append      = -MFS-I-image-pb.fits
+createmap_image_pb.control.append      = -image-pb.fits
 createmap_image_pb.control.mapfile_dir = input.output.mapfile_dir
 createmap_image_pb.control.filename    = pb_image.mapfile
 
@@ -181,7 +181,7 @@ createmap_image_pb.control.filename    = pb_image.mapfile
 createmap_image_nopb.control.kind        = plugin
 createmap_image_nopb.control.type        = appendMapfile
 createmap_image_nopb.control.mapfile_in  = create_imagebase_map.output.mapfile
-createmap_image_nopb.control.append      = -MFS-I-image.fits
+createmap_image_nopb.control.append      = -image.fits
 createmap_image_nopb.control.mapfile_dir = input.output.mapfile_dir
 createmap_image_nopb.control.filename    = pb_image.mapfile
 
