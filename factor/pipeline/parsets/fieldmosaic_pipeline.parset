@@ -1,4 +1,4 @@
-pipeline.steps = [update_mapfile_hosts, create_images_map, create_blanked_images_map, create_vertices_map, blank_images, create_compressed_mapfile_images, make_mosaic, create_ms_map, create_compressed_mapfile_ms, sort_into_Groups, sort_into_Groups_maps, concat_data, create_compressed_mapfile, concat, make_pbimage, createmap_image_pb, createmap_image_nopb, correct_mosaic]
+pipeline.steps = [update_mapfile_hosts, create_images_map, create_blanked_images_map, create_vertices_map, blank_images, create_compressed_mapfile_images, make_mosaic, create_ms_map, create_compressed_mapfile_ms, sort_into_Groups, sort_into_Groups_maps, concat_data, create_compressed_mapfile, concat, make_pbimage, create_imagebase_map, createmap_image_pb, createmap_image_nopb, correct_mosaic]
 
 pipeline.pluginpath = {{ pipeline_dir }}/plugins
 
@@ -141,7 +141,6 @@ make_pbimage.argument.flags       = [-no-update-model-required,-fit-beam,-reorde
 {% else %}
 make_pbimage.argument.flags       = [-no-update-model-required,-fit-beam,-reorder,-apply-primary-beam,-use-differential-lofar-beam,msfile]
 {% endif %}
-make_pbimage.argument.name        = {{ pipeline_parset_dir }}/fullfield
 make_pbimage.argument.channelsout = 1
 make_pbimage.argument.size        = 4096 4096
 make_pbimage.argument.niter       = 1
@@ -158,22 +157,33 @@ make_pbimage.argument.padding     = 1.0
 {% if use_idg %}
 make_pbimage.argument.idg-mode    = {{ idg_mode }}
 {% endif %}
+{% if local_dir is not none %}
+make_pbimage.argument.temp-dir    = {{ local_dir_parent }}
+{% endif %}
+
+# make a mapfile with the root-name of the WSClean image, length = 1
+create_imagebase_map.control.kind        = plugin
+create_imagebase_map.control.type        = trimMapfile
+create_imagebase_map.control.mapfile_in  = make_pbimage.output.make_pbimage-image.fits.mapfile
+create_imagebase_map.control.trim        = -
+create_imagebase_map.control.mapfile_dir = input.output.mapfile_dir
+create_imagebase_map.control.filename    = make_pbimage_rootname.mapfile
 
 # create a map with the PB-corrected image, length = 1
 createmap_image_pb.control.kind        = plugin
-createmap_image_pb.control.type        = addListMapfile
-createmap_image_pb.control.hosts       = [localhost]
-createmap_image_pb.control.files       = [{{ pipeline_parset_dir }}/fullfield-MFS-I-image-pb.fits]
+createmap_image_pb.control.type        = appendMapfile
+createmap_image_pb.control.mapfile_in  = create_imagebase_map.output.mapfile
+createmap_image_pb.control.append      = -MFS-I-image-pb.fits
 createmap_image_pb.control.mapfile_dir = input.output.mapfile_dir
 createmap_image_pb.control.filename    = pb_image.mapfile
 
 # create a map with the PB-uncorrected image, length = 1
 createmap_image_nopb.control.kind        = plugin
-createmap_image_nopb.control.type        = addListMapfile
-createmap_image_nopb.control.hosts       = [localhost]
-createmap_image_nopb.control.files       = [{{ pipeline_parset_dir }}/fullfield-MFS-I-image.fits]
+createmap_image_nopb.control.type        = appendMapfile
+createmap_image_nopb.control.mapfile_in  = create_imagebase_map.output.mapfile
+createmap_image_nopb.control.append      = -MFS-I-image.fits
 createmap_image_nopb.control.mapfile_dir = input.output.mapfile_dir
-createmap_image_nopb.control.filename    = nopb_image.mapfile
+createmap_image_nopb.control.filename    = pb_image.mapfile
 
 # correct the mosaic image for the primary beam, length = 1
 correct_mosaic.control.type        = pb_correct
