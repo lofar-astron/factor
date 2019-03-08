@@ -135,7 +135,6 @@ concat.argument.flags     = [msfiles,msconcat]
 make_pbimage.control.type         = wsclean
 make_pbimage.control.mapfile_in   = concat.output.mapfile
 make_pbimage.control.inputkey     = msfile
-make_pbimage.control.inplace      = True
 {% if use_idg %}
 make_pbimage.argument.flags       = [-no-update-model-required,-fit-beam,-reorder,-use-idg,-grid-with-beam,-use-differential-lofar-beam,msfile]
 {% else %}
