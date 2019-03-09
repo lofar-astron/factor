@@ -13,7 +13,7 @@
 {% if not preapply_phase_cal %}
 average0.control.type                                 = dppp
 average0.control.mapfiles_in                          = [shift_cal.output.mapfile]
-average0.control.inputkeys                            = [msin,parmdb]
+average0.control.inputkeys                            = [msin]
 average0.argument.numthreads                          = {{ max_cpus_per_io_proc_nfiles }}
 average0.argument.msin.datacolumn                     = DATA
 average0.argument.msout.overwrite                     = True
@@ -119,10 +119,10 @@ wsclean_image02.control.mapfiles_in             = [create_compressed_mapfile01.o
 wsclean_image02.control.inputkeys               = [msfile,fitsmask]
 wsclean_image02.argument.fits-mask              = fitsmask
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-join-channels,-save-source-list,msfile]
+wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-join-channels,-save-source-list,{{ idg_arg }}msfile]
 wsclean_image02.argument.channels-out           = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-save-source-list,msfile]
+wsclean_image02.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-save-source-list,{{ idg_arg }}msfile]
 {% endif %}
 wsclean_image02.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image02.argument.niter                  = 10000
@@ -158,6 +158,9 @@ wsclean_image02.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavel
 wsclean_image02.argument.auto-mask              = 2.6
 {% else %}
 wsclean_image02.argument.auto-mask              = 3.6
+{% endif %}
+{% if use_idg %}
+wsclean_image02.argument.idg-mode               = {{ idg_mode }}
 {% endif %}
 wsclean_image02.argument.auto-threshold         = 0.5
 wsclean_image02.argument.local-rms-window       = 50
@@ -238,7 +241,7 @@ remove_h5parms1.control.mapfile_in = make_fast_phase_h5parm_map.output.mapfile
 remove_h5parms1.control.inputkey   = h5parm
 remove_h5parms1.argument.flags     = [-rf,h5parm]
 
-# run GainCal with model column on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
+# run DDECal with sourcedb on freq-concatenated files, to solve for (fast) phases, length = ntimes * num_cal_blocks
 solve_phaseonly1.control.type                         = dppp_inplace
 {% if peel_skymodel is not none %}
 solve_phaseonly1.control.mapfiles_in                  = [{{ solve_concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile,expand_peel_sourcedb_map.output.mapfile]
@@ -332,10 +335,10 @@ wsclean_image12.control.mapfiles_in             = [create_compressed_mapfile1.ou
 wsclean_image12.control.inputkeys               = [msfile,fitsmask]
 wsclean_image12.argument.fits-mask              = fitsmask
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-join-channels,-save-source-list,msfile]
+wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-join-channels,-save-source-list,{{ idg_arg }}msfile]
 wsclean_image12.argument.channels-out           = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-save-source-list,msfile]
+wsclean_image12.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-save-source-list,{{ idg_arg }}msfile]
 {% endif %}
 wsclean_image12.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image12.argument.niter                  = 10000
@@ -371,6 +374,9 @@ wsclean_image12.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavel
 wsclean_image12.argument.auto-mask              = 2.3
 {% else %}
 wsclean_image12.argument.auto-mask              = 3.3
+{% endif %}
+{% if use_idg %}
+wsclean_image12.argument.idg-mode               = {{ idg_mode }}
 {% endif %}
 wsclean_image12.argument.auto-threshold         = 0.5
 wsclean_image12.argument.local-rms-window       = 50
@@ -497,10 +503,10 @@ wsclean_image22.control.mapfiles_in             = [create_compressed_mapfile2.ou
 wsclean_image22.control.inputkeys               = [msfile,fitsmask]
 wsclean_image22.argument.fits-mask              = fitsmask
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-join-channels,-save-source-list,msfile]
+wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-join-channels,-save-source-list,{{ idg_arg }}msfile]
 wsclean_image22.argument.channels-out           = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-save-source-list,msfile]
+wsclean_image22.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-save-source-list,{{ idg_arg }}msfile]
 {% endif %}
 wsclean_image22.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image22.argument.niter                  = 10000
@@ -535,6 +541,9 @@ wsclean_image22.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavel
 wsclean_image22.argument.auto-mask              = 2.0
 {% else %}
 wsclean_image22.argument.auto-mask              = 3.0
+{% endif %}
+{% if use_idg %}
+wsclean_image22.argument.idg-mode               = {{ idg_mode }}
 {% endif %}
 wsclean_image22.argument.auto-threshold         = 0.5
 wsclean_image22.argument.local-rms-window       = 50
@@ -665,7 +674,7 @@ remove_h5parms12.control.mapfile_in = make_slow_gain_h5parm_map.output.mapfile
 remove_h5parms12.control.inputkey   = h5parm
 remove_h5parms12.argument.flags     = [-rf,h5parm]
 
-# run GainCal with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes
+# run DDECAl with model column on freq-concatenated files, to solve for (slow) amplitudes, length = ntimes * num_cal_blocks
 solve_ampphase12.control.type                            = dppp_inplace
 solve_ampphase12.control.mapfiles_in                     = [{{ solve_concat_data_mapfile }},make_slow_gain_h5parm_map.output.mapfile,expand_sourcedb2_map.output.mapfile]
 solve_ampphase12.control.inputkeys                       = [msin,h5parm,sourcedb]
@@ -798,10 +807,10 @@ wsclean_image32.control.mapfiles_in             = [create_compressed_mapfile3.ou
 wsclean_image32.control.inputkeys               = [msfile,fitsmask]
 wsclean_image32.argument.fits-mask              = fitsmask
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-join-channels,-save-source-list,msfile]
+wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-join-channels,-save-source-list,{{ idg_arg }}msfile]
 wsclean_image32.argument.channels-out           = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-save-source-list,msfile]
+wsclean_image32.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-save-source-list,{{ idg_arg }}msfile]
 {% endif %}
 wsclean_image32.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image32.argument.niter                  = 10000
@@ -836,6 +845,9 @@ wsclean_image32.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavel
 wsclean_image32.argument.auto-mask              = 2.5
 {% else %}
 wsclean_image32.argument.auto-mask              = 3.5
+{% endif %}
+{% if use_idg %}
+wsclean_image32.argument.idg-mode               = {{ idg_mode }}
 {% endif %}
 wsclean_image32.argument.auto-threshold         = 0.5
 wsclean_image32.argument.local-rms-window       = 50
@@ -1082,10 +1094,10 @@ wsclean_image42.control.mapfiles_in             = [create_compressed_mapfile4.ou
 wsclean_image42.control.inputkeys               = [msfile,fitsmask]
 wsclean_image42.argument.fits-mask              = fitsmask
 {% if wsclean_nchannels_selfcal > 1 %}
-wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-join-channels,-save-source-list,msfile]
+wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-join-channels,-save-source-list,{{ idg_arg }}msfile]
 wsclean_image42.argument.channels-out           = {{ wsclean_nchannels_selfcal }}
 {% else %}
-wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-save-source-list,msfile]
+wsclean_image42.argument.flags                  = [-no-update-model-required,-multiscale,-fit-beam,-reorder,-local-rms,-save-source-list,{{ idg_arg }}msfile]
 {% endif %}
 wsclean_image42.argument.size                   = {{ cal_imsize }} {{ cal_imsize }}
 wsclean_image42.argument.niter                  = 10000
@@ -1120,6 +1132,9 @@ wsclean_image42.argument.baseline-averaging     = {{ facetselfcal_wsclean_nwavel
 wsclean_image42.argument.auto-mask              = 2.0
 {% else %}
 wsclean_image42.argument.auto-mask              = 3.0
+{% endif %}
+{% if use_idg %}
+wsclean_image42.argument.idg-mode               = {{ idg_mode }}
 {% endif %}
 wsclean_image42.argument.auto-threshold         = 0.5
 wsclean_image42.argument.local-rms-window       = 50
