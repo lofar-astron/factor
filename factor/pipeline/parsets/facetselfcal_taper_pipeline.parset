@@ -754,7 +754,7 @@ apply_amp1.argument.msin.datacolumn                     = CORRECTED_DATA
 apply_amp1.argument.steps                               = [correct_slow_amp,correct_slow_phase,avg]
 {% else %}
 apply_amp1.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile,expand_smoothed_amp1_h5parm_map.output.mapfile]
-apply_amp1.control.inputkeys                            = [msin,fast_h5parmdb,slow_h5parm]
+apply_amp1.control.inputkeys                            = [msin,fast_h5parm,slow_h5parm]
 apply_amp1.argument.msin.datacolumn                     = DATA
 apply_amp1.argument.steps                               = [correct_fast1,correct_fast2,correct_slow_amp,correct_slow_phase,avg]
 apply_amp1.argument.correct_fast1.type                  = applycal
@@ -1039,15 +1039,15 @@ apply_amp2.argument.msin.datacolumn                     = CORRECTED_DATA
 apply_amp2.argument.steps                               = [correct_slow_amp,correct_slow_phase,avg]
 {% else %}
 apply_amp2.control.mapfiles_in                          = [{{ concat_data_mapfile }},make_fast_phase_h5parm_map.output.mapfile,expand_smoothed_amp2_h5parm_map.output.mapfile]
-apply_amp2.control.inputkeys                            = [msin,fast_h5parmdb,slow_h5parm]
+apply_amp2.control.inputkeys                            = [msin,fast_h5parm,slow_h5parm]
 apply_amp2.argument.msin.datacolumn                     = DATA
 apply_amp2.argument.steps                               = [correct_fast1,correct_fast2,correct_slow_amp,correct_slow_phase,avg]
 apply_amp2.argument.correct_fast1.type                  = applycal
-apply_amp2.argument.correct_fast1.parmdb                = fast_h5parmdb
+apply_amp2.argument.correct_fast1.parmdb                = fast_h5parm
 apply_amp2.argument.correct_fast1.correction            = tec000
 apply_amp2.argument.correct_fast1.invert                = True
 apply_amp2.argument.correct_fast2.type                  = applycal
-apply_amp2.argument.correct_fast2.parmdb                = fast_h5parmdb
+apply_amp2.argument.correct_fast2.parmdb                = fast_h5parm
 apply_amp2.argument.correct_fast2.correction            = phase000
 apply_amp2.argument.correct_fast2.invert                = True
 {% endif %}
