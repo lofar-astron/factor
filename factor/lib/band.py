@@ -577,11 +577,11 @@ def process_chunk(ms_file, chunkid, nchunks, mystarttime, myendtime, chunksize,
         shutil.rmtree(temp_file)
 
     # Check that the chunk has at least min_fraction unflagged data.
-    # If not, then return (None, None)
+    # If not, then return False
     if find_unflagged_fraction(chunk_file) < min_fraction:
         log.debug('Chunk {} not used because it contains too little unflagged data'.format(chunk_name))
         seltab.close()
         tab.close()
-        return (None, None)
+        return False
 
     return chunk_file
