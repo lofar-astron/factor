@@ -132,32 +132,32 @@ concat.control.outputkey  = msconcat
 concat.argument.flags     = [msfiles,msconcat]
 
 # make a dummy image with WSClean to get the primary beam, length = 1
-make_pbimage.control.type         = wsclean
-make_pbimage.control.mapfile_in   = concat.output.mapfile
-make_pbimage.control.inputkey     = msfile
+make_pbimage.control.type          = wsclean
+make_pbimage.control.mapfile_in    = create_compressed_mapfile.output.mapfile
+make_pbimage.control.inputkey      = msfile
 {% if use_idg %}
-make_pbimage.argument.flags       = [-no-update-model-required,-fit-beam,-reorder,-use-idg,-grid-with-beam,-use-differential-lofar-beam,msfile]
+make_pbimage.argument.flags        = [-no-update-model-required,-fit-beam,-reorder,-use-idg,-grid-with-beam,-use-differential-lofar-beam,msfile]
 {% else %}
-make_pbimage.argument.flags       = [-no-update-model-required,-fit-beam,-reorder,-apply-primary-beam,-use-differential-lofar-beam,msfile]
+make_pbimage.argument.flags        = [-no-update-model-required,-fit-beam,-reorder,-apply-primary-beam,-use-differential-lofar-beam,msfile]
 {% endif %}
-make_pbimage.argument.channelsout = 1
-make_pbimage.argument.size        = 4096 4096
-make_pbimage.argument.niter       = 1
-make_pbimage.argument.pol         = I
-make_pbimage.argument.weight      = briggs -0.5
-make_pbimage.argument.mgain       = 1.0
-make_pbimage.argument.minuv-l     = 80
-make_pbimage.argument.maxuv-l     = 10000
-make_pbimage.argument.mem         = {{ max_percent_memory_per_proc_single }}
-make_pbimage.argument.j           = {{ max_cpus_per_proc_single }}
-make_pbimage.argument.threshold   = 0.001
-make_pbimage.argument.scale       = 0.0015
-make_pbimage.argument.padding     = 1.0
+make_pbimage.argument.channels-out = 1
+make_pbimage.argument.size         = 1024 1024
+make_pbimage.argument.niter        = 1
+make_pbimage.argument.pol          = I
+make_pbimage.argument.weight       = briggs -0.5
+make_pbimage.argument.mgain        = 1.0
+make_pbimage.argument.minuv-l      = 80
+make_pbimage.argument.maxuv-l      = 10000
+make_pbimage.argument.mem          = {{ max_percent_memory_per_proc_single }}
+make_pbimage.argument.j            = {{ max_cpus_per_proc_single }}
+make_pbimage.argument.threshold    = 0.001
+make_pbimage.argument.scale        = 0.006
+make_pbimage.argument.padding      = 1.0
 {% if use_idg %}
-make_pbimage.argument.idg-mode    = {{ idg_mode }}
+make_pbimage.argument.idg-mode     = {{ idg_mode }}
 {% endif %}
 {% if local_dir is not none %}
-make_pbimage.argument.temp-dir    = {{ local_dir_parent }}
+make_pbimage.argument.temp-dir     = {{ local_dir_parent }}
 {% endif %}
 
 # make a mapfile with the root-name of the WSClean image, length = 1
