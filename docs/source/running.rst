@@ -31,7 +31,7 @@ where ``factor.parset`` is the parset described in :ref:`factor_parset`. A numbe
                             groups!)
       -v                    enable verbose mode
 
-Factor begins a run by checking the input measurement sets and the direction-independent instrument tables. If the instrument tables contain real/imaginary values, they are converted the phase/amplitude. The input measurement sets are chunked in time to allow more efficient processing.
+Factor begins a run by checking the input measurement sets. The input measurement sets are chunked in time to allow more efficient processing.
 
 Next, Factor will check for a file describing the DDE calibrators. If not found, Factor will select the DDE calibrators automatically and generate the facet regions (saved in a text file in the working directory called ``factor_directions.txt``). At this point, if ``interactive = True`` is set in the parset, Factor will pause to allow a check on the facets.
 

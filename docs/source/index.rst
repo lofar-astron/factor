@@ -50,11 +50,3 @@ Factor Structure
 
    structure
    operations
-
-
-Code Documentation
-------------------
-.. toctree::
-   :maxdepth: 2
-
-   modules
