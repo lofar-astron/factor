@@ -274,29 +274,30 @@ def BLavg_multi(sorted_ms_dict, baseline_dict, input_colname, output_data_colnam
 
             # compute the FWHM
             dist = baseline_dict['{0}-{1}'.format(ant[0], ant[1])]
-            stddev = 30.0 * ionfactor * np.sqrt((25.0 / dist)) * (freq / 60.e6) # in sec
-            stddev = stddev/timepersample # in samples
+            if dist > 0:
+                stddev = 30.0 * ionfactor * np.sqrt((25.0 / dist)) * (freq / 60.e6) # in sec
+                stddev = stddev/timepersample # in samples
 
-            # Multiply every element of the data by the weights, convolve both
-            # the scaled data and the weights, and then divide the convolved data
-            # by the convolved weights (translating flagged data into weight=0).
-            # That's basically the equivalent of a running weighted average with
-            # a Gaussian window function.
+                # Multiply every element of the data by the weights, convolve both
+                # the scaled data and the weights, and then divide the convolved data
+                # by the convolved weights (translating flagged data into weight=0).
+                # That's basically the equivalent of a running weighted average with
+                # a Gaussian window function.
 
-            # weigth data and set bad data to 0 so nans do not propagate
-            data = np.nan_to_num(data*weights)
+                # weigth data and set bad data to 0 so nans do not propagate
+                data = np.nan_to_num(data*weights)
 
-            # smear weighted data and weights
-            dataR = gfilter(np.real(data), stddev, axis=0)
-            dataI = gfilter(np.imag(data), stddev, axis=0)
-            weights = gfilter(weights, stddev, axis=0)
+                # smear weighted data and weights
+                dataR = gfilter(np.real(data), stddev, axis=0)
+                dataI = gfilter(np.imag(data), stddev, axis=0)
+                weights = gfilter(weights, stddev, axis=0)
 
-            # re-create data
-            data = (dataR + 1j * dataI)
-            data[(weights != 0)] /= weights[(weights != 0)] # avoid divbyzero
-            for msindex in xrange(len(ms_names)):
-                all_data_list[msindex][sel_list[msindex],:,:] = data[startidx[msindex]:endidx[msindex],:,:]
-                all_weights_list[msindex][sel_list[msindex],:,:] = weights[startidx[msindex]:endidx[msindex],:,:]
+                # re-create data
+                data = (dataR + 1j * dataI)
+                data[(weights != 0)] /= weights[(weights != 0)] # avoid divbyzero
+                for msindex in xrange(len(ms_names)):
+                    all_data_list[msindex][sel_list[msindex],:,:] = data[startidx[msindex]:endidx[msindex],:,:]
+                    all_weights_list[msindex][sel_list[msindex],:,:] = weights[startidx[msindex]:endidx[msindex],:,:]
 
         ### write the data back to the files
         for msindex in xrange(len(ms_names)):
