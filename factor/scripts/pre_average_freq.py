@@ -88,21 +88,22 @@ def main(ms_input, input_colname, output_data_colname, output_weights_colname,
         # no more than 3 MHz (to avoid smoothing over the beam-induced effects)
         lambda_km = 299792.458 / freq_hz
         dist_km = baseline_dict['{0}-{1}'.format(ant[0], ant[1])]
-        resolution_deg = lambda_km / dist_km * 180.0 / np.pi
-        stddev_hz = min(3e6, get_target_bandwidth(freq_hz, delta_theta_deg,
-            resolution_deg, target_peak_reduction_factor)/4.0)
-        stddev_nchan = stddev_hz / chan_width_hz * np.sqrt(0.5 / dist_km)
+        if dist_km > 0:
+            resolution_deg = lambda_km / dist_km * 180.0 / np.pi
+            stddev_hz = min(3e6, get_target_bandwidth(freq_hz, delta_theta_deg,
+                resolution_deg, target_peak_reduction_factor)/4.0)
+            stddev_nchan = stddev_hz / chan_width_hz * np.sqrt(0.5 / dist_km)
 
-        # smear weighted data and weights
-        dataR = gfilter(np.real(data), stddev_nchan, axis=1)
-        dataI = gfilter(np.imag(data), stddev_nchan, axis=1)
-        weights = gfilter(weights, stddev_nchan, axis=1)
+            # smear weighted data and weights
+            dataR = gfilter(np.real(data), stddev_nchan, axis=1)
+            dataI = gfilter(np.imag(data), stddev_nchan, axis=1)
+            weights = gfilter(weights, stddev_nchan, axis=1)
 
-        # re-create data
-        data = (dataR + 1j * dataI)
-        data[(weights != 0)] /= weights[(weights != 0)] # avoid divbyzero
-        data_all[sel_list,:,:] = data
-        weights_all[sel_list,:,:] = weights
+            # re-create data
+            data = (dataR + 1j * dataI)
+            data[(weights != 0)] /= weights[(weights != 0)] # avoid divbyzero
+            data_all[sel_list,:,:] = data
+            weights_all[sel_list,:,:] = weights
 
     # Add the output columns if needed
     if output_data_colname not in ms.colnames():
