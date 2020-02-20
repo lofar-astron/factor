@@ -227,7 +227,8 @@ def find_executables(parset):
     executables = {'genericpipeline_executable': ['genericpipeline.py'],
                    'wsclean_executable': ['wsclean'],
                    'image2fits_executable': ['image2fits'],
-                   'h5collector_executable': ['H5parm_collector.py']}
+                   'h5collector_executable': ['H5parm_collector.py'],
+                   'DPPP_executable': ['DPPP']}
     for key, names in executables.iteritems():
         for name in names:
             path = spawn.find_executable(name)

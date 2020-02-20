@@ -143,6 +143,7 @@ class Operation(object):
                          'wsclean_executable': parset['wsclean_executable'],
                          'image2fits_executable': parset['image2fits_executable'],
                          'h5collector_executable': parset['h5collector_executable'],
+                         'DPPP_executable': parset['DPPP_executable'],
                          'dppp_nodescript': self.dppp_nodescript}
 
         # Define global parameters needed by all pipeline parsets. Other,
