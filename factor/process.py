@@ -1,6 +1,7 @@
 """
 Module that preforms the processing
 """
+from lofar.parameterset import _pyparameterset
 import sys
 import os
 import shutil
