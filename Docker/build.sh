@@ -7,5 +7,8 @@ TAG=$(git describe --tags)
 
 cd $(dirname ${0})
 
-echo docker build -t ${COMMUNITY}/${REPOSITORY}:${TAG}
-echo docker push ${COMMUNITY}/${REPOSITORY}:${TAG}
+docker build -t ${COMMUNITY}/${REPOSITORY}:${TAG} .
+docker tag ${COMMUNITY}/${REPOSITORY}:${TAG} ${COMMUNITY}/${REPOSITORY}:latest
+
+docker push ${COMMUNITY}/${REPOSITORY}:${TAG}
+docker push ${COMMUNITY}/${REPOSITORY}:latest

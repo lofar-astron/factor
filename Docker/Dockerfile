@@ -67,3 +67,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONPATH=/opt/lofarsoft/lib/python2.7/site-packages/
 ENV LD_LIBRARY_PATH=/opt/lofarsoft/lib:/usr/local/lib/
 # help: Docker image containing all required software to run factor 2.0. This image is built on Ubuntu 18.04.
+
+# Create entry point for container
+COPY entrypoint.sh /usr/local/sbin
+ENTRYPOINT [ "/usr/local/sbin/entrypoint.sh" ]
