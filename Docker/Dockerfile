@@ -1,73 +1,263 @@
-FROM ubuntu:18.04
-LABEL Maintainer="iacobelli@astron.nl;loose@astron.nl"
-ENV DEBIAN_FRONTEND=noninteractive
-ENV HDF5_USE_FILE_LOCKING=FALSE
+#############################################################################
+#  First stage of the build: compile and install the required software.     #
+#  This stage requires quite a lot of packages from the repository.         #
+#############################################################################
 
-# install common dependencies
-RUN apt-get update && apt-get --yes install --no-install-recommends bison build-essential cmake emacs flex g++ gcc gettext-base gfortran git libarmadillo-dev libblas-dev libboost-date-time-dev libboost-dev libboost-filesystem-dev libboost-numpy-dev libboost-program-options-dev libboost-python-dev libboost-regex-dev libboost-signals-dev libboost-system-dev libboost-thread-dev libcfitsio-dev libfftw3-dev libgsl-dev libgtkmm-3.0-dev libhdf5-serial-dev liblapacke-dev liblog4cplus-1.1-9 liblog4cplus-dev libncurses5-dev libpng-dev libpython2.7-dev libreadline-dev libxml2-dev openssh-server python python-pip python-tk python-setuptools subversion vim wcslib-dev wget && rm -rf /var/lib/apt/lists/*
+FROM ubuntu:18.04 as builder
 
-# install python2 packages
-RUN pip install setuptools wheel Cython
-RUN pip install --upgrade aplpy astropy Jinja2 matplotlib numpy==1.16 PySocks python-monetdb scipy shapely wcsaxes xmlrunner
+LABEL Maintainer="loose@astron.nl"
 
-#
-RUN mkdir /opt/lofarsoft/
+ARG BUILD_DIR=/build
+ARG INSTALL_DIR=/opt/lofarsoft
+ARG PORTABLE=TRUE
 
-# install boost python 1.63 with python2
-RUN cd / && wget https://sourceforge.net/projects/boost/files/boost/1.63.0/boost_1_63_0.tar.bz2/download -O boost_1_63_0.tar.bz2 && tar xvf boost_1_63_0.tar.bz2 && cd boost_1_63_0 && ./bootstrap.sh --with-python=/usr/bin/python --with-libraries=python,date_time,filesystem,system,program_options,test && ./b2 install && cd / && rm -r boost_1_63_0*
+# Install all build-time dependencies
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get update && \
+    apt-get install -y \
+        bison \
+        build-essential \
+        casacore-data \
+        casacore-dev \
+        casacore-tools \
+        cmake \
+        flex \
+        gfortran \
+        git \
+        libarmadillo-dev \
+        libboost-date-time-dev \
+        libboost-filesystem-dev \
+        libboost-numpy-dev \
+        libboost-program-options-dev \
+        libboost-python-dev \
+        libboost-system-dev \
+        libboost-test-dev \
+        libcfitsio-dev \
+        libfftw3-dev \
+        libgsl-dev \
+        libgtkmm-3.0-dev \
+        libhdf5-serial-dev \
+        liblog4cplus-dev \
+        liblua5.3-dev \
+        libpng-dev \
+        libxml2-dev \
+        ninja-build \
+        python-casacore \
+        python-dev \
+        python-matplotlib \
+        python-pip \
+        subversion \
+        wcslib-dev \
+        wget
 
-# install casacore data
-RUN cd / && mkdir -p /opt/lofarsoft/data && cd /opt/lofarsoft/data && wget ftp://anonymous@ftp.astron.nl/outgoing/Measures/WSRT_Measures.ztar && tar xvf WSRT_Measures.ztar && rm WSRT_Measures.ztar
+WORKDIR ${BUILD_DIR}
 
-# install casacore v2.4.1
-RUN cd / && wget https://github.com/casacore/casacore/archive/v2.4.1.tar.gz && tar xvf v2.4.1.tar.gz && cd casacore-2.4.1 && mkdir build && cd build && cmake -DPORTABLE=True -DBUILD_PYTHON=True -DDATA_DIR=/opt/lofarsoft/data -DUSE_OPENMP=ON -DUSE_THREADS=OFF -DUSE_FFTW3=TRUE -DUSE_HDF5=ON -DCXX11=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ -DCMAKE_CXX_FLAGS="-fsigned-char -O2 -DNDEBUG -march=native" ../ && make -j4 && make install && cd ../../ && rm -rf casacore-2.4.1 v2.4.1.tar.gz
-
-# install python casacore v3.2.0
-RUN cd / && wget https://github.com/casacore/python-casacore/archive/v3.2.0.tar.gz && tar xvf v3.2.0.tar.gz && cd python-casacore-3.2.0 && python setup.py build_ext -I/opt/lofarsoft/include -L/opt/lofarsoft/lib/ && mkdir -p /opt/lofarsoft/lib/python2.7/site-packages/ && export PYTHONPATH=/opt/lofarsoft/lib/python2.7/site-packages/ && python setup.py install --prefix=/opt/lofarsoft && cd ../ && rm -rf v3.2.0.tar.gz
+#===========================================================================#
+#                          C + +   P A C K A G E S                          #
+#===========================================================================#
 
 # install AOFlagger 2.14 last py2 version compatible
-RUN cd / && wget https://sourceforge.net/projects/aoflagger/files/aoflagger-2.14.0/aoflagger-2.14.0.tar.bz2/download && mv download download.tar && tar xvf download.tar && cd aoflagger-2.14.0 && mkdir build && cd build && cmake ../ -DPORTABLE=True -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft -DCMAKE_PREFIX_PATH=/opt/lofarsoft && make -j4 && make install && cd ../../ && rm -rf download.tar aoflagger-2.14.0
+RUN git clone --depth 1 --branch v2.14.0 https://gitlab.com/aroffringa/aoflagger.git
+# Remove optional (unused) Fortran support to support building wiht Ninja.
+RUN sed -i '/^enable_language(Fortran OPTIONAL)$/d' ${BUILD_DIR}/aoflagger/CMakeLists.txt
+RUN cmake \
+    -DCMAKE_BUILD_TYPE:STRING=Release \
+    -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
+    -DCMAKE_PREFIX_PATH=${INSTALL_DIR} \
+    -DPORTABLE=${PORTABLE} \
+    -H${BUILD_DIR}/aoflagger \
+    -B${BUILD_DIR}/aoflagger/build \
+    -G Ninja
+RUN ninja -C ${BUILD_DIR}/aoflagger/build install
 
-# install losoto 2.0
-RUN cd / && git clone https://github.com/revoltek/losoto.git && cd losoto && git checkout c8fbd6194074bef4009cb66dd7ecd59e98664d63 && export PYTHONPATH=/opt/lofarsoft/lib/python2.7/site-packages/ && pip install numexpr==2.7.3 tables==3.5.2 configparser==4.0.2 && python setup.py install --prefix=/opt/lofarsoft && cd / && rm -rf losoto
-
-# install RMextract v0.4
-RUN cd / && git clone https://github.com/lofar-astron/RMextract.git && cd RMextract && export PYTHONPATH=/opt/lofarsoft/lib/python2.7/site-packages/ && python setup.py install --prefix=/opt/lofarsoft && cd / && rm -rf RMextract
-
-# install pyBDSF v1.9.2
-RUN cd / && git clone https://github.com/lofar-astron/PyBDSF.git && export PYTHONPATH=/opt/lofarsoft/lib/python2.7/site-packages/ && cd PyBDSF && git checkout v1.9.2 && python setup.py install --prefix=/opt/lofarsoft && cd / && rm -rf PyBDSF
-
-# install LSMTool v1.4.2
-RUN cd / && git clone https://github.com/darafferty/LSMTool.git && cd LSMTool && git checkout v1.4.2 && export PYTHONPATH=/opt/lofarsoft/lib/python2.7/site-packages/ && python setup.py install --prefix=/opt/lofarsoft && cd / && rm -rf LSMTool
-
-# install the LOFAR beam library
-RUN cd / && git clone https://github.com/lofar-astron/LOFARBeam.git && cd LOFARBeam && mkdir build && cd build && cmake -DPORTABLE=True -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft -DCMAKE_PREFIX_PATH=/opt/lofarsoft ../ && make && make install && cd ../../ && rm -rf LOFARBeam
+# install the LOFAR beam library (not sure why we use HEAD of master here?)
+RUN git clone --depth 1 https://github.com/lofar-astron/LOFARBeam.git
+RUN cmake \
+    -DCMAKE_BUILD_TYPE:STRING=Release \
+    -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
+    -DCMAKE_PREFIX_PATH=${INSTALL_DIR} \
+    -DPORTABLE=${PORTABLE} \
+    -H${BUILD_DIR}/LOFARBeam \
+    -B${BUILD_DIR}/LOFARBeam/build \
+    -G Ninja
+RUN ninja -C ${BUILD_DIR}/LOFARBeam/build install
 
 # install IDG 0.7
-RUN cd / && git clone https://gitlab.com/astron-idg/idg.git && cd idg && git checkout 0.7 && mkdir build && cd build && cmake -DPORTABLE=True -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft ../ && make && make install && cd / && rm -rf idg
+RUN git clone --depth 1 --branch 0.7 https://gitlab.com/astron-idg/idg.git
+RUN cmake \
+    -DCMAKE_BUILD_TYPE:STRING=Release \
+    -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
+    -DCMAKE_PREFIX_PATH=${INSTALL_DIR} \
+    -DPORTABLE=${PORTABLE} \
+    -H${BUILD_DIR}/idg \
+    -B${BUILD_DIR}/idg/build \
+    -G Ninja
+RUN ninja -C ${BUILD_DIR}/idg/build install
 
 # install WSClean v2.10.1
-RUN cd / && git clone https://gitlab.com/aroffringa/wsclean.git && cd wsclean && git checkout v2.10.1 && mkdir -p build && cd build && cmake -DPORTABLE=True -DCASACORE_ROOT_DIR=/opt/lofarsoft -DIDGAPI_LIBRARIES=/opt/lofarsoft/lib/libidg-api.so -DIDGAPI_INCLUDE_DIRS=/opt/lofarsoft/include -DCMAKE_PREFIX_PATH=/opt/lofarsoft -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft ../ && make -j 4 && make install
+RUN git clone --depth 1 --branch v2.10.1 https://gitlab.com/aroffringa/wsclean.git
+RUN cmake \
+    -DCMAKE_BUILD_TYPE:STRING=Release \
+    -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
+    -DCMAKE_PREFIX_PATH=${INSTALL_DIR} \
+    -DPORTABLE=${PORTABLE} \
+    -H${BUILD_DIR}/wsclean \
+    -B${BUILD_DIR}/wsclean/build \
+    -G Ninja
+RUN ninja -C ${BUILD_DIR}/wsclean/build install
 
 # install Dysco v1.2
-RUN cd / && wget https://github.com/aroffringa/dysco/archive/v1.2.tar.gz && tar xvf v1.2.tar.gz && cd dysco-1.2 && mkdir build && cd build && cmake -DPORTABLE=True -DCASACORE_ROOT_DIR=/opt/lofarsoft -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft ../ && make -j 4 && make install && cd / && rm -rf v1.2.tar.gz dysco-1.2
+RUN git clone --depth 1 --branch v1.2 https://github.com/aroffringa/dysco.git
+RUN cmake \
+    -DCMAKE_BUILD_TYPE:STRING=Release \
+    -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
+    -DCMAKE_PREFIX_PATH=${INSTALL_DIR} \
+    -DPORTABLE=${PORTABLE} \
+    -H${BUILD_DIR}/dysco \
+    -B${BUILD_DIR}/dysco/build \
+    -G Ninja
+RUN ninja -C ${BUILD_DIR}/dysco/build install
 
 # install DP3 v4.1 last py2 version compatible
-RUN cd / && git clone https://github.com/lofar-astron/DP3.git && cd DP3 && git checkout v4.1 && mkdir build && cd build && cmake -DPORTABLE=True -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft -DCMAKE_PREFIX_PATH=/opt/lofarsoft ../ && make && make install && ln -s /opt/lofarsoft/bin/DPPP /opt/lofarsoft/bin/NDPPP && cd ../../ && rm -rf DP3
+RUN git clone --depth 1 --branch v4.1 https://github.com/lofar-astron/DP3.git
+RUN cmake \
+    -DCMAKE_BUILD_TYPE:STRING=Release \
+    -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
+    -DCMAKE_PREFIX_PATH=${INSTALL_DIR} \
+    -DPORTABLE=${PORTABLE} \
+    -H${BUILD_DIR}/DP3 \
+    -B${BUILD_DIR}/DP3/build \
+    -G Ninja
+RUN ninja -C ${BUILD_DIR}/DP3/build install
 
 # install LOFAR 3.2.1
-RUN cd / && svn --non-interactive -q co https://svn.astron.nl/LOFAR/branches/LOFAR-Release-3_2/ source
-RUN cd source && mkdir -p build/gnucxx11_optarch && cd build/gnucxx11_optarch && cmake -DPORTABLE=True -DBUILD_PACKAGES="Pipeline ParmDB pyparmdb" -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft -DCASACORE_ROOT_DIR=/opt/lofarsoft -DBUILD_TESTING=OFF -DUSE_OPENMP=True ../../ && make -j1 && make install && cd / && rm -rf source
+RUN svn --non-interactive --quiet checkout \
+    https://svn.astron.nl/LOFAR/branches/LOFAR-Release-3_2
+# Remove unnecessary requirement, we're building without tests
+RUN sed -i '/^find_python_module(xmlrunner REQUIRED)$/d' \
+    ${BUILD_DIR}/LOFAR-Release-3_2/CEP/Pipeline/framework/CMakeLists.txt
+RUN cmake \
+    -DCMAKE_BUILD_TYPE:STRING=Release \
+    -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
+    -DCMAKE_PREFIX_PATH=${INSTALL_DIR} \
+    -DPORTABLE=${PORTABLE} \
+    -DBUILD_PACKAGES="Pipeline ParmDB pyparmdb" \
+    -DBUILD_TESTING=OFF \
+    -DUSE_OPENMP=TRUE \
+    -H${BUILD_DIR}/LOFAR-Release-3_2 \
+    -B${BUILD_DIR}/LOFAR-Release-3_2/build/gnucxx11_optarch \
+    -G Ninja
+RUN ninja -C ${BUILD_DIR}/LOFAR-Release-3_2/build/gnucxx11_optarch install
+
+# Cleanup stuff we don't need at run-time
+RUN rm -rf ${INSTALL_DIR}/include ${INSTALL_DIR}/sbin
+
+#===========================================================================#
+#                       P Y T H O N   P A C K A G E S                       #
+#===========================================================================#
+
+# Set-up environment for python
+ENV PATH="${INSTALL_DIR}/bin:${PATH}"
+ENV PYTHONUSERBASE=${INSTALL_DIR}
+
+# install python2 base packages
+RUN pip install --user --upgrade pip
+RUN pip install --user --upgrade setuptools wheel
+
+# # install python-casacore
+# RUN pip install --user git+https://github.com/casacore/python-casacore.git@v3.2.0
+
+# install losoto 2.0
+RUN pip install --user numexpr==2.7.3  # avoids install of incompatible 2.8
+RUN pip install --user git+https://github.com/revoltek/losoto.git@2.0
+
+# install RMextract v0.4
+RUN pip install --user git+https://github.com/lofar-astron/RMextract.git@v0.4
+
+# install pyBDSF v1.9.2
+RUN pip install --user git+https://github.com/lofar-astron/PyBDSF.git@v1.9.2
+
+# install LSMTool v1.4.2
+RUN pip install --user git+https://github.com/darafferty/LSMTool.git@v1.4.2
 
 # install factor 2
-RUN cd / && git clone https://github.com/lofar-astron/factor.git && cd factor && export PYTHONPATH=/opt/lofarsoft/lib/python2.7/site-packages/ && python setup.py install --prefix=/opt/lofarsoft && cd / && rm -rf factor
+RUN pip install --user git+https://github.com/lofar-astron/factor.git
 
-# setup environment variables
-ENV DEBIAN_FRONTEND=noninteractive
-ENV PYTHONPATH=/opt/lofarsoft/lib/python2.7/site-packages/
-ENV LD_LIBRARY_PATH=/opt/lofarsoft/lib:/usr/local/lib/
-# help: Docker image containing all required software to run factor 2.0. This image is built on Ubuntu 18.04.
+
+#############################################################################
+#  Second stage of the build. Install minimal set of packages, only those   #
+#  required at run-time, to reduce the size of the final Docker image.      #
+#############################################################################
+
+FROM ubuntu:18.04 as runner
+
+# Arguments are not copied over between stages
+ARG INSTALL_DIR=/opt/lofarsoft
+
+# Copy the installed software from the builder stage to the runner stage.
+COPY --from=builder ${INSTALL_DIR} ${INSTALL_DIR}
+
+# Install all run-time dependencies
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get update && \
+    apt-get install -y \
+        libarmadillo8 \
+        libatkmm-1.6-1v5 \
+        libboost-date-time1.65.1 \
+        libboost-filesystem1.65.1 \
+        libboost-numpy1.65.1 \
+        libboost-program-options1.65.1 \
+        libboost-python1.65.1 \
+        libboost-system1.65.1 \
+        libcairomm-1.0-1v5 \
+        libcasa-casa2 \
+        libcasa-fits2 \
+        libcasa-measures2 \
+        libcasa-ms2 \
+        libcasa-python2 \
+        libcasa-scimath2 \
+        libcasa-tables2 \
+        libcfitsio5 \
+        libfftw3-double3 \
+        libfftw3-single3 \
+        libgcc1 \
+        libgfortran4 \
+        libglibmm-2.4-1v5 \
+        libgomp1 \
+        libgsl23 \
+        libgslcblas0 \
+        libgtkmm-3.0-1v5 \
+        libhdf5-100 \
+        libhdf5-cpp-100 \
+        liblapack3 \
+        liblog4cplus-1.1-9 \
+        libpng16-16 \
+        libpython2.7 \
+        libsigc++-2.0-0v5 \
+        libstdc++6 \
+        libxml2 \
+        python \
+        python-casacore \
+        python-matplotlib \
+        wget
+
+RUN rm -rf /var/lib/apt/lists/*
+
+# # Install WSRT Measures (extra casacore data). We purposely do this in the
+# # `runner` stage and not in the `builder` stage, because otherwise the
+# # previous `apt-get install` would clobber the files we had installed in
+# # in the `builder` stage (as `casacore-data` is installed as a dependency).
+# # Note: The file on the ftp site is updated daily. When warnings regarding
+# # leap seconds appear, ignore them or regenerate the docker image.
+# RUN wget -q -O /WSRT_Measures.ztar \
+#         ftp://ftp.astron.nl/outgoing/Measures/WSRT_Measures.ztar && \
+#     cd /var/lib/casacore/data && \
+#     tar xfz /WSRT_Measures.ztar && \
+#     rm /WSRT_Measures.ztar
+
+# Avoid concurrency issues when accessing HDF5 files from Python
+ENV HDF5_USE_FILE_LOCKING=FALSE
 
 # Create entry point for container
-COPY entrypoint.sh /usr/local/sbin
-ENTRYPOINT [ "/usr/local/sbin/entrypoint.sh" ]
+COPY entrypoint.sh /
+ENTRYPOINT [ "/entrypoint.sh" ]
