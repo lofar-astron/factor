@@ -248,6 +248,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
         libatkmm-1.6-1v5 \
         libboost-date-time1.65.1 \
         libboost-filesystem1.65.1 \
+        libboost-numpy1.65.1 \
         libboost-program-options1.65.1 \
         libboost-python1.65.1 \
         libboost-system1.65.1 \
