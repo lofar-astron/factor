@@ -1,2 +1,3 @@
-from _version import __version__
-import _logging
+from ._version import __version__
+import factor._logging
+
